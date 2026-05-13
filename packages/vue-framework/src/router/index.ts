@@ -4,7 +4,7 @@ export { buildLayoutRoutes } from './routes'
 export type {
   FrameworkRouteModule,
   FrameworkRouteItem,
+  InferredLayoutRouteBuildOptions,
   LayoutResolverOptions,
-  LayoutRouteBuildOptions,
   LayoutViewResolver,
 } from './types'

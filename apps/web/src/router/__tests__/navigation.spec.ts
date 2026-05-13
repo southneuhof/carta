@@ -38,10 +38,11 @@ describe('navigation helpers', () => {
     moduleState.value = [{ routes: [{ name: 'dashboard' }] }]
 
     const router = {
-      resolve: (path: string) => (path === '/settings/users' ? { matched: [{}], name: 'users' } : { matched: [], name: undefined }),
+      resolve: (path: string) => (path === '/authenticated/settings/users' ? { matched: [{}], name: 'users' } : { matched: [], name: undefined }),
     } as any
 
-    expect(resolvePostLoginRoute(router, '/settings/users')).toBe('/settings/users')
+    expect(resolvePostLoginRoute(router, '/authenticated/settings/users')).toBe('/authenticated/settings/users')
     expect(resolvePostLoginRoute(router, '/missing')).toEqual({ name: 'dashboard' })
+    expect(resolvePostLoginRoute(router, '/settings/users')).toEqual({ name: 'dashboard' })
   })
 })

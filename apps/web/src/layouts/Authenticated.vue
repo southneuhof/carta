@@ -2,6 +2,7 @@
 import Sidebar from '@/components/navigations/sidebar/rail/Sidebar.vue'
 import { useScreenStore } from '@/stores/screen'
 import NavigationDrawer from '@/components/navigations/sidebar/drawer/NavigationDrawer.vue'
+import AppRouterView from '@/components/routing/AppRouterView.vue'
 </script>
 
 <template>
@@ -15,7 +16,7 @@ import NavigationDrawer from '@/components/navigations/sidebar/drawer/Navigation
     >
       <NavigationDrawer v-if="!useScreenStore().isAtLeast('lg')" />
       <main class="flex w-full max-w-[1490px] flex-col gap-2">
-        <slot></slot>
+        <AppRouterView />
       </main>
     </div>
   </div>

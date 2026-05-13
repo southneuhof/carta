@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { PropType } from 'vue'
 import { useColorPreference } from '@/stores/colorpreference'
-import _app from '@/app/configs/_app'
 import Logo from '@/assets/corporate/assets/app-logo.svg'
 
 const props = defineProps({

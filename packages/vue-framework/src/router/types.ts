@@ -50,13 +50,7 @@ export type LayoutViewResolver = {
   resolveLayout: (layoutKey: string) => RouteComponent
 }
 
-export type LayoutRouteBuildOptions = {
-  resolveLayoutKey: (args: {
-    module: FrameworkRouteModule
-    route: FrameworkRouteItem
-    isChild: boolean
-    child?: FrameworkRouteChild
-  }) => string
-  resolver: LayoutViewResolver
+export type InferredLayoutRouteBuildOptions = {
+  modules?: FrameworkRouteModule[]
   includeModuleTitleMeta?: boolean
 }

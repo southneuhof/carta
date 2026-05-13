@@ -1,11 +1,11 @@
-import _app from '@/app/configs/_app'
+import app from '@/app/configs/app'
 import { storage } from '@/utils/storage'
 import { savePostLoginRedirect } from '@/utils/post-login-redirect'
 import { getDefaultAuthenticatedRouteLocation } from './navigation'
 import type { NavigationGuard } from 'vue-router'
 
 export function isPublicRoute(routeName: unknown): boolean {
-  return _app.unprotectedRoutes.includes(String(routeName))
+  return app.unprotectedRoutes.includes(String(routeName))
 }
 
 export function createAuthGuard(): NavigationGuard {

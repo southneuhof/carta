@@ -1,8 +1,6 @@
 import { createParser } from '@southneuhof/is-vue-framework/utils/parse'
 import { formatCurrency, formatDate, formatDateTime, formatDelta, formatHour, formatLargeNumber, formatMonth, formatNumber, formatTime } from '@/utils/common'
-import _dictionary from '@/app/configs/_dictionary'
-
-export const filter: Record<string, Record<string, string>> = _dictionary
+import { dictionary } from '@/app/configs/dictionary'
 
 const formatterMap: Record<string, any> = {
   number: formatNumber,
@@ -17,6 +15,6 @@ const formatterMap: Record<string, any> = {
 }
 
 export const parse = createParser({
-  dictionary: filter,
+  dictionary: dictionary,
   formatters: formatterMap,
 })

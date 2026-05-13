@@ -29,7 +29,7 @@ onClickOutside(
         <RailItem
           v-for="(item, index) in modules().value"
           :title="item.title"
-          :state="item.name === String($route.fullPath.split('/')[1]) ? 2 : sidebarState.index === index ? 1 : 0"
+          :state="item.name === String($route.meta.moduleName) ? 2 : sidebarState.index === index ? 1 : 0"
           @click="() => {
             sidebarState.index = index
             if (item.routes.length === 1) {
@@ -39,7 +39,7 @@ onClickOutside(
             sidebarState.open = true
           }"
         >
-          <Icon size="3xl" :fill="item.name == $route.fullPath.split('/')[1]" :name="(item.icon as any)"></Icon>
+          <Icon size="3xl" :fill="item.name === String($route.meta.moduleName)" :name="(item.icon as any)"></Icon>
         </RailItem>
       </div>
       <RailItem

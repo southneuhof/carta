@@ -1,75 +1,109 @@
 import type { RouteRecordRaw } from 'vue-router'
-import type { FrameworkRouteItem, FrameworkRouteModule, LayoutRouteBuildOptions } from './types'
+import type { FrameworkRouteItem, FrameworkRouteModule, InferredLayoutRouteBuildOptions, LayoutResolverOptions, ViewLoader } from './types'
+
+type InferredRoute = {
+  layoutName: string
+  moduleName: string
+  routeName: string
+  loader: ViewLoader
+}
 
 function toPathSegment(value: string): string {
   return String(value).toLowerCase()
 }
 
-function buildRoutePath(moduleName: string, routeName: string): string {
-  return `/${toPathSegment(moduleName)}/${toPathSegment(routeName)}`
+function normalizePath(path: string): string {
+  return path.replace(/\\/g, '/').replace(/\/+$/, '')
 }
 
-function buildChildPath(moduleName: string, routeName: string, childName: string): string {
-  return `${buildRoutePath(moduleName, routeName)}/${toPathSegment(childName)}`
+function toTitle(value: string): string {
+  return String(value)
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ')
 }
 
 function isSeparatorRoute(route: FrameworkRouteItem): boolean {
   return Boolean(route.separator)
 }
 
-export function buildLayoutRoutes(modules: FrameworkRouteModule[], options: LayoutRouteBuildOptions): RouteRecordRaw[] {
+function findMenuRoute(modules: FrameworkRouteModule[] | undefined, moduleName: string, routeName: string) {
+  const module = modules?.find((item) => toPathSegment(item.name) === moduleName)
+  const route = module?.routes.find((item) => !isSeparatorRoute(item) && toPathSegment(item.name) === routeName)
+
+  return module && route ? { module, route } : null
+}
+
+function inferRoute(layoutName: string, layoutPath: string, viewPath: string, loader: ViewLoader): InferredRoute | null {
+  const normalizedLayoutPath = normalizePath(layoutPath)
+  const normalizedViewPath = normalizePath(viewPath)
+  const prefix = `${normalizedLayoutPath}/`
+
+  if (!normalizedViewPath.startsWith(prefix)) return null
+
+  const relativePath = normalizedViewPath.slice(prefix.length)
+  const segments = relativePath.split('/')
+
+  if (segments.length !== 3) return null
+
+  const [moduleName, routeName, fileName] = segments
+  if (!moduleName || !routeName || fileName !== `${routeName}.vue`) return null
+
+  return {
+    layoutName,
+    moduleName,
+    routeName,
+    loader,
+  }
+}
+
+export function buildLayoutRoutes(layouts: LayoutResolverOptions, options: InferredLayoutRouteBuildOptions = {}): RouteRecordRaw[] {
   const routes: RouteRecordRaw[] = []
+  const routeNames = new Set<string>()
   const includeModuleTitleMeta = options.includeModuleTitleMeta !== false
 
-  for (const module of modules) {
-    for (const route of module.routes) {
-      if (isSeparatorRoute(route)) continue
+  for (const [layoutName, layoutConfig] of Object.entries(layouts)) {
+    const children: RouteRecordRaw[] = []
 
-      const layoutKey = options.resolveLayoutKey({ module, route, isChild: false })
-      const baseRoute: RouteRecordRaw & { children?: RouteRecordRaw[] } = {
-        path: buildRoutePath(module.name, route.name),
-        name: route.name,
-        component: options.resolver.resolveRouteView({
-          layoutKey,
-          moduleName: module.name,
-          routeName: route.name,
-        }),
-        meta: {
-          title: route.title,
-          ...route.meta,
-          ...(includeModuleTitleMeta ? { module_title: module.title } : {}),
-        },
+    for (const [viewPath, loader] of Object.entries(layoutConfig.views)) {
+      const inferred = inferRoute(layoutName, layoutConfig.path, viewPath, loader)
+      if (!inferred) continue
+
+      if (routeNames.has(inferred.routeName)) {
+        throw new Error(`Duplicate inferred route name: ${inferred.routeName}`)
+      }
+      routeNames.add(inferred.routeName)
+
+      const menuMatch = findMenuRoute(options.modules, inferred.moduleName, inferred.routeName)
+      const meta: Record<string, unknown> = {
+        layoutName: inferred.layoutName,
+        moduleName: inferred.moduleName,
+        routeName: inferred.routeName,
+        title: menuMatch?.route.title ?? toTitle(inferred.routeName),
+        ...(menuMatch?.route.meta ?? {}),
+        ...(menuMatch && includeModuleTitleMeta ? { module_title: menuMatch.module.title } : {}),
       }
 
-      if (route.children?.length) {
-        const children: RouteRecordRaw[] = route.children.map((child) => {
-          const childLayoutKey = options.resolveLayoutKey({ module, route, isChild: true, child })
-
-          return {
-            path: buildChildPath(module.name, route.name, child.name),
-            name: child.name,
-            component: options.resolver.resolveChildView({
-              layoutKey: childLayoutKey,
-              moduleName: module.name,
-              routeName: route.name,
-              childName: child.name,
-            }),
-            meta: {
-              title: child.title,
-              ...child.meta,
-              ...(includeModuleTitleMeta ? { module_title: module.title } : {}),
-            },
-          }
-        })
-
-        baseRoute.meta = { ...baseRoute.meta, children: route.children }
-        ;(baseRoute as { children?: RouteRecordRaw[] }).children = children
+      if (menuMatch?.route.children?.length) {
+        meta.children = menuMatch.route.children
       } else {
-        baseRoute.meta = { ...baseRoute.meta, pages: route.routes || null }
+        meta.pages = menuMatch?.route.routes || null
       }
 
-      routes.push(baseRoute)
+      children.push({
+        path: `${inferred.moduleName}/${inferred.routeName}`,
+        name: inferred.routeName,
+        component: inferred.loader,
+        meta,
+      })
     }
+
+    routes.push({
+      path: `/${layoutName}`,
+      component: layoutConfig.layout,
+      children,
+    })
   }
 
   return routes

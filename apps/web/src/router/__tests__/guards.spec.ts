@@ -34,16 +34,16 @@ describe('createAuthGuard', () => {
 
   it('allows public login route without token', () => {
     const guard = createAuthGuard()
-    const result = guard({ name: 'login', fullPath: '/unauthenticated/login', path: '/unauthenticated/login', matched: [{}] } as any, {} as any, next)
+    const result = guard({ name: 'login', fullPath: '/unauthenticated/auth/login', path: '/unauthenticated/auth/login', matched: [{}] } as any, {} as any, next)
 
     expect(result).toBe(true)
   })
 
   it('redirects protected route without token and saves redirect', () => {
     const guard = createAuthGuard()
-    const result = guard({ name: 'users', fullPath: '/settings/users', path: '/settings/users', matched: [{}] } as any, {} as any, next)
+    const result = guard({ name: 'users', fullPath: '/authenticated/settings/users', path: '/authenticated/settings/users', matched: [{}] } as any, {} as any, next)
 
-    expect(saveRedirectSpy).toHaveBeenCalledWith('/settings/users')
+    expect(saveRedirectSpy).toHaveBeenCalledWith('/authenticated/settings/users')
     expect(result).toEqual({ name: 'login' })
   })
 

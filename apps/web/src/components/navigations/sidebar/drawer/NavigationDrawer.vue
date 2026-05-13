@@ -60,7 +60,7 @@ onClickOutside(sidebarexpand as any, closeSidebar, { ignore: ['#sidebar', '#dial
     <Button variant="icon" size="square" class="ml-2 w-fit" @click="closeSidebar"><Icon name="close" /></Button>
     <TransitionGroup mode="out-in" tag="div" name="viewmode" class="min-w-full overflow-scroll">
       <div v-if="sidebarView === 'modules'" class="flex flex-col gap-2">
-        <NavItem :key="item.name" v-for="(item, index) in modules().value" :route="item" :active="item.name == $route.fullPath.split('/')[1]" @click="selectModule(item, index)" />
+        <NavItem :key="item.name" v-for="(item, index) in modules().value" :route="item" :active="item.name === String($route.meta.moduleName)" @click="selectModule(item, index)" />
         <NavItem :active="sidebarState.index === -1" :route="{ icon: 'user', title: 'Profil' }" @click="() => (sidebarView = 'profile')" />
       </div>
       <div v-else-if="sidebarView === 'routes'" class="flex flex-col gap-2">
