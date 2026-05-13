@@ -1,22 +1,23 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { modules } from '@/stores/modules'
 import { useRouter } from 'vue-router'
-import Toast from '@southneuhof/is-vue-framework/components/base/Toast.vue'
 import services from '@/utils/services'
-import PasswordInput from '@southneuhof/is-vue-framework/components/inputs/PasswordInput.vue'
-import Logo from '@/assets/corporate/common/Logo.vue'
 import { storage } from '@/utils/storage'
-import { permissions } from '@/stores/permissions'
+import { modules } from '@/stores/modules'
 import { globalLoading } from '@/stores/loading'
-import TextInput from '@southneuhof/is-vue-framework/components/inputs/TextInput.vue'
-import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
-import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
-import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
-import { consumePostLoginRedirect } from '@/utils/post-login-redirect'
+import { permissions } from '@/stores/permissions'
+import Logo from '@/assets/corporate/common/Logo.vue'
 import { resolvePostLoginRoute } from '@/router/navigation'
+import { consumePostLoginRedirect } from '@/utils/post-login-redirect'
+import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
+import Toast from '@southneuhof/is-vue-framework/components/base/Toast.vue'
+import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
+import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
+import TextInput from '@southneuhof/is-vue-framework/components/inputs/TextInput.vue'
+import PasswordInput from '@southneuhof/is-vue-framework/components/inputs/PasswordInput.vue'
 
 const BYPASS_ALL_PERMISSIONS = import.meta.env.VITE_APP_BYPASS_ALL_PERMISSIONS === 'true'
+
 const loginMessage = ref<{ message: string; type: 'error' | 'warning' | 'info' | 'success' | undefined }>({ message: '', type: undefined })
 const router = useRouter()
 const loading = ref(false)
