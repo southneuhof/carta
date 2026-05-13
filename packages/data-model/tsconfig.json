@@ -2,6 +2,9 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
+    "moduleSuffixes": [
+      ""
+    ],
     "paths": {
       "@southneuhof/is-data-model": [
         "../model-meta/src/index.ts"

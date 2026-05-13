@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "moduleSuffixes": [".server", ""],
+    "paths": {
+      "@client/data-model/*": ["../../packages/data-model/src/*"],
+      "@southneuhof/is-data-model": ["../../packages/model-meta/src/index.ts"],
+      "@southneuhof/is-data-model/*": ["../../packages/model-meta/src/*"]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "../../packages/data-model/src/**/*",
+    "../../packages/model-meta/src/**/*"
+  ]
+}

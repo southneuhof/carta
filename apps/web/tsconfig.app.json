@@ -5,8 +5,7 @@
     "src/**/*",
     "src/**/*.vue",
     "../../packages/model-meta/src/**/*",
-    "../../packages/data-model/src/models/base/**/*",
-    "../../packages/data-model/src/models/web/**/*",
+    "../../packages/data-model/src/**/*",
     "../../packages/sdk/src/**/*",
     "../../packages/vue-framework/src/**/*",
     "../../packages/apostle/src/**/*"
@@ -19,6 +18,10 @@
   ],
   "compilerOptions": {
     "composite": true,
+    "moduleSuffixes": [
+      ".web",
+      ""
+    ],
     "paths": {
       "@/*": [
         "./src/*"

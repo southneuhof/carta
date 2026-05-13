@@ -5,45 +5,49 @@ Client-owned model definitions package.
 ## Structure
 
 ```txt
-src/models/
-  base/
-  web/
-  mobile/
+src/
+  define-data-model.ts
+  define-data-model.web.ts
+  define-data-model.native.ts
+  define-data-model.server.ts
+  models/
+    users.model.ts
+    roles.model.ts
+    tasks.model.ts
 ```
 
-## Base model
+## Model definition
 
 ```ts
-import type { ModelConfig } from '@southneuhof/is-data-model'
+import type { ModelConfig } from "@southneuhof/is-data-model";
+import { defineDataModel } from "../define-data-model";
 
-const users = {
-  name: 'users',
-  title: 'Users',
-} satisfies ModelConfig
+const users = defineDataModel({
+  base: {
+    name: "users",
+    title: "Users",
+  } satisfies ModelConfig,
+  web: {
+    title: "Web Users",
+  },
+  mobile: {
+    icon: "team",
+    description: "Manage application users.",
+  },
+  server: {
+    title: "Server Users",
+  },
+});
 
-export default users
+export default users;
 ```
 
-## Re-export for platform
+`web`, `mobile`, and `server` are optional. Missing platform blocks fall back to `base`.
 
-```ts
-export { default } from '../base/users.model'
-```
-
-## Manual override for platform
-
-```ts
-import users from '../base/users.model'
-
-export default {
-  ...users,
-  title: 'Web Users',
-}
-```
+Platform blocks are deep-merged over `base`; arrays are replaced, not concatenated.
 
 ## App imports
 
 ```ts
-import users from '@client/data-model/models/web/users.model'
-import usersMobile from '@client/data-model/models/mobile/users.model'
+import users from "@client/data-model/models/users.model";
 ```

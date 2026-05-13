@@ -4,9 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "exports": {
-    "./models/base/*": "./src/models/base/*",
-    "./models/web/*": "./src/models/web/*",
-    "./models/mobile/*": "./src/models/mobile/*"
+    "./models/*": "./src/models/*"
   },
   "dependencies": {
     "@southneuhof/is-data-model": "workspace:*"

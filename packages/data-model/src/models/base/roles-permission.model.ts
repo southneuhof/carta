@@ -1,1 +1,0 @@
-import type { ModelConfig } from "@southneuhof/is-data-model";
