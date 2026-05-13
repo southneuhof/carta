@@ -102,21 +102,21 @@ const clearCanvas = () => {
 
 <template>
   <BaseInput v-bind="props">
-    <Card v-if="isSaved == null" class="flex flex-row items-center gap-4" color="surface-high">
+    <Card v-if="isSaved == null" class="flex flex-row items-center gap-4" color="surfaceContainerHigh">
       <Icon name="information" />
       <div class="flex flex-col">
         <p class="font-semibold">Gambar tanda tangan</p>
         <p>Tekan kursor pada kanvas untuk mulai menggambar</p>
       </div>
     </Card>
-    <Card v-else-if="!isSaved" class="flex flex-row items-center gap-4" color="error-container">
+    <Card v-else-if="!isSaved" class="flex flex-row items-center gap-4" color="errorContainer">
       <Icon name="information" />
       <div class="flex flex-col">
         <p class="font-semibold">Gambar belum tersimpan</p>
         <p>Tekan tombol simpan untuk menyimpan gambar.</p>
       </div>
     </Card>
-    <Card v-else class="flex flex-row items-center gap-4" color="info-container">
+    <Card v-else class="flex flex-row items-center gap-4" color="secondaryContainer">
       <Icon name="check" />
       <div class="flex flex-col">
         <p class="font-semibold">Gambar sudah tersimpan</p>

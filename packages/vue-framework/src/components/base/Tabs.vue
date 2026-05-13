@@ -41,9 +41,20 @@ const props = defineProps({
     default: false,
   },
   color: {
-    type: String as PropType<'primary' | 'secondary' | 'tertiary' | 'warning' | 'error' | 'info' | 'success' | 'surface-lowest' | 'surface-low' | 'surface' | 'surface-high' | 'surface-highest'>,
+    type: String as PropType<
+      | 'surface'
+      | 'surfaceContainerLowest'
+      | 'surfaceContainerLow'
+      | 'surfaceContainer'
+      | 'surfaceContainerHigh'
+      | 'surfaceContainerHighest'
+      | 'primaryContainer'
+      | 'secondaryContainer'
+      | 'tertiaryContainer'
+      | 'errorContainer'
+    >,
     required: false,
-    default: 'surface',
+    default: 'surfaceContainer',
   },
 })
 const emit = defineEmits(['change'])
@@ -122,7 +133,7 @@ defineExpose({
   <TabGroup v-if="props.variant == 'block'" :selectedIndex="selectedTab" @change="changeTab" class="overflow-auto">
     <TabList class="flex flex-row items-center gap-2">
       <Tab v-for="(tab, index) in props.config" as="template" :key="index" v-slot="{ selected }" class="min-w-max">
-        <Card interactive :color="selected ? 'primary' : color">
+        <Card :color="selected ? 'primaryContainer' : color">
           <div>{{ tab[props.view] }}</div>
         </Card>
       </Tab>
@@ -135,7 +146,7 @@ defineExpose({
         <div v-if="!props.config.length" class="text-muted">Tidak ada data</div>
         <Tab v-else v-for="(tab, index) in props.config" as="template" :key="index" v-slot="{ selected }">
           <div class="py-1">
-            <Card class="flex-row items-center justify-between" interactive :color="selected ? 'primary' : color">
+            <Card class="flex-row items-center justify-between" :color="selected ? 'primaryContainer' : color">
               <div>{{ tab[view] }}</div>
             </Card>
           </div>

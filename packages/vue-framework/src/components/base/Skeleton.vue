@@ -5,9 +5,20 @@ import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 
 const props = defineProps({
   color: {
-    type: String as PropType<'primary' | 'secondary' | 'tertiary' | 'warning' | 'error' | 'info' | 'success' | 'surface-lowest' | 'surface-low' | 'surface' | 'surface-high' | 'surface-highest'>,
+    type: String as PropType<
+      | 'surface'
+      | 'surfaceContainerLowest'
+      | 'surfaceContainerLow'
+      | 'surfaceContainer'
+      | 'surfaceContainerHigh'
+      | 'surfaceContainerHighest'
+      | 'primaryContainer'
+      | 'secondaryContainer'
+      | 'tertiaryContainer'
+      | 'errorContainer'
+    >,
     required: false,
-    default: 'surface',
+    default: 'surfaceContainer',
   },
 })
 </script>

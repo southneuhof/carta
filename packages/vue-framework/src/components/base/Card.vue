@@ -1,83 +1,168 @@
 <script setup lang="ts">
-import type { PropType } from 'vue'
+import type { CSSProperties } from 'vue'
 import { twMerge } from 'tailwind-merge'
-import { useAttrs } from 'vue'
+import { computed, useAttrs } from 'vue'
+
+defineOptions({ inheritAttrs: false })
+
+type CardType = 'filled' | 'elevated' | 'outlined'
+type CardColorRole =
+  | 'surface'
+  | 'surfaceContainerLowest'
+  | 'surfaceContainerLow'
+  | 'surfaceContainer'
+  | 'surfaceContainerHigh'
+  | 'surfaceContainerHighest'
+  | 'primaryContainer'
+  | 'secondaryContainer'
+  | 'tertiaryContainer'
+  | 'errorContainer'
 
 const attrs = useAttrs()
 
-const props = defineProps({
-  interactive: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  color: {
-    type: String as PropType<
-      | 'primary'
-      | 'secondary'
-      | 'tertiary'
-      | 'warning'
-      | 'error'
-      | 'info'
-      | 'success'
-      | 'primary-container'
-      | 'secondary-container'
-      | 'tertiary-container'
-      | 'warning-container'
-      | 'error-container'
-      | 'info-container'
-      | 'success-container'
-      | 'surface-lowest'
-      | 'surface-low'
-      | 'surface'
-      | 'surface-high'
-      | 'surface-highest'
-    >,
-    required: false,
-    default: 'surface',
-  },
-  variant: {
-    type: String as PropType<'filled' | 'outlined' | 'elevated'>,
-    required: false,
-    default: 'filled',
-  },
-})
+const props = withDefaults(
+  defineProps<{
+    type?: CardType
+    color?: CardColorRole
+    containerRole?: CardColorRole
+    disabled?: boolean
+    contentPadding?: number
+  }>(),
+  {
+    type: 'filled',
+    color: 'surfaceContainer',
+    disabled: false,
+    contentPadding: 16,
+  }
+)
 
-const colorMap: any = {
-  primary: 'bg-primary  text-on-primary ',
-  secondary: 'bg-secondary  text-on-secondary ',
-  tertiary: 'bg-tertiary  text-on ',
-  warning: 'bg-warning  text-on-warning ',
-  error: 'bg-error  text-on-error ',
-  info: 'bg-info  text-on-info ',
-  success: 'bg-success  text-on-success ',
-  'primary-container': 'bg-primary-container text-on-primary-container ',
-  'secondary-container': 'bg-secondary-container text-on-secondary-container ',
-  'tertiary-container': 'bg-tertiary-container text-on-container ',
-  'warning-container': 'bg-warning-container text-on-warning-container ',
-  'error-container': 'bg-error-container text-on-error-container ',
-  'info-container': 'bg-info-container text-on-info-container ',
-  'success-container': 'bg-success-container text-on-success-container ',
-  'surface-lowest': 'bg-surface-container-lowest text-on-surface ',
-  'surface-low': 'bg-surface-container-low text-on-surface ',
-  surface: 'bg-surface-container text-on-surface ',
-  'surface-high': 'bg-surface-container-high text-on-surface ',
-  'surface-highest': 'bg-surface-container-highest text-on-surface ',
+const isInteractive = computed(() => Boolean(attrs.onClick))
+
+const resolvedRole = computed(
+  () => props.color ?? props.containerRole ?? 'surfaceContainer'
+)
+
+const backgroundClassMap: Record<CardColorRole, string> = {
+  surface: 'bg-surface',
+  surfaceContainerLowest: 'bg-surface-container-lowest',
+  surfaceContainerLow: 'bg-surface-container-low',
+  surfaceContainer: 'bg-surface-container',
+  surfaceContainerHigh: 'bg-surface-container-high',
+  surfaceContainerHighest: 'bg-surface-container-highest',
+  primaryContainer: 'bg-primary-container',
+  secondaryContainer: 'bg-secondary-container',
+  tertiaryContainer: 'bg-tertiary-container',
+  errorContainer: 'bg-error-container',
 }
 
-const variantMap: any = {
+const foregroundClassMap: Record<CardColorRole, string> = {
+  surface: 'text-on-surface',
+  surfaceContainerLowest: 'text-on-surface',
+  surfaceContainerLow: 'text-on-surface',
+  surfaceContainer: 'text-on-surface',
+  surfaceContainerHigh: 'text-on-surface',
+  surfaceContainerHighest: 'text-on-surface',
+  primaryContainer: 'text-on-primary-container',
+  secondaryContainer: 'text-on-secondary-container',
+  tertiaryContainer: 'text-on-tertiary-container',
+  errorContainer: 'text-on-error-container',
+}
+
+const typeClassMap: Record<CardType, string> = {
   filled: '',
-  outlined: 'outline outline-1 outline-outline-variant/[24%]',
+  outlined: 'border border-outline-variant',
   elevated: '',
+}
+
+const typeStyle = computed<CSSProperties>(() => {
+  if (props.type !== 'elevated') return {}
+  return {
+    boxShadow: '0 1px 1px rgb(var(--md-sys-color-shadow) / 0.28)',
+  }
+})
+
+const mergedClass = computed(() =>
+  twMerge(
+    'relative flex flex-col gap-4 overflow-hidden rounded-xl',
+    backgroundClassMap[resolvedRole.value],
+    foregroundClassMap[resolvedRole.value],
+    typeClassMap[props.type],
+    isInteractive.value && !props.disabled ? 'group cursor-pointer' : '',
+    props.disabled ? 'pointer-events-none' : '',
+    attrs.class as string
+  )
+)
+
+const mergedStyle = computed(() => [
+  { padding: `${props.contentPadding}px` } as CSSProperties,
+  typeStyle.value,
+  attrs.style,
+])
+
+const forwardedAttrs = computed(() => {
+  const { class: _class, style: _style, onClick: _onClick, ...rest } =
+    attrs as Record<string, unknown>
+  return rest
+})
+
+const invokeClick = (event: Event) => {
+  const onClick = attrs.onClick
+  if (!onClick) return
+  if (Array.isArray(onClick)) {
+    onClick.forEach((handler) => {
+      if (typeof handler === 'function') handler(event)
+    })
+    return
+  }
+  if (typeof onClick === 'function') onClick(event)
+}
+
+const handleRootClick = (event: MouseEvent) => {
+  if (props.disabled) {
+    event.preventDefault()
+    event.stopPropagation()
+    return
+  }
+
+  invokeClick(event)
+}
+
+const handleRootKeydown = (event: KeyboardEvent) => {
+  if (!isInteractive.value || props.disabled) return
+
+  if (event.key === 'Enter') {
+    invokeClick(event)
+    return
+  }
+
+  if (event.key === ' ') {
+    event.preventDefault()
+    invokeClick(event)
+  }
 }
 </script>
 
 <template>
   <div
-    :class="`${interactive ? 'overlay cursor-pointer after:bg-on-surface/[8%] after:active:bg-on-surface/[12%]  ' : ''} ${twMerge(`pdf:px-0 pdf:py-0 flex flex-col gap-4 rounded-xl px-4 py-4 ${colorMap[props.color]}`, attrs.class as string)} ${variantMap[props.variant]}`"
+    v-bind="forwardedAttrs"
+    :role="isInteractive ? 'button' : undefined"
+    :tabindex="isInteractive ? 0 : undefined"
+    :aria-disabled="disabled ? 'true' : undefined"
+    :class="mergedClass"
+    :style="mergedStyle"
+    @click="handleRootClick"
+    @keydown="handleRootKeydown"
   >
     <div v-if="$slots.header"><slot name="header"></slot></div>
     <slot></slot>
     <div v-if="$slots.footer"><slot name="footer"></slot></div>
+    <div
+      class="pointer-events-none absolute inset-0 hidden bg-on-surface/[10%]"
+      :class="isInteractive && !disabled ? 'group-active:block' : ''"
+    />
+    <div
+      v-if="disabled"
+      class="pointer-events-none absolute inset-0 bg-on-surface/[12%]"
+    />
   </div>
 </template>

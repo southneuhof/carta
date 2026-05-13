@@ -45,7 +45,7 @@ const tempLocation = ref()
           <template v-if="modelValue?.length">
             <Modal v-for="item in modelValue" @open="() => (tempLocation = item)" @close="() => (tempLocation = null)">
               <template #trigger>
-                <Card color="surface-high" class="flex h-full max-w-fit flex-row items-center" interactive>
+                <Card color="surfaceContainerHigh" class="flex h-full max-w-fit flex-row items-center">
                   <Icon name="map-pin" />
                   <div v-if="item.name" class="flex flex-col">
                     <div>{{ item.name }}</div>

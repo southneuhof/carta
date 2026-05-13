@@ -106,13 +106,12 @@ const GOOGLE_MAP_API_KEY = data.gmaps.web
             </div>
           </template>
           <template #content>
-            <Card color="surface-high" class="min-w-full gap-2">
+            <Card color="surfaceContainerHigh" class="min-w-full gap-2">
               <template v-if="query">
                 <template v-if="autocompletePredictions">
                   <Card
                     v-for="prediction in autocompletePredictions"
-                    interactive
-                    :color="prediction.place_id === selectedLocation?.place_id ? 'info' : 'surface-high'"
+                    :color="prediction.place_id === selectedLocation?.place_id ? 'primaryContainer' : 'surfaceContainerHigh'"
                     @click=";[getLocationDetail(prediction.place_id), (selectedLocation = prediction)]"
                     class="flex-col gap-0"
                   >
@@ -128,7 +127,7 @@ const GOOGLE_MAP_API_KEY = data.gmaps.web
         </Popover>
         <div class="flex h-full flex-col justify-between">
           <div class="flex flex-col gap-8">
-            <Card color="surface-high" class="flex-row items-center gap-4">
+            <Card color="surfaceContainerHigh" class="flex-row items-center gap-4">
               <Tooltip>
                 <template #content> Gunakan lokasi saat ini </template>
                 <template #trigger>

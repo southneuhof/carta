@@ -274,12 +274,18 @@ onMounted(() => {
           </div>
         </template>
         <template #content="{ setOpen }">
-          <Card class="max-h-80 max-w-screen-sm gap-1 bg-surface-container-high p-0 shadow-sm" variant="outlined">
+          <Card type="outlined" color="surfaceContainerHigh" :content-padding="0" class="max-h-80 max-w-screen-sm gap-1 shadow-sm">
             <div v-if="props.searchable" class="sticky top-0 z-10 border-b border-outline-variant bg-surface-container-high p-4">
               <TextInput disable-helper-message v-model="query" placeholder="Cari..." icon="search" />
             </div>
             <div v-if="filteredData.length" class="h-full overflow-y-auto p-4">
-              <Card v-for="item in filteredData" color="surface-high" interactive class="flex flex-row items-center justify-between gap-4 px-4 py-2" @click="() => handleItemClick(item, setOpen)">
+              <Card
+                v-for="item in filteredData"
+                color="surfaceContainerHigh"
+                class="flex flex-row items-center justify-between gap-4"
+                style="padding: 8px 16px"
+                @click="() => handleItemClick(item, setOpen)"
+              >
                 <div class="">{{ item[view] }}</div>
                 <Icon v-if="multi && Array.isArray(modelValue)" :class="modelValue.map((item) => item[pick]).includes(item[pick]) ? 'opacity-100' : 'opacity-0'" name="check"></Icon>
                 <Icon v-else :class="String(currentPicked) === String(item[pick]) ? 'opacity-100' : 'opacity-0'" name="check"></Icon>

@@ -357,7 +357,7 @@ onMounted(() => {
             <div class="w-full border-t-[1px] border-t-primary"></div>
           </div>
           <div v-else-if="field.slice(0, 3) === 'S1|'" class="sticky top-[77px] z-10 col-span-12 mb-4 flex flex-col gap-1">
-            <Card color="primary-container" class="text-lg font-semibold">{{ field.slice(3) }}</Card>
+            <Card color="primaryContainer" class="text-lg font-semibold">{{ field.slice(3) }}</Card>
           </div>
           <template v-else-if="inputConfig[field]">
             <div
@@ -408,7 +408,7 @@ onMounted(() => {
               </div>
             </div>
           </template>
-          <Card v-else color="warning" class="col-span-12">WARN: inputConfig[{{ field }}] is undefined</Card>
+          <Card v-else color="errorContainer" class="col-span-12">WARN: inputConfig[{{ field }}] is undefined</Card>
         </template>
         <div v-if="!props.static && !disabled" class="col-span-12 mt-6 flex">
           <Button v-if="!$slots.submitButton" class="max-w-fit" :type="'submit'" :disabled="loading.get || loading.post">Submit</Button>

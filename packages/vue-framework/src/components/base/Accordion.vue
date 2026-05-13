@@ -11,27 +11,18 @@ const props = defineProps({
   },
   color: {
     type: String as PropType<
-      | 'primary'
-      | 'secondary'
-      | 'tertiary'
-      | 'warning'
-      | 'error'
-      | 'info'
-      | 'success'
-      | 'primary-container'
-      | 'secondary-container'
-      | 'tertiary-container'
-      | 'warning-container'
-      | 'error-container'
-      | 'info-container'
-      | 'success-container'
-      | 'surface-lowest'
-      | 'surface-low'
       | 'surface'
-      | 'surface-high'
-      | 'surface-highest'
+      | 'surfaceContainerLowest'
+      | 'surfaceContainerLow'
+      | 'surfaceContainer'
+      | 'surfaceContainerHigh'
+      | 'surfaceContainerHighest'
+      | 'primaryContainer'
+      | 'secondaryContainer'
+      | 'tertiaryContainer'
+      | 'errorContainer'
     >,
-    default: 'surface',
+    default: 'surfaceContainer',
   },
   unmount: {
     type: Boolean,

@@ -375,9 +375,9 @@ onBeforeUnmount(() => {
         </table>
       </template>
       <div v-else-if="loading" class="flex flex-col">
-        <Card class="h-[49px] animate-pulse" color="surface-high"></Card>
+        <Card class="h-[49px] animate-pulse" color="surfaceContainerHigh"></Card>
         <div v-for="_ in Array(tableData?.data.length || 10)" class="py-4">
-          <Card class="h-full animate-pulse" color="surface-high"></Card>
+          <Card class="h-full animate-pulse" color="surfaceContainerHigh"></Card>
         </div>
       </div>
       <div v-else class="mt-2 flex items-center justify-center text-muted print:items-start print:justify-start">Tidak ada data</div>
