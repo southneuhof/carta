@@ -80,7 +80,12 @@ watch(
         </template>
         <div v-else class="h-[25px] max-h-[25px] min-h-[25px] text-muted">Belum ada data yang dimasukkan</div>
       </div>
-      <TextInput v-bind="{ prefix, suffix, icon, constraint }" placeholder="Tekan tombol koma (,) untuk memisahkan" v-model="inputValue" />
+      <TextInput
+        v-bind="{ prefix, suffix, icon, constraint }"
+        placeholder="Tekan tombol koma (,) untuk memisahkan"
+        :model-value="inputValue"
+        @update:model-value="(value) => (inputValue = String(value))"
+      />
     </div>
   </BaseInput>
 </template>

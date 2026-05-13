@@ -28,5 +28,14 @@
   "include": [
     "src/**/*",
     "env.d.ts"
-  ]
+  ],
+  "vueCompilerOptions": {
+    "strictTemplates": true,
+    "checkUnknownProps": false,
+    "checkUnknownEvents": false,
+    "checkUnknownDirectives": false,
+    "checkUnknownComponents": false,
+    "checkUnknownSlots": false,
+    "checkUnknownAttributes": false
+  }
 }

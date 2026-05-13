@@ -64,6 +64,12 @@
     "target": "es2017"
   },
   "vueCompilerOptions": {
-    "strictTemplates": false
+    "strictTemplates": true,
+    "checkUnknownProps": false,
+    "checkUnknownEvents": false,
+    "checkUnknownDirectives": false,
+    "checkUnknownComponents": false,
+    "checkUnknownSlots": false,
+    "checkUnknownAttributes": false
   }
 }

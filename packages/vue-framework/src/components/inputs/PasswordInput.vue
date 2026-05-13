@@ -31,12 +31,17 @@ const props = defineProps({
   },
 })
 
-const modelValue = defineModel<string>()
+const modelValue = defineModel<string | number>()
 const showPassword = ref<boolean>(false)
 </script>
 
 <template>
-  <TextInput v-bind="props" v-model="modelValue" :type="showPassword ? 'text' : 'password'">
+  <TextInput
+    v-bind="props"
+    :model-value="modelValue"
+    @update:model-value="(value) => (modelValue = String(value))"
+    :type="showPassword ? 'text' : 'password'"
+  >
     <template #action>
       <Button variant="icon" size="square" @click="showPassword = !showPassword"><Icon :name="showPassword ? 'eye-off' : 'eye'" /></Button>
     </template>

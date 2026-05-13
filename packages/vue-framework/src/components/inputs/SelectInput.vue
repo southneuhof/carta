@@ -276,7 +276,13 @@ onMounted(() => {
         <template #content="{ setOpen }">
           <Card type="outlined" color="surfaceContainerHigh" :content-padding="0" class="max-h-80 max-w-screen-sm gap-1 shadow-sm">
             <div v-if="props.searchable" class="sticky top-0 z-10 border-b border-outline-variant bg-surface-container-high p-4">
-              <TextInput disable-helper-message v-model="query" placeholder="Cari..." icon="search" />
+              <TextInput
+                disable-helper-message
+                :model-value="query"
+                @update:model-value="(value) => (query = String(value))"
+                placeholder="Cari..."
+                icon="search"
+              />
             </div>
             <div v-if="filteredData.length" class="h-full overflow-y-auto p-4">
               <Card

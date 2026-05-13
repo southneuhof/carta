@@ -28,6 +28,10 @@
       "types": "./dist/adapters/state.d.ts",
       "import": "./dist/adapters/state.js"
     },
+    "./adapters/behaviors": {
+      "types": "./dist/adapters/behaviors.d.ts",
+      "import": "./dist/adapters/behaviors.js"
+    },
     "./components/*": "./dist/components/*",
     "./utils/*": {
       "types": "./dist/utils/*.d.ts",

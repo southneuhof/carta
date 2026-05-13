@@ -1,7 +1,7 @@
-import services from '@southneuhof/is-vue-framework/services'
+import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
 
 export async function defaultOnExport(detailConfig: any, id: number) {
-  const base = detailConfig?.getAPI ? `${detailConfig.getAPI}` : ''
-  if (!base) return
-  return services.downloadFile(`${base}/export-buker/${id}`, `${base}_${new Date().toISOString()}.pdf`)
+  const behavior = getFrameworkBehaviors().crudDetail?.onExport
+  if (!behavior) missingBehavior('crudDetail.onExport')
+  return behavior(detailConfig, id)
 }

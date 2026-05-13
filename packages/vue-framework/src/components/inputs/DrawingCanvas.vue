@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { dataURItoBlob } from '@southneuhof/is-vue-framework/utils/object'
-import services from '@southneuhof/is-vue-framework/services'
 import { ref, onMounted, type PropType } from 'vue'
+import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
 import BaseInput from './BaseInput.vue'
 import { commonProps } from './commonprops'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
@@ -15,7 +15,9 @@ const props = defineProps({
     type: Function as PropType<(image: string) => Promise<any>>,
     default: async (image: string) => {
       const blob = dataURItoBlob(image)
-      return await services.fileUploadNoAuth(blob, () => {})
+      const fileUploadNoAuth = getFrameworkBehaviors().upload?.fileUploadNoAuth
+      if (!fileUploadNoAuth) missingBehavior('upload.fileUploadNoAuth')
+      return await fileUploadNoAuth(blob, () => {})
     },
   },
   height: {

@@ -8,11 +8,11 @@ interface FolderItem {
   [key: string]: any
 }
 
-import services from '@southneuhof/is-vue-framework/services'
 import ConfirmationModal from '@southneuhof/is-vue-framework/components/composites/ConfirmationModal.vue'
 import { toast } from 'vue-sonner'
 import ModalForm from '@southneuhof/is-vue-framework/components/composites/ModalForm.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
 
 const props = defineProps({
   item: {
@@ -46,8 +46,9 @@ async function fetchChildren() {
 
   isLoading.value = true
   try {
-    const { data } = await services.get('files', { dir: props.item?.path || '', type: 'folder' })
-    children.value = data || []
+    const listFiles = getFrameworkBehaviors().fileManager?.listFiles
+    if (!listFiles) missingBehavior('fileManager.listFiles')
+    children.value = (await listFiles({ dir: props.item?.path || '', type: 'folder' })) || []
     console.log('children', children.value)
   } catch (error) {
     console.error('Error loading children:', error)
@@ -55,6 +56,12 @@ async function fetchChildren() {
   } finally {
     isLoading.value = false
   }
+}
+
+function deleteFile(path: string) {
+  const behavior = getFrameworkBehaviors().fileManager?.deleteFile
+  if (!behavior) missingBehavior('fileManager.deleteFile')
+  return behavior(path)
 }
 
 if (props.level === 0) {
@@ -120,8 +127,7 @@ if (props.level === 0) {
                 class="w-full"
                 :onConfirm="
                   () =>
-                    services
-                      .post('delete-file', { path: item.path })
+                    deleteFile(item.path)
                       .then(() => {
                         toast.success('File deleted successfully')
                         fetchChildren()

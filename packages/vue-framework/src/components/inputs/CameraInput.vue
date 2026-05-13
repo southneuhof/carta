@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { toast } from 'vue-sonner'
-import services from '@southneuhof/is-vue-framework/services'
+import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
 import Modal from '../base/Modal.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
@@ -92,8 +92,9 @@ const handleFileUpload = (file: File) => {
   const reader = new FileReader()
   reader.readAsDataURL(file)
   uploadPercentage.value = 0
-  services
-    .fileUpload(file, '', (event: any) => {
+  const fileUpload = getFrameworkBehaviors().upload?.fileUpload
+  if (!fileUpload) missingBehavior('upload.fileUpload')
+  fileUpload(file, '', (event: any) => {
       uploadDetail.value = file
       uploadPercentage.value = Math.round((100 * event.loaded) / event.total)
     })

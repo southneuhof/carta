@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import services from '@southneuhof/is-vue-framework/services'
 import { ref, watch, computed } from 'vue'
+import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
 import FileComponent from '@southneuhof/is-vue-framework/components/base/FileComponent.vue'
 import { toast } from 'vue-sonner'
 import UploadDropzone from './UploadDropzone.vue'
@@ -76,8 +76,9 @@ const handleFileUpload = (files: File | File[]) => {
       return
     }
     isUploading.value = true
-    services
-      .fileUpload(file, props.uploadPath, (event: any) => {
+    const fileUpload = getFrameworkBehaviors().upload?.fileUpload
+    if (!fileUpload) missingBehavior('upload.fileUpload')
+    fileUpload(file, props.uploadPath, (event: any) => {
         uploadDetail.value = file
         uploadPercentage.value = Math.round((100 * event.loaded) / event.total)
       })

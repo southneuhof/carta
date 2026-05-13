@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import CRUDComposite from '@southneuhof/is-vue-framework/components/composites/CRUDComposite.vue'
 import Switch from '@southneuhof/is-vue-framework/components/inputs/Switch.vue'
-import services from '@southneuhof/is-vue-framework/services'
+import services from '@/utils/services'
 import type { ModelConfig } from '@southneuhof/is-data-model'
 import { inject } from 'vue'
 import { useRoute } from 'vue-router'

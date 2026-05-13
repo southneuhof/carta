@@ -64,8 +64,22 @@ onMounted(() => {
       <div class="text-4xl font-bold">Demo App</div>
     </div>
     <form class="flex flex-col items-center gap-4" @submit.prevent="() => login()">
-      <TextInput class="w-full" v-model="formData.username" label="Email" enableHelperMessage required/>
-      <PasswordInput class="w-full" v-model="formData.password" label="Password" enableHelperMessage required/>
+      <TextInput
+        class="w-full"
+        :model-value="formData.username"
+        @update:model-value="(value) => (formData.username = String(value))"
+        label="Email"
+        enableHelperMessage
+        required
+      />
+      <PasswordInput
+        class="w-full"
+        :model-value="formData.password"
+        @update:model-value="(value) => (formData.password = String(value))"
+        label="Password"
+        enableHelperMessage
+        required
+      />
       <div v-if="!loading" class="flex flex-row items-center gap-2 w-full">
         <Button :disabled="loading" @click="() => login()" type="submit" class="mt-6 w-full">Login</Button>
       </div>

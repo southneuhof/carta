@@ -1,8 +1,8 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { parse } from './utils/filter'
-import services from './utils/services'
-import { configureFrameworkService } from '@southneuhof/is-vue-framework/services'
+import { configureFrameworkBehaviors } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import { frameworkBehaviors } from './framework/behaviors'
 import App from './App.vue'
 import router from './router'
 import '@vuepic/vue-datepicker/dist/main.css'
@@ -41,7 +41,7 @@ Chart.register(annotationPlugin)
 Chart.register(FunnelController, TrapezoidElement, LinearScale, CategoryScale)
 
 const app = createApp(App)
-configureFrameworkService(services)
+configureFrameworkBehaviors(frameworkBehaviors)
 
 declare module 'vue' {
   export interface ComponentCustomProperties {

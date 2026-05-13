@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { GoogleMap, Marker } from 'vue3-google-map'
-import { ref, watch, type PropType } from 'vue'
-import services from '@southneuhof/is-vue-framework/services'
+import { computed, ref, watch, type PropType } from 'vue'
+import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
 import { commonProps } from './commonprops'
 import Popover from '../base/Popover.vue'
 import SearchBox from '../composites/SearchBox.vue'
@@ -45,6 +45,17 @@ const center = ref<Coordinate>(modelValue.value ? { lat: Number(modelValue.value
 const autocompletePredictions = ref<Record<string, any>[]>([])
 const loading = ref(false)
 
+const formModel = computed({
+  get: () => modelValue.value as Coordinate,
+  set: (value: Partial<Coordinate>) => {
+    modelValue.value = {
+      lat: Number(value?.lat ?? modelValue.value?.lat ?? center.value.lat),
+      lng: Number(value?.lng ?? modelValue.value?.lng ?? center.value.lng),
+      formatted_address: value?.formatted_address ?? modelValue.value?.formatted_address,
+    }
+  },
+})
+
 watch(modelValue, () => {
   if (modelValue.value) center.value = modelValue.value
   else center.value = { lat: -1.2100164677737193, lng: 117.56306695042623 }
@@ -53,19 +64,22 @@ watch(modelValue, () => {
 async function getLocationDetail(place_id: any) {
   zoom.value = 5
   loading.value = true
-  const { result } = await services.get('google-map/detail-place', { place_id, fields: ['geometry', 'formatted_address'] })
+  const getPlaceDetail = getFrameworkBehaviors().location?.getPlaceDetail
+  if (!getPlaceDetail) missingBehavior('location.getPlaceDetail')
+  const result = await getPlaceDetail(place_id)
   loading.value = false
   modelValue.value = {
-    lat: result.geometry.location.lat,
-    lng: result.geometry.location.lng,
+    lat: result.lat,
+    lng: result.lng,
     formatted_address: result.formatted_address,
   }
   emit('validation:touch')
 }
 
 async function getPlacesAutocomplete() {
-  const { predictions } = await services.get('google-map/place-autocomplete', { input: query.value })
-  autocompletePredictions.value = predictions
+  const getPlaceAutocomplete = getFrameworkBehaviors().location?.getPlaceAutocomplete
+  if (!getPlaceAutocomplete) missingBehavior('location.getPlaceAutocomplete')
+  autocompletePredictions.value = await getPlaceAutocomplete(query.value)
 }
 
 function getCurrentLocation() {
@@ -90,9 +104,9 @@ function handlePinDragEnd(event: any) {
   emit('validation:touch')
 }
 
-const { data } = await services.get('configs')
-
-const GOOGLE_MAP_API_KEY = data.gmaps.web
+const getMapConfig = getFrameworkBehaviors().location?.getMapConfig
+if (!getMapConfig) missingBehavior('location.getMapConfig')
+const { apiKey: GOOGLE_MAP_API_KEY } = await getMapConfig()
 </script>
 
 <template>
@@ -140,7 +154,7 @@ const GOOGLE_MAP_API_KEY = data.gmaps.web
               </div>
               <p v-else class="text-muted">Klik pada peta atau tekan tombol untuk memilih lokasi</p>
             </Card>
-            <Form v-if="formConfig && modelValue" static v-model="modelValue" v-bind="formConfig"></Form>
+            <Form v-if="formConfig && modelValue" static v-model="formModel as any" v-bind="formConfig"></Form>
           </div>
           <div v-if="loading" class="flex flex-row items-center gap-4">
             <Spinner />

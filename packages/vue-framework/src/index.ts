@@ -2,6 +2,7 @@ export * from './utils'
 export * from './behaviors'
 export * from './renderers'
 export * from './router'
+export * from './adapters/behaviors'
 export {
   FrameworkService,
   parseFilenameFromContentDisposition,

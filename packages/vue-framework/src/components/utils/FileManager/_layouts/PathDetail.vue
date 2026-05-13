@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { parse } from '@southneuhof/is-vue-framework/utils/parse'
-import services from '@southneuhof/is-vue-framework/services'
 import { ref, watch } from 'vue'
+import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
 import { useDropZone } from '@vueuse/core'
 import { ContextMenuContent, ContextMenuItem, ContextMenuPortal, ContextMenuTrigger, ContextMenuRoot } from 'radix-vue'
 import { toast } from 'vue-sonner'
@@ -39,8 +39,9 @@ const columns = ref([
 ])
 
 async function getData() {
-  const response = await services.get('files', searchParameters.value)
-  const responseData = response.data
+  const listFiles = getFrameworkBehaviors().fileManager?.listFiles
+  if (!listFiles) missingBehavior('fileManager.listFiles')
+  const responseData = await listFiles(searchParameters.value)
 
   if (Array.isArray(responseData) && responseData.length > 0 && typeof responseData[0] === 'object' && responseData[0] !== null && '0' in responseData[0]) {
     data.value = responseData.map((item: any) => item[Object.keys(item)[0]])
@@ -73,7 +74,9 @@ function handleRowClick(item: any) {
 
 async function onDrop(files: File[] | null) {
   if (files && files.length > 0) {
-    const uploadPromises = files.map((file) => services.fileUpload(file, modelValue.value?.path))
+    const uploadFile = getFrameworkBehaviors().fileManager?.uploadFile ?? getFrameworkBehaviors().upload?.fileUpload
+    if (!uploadFile) missingBehavior('fileManager.uploadFile')
+    const uploadPromises = files.map((file) => uploadFile(file, modelValue.value?.path))
 
     toast.promise(Promise.all(uploadPromises), {
       loading: `Uploading ${files.length} file${files.length > 1 ? 's' : ''}...`,
@@ -91,6 +94,18 @@ const { isOverDropZone } = useDropZone(dropZoneRef as any, onDrop)
 await getData()
 
 const _window = window
+
+function syncFiles() {
+  const sync = getFrameworkBehaviors().fileManager?.syncFiles
+  if (!sync) missingBehavior('fileManager.syncFiles')
+  return sync(modelValue.value?.path)
+}
+
+function deleteFile(path: string) {
+  const behavior = getFrameworkBehaviors().fileManager?.deleteFile
+  if (!behavior) missingBehavior('fileManager.deleteFile')
+  return behavior(path)
+}
 </script>
 
 <template>
@@ -112,7 +127,7 @@ const _window = window
                   class="!p-1"
                   @click="
                     () => {
-                      toast.promise(services.get('sync-file', { dir: modelValue.path }), {
+                      toast.promise(syncFiles(), {
                         loading: 'Syncing files...',
                         success: () => {
                           getData()
@@ -210,8 +225,7 @@ const _window = window
                           class="w-full"
                           :onConfirm="
                             () =>
-                              services
-                                .post('delete-file', { path: item.path })
+                              deleteFile(item.path)
                                 .then(() => {
                                   toast.success('File deleted successfully')
                                   getData()

@@ -1,29 +1,28 @@
 import { defineAsyncComponent } from 'vue'
-import services from '@southneuhof/is-vue-framework/services'
-import { parseURL } from '@southneuhof/is-vue-framework/behaviors/common'
+import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
 
 export function defaultBeforeSubmit({ formData }: { formData: object }) {
-  return formData
+  return getFrameworkBehaviors().form?.beforeSubmit?.({ formData }) ?? formData
 }
 
 export async function defaultOnSubmit({ payload, method, targetAPI, type }: { payload: object; method: 'put' | 'post'; targetAPI: string; type: 'create' | 'update' }) {
-  if (type === 'create') return services[method](parseURL(targetAPI, '', '/create'), payload)
-  if (type === 'update') return services[method](parseURL(targetAPI, '', '/update'), payload)
-  throw new Error(`[vue-framework] Unrecognized submit type: ${type}`)
+  const onSubmit = getFrameworkBehaviors().form?.onSubmit
+  if (!onSubmit) missingBehavior('form.onSubmit')
+  return onSubmit({ payload, method, targetAPI, type })
 }
 
 export function defaultOnSuccess({ payload, response }: { payload: object; response: object }) {
-  return { payload, response }
+  return getFrameworkBehaviors().form?.onSuccess?.({ payload, response }) ?? { payload, response }
 }
 
 export function defaultOnError({ payload, error }: { payload: object; error: any }) {
-  return { payload, error }
+  return getFrameworkBehaviors().form?.onError?.({ payload, error }) ?? { payload, error }
 }
 
 export async function defaultFormGetData({ getAPI, id, searchParameters }: { getAPI: string; id?: string | number; searchParameters?: object }) {
-  if (!id) return
-  const { data } = await services.detail(getAPI, id, searchParameters || {})
-  return data
+  const getDetailData = getFrameworkBehaviors().form?.getDetailData
+  if (!getDetailData) missingBehavior('form.getDetailData')
+  return getDetailData({ getAPI, id, searchParameters })
 }
 
 export const componentTypeMap = {

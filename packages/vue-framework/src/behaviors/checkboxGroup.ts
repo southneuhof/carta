@@ -1,6 +1,7 @@
-import services from '@southneuhof/is-vue-framework/services'
+import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
 
 export async function defaultGetData(getAPI: string, searchParameters: object) {
-  const { data } = await services.dataset(getAPI, { active: true, ...searchParameters })
-  return data
+  const getData = getFrameworkBehaviors().checkboxGroup?.getData
+  if (!getData) missingBehavior('checkboxGroup.getData')
+  return getData(getAPI, searchParameters)
 }

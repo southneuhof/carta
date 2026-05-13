@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import services from '@southneuhof/is-vue-framework/services'
 import { ref, watch, type PropType } from 'vue'
 import PathTree from './_layouts/PathTree.vue'
 import PathDetail from './_layouts/PathDetail.vue'

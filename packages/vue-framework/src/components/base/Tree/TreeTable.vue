@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, type PropType } from 'vue'
 import TreeItem from './TreeItem.vue'
-import services from '@southneuhof/is-vue-framework/services'
 import { defaultTableConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
 import { defaultTableGetData } from '@southneuhof/is-vue-framework/behaviors/table'
 import { parse } from '@southneuhof/is-vue-framework/utils/parse'
