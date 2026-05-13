@@ -5,7 +5,7 @@ import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  envPrefix: ['VITE_', 'GOOGLE_MAP_API_KEY'],
+  envPrefix: ['VITE_'],
   plugins: [
     vue({
       script: {

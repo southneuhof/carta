@@ -1,26 +1,11 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { buildLayoutRoutes, createLayoutViewResolver } from '@southneuhof/is-vue-framework/router'
 import type { FrameworkRouteModule } from '@southneuhof/is-vue-framework/router'
-import AuthenticatedLayout from '@/layouts/Authenticated.vue'
-import UnauthenticatedLayout from '@/layouts/Unauthenticated.vue'
 import menu from '@/menu'
 import { createAuthGuard } from './guards'
+import { appLayouts } from '@/app/configs/appLayouts'
 
-const authenticatedViews = import.meta.glob('/src/views/authenticated/**/*.vue')
-const unauthenticatedViews = import.meta.glob('/src/views/unauthenticated/**/*.vue')
-
-const resolver = createLayoutViewResolver({
-  authenticated: {
-    path: '/src/views/authenticated',
-    layout: AuthenticatedLayout,
-    views: authenticatedViews,
-  },
-  unauthenticated: {
-    path: '/src/views/unauthenticated',
-    layout: UnauthenticatedLayout,
-    views: unauthenticatedViews,
-  },
-})
+const resolver = createLayoutViewResolver(appLayouts)
 
 const loginRoute = {
   path: '/unauthenticated/auth/login',
