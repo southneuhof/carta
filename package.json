@@ -16,7 +16,10 @@
     "release:verify": "pnpm release:pack && node scripts/verify-package-contents.mjs",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "publish-packages": "changeset publish"
+    "publish-packages": "changeset publish",
+    "sync:package-repos": "node scripts/sync-package-repos.mjs",
+    "sync:package-repos:any": "node scripts/sync-package-repos.mjs --allow-any-branch",
+    "sync:package-repos:dry": "node scripts/sync-package-repos.mjs --dry-run --allow-any-branch"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.7",

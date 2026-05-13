@@ -1,6 +1,12 @@
-# Base Frontend Monorepo
+# South Neuhof Information System Framework
 
-Monorepo skeleton for the company platform stack.
+Canonical framework lab monorepo for South Neuhof information system frontends.
+
+Clone this repository to contribute to the framework, its publishable libraries, and the Vue sandbox/reference app:
+
+```sh
+git clone https://github.com/southneuhof/is-framework
+```
 
 Current status:
 
@@ -42,6 +48,8 @@ The repository is standardized on `pnpm`.
 - `pnpm type-check:mobile` - type-check the mobile app
 - `pnpm release:verify` - build, pack, and verify publishable package contents
 - `pnpm changeset` - create a Changesets release note
+- `pnpm sync:package-repos` - sync package source folders to their read-only mirror repos
+- `pnpm sync:package-repos:dry` - print package repo sync commands without pushing
 
 ## Framework Package Flow
 
@@ -51,9 +59,80 @@ Published package consumption is build-first. The publishable packages emit to `
 
 Run `pnpm release:verify` before publishing or cutting a release PR. Generated `dist` output and local pack tarballs are not source artifacts.
 
+## Package Repository Mirrors
+
+This monorepo is the source of truth. The individual package repositories are generated mirrors of package source folders:
+
+```txt
+packages/model-meta    -> https://github.com/southneuhof/is-data-model
+packages/apostle       -> https://github.com/southneuhof/apostle
+packages/vue-framework -> https://github.com/southneuhof/is-vue-framework
+```
+
+Open framework issues and pull requests against this monorepo, not the mirror repositories.
+
+Maintainers can sync mirrors manually:
+
+```sh
+pnpm sync:package-repos
+```
+
+CI also syncs mirrors from `main` through `.github/workflows/sync-package-repos.yml`. The workflow requires a `GH_PACKAGES_TOKEN` secret that can push to the three package repositories.
+
+## Client Package Versions And Rollback
+
+Client apps should consume immutable GitHub Packages versions, not Git commits or mirror repository branches.
+
+Recommended client dependency style:
+
+```json
+{
+  "dependencies": {
+    "@southneuhof/is-data-model": "0.0.0",
+    "@southneuhof/apostle": "0.0.0",
+    "@southneuhof/is-vue-framework": "0.0.0"
+  }
+}
+```
+
+Use exact versions for production client apps while the framework is still maturing. Avoid `latest`, and avoid `^` ranges unless the client app intentionally accepts compatible automatic upgrades.
+
+The published packages include readable `src` files for debugging and learning:
+
+```txt
+node_modules/@southneuhof/is-vue-framework/src
+```
+
+To list available versions:
+
+```sh
+npm view @southneuhof/is-vue-framework versions --registry=https://npm.pkg.github.com
+```
+
+To roll one package back:
+
+```sh
+pnpm add @southneuhof/is-vue-framework@PREVIOUS_VERSION
+pnpm install
+pnpm build
+```
+
+To roll the framework package set back together:
+
+```sh
+pnpm add \
+  @southneuhof/is-data-model@PREVIOUS_VERSION \
+  @southneuhof/apostle@PREVIOUS_VERSION \
+  @southneuhof/is-vue-framework@PREVIOUS_VERSION
+```
+
+Commit the resulting `package.json` and `pnpm-lock.yaml` changes in the client app.
+
 ## GitHub Packages
 
 This repo includes `.npmrc` registry routing for `@southneuhof`. Local consumers still need a GitHub Packages token in their user-level npm config or environment. CI publishing is handled by `.github/workflows/release.yml` with Changesets.
+
+The release workflow requires `GH_PACKAGES_TOKEN` for `NODE_AUTH_TOKEN` because packages are linked to separate mirror repositories.
 
 ## Web App
 
