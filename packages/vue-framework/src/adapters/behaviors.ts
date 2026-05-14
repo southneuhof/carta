@@ -35,6 +35,16 @@ export interface FrameworkLookupBehaviors {
   fieldsAlias?: Record<string, string>
 }
 
+export type FrameworkFileUpload = (file: File, directory?: string, onUploadProgress?: (progress: { loaded: number; total: number }) => void) => Promise<any>
+
+export interface FrameworkFileInputBehaviors {
+  fileUpload?: FrameworkFileUpload
+}
+
+export interface FrameworkImageInputBehaviors {
+  fileUpload?: FrameworkFileUpload
+}
+
 export interface FrameworkUploadBehaviors {
   fileUpload?: (file: File, directory?: string, onUploadProgress?: (progress: { loaded: number; total: number }) => void) => Promise<any>
   fileUploadNoAuth?: (file: Blob, onUploadProgress?: (progress: { loaded: number; total: number }) => void) => Promise<any>
@@ -75,6 +85,8 @@ export interface FrameworkBehaviors {
   radioGroup?: FrameworkSelectBehaviors
   checkboxGroup?: FrameworkSelectBehaviors
   lookup?: FrameworkLookupBehaviors
+  fileInput?: FrameworkFileInputBehaviors
+  imageInput?: FrameworkImageInputBehaviors
   upload?: FrameworkUploadBehaviors
   location?: FrameworkLocationBehaviors
   fileManager?: FrameworkFileManagerBehaviors

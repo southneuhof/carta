@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import { ref, watch, type PropType } from 'vue'
+import { defaultImageInputUpload, type ImageInputUploadBehavior } from '@southneuhof/is-vue-framework/behaviors/imageInput'
 import { toast } from 'vue-sonner'
 import ImagePreview from '@southneuhof/is-vue-framework/components/base/ImagePreview.vue'
 import Draggable from 'vuedraggable'
@@ -49,6 +49,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  fileUpload: {
+    type: Function as PropType<ImageInputUploadBehavior>,
+    default: defaultImageInputUpload,
+  },
   ...commonProps,
 })
 
@@ -85,9 +89,7 @@ const handleFileUpload = (e: Event) => {
   if (!file) return
   uploadPercentage.value = 0
   isUploading.value = true
-  const fileUpload = getFrameworkBehaviors().upload?.fileUpload
-  if (!fileUpload) missingBehavior('upload.fileUpload')
-  fileUpload(file, props.uploadPath, (event: any) => {
+  props.fileUpload(file, props.uploadPath, (event: any) => {
       uploadDetail.value = file
       uploadPercentage.value = Math.round((100 * event.loaded) / event.total)
     })

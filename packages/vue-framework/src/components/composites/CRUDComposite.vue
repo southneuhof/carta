@@ -8,7 +8,6 @@ import CRUDCreate from './CRUD/CRUDCreate.vue'
 import CRUDUpdate from './CRUD/CRUDUpdate.vue'
 import { permissions } from '@southneuhof/is-vue-framework/adapters/state'
 import Spinner from '../base/Spinner.vue'
-import Card from '../base/Card.vue'
 
 const [router, route] = [useRouter(), useRoute()]
 
@@ -45,7 +44,6 @@ const currentView = computed<'list' | 'detail' | 'create' | 'update'>(() => (rou
 
 onMounted(async () => {
   if (!actionsPermission.view) return
-  // setTimeout(() => animate.value = true, 200);
 })
 </script>
 

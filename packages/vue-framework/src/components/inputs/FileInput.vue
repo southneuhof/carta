@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
-import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import { ref, watch, computed, type PropType } from 'vue'
+import { defaultFileInputUpload, type FileInputUploadBehavior } from '@southneuhof/is-vue-framework/behaviors/fileInput'
 import FileComponent from '@southneuhof/is-vue-framework/components/base/FileComponent.vue'
 import { toast } from 'vue-sonner'
 import UploadDropzone from './UploadDropzone.vue'
@@ -30,6 +30,10 @@ const props = defineProps({
   uploadPath: {
     type: String,
     default: '',
+  },
+  fileUpload: {
+    type: Function as PropType<FileInputUploadBehavior>,
+    default: defaultFileInputUpload,
   },
   ...commonProps,
 })
@@ -76,9 +80,7 @@ const handleFileUpload = (files: File | File[]) => {
       return
     }
     isUploading.value = true
-    const fileUpload = getFrameworkBehaviors().upload?.fileUpload
-    if (!fileUpload) missingBehavior('upload.fileUpload')
-    fileUpload(file, props.uploadPath, (event: any) => {
+    props.fileUpload(file, props.uploadPath, (event: any) => {
         uploadDetail.value = file
         uploadPercentage.value = Math.round((100 * event.loaded) / event.total)
       })
@@ -97,7 +99,6 @@ const handleFileUpload = (files: File | File[]) => {
 }
 
 function handleFileDelete(index: number) {
-  console.log('gamer')
   items.value.splice(index, 1)
   emitChanges()
   if (!props.multi) items.value = []

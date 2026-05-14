@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { configureFrameworkBehaviors, resetFrameworkBehaviorsForTests } from '@southneuhof/is-vue-framework/adapters/behaviors'
 import { defaultTableGetData } from '../table'
 import { defaultOnSubmit } from '../form'
+import { defaultFileInputUpload } from '../fileInput'
+import { defaultImageInputUpload } from '../imageInput'
 
 describe('registry-backed framework defaults', () => {
   beforeEach(() => {
@@ -26,5 +28,37 @@ describe('registry-backed framework defaults', () => {
 
     await expect(defaultOnSubmit({ payload: { a: 1 }, method: 'post', targetAPI: 'users', type: 'create' })).resolves.toEqual({ ok: true })
     expect(onSubmit).toHaveBeenCalledWith({ payload: { a: 1 }, method: 'post', targetAPI: 'users', type: 'create' })
+  })
+
+  it('uses registered file input upload behavior', async () => {
+    const file = new File(['file'], 'document.pdf', { type: 'application/pdf' })
+    const onUploadProgress = vi.fn()
+    const fileUpload = vi.fn(async () => ({ url: '/document.pdf' }))
+    configureFrameworkBehaviors({ fileInput: { fileUpload } })
+
+    await expect(defaultFileInputUpload(file, 'documents', onUploadProgress)).resolves.toEqual({ url: '/document.pdf' })
+    expect(fileUpload).toHaveBeenCalledWith(file, 'documents', onUploadProgress)
+  })
+
+  it('throws when required file input upload behavior is missing', async () => {
+    const file = new File(['file'], 'document.pdf', { type: 'application/pdf' })
+
+    await expect(defaultFileInputUpload(file)).rejects.toThrow('Missing behavior: fileInput.fileUpload')
+  })
+
+  it('uses registered image input upload behavior', async () => {
+    const file = new File(['image'], 'image.png', { type: 'image/png' })
+    const onUploadProgress = vi.fn()
+    const fileUpload = vi.fn(async () => ({ url: '/image.png' }))
+    configureFrameworkBehaviors({ imageInput: { fileUpload } })
+
+    await expect(defaultImageInputUpload(file, 'images', onUploadProgress)).resolves.toEqual({ url: '/image.png' })
+    expect(fileUpload).toHaveBeenCalledWith(file, 'images', onUploadProgress)
+  })
+
+  it('throws when required image input upload behavior is missing', async () => {
+    const file = new File(['image'], 'image.png', { type: 'image/png' })
+
+    await expect(defaultImageInputUpload(file)).rejects.toThrow('Missing behavior: imageInput.fileUpload')
   })
 })
