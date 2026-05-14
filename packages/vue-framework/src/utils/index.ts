@@ -1,5 +1,7 @@
 export * from './classnames'
 export * from './format'
+export * from './string'
+export * from './date'
 export * from './object'
 export * from './browser'
 export * from './parse'

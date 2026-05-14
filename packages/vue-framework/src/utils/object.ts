@@ -50,3 +50,20 @@ export function getObjectValue(o: any, s: string): any {
   }
   return o
 }
+
+export function sumArray(numbers: any[]): number {
+  return numbers.reduce((sum, num) => sum + num, 0)
+}
+
+export function indexCompare(mode: 'moreThan' | 'lessThan' | 'moreThanOrEqual' | 'lessThanOrEqual', arr: any[], value: any, isMoreThan: any) {
+  switch (mode) {
+    case 'moreThan':
+      return arr.findIndex((item: any) => item === value) > arr.findIndex((item: any) => item === isMoreThan)
+    case 'lessThan':
+      return arr.findIndex((item: any) => item === value) < arr.findIndex((item: any) => item === isMoreThan)
+    case 'moreThanOrEqual':
+      return arr.findIndex((item: any) => item === value) >= arr.findIndex((item: any) => item === isMoreThan)
+    case 'lessThanOrEqual':
+      return arr.findIndex((item: any) => item === value) <= arr.findIndex((item: any) => item === isMoreThan)
+  }
+}
