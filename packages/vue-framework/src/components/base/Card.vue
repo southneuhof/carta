@@ -26,13 +26,11 @@ const props = withDefaults(
     color?: CardColorRole
     containerRole?: CardColorRole
     disabled?: boolean
-    contentPadding?: number
   }>(),
   {
     type: 'filled',
     color: 'surfaceContainer',
     disabled: false,
-    contentPadding: 16,
   }
 )
 
@@ -83,7 +81,7 @@ const typeStyle = computed<CSSProperties>(() => {
 
 const mergedClass = computed(() =>
   twMerge(
-    'relative flex flex-col gap-4 overflow-hidden rounded-xl',
+    'relative flex flex-col gap-4 overflow-hidden rounded-xl p-4',
     backgroundClassMap[resolvedRole.value],
     foregroundClassMap[resolvedRole.value],
     typeClassMap[props.type],
@@ -94,7 +92,6 @@ const mergedClass = computed(() =>
 )
 
 const mergedStyle = computed(() => [
-  { padding: `${props.contentPadding}px` } as CSSProperties,
   typeStyle.value,
   attrs.style,
 ])
