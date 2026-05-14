@@ -1,11 +1,10 @@
-import { access } from 'node:fs/promises'
+import { access, readFile } from 'node:fs/promises'
 import { execFileSync } from 'node:child_process'
 
 const packages = [
   {
     name: '@southneuhof/is-data-model',
     root: 'packages/model-meta',
-    tarball: 'packages/model-meta/southneuhof-is-data-model-0.0.0.tgz',
     requiredFiles: [
       'dist/index.js',
       'dist/index.js.map',
@@ -17,7 +16,6 @@ const packages = [
   {
     name: '@southneuhof/apostle',
     root: 'packages/apostle',
-    tarball: 'packages/apostle/southneuhof-apostle-0.0.0.tgz',
     requiredFiles: [
       'dist/index.js',
       'dist/index.js.map',
@@ -29,7 +27,6 @@ const packages = [
   {
     name: '@southneuhof/is-vue-framework',
     root: 'packages/vue-framework',
-    tarball: 'packages/vue-framework/southneuhof-is-vue-framework-0.0.0.tgz',
     requiredFiles: [
       'dist/index.js',
       'dist/index.js.map',
@@ -68,16 +65,25 @@ function readTarballEntries(tarball) {
     .filter(Boolean)
 }
 
+async function packageTarballPath(pkg) {
+  const manifest = JSON.parse(await readFile(`${pkg.root}/package.json`, 'utf8'))
+  const tarballName = `${manifest.name.replace(/^@/, '').replace('/', '-')}-${manifest.version}.tgz`
+
+  return `${pkg.root}/${tarballName}`
+}
+
 for (const pkg of packages) {
+  const tarball = await packageTarballPath(pkg)
+
   for (const file of pkg.requiredFiles) {
     await verifyLocalFile(pkg.root, file)
   }
 
   let entries
   try {
-    entries = readTarballEntries(pkg.tarball)
+    entries = readTarballEntries(tarball)
   } catch {
-    missing.push(pkg.tarball)
+    missing.push(tarball)
     continue
   }
 
@@ -87,7 +93,7 @@ for (const pkg of packages) {
     const packedPath = `package/${file}`
 
     if (!entrySet.has(packedPath)) {
-      missing.push(`${pkg.tarball}:${packedPath}`)
+      missing.push(`${tarball}:${packedPath}`)
     }
   }
 
