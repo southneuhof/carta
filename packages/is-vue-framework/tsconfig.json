@@ -12,10 +12,10 @@
         "./src/*"
       ],
       "@southneuhof/is-data-model": [
-        "../model-meta/src/index.ts"
+        "../is-data-model/src/index.ts"
       ],
       "@southneuhof/is-data-model/*": [
-        "../model-meta/src/*"
+        "../is-data-model/src/*"
       ],
       "@southneuhof/apostle": [
         "../apostle/src/index.ts"

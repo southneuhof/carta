@@ -14,10 +14,10 @@
         "../../packages/data-model/src/*"
       ],
       "@southneuhof/is-data-model": [
-        "../../packages/model-meta/src/index.ts"
+        "../../packages/is-data-model/src/index.ts"
       ],
       "@southneuhof/is-data-model/*": [
-        "../../packages/model-meta/src/*"
+        "../../packages/is-data-model/src/*"
       ]
     }
   },

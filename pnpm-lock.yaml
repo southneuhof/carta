@@ -57,7 +57,7 @@ importers:
         version: link:../../packages/sdk
       '@southneuhof/is-data-model':
         specifier: workspace:*
-        version: link:../../packages/model-meta
+        version: link:../../packages/is-data-model
       expo:
         specifier: ~54.0.33
         version: 54.0.33(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.85.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
@@ -202,10 +202,10 @@ importers:
         version: 1.7.23(vue@3.5.32(typescript@5.9.3))
       '@southneuhof/is-data-model':
         specifier: workspace:*
-        version: link:../../packages/model-meta
+        version: link:../../packages/is-data-model
       '@southneuhof/is-vue-framework':
         specifier: workspace:*
-        version: link:../../packages/vue-framework
+        version: link:../../packages/is-vue-framework
       '@tanstack/vue-form':
         specifier: 1.29.1
         version: 1.29.1(vue@3.5.32(typescript@5.9.3))
@@ -441,7 +441,7 @@ importers:
     dependencies:
       '@southneuhof/is-data-model':
         specifier: workspace:*
-        version: link:../model-meta
+        version: link:../is-data-model
       zod:
         specifier: ^3.25.0
         version: 3.25.76
@@ -452,14 +452,14 @@ importers:
     dependencies:
       '@southneuhof/is-data-model':
         specifier: workspace:*
-        version: link:../model-meta
+        version: link:../is-data-model
       zod:
         specifier: ^3.25.0
         version: 3.25.76
 
   packages/domain: {}
 
-  packages/model-meta:
+  packages/is-data-model:
     dependencies:
       zod:
         specifier: ^3.25.0
@@ -469,9 +469,7 @@ importers:
         specifier: ^2.1.9
         version: 2.1.9(@types/node@18.19.130)(jsdom@20.0.3)(lightningcss@1.32.0)(terser@5.46.1)
 
-  packages/sdk: {}
-
-  packages/vue-framework:
+  packages/is-vue-framework:
     dependencies:
       '@headlessui/vue':
         specifier: ^1.7.14
@@ -481,7 +479,7 @@ importers:
         version: link:../apostle
       '@southneuhof/is-data-model':
         specifier: workspace:^
-        version: link:../model-meta
+        version: link:../is-data-model
       '@tinymce/tinymce-vue':
         specifier: ^6.0.1
         version: 6.3.0(tinymce@7.9.2)(vue@3.5.32(typescript@5.9.3))
@@ -555,6 +553,8 @@ importers:
       vue-tsc:
         specifier: ^3.2.4
         version: 3.2.7(typescript@5.9.3)
+
+  packages/sdk: {}
 
 packages:
 

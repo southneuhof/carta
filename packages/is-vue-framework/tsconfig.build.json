@@ -18,10 +18,10 @@
         "./src/*"
       ],
       "@southneuhof/is-data-model": [
-        "../model-meta/dist/index.d.ts"
+        "../is-data-model/dist/index.d.ts"
       ],
       "@southneuhof/is-data-model/*": [
-        "../model-meta/dist/*"
+        "../is-data-model/dist/*"
       ],
       "@southneuhof/apostle": [
         "../apostle/dist/index.d.ts"

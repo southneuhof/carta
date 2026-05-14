@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.app.json",
-  "exclude": ["../../packages/sdk/src/__tests__/*", "../../packages/model-meta/src/__tests__/*"],
+  "exclude": ["../../packages/sdk/src/__tests__/*", "../../packages/is-data-model/src/__tests__/*"],
   "compilerOptions": {
     "composite": true,
     "lib": ["DOM", "es2022"],

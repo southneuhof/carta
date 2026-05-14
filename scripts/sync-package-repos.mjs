@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process'
 const packages = [
   {
     name: '@southneuhof/is-data-model',
-    prefix: 'packages/model-meta',
+    prefix: 'packages/is-data-model',
     repo: 'https://github.com/southneuhof/is-data-model.git',
     branch: 'main',
     tempBranch: 'sync/is-data-model',
@@ -17,7 +17,7 @@ const packages = [
   },
   {
     name: '@southneuhof/is-vue-framework',
-    prefix: 'packages/vue-framework',
+    prefix: 'packages/is-vue-framework',
     repo: 'https://github.com/southneuhof/is-vue-framework.git',
     branch: 'main',
     tempBranch: 'sync/is-vue-framework',

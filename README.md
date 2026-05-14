@@ -14,8 +14,8 @@ Current status:
 - `apps/api` is a placeholder for the future backend app.
 - `apps/base-mobile` is the active Expo mobile baseline.
 - `packages/contracts`, `packages/sdk`, and `packages/domain` are scaffolded package boundaries only.
-- `packages/model-meta` contains shared model config types and runtime helpers, published as `@southneuhof/is-data-model`.
-- `packages/vue-framework` contains Vue components, services, and app patterns, published as `@southneuhof/is-vue-framework`.
+- `packages/is-data-model` contains shared model config types and runtime helpers, published as `@southneuhof/is-data-model`.
+- `packages/is-vue-framework` contains Vue components, services, and app patterns, published as `@southneuhof/is-vue-framework`.
 - `packages/apostle` contains HTTP helpers used by `vue-framework`, published as `@southneuhof/apostle`.
 - `packages/data-model` contains project-owned model definitions (base/web/mobile).
 
@@ -30,8 +30,8 @@ packages/
   contracts/        # future generated API contracts
   sdk/              # shared API client wrapper
   domain/           # future shared domain primitives
-  model-meta/       # shared model metadata + runtime config builders
-  vue-framework/    # Vue framework components and patterns
+  is-data-model/       # shared model metadata + runtime config builders
+  is-vue-framework/    # Vue framework components and patterns
   apostle/          # HTTP helper package
   data-model/       # project-owned model definitions (base/web/mobile)
 ```
@@ -64,9 +64,9 @@ Run `pnpm release:verify` before publishing or cutting a release PR. Generated `
 This monorepo is the source of truth. The individual package repositories are generated mirrors of package source folders:
 
 ```txt
-packages/model-meta    -> https://github.com/southneuhof/is-data-model
+packages/is-data-model    -> https://github.com/southneuhof/is-data-model
 packages/apostle       -> https://github.com/southneuhof/apostle
-packages/vue-framework -> https://github.com/southneuhof/is-vue-framework
+packages/is-vue-framework -> https://github.com/southneuhof/is-vue-framework
 ```
 
 Open framework issues and pull requests against this monorepo, not the mirror repositories.

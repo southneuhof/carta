@@ -4,13 +4,13 @@
     "moduleSuffixes": [".server", ""],
     "paths": {
       "@client/data-model/*": ["../../packages/data-model/src/*"],
-      "@southneuhof/is-data-model": ["../../packages/model-meta/src/index.ts"],
-      "@southneuhof/is-data-model/*": ["../../packages/model-meta/src/*"]
+      "@southneuhof/is-data-model": ["../../packages/is-data-model/src/index.ts"],
+      "@southneuhof/is-data-model/*": ["../../packages/is-data-model/src/*"]
     }
   },
   "include": [
     "src/**/*",
     "../../packages/data-model/src/**/*",
-    "../../packages/model-meta/src/**/*"
+    "../../packages/is-data-model/src/**/*"
   ]
 }

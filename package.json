@@ -12,7 +12,7 @@
     "type-check": "turbo run type-check",
     "type-check:mobile": "pnpm --filter base-mobile type-check",
     "lint": "turbo run lint",
-    "release:pack": "turbo run build && pnpm --dir packages/model-meta pack && pnpm --dir packages/apostle pack && pnpm --dir packages/vue-framework pack",
+    "release:pack": "turbo run build && pnpm --dir packages/is-data-model pack && pnpm --dir packages/apostle pack && pnpm --dir packages/is-vue-framework pack",
     "release:verify": "pnpm release:pack && node scripts/verify-package-contents.mjs",
     "changeset": "changeset",
     "version-packages": "changeset version",

@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process'
 const packages = [
   {
     name: '@southneuhof/is-data-model',
-    root: 'packages/model-meta',
+    root: 'packages/is-data-model',
     requiredFiles: [
       'dist/index.js',
       'dist/index.js.map',
@@ -26,7 +26,7 @@ const packages = [
   },
   {
     name: '@southneuhof/is-vue-framework',
-    root: 'packages/vue-framework',
+    root: 'packages/is-vue-framework',
     requiredFiles: [
       'dist/index.js',
       'dist/index.js.map',

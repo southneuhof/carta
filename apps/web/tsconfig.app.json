@@ -4,16 +4,16 @@
     "env.d.ts",
     "src/**/*",
     "src/**/*.vue",
-    "../../packages/model-meta/src/**/*",
+    "../../packages/is-data-model/src/**/*",
     "../../packages/data-model/src/**/*",
     "../../packages/sdk/src/**/*",
-    "../../packages/vue-framework/src/**/*",
+    "../../packages/is-vue-framework/src/**/*",
     "../../packages/apostle/src/**/*"
   ],
   "exclude": [
     "src/**/__tests__/*",
     "../../packages/sdk/src/__tests__/*",
-    "../../packages/vue-framework/src/**/__tests__/*",
+    "../../packages/is-vue-framework/src/**/__tests__/*",
     "../../packages/apostle/src/**/__tests__/*"
   ],
   "compilerOptions": {
@@ -27,10 +27,10 @@
         "./src/*"
       ],
       "@southneuhof/is-data-model": [
-        "../../packages/model-meta/src/index.ts"
+        "../../packages/is-data-model/src/index.ts"
       ],
       "@southneuhof/is-data-model/*": [
-        "../../packages/model-meta/src/*"
+        "../../packages/is-data-model/src/*"
       ],
       "@repo/sdk": [
         "../../packages/sdk/src/index.ts"
@@ -42,10 +42,10 @@
         "./node_modules/vue3-google-map/dist/types/index.d.ts"
       ],
       "@southneuhof/is-vue-framework": [
-        "../../packages/vue-framework/src/index.ts"
+        "../../packages/is-vue-framework/src/index.ts"
       ],
       "@southneuhof/is-vue-framework/*": [
-        "../../packages/vue-framework/src/*"
+        "../../packages/is-vue-framework/src/*"
       ],
       "@southneuhof/apostle": [
         "../../packages/apostle/src/index.ts"

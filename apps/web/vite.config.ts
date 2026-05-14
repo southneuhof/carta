@@ -27,19 +27,19 @@ export default defineConfig({
       },
       {
         find: /^@southneuhof\/is-data-model$/,
-        replacement: fileURLToPath(new URL('../../packages/model-meta/src/index.ts', import.meta.url)),
+        replacement: fileURLToPath(new URL('../../packages/is-data-model/src/index.ts', import.meta.url)),
       },
       {
         find: '@southneuhof/is-data-model/',
-        replacement: fileURLToPath(new URL('../../packages/model-meta/src/', import.meta.url)),
+        replacement: fileURLToPath(new URL('../../packages/is-data-model/src/', import.meta.url)),
       },
       {
         find: /^@southneuhof\/is-vue-framework$/,
-        replacement: fileURLToPath(new URL('../../packages/vue-framework/src/index.ts', import.meta.url)),
+        replacement: fileURLToPath(new URL('../../packages/is-vue-framework/src/index.ts', import.meta.url)),
       },
       {
         find: '@southneuhof/is-vue-framework/',
-        replacement: fileURLToPath(new URL('../../packages/vue-framework/src/', import.meta.url)),
+        replacement: fileURLToPath(new URL('../../packages/is-vue-framework/src/', import.meta.url)),
       },
       {
         find: /^@southneuhof\/apostle$/,
