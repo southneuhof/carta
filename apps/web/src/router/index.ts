@@ -3,7 +3,7 @@ import { buildLayoutRoutes } from '@southneuhof/is-vue-framework/router'
 import type { FrameworkRouteModule } from '@southneuhof/is-vue-framework/router'
 import menu from '@/menu'
 import { createAuthGuard } from './guards'
-import { appLayouts } from '@/app/configs/appLayouts'
+import { appLayouts } from '@/configs/appLayouts'
 
 const notFoundRoute = {
   path: '/:pathMatch(.*)*',

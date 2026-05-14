@@ -1,6 +1,6 @@
 import { createParser } from '@southneuhof/is-vue-framework/utils/parse'
 import { formatCurrency, formatDate, formatDateTime, formatDelta, formatHour, formatLargeNumber, formatMonth, formatNumber, formatTime } from '@/utils/common'
-import { dictionary } from '@/app/configs/dictionary'
+import { dictionary } from '@/configs/dictionary'
 
 const formatterMap: Record<string, any> = {
   number: formatNumber,

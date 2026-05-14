@@ -1,4 +1,4 @@
-import app from '@/app/configs/app'
+import app from '@/configs/app'
 import { storage } from '@/utils/storage'
 import { savePostLoginRedirect } from '@/utils/post-login-redirect'
 import { getDefaultAuthenticatedRouteLocation } from './navigation'
