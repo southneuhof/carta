@@ -65,7 +65,9 @@ function assertCleanWorkingTree() {
 }
 
 function withToken(repo) {
-  if (!packageRepoToken) return repo
+  if (!packageRepoToken) {
+    throw new Error('GITHUB_TOKEN_FOR_PACKAGE_REPOS is required to push package mirror repositories.')
+  }
 
   return repo.replace('https://github.com/', `https://x-access-token:${packageRepoToken}@github.com/`)
 }
