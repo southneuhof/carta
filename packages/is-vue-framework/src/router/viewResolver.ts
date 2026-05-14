@@ -1,5 +1,5 @@
 import type { RouteComponent } from 'vue-router'
-import type { LayoutResolveChildInput, LayoutResolveRouteInput, LayoutResolverOptions, LayoutViewResolver, ViewLoader } from './types'
+import type { LayoutResolveChildInput, LayoutResolveRouteInput, LayoutResolverOptions, LayoutViewResolver, ViewLoader } from './types.js'
 
 function toPathSegment(value: string): string {
   return String(value).toLowerCase()

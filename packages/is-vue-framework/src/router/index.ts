@@ -1,5 +1,5 @@
-export { createLayoutViewResolver } from './viewResolver'
-export { buildLayoutRoutes } from './routes'
+export { createLayoutViewResolver } from './viewResolver.js'
+export { buildLayoutRoutes } from './routes.js'
 
 export type {
   FrameworkRouteModule,
@@ -7,4 +7,4 @@ export type {
   InferredLayoutRouteBuildOptions,
   LayoutResolverOptions,
   LayoutViewResolver,
-} from './types'
+} from './types.js'

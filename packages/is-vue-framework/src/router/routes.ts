@@ -1,5 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router'
-import type { FrameworkRouteItem, FrameworkRouteModule, InferredLayoutRouteBuildOptions, LayoutResolverOptions, ViewLoader } from './types'
+import type { FrameworkRouteItem, FrameworkRouteModule, InferredLayoutRouteBuildOptions, LayoutResolverOptions, ViewLoader } from './types.js'
 
 type InferredRoute = {
   layoutName: string

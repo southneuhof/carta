@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import remixiconTags from '@southneuhof/is-vue-framework/components/base/remixicon-tags'
+import remixiconTags from './remixicon-tags'
 import type { PropType } from 'vue'
 
 const props = defineProps({
