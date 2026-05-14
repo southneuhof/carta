@@ -2,7 +2,6 @@ export const storage = {
   localStorage: {
     get: (key: string): any | undefined => {
       const item = localStorage.getItem(key)
-      // console.log('parsing', item)
       try {
         return item ? JSON.parse(item) : undefined
       } catch (error) {

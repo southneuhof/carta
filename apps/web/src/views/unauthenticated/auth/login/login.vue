@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import services from '@/utils/services'
-import { storage } from '@/utils/storage'
+import { storage } from '@southneuhof/is-vue-framework/utils/storage'
 import { modules } from '@/stores/modules'
 import { globalLoading } from '@/stores/loading'
 import { permissions } from '@/stores/permissions'

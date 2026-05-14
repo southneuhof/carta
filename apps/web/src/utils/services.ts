@@ -1,7 +1,7 @@
 import config from '@/config'
 import router from '../router'
 import { modules } from '@/stores/modules'
-import { storage } from './storage'
+import { storage } from '@southneuhof/is-vue-framework/utils/storage'
 import { useColorPreference } from '@/stores/colorpreference'
 import { permissions } from '@/stores/permissions'
 import { toast } from 'vue-sonner'

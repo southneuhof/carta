@@ -2,6 +2,7 @@
 import users from '@client/data-model/models/users.model'
 import CRUDComposite from '@southneuhof/is-vue-framework/components/composites/CRUDComposite.vue'
 import UsersMappingRole from './_layouts/UsersMappingRole.vue';
+import Button from '@southneuhof/is-vue-framework/components/base/Button.vue';
 </script>
 
 <template>

@@ -1,4 +1,4 @@
-import { storage } from './storage'
+import { storage } from '@southneuhof/is-vue-framework/utils/storage'
 import { permissions } from '@/stores/permissions'
 
 const BYPASS_ALL_PERMISSIONS = import.meta.env.VITE_APP_BYPASS_ALL_PERMISSIONS === 'true'
