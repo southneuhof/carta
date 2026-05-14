@@ -107,7 +107,7 @@
     "clean": "node ../../scripts/clean-package.mjs dist",
     "clean:build-info": "node ../../scripts/clean-package.mjs dist/tsconfig.build.tsbuildinfo",
     "build:js": "tsc -p tsconfig.build.json",
-    "build:types": "vue-tsc --declaration --emitDeclarationOnly -p tsconfig.build.json",
+    "build:types": "vue-tsc --declaration --declarationMap --emitDeclarationOnly -p tsconfig.build.json",
     "copy:assets": "node ../../scripts/copy-package-assets.mjs packages/vue-framework/src packages/vue-framework/dist",
     "type-check": "vue-tsc --noEmit -p tsconfig.build.json",
     "test": "vitest run --environment jsdom"
