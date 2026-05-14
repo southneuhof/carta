@@ -5,12 +5,12 @@ import SearchBox from '../SearchBox.vue'
 import { onMounted, ref } from 'vue'
 import { keyManager } from '@southneuhof/is-vue-framework/adapters/state'
 import Table from '../Table.vue'
-import ConfirmationModal from '../ConfirmationModal.vue'
+import ConfirmationDialog from '../ConfirmationDialog.vue'
 import Switch from '@southneuhof/is-vue-framework/components/inputs/Switch.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { defaultOnExport, defaultOnDragChange, onDelete } from '@southneuhof/is-vue-framework/behaviors/crudList'
 import Form from '../Form.vue'
-import Modal from '@southneuhof/is-vue-framework/components/base/Modal.vue'
+import Dialog from '@southneuhof/is-vue-framework/components/base/Dialog.vue'
 import { defaultTableConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
@@ -135,7 +135,7 @@ onMounted(() => {
                   </Tooltip>
                   <Tooltip>
                     <template #trigger>
-                      <Modal :title="`Atur Kolom Tabel ${config.title}`">
+                      <Dialog :title="`Atur Kolom Tabel ${config.title}`">
                         <template #trigger>
                           <Button kind="icon">
                             <template #icon>
@@ -151,7 +151,7 @@ onMounted(() => {
                             </div>
                           </div>
                         </template>
-                      </Modal>
+                      </Dialog>
                     </template>
                     <template #content>Atur Kolom</template>
                   </Tooltip>
@@ -237,7 +237,7 @@ onMounted(() => {
                           <Icon name="edit"></Icon>
                         </template>
                       </Button>
-                      <ConfirmationModal
+                      <ConfirmationDialog
                         v-if="(config.actions?.delete ?? true) && data.can_delete != false && permissions.delete"
                         :onConfirm="async () => await onDelete(config.name, data[listConfig.uid!])"
                         :onSuccess="() => {
@@ -253,7 +253,7 @@ onMounted(() => {
                             </template>
                           </Button>
                         </template>
-                      </ConfirmationModal>
+                      </ConfirmationDialog>
                       <slot v-if="$slots['list-rowAdditionalActions']" name="list-rowAdditionalActions" v-bind="{ data }"></slot>
                     </div>
                   </template>

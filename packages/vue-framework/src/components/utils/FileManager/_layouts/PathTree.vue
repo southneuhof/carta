@@ -8,9 +8,9 @@ interface FolderItem {
   [key: string]: any
 }
 
-import ConfirmationModal from '@southneuhof/is-vue-framework/components/composites/ConfirmationModal.vue'
+import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composites/ConfirmationDialog.vue'
 import { toast } from 'vue-sonner'
-import ModalForm from '@southneuhof/is-vue-framework/components/composites/ModalForm.vue'
+import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
 
@@ -93,7 +93,7 @@ if (props.level === 0) {
           <!-- <Transition name="fade"> -->
           <ContextMenuContent class="z-10 min-w-[220px] rounded-md border border-outline-variant bg-surface-container-high p-1 text-sm text-on-surface shadow-md">
             <ContextMenuItem @select.prevent>
-              <ModalForm
+              <DialogForm
                 :fields="['folder_name']"
                 :fieldsAlias="{ folder_name: 'Nama Folder' }"
                 :inputConfig="{
@@ -120,10 +120,10 @@ if (props.level === 0) {
                     <p>Buat Folder Baru</p>
                   </div>
                 </template>
-              </ModalForm>
+              </DialogForm>
             </ContextMenuItem>
             <ContextMenuItem @select.prevent>
-              <ConfirmationModal
+              <ConfirmationDialog
                 class="w-full"
                 :onConfirm="
                   () =>
@@ -141,7 +141,7 @@ if (props.level === 0) {
                     <p>Delete</p>
                   </div>
                 </template>
-              </ConfirmationModal>
+              </ConfirmationDialog>
             </ContextMenuItem>
           </ContextMenuContent>
           <!-- </Transition> -->

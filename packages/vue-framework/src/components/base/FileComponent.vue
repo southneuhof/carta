@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { PropType } from 'vue'
-import IframePreviewModal from '../composites/IframePreviewModal.vue'
+import IframePreviewDialog from '../composites/IframePreviewDialog.vue'
 import { getFileExtension, isPreviewableExtension } from '@southneuhof/is-vue-framework/utils/object'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import Tooltip from '@southneuhof/is-vue-framework/components/base/Tooltip.vue'
@@ -58,11 +58,11 @@ const isPreviewable = computed(() => {
           </div>
           <template v-if="isPreviewable">
             <div class="h-[12px] w-[1px] bg-outline/[24%]"></div>
-            <IframePreviewModal :url="url" :title="filename">
+            <IframePreviewDialog :url="url" :title="filename">
               <template #trigger>
                 <button target="_blank" class="cursor-pointer text-sm text-primary">Preview <Icon name="eye" size="sm"></Icon></button>
               </template>
-            </IframePreviewModal>
+            </IframePreviewDialog>
           </template>
           <template v-else>
             <div class="h-[12px] w-[1px] bg-outline/[24%]"></div>

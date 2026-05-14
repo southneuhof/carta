@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { toast } from 'vue-sonner'
 import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
-import Modal from '../base/Modal.vue'
+import Dialog from '../base/Dialog.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
@@ -134,7 +134,7 @@ onMounted(() => {
   <div class="flex flex-row gap-4">
     <img v-if="image" :src="image" class="h-36 w-36 rounded-xl bg-surface-container-highest object-scale-down" />
     <div class="flex flex-col items-center justify-center gap-2">
-      <Modal :title="'Kamera'" :closeAction="() => deactivateCamera()">
+      <Dialog :title="'Kamera'" :closeAction="() => deactivateCamera()">
         <template #trigger>
           <Button v-if="!image" @click="activateCamera()">Buka Kamera <Icon name="camera" /></Button>
           <Button v-else @click="activateCamera()">Ambil Ulang Foto <Icon class="h-5 w-5" name="refresh" /></Button>
@@ -153,7 +153,7 @@ onMounted(() => {
             </div>
           </div>
         </template>
-      </Modal>
+      </Dialog>
       <Button v-if="image" @click="resetComponentState()" class="w-full" variant="tonal">Hapus Foto <Icon name="delete-bin" /></Button>
     </div>
   </div>

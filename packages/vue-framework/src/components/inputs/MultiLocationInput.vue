@@ -3,7 +3,7 @@ import { ref, type PropType } from 'vue'
 import LocationInput from './LocationInput.vue'
 import BaseInput from './BaseInput.vue'
 import { commonProps } from './commonprops'
-import Modal from '../base/Modal.vue'
+import Dialog from '../base/Dialog.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
@@ -31,7 +31,7 @@ const tempLocation = ref()
 <template>
   <BaseInput v-bind="props">
     <div class="flex flex-col gap-4">
-      <Modal @close="() => (tempLocation = null)">
+      <Dialog @close="() => (tempLocation = null)">
         <template #trigger>
           <Button><Icon name="add" />Tambah Lokasi</Button>
         </template>
@@ -39,11 +39,11 @@ const tempLocation = ref()
           <LocationInput v-model="tempLocation" :formConfig="locationForm" />
           <Button @click="() => [modelValue?.push(tempLocation), setOpen(false)]">Simpan</Button>
         </template>
-      </Modal>
+      </Dialog>
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-8 flex flex-row flex-wrap gap-4">
           <template v-if="modelValue?.length">
-            <Modal v-for="item in modelValue" @open="() => (tempLocation = item)" @close="() => (tempLocation = null)">
+            <Dialog v-for="item in modelValue" @open="() => (tempLocation = item)" @close="() => (tempLocation = null)">
               <template #trigger>
                 <Card color="surfaceContainerHigh" class="flex h-full max-w-fit flex-row items-center">
                   <Icon name="map-pin" />
@@ -58,7 +58,7 @@ const tempLocation = ref()
                 <LocationInput v-model="tempLocation" :formConfig="locationForm" />
                 <Button @click="() => setOpen(false)">Simpan</Button>
               </template>
-            </Modal>
+            </Dialog>
           </template>
           <div v-else class="text-muted">Belum ada lokasi yang ditambahkan</div>
         </div>

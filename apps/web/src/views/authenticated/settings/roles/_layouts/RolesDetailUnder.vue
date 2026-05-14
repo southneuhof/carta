@@ -4,7 +4,7 @@ import Switch from '@southneuhof/is-vue-framework/components/inputs/Switch.vue'
 import tasks from '@client/data-model/models/tasks.model'
 import CRUDComposite from '@southneuhof/is-vue-framework/components/composites/CRUDComposite.vue'
 import services from '@/utils/services'
-import ModalForm from '@southneuhof/is-vue-framework/components/composites/ModalForm.vue'
+import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue'
 import { toast } from 'vue-sonner'
 import { keyManager } from '@/stores/keyManager'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
@@ -48,7 +48,7 @@ const data = inject<any>('data', {})
       />
     </template>
     <template #list-view-header-action>
-      <ModalForm
+      <DialogForm
         :fields="['source_role_id']"
         targetAPI="custom/mappingrolepermission/copy?custom"
         :fieldsAlias="{
@@ -84,7 +84,7 @@ const data = inject<any>('data', {})
         <template #trigger>
           <Button kind="icon" variant="standard">Salin dari Role Lain<Icon name="file-copy"></Icon></Button>
         </template>
-      </ModalForm>
+      </DialogForm>
     </template>
   </CRUDComposite>
 </template>

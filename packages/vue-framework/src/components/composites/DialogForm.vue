@@ -3,9 +3,9 @@ import Form from '@southneuhof/is-vue-framework/components/composites/Form.vue'
 import type { InputConfig } from '@southneuhof/is-data-model'
 import type { PropType } from 'vue'
 import { defaultFormGetData, defaultBeforeSubmit, defaultOnSubmit, defaultOnSuccess, defaultOnError } from '@southneuhof/is-vue-framework/behaviors/form'
-import Modal from '../base/Modal.vue'
+import Dialog from '../base/Dialog.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
-// import ModalDeprecated from '../base/ModalDeprecated.vue';
+// import DialogDeprecated from '../base/DialogDeprecated.vue';
 
 const props = defineProps({
   inputConfig: { type: Object as PropType<InputConfig>, default: () => ({}) },
@@ -36,7 +36,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <Modal :class="($attrs.class as string)" :disabled="disabled">
+  <Dialog :class="($attrs.class as string)" :disabled="disabled">
     <template #trigger="{ disabled }">
       <slot name="trigger" v-bind="{ disabled }"></slot>
     </template>
@@ -65,5 +65,5 @@ const props = defineProps({
         <slot v-if="$slots.footer" name="footer"></slot>
       </div>
     </template>
-  </Modal>
+  </Dialog>
 </template>

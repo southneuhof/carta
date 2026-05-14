@@ -2,11 +2,11 @@
 import type { PropType } from 'vue'
 import { commonProps } from './commonprops'
 import BaseInput from './BaseInput.vue'
-import ModalForm from '../composites/ModalForm.vue'
+import DialogForm from '../composites/DialogForm.vue'
 import Table from '../composites/Table.vue'
 import { keyManager } from '@southneuhof/is-vue-framework/adapters/state'
 import { useId } from 'radix-vue'
-import ConfirmationModal from '../composites/ConfirmationModal.vue'
+import ConfirmationDialog from '../composites/ConfirmationDialog.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 
@@ -33,7 +33,7 @@ const _console = console
     <div class="flex flex-col gap-4">
       <div class="flex flex-row items-center justify-between gap-4">
         <p class="text-xl">{{ label || title }}</p>
-        <ModalForm
+        <DialogForm
           v-if="!disabled"
           v-bind="{
             ...(form as any),
@@ -52,7 +52,7 @@ const _console = console
             <Button v-if="!$slots['create-button']"><Icon name="add"></Icon>Tambah</Button>
             <slot v-else name="create-button" />
           </template>
-        </ModalForm>
+        </DialogForm>
       </div>
       <Table
         v-if="!$slots['table']"
@@ -68,7 +68,7 @@ const _console = console
       >
         <template v-if="!disabled" #list-rowActions="{ data, index }">
           <div class="flex flex-row items-center gap-2">
-            <ModalForm
+            <DialogForm
               v-bind="{
                 ...(form as any),
                 fields: form?.fields || fields,
@@ -86,8 +86,8 @@ const _console = console
               <template #trigger>
                 <Button color="warning" variant="tonal" size="square"><Icon name="edit"></Icon></Button>
               </template>
-            </ModalForm>
-            <ConfirmationModal
+            </DialogForm>
+            <ConfirmationDialog
               :onConfirm="
                 () => {
                   modelValue.splice(index, 1)
@@ -98,7 +98,7 @@ const _console = console
               <template #trigger>
                 <Button color="error" variant="tonal" size="square"><Icon name="delete-bin"></Icon></Button>
               </template>
-            </ConfirmationModal>
+            </ConfirmationDialog>
           </div>
         </template>
       </Table>

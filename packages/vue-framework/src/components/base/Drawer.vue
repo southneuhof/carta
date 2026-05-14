@@ -40,11 +40,11 @@ watch(
   }
 )
 
-function closeModal() {
+function closeDialog() {
   isOpen.value = false
   props.onClose()
 }
-function openModal() {
+function openDialog() {
   props.onOpen()
   isOpen.value = true
 }
@@ -61,7 +61,7 @@ watch(isOpen, (val) => {
 <template>
   <DrawerRoot :direction="'right'">
     <DrawerTrigger>
-      <slot name="trigger" v-bind="openModal"></slot>
+      <slot name="trigger" v-bind="openDialog"></slot>
     </DrawerTrigger>
     <DrawerPortal>
       <DrawerOverlay class="fixed inset-0 bg-black/40" />
@@ -70,11 +70,11 @@ watch(isOpen, (val) => {
       </DrawerContent>
     </DrawerPortal>
   </DrawerRoot>
-  <!-- <div type="button" @click="disabled ? null : openModal()">
-    <slot name="trigger" v-bind="openModal"></slot>
+  <!-- <div type="button" @click="disabled ? null : openDialog()">
+    <slot name="trigger" v-bind="openDialog"></slot>
   </div>
   <TransitionRoot appear :show="isOpen" as="template">
-    <Dialog as="div" @close="closeModal" class="relative z-10" id="dialog" :class="useColorPreference().value">
+    <Dialog as="div" @close="closeDialog" class="relative z-10" id="dialog" :class="useColorPreference().value">
       <TransitionChild as="template" enter="duration-300 ease-out" enter-from="opacity-0" enter-to="opacity-100" leave="duration-200 ease-in" leave-from="opacity-100" leave-to="opacity-0">
         <div class="fixed inset-0 bg-black bg-opacity-25" />
       </TransitionChild>
@@ -89,17 +89,17 @@ watch(isOpen, (val) => {
                     <DialogTitle as="h3" class="text-2xl">
                       <div class="flex w-full flex-col" :class="$slots.icon ? 'items-center justify-center gap-4' : ''">
                         <slot v-if="$slots.icon" name="icon"></slot>
-                        <slot v-if="$slots.title" name="title" v-bind="{ closeModal }"></slot>
+                        <slot v-if="$slots.title" name="title" v-bind="{ closeDialog }"></slot>
                         <div v-else>{{ props.title }}</div>
                       </div>
                     </DialogTitle>
                     <div v-if="$slots.content" class="text-on-surface-variant ">
-                      <slot name="content" v-bind="{ closeModal }"></slot>
+                      <slot name="content" v-bind="{ closeDialog }"></slot>
                     </div>
 
                     <div v-if="$slots.footer">
                       <div class="flex flex-row items-center justify-end gap-2">
-                        <slot name="footer" v-bind="{ closeModal }"></slot>
+                        <slot name="footer" v-bind="{ closeDialog }"></slot>
                       </div>
                     </div>
                   </div>

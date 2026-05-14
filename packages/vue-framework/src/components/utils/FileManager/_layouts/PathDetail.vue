@@ -5,9 +5,9 @@ import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-fram
 import { useDropZone } from '@vueuse/core'
 import { ContextMenuContent, ContextMenuItem, ContextMenuPortal, ContextMenuTrigger, ContextMenuRoot } from 'radix-vue'
 import { toast } from 'vue-sonner'
-import ConfirmationModal from '@southneuhof/is-vue-framework/components/composites/ConfirmationModal.vue'
+import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composites/ConfirmationDialog.vue'
 import config from '@southneuhof/is-vue-framework/adapters/defaults'
-import ModalForm from '@southneuhof/is-vue-framework/components/composites/ModalForm.vue'
+import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 
@@ -221,7 +221,7 @@ function deleteFile(path: string) {
                         Download
                       </ContextMenuItem> -->
                       <ContextMenuItem @select.prevent>
-                        <ConfirmationModal
+                        <ConfirmationDialog
                           class="w-full"
                           :onConfirm="
                             () =>
@@ -239,7 +239,7 @@ function deleteFile(path: string) {
                               <p>Delete</p>
                             </div>
                           </template>
-                        </ConfirmationModal>
+                        </ConfirmationDialog>
                       </ContextMenuItem>
                     </ContextMenuContent>
                   </Transition>
@@ -260,7 +260,7 @@ function deleteFile(path: string) {
       <Transition name="fade">
         <ContextMenuContent class="z-1 min-w-[220px] rounded-md border border-outline-variant bg-surface-container-high p-1 text-sm text-on-surface shadow-md">
           <ContextMenuItem @select.prevent>
-            <ModalForm
+            <DialogForm
               :fields="['folder_name']"
               :fieldsAlias="{ folder_name: 'Nama Folder' }"
               :inputConfig="{
@@ -287,7 +287,7 @@ function deleteFile(path: string) {
                   <p>Buat Folder Baru</p>
                 </div>
               </template>
-            </ModalForm>
+            </DialogForm>
           </ContextMenuItem>
         </ContextMenuContent>
       </Transition>

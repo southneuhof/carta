@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, getCurrentInstance, ref, type PropType } from 'vue'
-import Modal from '../base/Modal.vue'
+import Dialog from '../base/Dialog.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 
 type ButtonKind = 'button' | 'icon' | 'split'
@@ -9,7 +9,7 @@ type ButtonColor = 'primary' | 'warning' | 'error' | 'info' | 'success'
 type ButtonSize = 'square' | 'full'
 type ButtonType = 'button' | 'submit' | 'reset'
 
-export type ConfirmationModalActions = {
+export type ConfirmationDialogActions = {
   label: string
   appearance?: {
     variant?: ButtonVariant
@@ -34,7 +34,7 @@ const props = defineProps({
     default: 'Tekan lanjut untuk melanjutkan aksi',
   },
   actions: {
-    type: Array as PropType<ConfirmationModalActions[]>,
+    type: Array as PropType<ConfirmationDialogActions[]>,
     default: null,
   },
   onConfirm: {
@@ -65,7 +65,7 @@ const props = defineProps({
 const isPending = ref(false)
 const instance = getCurrentInstance()
 
-const resolvedActions = computed<ConfirmationModalActions[]>(() => {
+const resolvedActions = computed<ConfirmationDialogActions[]>(() => {
   const isActionsPropDeclared = !!instance?.vnode.props && 'actions' in instance.vnode.props
   if (isActionsPropDeclared) return props.actions ?? []
 
@@ -98,7 +98,7 @@ function isPromiseLike(value: unknown): value is Promise<unknown> {
   return !!value && typeof (value as Promise<unknown>).then === 'function'
 }
 
-async function handleAction(action: ConfirmationModalActions, setOpen: (open: boolean) => void) {
+async function handleAction(action: ConfirmationDialogActions, setOpen: (open: boolean) => void) {
   if (isPending.value) return
 
   try {
@@ -126,7 +126,7 @@ async function handleAction(action: ConfirmationModalActions, setOpen: (open: bo
 </script>
 
 <template>
-  <Modal :class="[$attrs.class as string, { 'pointer-events-none': isPending }]" :disabled="disabled">
+  <Dialog :class="[$attrs.class as string, { 'pointer-events-none': isPending }]" :disabled="disabled">
     <template #trigger="{ disabled }">
       <slot name="trigger" v-bind="{ disabled }"></slot>
     </template>
@@ -146,5 +146,5 @@ async function handleAction(action: ConfirmationModalActions, setOpen: (open: bo
         </Button>
       </div>
     </template>
-  </Modal>
+  </Dialog>
 </template>

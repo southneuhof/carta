@@ -7,9 +7,9 @@ import BaseInput from './BaseInput.vue'
 import Table from '../composites/Table.vue'
 import Checkbox from './CheckboxInput.vue'
 import SearchBox from '../composites/SearchBox.vue'
-import ModalForm from '../composites/ModalForm.vue'
-import ConfirmationModal from '../composites/ConfirmationModal.vue'
-import Modal from '../base/Modal.vue'
+import DialogForm from '../composites/DialogForm.vue'
+import ConfirmationDialog from '../composites/ConfirmationDialog.vue'
+import Dialog from '../base/Dialog.vue'
 import Popover from '../base/Popover.vue'
 import Form from '../composites/Form.vue'
 import { keyManager } from '@southneuhof/is-vue-framework/adapters/state'
@@ -320,7 +320,7 @@ function handleClick(data: Record<string, any>) {
 <template>
   <BaseInput v-bind="props">
     <div class="flex flex-row items-center gap-2">
-      <Modal @close="resetStagedInputValue">
+      <Dialog @close="resetStagedInputValue">
         <template #trigger>
           <slot v-if="$slots['trigger']" name="trigger"></slot>
           <div
@@ -413,16 +413,16 @@ function handleClick(data: Record<string, any>) {
             </Table>
           </div>
         </template>
-      </Modal>
-      <ModalForm v-if="inlineAddFormConfig" v-bind="(inlineAddFormConfig as any)">
+      </Dialog>
+      <DialogForm v-if="inlineAddFormConfig" v-bind="(inlineAddFormConfig as any)">
         <template #trigger>
           <Button size="square" kind="icon" variant="standard"><Icon name="add"></Icon></Button>
         </template>
-      </ModalForm>
+      </DialogForm>
     </div>
     <Table v-if="multi && modelValue?.length && !hidePreviewTable" :key="previewTableKey" :data="modelValue" :fields="fields" :fieldsAlias="fieldsAlias">
       <template #list-rowActions="{ data }">
-        <ConfirmationModal
+        <ConfirmationDialog
           :onConfirm="
             async () => {
               handleClick(data)
@@ -433,7 +433,7 @@ function handleClick(data: Record<string, any>) {
           <template #trigger>
             <Button variant="tonal" size="square" color="error"><Icon name="delete-bin"></Icon></Button>
           </template>
-        </ConfirmationModal>
+        </ConfirmationDialog>
       </template>
     </Table>
   </BaseInput>

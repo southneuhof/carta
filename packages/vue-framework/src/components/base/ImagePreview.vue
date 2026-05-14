@@ -79,7 +79,7 @@ function onDetailError() {
   detailError.value = true
 }
 
-function openModal() {
+function openDialog() {
   if (slots['image-thumbnail']) {
     isOpen.value = true
     return
@@ -87,7 +87,7 @@ function openModal() {
   if (thumbnailSrc.value || detailSrc.value) isOpen.value = true
 }
 
-function closeModal() {
+function closeDialog() {
   isOpen.value = false
 }
 </script>
@@ -98,12 +98,12 @@ function closeModal() {
       v-if="!props.disableControls && (props.thumbnail || props.url)"
       class="absolute flex h-full w-full flex-row items-center justify-center gap-2 rounded-xl bg-black/[12%] text-on-surface opacity-0 transition-opacity duration-100 hover:opacity-100"
     >
-      <Button @click="() => openModal()" color="info" size="square"><Icon size="lg" name="eye"></Icon></Button>
+      <Button @click="() => openDialog()" color="info" size="square"><Icon size="lg" name="eye"></Icon></Button>
       <slot name="actions" />
     </div>
     <div
       v-else
-      @click="() => openModal()"
+      @click="() => openDialog()"
       class="absolute flex h-full w-full cursor-pointer flex-row items-center justify-center gap-2 rounded-xl bg-black/[12%] text-on-surface opacity-0 transition-opacity duration-100 hover:opacity-100"
     ></div>
     <div v-if="$slots['image-description']" class="absolute bottom-4 rounded-xl bg-scrim/[18%] px-4 py-2 text-sm text-white">
@@ -120,11 +120,11 @@ function closeModal() {
       </div>
     </template>
   </div>
-  <div v-else @click="() => openModal()">
+  <div v-else @click="() => openDialog()">
     <slot name="trigger" />
   </div>
   <TransitionRoot appear :show="isOpen" as="template">
-    <Dialog as="div" @close="closeModal" class="relative z-10" id="dialog">
+    <Dialog as="div" @close="closeDialog" class="relative z-10" id="dialog">
       <TransitionChild as="template" enter="duration-300 ease-out" enter-from="opacity-0" enter-to="opacity-100" leave="duration-200 ease-in" leave-from="opacity-100" leave-to="opacity-0">
         <div class="fixed inset-0 bg-black bg-opacity-25" />
       </TransitionChild>
@@ -143,7 +143,7 @@ function closeModal() {
               <div class="flex min-h-full items-center justify-center">
                 <DialogPanel class="max-w-screen-lg">
                   <div class="relative">
-                    <button class="absolute right-4 top-4 text-on-surface" @click="closeModal()"><Icon name="close"></Icon></button>
+                    <button class="absolute right-4 top-4 text-on-surface" @click="closeDialog()"><Icon name="close"></Icon></button>
                     <slot v-if="$slots['image-detail']" name="image-detail" />
                     <img v-else-if="detailSrc" class="h-full rounded-xl bg-surface-container-high object-scale-down" :src="detailSrc" @error="onDetailError" />
                     <div v-else class="flex h-[240px] w-[240px] items-center justify-center rounded-xl bg-surface-container-high text-muted">

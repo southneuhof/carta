@@ -84,8 +84,8 @@ hr {
   display: none;
 }
 
-/* TinyMCE Modal Compatibility */
-/* Ensure TinyMCE dialogs, menus, and auxiliary elements appear above Radix modals */
+/* TinyMCE Dialog Compatibility */
+/* Ensure TinyMCE dialogs, menus, and auxiliary elements appear above Radix dialogs */
 
 /* When a TinyMCE dialog is open, disable pointer events on the Radix overlay */
 /* This allows clicks to pass through to TinyMCE dialogs */

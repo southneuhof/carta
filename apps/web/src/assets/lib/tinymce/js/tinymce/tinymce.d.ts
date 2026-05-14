@@ -2052,7 +2052,7 @@ interface BaseEditorOptions {
   directionality?: 'ltr' | 'rtl'
   doctype?: string
   document_base_url?: string
-  draggable_modal?: boolean
+  draggable_dialog?: boolean
   editable_class?: string
   editable_root?: boolean
   element_format?: 'xhtml' | 'html'
@@ -2249,7 +2249,7 @@ interface EditorOptions extends NormalizedEditorOptions {
   default_font_stack: string[]
   document_base_url: string
   init_content_sync: boolean
-  draggable_modal: boolean
+  draggable_dialog: boolean
   editable_class: string
   editable_root: boolean
   font_css: string[]

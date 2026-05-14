@@ -4,7 +4,7 @@ import { buildFormConfig, type ModelConfig } from '@southneuhof/is-data-model'
 import Form from '../Form.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { bulkCreateFormProps, composeInputTemplateSheet } from '@southneuhof/is-vue-framework/behaviors/crudCreate'
-import Modal from '@southneuhof/is-vue-framework/components/base/Modal.vue'
+import Dialog from '@southneuhof/is-vue-framework/components/base/Dialog.vue'
 import { defaultFormConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
 import { defineAsyncComponent } from 'vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
@@ -43,7 +43,7 @@ const createFormConfig: CreateConfig = buildFormConfig(props.config, 'create', {
         </Button>
         <div class="min-w-max text-xl">Tambah {{ config.title || $route.meta.title }}</div>
       </div>
-      <!-- <Modal>
+      <!-- <Dialog>
         <template #trigger>
           <Button kind="icon" variant="standard"><Icon name="function-add"></Icon>Bulk Create</Button>
         </template>
@@ -79,7 +79,7 @@ const createFormConfig: CreateConfig = buildFormConfig(props.config, 'create', {
             />
           </div>
         </template>
-      </Modal> -->
+      </Dialog> -->
     </Card>
     <Transition name="vfade" mode="out-in">
       <Suspense>
