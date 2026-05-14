@@ -33,17 +33,19 @@ const createFormConfig: CreateConfig = buildFormConfig(props.config, 'create', {
       <div class="flex flex-row items-center gap-4">
         <Button
           @click="() => ($route.query['redirected'] == 'true' ? $router.back() : $router.push({ query: { ...$route.query, [`${config.name}_view`]: 'list' } }))"
-          variant="icon"
+          kind="icon" variant="text"
           size="square"
           class="max-w-fit"
         >
-          <Icon name="arrow-left" />
+          <template #icon>
+            <Icon name="arrow-left" />
+          </template>
         </Button>
         <div class="min-w-max text-xl">Tambah {{ config.title || $route.meta.title }}</div>
       </div>
       <!-- <Modal>
         <template #trigger>
-          <Button variant="icon"><Icon name="function-add"></Icon>Bulk Create</Button>
+          <Button kind="icon" variant="standard"><Icon name="function-add"></Icon>Bulk Create</Button>
         </template>
         <template #title>
           Bulk Create

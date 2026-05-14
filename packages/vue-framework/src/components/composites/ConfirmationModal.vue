@@ -3,8 +3,9 @@ import { computed, getCurrentInstance, ref, type PropType } from 'vue'
 import Modal from '../base/Modal.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 
-type ButtonVariant = 'filled' | 'outlined' | 'tonal' | 'icon'
-type ButtonColor = 'primary' | 'secondary' | 'tertiary' | 'warning' | 'error' | 'info' | 'success'
+type ButtonKind = 'button' | 'icon' | 'split'
+type ButtonVariant = 'elevated' | 'filled' | 'tonal' | 'outlined' | 'text' | 'standard'
+type ButtonColor = 'primary' | 'warning' | 'error' | 'info' | 'success'
 type ButtonSize = 'square' | 'full'
 type ButtonType = 'button' | 'submit' | 'reset'
 
@@ -12,6 +13,7 @@ export type ConfirmationModalActions = {
   label: string
   appearance?: {
     variant?: ButtonVariant
+    kind?: ButtonKind
     color?: ButtonColor
     size?: ButtonSize
     type?: ButtonType
@@ -72,7 +74,7 @@ const resolvedActions = computed<ConfirmationModalActions[]>(() => {
       label: 'Continue',
       appearance: {
         color: 'primary',
-        variant: 'icon',
+        variant: 'filled',
       },
       onClick: (setOpen) => (props.onConfirm ? props.onConfirm(setOpen) : setOpen(false)),
       onSuccess: props.onSuccess ?? undefined,

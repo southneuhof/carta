@@ -274,7 +274,7 @@ onMounted(() => {
           </div>
         </template>
         <template #content="{ setOpen }">
-          <Card type="outlined" color="surfaceContainerHigh" :content-padding="0" class="max-h-80 max-w-screen-sm gap-1 shadow-sm">
+          <Card variant="outlined" color="surfaceContainerHigh" :content-padding="0" class="max-h-80 max-w-screen-sm gap-1 shadow-sm">
             <div v-if="props.searchable" class="sticky top-0 z-10 border-b border-outline-variant bg-surface-container-high p-4">
               <TextInput
                 disable-helper-message

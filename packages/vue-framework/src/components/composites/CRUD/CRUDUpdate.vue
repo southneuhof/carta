@@ -30,11 +30,14 @@ const updateFormConfig: UpdateConfig = buildFormConfig(props.config, 'update', {
       <div class="flex flex-row items-center gap-4">
         <Button
           @click="() => ($route.query['redirected'] == 'true' ? $router.back() : $router.push({ query: { ...$route.query, [`${config.name}_view`]: 'list' } }))"
-          variant="icon"
+          kind="icon"
           size="square"
+          variant="text"
           class="max-w-fit"
         >
-          <Icon name="arrow-left" />
+          <template #icon>
+            <Icon name="arrow-left" />
+          </template>
         </Button>
         <div class="min-w-max text-xl">Perbarui {{ config.title || $route.meta.title }}</div>
       </div>

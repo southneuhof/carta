@@ -43,7 +43,7 @@ const showPassword = ref<boolean>(false)
     :type="showPassword ? 'text' : 'password'"
   >
     <template #action>
-      <Button variant="icon" size="square" @click="showPassword = !showPassword"><Icon :name="showPassword ? 'eye-off' : 'eye'" /></Button>
+      <Button kind="icon" variant="standard" size="square" @click="showPassword = !showPassword"><Icon :name="showPassword ? 'eye-off' : 'eye'" /></Button>
     </template>
   </TextInput>
 </template>

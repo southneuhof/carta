@@ -44,7 +44,9 @@ const fileInput = ref()
         <label class="w-fit">
           <a class="cursor-pointer">
             <Button @click="openFileDialog()">
-              <Icon name="add-circle"></Icon>
+              <template #icon>
+                <Icon name="add-circle"></Icon>
+              </template>
               <div>Pilih dari penyimpanan</div>
             </Button>
             <input

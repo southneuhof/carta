@@ -76,7 +76,7 @@ const toggle = async () => {
   <tr class="group relative hover:bg-on-surface/[4%]">
     <td>
       <div :style="{ paddingLeft: `${(!levels || level < levels ? props.level : props.level + 2) * 20}px` }" class="flex flex-row items-center gap-2">
-        <Button v-if="!levels || level < levels" variant="icon" size="square" @click="toggle"><Icon :name="expanded ? 'arrow-up-s' : 'arrow-down-s'" /></Button>
+        <Button v-if="!levels || level < levels" kind="icon" variant="standard" size="square" @click="toggle"><Icon :name="expanded ? 'arrow-up-s' : 'arrow-down-s'" /></Button>
         <slot v-if="$slots['list-rowActions'] && props.data" name="list-rowActions" v-bind="{ data: props.data, index: props.index }" />
         <p>{{ props.data[props.fields[0]] }}</p>
       </div>

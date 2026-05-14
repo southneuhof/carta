@@ -42,7 +42,7 @@ const open = ref(false)
             <FileManager :multi="props.multi" :activePath="modelValue?.type === 'folder' ? modelValue?.path : modelValue?.path.split('/').slice(0, -1).join('/')" :activeObject="modelValue">
               <template #footer="{ data }">
                 <div class="flex flex-row items-center justify-center gap-2">
-                  <Button variant="icon" @click="() => (open = false)">Cancel</Button>
+                  <Button kind="icon" variant="standard" @click="() => (open = false)">Cancel</Button>
                   <Button
                     :disabled="!data"
                     @click="

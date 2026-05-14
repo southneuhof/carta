@@ -227,11 +227,13 @@ const { handlePrint } = useVueToPrint({
       <div class="flex flex-row items-center gap-4">
         <Button
           @click="() => ($route.query['redirected'] == 'true' ? $router.back() : $router.push({ query: { ...$route.query, [`${config.name}_view`]: 'list' } }))"
-          variant="icon"
+          kind="icon" variant="standard"
           size="square"
           class="max-w-fit"
         >
-          <Icon name="arrow-left" />
+          <template #icon>
+            <Icon name="arrow-left" />
+          </template>
         </Button>
         <div class="min-w-max text-xl">Detail {{ config.title || $route.meta.title }}</div>
       </div>

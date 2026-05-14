@@ -82,7 +82,7 @@ const data = inject<any>('data', {})
           <p>Pilih Role Sumber</p>
         </template>
         <template #trigger>
-          <Button variant="icon">Salin dari Role Lain<Icon name="file-copy"></Icon></Button>
+          <Button kind="icon" variant="standard">Salin dari Role Lain<Icon name="file-copy"></Icon></Button>
         </template>
       </ModalForm>
     </template>

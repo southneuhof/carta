@@ -416,7 +416,7 @@ function handleClick(data: Record<string, any>) {
       </Modal>
       <ModalForm v-if="inlineAddFormConfig" v-bind="(inlineAddFormConfig as any)">
         <template #trigger>
-          <Button size="square" variant="icon"><Icon name="add"></Icon></Button>
+          <Button size="square" kind="icon" variant="standard"><Icon name="add"></Icon></Button>
         </template>
       </ModalForm>
     </div>

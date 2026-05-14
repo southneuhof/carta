@@ -145,7 +145,7 @@ const { apiKey: GOOGLE_MAP_API_KEY } = await getMapConfig()
               <Tooltip>
                 <template #content> Gunakan lokasi saat ini </template>
                 <template #trigger>
-                  <Button variant="icon" size="square" @click="getCurrentLocation"><Icon class="max-h-fit max-w-fit" name="map-pin" /></Button>
+                  <Button kind="icon" variant="standard" size="square" @click="getCurrentLocation"><Icon class="max-h-fit max-w-fit" name="map-pin" /></Button>
                 </template>
               </Tooltip>
               <div v-if="modelValue" class="flex flex-col gap-2">

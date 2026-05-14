@@ -1,101 +1,359 @@
 <script setup lang="ts">
+import { computed, ref, useAttrs, useSlots } from 'vue'
+import { DropdownMenuContent, DropdownMenuPortal, DropdownMenuRoot, DropdownMenuTrigger } from 'radix-vue'
 import { twMerge } from 'tailwind-merge'
-import type { PropType } from 'vue'
 
-const props = defineProps({
-  variant: {
-    type: String as PropType<'filled' | 'outlined' | 'tonal' | 'icon'>,
-    required: false,
-    default: 'filled',
-  },
-  disabled: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  color: {
-    type: String as PropType<'primary' | 'secondary' | 'tertiary' | 'warning' | 'error' | 'info' | 'success'>,
-    default: 'primary',
-  },
-  size: {
-    type: String as PropType<'square' | 'full'>,
-    required: false,
-    default: 'full',
-  },
-  type: {
-    type: String as PropType<'button' | 'submit' | 'reset'>,
-    required: false,
-    default: 'button',
-  },
+defineOptions({
+  inheritAttrs: false,
 })
 
-const colorMap = {
-  filled: {
-    base: 'inline-flex items-center justify-center gap-2 disabled:bg-on-surface/[12%] disabled:text-on-surface/[38%]  ',
-    primary: 'bg-primary after:bg-on-primary/[8%]   text-on-primary ',
-    secondary: 'bg-secondary after:bg-on-secondary/[8%]   text-on-secondary ',
-    tertiary: 'bg-tertiary after:bg-on-tertiary/[8%]   text-on-tertiary ',
-    warning: 'bg-warning after:bg-on-warning/[8%]   text-on-warning ',
-    error: 'bg-error after:bg-on-error/[8%]   text-on-error ',
-    info: 'bg-info after:bg-on-info/[8%]   text-on-info ',
-    success: 'bg-success after:bg-on-success/[8%]   text-on-success ',
+type ButtonKind = 'button' | 'icon' | 'split'
+
+type ButtonVariant = 'elevated' | 'filled' | 'tonal' | 'outlined' | 'text' | 'standard'
+
+type ButtonColor = 'primary' | 'info' | 'success' | 'warning' | 'error'
+
+type ButtonType = 'submit' | 'button' | 'reset'
+
+const props = withDefaults(
+  defineProps<{
+    kind?: ButtonKind
+    variant?: ButtonVariant
+    color?: ButtonColor
+
+    disabled?: boolean
+    softDisabled?: boolean
+
+    href?: string
+    target?: string
+    type?: ButtonType
+    name?: string
+    value?: string
+    form?: string
+
+    trailingIcon?: boolean
+    toggle?: boolean
+    selected?: boolean
+    ariaLabel?: string
+    ariaLabelSelected?: string
+
+    menuAriaLabel?: string
+  }>(),
+  {
+    kind: 'button',
+    variant: 'filled',
+    color: 'primary',
+    disabled: false,
+    softDisabled: false,
+    type: 'submit',
+    trailingIcon: false,
+    toggle: false,
+    selected: false,
   },
-  tonal: {
-    base: 'disabled:text-black-light  inline-flex cursor-pointer justify-center gap-2 focus:outline-none disabled:cursor-default disabled:bg-on-surface/[12%] disabled:text-on-surface/[38%]  ',
-    primary: 'bg-primary-container after:hover:bg-on-primary-container/[8%]  after:active:bg-on-primary-container/[12%]   text-on-primary-container ',
-    secondary: 'bg-secondary-container after:hover:bg-on-secondary-container/[8%]  after:active:bg-on-secondary-container/[12%]   text-on-secondary-container ',
-    tertiary: 'bg-tertiary-container after:hover:bg-on-tertiary-container/[8%]  after:active:bg-on-tertiary-container/[12%]   text-on-tertiary-container ',
-    info: 'bg-info-container after:hover:bg-on-info-container/[8%] after:active:bg-on-info-container/[12%] text-on-info-container ',
-    warning: 'bg-warning-container after:hover:bg-on-warning-container/[8%]  after:active:bg-on-warning-container/[12%]   text-on-warning-container ',
-    error: 'bg-error-container after:hover:bg-on-error-container/[8%]  after:active:bg-on-error-container/[12%]   text-on-error-container ',
-    success: 'bg-success-container after:hover:bg-on-success-container/[8%]  after:active:bg-on-success-container/[12%]   text-on-success-container ',
+)
+
+const emit = defineEmits<{
+  click: [event: MouseEvent]
+  'update:selected': [selected: boolean]
+  input: [event: InputEvent]
+  change: [event: Event]
+  'trailing-click': [event: MouseEvent]
+}>()
+
+const attrs = useAttrs()
+const slots = useSlots()
+const menuOpen = ref(false)
+
+const isIcon = computed(() => props.kind === 'icon')
+const isSplit = computed(() => props.kind === 'split')
+const isLink = computed(() => !!props.href)
+const isDisabled = computed(() => props.disabled || props.softDisabled)
+const currentAriaLabel = computed(() => (props.toggle && props.selected && props.ariaLabelSelected ? props.ariaLabelSelected : props.ariaLabel))
+
+const resolvedVariant = computed<ButtonVariant>(() => {
+  if (props.kind === 'button' && props.variant === 'standard') return 'text'
+  if (props.kind === 'icon' && props.variant === 'text') return 'standard'
+  if (props.kind === 'split' && (props.variant === 'text' || props.variant === 'standard')) return 'filled'
+
+  return props.variant
+})
+
+const rootAttrs = computed(() => {
+  const { class: _class, ...rest } = attrs
+  return rest
+})
+
+const hasLeadingIcon = computed(() => !!slots.icon)
+const hasSelectedIcon = computed(() => !!slots['selected-icon'])
+const hasTrailingIcon = computed(() => props.trailingIcon || !!slots['trailing-icon'])
+const hasMenu = computed(() => !!slots.menu)
+
+const baseInteractiveClass =
+  'overlay relative inline-flex select-none items-center justify-center overflow-hidden whitespace-nowrap rounded-full border border-transparent align-middle transition-[box-shadow,background-color,color,border-color] duration-150 ease-out after:pointer-events-none after:block after:bg-current after:opacity-0 hover:after:opacity-[.08] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:after:opacity-[.12] disabled:pointer-events-none disabled:cursor-default'
+
+const labelButtonClass =
+  'h-10 min-w-16 gap-2 px-6 text-sm font-medium leading-5 tracking-normal disabled:bg-on-surface/[12%] disabled:text-on-surface/[38%] aria-disabled:pointer-events-auto aria-disabled:cursor-default aria-disabled:bg-on-surface/[12%] aria-disabled:text-on-surface/[38%]'
+
+const iconButtonClass =
+  'h-10 w-10 min-w-10 shrink-0 rounded-full p-2 text-[24px] leading-none disabled:bg-transparent disabled:text-on-surface/[38%] aria-disabled:pointer-events-auto aria-disabled:cursor-default aria-disabled:bg-transparent aria-disabled:text-on-surface/[38%]'
+
+const variantClasses: Record<ButtonColor, Record<ButtonVariant, string>> = {
+  primary: {
+    filled: 'bg-primary text-on-primary shadow-none focus-visible:outline-primary after:bg-on-primary',
+    tonal: 'bg-secondary-container text-on-secondary-container shadow-none focus-visible:outline-secondary after:bg-on-secondary-container',
+    elevated: 'bg-surface-container-low text-primary shadow-elevation-1 hover:shadow-elevation-2 focus-visible:outline-primary after:bg-primary',
+    outlined: 'border-outline bg-transparent text-primary focus-visible:outline-primary after:bg-primary disabled:border-on-surface/[12%] aria-disabled:border-on-surface/[12%]',
+    text: 'bg-transparent text-primary focus-visible:outline-primary after:bg-primary',
+    standard: 'bg-transparent text-on-surface-variant focus-visible:outline-primary after:bg-on-surface-variant',
   },
-  outlined: {
-    base: 'font-medium disabled:text-on-surface/[38%]  outline outline-1 disabled:outline-on-surface/[12%]  inline-flex justify-center gap-2',
-    primary: 'after:hover:bg-on-primary-container/[8%]  outline-primary  after:active:bg-on-primary-container/[12%]  disabled:bg-on-surface/[12%] disabled:text-on-surface/[38%]   text-primary  ',
-    secondary:
-      'after:hover:bg-on-secondary-container/[8%]  outline-secondary  after:active:bg-on-secondary-container/[12%]  disabled:bg-on-surface/[12%] disabled:text-on-surface/[38%]   text-secondary  ',
-    tertiary: 'after:hover:bg-on-tertiary-container/[8%]  outline-tertiary  after:active:bg-on-tertiary-container/[12%]  disabled:bg-on-surface/[12%] disabled:text-on-surface/[38%]   text-tertiary  ',
-    info: 'after:hover:bg-on-info-container/[8%]  outline-info  after:active:bg-on-info-container/[12%]  disabled:bg-on-surface/[12%] disabled:text-on-surface/[38%]   text-info  ',
-    warning: 'after:hover:bg-on-warning-container/[8%]  outline-warning  after:active:bg-on-warning-container/[12%]  disabled:bg-on-surface/[12%] disabled:text-on-surface/[38%]   text-warning  ',
-    error: 'after:hover:bg-on-error-container/[8%]  outline-error  after:active:bg-on-error-container/[12%]  disabled:bg-on-surface/[12%] disabled:text-on-surface/[38%]   text-error  ',
-    success: 'after:hover:bg-on-success-container/[8%]  outline-success  after:active:bg-on-success-container/[12%]  disabled:bg-on-surface/[12%] disabled:text-on-surface/[38%]   text-success  ',
+  info: {
+    filled: 'bg-info text-on-info shadow-none focus-visible:outline-info after:bg-on-info',
+    tonal: 'bg-info-container text-on-info-container shadow-none focus-visible:outline-info after:bg-on-info-container',
+    elevated: 'bg-surface-container-low text-info shadow-elevation-1 hover:shadow-elevation-2 focus-visible:outline-info after:bg-info',
+    outlined: 'border-outline bg-transparent text-info focus-visible:outline-info after:bg-info disabled:border-on-surface/[12%] aria-disabled:border-on-surface/[12%]',
+    text: 'bg-transparent text-info focus-visible:outline-info after:bg-info',
+    standard: 'bg-transparent text-info focus-visible:outline-info after:bg-info',
   },
-  text: {
-    base: 'font-medium disabled:text-on-surface/[38%] ',
-    primary: 'after:hover:bg-on-primary-container/[8%]  after:active:bg-on-primary-container/[12%]  disabled:bg-on-surface/[12%] disabled:text-on-surface/[38%]   text-primary ',
-    secondary: 'after:hover:bg-on-secondary-container/[8%]  after:active:bg-on-secondary-container/[12%]  disabled:bg-on-surface/[12%] disabled:text-on-surface/[38%]   text-secondary ',
-    tertiary: 'after:hover:bg-on-tertiary-container/[8%]  after:active:bg-on-tertiary-container/[12%]  disabled:bg-on-surface/[12%] disabled:text-on-surface/[38%]   text-tertiary ',
-    info: 'after:hover:bg-on-info-container/[8%]  after:active:bg-on-info-container/[12%]  text-info ',
-    warning: 'after:hover:bg-on-warning-container/[8%]  after:active:bg-on-warning-container/[12%]  text-warning ',
-    error: 'after:hover:bg-on-error-container/[8%]  after:active:bg-on-error-container/[12%]  text-error ',
-    success: 'after:hover:bg-on-success-container/[8%]  after:active:bg-on-success-container/[12%]  text-success ',
+  success: {
+    filled: 'bg-success text-on-success shadow-none focus-visible:outline-success after:bg-on-success',
+    tonal: 'bg-success-container text-on-success-container shadow-none focus-visible:outline-success after:bg-on-success-container',
+    elevated: 'bg-surface-container-low text-success shadow-elevation-1 hover:shadow-elevation-2 focus-visible:outline-success after:bg-success',
+    outlined: 'border-outline bg-transparent text-success focus-visible:outline-success after:bg-success disabled:border-on-surface/[12%] aria-disabled:border-on-surface/[12%]',
+    text: 'bg-transparent text-success focus-visible:outline-success after:bg-success',
+    standard: 'bg-transparent text-success focus-visible:outline-success after:bg-success',
   },
-  icon: {
-    base: 'disabled:text-black-light  inline-flex cursor-pointer justify-center gap-2 focus:outline-none disabled:cursor-default disabled:text-on-surface/[38%] ',
-    primary: 'after:hover:bg-on-primary-container/[8%]  after:active:bg-on-primary-container/[12%]  disabled:bg-on-surface/[12%] disabled:text-on-surface/[38%]   text-primary ',
-    secondary: 'after:hover:bg-on-secondary-container/[8%]  after:active:bg-on-secondary-container/[12%]  disabled:bg-on-surface/[12%] disabled:text-on-surface/[38%]   text-secondary ',
-    tertiary: 'after:hover:bg-on-tertiary-container/[8%]  after:active:bg-on-tertiary-container/[12%]  disabled:bg-on-surface/[12%] disabled:text-on-surface/[38%]   text-tertiary ',
-    info: 'after:hover:bg-on-info-container/[8%]  after:active:bg-on-info-container/[12%]  text-info ',
-    warning: 'after:hover:bg-on-warning-container/[8%]  after:active:bg-on-warning-container/[12%]  text-warning ',
-    error: 'after:hover:bg-on-error-container/[8%]  after:active:bg-on-error-container/[12%]  text-error ',
-    success: 'after:hover:bg-on-success-container/[8%]  after:active:bg-on-success-container/[12%]  text-success ',
+  warning: {
+    filled: 'bg-warning text-on-warning shadow-none focus-visible:outline-warning after:bg-on-warning',
+    tonal: 'bg-warning-container text-on-warning-container shadow-none focus-visible:outline-warning after:bg-on-warning-container',
+    elevated: 'bg-surface-container-low text-warning shadow-elevation-1 hover:shadow-elevation-2 focus-visible:outline-warning after:bg-warning',
+    outlined: 'border-outline bg-transparent text-warning focus-visible:outline-warning after:bg-warning disabled:border-on-surface/[12%] aria-disabled:border-on-surface/[12%]',
+    text: 'bg-transparent text-warning focus-visible:outline-warning after:bg-warning',
+    standard: 'bg-transparent text-warning focus-visible:outline-warning after:bg-warning',
+  },
+  error: {
+    filled: 'bg-error text-on-error shadow-none focus-visible:outline-error after:bg-on-error',
+    tonal: 'bg-error-container text-on-error-container shadow-none focus-visible:outline-error after:bg-on-error-container',
+    elevated: 'bg-surface-container-low text-error shadow-elevation-1 hover:shadow-elevation-2 focus-visible:outline-error after:bg-error',
+    outlined: 'border-outline bg-transparent text-error focus-visible:outline-error after:bg-error disabled:border-on-surface/[12%] aria-disabled:border-on-surface/[12%]',
+    text: 'bg-transparent text-error focus-visible:outline-error after:bg-error',
+    standard: 'bg-transparent text-error focus-visible:outline-error after:bg-error',
   },
 }
 
-const sizeMap = {
-  square: 'aspect-square p-2',
-  full: 'px-6 py-2',
+const selectedStandardIconClass: Record<ButtonColor, string> = {
+  primary: 'bg-primary text-on-primary after:bg-on-primary',
+  info: 'bg-info text-on-info after:bg-on-info',
+  success: 'bg-success text-on-success after:bg-on-success',
+  warning: 'bg-warning text-on-warning after:bg-on-warning',
+  error: 'bg-error text-on-error after:bg-on-error',
+}
+
+const regularPaddingClass = computed(() => {
+  if (hasLeadingIcon.value && hasTrailingIcon.value) return 'pl-4 pr-4'
+  if (hasLeadingIcon.value) return 'pl-4 pr-6'
+  if (hasTrailingIcon.value) return 'pl-6 pr-4'
+  return ''
+})
+
+const regularClasses = computed(() =>
+  twMerge(baseInteractiveClass, labelButtonClass, variantClasses[props.color][resolvedVariant.value], regularPaddingClass.value, attrs.class as string | undefined),
+)
+
+const iconClasses = computed(() =>
+  twMerge(
+    baseInteractiveClass,
+    iconButtonClass,
+    variantClasses[props.color][resolvedVariant.value],
+    props.selected && props.toggle && resolvedVariant.value === 'standard' ? selectedStandardIconClass[props.color] : '',
+    attrs.class as string | undefined,
+  ),
+)
+
+const splitPrimaryClasses = computed(() =>
+  twMerge(
+    baseInteractiveClass,
+    labelButtonClass,
+    variantClasses[props.color][resolvedVariant.value],
+    'rounded-r-sm pl-5 pr-4 disabled:rounded-r-sm aria-disabled:rounded-r-sm',
+    hasLeadingIcon.value ? 'pl-4' : '',
+    attrs.class as string | undefined,
+  ),
+)
+
+const splitTrailingClasses = computed(() =>
+  twMerge(baseInteractiveClass, iconButtonClass, variantClasses[props.color][resolvedVariant.value], 'w-12 rounded-l-sm border-l-outline/[24%] px-3'),
+)
+
+if ((import.meta as any).env?.DEV) {
+  if (props.kind === 'button' && props.variant === 'standard') {
+    console.warn('[Button] kind="button" does not support variant="standard"; falling back to variant="text".')
+  }
+
+  if (props.kind === 'icon' && props.variant === 'text') {
+    console.warn('[Button] kind="icon" does not support variant="text"; falling back to variant="standard".')
+  }
+
+  if (props.kind === 'split' && (props.variant === 'text' || props.variant === 'standard')) {
+    console.warn('[Button] kind="split" does not support variant="text" or "standard"; falling back to variant="filled".')
+  }
+
+  if (props.kind === 'icon' && !currentAriaLabel.value) {
+    console.warn('[Button] kind="icon" requires aria-label for accessible icon-only usage.')
+  }
+}
+
+function dispatchToggleEvents(event: MouseEvent) {
+  const selected = !props.selected
+
+  emit('update:selected', selected)
+  emit('input', new InputEvent('input', { bubbles: true, inputType: 'insertReplacementText' }))
+  emit('change', new Event('change', { bubbles: true }))
+
+  if (event.currentTarget instanceof HTMLElement) {
+    event.currentTarget.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertReplacementText' }))
+    event.currentTarget.dispatchEvent(new Event('change', { bubbles: true }))
+  }
+}
+
+function handleClick(event: MouseEvent) {
+  if (isDisabled.value) {
+    event.preventDefault()
+    event.stopImmediatePropagation()
+    return
+  }
+
+  if (props.toggle) dispatchToggleEvents(event)
+
+  emit('click', event)
+}
+
+function handleTrailingClick(event: MouseEvent) {
+  if (isDisabled.value) {
+    event.preventDefault()
+    event.stopImmediatePropagation()
+    return
+  }
+
+  emit('trailing-click', event)
+}
+
+function closeMenu() {
+  menuOpen.value = false
 }
 </script>
 
 <template>
-  <button
-    class="overlay flex items-center justify-center rounded-full disabled:pointer-events-none"
-    :type="props.type"
-    :disabled="props.disabled"
-    :class="`${twMerge(colorMap[props.variant][props.color], $attrs?.class as string)} ${sizeMap[props.size]} ${colorMap[props.variant].base}`"
+  <span v-if="isSplit" v-bind="rootAttrs" role="group" class="inline-flex h-10 items-center gap-px align-middle">
+    <component
+      :is="isLink ? 'a' : 'button'"
+      :href="isLink && !isDisabled ? href : undefined"
+      :target="isLink ? target : undefined"
+      :type="isLink ? undefined : type"
+      :name="isLink ? undefined : name"
+      :value="isLink ? undefined : value"
+      :form="isLink ? undefined : form"
+      :disabled="!isLink && disabled ? true : undefined"
+      :aria-disabled="softDisabled || (isLink && disabled) ? 'true' : undefined"
+      :tabindex="softDisabled ? 0 : undefined"
+      :class="splitPrimaryClasses"
+      @click="handleClick"
+    >
+      <span v-if="hasLeadingIcon" class="inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center [&>*]:h-[18px] [&>*]:w-[18px]">
+        <slot name="icon" />
+      </span>
+      <span class="inline-flex items-center">
+        <slot />
+      </span>
+    </component>
+
+    <DropdownMenuRoot v-if="hasMenu" v-model:open="menuOpen">
+      <DropdownMenuTrigger as-child>
+        <button
+          type="button"
+          :disabled="disabled ? true : undefined"
+          :aria-disabled="softDisabled ? 'true' : undefined"
+          :tabindex="softDisabled ? 0 : undefined"
+          :aria-label="menuAriaLabel"
+          aria-haspopup="menu"
+          :aria-expanded="menuOpen ? 'true' : 'false'"
+          :class="splitTrailingClasses"
+          @click="handleTrailingClick"
+        >
+          <span class="inline-flex h-6 w-6 items-center justify-center [&>*]:h-6 [&>*]:w-6">
+            <slot v-if="$slots['trailing-icon']" name="trailing-icon" />
+            <svg v-else viewBox="0 0 24 24" aria-hidden="true" class="h-6 w-6 fill-current">
+              <path d="M7 10l5 5 5-5H7z" />
+            </svg>
+          </span>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuPortal>
+        <DropdownMenuContent
+          align="end"
+          :side-offset="4"
+          class="z-[20] min-w-40 rounded-lg border border-outline/[12%] bg-surface-container p-1 text-on-surface shadow-elevation-3 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+        >
+          <slot name="menu" v-bind="{ open: menuOpen, close: closeMenu }" />
+        </DropdownMenuContent>
+      </DropdownMenuPortal>
+    </DropdownMenuRoot>
+
+    <button
+      v-else
+      type="button"
+      :disabled="disabled ? true : undefined"
+      :aria-disabled="softDisabled ? 'true' : undefined"
+      :tabindex="softDisabled ? 0 : undefined"
+      :aria-label="menuAriaLabel"
+      aria-haspopup="menu"
+      :aria-expanded="undefined"
+      :class="splitTrailingClasses"
+      @click="handleTrailingClick"
+    >
+      <span class="inline-flex h-6 w-6 items-center justify-center [&>*]:h-6 [&>*]:w-6">
+        <slot v-if="$slots['trailing-icon']" name="trailing-icon" />
+        <svg v-else viewBox="0 0 24 24" aria-hidden="true" class="h-6 w-6 fill-current">
+          <path d="M7 10l5 5 5-5H7z" />
+        </svg>
+      </span>
+    </button>
+  </span>
+
+  <component
+    :is="isLink ? 'a' : 'button'"
+    v-else
+    v-bind="rootAttrs"
+    :href="isLink && !isDisabled ? href : undefined"
+    :target="isLink ? target : undefined"
+    :type="isLink ? undefined : type"
+    :name="isLink ? undefined : name"
+    :value="isLink ? undefined : value"
+    :form="isLink ? undefined : form"
+    :disabled="!isLink && disabled ? true : undefined"
+    :aria-disabled="softDisabled || (isLink && disabled) ? 'true' : undefined"
+    :tabindex="softDisabled ? 0 : undefined"
+    :aria-label="isIcon ? currentAriaLabel : undefined"
+    :aria-pressed="isIcon && toggle ? String(selected) : undefined"
+    :class="isIcon ? iconClasses : regularClasses"
+    @click="handleClick"
   >
-    <slot></slot>
-  </button>
+    <template v-if="isIcon">
+      <span class="inline-flex h-6 w-6 items-center justify-center [&>*]:h-6 [&>*]:w-6">
+        <slot v-if="toggle && selected && hasSelectedIcon" name="selected-icon" />
+        <slot v-else name="icon" />
+      </span>
+    </template>
+    <template v-else>
+      <span v-if="hasLeadingIcon && !trailingIcon" class="inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center [&>*]:h-[18px] [&>*]:w-[18px]">
+        <slot name="icon" />
+      </span>
+      <span class="inline-flex items-center">
+        <slot />
+      </span>
+      <span v-if="hasTrailingIcon" class="inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center [&>*]:h-[18px] [&>*]:w-[18px]">
+        <slot v-if="$slots['trailing-icon']" name="trailing-icon" />
+        <slot v-else name="icon" />
+      </span>
+    </template>
+  </component>
 </template>

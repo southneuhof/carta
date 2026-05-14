@@ -5,7 +5,7 @@ import { computed, useAttrs } from 'vue'
 
 defineOptions({ inheritAttrs: false })
 
-type CardType = 'filled' | 'elevated' | 'outlined'
+type CardVariant = 'filled' | 'elevated' | 'outlined'
 type CardColorRole =
   | 'surface'
   | 'surfaceContainerLowest'
@@ -22,15 +22,17 @@ const attrs = useAttrs()
 
 const props = withDefaults(
   defineProps<{
-    type?: CardType
+    variant?: CardVariant
     color?: CardColorRole
     containerRole?: CardColorRole
     disabled?: boolean
+    contentPadding?: number
   }>(),
   {
-    type: 'filled',
+    variant: 'filled',
     color: 'surfaceContainer',
     disabled: false,
+    contentPadding: 16,
   }
 )
 
@@ -66,14 +68,14 @@ const foregroundClassMap: Record<CardColorRole, string> = {
   errorContainer: 'text-on-error-container',
 }
 
-const typeClassMap: Record<CardType, string> = {
+const variantClassMap: Record<CardVariant, string> = {
   filled: '',
   outlined: 'border border-outline-variant',
   elevated: '',
 }
 
-const typeStyle = computed<CSSProperties>(() => {
-  if (props.type !== 'elevated') return {}
+const variantStyle = computed<CSSProperties>(() => {
+  if (props.variant !== 'elevated') return {}
   return {
     boxShadow: '0 1px 1px rgb(var(--md-sys-color-shadow) / 0.28)',
   }
@@ -81,10 +83,10 @@ const typeStyle = computed<CSSProperties>(() => {
 
 const mergedClass = computed(() =>
   twMerge(
-    'relative flex flex-col gap-4 overflow-hidden rounded-xl p-4',
+    'relative flex flex-col gap-4 overflow-hidden rounded-xl',
     backgroundClassMap[resolvedRole.value],
     foregroundClassMap[resolvedRole.value],
-    typeClassMap[props.type],
+    variantClassMap[props.variant],
     isInteractive.value && !props.disabled ? 'group cursor-pointer' : '',
     props.disabled ? 'pointer-events-none' : '',
     attrs.class as string
@@ -92,7 +94,8 @@ const mergedClass = computed(() =>
 )
 
 const mergedStyle = computed(() => [
-  typeStyle.value,
+  { padding: `${props.contentPadding}px` } as CSSProperties,
+  variantStyle.value,
   attrs.style,
 ])
 

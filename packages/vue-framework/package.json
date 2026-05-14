@@ -96,6 +96,7 @@
   },
   "devDependencies": {
     "@types/node": "^18.16.16",
+    "@vitejs/plugin-vue": "^5.2.4",
     "jsdom": "^20.0.3",
     "typescript": "^5.9.3",
     "vue-tsc": "^3.2.4",

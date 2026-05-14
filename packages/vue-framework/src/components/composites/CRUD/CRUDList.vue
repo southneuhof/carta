@@ -108,12 +108,14 @@ onMounted(() => {
                     <template #trigger>
                       <Popover v-if="config.view?.list?.filter?.fields?.length" :ignore="['#form-lookup']">
                         <template #trigger>
-                          <Button size="square">
-                            <Icon name="filter" />
+                          <Button kind="icon" size="square">
+                            <template #icon>
+                              <Icon name="filter" />
+                            </template>
                           </Button>
                         </template>
                         <template #content>
-                          <Card class="w-[350px] outline outline-1 outline-outline" color="surface">
+                          <Card class="w-[350px]" variant="outlined">
                             <Form :key="keyManager().value[`sys_${config.name}_name`]" static v-model="searchParameters" v-bind="(filterProps as any)" />
                             <Button
                               @click="
@@ -135,8 +137,10 @@ onMounted(() => {
                     <template #trigger>
                       <Modal :title="`Atur Kolom Tabel ${config.title}`">
                         <template #trigger>
-                          <Button size="square">
-                            <Icon name="table" />
+                          <Button kind="icon">
+                            <template #icon>
+                              <Icon name="table" />
+                            </template>
                           </Button>
                         </template>
                         <template #content>
@@ -155,10 +159,12 @@ onMounted(() => {
                     <template #trigger>
                       <Button
                         v-if="listConfig.export?.allow"
-                        size="square"
+                        kind="icon"
                         @click="() => listConfig.export?.onExport?.({ exportAPI: listConfig.export?.exportAPI!, params: searchParameters, listConfig: listConfig })"
                       >
-                        <Icon name="file-excel"></Icon>
+                        <template #icon>
+                          <Icon name="file-excel"></Icon>
+                        </template>
                       </Button>
                     </template>
                     <template #content>Export Data</template>
@@ -168,7 +174,12 @@ onMounted(() => {
             </div>
             <div v-if="(config.actions?.create ?? true) && permissions.create" class="flex items-center pl-4">
               <slot v-if="$slots['list-createButton']" name="list-createButton" v-bind="{ listConfig }"> </slot>
-              <Button v-else @click="() => router.push({ name: String(route.name), query: { ...route.query, [`${config.name}_view`]: 'create' } })"> <Icon name="add"></Icon>Tambah </Button>
+              <Button v-else @click="() => router.push({ name: String(route.name), query: { ...route.query, [`${config.name}_view`]: 'create' } })">
+                <template #icon>
+                  <Icon name="add"></Icon>
+                </template>
+                Tambah
+              </Button>
             </div>
           </div>
         </div>
@@ -209,18 +220,22 @@ onMounted(() => {
                       <Button
                         v-if="(config.actions?.detail ?? true) && permissions.detail"
                         color="info"
-                        size="square"
+                        kind="icon"
                         @click="() => router.push({ name: String(route.name), query: { ...route.query, [`${config.name}_view`]: 'detail', [`${config.name}_id`]: data[listConfig.uid!] } })"
                       >
-                        <Icon name="information"></Icon>
+                        <template #icon>
+                          <Icon name="information"></Icon>
+                        </template>
                       </Button>
                       <Button
                         v-if="(config.actions?.update ?? true) && data.can_update != false && permissions.update"
                         color="warning"
-                        size="square"
+                        kind="icon"
                         @click="() => router.push({ name: String(route.name), query: { ...route.query, [`${config.name}_view`]: 'update', [`${config.name}_id`]: data[listConfig.uid!] } })"
                       >
-                        <Icon name="edit"></Icon>
+                        <template #icon>
+                          <Icon name="edit"></Icon>
+                        </template>
                       </Button>
                       <ConfirmationModal
                         v-if="(config.actions?.delete ?? true) && data.can_delete != false && permissions.delete"
@@ -232,8 +247,10 @@ onMounted(() => {
 
                       >
                         <template #trigger>
-                          <Button size="square" color="error">
-                            <Icon name="delete-bin"></Icon>
+                          <Button kind="icon" color="error">
+                            <template #icon>
+                              <Icon name="delete-bin"></Icon>
+                            </template>
                           </Button>
                         </template>
                       </ConfirmationModal>

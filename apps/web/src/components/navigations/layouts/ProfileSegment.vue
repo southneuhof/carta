@@ -22,10 +22,19 @@ const profileData = storage.localStorage.get('profile')
       <div class="flex flex-col gap-4">
         <div class="flex w-full flex-row items-center justify-between">
           <div>Mode Tampilan</div>
-          <Button variant="icon" color="primary" size="square" @click="useColorPreference().toggle()"><Icon :name="useColorPreference().value == 'dark' ? 'sun' : 'moon'" /></Button>
+          <Button kind="icon" variant="text" size="square" @click="useColorPreference().toggle()">
+            <template #icon>
+              <Icon :name="useColorPreference().value == 'dark' ? 'sun' : 'moon'" />
+            </template>
+          </Button>
         </div>
         <div class="flex flex-row items-center gap-2">
-          <Button @click="services.signOut()" class="w-full" variant="tonal" color="error"><Icon name="logout-box" />Keluar</Button>
+          <Button @click="services.signOut()" class="w-full" variant="tonal" color="error">
+            <template #icon>
+              <Icon name="logout-box" />
+            </template>
+            Keluar
+          </Button>
         </div>
       </div>
     </div>

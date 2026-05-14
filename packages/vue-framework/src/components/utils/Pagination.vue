@@ -37,11 +37,11 @@ watch(
 <template>
   <div class="flex flex-col flex-wrap items-center justify-between gap-4 sm:flex-row">
     <div class="flex flex-row gap-2">
-      <Button size="square" :disabled="modelValue.page <= 1" @click="() => (modelValue.page = 1)"><Icon size="base" name="arrow-left-double" /></Button>
-      <Button size="square" :disabled="modelValue.page <= 1" @click="() => modelValue.page--"><Icon size="base" name="arrow-left-s" /></Button>
+      <Button size="square" variant="tonal" :disabled="modelValue.page <= 1" @click="() => (modelValue.page = 1)"><Icon size="base" name="arrow-left-double" /></Button>
+      <Button size="square" variant="tonal" :disabled="modelValue.page <= 1" @click="() => modelValue.page--"><Icon size="base" name="arrow-left-s" /></Button>
       <div class="flex aspect-square w-9 items-center justify-center rounded-full px-2 text-sm">{{ modelValue.page }}</div>
-      <Button size="square" :disabled="modelValue.page >= dataInfo.totalPage" @click="() => modelValue.page++"><Icon size="base" name="arrow-right-s" /></Button>
-      <Button size="square" :disabled="modelValue.page >= dataInfo.totalPage" @click="() => (modelValue.page = dataInfo.totalPage)"><Icon size="base" name="arrow-right-double" /></Button>
+      <Button size="square" variant="tonal" :disabled="modelValue.page >= dataInfo.totalPage" @click="() => modelValue.page++"><Icon size="base" name="arrow-right-s" /></Button>
+      <Button size="square" variant="tonal" :disabled="modelValue.page >= dataInfo.totalPage" @click="() => (modelValue.page = dataInfo.totalPage)"><Icon size="base" name="arrow-right-double" /></Button>
     </div>
     <div v-if="!$slots['pagination-lengthControl']" class="flex flex-row items-center gap-4 text-sm">
       <Select :data="limitSet.map((item) => ({ id: String(item), name: String(item) }))" v-model="limitValue"></Select>
