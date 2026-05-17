@@ -15,6 +15,7 @@ import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Chip from '@southneuhof/is-vue-framework/components/base/Chip.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import Dialog from '@southneuhof/is-vue-framework/components/base/Dialog.vue'
 
 const props = defineProps({
   level: { type: Number, required: true },
@@ -177,7 +178,7 @@ function handleSectionReorder(event: any) {
                               </Card>
                             </template>
                           </ConfirmationDialog>
-                          <Modal v-if="permissions().has('update-menuItem')">
+                          <Dialog v-if="permissions().has('update-menuItem')">
                             <template #trigger>
                               <Card class="flex-row items-center gap-4 rounded-md p-2">
                                 <Icon name="settings"></Icon>
@@ -187,7 +188,7 @@ function handleSectionReorder(event: any) {
                             <template #content>
                               <MenuItemSettings :menuItem="item"/>
                             </template>
-                          </Modal>
+                          </Dialog>
                         </Card>
                       </template>
                     </Popover>

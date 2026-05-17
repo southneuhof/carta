@@ -74,7 +74,7 @@ const resolvedActions = computed<ConfirmationDialogActions[]>(() => {
       label: 'Continue',
       appearance: {
         color: 'primary',
-        variant: 'filled',
+        variant: 'text',
       },
       onClick: (setOpen) => (props.onConfirm ? props.onConfirm(setOpen) : setOpen(false)),
       onSuccess: props.onSuccess ?? undefined,
@@ -127,8 +127,8 @@ async function handleAction(action: ConfirmationDialogActions, setOpen: (open: b
 
 <template>
   <Dialog :class="[$attrs.class as string, { 'pointer-events-none': isPending }]" :disabled="disabled">
-    <template #trigger="{ disabled }">
-      <slot name="trigger" v-bind="{ disabled }"></slot>
+    <template #trigger="triggerProps">
+      <slot name="trigger" v-bind="triggerProps"></slot>
     </template>
     <template #title>
       <slot name="title">{{ title }}</slot>

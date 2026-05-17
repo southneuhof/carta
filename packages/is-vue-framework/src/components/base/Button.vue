@@ -89,7 +89,7 @@ const hasTrailingIcon = computed(() => props.trailingIcon || !!slots['trailing-i
 const hasMenu = computed(() => !!slots.menu)
 
 const baseInteractiveClass =
-  'overlay relative inline-flex select-none items-center justify-center overflow-hidden whitespace-nowrap rounded-full border border-transparent align-middle transition-[box-shadow,background-color,color,border-color] duration-150 ease-out after:pointer-events-none after:block after:bg-current after:opacity-0 hover:after:opacity-[.08] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:after:opacity-[.12] disabled:pointer-events-none disabled:cursor-default'
+  'overlay relative inline-flex select-none items-center justify-center overflow-hidden whitespace-nowrap rounded-full border border-transparent align-middle transition-none after:pointer-events-none after:block after:bg-current after:opacity-0 hover:after:opacity-[.08] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:after:opacity-[.12] disabled:pointer-events-none disabled:cursor-default'
 
 const labelButtonClass =
   'h-10 min-w-16 gap-2 px-6 text-sm font-medium leading-5 tracking-normal disabled:bg-on-surface/[12%] disabled:text-on-surface/[38%] aria-disabled:pointer-events-auto aria-disabled:cursor-default aria-disabled:bg-on-surface/[12%] aria-disabled:text-on-surface/[38%]'

@@ -6,7 +6,7 @@ import { ref } from 'vue'
 import AdBannerEditor from './_layouts/AdBannerEditor.vue'
 import { keyManager } from '@/stores/keyManager'
 import { toast } from 'vue-sonner'
-import { adBannerLanguageMapModel } from '@/models'
+import adBannerLanguageMapModel from '@client/data-model/models/adBannerLanguageMap.model'
 import { buildFormConfig } from '@southneuhof/is-data-model'
 
 const props = defineProps({

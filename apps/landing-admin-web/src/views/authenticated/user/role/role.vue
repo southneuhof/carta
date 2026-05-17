@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import CRUDComposite from '@southneuhof/is-vue-framework/components/composites/CRUDComposite.vue';
-import { mappingPermissionRoleModel, roleModel } from '@/models';
+import mappingPermissionRoleModel from '@client/data-model/models/mappingPermissionRole.model'
+import roleModel from '@client/data-model/models/role.model'
 import Switch from '@southneuhof/is-vue-framework/components/inputs/Switch.vue';
 import services from '@/utils/services';
+
 </script>
 
 <template>
@@ -24,9 +26,9 @@ import services from '@/utils/services';
       >
         <template #list-rowActions="{data: permissionData}">
           <Switch
-            :active="permissionData.active"
-            :onToggle="() => {
-              services.post('mappingPermissionRole/toggle', {role_id: roleData.id, permission_code: permissionData.code, active: !permissionData.active})
+            v-model="permissionData.active"
+            :onToggle="(active) => {
+              services.post('mappingPermissionRole/toggle', {role_id: roleData.id, permission_code: permissionData.code, active})
             }"
           />
         </template>

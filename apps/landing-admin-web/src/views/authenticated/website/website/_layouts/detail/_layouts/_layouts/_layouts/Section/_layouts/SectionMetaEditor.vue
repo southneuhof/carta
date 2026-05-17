@@ -4,21 +4,23 @@ import { keyManager } from '@/stores/keyManager'
 import { toast } from 'vue-sonner'
 import { getSmallestChildObject } from '@/utils/common'
 import services from '@/utils/services'
-import { inject } from 'vue'
+import { computed, inject, unref } from 'vue'
 
-const sectionData = inject<any>('sectionData', {})
-const sectionConfig = inject<any>('sectionConfig', {})
+const injectedSectionData = inject<any>('sectionData', {})
+const injectedSectionConfig = inject<any>('sectionConfig', {})
+const sectionData = computed(() => unref(injectedSectionData) ?? {})
+const sectionConfig = computed(() => unref(injectedSectionConfig) ?? {})
 const pageTranslation = inject<Record<string, any>>('pageTranslation')
 
 async function submitSectionMetadata(payload: object, targetAPI: string, type: 'create' | 'update', searchParameters?: object): Promise<object> {
   try {
-    return await services.update(targetAPI, { ...sectionData, meta: payload, ...(searchParameters || {}), page_translation_id: pageTranslation?.value?.id })
+    return await services.update(targetAPI, { ...sectionData.value, meta: payload, ...(searchParameters || {}), page_translation_id: pageTranslation?.value?.id })
   } catch (err: any) {
     throw new Error(err)
   }
 }
 
-const topmostSection = getSmallestChildObject(sectionData, 'parentSectionData')
+const topmostSection = computed(() => getSmallestChildObject(sectionData.value, 'parentSectionData'))
 </script>
 
 <template>

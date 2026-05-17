@@ -3,9 +3,16 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./sections/*": "./src/sections/*"
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./sections/*": {
+      "types": "./src/sections/*.ts",
+      "default": "./src/sections/*.ts"
+    }
   },
   "dependencies": {
     "@southneuhof/landing-sveltekit-framework": "workspace:^"

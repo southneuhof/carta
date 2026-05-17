@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import CRUDComposite from '@southneuhof/is-vue-framework/components/composites/CRUDComposite.vue';
-import { collectionModel } from '@/models';
+import collectionModel from '@client/data-model/models/collection.model'
 </script>
 
 <template>

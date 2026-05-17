@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import CRUDComposite from '@southneuhof/is-vue-framework/components/composites/CRUDComposite.vue';
-import { mappingRoleMenuItemModel } from '@/models';
+import mappingRoleMenuItemModel from '@client/data-model/models/mappingRoleMenuItem.model'
 import { inject } from 'vue';
 import services from '@/utils/services';
 import Switch from '@southneuhof/is-vue-framework/components/inputs/Switch.vue';

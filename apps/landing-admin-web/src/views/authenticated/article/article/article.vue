@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import CRUDComposite from '@southneuhof/is-vue-framework/components/composites/CRUDComposite.vue';
 import ArticleDetailUnder from './_layouts/ArticleDetailUnder.vue';
-import { articleModel } from '@/models';
+import articleModel from '@client/data-model/models/article.model'
 import { parse } from '@/utils/common';
 </script>
 

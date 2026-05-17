@@ -5,8 +5,11 @@
   import { blur, fade } from "svelte/transition";
   import * as Carousel from "$lib/app/components/ui/carousel";
   import { background } from "@southneuhof/landing-sveltekit-framework/client";
+  import heroBannerSchema from "@southneuhof/landing-section-schema/sections/hero-banner";
+  import type { LandingSectionForSchema } from "@southneuhof/landing-sveltekit-framework/types";
 
-  const { section } = $props();
+  type Section = LandingSectionForSchema<typeof heroBannerSchema>
+  const { section }: { section: Section } = $props();
 
   let activeBannerIndex = $state(0);
   let activeQuickAccessIndex = $state(0);

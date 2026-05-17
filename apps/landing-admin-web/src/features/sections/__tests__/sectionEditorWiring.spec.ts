@@ -17,6 +17,12 @@ describe('section editor wiring', () => {
     expect(sectionEditor).toContain('matchSchemaSlotsToStructure')
   })
 
+  it('uses section overlay configs from adapter', () => {
+    const adapterPath = join(appRoot, 'features/sections/schemaAdapter.ts')
+    const adapter = readFileSync(adapterPath, 'utf-8')
+    expect(adapter).toContain('@/configs/sections')
+  })
+
   it('uses add section options in add wizard', () => {
     const sectionAddWizard = readFileSync(sectionAddWizardPath, 'utf-8')
     expect(sectionAddWizard).toContain('getAddSectionOptions')

@@ -1,5 +1,8 @@
 import { exception } from '$lib/utils/response';
-import { requireAuthenticatedUser, requirePermission } from '$lib/utils/routing';
+import {
+  hasGlobalPermissionAccess,
+  requirePermission,
+} from '$lib/utils/routing';
 import type { RequestEvent } from '@sveltejs/kit';
 import type { BaseOperationConfig } from '@southneuhof/landing-sveltekit-framework/types';
 
@@ -48,15 +51,25 @@ export function requireRoleScopedAccess(
   allowedRoleIds: number[],
   notFoundMessage = 'Record not found',
 ) {
-  const user = requireAuthenticatedUser(locals);
-  if (locals.isPrivilegedRole) return;
+  if (hasRoleScopedAccess(locals, allowedRoleIds)) return;
+
+  throw exception(notFoundMessage, 404);
+}
+
+export function hasRoleScopedAccess(
+  locals: App.Locals,
+  allowedRoleIds: Array<number | string>,
+): boolean {
+  if (hasGlobalPermissionAccess(locals)) return true;
 
   // No explicit role bindings means the resource is unrestricted.
-  if (!allowedRoleIds.length) {
-    return;
-  }
+  if (!allowedRoleIds.length) return true;
 
-  if (!allowedRoleIds.includes(user.role_id)) {
-    throw exception(notFoundMessage, 404);
-  }
+  const userRoleId = locals.user?.role_id;
+  if (userRoleId == null) return false;
+
+  const normalizedUserRoleId = Number(userRoleId);
+  if (Number.isNaN(normalizedUserRoleId)) return false;
+
+  return allowedRoleIds.some((roleId) => Number(roleId) === normalizedUserRoleId);
 }

@@ -37,8 +37,8 @@ const props = defineProps({
 
 <template>
   <Dialog :class="($attrs.class as string)" :disabled="disabled">
-    <template #trigger="{ disabled }">
-      <slot name="trigger" v-bind="{ disabled }"></slot>
+    <template #trigger="triggerProps">
+      <slot name="trigger" v-bind="triggerProps"></slot>
     </template>
     <template #title v-if="$slots['title']">
       <slot name="title"></slot>

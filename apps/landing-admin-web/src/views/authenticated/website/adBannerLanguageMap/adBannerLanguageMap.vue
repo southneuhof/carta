@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { adBannerLanguageMapModel } from '@/models'
+import adBannerLanguageMapModel from '@client/data-model/models/adBannerLanguageMap.model'
 import CRUDComposite from '@southneuhof/is-vue-framework/components/composites/CRUDComposite.vue'
 import AdBannerLanguageMapDetailUnder from './_layouts/AdBannerLanguageMapDetailUnder.vue'
 </script>

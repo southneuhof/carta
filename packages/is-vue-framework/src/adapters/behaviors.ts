@@ -1,3 +1,5 @@
+import { applyFrameworkDefaults, type FrameworkDefaultsInput, resetFrameworkDefaultsForTests } from './defaults'
+
 export type FrameworkFormGetData = (params: { getAPI: string; id?: string | number; searchParameters?: object }) => Promise<object | undefined>
 export type FrameworkFormBeforeSubmit = (params: { formData: object }) => object
 export type FrameworkFormSubmit = (params: { payload: object; method: 'put' | 'post'; targetAPI: string; type: 'create' | 'update' }) => Promise<object | void>
@@ -78,6 +80,7 @@ export interface FrameworkCrudDetailBehaviors {
 }
 
 export interface FrameworkBehaviors {
+  defaults?: FrameworkDefaultsInput
   form?: FrameworkFormBehaviors
   table?: FrameworkTableBehaviors
   detail?: FrameworkDetailBehaviors
@@ -104,6 +107,10 @@ function mergeBehaviorGroup<K extends keyof FrameworkBehaviors>(key: K, value: F
 
 export function configureFrameworkBehaviors(nextBehaviors: FrameworkBehaviors) {
   for (const key of Object.keys(nextBehaviors) as Array<keyof FrameworkBehaviors>) {
+    if (key === 'defaults') {
+      applyFrameworkDefaults(nextBehaviors.defaults)
+      continue
+    }
     mergeBehaviorGroup(key, nextBehaviors[key])
   }
 }
@@ -116,6 +123,7 @@ export function resetFrameworkBehaviorsForTests() {
   for (const key of Object.keys(behaviors) as Array<keyof FrameworkBehaviors>) {
     delete behaviors[key]
   }
+  resetFrameworkDefaultsForTests()
 }
 
 export function missingBehavior(name: string): never {

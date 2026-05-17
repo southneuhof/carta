@@ -3,7 +3,7 @@ import Form from '@southneuhof/is-vue-framework/components/composites/Form.vue'
 import { keyManager } from '@/stores/keyManager'
 import { toast } from 'vue-sonner'
 import services from '@/utils/services'
-import { adBannerModel } from '@/models'
+import adBannerModel from '@client/data-model/models/adBanner.model'
 import { buildFormConfig } from '@southneuhof/is-data-model'
 
 const props = defineProps({

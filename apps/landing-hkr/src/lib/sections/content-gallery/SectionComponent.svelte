@@ -2,8 +2,11 @@
   import Button from "$lib/app/components/ui/Button.svelte";
   import { m } from "$lib/paraglide/messages";
   import { widthPresetClassMap } from "$lib/utils/uicommon";
+  import contentGallerySchema from "@southneuhof/landing-section-schema/sections/content-gallery";
+  import type { LandingSectionForSchema } from "@southneuhof/landing-sveltekit-framework/types";
 
-  const {section} = $props()
+  type Section = LandingSectionForSchema<typeof contentGallerySchema>
+  const { section }: { section: Section } = $props()
 
   const contentAlignClassMap:any  = {
     left: {
@@ -95,7 +98,7 @@
   <div class="flex flex-col gap-base">
     {#each section.data.gallery as image}
       <div class="flex flex-col gap-base items-center justify-center">
-        <img src={image.media} alt={image.title} class="w-full object-cover object-center rounded-sm {!section.meta.remove_outline_on_images ? 'outline outline-outline-variant' : ''} "/>
+        <img src={image.media} alt={image.title} class="w-full object-cover object-center rounded-sm outline outline-outline-variant"/>
         <!-- {#if image.title || image.subtitle}
           <div class="flex flex-col gap-xs items-center justify-center">
             {#if image.subtitle}<p class="text-sm">{image.subtitle}</p>{/if}

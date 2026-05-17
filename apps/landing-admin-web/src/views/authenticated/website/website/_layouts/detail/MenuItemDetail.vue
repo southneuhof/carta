@@ -1,5 +1,4 @@
 <script setup lang="ts">
-  import Tabs from '@southneuhof/is-vue-framework/components/base/Tabs.vue';
   import { languages } from '@/utils/common';
   import services from '@/utils/services';
   import { computed, onMounted, provide, ref, watch } from 'vue';
@@ -11,12 +10,16 @@
   import { permissions } from '@/stores/permissions';
   import Popover from '@southneuhof/is-vue-framework/components/base/Popover.vue';
   import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue';
-  import Table from '@southneuhof/is-vue-framework/components/composites/Table.vue';
-  import VerificationLogViewer from '@/features/verification/VerificationLogViewer.vue';
   import { parse } from '@/utils/common';
   import MenuItemIDSelectInput from '@/features/menu/MenuItemIDSelectInput.vue';
   import MenuItemSettings from '../list/_layouts/_layouts/MenuItemSettings.vue';
   import { adminApiBaseURL } from '@/utils/auth-client';
+  import Button from '@southneuhof/is-vue-framework/components/base/Button.vue';
+  import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue';
+  import Dialog from '@southneuhof/is-vue-framework/components/base/Dialog.vue';
+  import Chip from '@southneuhof/is-vue-framework/components/base/Chip.vue';
+import Card from '@southneuhof/is-vue-framework/components/base/Card.vue';
+import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue';
 
   const [route, router] = [useRoute(), useRouter()]
   const [{data: menuItemData}] = await Promise.all([
@@ -63,24 +66,33 @@
     <div class="flex flex-col gap-4">
       <div class="flex flex-row items-center gap-4 justify-between">
         <div class="flex flex-row items-center gap-2">
-          <Button variant="standard" @click="() => $router.push({query: {...$route.query, [`${String($route.name)}_view`]: undefined, [`${String($route.name)}_id`]: undefined}})"><Icon>arrow_back</Icon></Button>
+          <Button
+            variant="standard"
+            kind="icon"
+            aria-label="Kembali"
+            @click="() => $router.push({query: {...$route.query, [`${String($route.name)}_view`]: undefined, [`${String($route.name)}_id`]: undefined}})"
+          >
+            <template #icon>
+              <Icon name="arrow-left"></Icon>
+            </template>
+          </Button>
           <div class="flex flex-col gap-1">
             <div class="flex flex-row items-center gap-2">
               <p class="text-xl font-bold">{{ menuItemData.translations.find((t: any) => t.language === 'id').name }}</p>
-              <Icon v-if="!menuItemData.visible" :size="14" class="text-muted">visibility_off</Icon>
+              <Icon v-if="!menuItemData.visible" size="base" class="text-muted" name="eye-off"></Icon>
               <template v-if="permissions().has('update-menuItem')">
                 <div class="h-[16px] w-[1px] bg-muted"></div>
-                <Modal>
+                <Dialog>
                   <template #trigger>
-                    <button class="text-sm font-semibold text-muted flex items-center justify-center"><Icon :size="14">settings</Icon></button>
+                    <button class="text-sm font-semibold text-muted flex items-center justify-center"><Icon size="base" name="settings"></Icon></button>
                   </template>
                   <template #content>
                     <MenuItemSettings :menuItem="menuItemData"/>
                   </template>
-                </Modal>
+                </Dialog>
               </template>
               <div class="h-[16px] w-[1px] bg-muted"></div>
-              <button @click="openPreview" class="text-sm font-semibold text-muted flex items-center justify-center gap-1">Preview <Icon :size="12">open_in_new</Icon></button>
+              <button @click="openPreview" class="text-sm font-semibold text-muted flex items-center justify-center gap-1">Preview <Icon size="sm" name="external-link"></Icon></button>
             </div>
             <div class="flex flex-row items-center gap-6">
               <div class="flex flex-row items-center gap-2">
@@ -113,7 +125,7 @@
                   }"
                 >
                   <template #trigger>
-                    <button class="text-sm underline font-semibold text-muted"><Icon :size="12" class="underline">content_copy</Icon> Reset dan Salin dari Halaman Lain</button>
+                    <button class="text-sm underline font-semibold text-muted"><Icon size="xs" class="underline" name="file-copy"></Icon> Reset dan Salin dari Halaman Lain</button>
                   </template>
                 </MenuItemIDSelectInput>
                 <template v-if="activeLanguageIndex === 1">
@@ -130,7 +142,7 @@
                     }"
                   >
                     <template #trigger>
-                      <button class="text-sm underline font-semibold text-muted"><Icon :size="12" class="underline">content_copy</Icon> Reset dan Salin dari ID</button>
+                      <button class="text-sm underline font-semibold text-muted"><Icon size="xs" class="underline" name="file-copy"></Icon> Reset dan Salin dari ID</button>
                     </template>
                   </ConfirmationDialog>
                 </template>
@@ -139,15 +151,6 @@
           </div>
         </div>
         <div class="flex flex-row items-center gap-4">
-          <!-- <Button
-            v-if="pageTranslation?.id"
-            variant="outlined"
-            color="info"
-            class="rounded-full"
-            @click="openPreview"
-          >
-            Preview <Icon>open_in_new</Icon>
-          </Button> -->
           <div v-if="latestLog" class="flex flex-col items-end">
             <p class="text-sm text-muted">
               <span v-if="latestLog.action === 'REVISE'" class="font-semibold text-warning">{{ latestLog.action.replace(/_/g, ' ') }}</span>
@@ -160,7 +163,7 @@
           <template v-if="pageTranslation.status_code === 'PUBLISHED'">
             <Popover align="end">
               <template #trigger>
-                <Chip color="success">Published <Icon>expand_more</Icon></Chip>
+                <Chip color="success">Published <Icon name="arrow-down-s"></Icon></Chip>
               </template>
               <template #content>
                 <Card class="outline outline-1 outline-outline/[24%] p-1 flex flex-col gap-1">
@@ -173,7 +176,7 @@
                     }"
                   >
                     <template #trigger>
-                      <Button variant="standard" color="info" class="rounded-lg">Buat Draft <Icon>chevron_right</Icon></Button>
+                      <Button variant="standard" color="info" class="rounded-lg">Buat Draft <Icon name="arrow-right-s"></Icon></Button>
                     </template>
                   </ConfirmationDialog>
                 </Card>
@@ -184,8 +187,8 @@
           <template v-else-if="['DRAFT', 'REVIEW'].includes(pageTranslation.status_code)">
             <Popover align="end">
               <template #trigger>
-                <Chip v-if="pageTranslation.status_code === 'DRAFT'" color="neutral">Draft <Icon>expand_more</Icon></Chip>
-                <Chip v-else color="warning">Review <Icon>expand_more</Icon></Chip>
+                <Chip v-if="pageTranslation.status_code === 'DRAFT'" color="neutral">Draft <Icon name="arrow-down-s"></Icon></Chip>
+                <Chip v-else color="warning">Review <Icon name="arrow-down-s"></Icon></Chip>
               </template>
               <template #content>
                 <Card class="outline outline-1 outline-outline/[24%] p-1 flex flex-col gap-1">
@@ -203,13 +206,13 @@
                       <div class="flex flex-col gap-1">
                         <div class="flex flex-row items-center gap-2">
                           <p>Ajukan Verifikasi Halaman</p>
-                          <Icon>check</Icon>
+                          <Icon name="check"></Icon>
                         </div>
                         <p class="text-muted font-normal text-base">Setelah diajukan, halaman akan ditandai sebagai "selesai" dan dapat diverifikasi admin.</p>
                       </div>
                     </template>
                     <template #trigger>
-                      <Button variant="standard" color="info" class="rounded-lg">Ajukan Verifikasi <Icon>chevron_right</Icon></Button>
+                      <Button variant="standard" color="info" class="rounded-lg">Ajukan Verifikasi <Icon name="arrow-right-s"></Icon></Button>
                     </template>
                   </DialogForm>
                   <DialogForm
@@ -226,13 +229,13 @@
                       <div class="flex flex-col gap-1">
                         <div class="flex flex-row items-center gap-2">
                           <p>Kembalikan ke Draft</p>
-                          <Icon>refresh</Icon>
+                          <Icon name="refresh"></Icon>
                         </div>
                         <p class="text-muted font-normal text-base">Setelah dilakukan aksi ini, status halaman akan kembali ke "draft".</p>
                       </div>
                     </template>
                     <template #trigger>
-                      <Button variant="standard" color="info" class="rounded-lg">Kembalikan ke Draft <Icon>refresh</Icon></Button>
+                      <Button variant="standard" color="info" class="rounded-lg">Kembalikan ke Draft <Icon name="refresh"></Icon></Button>
                     </template>
                   </DialogForm>
                   <template v-if="permissions().has('verify-page')">
@@ -249,13 +252,13 @@
                         <div class="flex flex-col gap-1">
                           <div class="flex flex-row items-center gap-2">
                             <p>Terima Verifikasi Halaman</p>
-                            <Icon>check</Icon>
+                            <Icon name="check"></Icon>
                           </div>
                           <p class="text-muted font-normal text-base">Setelah diverifikasi, halaman akan dipublikasikan di landing page untuk dilihat publik.</p>
                         </div>
                       </template>
                       <template #trigger>
-                        <Button variant="standard" color="success" class="rounded-lg">Verifikasi Halaman <Icon>check</Icon></Button>
+                        <Button variant="standard" color="success" class="rounded-lg">Verifikasi Halaman <Icon name="check"></Icon></Button>
                       </template>
                     </DialogForm>
                     <DialogForm
@@ -271,42 +274,19 @@
                         <div class="flex flex-col gap-1">
                           <div class="flex flex-row items-center gap-2">
                             <p>Hapus Draft</p>
-                            <Icon>close</Icon>
+                            <Icon name="close"></Icon>
                           </div>
                           <p class="text-muted font-normal text-base">Setelah menghapus draft, halaman akan dikembalikan ke keadaan semula sebelum pengubahan. Halaman akan kembali ke bentuk published semula.</p>
                         </div>
                       </template>
                       <template #trigger>
-                        <Button variant="standard" color="error" class="rounded-lg">Hapus Draft <Icon>close</Icon></Button>
+                        <Button variant="standard" color="error" class="rounded-lg">Hapus Draft <Icon name="close"></Icon></Button>
                       </template>
                     </DialogForm>
-                    <!-- <DialogForm
-                      :fields="['description']"
-                      :extraData="{id: pageTranslation.id, action: 'REVISE'}"
-                      targetAPI="pageTranslation/verify?custom"
-                      :onSuccess="() => {
-                        toast.success('Berhasil mengajukan revisi!')
-                        keyManager().triggerChange('website')
-                      }"
-                    >
-                      <template #title>
-                        <div class="flex flex-col gap-1">
-                          <div class="flex flex-row items-center gap-2">
-                            <p>Ajukan Revisi</p>
-                            <Icon>history</Icon>
-                          </div>
-                          <p class="text-muted font-normal text-base">Setelah mengajukan revisi, halaman akan dikembalikan ke keadaan semula sebelum pengubahan. Halaman akan tetap dalam status draft.</p>
-                        </div>
-                      </template>
-                      <template #trigger>
-                        <Button variant="standard" color="warning" class="rounded-lg">Revisi <Icon>history</Icon></Button>
-                      </template>
-                    </DialogForm> -->
                   </template>
                 </Card>
               </template>
             </Popover>
-            <!-- <Chip v-else color="neutral">Draft</Chip> -->
           </template>
         </div>
       </div>

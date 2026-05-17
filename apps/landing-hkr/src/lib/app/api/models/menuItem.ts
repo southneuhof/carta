@@ -1,10 +1,10 @@
 import type { ModelConfig } from '@southneuhof/landing-sveltekit-framework/types';
 import { languages, parseSlug } from "$lib/utils/common";
-import { requireRoleScopedAccess } from "$lib/app/api/authorization";
+import { hasRoleScopedAccess, requireRoleScopedAccess } from "$lib/app/api/authorization";
 import { exception } from "$lib/utils/response";
 import prisma from "$lib/utils/prisma";
 import type { RequestEvent } from "@sveltejs/kit";
-import type { Language, MenuItem, Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
 export async function requireMenuItemAccess(event: RequestEvent, input: Record<string, any>) {
   const id = input.id ?? input.menu_item_id;
@@ -43,6 +43,9 @@ export default {
     },
     lifecycle: {
       pre: async (body) => {
+        const name = typeof body.name === 'string' ? body.name.trim() : '';
+        if (!name) throw new Error('Nama harus diisi');
+
         let level = 1;
         if (!body.parent_id) {
           body.level = level;
@@ -67,20 +70,34 @@ export default {
         });
 
         body.order = (maxOrderItem?.order ?? 0) + 1;
-        body.slug = parseSlug(body.name); // Add this line to set the slug based on the name
-        body.visible = false
+        body.slug = parseSlug(body.slug || name);
+        body.visible = false;
         return body;
       },
-      post: async (body: any, data: any) => {
-        const translations = languages.map(language => ({
-          name: body.name,
-          language,
-          menu_item_id: data.id,
-        }));
-        await prisma.menuItemTranslation.createMany({
-          data: translations
+      main: async (body: any) => {
+        const name = typeof body.name === 'string' ? body.name.trim() : '';
+        const { name: _omitName, ...menuItemData } = body;
+
+        const created = await prisma.$transaction(async (tx) => {
+          const menuItem = await tx.menuItem.create({
+            data: menuItemData,
+          });
+
+          await tx.menuItemTranslation.createMany({
+            data: languages.map((language) => ({
+              name,
+              language,
+              menu_item_id: menuItem.id,
+            })),
+          });
+
+          return menuItem;
         });
-        return {...data, ...body};
+
+        return {
+          ...created,
+          name,
+        };
       }
     }
   },
@@ -142,23 +159,15 @@ export default {
     },
     lifecycle: {
       post: async (data, total, locals) => {
-        const userRoleId = locals?.user?.role_id;
-        const isAdmin = Boolean(locals?.isPrivilegedRole);
-
         // To add the 'can_edit' property, we must map over the data array
         // and return new objects, as the original `data` is read-only.
         return data.map((item: any) => {
           // We need to assert the type to get access to the 'allowedRoles' relation.
           const menuItem = item as Prisma.MenuItemGetPayload<{ include: { allowedRoles: true, page: true } }>;
-          
-          let can_edit = false;
-          if (isAdmin) {
-            // Admins can edit everything.
-            can_edit = true;
-          } else if (userRoleId && menuItem.allowedRoles) {
-            // For other users, check if their role is in the item's allowedRoles list.
-            can_edit = menuItem.allowedRoles.some(role => role.id === userRoleId);
-          }
+          const can_edit = hasRoleScopedAccess(
+            locals as App.Locals,
+            (menuItem.allowedRoles ?? []).map((role) => role.id),
+          );
 
           // Return a new object with all original properties plus 'can_edit'.
           // const page = {
@@ -222,15 +231,10 @@ export default {
     },
     lifecycle: {
       async post(data: Record<string, any>, _total?: number, locals?: Record<string, any>) {
-        const userRoleId = locals?.user?.role_id;
-        const isAdmin = Boolean(locals?.isPrivilegedRole);
-        let can_edit = false;
-
-        if (isAdmin) {
-          can_edit = true;
-        } else if (userRoleId && data.allowedRoles) {
-          can_edit = data.allowedRoles.some((role: { id: string }) => role.id === userRoleId);
-        }
+        const can_edit = hasRoleScopedAccess(
+          locals as App.Locals,
+          (data.allowedRoles ?? []).map((role: { id: number | string }) => role.id),
+        );
 
         if (data.page?.[0]?.translations) {
           const prioritizedTranslations = new Map();

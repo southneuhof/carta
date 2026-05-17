@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import CRUDComposite from '@southneuhof/is-vue-framework/components/composites/CRUDComposite.vue';
 import TranslationEditor from '@/features/translations/TranslationEditor.vue';
-import { articleCategoryModel, mappingRoleArticleCategoryModel } from '@/models';
+import articleCategoryModel from '@client/data-model/models/articleCategory.model'
+import mappingRoleArticleCategoryModel from '@client/data-model/models/mappingRoleArticleCategory.model'
 import services from '@/utils/services';
 import Switch from '@southneuhof/is-vue-framework/components/inputs/Switch.vue';
 import { permissions } from '@/stores/permissions';

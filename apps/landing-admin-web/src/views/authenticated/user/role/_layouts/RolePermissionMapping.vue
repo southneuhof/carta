@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import CRUDComposite from '@southneuhof/is-vue-framework/components/composites/CRUDComposite.vue'
 import Switch from '@southneuhof/is-vue-framework/components/inputs/Switch.vue'
-import { mappingPermissionRoleModel } from '@/models'
+import mappingPermissionRoleModel from '@client/data-model/models/mappingPermissionRole.model'
 import services from '@/utils/services'
 
 const props = defineProps<{ roleId: string }>()

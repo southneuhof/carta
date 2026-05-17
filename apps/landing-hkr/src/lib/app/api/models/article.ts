@@ -172,14 +172,15 @@ export default {
       },
     },
     where: async (event) => {
-      const searchWhere = event.url.searchParams.get("search")
+      const search = event.url.searchParams.get("search");
+      const searchWhere = search
         ? {
-            field: "translations",
-            operator: "some" as const,
-            value: {
-              title: {
-                contains: event.url.searchParams.get("search"),
-                mode: "insensitive",
+            translations: {
+              some: {
+                title: {
+                  contains: search,
+                  mode: "insensitive" as const,
+                },
               },
             },
           }
@@ -190,9 +191,16 @@ export default {
           ? { AND: [searchWhere] }
           : undefined;
 
+      const roleId = event.locals.user?.role_id;
+      if (roleId == null) {
+        return {
+          id: "non-existent-id",
+        };
+      }
+
       // Get all category IDs that the user's role has access to
       const roleWithCategories = await prisma.role.findUnique({
-        where: { id: event.locals.user?.role_id },
+        where: { id: roleId },
         select: {
           accessibleArticleCategory: {
             select: { id: true },
@@ -208,7 +216,7 @@ export default {
       // If role has no accessible categories, return no results
       if (accessibleCategoryIds.length === 0) {
         return {
-          AND: [{ field: "id", operator: "equals", value: "non-existent-id" }],
+          id: "non-existent-id",
         };
       }
 
@@ -217,9 +225,11 @@ export default {
         AND: [
           searchWhere,
           {
-            field: "categories",
-            operator: "some" as const,
-            value: { id: { in: accessibleCategoryIds } },
+            categories: {
+              some: {
+                id: { in: accessibleCategoryIds },
+              },
+            },
           },
         ].filter(Boolean),
       };

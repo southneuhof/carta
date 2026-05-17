@@ -7,6 +7,7 @@ import SectionAddWizard from './_layouts/SectionAddWizard.vue'
 import Draggable from 'vuedraggable'
 import { inject, ref } from 'vue'
 import { buildCreateSectionPayload } from '@/features/sections/schemaAdapter'
+import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
 
 const props = defineProps({
   sectionGroupID: {

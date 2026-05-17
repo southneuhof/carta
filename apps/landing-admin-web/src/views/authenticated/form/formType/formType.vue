@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import CRUDComposite from '@southneuhof/is-vue-framework/components/composites/CRUDComposite.vue';
-import { formTypeModel } from '@/models';
+import formTypeModel from '@client/data-model/models/formType.model'
 import FormTypeDetailUnder from './_layouts/FormTypeDetailUnder.vue';
 
 

@@ -40,32 +40,18 @@ const props = defineProps({
   },
 })
 
-const modelValue = defineModel()
-const inputValue = computed(() => modelValue.value)
-
-function toBoolean(value: any): boolean {
-  if (typeof value === 'boolean') return value
-  if (typeof value === 'string') {
-    const normalized = value.toLowerCase()
-    if (normalized === 'y' || normalized === 'true' || normalized === '1') return true
-    if (normalized === 'n' || normalized === 'false' || normalized === '0') return false
-  }
-  return Boolean(value)
-}
+const modelValue = defineModel<boolean>({ default: false })
+const isChecked = computed(() => modelValue.value)
 
 const classMap = {
   track: {
-    false: 'bg-surface-container-highest outline outline-2 outline-outline/[24%] ',
-    true: 'bg-primary ',
-    N: 'bg-surface-container-highest outline outline-2 outline-outline/[24%] ',
-    Y: 'bg-primary ',
+    inactive: 'bg-surface-container-highest outline outline-2 outline-outline/[24%] ',
+    active: 'bg-primary ',
     disabled: 'bg-surface-container-highest outline outline-2 outline-outline/[12%] cursor-not-allowed ',
   },
   thumb: {
-    false: 'bg-outline ',
-    true: 'bg-on-primary ',
-    N: 'bg-outline ',
-    Y: 'bg-on-primary ',
+    inactive: 'bg-outline ',
+    active: 'bg-on-primary ',
     disabled: 'bg-outline/[38%] ',
   },
 }
@@ -93,7 +79,7 @@ const sizeMap: Record<
 function handleClick() {
   if (props.disabled) return
 
-  const nextValue = !toBoolean(inputValue.value)
+  const nextValue = !isChecked.value
   modelValue.value = nextValue
   props.onToggle(nextValue)
   if (nextValue) {
@@ -109,12 +95,12 @@ function handleClick() {
     <button
       type="button"
       @click="handleClick"
-      :class="`rounded-full ${sizeMap[props.size].track} ${props.disabled ? classMap.track.disabled : (classMap.track as any)[String(inputValue)]}`"
+      :class="`rounded-full ${sizeMap[props.size].track} ${props.disabled ? classMap.track.disabled : isChecked ? classMap.track.active : classMap.track.inactive}`"
       :disabled="props.disabled"
     >
       <div class="flex h-full w-full">
         <div
-          :class="`rounded-full transition-all ${sizeMap[props.size].thumb} ${props.disabled ? classMap.thumb.disabled : (classMap.thumb as any)[String(inputValue)]} ${toBoolean(inputValue) && !props.disabled ? sizeMap[props.size].thumbActive : ''}`"
+          :class="`rounded-full transition-all ${sizeMap[props.size].thumb} ${props.disabled ? classMap.thumb.disabled : isChecked ? classMap.thumb.active : classMap.thumb.inactive} ${isChecked && !props.disabled ? sizeMap[props.size].thumbActive : ''}`"
         ></div>
       </div>
     </button>

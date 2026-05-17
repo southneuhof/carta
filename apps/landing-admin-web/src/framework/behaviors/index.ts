@@ -1,4 +1,6 @@
 import type { FrameworkBehaviors } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import config from '@/config'
+import { defaultDetailConfig, defaultFormConfig, defaultTableConfig } from '@/configs/defaults'
 import * as form from './form'
 import * as table from './table'
 import * as detail from './detail'
@@ -14,6 +16,13 @@ import * as crudList from './crudList'
 import * as crudDetail from './crudDetail'
 
 export const frameworkBehaviors: FrameworkBehaviors = {
+  defaults: {
+    table: defaultTableConfig,
+    detail: defaultDetailConfig,
+    form: defaultFormConfig,
+    config,
+    mode: 'default',
+  },
   form,
   table,
   detail,
@@ -22,6 +31,12 @@ export const frameworkBehaviors: FrameworkBehaviors = {
   checkboxGroup,
   lookup,
   upload,
+  imageInput: {
+    fileUpload: upload.fileUpload,
+  },
+  fileInput: {
+    fileUpload: upload.fileUpload,
+  },
   location,
   fileManager,
   dynamicForm,

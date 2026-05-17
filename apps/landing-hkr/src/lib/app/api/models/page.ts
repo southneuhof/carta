@@ -1,7 +1,7 @@
 import type { ModelConfig } from '@southneuhof/landing-sveltekit-framework/types';
-import { languages, parseSlug } from '$lib/utils/common';
+import { languages } from '$lib/utils/common';
 import prisma from '$lib/utils/prisma';
-import type { Page, Prisma } from '@prisma/client';
+import type { Page } from '@prisma/client';
 
 export default {
   create: {
@@ -9,15 +9,11 @@ export default {
     fields: ['menu_item_id'],
     lifecycle: {
       pre: async (body: any) => {
-        const parentMenuItem = await prisma.menuItem.findUnique({
-          where: { id: body.menu_item_id },
-          include: {
-            translations: {
-              where: { language: 'id' },
-            },
-          },
-        })
-        if (parentMenuItem?.translations[0]) body.slug = parseSlug(parentMenuItem.translations[0].name)
+        if (body.menu_item_id) {
+          body.menuItem = { connect: { id: body.menu_item_id } };
+          delete body.menu_item_id;
+        }
+        delete body.slug;
         return body;
       },
       post: async (body: any, data: any) => {

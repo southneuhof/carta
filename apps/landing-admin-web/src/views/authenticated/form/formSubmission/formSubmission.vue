@@ -3,7 +3,8 @@ import Tabs from '@southneuhof/is-vue-framework/components/base/Tabs.vue';
 import CRUDComposite from '@southneuhof/is-vue-framework/components/composites/CRUDComposite.vue';
 import services from '@/utils/services';
 import { onMounted, ref } from 'vue';
-import { formTypeModel, formSubmissionModel } from '@/models';
+import formTypeModel from '@client/data-model/models/formType.model'
+import formSubmissionModel from '@client/data-model/models/formSubmission.model'
 
 const formType = ref()
 const activeTabIndex = ref()

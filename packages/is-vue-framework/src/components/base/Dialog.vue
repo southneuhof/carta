@@ -25,8 +25,8 @@ watch(open, () => {
 <template>
   <slot v-if="disabled" name="trigger" v-bind="{ setOpen, disabled }" />
   <Dialog v-else v-model:open="open">
-    <DialogTrigger asChild>
-      <slot name="trigger" v-bind="{ setOpen, disabled }" />
+    <DialogTrigger asChild v-slot="triggerBindings">
+      <slot name="trigger" v-bind="{ setOpen, disabled, ...triggerBindings }" />
     </DialogTrigger>
     <DialogContent class="flex max-h-[95vh] flex-col" :class="$attrs.class">
       <DialogHeader v-if="$slots['title'] || $slots['description']" class="sticky top-0 z-10 border-b-[1px] border-outline bg-surface-container px-6 pb-6 pt-6">

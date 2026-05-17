@@ -9,6 +9,10 @@ import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composi
 import Detail from '@southneuhof/is-vue-framework/components/composites/Detail.vue'
 import { getSmallestChildObject } from '@/utils/common'
 import type { SupportedSectionSlotEditor } from '@/features/sections/schemaAdapter'
+import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
+import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
+import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
 
 const props = defineProps({
   galleryID: {
@@ -55,30 +59,32 @@ const listConfig = computed(() => ({
   onDragChange: (event: any) => onDragChange('content', event),
 }))
 
-const createFormConfig = {
+const createFormConfig = computed(() => ({
   fields: fields.value,
   targetAPI: 'content',
   fieldsAlias: fieldsAlias.value,
   inputConfig: {
     content: { type: 'rich-text' },
+    ...(props.slotConfig?.inputConfig ?? {}),
   },
   extraData: { gallery_id: props.galleryID, page_translation_id: pageTranslation?.value?.id },
-}
+}))
 
-const updateFormConfig = {
+const updateFormConfig = computed(() => ({
   fields: fields.value,
   targetAPI: 'content',
   fieldsAlias: fieldsAlias.value,
   inputConfig: {
     content: { type: 'rich-text' },
+    ...(props.slotConfig?.inputConfig ?? {}),
   },
   extraData: { page_translation_id: pageTranslation?.value?.id },
-}
+}))
 
-const detailConfig = {
+const detailConfig = computed(() => ({
   fields: fields.value,
   fieldsAlias: fieldsAlias.value,
-}
+}))
 
 const currentView = ref<'list' | 'create' | 'update' | 'detail'>('list')
 const activeData = ref<any>(null)
@@ -90,7 +96,7 @@ const topmostSection = getSmallestChildObject(sectionData, 'parentSectionData')
   <Card>
     <div class="flex flex-row items-center justify-between gap-4">
       <div class="flex flex-row items-center gap-2">
-        <Icon>category</Icon>
+        <Icon name="gallery"></Icon>
         <p class="text-xl font-semibold">{{ name }}</p>
         <div v-if="loading" class="h-[34px] flex items-center justify-center">
           <Spinner />
@@ -104,12 +110,24 @@ const topmostSection = getSmallestChildObject(sectionData, 'parentSectionData')
             activeData = null
           }"
         >
-          <Icon>chevron_left</Icon>Kembali
+          <template #icon>
+            <Icon name="arrow-left-s"></Icon>
+          </template>
+          Kembali
         </Button>
       </div>
       <div v-if="!loading" class="flex flex-row items-center gap-4">
-        <Button v-if="isOpen && currentView === 'list' && pageTranslation?.status_code === 'DRAFT'" class="h-[34px]" @click="() => (currentView = 'create')"><Icon>add</Icon>Tambah</Button>
-        <Button variant="standard" @click="() => (isOpen = !isOpen)"><Icon>{{ isOpen ? 'expand_less' : 'expand_more' }}</Icon></Button>
+        <Button v-if="isOpen && currentView === 'list' && pageTranslation?.status_code === 'DRAFT'" class="h-[34px]" @click="() => (currentView = 'create')">
+          <template #icon>
+            <Icon name="add"></Icon>
+          </template>
+          Tambah
+        </Button>
+        <Button variant="standard" kind="icon" aria-label="Toggle gallery" @click="() => (isOpen = !isOpen)">
+          <template #icon>
+            <Icon :name="isOpen ? 'arrow-up-s' : 'arrow-down-s'"></Icon>
+          </template>
+        </Button>
       </div>
     </div>
     <div v-show="isOpen" class="flex flex-col gap-4">
@@ -119,10 +137,18 @@ const topmostSection = getSmallestChildObject(sectionData, 'parentSectionData')
             <Table draggable :key="keyManager().value[`table-gallery-${galleryID}`]" v-bind="listConfig" :onDataLoaded="() => (loading = false)" :disabled="pageTranslation?.status_code !== 'DRAFT'">
               <template #list-rowActions="{ data }">
                 <div class="flex flex-row items-center gap-2">
-                  <Icon v-if="pageTranslation?.status_code === 'DRAFT'" class="mr-3 cursor-move">drag_indicator</Icon>
-                  <Button color="info" @click="() => { activeData = data; currentView = 'detail' }"><Icon>info</Icon></Button>
+                  <Icon v-if="pageTranslation?.status_code === 'DRAFT'" class="mr-3 cursor-move" name="draggable"></Icon>
+                  <Button kind="icon" color="info" aria-label="Lihat detail" @click="() => { activeData = data; currentView = 'detail' }">
+                    <template #icon>
+                      <Icon name="information"></Icon>
+                    </template>
+                  </Button>
                   <template v-if="pageTranslation?.status_code === 'DRAFT'">
-                    <Button color="warning" @click="() => { activeData = data; currentView = 'update' }"><Icon>edit</Icon></Button>
+                    <Button kind="icon" color="warning" aria-label="Ubah data" @click="() => { activeData = data; currentView = 'update' }">
+                      <template #icon>
+                        <Icon name="edit"></Icon>
+                      </template>
+                    </Button>
                     <ConfirmationDialog
                       :onConfirm="() => {
                         services.delete('content', { id: data.id }).then(() => {
@@ -133,7 +159,11 @@ const topmostSection = getSmallestChildObject(sectionData, 'parentSectionData')
                       }"
                     >
                       <template #trigger>
-                        <Button color="error"><Icon>delete_forever</Icon></Button>
+                        <Button kind="icon" color="error" aria-label="Hapus data">
+                          <template #icon>
+                            <Icon name="delete-bin"></Icon>
+                          </template>
+                        </Button>
                       </template>
                     </ConfirmationDialog>
                   </template>

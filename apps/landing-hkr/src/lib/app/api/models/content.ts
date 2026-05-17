@@ -3,6 +3,31 @@ import prisma from "$lib/utils/prisma";
 import type { Content } from "@prisma/client";
 import { copySectionGroupContent } from '$lib/utils/section';
 import { ensureDraftState } from '$lib/utils/page';
+import { exception } from '$lib/utils/response';
+
+const ensureDraftPreHook = async (body: Record<string, any>, options?: { requireId?: boolean }) => {
+  const { id, page_translation_id, ...rest } = body;
+  const requireId = options?.requireId ?? false;
+
+  if (requireId && !id) {
+    throw exception('Missing content id', 400);
+  }
+
+  if (!page_translation_id) {
+    return body;
+  }
+
+  const { idMap } = await ensureDraftState(page_translation_id);
+  if (idMap && id) {
+    const newContentId = idMap.get(id);
+    if (newContentId) {
+      return { id: newContentId, ...rest };
+    }
+  }
+
+  // `page_translation_id` is only used to ensure draft state; never pass it to prisma.
+  return { ...(id ? { id } : {}), ...rest };
+};
 
 export default {
   // types: {
@@ -26,7 +51,7 @@ export default {
     fields: ['media', 'title', 'subtitle', 'description', 'label', 'content', 'blurb', 'media_type', 'attachment', 'status', 'order', 'gallery_id', 'url', 'url_text', 'url_type', 'amount', 'collection', 'meta'],
     lifecycle: {
       pre: async (body) => {
-        const { page_translation_id, ...rest } = body;
+        const { page_translation_id } = body;
         // Handle draft creation
         if (page_translation_id) {
           const { idMap } = await ensureDraftState(page_translation_id);
@@ -48,7 +73,7 @@ export default {
         });
 
         body.order = (maxOrderItem?.order ?? 0) + 1;
-        return body;
+        return page_translation_id ? await ensureDraftPreHook(body) : body;
       }
     }
   },
@@ -57,66 +82,21 @@ export default {
     by: ['id'],
     fields: ['media', 'title', 'subtitle', 'description', 'label', 'content', 'blurb', 'media_type', 'attachment', 'status', 'order', 'url', 'url_text', 'url_type', 'amount', 'collection', 'meta'],
     lifecycle: {
-      pre: async (body) => {
-        const { id, page_translation_id, ...rest } = body;
-        if (!page_translation_id) return body;
-
-        const { idMap } = await ensureDraftState(page_translation_id);
-
-        // If a new draft was created, we need to use the new ID for the content.
-        if (idMap) {
-          const newContentId = idMap.get(id);
-          if (newContentId) {
-            return { id: newContentId, page_translation_id, ...rest };
-          }
-        }
-
-        return body;
-      }
+      pre: async (body) => await ensureDraftPreHook(body, { requireId: true })
     }
   },
   reorder: {
     allow: true,
     axis: ['gallery_id'],
     lifecycle: {
-      pre: async (body) => {
-        const { id, page_translation_id, ...rest } = body;
-        if (!page_translation_id) return body;
-
-        const { idMap } = await ensureDraftState(page_translation_id);
-
-        // If a new draft was created, we need to use the new ID for the content.
-        if (idMap) {
-          const newContentId = idMap.get(id);
-          if (newContentId) {
-            return { id: newContentId, page_translation_id, ...rest };
-          }
-        }
-
-        return body;
-      }
+      pre: async (body) => await ensureDraftPreHook(body, { requireId: true })
     }
   },
   delete: {
     allow: true,
     by: ['id'],
     lifecycle: {
-      pre: async (body) => {
-        const { id, page_translation_id, ...rest } = body;
-        if (!page_translation_id) return body;
-
-        const { idMap } = await ensureDraftState(page_translation_id);
-
-        // If a new draft was created, we need to use the new ID for the content.
-        if (idMap) {
-          const newContentId = idMap.get(id);
-          if (newContentId) {
-            return { id: newContentId, page_translation_id, ...rest };
-          }
-        }
-
-        return body;
-      }
+      pre: async (body) => await ensureDraftPreHook(body, { requireId: true })
     }
   }
 } as ModelConfig<Content>

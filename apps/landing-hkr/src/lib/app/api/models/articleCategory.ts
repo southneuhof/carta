@@ -70,15 +70,17 @@ export default {
     where: ({locals}) => {
       const isAdmin = Boolean(locals?.isPrivilegedRole);
       if (isAdmin) return undefined
-      return {
-        AND: [
-          {
-            field: 'allowedRoles',
-            operator: 'some',
-            value: {id: locals.user?.role_id}
-          }
-        ]
+      const roleId = locals.user?.role_id;
+      if (!roleId) {
+        return { id: '__no_access__' };
       }
+      return {
+        allowedRoles: {
+          some: {
+            id: roleId
+          }
+        }
+      };
     }
   },
 

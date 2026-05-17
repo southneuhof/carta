@@ -36,13 +36,11 @@ const props = withDefaults(
     color?: CardColorRole
     containerRole?: CardColorRole
     disabled?: boolean
-    contentPadding?: number
   }>(),
   {
     variant: 'filled',
     color: 'surfaceContainer',
     disabled: false,
-    contentPadding: 16,
   }
 )
 
@@ -113,21 +111,19 @@ const variantStyle = computed<CSSProperties>(() => {
 
 const mergedClass = computed(() =>
   twMerge(
-    'relative flex flex-col gap-4 overflow-hidden rounded-xl',
+    'relative flex flex-col gap-4 overflow-hidden rounded-xl p-4',
     backgroundClassMap[resolvedRole.value],
     foregroundClassMap[resolvedRole.value],
     variantClassMap[props.variant],
-    isInteractive.value && !props.disabled ? 'group cursor-pointer' : '',
+    isInteractive.value && !props.disabled
+      ? 'overlay cursor-pointer select-none transition-none after:pointer-events-none after:block after:bg-current after:opacity-0 hover:after:opacity-[.08] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:after:opacity-[.12]'
+      : '',
     props.disabled ? 'pointer-events-none' : '',
     attrs.class as string
   )
 )
 
-const mergedStyle = computed(() => [
-  { padding: `${props.contentPadding}px` } as CSSProperties,
-  variantStyle.value,
-  attrs.style,
-])
+const mergedStyle = computed(() => [variantStyle.value, attrs.style])
 
 const forwardedAttrs = computed(() => {
   const { class: _class, style: _style, onClick: _onClick, ...rest } =
@@ -186,10 +182,6 @@ const handleRootKeydown = (event: KeyboardEvent) => {
     <div v-if="$slots.header"><slot name="header"></slot></div>
     <slot></slot>
     <div v-if="$slots.footer"><slot name="footer"></slot></div>
-    <div
-      class="pointer-events-none absolute inset-0 hidden bg-on-surface/[10%]"
-      :class="isInteractive && !disabled ? 'group-active:block' : ''"
-    />
     <div
       v-if="disabled"
       class="pointer-events-none absolute inset-0 bg-on-surface/[12%]"

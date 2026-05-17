@@ -226,7 +226,10 @@ function buildInputConfig() {
 async function preflight() {
   loading.value.get = true
   formData.value = (await props.getInitialData()) || {}
-  if (props.formType === 'update') formData.value = (await props.getDetailData({ getAPI: props.getAPI || '', id: props.dataID, searchParameters: props.searchParameters })) || {}
+  if (props.formType === 'update') {
+    const detailData = await props.getDetailData({ getAPI: props.getAPI || '', id: props.dataID, searchParameters: props.searchParameters })
+    formData.value = { ...formData.value, ...detailData }
+  }
 
   if (props.static) {
     watch(

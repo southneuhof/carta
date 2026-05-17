@@ -17,7 +17,7 @@ describe('section schema adapter', () => {
   it('builds add-section options from supported schemas only', () => {
     const options = getAddSectionOptions()
 
-    expect(options).toHaveLength(5)
+    expect(options).toHaveLength(SUPPORTED_SECTION_SCHEMA_CODES.length)
     expect(options.map((option) => option.code).sort()).toEqual([...SUPPORTED_SECTION_SCHEMA_CODES].sort())
   })
 
@@ -67,6 +67,25 @@ describe('section schema adapter', () => {
     expect(childSections?.customEditorKey).toBe('data-list.childSections')
   })
 
+  it('exposes shared section meta settings to the editor config', () => {
+    const contentDefaultConfig = getSupportedEditorConfig('content-default')
+    expect(contentDefaultConfig?.meta?.fields).toContain('width_preset')
+    expect(contentDefaultConfig?.meta?.inputConfig?.width_preset?.type).toBe('select')
+    expect(contentDefaultConfig?.meta?.defaultValues?.width_preset).toBe('md')
+    const contentSlot = contentDefaultConfig?.slots.find((slot) => slot.key === 'content')
+    expect(contentSlot?.fields).toEqual(['media_type', 'media', 'attachment', 'subtitle', 'title', 'description', 'url', 'url_text'])
+    expect(contentSlot?.inputConfig?.media?.dependency?.fields).toEqual(['media_type'])
+
+    const dataListConfig = getSupportedEditorConfig('data-list')
+    expect(dataListConfig?.meta?.fields).toContain('closed_on_initial')
+    expect(dataListConfig?.meta?.inputConfig?.closed_on_initial?.dependency?.fields).toEqual(['collapsible'])
+    expect(dataListConfig?.meta?.defaultValues?.type).toBe('list')
+  })
+
+  it('keeps unknown section unsupported/read-only', () => {
+    expect(getSupportedEditorConfig('legacy-unknown')).toBeNull()
+  })
+
   it('builds section create payload from supported schema only', () => {
     const payload = buildCreateSectionPayload({
       schemaCode: 'content-default',
@@ -76,8 +95,10 @@ describe('section schema adapter', () => {
 
     expect(payload.section_type_code).toBe('content-default')
     expect(payload.name).toBe('Content Default')
+    expect(payload.description).toBe('Single content slot section')
     expect(payload.section_group_id).toBe('sg-1')
     expect(payload.page_translation_id).toBe('pt-1')
-    expect(payload.config.code).toBe('content-default')
+    expect(payload.meta).toMatchObject({ width_preset: 'md' })
+    expect(payload).not.toHaveProperty('config')
   })
 })

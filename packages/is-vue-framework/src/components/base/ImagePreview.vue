@@ -98,7 +98,11 @@ function closeDialog() {
       v-if="!props.disableControls && (props.thumbnail || props.url)"
       class="absolute flex h-full w-full flex-row items-center justify-center gap-2 rounded-xl bg-black/[12%] text-on-surface opacity-0 transition-opacity duration-100 hover:opacity-100"
     >
-      <Button @click="() => openDialog()" color="info"><Icon size="lg" name="eye"></Icon></Button>
+      <Button @click="() => openDialog()" color="info" kind="icon" type="button">
+        <template #icon>
+          <Icon size="lg" name="eye"></Icon>
+        </template>
+      </Button>
       <slot name="actions" />
     </div>
     <div

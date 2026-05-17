@@ -66,6 +66,31 @@ class AppServices extends FrameworkService {
     return extractErrorMessage(error)
   }
 
+  override async fileUpload(
+    file: File,
+    _directory: string = '',
+    _onUploadProgress?: (progress: { loaded: number; total: number }) => void,
+    options?: ServiceRequestOptions
+  ): Promise<any> {
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const uploadedUrl = await this.post('public/upload/private', formData, options)
+      const url = typeof uploadedUrl === 'string' ? uploadedUrl : uploadedUrl?.url || uploadedUrl?.data || ''
+
+      return {
+        success: true,
+        path: url,
+        data: url,
+        url,
+      }
+    } catch (error) {
+      console.error(error)
+      return { success: false }
+    }
+  }
+
   // delete(url: string, data: object, options?: ServiceRequestOptions) {
   //   return this.remove(url, data, options)
   // }

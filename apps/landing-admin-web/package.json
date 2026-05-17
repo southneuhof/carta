@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "run-p build-only",
+    "build": "run-s type-check build-only",
     "preview": "vite preview --port 3100",
     "test": "vitest run --environment jsdom --root src/",
     "test:unit": "vitest run --environment jsdom --root src/",

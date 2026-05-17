@@ -47,6 +47,25 @@ export default defineConfig({
       },
     ],
   },
+  optimizeDeps: {
+    exclude: ['@southneuhof/landing-section-schema'],
+  },
+  server: {
+    fs: {
+      allow: [
+        fileURLToPath(new URL('../..', import.meta.url)),
+        fileURLToPath(new URL('../../packages/landing-section-schema', import.meta.url)),
+      ],
+    },
+    watch: {
+      // Keep default node_modules ignore, but un-ignore this workspace package if resolved via links.
+      ignored: [
+        '**/node_modules/**',
+        '!**/node_modules/@southneuhof/landing-section-schema/**',
+        '!**/packages/landing-section-schema/**',
+      ],
+    },
+  },
   esbuild: {
     jsxFactory: 'h',
     jsxFragment: 'Fragment',

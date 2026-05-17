@@ -149,7 +149,11 @@ function handleChange(event: any) {
                 <div class="w-fit cursor-move">
                   <ImagePreview v-if="element" :url="element.url" :thumbnail="element.tumbnail_url">
                     <template #actions>
-                      <Button color="error" type="button" @click="removeItem(index)"><Icon name="delete-bin"></Icon></Button>
+                      <Button color="error" kind="icon" @click="removeItem(index)" type="button">
+                        <template #icon>
+                          <Icon name="delete-bin"></Icon>
+                        </template>
+                      </Button>
                     </template>
                   </ImagePreview>
                 </div>
@@ -159,7 +163,7 @@ function handleChange(event: any) {
               <label v-if="(props.multi && images.length != (props.limit == -1 ? 99999 : props.limit)) || (!props.multi && !images[0])">
                 <a class="h-4 w-full cursor-pointer">
                   <div class="relative flex h-40 w-40 items-center justify-center rounded-xl outline-dashed outline-2 outline-outline">
-                    <Icon name="image-add" size="36" class="text-surface-variant"></Icon>
+                    <Icon name="image-add" size="2xl" class="text-on-surface"></Icon>
                     <div class="absolute left-0 top-0 h-full w-full">
                       <div v-if="uploadPercentage != 0 && uploadPercentage != 100" class="absolute h-40 w-40 rounded-xl bg-tertiary/20" :style="{ width: uploadPercentage + '%' }"></div>
                     </div>

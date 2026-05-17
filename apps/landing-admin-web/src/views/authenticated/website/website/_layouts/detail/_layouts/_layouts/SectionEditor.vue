@@ -18,6 +18,11 @@ import {
 } from '@/features/sections/schemaAdapter'
 import UnsupportedSectionPanel from '@/components/sections/UnsupportedSectionPanel.vue'
 import { resolveSectionSlotEditor } from '@/features/sections/editorRegistry'
+import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
+import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
+import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
+import Dialog from '@southneuhof/is-vue-framework/components/base/Dialog.vue'
 
 export type SectionData = {
   id: string
@@ -89,22 +94,26 @@ function slotLabel(slotKey: string) {
     <template #fallback>
       <div class="h-fit w-full flex items-center justify-center"><Spinner /></div>
     </template>
-    <Card class="bg-transparent" :class="{ 'outline outline-1 outline-outline': !asChild, 'p-0': asChild }">
+    <Card class="bg-transparent" :variant="!asChild ? 'outlined' : 'filled'" :class="{ 'p-0': asChild }">
       <div class="flex flex-row items-center justify-between gap-4">
         <div class="flex flex-row items-center gap-2" :class="{ 'text-muted': !sectionData.visible }">
-          <Icon>folder</Icon>
+          <Icon name="folder"></Icon>
           <div>
             <p class="text-xl font-semibold">{{ sectionData.name }} <span class="text-xs font-normal text-muted">{{ sectionData.section_type_code }}</span></p>
             <p class="text-sm"><span class="text-muted">Diperbarui</span> <span class="text-on-surface/[67%]">{{ parse('datetime', sectionData.updated_at) }}</span></p>
           </div>
           <Popover>
             <template #trigger>
-              <Button variant="standard"><Icon>more_horiz</Icon></Button>
+              <Button variant="standard" kind="icon" aria-label="Opsi section">
+                <template #icon>
+                  <Icon name="more"></Icon>
+                </template>
+              </Button>
             </template>
             <template #content>
               <Card class="gap-1 rounded-md p-1 outline outline-1 outline-outline/[38%]">
                 <ConfirmationDialog
-                  v-if="!sectionData.parent_section_id && pageTranslation?.status_code === 'DRAFT' && panelState.kind === 'supported'"
+                  v-if="!sectionData.parent_section_id && pageTranslation?.status_code === 'DRAFT'"
                   :onConfirm="() => {
                     services.delete('section', { id: sectionData.id }).then(() => {
                       toast.success('Berhasil menghapus section!')
@@ -114,27 +123,37 @@ function slotLabel(slotKey: string) {
                 >
                   <template #trigger>
                     <Card class="flex-row items-center gap-4 rounded-md p-2" color="errorContainer">
-                      <Icon>delete_forever</Icon>
+                      <Icon name="delete-bin"></Icon>
                       <p>Hapus</p>
                     </Card>
                   </template>
                 </ConfirmationDialog>
-                <Modal>
+                <Dialog>
                   <template #trigger>
                     <Card class="flex-row items-center gap-4 rounded-md p-2">
-                      <Icon>settings</Icon>
+                      <Icon name="settings"></Icon>
                       <p>Pengaturan Section</p>
                     </Card>
                   </template>
                   <template #content>
                     <SectionSettings />
                   </template>
-                </Modal>
+                </Dialog>
               </Card>
             </template>
           </Popover>
         </div>
-        <Button v-if="!asChild" variant="standard" @click="() => (isOpen = !isOpen)"><Icon>{{ isOpen ? 'expand_less' : 'expand_more' }}</Icon></Button>
+        <Button
+          v-if="!asChild"
+          variant="standard"
+          kind="icon"
+          aria-label="Toggle section"
+          @click="() => (isOpen = !isOpen)"
+        >
+          <template #icon>
+            <Icon :name="isOpen ? 'arrow-up-s' : 'arrow-down-s'"></Icon>
+          </template>
+        </Button>
       </div>
 
       <template v-if="isOpen">
@@ -147,7 +166,7 @@ function slotLabel(slotKey: string) {
           :message="panelState.viewModel.message"
         />
 
-        <div v-else class="flex flex-col gap-4">
+        <div v-else class="flex flex-col gap-2">
           <div v-for="matched in matchedSlots" :key="matched.slotKey" class="flex flex-col gap-4">
             <component
               v-if="resolveSectionSlotEditor(matched.editor.customEditorKey) && matched.items.length"

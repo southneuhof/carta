@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { inject } from 'vue';
-import { mappingRoleFormTypeModel } from '@/models';
+import mappingRoleFormTypeModel from '@client/data-model/models/mappingRoleFormType.model'
 import services from '@/utils/services';
 import Switch from '@southneuhof/is-vue-framework/components/inputs/Switch.vue';
 import CRUDComposite from '@southneuhof/is-vue-framework/components/composites/CRUDComposite.vue';

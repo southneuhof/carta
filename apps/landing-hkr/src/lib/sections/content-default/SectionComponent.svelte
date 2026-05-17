@@ -2,8 +2,10 @@
   import Button from "$lib/app/components/ui/Button.svelte";
   import { m } from "$lib/paraglide/messages";
   import { widthPresetClassMap } from "$lib/utils/uicommon";
+  import contentDefault from "@southneuhof/landing-section-schema/sections/content-default";
+  import type { LandingSectionForSchema } from "@southneuhof/landing-sveltekit-framework/types";
 
-  const {section} = $props()
+  const { section }: { section: LandingSectionForSchema<typeof contentDefault> } = $props()
 
   const contentAlignClassMap:any  = {
     left: {
@@ -40,6 +42,8 @@
     vertical: 'flex flex-col gap-6'
   }
 </script>
+
+{JSON.stringify(section.data.content)}
 
 <div class="flex items-center justify-center w-full">
   <div class="w-full {widthPresetClassMap[section.meta.width_preset]} {section.meta.layout_direction ? layoutDirectionClassMap[section.meta.layout_direction] : layoutDirectionClassMap['vertical']} py-6 lg:py-12 px-6 lg:px-12 {(contentAlignClassMap as any)[section.meta.content_align].container} justify-center">
@@ -82,7 +86,7 @@
 {#snippet ContentMedia()}
   {#if section.data.content.media}
     {#if section.data.content.media_type === 'embed'}
-      <div class="min-h-[300px] md:h-[450px] w-full">
+      <div class="min-h-75 md:h-112.5 w-full">
         <div class="embed-preview">
           <div class="h-full w-full">{@html section.data.content.media}</div>
         </div>

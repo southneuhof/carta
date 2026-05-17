@@ -1,6 +1,6 @@
-import type { SectionSchema } from '@southneuhof/landing-sveltekit-framework/types';
+import { defineSectionSchema } from '../defineSectionSchema';
 
-export default {
+export default defineSectionSchema({
   code: 'hero-banner',
   info: {
     name: 'Hero Banner',
@@ -11,4 +11,4 @@ export default {
     quickAccess: { type: 'gallery', order: 2, many: true },
     projectCategory: { type: 'gallery', order: 3, many: true },
   },
-} satisfies SectionSchema;
+});

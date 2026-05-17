@@ -6,8 +6,11 @@
   import { onDestroy, onMount } from "svelte";
   import { fade } from "svelte/transition";
   import { m } from "$lib/paraglide/messages";
+  import heroBannerTwoSchema from "@southneuhof/landing-section-schema/sections/hero-banner-two";
+  import type { LandingSectionForSchema } from "@southneuhof/landing-sveltekit-framework/types";
 
-  const { section } = $props();
+  type Section = LandingSectionForSchema<typeof heroBannerTwoSchema>
+  const { section }: { section: Section } = $props();
 
   let activeBannerIndex = $state(0);
 

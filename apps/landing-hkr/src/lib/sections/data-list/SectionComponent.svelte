@@ -8,8 +8,11 @@
   import MediaView from "./_layouts/MediaView.svelte";
   import SectionHeader from "$lib/app/components/app/SectionHeader.svelte";
   import { widthPresetClassMap } from "$lib/utils/uicommon";
+  import dataListSchema from "@southneuhof/landing-section-schema/sections/data-list";
+  import type { LandingSectionForSchema } from "@southneuhof/landing-sveltekit-framework/types";
 
-  const {section} = $props()
+  type Section = LandingSectionForSchema<typeof dataListSchema>
+  const { section }: { section: Section } = $props()
 
   let searchQuery = $state('')
 

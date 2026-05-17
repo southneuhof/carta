@@ -1,44 +1,48 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import {
-  getAddSectionOptions,
-  getSupportedSectionSchemaGroup,
-  type SupportedSectionSchemaCode,
-} from '@/features/sections/schemaAdapter'
+  import { computed, ref } from 'vue'
+  import {
+    getAddSectionOptions,
+    getSupportedSectionSchemaGroup,
+    type SupportedSectionSchemaCode,
+  } from '@/features/sections/schemaAdapter'
+  import Button from '@southneuhof/is-vue-framework/components/base/Button.vue';
+  import Card from '@southneuhof/is-vue-framework/components/base/Card.vue';
+  import Dialog from '@southneuhof/is-vue-framework/components/base/Dialog.vue';
+  import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue';
 
-const props = defineProps<{
-  onSubmit: (schemaCode: string) => Promise<void> | void
-}>()
+  const props = defineProps<{
+    onSubmit: (schemaCode: string) => Promise<void> | void
+  }>()
 
-const options = getAddSectionOptions()
+  const options = getAddSectionOptions()
 
-const groupedOptions = computed(() =>
-  Object.entries(
-    options.reduce<Record<string, typeof options>>((groups, option) => {
-      const group = getSupportedSectionSchemaGroup(option.code)
-      groups[group] ||= []
-      groups[group].push(option)
-      return groups
-    }, {}),
-  ).map(([name, types]) => ({ name, types })),
-)
+  const groupedOptions = computed(() =>
+    Object.entries(
+      options.reduce<Record<string, typeof options>>((groups, option) => {
+        const group = getSupportedSectionSchemaGroup(option.code)
+        groups[group] ||= []
+        groups[group].push(option)
+        return groups
+      }, {}),
+    ).map(([name, types]) => ({ name, types })),
+  )
 
-const selectedCode = ref<SupportedSectionSchemaCode | null>(null)
-const loading = ref(false)
+  const selectedCode = ref<SupportedSectionSchemaCode | null>(null)
+  const loading = ref(false)
 
-async function handleSubmitConfig() {
-  if (!selectedCode.value) return
-  loading.value = true
-  try {
-    await props.onSubmit(selectedCode.value)
-  } finally {
-    loading.value = false
+  async function handleSubmitConfig() {
+    if (!selectedCode.value) return
+    loading.value = true
+    try {
+      await props.onSubmit(selectedCode.value)
+    } finally {
+      loading.value = false
+    }
   }
-}
 </script>
 
 <template>
-  <Modal>
+  <Dialog>
     <template #title>
       <div class="flex flex-col gap-2">
         <p>Tambah Section</p>
@@ -46,8 +50,11 @@ async function handleSubmitConfig() {
       </div>
     </template>
     <template #trigger>
-      <Button class="w-full" variant="standard">
-        <Icon>add</Icon>Tambah
+      <Button class="w-full" variant="text">
+        <template #icon>
+          <Icon name="add"></Icon>
+        </template>
+        Tambah
       </Button>
     </template>
     <template #content>
@@ -59,9 +66,10 @@ async function handleSubmitConfig() {
               <Card
                 v-for="option in category.types"
                 :key="option.code"
-                :color="selectedCode === option.code ? 'primaryContainer' : 'surface'"
+                :color="selectedCode === option.code ? 'primaryContainer' : 'surfaceContainer'"
+                variant="outlined"
 
-                class="cursor-pointer gap-1 border border-outline p-4"
+                class="cursor-pointer gap-1"
                 @click="() => (selectedCode = selectedCode === option.code ? null : option.code)"
               >
                 <div>
@@ -79,5 +87,5 @@ async function handleSubmitConfig() {
         <Button :disabled="!selectedCode || loading" class="px-6 py-2" @click="handleSubmitConfig"> Tambah </Button>
       </div>
     </template>
-  </Modal>
+  </Dialog>
 </template>
