@@ -1,6 +1,6 @@
 import { ref, watch } from 'vue'
 import { defineStore } from 'pinia'
-import { storage } from '@southneuhof/is-vue-framework/utils/storage'
+import { storage } from '@southneuhof/utilities/storage'
 
 type ColorMode = 'light' | 'dark'
 

@@ -66,6 +66,7 @@
     "xlsx": "^0.18.5",
     "zod": "^3.25.0",
     "@southneuhof/is-vue-framework": "workspace:*",
+    "@southneuhof/utilities": "workspace:*",
     "@client/data-model": "workspace:*"
   },
   "devDependencies": {

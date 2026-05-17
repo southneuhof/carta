@@ -16,11 +16,25 @@ const packages = [
     tempBranch: 'sync/apostle',
   },
   {
+    name: '@southneuhof/utilities',
+    prefix: 'packages/utilities',
+    repo: 'https://github.com/southneuhof/utilities.git',
+    branch: 'main',
+    tempBranch: 'sync/utilities',
+  },
+  {
     name: '@southneuhof/is-vue-framework',
     prefix: 'packages/is-vue-framework',
     repo: 'https://github.com/southneuhof/is-vue-framework.git',
     branch: 'main',
     tempBranch: 'sync/is-vue-framework',
+  },
+  {
+    name: '@southneuhof/landing-sveltekit-framework',
+    prefix: 'packages/landing-sveltekit-framework',
+    repo: 'https://github.com/southneuhof/landing-sveltekit-framework.git',
+    branch: 'main',
+    tempBranch: 'sync/landing-sveltekit-framework',
   },
 ]
 

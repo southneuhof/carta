@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { storage } from '@southneuhof/is-vue-framework/utils/storage'
+import { storage } from '@southneuhof/utilities/storage'
 
 let value: Set<string> = new Set()
 const BYPASS_ALL_PERMISSIONS = import.meta.env.VITE_APP_BYPASS_ALL_PERMISSIONS === 'true'

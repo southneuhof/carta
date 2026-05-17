@@ -1,0 +1,507 @@
+// schema.prisma
+datasource db {
+  provider = "postgresql" // or your preferred database provider
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ENUMS
+enum ContentMediaType {
+  image
+  video
+  panorama
+  embed
+}
+
+enum Language {
+  id
+  en
+}
+
+enum FieldType {
+  text
+  textarea
+  number
+  select
+  image
+  file
+  date
+}
+
+enum CalculatorFieldType {
+  number
+  select
+}
+
+enum ContentUrlType {
+  internal
+  external
+}
+
+enum CalculatorResultType {
+  number
+  currency
+}
+
+enum MenuItemType {
+  link
+  page
+}
+
+enum FormFieldValidationType {
+  email
+  phone
+  number
+  url
+  date
+  file
+}
+
+enum SectionTypeType {
+  parent
+  child
+}
+
+enum MenuItemRole {
+  home
+  document_request
+  help_center 
+  project_list
+}
+
+// MODELS
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  name          String
+  password      String?
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Each user has one role.
+  role_id Int
+  role    Role @relation(fields: [role_id], references: [id])
+
+  sessions       Session[]
+  authSessions   AuthSession[]
+  authAccounts   AuthAccount[]
+  verifications VerificationLog[]
+}
+
+model Session {
+  id         Int      @id @default(autoincrement())
+  token      String   @unique
+  user_id    Int
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model AuthSession {
+  id        Int      @id @default(autoincrement())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AuthAccount {
+  id                    Int       @id @default(autoincrement())
+  accountId             String
+  providerId            String
+  userId                Int
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model AuthVerification {
+  id         Int      @id @default(autoincrement())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+///
+/// Menu & Page
+///
+
+model MenuItem {
+  id             String                @id @default(cuid())
+  parent_id      String?
+  level          Int // 0 for root, 1 for first level, etc.
+  parent         MenuItem?             @relation("MenuItemChildren", fields: [parent_id], references: [id], onDelete: Cascade)
+  children       MenuItem[]            @relation("MenuItemChildren")
+  menu_item_type MenuItemType          @default(page)
+  visible        Boolean               @default(true)
+  role           MenuItemRole?         
+  slug           String
+  show_submenu_below_navbar Boolean @default(false)
+  url            String?
+  order          Int // For ordering among siblings
+  translations   MenuItemTranslation[]
+  page           Page[]
+  allowedRoles   Role[]         @relation("MenuItemAccess")
+}
+
+model MenuItemTranslation {
+  id           String   @id @default(cuid())
+  menu_item_id String
+  language     Language
+  name         String
+  description  String?
+  media        String?
+  menuItem     MenuItem @relation(fields: [menu_item_id], references: [id], onDelete: Cascade)
+}
+
+model Page {
+  id           String            @id @default(cuid())
+  created_at   DateTime          @default(now())
+  updated_at   DateTime          @updatedAt
+  translations PageTranslation[]
+  menu_item_id String?
+  menuItem     MenuItem?         @relation(fields: [menu_item_id], references: [id], onDelete: Cascade)
+}
+
+model PageTranslation {
+  id            String         @id @default(cuid())
+  page_id       String
+  language      Language
+  page          Page           @relation(fields: [page_id], references: [id], onDelete: Cascade)
+  sectionGroups SectionGroup[]
+
+  // Verification & Draft/Publish
+  status_code   String           @default("PUBLISHED")
+  live_for_id   String?          @unique
+  liveFor       PageTranslation? @relation("PageTranslationLiveDraft", fields: [live_for_id], references: [id], onDelete: SetNull)
+  draft         PageTranslation? @relation("PageTranslationLiveDraft")
+}
+
+model VerificationLog {
+  id                  String             @id @default(cuid())
+  action              String
+  description         String?
+  verifier_id         Int?
+  verifier            User?              @relation(fields: [verifier_id], references: [id], onDelete: SetNull)
+  created_at          DateTime           @default(now())
+  model               String
+  data_id             String
+}
+
+model SectionType {
+  id          String          @id @default(cuid())
+  name        String
+  code        String          @unique
+  description String?
+  category    SectionTypeType @default(parent)
+  // section     Section[]
+}
+
+model Section {
+  id                String        @id @default(cuid())
+  name              String
+  description       String?
+  visible           Boolean       @default(true)
+  order             Int
+  meta              Json          @default("{}")
+  section_type_code String?
+  // sectionType       SectionType?  @relation(fields: [section_type_code], references: [code])
+  section_group_id  String?
+  sectionGroup      SectionGroup? @relation(fields: [section_group_id], references: [id], onDelete: Cascade)
+
+  // Add parent-child relationship
+  parent_section_id String?
+  parentSection     Section?  @relation("SectionChildren", fields: [parent_section_id], references: [id], onDelete: Cascade)
+  childSections     Section[] @relation("SectionChildren")
+
+  contents           Content[]
+  galleries          Gallery[]
+  updated_at         DateTime  @updatedAt @default(now())
+  childSectionGroups SectionGroup[] @relation("SectionToGroups")
+}
+
+model Content {
+  id          String   @id @default(cuid())
+  media       String?
+  title       String?
+  subtitle    String?
+  description String?
+  label       String?
+  content     String?
+  blurb       String?
+  media_type  ContentMediaType?
+  order       Int
+  section_id  String?
+  url_type    ContentUrlType?
+  url         String?
+  url_text    String?
+  attachment  String?
+  amount      Float?
+  status      Boolean?
+  collection  Json      @default("[]")
+  meta        Json      @default("{}")
+  section     Section? @relation(fields: [section_id], references: [id], onDelete: Cascade)
+  gallery_id  String?
+  gallery     Gallery? @relation(fields: [gallery_id], references: [id], onDelete: Cascade)
+}
+
+model Gallery {
+  id         String    @id @default(cuid())
+  order      Int
+  section_id String
+  section    Section   @relation(fields: [section_id], references: [id], onDelete: Cascade)
+  contents   Content[]
+}
+
+///
+/// SectionGroup now acts as the container for sections.
+/// It can be attached either directly to a PageTranslation (top-level)
+/// or nested inside a Section (if you need further grouping, e.g. for tabs).
+///
+model SectionGroup {
+  id                  String           @id @default(cuid())
+  /// Order is null for top-level groups, otherwise it's the order within its parent.
+  order               Int?
+  // If attached directly to a PageTranslation, set this field.
+  page_translation_id String?
+  pageTranslation     PageTranslation? @relation(fields: [page_translation_id], references: [id], onDelete: Cascade)
+
+  // If nested inside a Section, set this field.
+  parent_section_id String?
+  parentSection     Section? @relation("SectionToGroups", fields: [parent_section_id], references: [id], onDelete: Cascade)
+
+  // The Sections contained in this group.
+  sections Section[]
+}
+
+///
+/// Form
+///
+
+model FormType {
+  id           String           @id @default(cuid())
+  name         String
+  description  String?
+  fields       FormField[]
+  submissions  FormSubmission[]
+  // Many-to-many relation to Role for access control.
+  allowedRoles Role[]           @relation("FormTypeAccess")
+}
+
+model FormField {
+  id                   String                   @id @default(cuid())
+  form_type_id         String
+  formType             FormType                 @relation(fields: [form_type_id], references: [id], onDelete: Cascade)
+  order                Int
+  col_span              Int                      @default(12)
+  type                 FieldType
+  validation_type_code FormFieldValidationType?
+  label                String
+  label_en             String?
+  code                 String
+  required             Boolean                  @default(false)
+  helper_message        String?
+  helper_message_en     String?
+  data                 Json?
+}
+
+model FormSubmission {
+  id           String   @id @default(cuid())
+  form_type_id String
+  formType     FormType @relation(fields: [form_type_id], references: [id], onDelete: SetDefault)
+  data         Json
+  read         Boolean  @default(false)
+  submitted_at DateTime @default(now())
+}
+
+///
+/// Calculator
+///
+
+model CalculatorType {
+  id          String            @id @default(cuid())
+  name        String
+  description String?
+  fields      CalculatorField[]
+  details     CalculatorDetailField[]
+}
+
+model CalculatorField {
+  id                 String         @id @default(cuid())
+  calculator_type_id String
+  calculatorType     CalculatorType @relation(fields: [calculator_type_id], references: [id], onDelete: Cascade)
+  order              Int
+  col_span           Int            @default(12)
+  type               CalculatorFieldType
+  label              String
+  code               String
+  required           Boolean        @default(false)
+  helper_message      String?
+  data               Json?
+}
+
+model CalculatorDetailField {
+  id                 String         @id @default(cuid())
+  calculator_type_id String
+  calculatorType     CalculatorType @relation(fields: [calculator_type_id], references: [id], onDelete: Cascade)
+  order              Int
+  label              String
+  formula            String
+  type               CalculatorResultType
+  unit               String?
+  primary            Boolean @default(false)
+}
+
+///
+/// User Roles & Permissions
+///
+
+model RoleGroup {
+  id    Int    @id @default(autoincrement())
+  name  String
+  roles Role[]
+}
+
+model Role {
+  id                  Int          @id @default(autoincrement())
+  name                String
+  role_group_id       Int
+  roleGroup           RoleGroup    @relation(fields: [role_group_id], references: [id])
+  // Many-to-many relation with Permission
+  permissions         Permission[] @relation("RolePermissions")
+  // Users that have this Role
+  users               User[]
+  // Access control for forms: which form types are accessible to this role.
+  accessibleFormTypes       FormType[]        @relation("FormTypeAccess")
+  accessibleMenuItem        MenuItem[]        @relation("MenuItemAccess")
+  accessibleArticleCategory ArticleCategory[] @relation("ArticleCategoryAccess")
+}
+
+model Permission {
+  // id          Int     @id @default(autoincrement())
+  code        String     @id @unique
+  name        String
+  description String?
+  // Many-to-many relation with Role
+  roles       Role[]  @relation("RolePermissions")
+}
+
+///
+/// Article
+///
+
+model ArticleCategory {
+  id           String                       @id @default(cuid())
+  created_at   DateTime                     @default(now())
+  updated_at   DateTime                     @updatedAt
+  translations ArticleCategoryTranslation[]
+  articles     Article[]                    @relation("ArticleToCategories")
+  allowedRoles Role[]                       @relation("ArticleCategoryAccess")
+}
+
+model ArticleCategoryTranslation {
+  id                  String          @id @default(cuid())
+  article_category_id String
+  language            Language
+  name                String
+  description         String?
+  articleCategory     ArticleCategory @relation(fields: [article_category_id], references: [id], onDelete: Cascade)
+}
+
+model Article {
+  id                  String               @id @default(cuid())
+  created_at          DateTime             @default(now())
+  updated_at          DateTime             @updatedAt
+  categories          ArticleCategory[]    @relation("ArticleToCategories")
+  translations        ArticleTranslation[]
+} 
+
+model ArticleTranslation {
+  id         String   @id @default(cuid())
+  article_id String
+  language   Language
+  title      String
+  slug       String
+  content    String?  @db.Text
+  excerpt    String?
+  thumbnail  String?
+  status_code   String        @default("PUBLISHED")
+  article    Article  @relation(fields: [article_id], references: [id], onDelete: Cascade)
+
+  // Verification & Draft/Publish
+  live_for_id   String?             @unique
+  liveFor       ArticleTranslation? @relation("ArticleTranslationLiveDraft", fields: [live_for_id], references: [id], onDelete: SetNull)
+  draft         ArticleTranslation? @relation("ArticleTranslationLiveDraft")
+
+  @@unique([language, slug, status_code])
+}
+
+///
+/// Misc
+///
+
+model CompanyProfile {
+  id        Int     @id @default(1) // Fixed ID of 1
+  name      String?
+  slogan    String?
+  address   String?
+  email     String?
+  phone     String?
+  facebook  String?
+  instagram String?
+  twitter   String?
+  youtube   String?
+  whatsapp  String?
+  linkedin  String?
+  logo      String?
+  subsidiaries Json[]
+
+  @@unique([id]) // Ensure only one record exists
+  @@map("company_profile")
+}
+
+model WebsiteVisit {
+  id        Int      @id @default(autoincrement())
+  ip_address String
+  user_agent String?
+  visited_at DateTime @default(now())
+}
+
+model AnalyticsEvent {
+  id           String     @id @default(cuid())
+  type         String     // 'pageview', 'cta_click', 'engagement'
+  name         String?
+  source       String
+  target       String?
+  timestamp    DateTime   @default(now())
+}
+
+model Collection {
+  name      String
+  code      String  @id @unique
+  data      Json[]  @default([])
+}

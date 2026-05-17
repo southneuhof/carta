@@ -18,10 +18,16 @@
         "../is-data-model/src/*"
       ],
       "@southneuhof/apostle": [
-        "../apostle/src/index.ts"
+        "../apostle/dist/index.d.ts"
       ],
       "@southneuhof/apostle/*": [
-        "../apostle/src/*"
+        "../apostle/dist/*"
+      ],
+      "@southneuhof/utilities": [
+        "../utilities/src/index.ts"
+      ],
+      "@southneuhof/utilities/*": [
+        "../utilities/src/*"
       ]
     }
   },

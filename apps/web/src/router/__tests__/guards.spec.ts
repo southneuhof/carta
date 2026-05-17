@@ -4,7 +4,7 @@ const tokenState = { token: '' }
 const saveRedirectSpy = vi.fn()
 const getDefaultRouteSpy = vi.fn(() => ({ name: 'dashboard' }))
 
-vi.mock('@southneuhof/is-vue-framework/utils/storage', () => ({
+vi.mock('@southneuhof/utilities/storage', () => ({
   storage: {
     cookie: {
       get: () => tokenState.token,

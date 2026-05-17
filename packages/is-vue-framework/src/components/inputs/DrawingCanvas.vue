@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { dataURItoBlob } from '@southneuhof/is-vue-framework/utils/object'
+import { dataURItoBlob } from '@southneuhof/utilities/object'
 import { ref, onMounted, type PropType } from 'vue'
 import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
 import BaseInput from './BaseInput.vue'

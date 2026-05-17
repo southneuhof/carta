@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import services from '@/utils/services'
 import { useColorPreference } from '@/stores/colorpreference'
-import { storage } from '@southneuhof/is-vue-framework/utils/storage'
+import { storage } from '@southneuhof/utilities/storage'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { debounce } from '@southneuhof/is-vue-framework/utils/object'
+import { debounce } from '@southneuhof/utilities/object'
 import { ref, watch } from 'vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 

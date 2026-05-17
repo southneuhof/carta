@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { titleCase } from '@southneuhof/is-vue-framework/utils/string'
+import { titleCase } from '@southneuhof/utilities/string'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 
 const props = defineProps({

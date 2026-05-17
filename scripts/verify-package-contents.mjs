@@ -25,6 +25,17 @@ const packages = [
     ],
   },
   {
+    name: '@southneuhof/utilities',
+    root: 'packages/utilities',
+    requiredFiles: [
+      'dist/index.js',
+      'dist/index.js.map',
+      'dist/index.d.ts',
+      'dist/index.d.ts.map',
+      'src/index.ts',
+    ],
+  },
+  {
     name: '@southneuhof/is-vue-framework',
     root: 'packages/is-vue-framework',
     requiredFiles: [
@@ -37,6 +48,21 @@ const packages = [
       'dist/styles/framework.css',
       'src/index.ts',
       'src/components/composites/CRUDComposite.vue',
+    ],
+  },
+  {
+    name: '@southneuhof/landing-sveltekit-framework',
+    root: 'packages/landing-sveltekit-framework',
+    requiredFiles: [
+      'dist/index.js',
+      'dist/index.d.ts',
+      'dist/components/LandingPage.svelte',
+      'dist/components/SectionRenderer.svelte',
+      'dist/components/SectionWrapper.svelte',
+      'dist/components/IntersectionObserver.svelte',
+      'dist/styles/framework.css',
+      'src/index.ts',
+      'src/components/LandingPage.svelte',
     ],
   },
 ]

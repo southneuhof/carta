@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import { useScreenStore } from '@/stores/screen'
-import { debounce } from '@southneuhof/is-vue-framework/utils/object'
+import { debounce } from '@southneuhof/utilities/object'
 import { onMounted, onBeforeUnmount, onErrorCaptured, ref } from 'vue'
 import { useColorPreference } from './stores/colorpreference'
 import { Toaster } from 'vue-sonner'

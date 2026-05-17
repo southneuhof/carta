@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, useSlots, watch } from 'vue'
 import type { PropType } from 'vue'
-import { parse } from '@southneuhof/is-vue-framework/utils/parse'
+import { parse } from '@southneuhof/utilities/parse'
 import Pagination from '@southneuhof/is-vue-framework/components/utils/Pagination.vue'
 import { defaultTableGetData, tableFieldTypes } from '@southneuhof/is-vue-framework/behaviors/table'
 import { defaultTableConfig } from '@southneuhof/is-vue-framework/adapters/defaults'

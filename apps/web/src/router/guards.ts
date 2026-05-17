@@ -1,5 +1,5 @@
 import app from '@/configs/app'
-import { storage } from '@southneuhof/is-vue-framework/utils/storage'
+import { storage } from '@southneuhof/utilities/storage'
 import { savePostLoginRedirect } from '@/utils/post-login-redirect'
 import { getDefaultAuthenticatedRouteLocation } from './navigation'
 import type { NavigationGuard } from 'vue-router'

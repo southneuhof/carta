@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import type { PropType } from 'vue'
 import IframePreviewDialog from '../composites/IframePreviewDialog.vue'
-import { getFileExtension, isPreviewableExtension } from '@southneuhof/is-vue-framework/utils/object'
+import { getFileExtension, isPreviewableExtension } from '@southneuhof/utilities/object'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import Tooltip from '@southneuhof/is-vue-framework/components/base/Tooltip.vue'
 

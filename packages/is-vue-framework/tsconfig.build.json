@@ -28,6 +28,12 @@
       ],
       "@southneuhof/apostle/*": [
         "../apostle/dist/*"
+      ],
+      "@southneuhof/utilities": [
+        "../utilities/dist/index.d.ts"
+      ],
+      "@southneuhof/utilities/*": [
+        "../utilities/dist/*"
       ]
     }
   },

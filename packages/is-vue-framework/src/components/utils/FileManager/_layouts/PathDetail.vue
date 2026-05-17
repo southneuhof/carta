@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { parse } from '@southneuhof/is-vue-framework/utils/parse'
+import { parse } from '@southneuhof/utilities/parse'
 import { ref, watch } from 'vue'
 import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
 import { useDropZone } from '@vueuse/core'

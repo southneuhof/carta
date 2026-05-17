@@ -1,0 +1,51 @@
+{
+  "name": "@southneuhof/utilities",
+  "private": false,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Shared frontend utility helpers for South Neuhof applications and framework packages.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/southneuhof/utilities.git"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "!dist/**/*.tsbuildinfo",
+    "!src/**/__tests__/**",
+    "!src/**/*.spec.*",
+    "!src/**/*.test.*",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^1.13.1"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.9"
+  },
+  "scripts": {
+    "build": "pnpm clean && pnpm build:js && pnpm clean:build-info",
+    "clean": "node ../../scripts/clean-package.mjs dist",
+    "clean:build-info": "node ../../scripts/clean-package.mjs dist/tsconfig.build.tsbuildinfo",
+    "build:js": "tsc -p tsconfig.build.json",
+    "type-check": "tsc --noEmit -p tsconfig.build.json",
+    "test": "vitest run --environment jsdom"
+  }
+}

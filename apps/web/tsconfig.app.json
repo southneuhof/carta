@@ -8,12 +8,14 @@
     "../../packages/data-model/src/**/*",
     "../../packages/sdk/src/**/*",
     "../../packages/is-vue-framework/src/**/*",
+    "../../packages/utilities/src/**/*",
     "../../packages/apostle/src/**/*"
   ],
   "exclude": [
     "src/**/__tests__/*",
     "../../packages/sdk/src/__tests__/*",
     "../../packages/is-vue-framework/src/**/__tests__/*",
+    "../../packages/utilities/src/**/__tests__/*",
     "../../packages/apostle/src/**/__tests__/*"
   ],
   "compilerOptions": {
@@ -46,6 +48,12 @@
       ],
       "@southneuhof/is-vue-framework/*": [
         "../../packages/is-vue-framework/src/*"
+      ],
+      "@southneuhof/utilities": [
+        "../../packages/utilities/src/index.ts"
+      ],
+      "@southneuhof/utilities/*": [
+        "../../packages/utilities/src/*"
       ],
       "@southneuhof/apostle": [
         "../../packages/apostle/src/index.ts"

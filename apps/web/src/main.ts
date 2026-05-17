@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { configureParser, parse } from '@southneuhof/is-vue-framework/utils/parse'
+import { configureParser, parse } from '@southneuhof/utilities/parse'
 import { configureFrameworkBehaviors } from '@southneuhof/is-vue-framework/adapters/behaviors'
 import { frameworkBehaviors } from './framework/behaviors'
 import { dictionary } from '@/configs/dictionary'

@@ -3,7 +3,7 @@ import { ref, onMounted, type PropType } from 'vue'
 import TreeItem from './TreeItem.vue'
 import { defaultTableConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
 import { defaultTableGetData } from '@southneuhof/is-vue-framework/behaviors/table'
-import { parse } from '@southneuhof/is-vue-framework/utils/parse'
+import { parse } from '@southneuhof/utilities/parse'
 
 const props = defineProps({
   fields: { type: Array as PropType<string[]>, required: true },

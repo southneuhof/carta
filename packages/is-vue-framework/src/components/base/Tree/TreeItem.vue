@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import type { PropType } from 'vue'
 import { defaultTableGetData, tableFieldTypes } from '@southneuhof/is-vue-framework/behaviors/table'
 import { defaultTableConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
-import { parse } from '@southneuhof/is-vue-framework/utils/parse'
+import { parse } from '@southneuhof/utilities/parse'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 

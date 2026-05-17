@@ -1,5 +1,5 @@
 import services from '@/utils/services'
-import { parse } from '@southneuhof/is-vue-framework/utils/parse'
+import { parse } from '@southneuhof/utilities/parse'
 import * as XLSX from 'xlsx'
 
 export async function onDelete(endpoint: string, id: string | number) {

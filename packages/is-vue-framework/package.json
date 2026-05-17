@@ -33,10 +33,6 @@
       "import": "./dist/adapters/behaviors.js"
     },
     "./components/*": "./dist/components/*",
-    "./utils/*": {
-      "types": "./dist/utils/*.d.ts",
-      "import": "./dist/utils/*.js"
-    },
     "./renderers/*": {
       "types": "./dist/renderers/*.d.ts",
       "import": "./dist/renderers/*.js"
@@ -74,6 +70,7 @@
   },
   "dependencies": {
     "@southneuhof/apostle": "workspace:^",
+    "@southneuhof/utilities": "workspace:^",
     "clsx": "^2.1.1",
     "tailwind-merge": "^1.13.1",
     "xlsx": "^0.18.5",

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { defaultDetailGetData, defaultOnDataLoaded, detailFieldTypes } from '@southneuhof/is-vue-framework/behaviors/detail'
-import { parse } from '@southneuhof/is-vue-framework/utils/parse'
+import { parse } from '@southneuhof/utilities/parse'
 import { computed, onMounted, ref, type PropType } from 'vue'
 import { componentTypeMap, parsedTypes } from './common/properties'
 import { defaultDetailConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
