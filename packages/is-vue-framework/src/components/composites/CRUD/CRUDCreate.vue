@@ -34,7 +34,7 @@ const createFormConfig: CreateConfig = buildFormConfig(props.config, 'create', {
         <Button
           @click="() => ($route.query['redirected'] == 'true' ? $router.back() : $router.push({ query: { ...$route.query, [`${config.name}_view`]: 'list' } }))"
           kind="icon" variant="text"
-          size="square"
+
           class="max-w-fit"
         >
           <template #icon>

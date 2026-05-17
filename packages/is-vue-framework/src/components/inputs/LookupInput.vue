@@ -338,7 +338,7 @@ function handleClick(data: Record<string, any>) {
               <SearchBox v-model="params.search" class="w-full" />
               <Popover v-if="filterConfig?.fields?.length" :ignore="['#form-lookup']">
                 <template #trigger>
-                  <Button size="square">
+                  <Button>
                     <Icon name="filter" />
                   </Button>
                 </template>
@@ -416,7 +416,7 @@ function handleClick(data: Record<string, any>) {
       </Dialog>
       <DialogForm v-if="inlineAddFormConfig" v-bind="(inlineAddFormConfig as any)">
         <template #trigger>
-          <Button size="square" kind="icon" variant="standard"><Icon name="add"></Icon></Button>
+          <Button kind="icon" variant="standard"><Icon name="add"></Icon></Button>
         </template>
       </DialogForm>
     </div>
@@ -431,7 +431,7 @@ function handleClick(data: Record<string, any>) {
           "
         >
           <template #trigger>
-            <Button variant="tonal" size="square" color="error"><Icon name="delete-bin"></Icon></Button>
+            <Button variant="tonal" color="error"><Icon name="delete-bin"></Icon></Button>
           </template>
         </ConfirmationDialog>
       </template>

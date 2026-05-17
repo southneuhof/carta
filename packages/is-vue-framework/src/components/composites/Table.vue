@@ -314,7 +314,7 @@ onBeforeUnmount(() => {
               <tr class="group relative" :class="{'hover:bg-primary/[8%]': hoverEffect, 'bg-surface-container-highest/[12%]': props.striped && index % 2 === 1}" @click="() => onRowClick(item)">
                 <td v-if="$slots['list-rowActions'] && tableData.rawData[index]" class="p-3">
                   <div class="flex flex-row items-center gap-4">
-                    <Button v-if="$slots['list-rowExpand']" kind="icon" variant="standard" size="square" @click="() => rowExpandActiveIndex === index ? rowExpandActiveIndex = null : rowExpandActiveIndex = index"><Icon :name="rowExpandActiveIndex == index ? 'arrow-down-s' : 'arrow-up-s'"/></Button>
+                    <Button v-if="$slots['list-rowExpand']" kind="icon" variant="standard" @click="() => rowExpandActiveIndex === index ? rowExpandActiveIndex = null : rowExpandActiveIndex = index"><Icon :name="rowExpandActiveIndex == index ? 'arrow-down-s' : 'arrow-up-s'"/></Button>
                     <slot name="list-rowActions" v-bind="{data: tableData.rawData[index], index}"/>
                   </div>
                 </td>
@@ -343,7 +343,7 @@ onBeforeUnmount(() => {
                       <Button
                         v-if="$slots['list-rowExpand']"
                         kind="icon" variant="standard"
-                        size="square"
+
                         @click="() => (rowExpandActiveIndex === index ? (rowExpandActiveIndex = null) : (rowExpandActiveIndex = index))"
                         ><Icon :name="rowExpandActiveIndex == index ? 'arrow-down-s' : 'arrow-up-s'"
                       /></Button>

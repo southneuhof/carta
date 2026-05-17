@@ -31,7 +31,7 @@ const updateFormConfig: UpdateConfig = buildFormConfig(props.config, 'update', {
         <Button
           @click="() => ($route.query['redirected'] == 'true' ? $router.back() : $router.push({ query: { ...$route.query, [`${config.name}_view`]: 'list' } }))"
           kind="icon"
-          size="square"
+
           variant="text"
           class="max-w-fit"
         >

@@ -122,7 +122,7 @@ function deleteFile(path: string) {
               <div class="flex flex-row items-center gap-1">
                 <p class="text-xl font-semibold">{{ modelValue?.path.split('/').pop() }}</p>
                 <Button
-                  size="square"
+
                   kind="icon" variant="standard"
                   class="!p-1"
                   @click="

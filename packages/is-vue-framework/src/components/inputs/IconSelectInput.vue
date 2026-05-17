@@ -32,7 +32,7 @@ const iconList = [
 <template>
   <BaseInput v-bind="props">
     <div class="grid w-fit grid-cols-4 gap-2">
-      <Button v-for="icon in iconList" kind="icon" :aria-label="icon" @click="() => (modelValue = icon)" :variant="modelValue === icon ? 'tonal' : 'standard'" size="square" class="max-w-fit"
+      <Button v-for="icon in iconList" kind="icon" :aria-label="icon" @click="() => (modelValue = icon)" :variant="modelValue === icon ? 'tonal' : 'standard'" class="max-w-fit"
         ><i :class="icon" class="text-xl text-on-surface"
       /></Button>
     </div>

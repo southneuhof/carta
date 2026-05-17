@@ -1,4 +1,5 @@
 import { auth } from '$lib/auth';
+import { env } from '$env/dynamic/private';
 import { isTrustedOrigin } from '$lib/server/trusted-origins';
 import prisma from './prisma';
 import {
@@ -11,6 +12,11 @@ import {
 } from '@southneuhof/landing-sveltekit-framework/auth';
 
 export { isProtectedRoute };
+
+export function isBypassAllPermissionsEnabled(): boolean {
+  const value = env.BYPASS_ALL_PERMISSIONS?.trim().toLowerCase();
+  return value === 'true' || value === '1' || value === 'yes' || value === 'on';
+}
 
 export function handleCorsPreflightRequest(request: Request): Response {
   return frameworkHandleCorsPreflightRequest(request, isTrustedOrigin);
@@ -42,7 +48,7 @@ export async function hydrateRequestAuth(event: { request: Request; locals: App.
   const authSession = await auth.api.getSession({ headers: event.request.headers });
   event.locals.auth = authSession;
   event.locals.user = await findUserById(authSession?.user?.id);
-  event.locals.isPrivilegedRole = isPrivilegedUser(event.locals.user);
+  event.locals.isPrivilegedRole = isPrivilegedUser(event.locals.user) || isBypassAllPermissionsEnabled();
 }
 
 export function requireAuthenticatedUser(locals: App.Locals): NonNullable<App.Locals['user']> {
@@ -50,9 +56,11 @@ export function requireAuthenticatedUser(locals: App.Locals): NonNullable<App.Lo
 }
 
 export function hasPermission(locals: App.Locals, permission?: string): boolean {
+  if (isBypassAllPermissionsEnabled()) return true;
   return frameworkHasPermission(locals as any, permission);
 }
 
 export function requirePermission(locals: App.Locals, permission?: string): void {
+  if (isBypassAllPermissionsEnabled()) return;
   frameworkRequirePermission(locals as any, permission);
 }

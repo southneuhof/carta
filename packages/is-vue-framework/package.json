@@ -32,7 +32,7 @@
       "types": "./dist/adapters/behaviors.d.ts",
       "import": "./dist/adapters/behaviors.js"
     },
-    "./components/*": "./dist/components/*",
+    "./components/*": "./src/components/*",
     "./renderers/*": {
       "types": "./dist/renderers/*.d.ts",
       "import": "./dist/renderers/*.js"

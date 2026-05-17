@@ -58,7 +58,7 @@ function setOpen(v: boolean) {
         <div class="min-w-0 flex-1">
           <slot name="preview" v-bind="{ isOpen, setOpen }"></slot>
         </div>
-        <Button @click.stop="toggle" size="square" kind="icon" variant="standard">
+        <Button @click.stop="toggle" kind="icon" variant="standard">
           <Icon :name="isOpen ? 'arrow-up-s' : 'arrow-down-s'"></Icon>
         </Button>
       </div>

@@ -4,7 +4,7 @@ import { sequence } from '@sveltejs/kit/hooks';
 import { building } from '$app/environment';
 import { auth } from '$lib/auth';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
-import { addCorsHeaders, handleCorsPreflightRequest, hydrateRequestAuth, isProtectedRoute, requireAuthenticatedUser } from '$lib/utils/routing';
+import { addCorsHeaders, handleCorsPreflightRequest, hydrateRequestAuth, isBypassAllPermissionsEnabled, isProtectedRoute, requireAuthenticatedUser } from '$lib/utils/routing';
 
 const handleParaglide: Handle = ({ event, resolve }) => paraglideMiddleware(event.request, ({ request, locale }) => {
 	event.request = request;
@@ -34,7 +34,7 @@ export const customHandle: Handle = async ({ resolve, event }) => {
 
   if (url.pathname.startsWith('/api')) {
     // Check authentication for protected routes
-    if (isProtectedRoute(url.pathname)) {
+    if (isProtectedRoute(url.pathname) && !isBypassAllPermissionsEnabled()) {
       try {
         requireAuthenticatedUser(event.locals)
       } catch (err) {
@@ -60,13 +60,6 @@ const handleBetterAuth: Handle = async ({ event, resolve }) => {
     resolve,
     building,
   });
-
-  if (event.url.pathname === '/api/auth/sign-in/email' && response.status === 401) {
-    return addCorsHeaders(
-      json({ message: 'Invalid credentials' }, { status: 403 }),
-      event.request,
-    );
-  }
 
   if (event.url.pathname.startsWith('/api/auth')) {
     return addCorsHeaders(response, event.request);

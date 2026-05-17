@@ -7,6 +7,16 @@ defineOptions({ inheritAttrs: false })
 
 type CardVariant = 'filled' | 'elevated' | 'outlined'
 type CardColorRole =
+  | 'primary'
+  | 'secondary'
+  | 'tertiary'
+  | 'info'
+  | 'infoContainer'
+  | 'warning'
+  | 'warningContainer'
+  | 'success'
+  | 'successContainer'
+  | 'error'
   | 'surface'
   | 'surfaceContainerLowest'
   | 'surfaceContainerLow'
@@ -43,6 +53,16 @@ const resolvedRole = computed(
 )
 
 const backgroundClassMap: Record<CardColorRole, string> = {
+  primary: 'bg-primary',
+  secondary: 'bg-secondary',
+  tertiary: 'bg-tertiary',
+  info: 'bg-info',
+  infoContainer: 'bg-info-container',
+  warning: 'bg-warning',
+  warningContainer: 'bg-warning-container',
+  success: 'bg-success',
+  successContainer: 'bg-success-container',
+  error: 'bg-error',
   surface: 'bg-surface',
   surfaceContainerLowest: 'bg-surface-container-lowest',
   surfaceContainerLow: 'bg-surface-container-low',
@@ -56,6 +76,16 @@ const backgroundClassMap: Record<CardColorRole, string> = {
 }
 
 const foregroundClassMap: Record<CardColorRole, string> = {
+  primary: 'text-on-primary',
+  secondary: 'text-on-secondary',
+  tertiary: 'text-on-tertiary',
+  info: 'text-on-info',
+  infoContainer: 'text-on-info-container',
+  warning: 'text-on-warning',
+  warningContainer: 'text-on-warning-container',
+  success: 'text-on-success',
+  successContainer: 'text-on-success-container',
+  error: 'text-on-error',
   surface: 'text-on-surface',
   surfaceContainerLowest: 'text-on-surface',
   surfaceContainerLow: 'text-on-surface',

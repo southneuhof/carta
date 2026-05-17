@@ -1,0 +1,60 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": [
+    "env.d.ts",
+    "src/**/*",
+    "src/**/*.vue",
+    "../../packages/data-model/src/**/*"
+  ],
+  "exclude": [
+    "src/**/__tests__/*"
+  ],
+  "compilerOptions": {
+    "composite": true,
+    "baseUrl": ".",
+    "moduleSuffixes": [
+      ".web",
+      ""
+    ],
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "vue3-google-map": [
+        "./node_modules/vue3-google-map/dist/types/index.d.ts"
+      ],
+      "@client/data-model/*": [
+        "../../packages/data-model/src/*"
+      ],
+      "@client/data-model/models/*": [
+        "../../packages/data-model/src/models/*"
+      ],
+      "@southneuhof/utilities/*": [
+        "../../packages/utilities/src/*"
+      ],
+      "@southneuhof/is-vue-framework/components/*": [
+        "../../packages/is-vue-framework/src/components/*"
+      ],
+      "@southneuhof/is-vue-framework/adapters/*": [
+        "../../packages/is-vue-framework/src/adapters/*"
+      ],
+      "@southneuhof/is-vue-framework/behaviors/*": [
+        "../../packages/is-vue-framework/src/behaviors/*"
+      ],
+      "@southneuhof/is-vue-framework/services/*": [
+        "../../packages/is-vue-framework/src/services/*"
+      ]
+    },
+    "module": "esnext",
+    "target": "es2017"
+  },
+  "vueCompilerOptions": {
+    "strictTemplates": true,
+    "checkUnknownProps": false,
+    "checkUnknownEvents": false,
+    "checkUnknownDirectives": false,
+    "checkUnknownComponents": false,
+    "checkUnknownSlots": false,
+    "checkUnknownAttributes": false
+  }
+}

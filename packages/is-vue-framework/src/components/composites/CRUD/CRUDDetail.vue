@@ -228,7 +228,7 @@ const { handlePrint } = useVueToPrint({
         <Button
           @click="() => ($route.query['redirected'] == 'true' ? $router.back() : $router.push({ query: { ...$route.query, [`${config.name}_view`]: 'list' } }))"
           kind="icon" variant="standard"
-          size="square"
+
           class="max-w-fit"
         >
           <template #icon>

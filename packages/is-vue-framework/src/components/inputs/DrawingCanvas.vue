@@ -141,7 +141,7 @@ const clearCanvas = () => {
         <div class="flex flex-row items-center gap-2">
           <Tooltip>
             <template #trigger>
-              <Button size="square" :variant="currentDrawingMode === 'draw' ? 'filled' : 'outlined'" color="primary" @click="setToDraw">
+              <Button :variant="currentDrawingMode === 'draw' ? 'filled' : 'outlined'" color="primary" @click="setToDraw">
                 <Icon name="edit" />
               </Button>
             </template>
@@ -149,7 +149,7 @@ const clearCanvas = () => {
           </Tooltip>
           <Tooltip>
             <template #trigger>
-              <Button size="square" :variant="currentDrawingMode === 'erase' ? 'filled' : 'outlined'" color="warning" @click="setToErase">
+              <Button :variant="currentDrawingMode === 'erase' ? 'filled' : 'outlined'" color="warning" @click="setToErase">
                 <Icon name="eraser" />
               </Button>
             </template>
@@ -157,7 +157,7 @@ const clearCanvas = () => {
           </Tooltip>
           <Tooltip>
             <template #trigger>
-              <Button size="square" color="error" @click="clearCanvas">
+              <Button color="error" @click="clearCanvas">
                 <Icon name="close-circle" />
               </Button>
             </template>
@@ -166,7 +166,7 @@ const clearCanvas = () => {
         </div>
         <Tooltip>
           <template #trigger>
-            <Button size="square" color="info" @click="saveImage">
+            <Button color="info" @click="saveImage">
               <Icon name="save" />
             </Button>
           </template>

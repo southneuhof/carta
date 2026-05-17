@@ -108,7 +108,7 @@ onMounted(() => {
                     <template #trigger>
                       <Popover v-if="config.view?.list?.filter?.fields?.length" :ignore="['#form-lookup']">
                         <template #trigger>
-                          <Button kind="icon" size="square">
+                          <Button kind="icon">
                             <template #icon>
                               <Icon name="filter" />
                             </template>

@@ -1,12 +1,10 @@
 <script lang="ts">
   import { browser } from "$app/environment";
   import SelectInput from "$lib/app/components/input/SelectInput.svelte";
-  import Button from "$lib/app/components/ui/Button.svelte";
   import { Image } from "@southneuhof/landing-sveltekit-framework/client";
   import { getLocale } from "$lib/paraglide/runtime";
   import { onDestroy, onMount } from "svelte";
-  import { blur, fade, fly } from "svelte/transition";
-  import { createEventDispatcher } from "svelte";
+  import { fade } from "svelte/transition";
   import { m } from "$lib/paraglide/messages";
 
   const { section } = $props();
@@ -110,7 +108,7 @@
 
   const categoryFilterNameMap: Record<string, string> = $derived.by(() => {
     return Object.fromEntries(
-      section.data.filter.category?.map((item: any) => [
+      section.data.filter?.category?.map((item: any) => [
         item.code,
         locale === "id" ? item.name_id : item.name_en,
       ]) || [],
@@ -119,7 +117,7 @@
 
   const locationFilterNameMap: Record<string, string> = $derived.by(() => {
     return Object.fromEntries(
-      section.data.filter.location?.map((item: any) => [
+      section.data.filter?.location?.map((item: any) => [
         item.code,
         item.name,
       ]) || [],
@@ -154,7 +152,6 @@
 </script>
 
 <div class="h-screen flex items-end bg-black/80 text-white w-full relative">
-  <!-- Preload adjacent images -->
   {#each section.data.banner as banner, i}
     {#if preloadIndexes.includes(i) && banner?.media}
       {#if !banner?.media_type || banner?.media_type === "image"}
@@ -260,7 +257,7 @@
                 name_id: "Semua Kategori",
                 name_en: "All Categories",
               },
-              ...(section.data.filter.category || []),
+              ...(section.data.filter?.category || []),
             ]}
             bind:value={categoryActiveCode}
             view="name_{getLocale()}"
@@ -272,7 +269,7 @@
           <SelectInput
             data={[
               { code: "all", name: m.all_location() },
-              ...(section.data.filter.location || []),
+              ...(section.data.filter?.location || []),
             ]}
             bind:value={locationActiveCode}
             view="name"

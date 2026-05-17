@@ -57,7 +57,7 @@ setInterval(() => {
       v-if="!props.disableControls && (props.images?.[currentIndex]?.thumbnail || props.images?.[currentIndex]?.url)"
       class="absolute flex h-full w-full flex-row items-center justify-center gap-2 rounded-xl bg-black/[12%] text-on-surface opacity-0 transition-opacity duration-100 hover:opacity-100"
     >
-      <Button @click="() => openDialog(currentIndex)" color="info" size="square"><Icon name="eye"></Icon></Button>
+      <Button @click="() => openDialog(currentIndex)" color="info"><Icon name="eye"></Icon></Button>
       <slot name="actions" />
     </div>
     <div
@@ -99,9 +99,9 @@ setInterval(() => {
                 </button>
                 <img class="h-full w-full rounded-xl object-scale-down" :src="props.images?.[currentIndex].url" />
                 <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                  <Button size="square" :disabled="currentIndex === 0" @click="prevImage"><Icon name="arrow-left-s"></Icon></Button>
+                  <Button :disabled="currentIndex === 0" @click="prevImage"><Icon name="arrow-left-s"></Icon></Button>
                   <span class="text-white">{{ currentIndex + 1 }} / {{ props.images.length }}</span>
-                  <Button size="square" :disabled="currentIndex === props.images.length - 1" @click="nextImage"><Icon name="arrow-right-s"></Icon></Button>
+                  <Button :disabled="currentIndex === props.images.length - 1" @click="nextImage"><Icon name="arrow-right-s"></Icon></Button>
                 </div>
               </div>
             </DialogPanel>

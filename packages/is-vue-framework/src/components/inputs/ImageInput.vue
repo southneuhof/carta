@@ -149,7 +149,7 @@ function handleChange(event: any) {
                 <div class="w-fit cursor-move">
                   <ImagePreview v-if="element" :url="element.url" :thumbnail="element.tumbnail_url">
                     <template #actions>
-                      <Button size="square" color="error" type="button" @click="removeItem(index)"><Icon name="delete-bin"></Icon></Button>
+                      <Button color="error" type="button" @click="removeItem(index)"><Icon name="delete-bin"></Icon></Button>
                     </template>
                   </ImagePreview>
                 </div>

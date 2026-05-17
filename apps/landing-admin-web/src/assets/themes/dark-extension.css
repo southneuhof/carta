@@ -1,0 +1,14 @@
+.dark {
+  --md-sys-color-warning: 255 203 150;
+  --md-sys-color-on-warning: 88 47 0;
+  --md-sys-color-warning-container: 247 160 60;
+  --md-sys-color-on-warning-container: 33 14 0;
+  --md-sys-color-success: 125 217 161;
+  --md-sys-color-on-success: 0 57 31;
+  --md-sys-color-success-container: 34 132 84;
+  --md-sys-color-on-success-container: 255 255 255;
+  --md-sys-color-info: 169 199 255;
+  --md-sys-color-on-info: 0 48 98;
+  --md-sys-color-info-container: 0 83 164;
+  --md-sys-color-on-info-container: 246 247 255;
+}

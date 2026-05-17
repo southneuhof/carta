@@ -5,6 +5,9 @@
   "packageManager": "pnpm@10.8.0",
   "scripts": {
     "dev": "pnpm --filter @southneuhof/framework-web dev",
+    "landing:dev": "sh -c 'pnpm run landing:dev:server & pnpm run landing:dev:admin & wait'",
+    "landing:dev:server": "pnpm --dir apps/landing-hkr dev -- --port 5173 --strictPort",
+    "landing:dev:admin": "pnpm --dir apps/landing-admin-web dev -- --port 5174 --strictPort",
     "dev:mobile": "pnpm --filter base-mobile start",
     "dev:mobile:legacy": "pnpm --filter base-mobile start",
     "build": "turbo run build",

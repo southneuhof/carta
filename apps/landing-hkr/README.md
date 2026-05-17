@@ -15,6 +15,9 @@ SvelteKit + Vite app backed by Postgres via Prisma.
    - `DATABASE_URL` (Postgres connection string)
    - `PUBLIC_RECAPTCHA_SITEKEY`
    - `RECAPTCHA_SECRETKEY`
+   - `BETTER_AUTH_URL` (canonical URL for this app)
+   - `BETTER_AUTH_TRUSTED_ORIGINS` (comma-separated origins allowed to call `/api/auth`, e.g. admin frontend URL)
+   - `BYPASS_ALL_PERMISSIONS` (optional; when `true`, skips API authentication and permission/role-scope checks)
    - For local dev, you can use the Google test keys listed in `.env.example`.
 3. Install dependencies:
    - `npm install` (or `npm ci` if you want lockfile-reproducible installs)
@@ -29,6 +32,8 @@ SvelteKit + Vite app backed by Postgres via Prisma.
 ## Notes
 
 - If you use `npx prisma migrate deploy` (typical for production), also run `npx prisma generate` as part of your deploy/build.
+- Auth login endpoint is `/api/auth/sign-in/email`; invalid credentials return `401`.
+- `BYPASS_ALL_PERMISSIONS=true` is intended for debugging/emergency access only; keep it `false` in normal operation.
 - Optional internal DB tunnel:
   - `npm run tunneldb` opens an SSH tunnel to a remote Postgres on local port `5433` (requires SSH access).
   - Point `DATABASE_URL` at `localhost:5433` if you use this.

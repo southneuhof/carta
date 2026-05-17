@@ -14,8 +14,8 @@ const props = defineProps({
   title: String,
   fields: { type: Array as PropType<string[]> },
   fieldsAlias: { type: Object },
-  form: { type: Object as PropType<Partial<CRUDCreateProps>>, required: true },
-  table: { type: Object as PropType<Partial<CRUDListProps>> },
+  form: { type: Object as PropType<Record<string, unknown>>, required: true },
+  table: { type: Object as PropType<Record<string, unknown>> },
   formData: { type: Object },
   draggable: { type: Boolean, default: false },
   ...commonProps,
@@ -38,7 +38,7 @@ const _console = console
           v-bind="{
             ...(form as any),
             fields: form?.fields || fields,
-            fieldsAlias: {...fieldsAlias, ...form?.fieldsAlias},
+            fieldsAlias: { ...(fieldsAlias as Record<string, unknown>), ...((form?.fieldsAlias as Record<string, unknown>) || {}) },
           }"
           :onSubmit="
             async ({ payload }) => {
@@ -59,7 +59,7 @@ const _console = console
         v-bind="({
           ...table,
           fields: table?.fields || fields,
-          fieldsAlias: {...fieldsAlias, ...table?.fieldsAlias},
+          fieldsAlias: { ...(fieldsAlias as Record<string, unknown>), ...((table?.fieldsAlias as Record<string, unknown>) || {}) },
         } as any)"
         :data="modelValue"
         :key="keyManager().value[`table-input-${id}`]"
@@ -72,7 +72,7 @@ const _console = console
               v-bind="{
                 ...(form as any),
                 fields: form?.fields || fields,
-                fieldsAlias: {...fieldsAlias, ...form?.fieldsAlias},
+                fieldsAlias: { ...(fieldsAlias as Record<string, unknown>), ...((form?.fieldsAlias as Record<string, unknown>) || {}) },
               }"
               :onSubmit="
                 async ({ payload }) => {
@@ -84,7 +84,7 @@ const _console = console
               formType="update"
             >
               <template #trigger>
-                <Button color="warning" variant="tonal" size="square"><Icon name="edit"></Icon></Button>
+                <Button color="warning" variant="tonal"><Icon name="edit"></Icon></Button>
               </template>
             </DialogForm>
             <ConfirmationDialog
@@ -96,7 +96,7 @@ const _console = console
               "
             >
               <template #trigger>
-                <Button color="error" variant="tonal" size="square"><Icon name="delete-bin"></Icon></Button>
+                <Button color="error" variant="tonal"><Icon name="delete-bin"></Icon></Button>
               </template>
             </ConfirmationDialog>
           </div>
