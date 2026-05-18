@@ -1,6 +1,6 @@
 import dataList from '@southneuhof/landing-section-schema/sections/data-list'
-import { defineAsyncComponent } from 'vue'
 import { defineSectionEditorOverlay } from './types'
+import { dataListGalleryConfigs } from './contentClassConfigs'
 
 export default defineSectionEditorOverlay(dataList, {
   group: 'Utility',
@@ -112,9 +112,8 @@ export default defineSectionEditorOverlay(dataList, {
       slots: {
         gallery: {
           label: 'Data',
-          component: defineAsyncComponent(() =>
-            import('@/views/authenticated/website/website/_layouts/detail/_layouts/_layouts/_layouts/_Custom/DataListGalleryEditor.vue')
-          ),
+          resolveConfig: ({ parentSectionData }) =>
+            dataListGalleryConfigs[parentSectionData?.meta?.type ?? 'list'] ?? dataListGalleryConfigs.list,
         },
       },
     },

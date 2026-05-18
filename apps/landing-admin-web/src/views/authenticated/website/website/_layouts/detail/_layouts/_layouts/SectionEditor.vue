@@ -72,7 +72,7 @@ const nestedParentEditor = computed<SupportedSectionSlotEditorContext | null>(()
 
 provide('sectionData', providedSectionData)
 
-const isNestedSchemaMode = computed(() => Boolean(nestedParentEditor.value?.data))
+const isNestedSchemaMode = computed(() => Boolean(nestedParentEditor.value?.schema))
 const panelState = computed(() => {
   if (isNestedSchemaMode.value) return { kind: 'nested' as const }
   return getSectionPanelState(sectionData.value)
@@ -87,7 +87,7 @@ const unsupportedViewModel = computed(() =>
 provide('sectionConfig', editorConfig)
 
 const matchedSlots = computed<MatchedSchemaSlot[]>(() => {
-  if (nestedParentEditor.value?.data && props.nestedParentMatch) {
+  if (nestedParentEditor.value?.schema && props.nestedParentMatch) {
     return matchNestedSchemaSlotsToStructure({
       parentMatch: props.nestedParentMatch,
       structure: sectionData.value.structure ?? [],
@@ -238,7 +238,7 @@ function slotLabel(match: MatchedSchemaSlot) {
                 <SectionGroupEditor
                   v-for="item in matched.items"
                   :sectionGroupID="String(item.id)"
-                  :nestedParentMatch="matched.editor.data ? matched : undefined"
+                  :nestedParentMatch="matched.editor.schema ? matched : undefined"
                   :parentSectionData="currentSectionData"
                   :key="keyManager().value[`sectionGroupOrchestrator-${item.id}`]"
                 />
@@ -252,7 +252,7 @@ function slotLabel(match: MatchedSchemaSlot) {
                   v-for="item in matched.items"
                   asChild
                   :sectionID="String(item.id)"
-                  :nestedParentMatch="matched.editor.data ? matched : undefined"
+                  :nestedParentMatch="matched.editor.schema ? matched : undefined"
                   :parentSectionDataOverride="currentSectionData"
                   :key="keyManager().value[`section-${item.id}`]"
                 />

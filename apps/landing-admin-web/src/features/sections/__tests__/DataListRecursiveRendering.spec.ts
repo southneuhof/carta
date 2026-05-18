@@ -90,15 +90,14 @@ const DraggableStub = defineComponent({
   `,
 })
 
-const AsyncComponentWrapperStub = defineComponent({
-  name: 'AsyncComponentWrapperStub',
+const GalleryEditorStub = defineComponent({
   props: {
-    objectID: { type: String, required: true },
+    galleryID: { type: String, required: true },
     sectionData: { type: Object, required: true },
     slotConfig: { type: Object, required: true },
   },
   template:
-    '<div data-testid="data-list-gallery-editor" :data-object-id="objectID" :data-section-id="sectionData.id" :data-parent-id="sectionData.parentSectionData?.id" :data-parent-type="sectionData.parentSectionData?.meta?.type"></div>',
+    '<div data-testid="gallery-editor" :data-gallery-id="galleryID" :data-section-id="sectionData.id" :data-parent-id="sectionData.parentSectionData?.id" :data-parent-type="sectionData.parentSectionData?.meta?.type" :data-fields="JSON.stringify(slotConfig?.resolveConfig?.({ slot: slotConfig, sectionData, parentSectionData: sectionData.parentSectionData, rootSectionData: sectionData.parentSectionData })?.fields ?? slotConfig?.fields ?? [])"></div>',
 })
 
 const mountSectionEditor = async () => {
@@ -122,11 +121,10 @@ const mountSectionEditor = async () => {
         SectionSettings: BaseStub,
         UnsupportedSectionPanel: BaseStub,
         ContentEditor: BaseStub,
-        GalleryEditor: BaseStub,
+        GalleryEditor: GalleryEditorStub,
         SectionAddWizard: BaseStub,
         Button: ButtonStub,
         Draggable: DraggableStub,
-        AsyncComponentWrapper: AsyncComponentWrapperStub,
       },
     },
   })
@@ -135,7 +133,7 @@ const mountSectionEditor = async () => {
 }
 
 function findGroupToggle(wrapper: ReturnType<typeof mount>) {
-  return wrapper.findAll('button').find((btn) => btn.text().includes('expand_more') || btn.text().includes('expand_less'))
+  return wrapper.findAll('button').find((btn) => btn.html().includes('arrow-down-s') || btn.html().includes('arrow-up-s'))
 }
 
 describe('data-list recursive rendering', () => {
@@ -144,7 +142,7 @@ describe('data-list recursive rendering', () => {
     servicesMock.detail.mockClear()
   })
 
-  it('renders nested data-list gallery editor with gallery id and parent data-list context', async () => {
+  it('renders nested gallery using default GalleryEditor with resolved data-list config', async () => {
     const wrapper = await mountSectionEditor()
 
     const groupToggle = findGroupToggle(wrapper)
@@ -152,13 +150,14 @@ describe('data-list recursive rendering', () => {
     await groupToggle!.trigger('click')
     await flushPromises()
 
-    const editors = wrapper.findAll('[data-testid="data-list-gallery-editor"]')
+    const editors = wrapper.findAll('[data-testid="gallery-editor"]')
     expect(editors).toHaveLength(1)
-    expect(editors[0].attributes('data-object-id')).toBe('nested-gallery')
+    expect(editors[0].attributes('data-gallery-id')).toBe('nested-gallery')
     expect(editors[0].attributes('data-section-id')).toBe('child-section-1')
     expect(editors[0].attributes('data-parent-id')).toBe('root-data-list')
     expect(editors[0].attributes('data-parent-type')).toBe('list')
-    expect(editors.some((node) => node.attributes('data-object-id') === 'child-group')).toBe(false)
+    expect(editors[0].attributes('data-fields')).toContain('"title"')
+    expect(editors[0].attributes('data-fields')).toContain('"attachment"')
   })
 
   it('shows fallback when nested gallery placeholder is missing', async () => {
@@ -169,7 +168,7 @@ describe('data-list recursive rendering', () => {
     await groupToggle!.trigger('click')
     await flushPromises()
 
-    expect(wrapper.find('[data-testid="data-list-gallery-editor"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="gallery-editor"]').exists()).toBe(false)
     expect(wrapper.text()).toContain('No data found for this slot.')
   })
 })

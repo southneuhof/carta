@@ -3,6 +3,7 @@ import dataListSchema from '@southneuhof/landing-section-schema/sections/data-li
 import type { Component } from 'vue'
 import { describe, it } from 'vitest'
 import { defineSectionEditorOverlay } from '@/configs/sections'
+import { dataListGalleryConfigs } from '@/configs/sections/contentClassConfigs'
 
 describe('section overlay typing', () => {
   it('type-checks schema-aware slot and meta keys', () => {
@@ -46,7 +47,8 @@ describe('section overlay typing', () => {
             // Nested slot keys are intentionally string-keyed in Phase 1; recursive key inference is deferred.
             gallery: {
               label: 'Data',
-              component: {} as Component,
+              fields: ['title'],
+              resolveConfig: ({ parentSectionData }) => dataListGalleryConfigs[parentSectionData?.meta?.type ?? 'list'],
             },
           },
         },

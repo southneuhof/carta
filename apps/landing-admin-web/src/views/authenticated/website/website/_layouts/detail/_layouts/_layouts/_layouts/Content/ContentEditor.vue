@@ -6,6 +6,7 @@ import { getSmallestChildObject } from '@/utils/common';
 import services from '@/utils/services';
 import { computed, inject, onMounted, ref, type PropType } from 'vue';
 import type { SupportedSectionSlotEditor } from '@/features/sections/schemaAdapter';
+import { resolveSlotEditorConfig } from '@/features/sections/slotEditorConfig';
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue';
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue';
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue';
@@ -35,9 +36,29 @@ import Button from '@southneuhof/is-vue-framework/components/base/Button.vue';
       loading.value = false
     })
   })
+  const pageTranslation = inject<Record<string, any>>('pageTranslation')
+  const sectionData = inject<any>('sectionData', {})
 
-  const fields = computed(() => props.slotConfig?.fields ?? [])
-  const fieldsAlias = computed(() => props.slotConfig?.fieldAliases ?? {})
+  const rootSectionData = computed(() => {
+    let current = sectionData as any
+    while (current?.parentSectionData) current = current.parentSectionData
+    return current ?? null
+  })
+  const resolvedSlotConfig = computed(() =>
+    resolveSlotEditorConfig(props.slotConfig, {
+      slot: {
+        key: props.slotConfig?.key ?? '',
+        type: props.slotConfig?.type ?? 'content',
+        order: props.slotConfig?.order ?? 0,
+        many: props.slotConfig?.many ?? false,
+      },
+      sectionData,
+      parentSectionData: sectionData?.parentSectionData ?? null,
+      rootSectionData: rootSectionData.value,
+    }),
+  )
+  const fields = computed(() => resolvedSlotConfig.value?.fields ?? [])
+  const fieldsAlias = computed(() => resolvedSlotConfig.value?.fieldAliases ?? {})
 
   const updateFormConfig = computed(() => ({
     fields: fields.value,
@@ -45,12 +66,9 @@ import Button from '@southneuhof/is-vue-framework/components/base/Button.vue';
     fieldsAlias: fieldsAlias.value,
     inputConfig: {
       content: { type: 'rich-text' },
-      ...(props.slotConfig?.inputConfig ?? {}),
+      ...(resolvedSlotConfig.value?.inputConfig ?? {}),
     },
   }))
-
-  const pageTranslation = inject<Record<string, any>>('pageTranslation')
-  const sectionData = inject<any>('sectionData', {})
   
   const topmostSection = getSmallestChildObject(sectionData, 'parentSectionData')
 </script>

@@ -9,6 +9,7 @@ import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composi
 import Detail from '@southneuhof/is-vue-framework/components/composites/Detail.vue'
 import { getSmallestChildObject } from '@/utils/common'
 import type { SupportedSectionSlotEditor } from '@/features/sections/schemaAdapter'
+import { resolveSlotEditorConfig } from '@/features/sections/slotEditorConfig'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
@@ -34,6 +35,7 @@ const props = defineProps({
 })
 
 const pageTranslation = inject<any>('pageTranslation')
+const sectionData = inject<any>('sectionData', {})
 const isOpen = ref(false)
 const loading = ref(true)
 
@@ -47,48 +49,79 @@ function onDragChange(model: string, event: any) {
   })
 }
 
-const fields = computed(() => props.slotConfig?.fields ?? ['title', 'description', 'media', 'url'])
-const fieldsAlias = computed(() => props.slotConfig?.fieldAliases ?? {})
+const rootSectionData = computed(() => {
+  let current = sectionData as any
+  while (current?.parentSectionData) current = current.parentSectionData
+  return current ?? null
+})
+const resolvedSlotConfig = computed(() =>
+  resolveSlotEditorConfig(props.slotConfig, {
+    slot: {
+      key: props.slotConfig?.key ?? '',
+      type: props.slotConfig?.type ?? 'gallery',
+      order: props.slotConfig?.order ?? 0,
+      many: props.slotConfig?.many ?? false,
+    },
+    sectionData,
+    parentSectionData: sectionData?.parentSectionData ?? null,
+    rootSectionData: rootSectionData.value,
+  }),
+)
+const fields = computed(() => resolvedSlotConfig.value?.fields ?? ['title', 'description', 'media', 'url'])
+const fieldsAlias = computed(() => resolvedSlotConfig.value?.fieldAliases ?? {})
 
 const listConfig = computed(() => ({
   getAPI: 'content',
   deleteAPI: 'content',
   fields: fields.value,
   fieldsAlias: fieldsAlias.value,
+  fieldsDictionary: resolvedSlotConfig.value?.fieldsDictionary as any,
+  fieldsParse: resolvedSlotConfig.value?.fieldsParse as any,
+  fieldsProxy: resolvedSlotConfig.value?.fieldsProxy as any,
+  fieldsType: resolvedSlotConfig.value?.fieldsType as any,
+  fieldsUnit: resolvedSlotConfig.value?.fieldsUnit as any,
   searchParameters: { gallery_id: props.galleryID, sort: 'asc', sort_by: 'order', limit: 1000 },
-  onDragChange: (event: any) => onDragChange('content', event),
+  onDragChange: resolvedSlotConfig.value?.onDragChange ?? ((event: any) => onDragChange('content', event)),
 }))
 
 const createFormConfig = computed(() => ({
   fields: fields.value,
   targetAPI: 'content',
-  fieldsAlias: fieldsAlias.value,
-  inputConfig: {
-    content: { type: 'rich-text' },
-    ...(props.slotConfig?.inputConfig ?? {}),
+    fieldsAlias: fieldsAlias.value,
+    inputConfig: {
+      content: { type: 'rich-text' },
+      ...(resolvedSlotConfig.value?.inputConfig ?? {}),
+    },
+  extraData: {
+    ...(resolvedSlotConfig.value?.defaultValues ?? {}),
+    gallery_id: props.galleryID,
+    page_translation_id: pageTranslation?.value?.id,
   },
-  extraData: { gallery_id: props.galleryID, page_translation_id: pageTranslation?.value?.id },
 }))
 
 const updateFormConfig = computed(() => ({
   fields: fields.value,
   targetAPI: 'content',
-  fieldsAlias: fieldsAlias.value,
-  inputConfig: {
-    content: { type: 'rich-text' },
-    ...(props.slotConfig?.inputConfig ?? {}),
-  },
+    fieldsAlias: fieldsAlias.value,
+    inputConfig: {
+      content: { type: 'rich-text' },
+      ...(resolvedSlotConfig.value?.inputConfig ?? {}),
+    },
   extraData: { page_translation_id: pageTranslation?.value?.id },
 }))
 
 const detailConfig = computed(() => ({
   fields: fields.value,
   fieldsAlias: fieldsAlias.value,
+  fieldsDictionary: resolvedSlotConfig.value?.fieldsDictionary as any,
+  fieldsParse: resolvedSlotConfig.value?.fieldsParse as any,
+  fieldsProxy: resolvedSlotConfig.value?.fieldsProxy as any,
+  fieldsType: resolvedSlotConfig.value?.fieldsType as any,
+  fieldsUnit: resolvedSlotConfig.value?.fieldsUnit as any,
 }))
 
 const currentView = ref<'list' | 'create' | 'update' | 'detail'>('list')
 const activeData = ref<any>(null)
-const sectionData = inject<any>('sectionData', {})
 const topmostSection = getSmallestChildObject(sectionData, 'parentSectionData')
 </script>
 
@@ -174,7 +207,7 @@ const topmostSection = getSmallestChildObject(sectionData, 'parentSectionData')
           <template v-else-if="currentView === 'create'">
             <Form
               v-bind="createFormConfig"
-              :getInitialData="async () => ({ meta: props.sectionData.meta  })"
+              :getInitialData="async () => ({ ...(resolvedSlotConfig?.defaultValues ?? {}), meta: props.sectionData.meta  })"
               :disabled="pageTranslation?.status_code !== 'DRAFT'"
               :onSuccess="() => {
                 toast.success('Berhasil menambahkan data!')

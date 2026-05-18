@@ -37,12 +37,22 @@ describe('section editor wiring', () => {
     expect(sectionAddWizard).toContain('getAddSectionOptions')
   })
 
-  it('uses nested add flow in section group editor when nested schema data exists', () => {
+  it('uses nested add flow in section group editor when nested schema exists', () => {
     const sectionGroupEditor = readFileSync(sectionGroupEditorPath, 'utf-8')
     expect(sectionGroupEditor).toContain('buildCreateNestedSectionPayload')
     expect(sectionGroupEditor).toContain('isNestedSchemaGroup')
-    expect(sectionGroupEditor).toContain('Tambah Data')
+    expect(sectionGroupEditor).toContain('Boolean(editor.schema)')
     expect(sectionGroupEditor).toContain('v-else-if="isOpen && pageTranslation?.status_code === \'DRAFT\'"')
+  })
+
+  it('uses nested schema matching in section editor', () => {
+    const sectionEditor = readFileSync(sectionEditorPath, 'utf-8')
+    const legacyNestedParentData = 'nestedParentEditor.value?.' + 'data'
+    const legacyMatchedEditorData = 'matched.editor.' + 'data ? matched : undefined'
+    expect(sectionEditor).toContain('nestedParentEditor.value?.schema')
+    expect(sectionEditor).toContain('matched.editor.schema ? matched : undefined')
+    expect(sectionEditor).not.toContain(legacyNestedParentData)
+    expect(sectionEditor).not.toContain(legacyMatchedEditorData)
   })
 
   it('does not use legacy sectionType configs', () => {

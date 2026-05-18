@@ -27,7 +27,7 @@ import type { SupportedSectionSlotEditor } from '@/features/sections/schemaAdapt
 <template>
   <Card>
     <Form
-      :getData="async () => JSON.parse(JSON.stringify(data.meta))"
+      :getDetailData="async () => JSON.parse(JSON.stringify(data.meta))"
       :fields="[
         'email',
         'whatsapp',

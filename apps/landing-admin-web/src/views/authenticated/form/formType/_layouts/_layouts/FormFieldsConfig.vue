@@ -205,7 +205,7 @@ import Draggable from 'vuedraggable'
                   <DialogForm
                     v-bind="formFieldForm"
                     formType="update"
-                    :getData="() => JSON.parse(JSON.stringify(item))"
+                    :getDetailData="() => JSON.parse(JSON.stringify(item))"
                     :onSuccess="() => {
                       toast.success('Berhasil menambahkan data!')
                       keyManager().triggerChange('form-type-detail-under')

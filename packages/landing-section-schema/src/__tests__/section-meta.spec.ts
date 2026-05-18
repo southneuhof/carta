@@ -45,15 +45,30 @@ describe('shared section schema meta', () => {
       many: true,
     });
 
-    expect(dataList.data.childSections.data?.gallery).toMatchObject({
+    expect(dataList.data.childSections.schema?.info).toMatchObject({
+      name: 'Data Item',
+      description: 'Single data-list item',
+    });
+
+    expect(dataList.data.childSections.schema?.meta).toMatchObject({
+      fields: [],
+      defaultValues: {},
+    });
+
+    expect(dataList.data.childSections.schema?.data.gallery).toMatchObject({
       type: 'gallery',
       order: 1,
     });
   });
 
   it('preserves nested data-list slot typing', () => {
-    type ChildSectionSlots = NonNullable<typeof dataList.data.childSections.data>;
+    type ChildSectionSchema = NonNullable<typeof dataList.data.childSections.schema>;
+    type ChildSectionSlots = ChildSectionSchema['data'];
     const nestedGalleryType: ChildSectionSlots['gallery']['type'] = 'gallery';
     expect(nestedGalleryType).toBe('gallery');
+
+    type ChildSectionMetaFields = NonNullable<ChildSectionSchema['meta']>['fields'];
+    const nestedMetaFields: ChildSectionMetaFields = [];
+    expect(nestedMetaFields).toEqual([]);
   });
 });

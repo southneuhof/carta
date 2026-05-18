@@ -24,8 +24,18 @@ export default defineSectionSchema({
       type: 'sectionGroup',
       order: 2,
       many: true,
-      data: {
-        gallery: { type: 'gallery', order: 1 },
+      schema: {
+        info: {
+          name: 'Data Item',
+          description: 'Single data-list item',
+        },
+        meta: {
+          fields: [] as const,
+          defaultValues: {},
+        },
+        data: {
+          gallery: { type: 'gallery', order: 1 },
+        },
       },
     },
   },

@@ -41,6 +41,17 @@ export const defaultGlobalConfig: {
         }
       },
     },
+    visible: {
+      type: 'radio',
+      props: {
+        required: true,
+        defaultValue: true,
+        data: [
+          {name: 'Ditampilkan', id: true},
+          {name: 'Disembunyikan', id: false}
+        ]
+      }
+    },
     attachment: {type: 'file'},
     amount: {type: 'number'},
     url_type: {
@@ -94,6 +105,7 @@ export const defaultGlobalConfig: {
   },
   fieldsAlias: {
     name: 'Nama',
+    visible: 'Visibilitas',
     code: 'Kode',
     file: 'File',
     description: 'Keterangan',

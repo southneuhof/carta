@@ -14,7 +14,7 @@ const topmostSection = getSmallestChildObject(sectionData, 'parentSectionData')
 <template>
   <Form
     :fields="['name', 'visible', 'description']"
-    :getData="async () => JSON.parse(JSON.stringify(sectionData))"
+    :getDetailData="async () => JSON.parse(JSON.stringify(sectionData))"
     formType="update"
     targetAPI="section"
     :disabled="pageTranslation?.status_code !== 'DRAFT'"

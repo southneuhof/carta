@@ -251,7 +251,7 @@ const {data: [latestLog]} = await services.list('verificationLog', { model: 'art
         content: 'Isi Artikel',
       }"
       :disabled="articleTranslation.status_code !== 'DRAFT'"
-      :getData="async () => JSON.parse(JSON.stringify(articleTranslation))"
+      :getDetailData="async () => JSON.parse(JSON.stringify(articleTranslation))"
       formType="update"
       :searchParameters="{ article_id: props.article.id, language: props.language.code }"
       :onSuccess="

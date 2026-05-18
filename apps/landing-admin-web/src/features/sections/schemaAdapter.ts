@@ -2,16 +2,9 @@ import sectionSchemas from './manifest'
 import { sectionEditorOverlays } from '@/configs/sections'
 import type { InputConfig } from '@southneuhof/is-data-model'
 import type { Component } from 'vue'
+import type { ContentSlotEditorConfig, SlotConfigContext } from './slotEditorConfig'
 
 type SectionSchemaSlotType = 'content' | 'gallery' | 'section' | 'sectionGroup'
-type SectionSchemaSlot = {
-  type: SectionSchemaSlotType
-  order: number
-  many?: boolean
-  data?: Record<string, SectionSchemaSlot>
-}
-export type SectionSchemaData = Record<string, SectionSchemaSlot>
-export type SectionSlotPath = string[]
 type SectionSchemaMeta = {
   fields?: readonly string[]
   inputConfig?: Record<string, any>
@@ -19,6 +12,22 @@ type SectionSchemaMeta = {
   defaultValues?: Record<string, unknown>
   getInitialData?: () => Promise<Record<string, unknown>>
 }
+type NestedSectionSchema = {
+  info?: {
+    name?: string
+    description?: string
+  }
+  meta?: SectionSchemaMeta
+  data: Record<string, SectionSchemaSlot>
+}
+type SectionSchemaSlot = {
+  type: SectionSchemaSlotType
+  order: number
+  many?: boolean
+  schema?: NestedSectionSchema
+}
+export type SectionSchemaData = Record<string, SectionSchemaSlot>
+export type SectionSlotPath = string[]
 type SectionSchema = { code: string; info?: { name?: string; description?: string }; meta?: SectionSchemaMeta; data: SectionSchemaData }
 type SectionSchemaRegistry = Record<string, SectionSchema>
 
@@ -38,8 +47,16 @@ export type SupportedSectionSlotEditor = {
   fields: string[]
   inputConfig?: InputConfig
   fieldAliases?: Record<string, string>
+  fieldsDictionary?: Record<string, unknown>
+  fieldsParse?: Record<string, unknown>
+  fieldsProxy?: Record<string, unknown>
+  fieldsType?: Record<string, unknown>
+  fieldsUnit?: Record<string, unknown>
+  defaultValues?: Record<string, unknown>
+  onDragChange?: (event: any) => void
+  resolveConfig?: (ctx: SlotConfigContext) => ContentSlotEditorConfig
   component?: Component
-  data?: SectionSchemaData
+  schema?: NestedSectionSchema
   slots?: Record<string, SupportedSectionSlotOverlay>
 }
 export type SupportedSectionSlotOverlay = {
@@ -47,13 +64,21 @@ export type SupportedSectionSlotOverlay = {
   fields?: string[]
   fieldAliases?: Record<string, string>
   inputConfig?: InputConfig
+  fieldsDictionary?: Record<string, unknown>
+  fieldsParse?: Record<string, unknown>
+  fieldsProxy?: Record<string, unknown>
+  fieldsType?: Record<string, unknown>
+  fieldsUnit?: Record<string, unknown>
+  defaultValues?: Record<string, unknown>
+  onDragChange?: (event: any) => void
+  resolveConfig?: (ctx: SlotConfigContext) => ContentSlotEditorConfig
   component?: Component
   slots?: Record<string, SupportedSectionSlotOverlay>
 }
 export type SupportedSectionSlotEditorContext = SupportedSectionSlotEditor & {
   path: SectionSlotPath
   pathKey: string
-  data?: SectionSchemaData
+  schema?: NestedSectionSchema
   slots?: Record<string, SupportedSectionSlotOverlay>
 }
 export type SupportedSectionEditorConfig = {
@@ -104,8 +129,16 @@ function toSlotEditorContext(input: {
     fields: input.overlaySlot?.fields ?? getDefaultFields(input.slot.type),
     inputConfig: input.overlaySlot?.inputConfig,
     fieldAliases: input.overlaySlot?.fieldAliases,
+    fieldsDictionary: input.overlaySlot?.fieldsDictionary,
+    fieldsParse: input.overlaySlot?.fieldsParse,
+    fieldsProxy: input.overlaySlot?.fieldsProxy,
+    fieldsType: input.overlaySlot?.fieldsType,
+    fieldsUnit: input.overlaySlot?.fieldsUnit,
+    defaultValues: input.overlaySlot?.defaultValues,
+    onDragChange: input.overlaySlot?.onDragChange,
+    resolveConfig: input.overlaySlot?.resolveConfig,
     component: input.overlaySlot?.component,
-    data: input.slot.data,
+    schema: input.slot.schema,
     slots: input.overlaySlot?.slots,
     path: input.path,
     pathKey: input.path.join('.'),
@@ -244,10 +277,10 @@ export function matchNestedSchemaSlotsToStructure(input: {
   structure: SectionStructureItem[]
 }): MatchedSchemaSlot[] {
   const parentEditor = 'editor' in input.parentMatch ? input.parentMatch.editor : input.parentMatch
-  if (!parentEditor.data) return []
+  if (!parentEditor.schema) return []
 
   return matchSchemaDataToStructure({
-    schemaData: parentEditor.data,
+    schemaData: parentEditor.schema.data,
     structure: input.structure,
     overlaySlots: parentEditor.slots,
     basePath: parentEditor.path,

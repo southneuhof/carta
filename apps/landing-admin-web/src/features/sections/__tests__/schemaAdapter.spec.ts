@@ -59,17 +59,19 @@ describe('section schema adapter', () => {
     expect(projectCategory?.items.map((item) => item.id)).toEqual(['d'])
   })
 
-  it('exposes schema-specific slot metadata and custom editor components', () => {
+  it('exposes schema-specific slot metadata and dynamic slot resolvers', () => {
     const heroBannerConfig = getSupportedEditorConfig('hero-banner')
     expect(heroBannerConfig).not.toBeNull()
 
     const projectCategorySlot = heroBannerConfig?.slots.find((slot) => slot.key === 'projectCategory')
-    expect(projectCategorySlot?.component).toBeDefined()
+    expect(projectCategorySlot?.component).toBeUndefined()
+    expect(projectCategorySlot?.resolveConfig).toBeDefined()
 
     const dataListConfig = getSupportedEditorConfig('data-list')
     const childSections = dataListConfig?.slots.find((slot) => slot.key === 'childSections')
     expect(childSections?.component).toBeUndefined()
-    expect(childSections?.slots?.gallery?.component).toBeDefined()
+    expect(childSections?.slots?.gallery?.component).toBeUndefined()
+    expect(childSections?.slots?.gallery?.resolveConfig).toBeDefined()
   })
 
   it('exposes recursive slot schema and nested overlay config', () => {
@@ -78,11 +80,19 @@ describe('section schema adapter', () => {
 
     expect(childSections?.type).toBe('sectionGroup')
     expect(childSections?.order).toBe(2)
-    expect(childSections?.data?.gallery).toMatchObject({
+    expect(childSections?.schema?.info).toMatchObject({
+      name: 'Data Item',
+      description: 'Single data-list item',
+    })
+    expect(childSections?.schema?.meta).toMatchObject({
+      fields: [],
+      defaultValues: {},
+    })
+    expect(childSections?.schema?.data.gallery).toMatchObject({
       type: 'gallery',
       order: 1,
     })
-    expect(childSections?.slots?.gallery?.component).toBeDefined()
+    expect(childSections?.slots?.gallery?.resolveConfig).toBeDefined()
   })
 
   it('matches root schema slots with path-aware context', () => {
@@ -101,12 +111,14 @@ describe('section schema adapter', () => {
     expect(childSections?.items.map((item) => item.id)).toEqual(['group-1'])
     expect(childSections?.editor.path).toEqual(['childSections'])
     expect(childSections?.editor.type).toBe('sectionGroup')
-    expect(childSections?.editor.data?.gallery).toMatchObject({ type: 'gallery', order: 1 })
-    expect(childSections?.editor.slots?.gallery?.component).toBeDefined()
+    expect(childSections?.editor.schema?.info?.name).toBe('Data Item')
+    expect(childSections?.editor.schema?.meta?.defaultValues).toEqual({})
+    expect(childSections?.editor.schema?.data.gallery).toMatchObject({ type: 'gallery', order: 1 })
+    expect(childSections?.editor.slots?.gallery?.resolveConfig).toBeDefined()
     expect(childSections?.editor.component).toBeUndefined()
   })
 
-  it('matches nested sectionGroup-owned schema data against a child section structure', () => {
+  it('matches nested sectionGroup-owned schema against a child section structure', () => {
     const rootMatches = matchRootSchemaSlotsToStructure('data-list', [
       { id: 'group-1', type: 'sectionGroup', order: 2 },
     ])
@@ -127,10 +139,30 @@ describe('section schema adapter', () => {
     expect(gallery?.path).toEqual(['childSections', 'gallery'])
     expect(gallery?.items.map((item) => item.id)).toEqual(['gallery-1'])
     expect(gallery?.editor.type).toBe('gallery')
-    expect(gallery?.editor.component).toBeDefined()
+    expect(gallery?.editor.label).toBe('Data')
+    expect(gallery?.editor.component).toBeUndefined()
+    expect(gallery?.editor.resolveConfig).toBeDefined()
   })
 
-  it('does not match nested custom gallery overlay against a non-gallery runtime item', () => {
+  it('returns no nested matches when parent editor has no nested schema', () => {
+    const nestedMatches = matchNestedSchemaSlotsToStructure({
+      parentMatch: {
+        key: 'plainGroup',
+        type: 'sectionGroup',
+        order: 1,
+        many: true,
+        label: 'Plain Group',
+        fields: [],
+        path: ['plainGroup'],
+        pathKey: 'plainGroup',
+      },
+      structure: [{ id: 'gallery-1', type: 'gallery', order: 1 }],
+    })
+
+    expect(nestedMatches).toEqual([])
+  })
+
+  it('does not match nested gallery overlay against a non-gallery runtime item', () => {
     const rootMatches = matchRootSchemaSlotsToStructure('data-list', [
       { id: 'group-1', type: 'sectionGroup', order: 2 },
     ])
@@ -148,7 +180,8 @@ describe('section schema adapter', () => {
     const gallery = nestedMatches.find((match) => match.pathKey === 'childSections.gallery')
 
     expect(gallery?.items).toEqual([])
-    expect(gallery?.editor.component).toBeDefined()
+    expect(gallery?.editor.component).toBeUndefined()
+    expect(gallery?.editor.resolveConfig).toBeDefined()
   })
 
   it('preserves many=false and many=true behavior in generic schema data matching', () => {

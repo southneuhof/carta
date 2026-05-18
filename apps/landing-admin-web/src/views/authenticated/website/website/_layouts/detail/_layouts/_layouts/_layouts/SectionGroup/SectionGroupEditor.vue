@@ -24,7 +24,7 @@ const isOpen = ref(false)
 const isNestedSchemaGroup = computed(() => {
   if (!props.nestedParentMatch) return false
   const editor = 'editor' in props.nestedParentMatch ? props.nestedParentMatch.editor : props.nestedParentMatch
-  return Boolean(editor.data)
+  return Boolean(editor.schema)
 })
 
 async function createSection(schemaCode: string) {
@@ -52,10 +52,10 @@ async function createNestedSection() {
 </script>
 
 <template>
-  <Card class="flex flex-col gap-4 bg-transparent outline outline-1 outline-primary">
+  <Card class="flex flex-col gap-4 bg-transparent" variant="outlined">
     <div class="flex flex-row items-center justify-between gap-4">
       <div class="flex flex-row items-center gap-2">
-        <Icon>folder_copy</Icon>
+        <Icon name="folders">folder_copy</Icon>
         <p class="text-xl font-semibold">Section Group</p>
       </div>
       <div class="flex flex-row items-center gap-4">
@@ -63,10 +63,14 @@ async function createNestedSection() {
           <template #icon>
             <Icon name="add"></Icon>
           </template>
-          Tambah Data
+          Tambah
         </Button>
         <SectionAddWizard v-else-if="isOpen && pageTranslation?.status_code === 'DRAFT'" :onSubmit="createSection" />
-        <Button variant="standard" @click="() => (isOpen = !isOpen)"><Icon>{{ isOpen ? 'expand_less' : 'expand_more' }}</Icon></Button>
+        <Button variant="standard" kind="icon" @click="() => (isOpen = !isOpen)">
+          <template #icon>
+            <Icon :name="isOpen ? 'arrow-up-s' : 'arrow-down-s'"></Icon>
+          </template>
+        </Button>
       </div>
     </div>
     <Suspense v-if="isOpen" :timeout="0">

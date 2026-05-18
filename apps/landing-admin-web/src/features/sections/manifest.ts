@@ -1,9 +1,24 @@
 type SectionSchemaSlotType = 'content' | 'gallery' | 'section' | 'sectionGroup'
+type SectionSchemaMeta = {
+  fields?: readonly string[]
+  inputConfig?: Record<string, any>
+  fieldsAlias?: Record<string, string>
+  defaultValues?: Record<string, unknown>
+  getInitialData?: () => Promise<Record<string, unknown>>
+}
+type NestedSectionSchema = {
+  info?: {
+    name?: string
+    description?: string
+  }
+  meta?: SectionSchemaMeta
+  data: Record<string, SectionSchemaSlot>
+}
 type SectionSchemaSlot = {
   type: SectionSchemaSlotType
   order: number
   many?: boolean
-  data?: Record<string, SectionSchemaSlot>
+  schema?: NestedSectionSchema
 }
 type SectionSchema = {
   code: string
