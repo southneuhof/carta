@@ -1,4 +1,5 @@
 import heroBanner from '@southneuhof/landing-section-schema/sections/hero-banner'
+import { defineAsyncComponent } from 'vue'
 import { defineSectionEditorOverlay } from './types'
 
 export default defineSectionEditorOverlay(heroBanner, {
@@ -47,7 +48,9 @@ export default defineSectionEditorOverlay(heroBanner, {
     },
     projectCategory: {
       label: 'Project Category Items',
-      customEditorKey: 'hero-banner.projectCategory',
+      component: defineAsyncComponent(() =>
+        import('@/views/authenticated/website/website/_layouts/detail/_layouts/_layouts/_layouts/_Custom/ContentGalleryGalleryEditor.vue')
+      ),
     },
   },
 })

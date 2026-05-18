@@ -1,4 +1,5 @@
 import contentDefaultSchema from '@southneuhof/landing-section-schema/sections/content-default'
+import type { Component } from 'vue'
 import { describe, it } from 'vitest'
 import { defineSectionEditorOverlay } from '@/configs/sections'
 
@@ -13,6 +14,7 @@ describe('section overlay typing', () => {
       slots: {
         content: {
           label: 'Content',
+          component: {} as Component,
         },
       },
     })

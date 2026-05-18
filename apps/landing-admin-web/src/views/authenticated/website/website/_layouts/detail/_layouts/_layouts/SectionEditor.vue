@@ -17,7 +17,6 @@ import {
   type SupportedSectionSlotEditor,
 } from '@/features/sections/schemaAdapter'
 import UnsupportedSectionPanel from '@/components/sections/UnsupportedSectionPanel.vue'
-import { resolveSectionSlotEditor } from '@/features/sections/editorRegistry'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
@@ -169,8 +168,8 @@ function slotLabel(slotKey: string) {
         <div v-else class="flex flex-col gap-2">
           <div v-for="matched in matchedSlots" :key="matched.slotKey" class="flex flex-col gap-4">
             <component
-              v-if="resolveSectionSlotEditor(matched.editor.customEditorKey) && matched.items.length"
-              :is="resolveSectionSlotEditor(matched.editor.customEditorKey)"
+              v-if="matched.editor.component && matched.items.length"
+              :is="matched.editor.component"
               :slotConfig="slotEditor(matched.slotKey)"
               :sectionData="{ ...sectionData, parentSectionData }"
               :objectID="String(matched.items[0].id)"

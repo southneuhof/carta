@@ -15,6 +15,10 @@ describe('section editor wiring', () => {
     const sectionEditor = readFileSync(sectionEditorPath, 'utf-8')
     expect(sectionEditor).toContain('getSectionPanelState')
     expect(sectionEditor).toContain('matchSchemaSlotsToStructure')
+    expect(sectionEditor).toContain('matched.editor.component')
+    expect(sectionEditor).not.toContain('resolveSectionSlotEditor')
+    expect(sectionEditor).not.toContain('customEditorKey')
+    expect(sectionEditor).not.toContain('editorRegistry')
   })
 
   it('uses section overlay configs from adapter', () => {

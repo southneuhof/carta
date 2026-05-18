@@ -55,16 +55,16 @@ describe('section schema adapter', () => {
     expect(projectCategory?.items.map((item) => item.id)).toEqual(['d'])
   })
 
-  it('exposes schema-specific slot metadata and custom editor keys', () => {
+  it('exposes schema-specific slot metadata and custom editor components', () => {
     const heroBannerConfig = getSupportedEditorConfig('hero-banner')
     expect(heroBannerConfig).not.toBeNull()
 
     const projectCategorySlot = heroBannerConfig?.slots.find((slot) => slot.key === 'projectCategory')
-    expect(projectCategorySlot?.customEditorKey).toBe('hero-banner.projectCategory')
+    expect(projectCategorySlot?.component).toBeDefined()
 
     const dataListConfig = getSupportedEditorConfig('data-list')
     const childSections = dataListConfig?.slots.find((slot) => slot.key === 'childSections')
-    expect(childSections?.customEditorKey).toBe('data-list.childSections')
+    expect(childSections?.component).toBeDefined()
   })
 
   it('exposes shared section meta settings to the editor config', () => {

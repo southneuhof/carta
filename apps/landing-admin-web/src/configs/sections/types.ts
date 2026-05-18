@@ -1,4 +1,5 @@
 import type { InputConfig } from '@southneuhof/is-data-model'
+import type { Component } from 'vue'
 
 type SectionSchemaSlotType = 'content' | 'gallery' | 'section' | 'sectionGroup'
 type SectionSchemaSlot = {
@@ -36,7 +37,7 @@ export type SectionEditorOverlay<TSchema extends SectionSchema> = {
     fields?: string[]
     fieldAliases?: Record<string, string>
     inputConfig?: InputConfig
-    customEditorKey?: string
+    component?: Component
   }>>
 }
 

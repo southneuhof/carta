@@ -1,6 +1,7 @@
 import sectionSchemas from './manifest'
 import { sectionEditorOverlays } from '@/configs/sections'
 import type { InputConfig } from '@southneuhof/is-data-model'
+import type { Component } from 'vue'
 
 type SectionSchemaSlotType = 'content' | 'gallery' | 'section' | 'sectionGroup'
 type SectionSchemaSlot = { type: SectionSchemaSlotType; order: number; many?: boolean }
@@ -30,7 +31,7 @@ export type SupportedSectionSlotEditor = {
   fields: string[]
   inputConfig?: InputConfig
   fieldAliases?: Record<string, string>
-  customEditorKey?: string
+  component?: Component
 }
 export type SupportedSectionEditorConfig = {
   code: SupportedSectionSchemaCode
@@ -68,7 +69,7 @@ function toSlotEditor(code: SupportedSectionSchemaCode, slotKey: string, slot: S
     fields: overlaySlot?.fields ?? getDefaultFields(slot.type),
     inputConfig: overlaySlot?.inputConfig,
     fieldAliases: overlaySlot?.fieldAliases,
-    customEditorKey: overlaySlot?.customEditorKey,
+    component: overlaySlot?.component,
   }
 }
 

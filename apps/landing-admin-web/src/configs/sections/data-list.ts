@@ -1,4 +1,5 @@
 import dataList from '@southneuhof/landing-section-schema/sections/data-list'
+import { defineAsyncComponent } from 'vue'
 import { defineSectionEditorOverlay } from './types'
 
 export default defineSectionEditorOverlay(dataList, {
@@ -108,7 +109,9 @@ export default defineSectionEditorOverlay(dataList, {
     },
     childSections: {
       label: 'Child Sections',
-      customEditorKey: 'data-list.childSections',
+      component: defineAsyncComponent(() =>
+        import('@/views/authenticated/website/website/_layouts/detail/_layouts/_layouts/_layouts/_Custom/DataListGalleryEditor.vue')
+      ),
     },
   },
 })
