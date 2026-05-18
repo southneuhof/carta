@@ -35,14 +35,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm build
+      - name: Build publishable packages
+        run: pnpm --filter @southneuhof/is-data-model --filter @southneuhof/apostle --filter @southneuhof/utilities --filter @southneuhof/is-vue-framework --filter @southneuhof/landing-sveltekit-framework build
 
-      - name: Test
-        run: pnpm test
+      - name: Test publishable packages
+        run: pnpm --filter @southneuhof/is-data-model --filter @southneuhof/apostle --filter @southneuhof/utilities --filter @southneuhof/is-vue-framework --filter @southneuhof/landing-sveltekit-framework test
 
-      - name: Type check
-        run: pnpm type-check
+      - name: Type check publishable packages
+        run: pnpm --filter @southneuhof/is-data-model --filter @southneuhof/apostle --filter @southneuhof/utilities --filter @southneuhof/is-vue-framework --filter @southneuhof/landing-sveltekit-framework type-check
 
       - name: Verify package contents
         run: pnpm release:verify
