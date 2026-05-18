@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import services from '@/utils/services';
 import { inject } from 'vue';
 import {Bar} from 'vue-chartjs'

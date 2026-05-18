@@ -38,7 +38,7 @@ const listConfig = ref<ListConfig>(
     fieldsHeaderClass: defaultTableConfig.fieldsHeaderClass,
     fieldsParse: defaultTableConfig.fieldsParse,
     fieldsProxy: defaultTableConfig.fieldsProxy,
-    fieldsType: defaultTableConfig.fieldsType,
+    fieldsType: defaultTableConfig.fieldsType as Record<string, { type: string; props?: any }>,
     fieldsAlign: defaultTableConfig.fieldsAlign,
     onDragChange: (event: any) =>
       defaultOnDragChange(props.config.view?.list?.getAPI || props.config.view?.getAPI || props.config.modelAPI || props.config.name, event),

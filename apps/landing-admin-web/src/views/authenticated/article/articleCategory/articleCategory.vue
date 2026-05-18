@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import Modal from '@southneuhof/is-vue-framework/components/base/Dialog.vue'
+import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import CRUDComposite from '@southneuhof/is-vue-framework/components/composites/CRUDComposite.vue';
 import TranslationEditor from '@/features/translations/TranslationEditor.vue';
 import articleCategoryModel from '@client/data-model/models/articleCategory.model'

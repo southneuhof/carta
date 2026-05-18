@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { configureParser, createParser, parse, resetParserConfigForTests } from '../parse'
+import { configureParser, parse, resetParserConfigForTests } from '../parse'
 
 describe('parse utilities', () => {
   afterEach(() => {
@@ -36,7 +36,7 @@ describe('parse utilities', () => {
   })
 
   it('falls back to dictionary values for unknown formatter keys', () => {
-    const localParse = createParser({
+    configureParser({
       dictionary: {
         status: {
           pending: 'Pending',
@@ -44,7 +44,7 @@ describe('parse utilities', () => {
       },
     })
 
-    expect(localParse('status', 'pending')).toBe('Pending')
+    expect(parse('status', 'pending')).toBe('Pending')
   })
 
   it('returns raw values for unknown keys without dictionary matches', () => {

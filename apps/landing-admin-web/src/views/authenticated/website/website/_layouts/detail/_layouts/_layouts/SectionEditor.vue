@@ -9,7 +9,7 @@ import SectionSettings from './_layouts/Section/SectionSettings.vue'
 import { computed, inject, provide, ref, watch } from 'vue'
 import GalleryEditor from './_layouts/Gallery/GalleryEditor.vue'
 import SectionGroupEditor from './_layouts/SectionGroup/SectionGroupEditor.vue'
-import { parse } from '@/utils/common'
+import { parse } from '@southneuhof/utilities/parse'
 import {
   getSectionPanelState,
   getSupportedEditorConfig,

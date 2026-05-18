@@ -79,6 +79,10 @@ function assertCleanWorkingTree() {
 }
 
 function withToken(repo) {
+  if (dryRun) {
+    return repo
+  }
+
   if (!packageRepoToken) {
     throw new Error('GITHUB_TOKEN_FOR_PACKAGE_REPOS is required to push package mirror repositories.')
   }
@@ -87,6 +91,10 @@ function withToken(repo) {
 }
 
 function remoteHead(repo, branch) {
+  if (dryRun) {
+    return ''
+  }
+
   const output = run(`git ls-remote --heads ${repo} ${branch}`, { mutates: false })
   const [sha] = output.split(/\s+/)
 

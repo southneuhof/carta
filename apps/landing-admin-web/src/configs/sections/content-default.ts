@@ -1,7 +1,7 @@
-import schema from '@southneuhof/landing-section-schema/sections/content-default'
+import contentDefault from '@southneuhof/landing-section-schema/sections/content-default'
 import { defineSectionEditorOverlay } from './types'
 
-export default defineSectionEditorOverlay(schema, {
+export default defineSectionEditorOverlay(contentDefault, {
   group: 'Elements',
   meta: {
     inputConfig: {

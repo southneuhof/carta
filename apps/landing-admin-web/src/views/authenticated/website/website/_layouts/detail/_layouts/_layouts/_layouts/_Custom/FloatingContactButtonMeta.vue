@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Form from '@southneuhof/is-vue-framework/components/composites/Form.vue';
 import { toast } from 'vue-sonner';
 import services from '@/utils/services';

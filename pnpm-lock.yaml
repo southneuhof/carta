@@ -391,17 +391,20 @@ importers:
         specifier: ^1.7.14
         version: 1.7.23(vue@3.5.32(typescript@5.9.3))
       '@southneuhof/apostle':
-        specifier: 0.0.1
-        version: 0.0.1
+        specifier: workspace:^
+        version: link:../../packages/apostle
       '@southneuhof/is-data-model':
-        specifier: 0.0.2
-        version: 0.0.2
+        specifier: workspace:^
+        version: link:../../packages/is-data-model
       '@southneuhof/is-vue-framework':
         specifier: workspace:*
         version: link:../../packages/is-vue-framework
       '@southneuhof/landing-section-schema':
         specifier: workspace:*
         version: link:../../packages/landing-section-schema
+      '@southneuhof/utilities':
+        specifier: workspace:*
+        version: link:../../packages/utilities
       '@tanstack/vue-form':
         specifier: 1.29.1
         version: 1.29.1(vue@3.5.32(typescript@5.9.3))
@@ -3575,12 +3578,6 @@ packages:
 
   '@sinonjs/fake-timers@10.3.0':
     resolution: {integrity: sha512-V4BG07kuYSUkTCSBHG8G8TNhM+F19jXFWnQtzj+we8DrkpSBCee9Z3Ms8yiGer/dlmhe35/Xdgyo3/0rQKg7YA==}
-
-  '@southneuhof/apostle@0.0.1':
-    resolution: {integrity: sha512-jnjl111XltnkhtCiQ16Xhk9wiFdfHMqv74xFVYM1YpK8fN68Z7nhbKYRWyMTkIXXa/CvXFJdAxkLFQH+LJj4DQ==, tarball: https://npm.pkg.github.com/download/@southneuhof/apostle/0.0.1/c4acb18cb065e0106e38d2d9d6e846a9c7c4708e}
-
-  '@southneuhof/is-data-model@0.0.2':
-    resolution: {integrity: sha512-WZ9xSxLgq0amNN/KLK1lo30pqr5JyOIOXq1bEpnheohgYxaA+3cqdzM0wYA82K3OMRRVzY8HkFNaTdySlM443w==, tarball: https://npm.pkg.github.com/download/@southneuhof/is-data-model/0.0.2/8e8aba79d3a7f433d558c06dbfbbb75e0107e858}
 
   '@sqlite.org/sqlite-wasm@3.48.0-build4':
     resolution: {integrity: sha512-hI6twvUkzOmyGZhQMza1gpfqErZxXRw6JEsiVjUbo7tFanVD+8Oil0Ih3l2nGzHdxPI41zFmfUQG7GHqhciKZQ==}
@@ -13025,14 +13022,6 @@ snapshots:
   '@sinonjs/fake-timers@10.3.0':
     dependencies:
       '@sinonjs/commons': 3.0.1
-
-  '@southneuhof/apostle@0.0.1':
-    dependencies:
-      qs: 6.15.1
-
-  '@southneuhof/is-data-model@0.0.2':
-    dependencies:
-      zod: 3.25.76
 
   '@sqlite.org/sqlite-wasm@3.48.0-build4': {}
 

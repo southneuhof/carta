@@ -22,12 +22,64 @@ export default defineConfig({
         replacement: fileURLToPath(new URL('./src', import.meta.url)),
       },
       {
+        find: /^@client\/data-model$/,
+        replacement: fileURLToPath(new URL('../../packages/data-model/src/index.ts', import.meta.url)),
+      },
+      {
         find: '@client/data-model/',
         replacement: fileURLToPath(new URL('../../packages/data-model/src/', import.meta.url)),
       },
       {
+        find: /^@southneuhof\/apostle$/,
+        replacement: fileURLToPath(new URL('../../packages/apostle/src/index.ts', import.meta.url)),
+      },
+      {
+        find: '@southneuhof/apostle/',
+        replacement: fileURLToPath(new URL('../../packages/apostle/src/', import.meta.url)),
+      },
+      {
+        find: /^@southneuhof\/is-data-model$/,
+        replacement: fileURLToPath(new URL('../../packages/is-data-model/src/index.ts', import.meta.url)),
+      },
+      {
+        find: '@southneuhof/is-data-model/',
+        replacement: fileURLToPath(new URL('../../packages/is-data-model/src/', import.meta.url)),
+      },
+      {
+        find: /^@southneuhof\/landing-section-schema$/,
+        replacement: fileURLToPath(new URL('../../packages/landing-section-schema/src/index.ts', import.meta.url)),
+      },
+      {
+        find: '@southneuhof/landing-section-schema/',
+        replacement: fileURLToPath(new URL('../../packages/landing-section-schema/src/', import.meta.url)),
+      },
+      {
+        find: /^@southneuhof\/utilities$/,
+        replacement: fileURLToPath(new URL('../../packages/utilities/src/index.ts', import.meta.url)),
+      },
+      {
         find: '@southneuhof/utilities/',
         replacement: fileURLToPath(new URL('../../packages/utilities/src/', import.meta.url)),
+      },
+      {
+        find: /^@southneuhof\/is-vue-framework$/,
+        replacement: fileURLToPath(new URL('../../packages/is-vue-framework/src/index.ts', import.meta.url)),
+      },
+      {
+        find: /^@southneuhof\/is-vue-framework\/router$/,
+        replacement: fileURLToPath(new URL('../../packages/is-vue-framework/src/router/index.ts', import.meta.url)),
+      },
+      {
+        find: '@southneuhof/is-vue-framework/router/',
+        replacement: fileURLToPath(new URL('../../packages/is-vue-framework/src/router/', import.meta.url)),
+      },
+      {
+        find: /^@southneuhof\/is-vue-framework\/renderers$/,
+        replacement: fileURLToPath(new URL('../../packages/is-vue-framework/src/renderers/index.ts', import.meta.url)),
+      },
+      {
+        find: '@southneuhof/is-vue-framework/renderers/',
+        replacement: fileURLToPath(new URL('../../packages/is-vue-framework/src/renderers/', import.meta.url)),
       },
       {
         find: '@southneuhof/is-vue-framework/components/',

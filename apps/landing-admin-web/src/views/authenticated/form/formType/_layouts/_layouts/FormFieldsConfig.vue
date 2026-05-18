@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
+import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composites/ConfirmationDialog.vue';
 import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue';
 import { keyManager } from '@/stores/keyManager';

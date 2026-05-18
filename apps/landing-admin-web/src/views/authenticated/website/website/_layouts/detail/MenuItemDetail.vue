@@ -10,16 +10,16 @@
   import { permissions } from '@/stores/permissions';
   import Popover from '@southneuhof/is-vue-framework/components/base/Popover.vue';
   import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue';
-  import { parse } from '@/utils/common';
-  import MenuItemIDSelectInput from '@/features/menu/MenuItemIDSelectInput.vue';
+  import { parse } from '@southneuhof/utilities/parse';
+  import MenuItemIDSelectInput from '@/components/inputs/MenuItemInput/MenuItemIDSelectInput.vue';
   import MenuItemSettings from '../list/_layouts/_layouts/MenuItemSettings.vue';
   import { adminApiBaseURL } from '@/utils/auth-client';
   import Button from '@southneuhof/is-vue-framework/components/base/Button.vue';
   import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue';
   import Dialog from '@southneuhof/is-vue-framework/components/base/Dialog.vue';
   import Chip from '@southneuhof/is-vue-framework/components/base/Chip.vue';
-import Card from '@southneuhof/is-vue-framework/components/base/Card.vue';
-import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue';
+  import Card from '@southneuhof/is-vue-framework/components/base/Card.vue';
+  import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue';
 
   const [route, router] = [useRoute(), useRouter()]
   const [{data: menuItemData}] = await Promise.all([

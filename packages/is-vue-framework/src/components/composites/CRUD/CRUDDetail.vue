@@ -24,7 +24,7 @@ const detailConfig: DetailConfig = {
     fieldsAlias: defaultDetailConfig.fieldsAlias,
     fieldsParse: defaultDetailConfig.fieldsParse,
     fieldsProxy: defaultDetailConfig.fieldsProxy,
-    fieldsType: defaultDetailConfig.fieldsType,
+    fieldsType: defaultDetailConfig.fieldsType as Record<string, { type: string; props?: any }>,
   }),
   dataID: String(route.query[`${props.config.name}_id`]),
 }

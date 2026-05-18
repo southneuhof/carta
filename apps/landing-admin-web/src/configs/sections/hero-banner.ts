@@ -1,7 +1,7 @@
-import schema from '@southneuhof/landing-section-schema/sections/hero-banner'
+import heroBanner from '@southneuhof/landing-section-schema/sections/hero-banner'
 import { defineSectionEditorOverlay } from './types'
 
-export default defineSectionEditorOverlay(schema, {
+export default defineSectionEditorOverlay(heroBanner, {
   group: 'Banner',
   slots: {
     banner: {

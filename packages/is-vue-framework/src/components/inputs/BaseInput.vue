@@ -81,7 +81,7 @@ function onValidationTouch() {
 
 <template>
   <div ref="containerRef" @focusout="onFocusOut" @validation:touch="onValidationTouch" :class="`${twMerge(`flex flex-col gap-2`, $attrs.class as string)}`">
-    <div>
+    <div v-if="props.label || $slots.label || requiredMark" class="text-sm font-medium">
       <label v-if="props.label" class="text-sm font-medium">
         <template v-if="!$slots.label">
           {{ props.label }}

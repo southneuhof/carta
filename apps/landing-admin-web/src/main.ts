@@ -1,9 +1,11 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { configureParser, parse } from '@southneuhof/utilities/parse'
-import { configureFrameworkBehaviors } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import { createFrameworkPlugin } from '@southneuhof/is-vue-framework'
 import { frameworkBehaviors } from './framework/behaviors'
 import { dictionary } from '@/configs/dictionary'
+import config from '@/config'
+import { defaultDetailConfig, defaultFormConfig, defaultTableConfig } from '@/configs/defaults'
 import App from './App.vue'
 import router from './router'
 import '@vuepic/vue-datepicker/dist/main.css'
@@ -17,6 +19,7 @@ import { LinearScale, CategoryScale, ArcElement, Tooltip, Legend, Title } from '
 import { FunnelController, TrapezoidElement } from 'chartjs-chart-funnel'
 import VueTippy from 'vue-tippy'
 import 'tippy.js/dist/tippy.css' // optional for styling
+import { inputComponentRegistry } from './configs/inputComponentRegistry'
 
 Chart.register(ChartDataLabels)
 Chart.register(ArcElement, Tooltip, Legend, Title)
@@ -42,18 +45,28 @@ Chart.register(annotationPlugin)
 Chart.register(FunnelController, TrapezoidElement, LinearScale, CategoryScale)
 
 const app = createApp(App)
-configureParser({ dictionary, formatters: {} })
-configureFrameworkBehaviors(frameworkBehaviors)
-
-declare module 'vue' {
-  export interface ComponentCustomProperties {
-    $parse: (key: string, value: string | number, mode?: 'dictionary' | 'parser') => any
-  }
-}
+configureParser({ dictionary })
 
 document.addEventListener('DOMContentLoaded', async () => {
   app.use(createPinia())
   app.use(router)
+
+  app.use(
+    createFrameworkPlugin({
+      extension: {
+        inputs: inputComponentRegistry,
+      },
+      config,
+      defaults: {
+        table: defaultTableConfig,
+        detail: defaultDetailConfig,
+        form: defaultFormConfig,
+        mode: 'default',
+      },
+      behaviors: frameworkBehaviors,
+    }),
+  )
+
   app.use(
     VueTippy,
     // optional
@@ -67,7 +80,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       }, // => Global default options * see all props
     }
   )
-  app.config.globalProperties.$parse = parse
 
   app.config.errorHandler = (err, vm, info) => {
     console.error('Global error handler :: ', err)

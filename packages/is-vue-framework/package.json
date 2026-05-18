@@ -32,7 +32,14 @@
       "types": "./dist/adapters/behaviors.d.ts",
       "import": "./dist/adapters/behaviors.js"
     },
-    "./components/*": "./src/components/*",
+    "./adapters/*": {
+      "types": "./dist/adapters/*.d.ts",
+      "import": "./dist/adapters/*.js"
+    },
+    "./components/*": {
+      "types": "./dist/components/*.vue.d.ts",
+      "import": "./dist/components/*.vue"
+    },
     "./renderers/*": {
       "types": "./dist/renderers/*.d.ts",
       "import": "./dist/renderers/*.js"

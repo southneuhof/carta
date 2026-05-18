@@ -32,7 +32,6 @@ export interface FrameworkDefaultsInput {
   table?: FrameworkTableDefaults
   detail?: FrameworkDetailDefaults
   form?: FrameworkFormDefaults
-  config?: FrameworkAppConfigDefaults
   mode?: string
 }
 
@@ -138,8 +137,12 @@ export function applyFrameworkDefaults(nextDefaults?: FrameworkDefaultsInput) {
   if (nextDefaults.table) deepMergeInto(defaultTableConfig, nextDefaults.table as Record<string, any>)
   if (nextDefaults.detail) deepMergeInto(defaultDetailConfig, nextDefaults.detail as Record<string, any>)
   if (nextDefaults.form) deepMergeInto(defaultFormConfig, nextDefaults.form as Record<string, any>)
-  if (nextDefaults.config) deepMergeInto(config, nextDefaults.config as Record<string, any>)
   if (typeof nextDefaults.mode === 'string') mode = nextDefaults.mode
+}
+
+export function applyFrameworkConfig(nextConfig?: FrameworkAppConfigDefaults) {
+  if (!nextConfig) return
+  deepMergeInto(config, nextConfig as Record<string, any>)
 }
 
 function resetMutableObject(target: Record<string, any>, baseline: Record<string, any>) {

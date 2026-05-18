@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { configureParser, parse } from '@southneuhof/utilities/parse'
-import { configureFrameworkBehaviors } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import { createFrameworkPlugin } from '@southneuhof/is-vue-framework'
 import { frameworkBehaviors } from './framework/behaviors'
 import { dictionary } from '@/configs/dictionary'
 import App from './App.vue'
@@ -42,8 +42,7 @@ Chart.register(annotationPlugin)
 Chart.register(FunnelController, TrapezoidElement, LinearScale, CategoryScale)
 
 const app = createApp(App)
-configureParser({ dictionary, formatters: {} })
-configureFrameworkBehaviors(frameworkBehaviors)
+configureParser({ dictionary })
 
 declare module 'vue' {
   export interface ComponentCustomProperties {
@@ -54,6 +53,11 @@ declare module 'vue' {
 document.addEventListener('DOMContentLoaded', async () => {
   app.use(createPinia())
   app.use(router)
+  app.use(
+    createFrameworkPlugin({
+      behaviors: frameworkBehaviors,
+    }),
+  )
   app.use(
     VueTippy,
     // optional

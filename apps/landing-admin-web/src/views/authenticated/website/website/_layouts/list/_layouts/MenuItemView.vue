@@ -10,7 +10,7 @@ import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composi
 import { toast } from 'vue-sonner'
 import MenuItemSettings from './_layouts/MenuItemSettings.vue'
 import { permissions } from '@/stores/permissions'
-import { menuItemFormConfig } from '@/features/menu/menuItemFormConfig'
+import { menuItemFormConfig } from '@/configs/menuItemFormConfig'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Chip from '@southneuhof/is-vue-framework/components/base/Chip.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'

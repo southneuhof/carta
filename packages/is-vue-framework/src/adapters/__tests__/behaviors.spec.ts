@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { configureFrameworkBehaviors, getFrameworkBehaviors, missingBehavior, resetFrameworkBehaviorsForTests } from '../behaviors'
-import config, { defaultDetailConfig, defaultFormConfig, defaultTableConfig, mode } from '../defaults'
+import config, { applyFrameworkConfig, applyFrameworkDefaults, defaultDetailConfig, defaultFormConfig, defaultTableConfig, mode } from '../defaults'
 
 describe('framework behavior registry', () => {
   beforeEach(() => {
@@ -32,28 +32,26 @@ describe('framework behavior registry', () => {
     expect(() => missingBehavior('table.getData')).toThrow('Missing behavior: table.getData')
   })
 
-  it('applies defaults through behavior configuration', () => {
-    configureFrameworkBehaviors({
-      defaults: {
-        table: {
-          fieldsAlias: { title: 'Judul' },
-          fieldsClass: { title: 'truncate' },
-          fieldsType: { active: { type: 'chip' } },
-          fieldsAlign: { active: 'center' },
-        },
-        detail: {
-          fieldsAlias: { description: 'Deskripsi' },
-          fieldsType: { status: { type: 'chip' } },
-        },
-        form: {
-          fieldsAlias: { code: 'Kode' },
-          inputConfig: { code: { type: 'text', props: { required: true } } },
-        },
-        config: {
-          apiUrl: 'https://api.example.com/',
-        },
-        mode: 'custom',
+  it('applies defaults through defaults registry API', () => {
+    applyFrameworkDefaults({
+      table: {
+        fieldsAlias: { title: 'Judul' },
+        fieldsClass: { title: 'truncate' },
+        fieldsType: { active: { type: 'chip' } },
+        fieldsAlign: { active: 'center' },
       },
+      detail: {
+        fieldsAlias: { description: 'Deskripsi' },
+        fieldsType: { status: { type: 'chip' } },
+      },
+      form: {
+        fieldsAlias: { code: 'Kode' },
+        inputConfig: { code: { type: 'text', props: { required: true } } },
+      },
+      mode: 'custom',
+    })
+    applyFrameworkConfig({
+      apiUrl: 'https://api.example.com/',
     })
 
     expect(defaultTableConfig.fieldsAlias.title).toBe('Judul')
@@ -69,28 +67,24 @@ describe('framework behavior registry', () => {
   })
 
   it('deep merges defaults across repeated calls', () => {
-    configureFrameworkBehaviors({
-      defaults: {
-        table: {
-          fieldsAlias: { title: 'Judul' },
-          fieldsType: { status: { type: 'chip', props: { color: 'success' } } },
-        },
-        config: {
-          server: { timeout: 1000 },
-        },
+    applyFrameworkDefaults({
+      table: {
+        fieldsAlias: { title: 'Judul' },
+        fieldsType: { status: { type: 'chip', props: { color: 'success' } } },
       },
     })
+    applyFrameworkConfig({
+      server: { timeout: 1000 },
+    })
 
-    configureFrameworkBehaviors({
-      defaults: {
-        table: {
-          fieldsAlias: { code: 'Kode' },
-          fieldsType: { status: { props: { rounded: true } } },
-        },
-        config: {
-          server: { retries: 2 },
-        },
+    applyFrameworkDefaults({
+      table: {
+        fieldsAlias: { code: 'Kode' },
+        fieldsType: { status: { props: { rounded: true } } },
       },
+    })
+    applyFrameworkConfig({
+      server: { retries: 2 },
     })
 
     expect(defaultTableConfig.fieldsAlias.title).toBe('Judul')
@@ -103,15 +97,13 @@ describe('framework behavior registry', () => {
   })
 
   it('resets defaults when behavior registry resets for tests', () => {
-    configureFrameworkBehaviors({
-      defaults: {
-        table: { fieldsAlias: { title: 'Judul' } },
-        detail: { fieldsAlias: { title: 'Judul' } },
-        form: { fieldsAlias: { title: 'Judul' } },
-        config: { apiUrl: 'https://api.example.com/' },
-        mode: 'custom',
-      },
+    applyFrameworkDefaults({
+      table: { fieldsAlias: { title: 'Judul' } },
+      detail: { fieldsAlias: { title: 'Judul' } },
+      form: { fieldsAlias: { title: 'Judul' } },
+      mode: 'custom',
     })
+    applyFrameworkConfig({ apiUrl: 'https://api.example.com/' })
 
     resetFrameworkBehaviorsForTests()
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { parse } from '@/utils/common'
+import { parse } from '@southneuhof/utilities/parse'
 import services from '@/utils/services'
 import { computed } from 'vue'
 

@@ -21,17 +21,7 @@ const defaultFormatters: Record<string, Formatter> = {
 
 let parserConfig: Required<ParserConfig> = {
   dictionary: {},
-  formatters: {},
-}
-
-export function createParser(options?: ParserConfig) {
-  const dictionary = options?.dictionary || {}
-  const formatters = { ...defaultFormatters, ...(options?.formatters || {}) }
-
-  return (key: string, value: any): any => {
-    if (!formatters[key]) return dictionary[key]?.[value] || value
-    return formatters[key](value)
-  }
+  formatters: { ...defaultFormatters },
 }
 
 export function configureParser(options: ParserConfig) {
@@ -44,10 +34,11 @@ export function configureParser(options: ParserConfig) {
 export function resetParserConfigForTests() {
   parserConfig = {
     dictionary: {},
-    formatters: {},
+    formatters: { ...defaultFormatters },
   }
 }
 
 export function parse(key: string, value: any): any {
-  return createParser(parserConfig)(key, value)
+  if (!parserConfig.formatters[key]) return parserConfig.dictionary[key]?.[value] || value
+  return parserConfig.formatters[key](value)
 }

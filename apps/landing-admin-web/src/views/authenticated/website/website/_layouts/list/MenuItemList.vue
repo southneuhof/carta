@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
 import { keyManager } from '@/stores/keyManager';
 import { ref } from 'vue';
 import MenuItemView from './_layouts/MenuItemView.vue';

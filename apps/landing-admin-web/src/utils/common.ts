@@ -1,8 +1,3 @@
-import { dictionary } from '@/configs/dictionary'
-import { createParser } from '@southneuhof/utilities/parse'
-
-export const parse = createParser({ dictionary })
-
 export const titleCase = (s: string) =>
   s
     .replace(/^[-_]*(.)/, (_: any, c: any) => c.toUpperCase())

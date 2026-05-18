@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
+import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import services from '@/utils/services'
 import { inject, ref } from 'vue'
 import SectionEditor from '../../SectionEditor.vue'

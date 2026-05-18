@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import services from '@/utils/services';
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue';
+import { parse } from '@southneuhof/utilities';
 import { inject } from 'vue';
 import {Bar} from 'vue-chartjs'
 
@@ -28,7 +29,7 @@ import {Bar} from 'vue-chartjs'
     <div>
       <Bar
         :data="{
-          labels: data.map((item: any) =>  parseAs ? $parse(parseAs, item.label) : item.label),
+          labels: data.map((item: any) =>  parseAs ? parse(parseAs, item.label) : item.label),
           datasets: [
             {
               data: data.map((item: any) => item.value),

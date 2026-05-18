@@ -2,7 +2,7 @@
 import Form from '@southneuhof/is-vue-framework/components/composites/Form.vue';
 import { keyManager } from '@/stores/keyManager';
 import { toast } from 'vue-sonner';
-import { menuItemFormConfig } from '@/features/menu/menuItemFormConfig';
+import { menuItemFormConfig } from '@/configs/menuItemFormConfig';
 import { inject } from 'vue';
 
 const menuItem = inject<any>('menuItem')

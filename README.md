@@ -53,7 +53,7 @@ The repository is standardized on `pnpm`.
 
 ## Framework Package Flow
 
-Framework development is source-first. The sandbox web app resolves `@southneuhof/is-data-model`, `@southneuhof/is-vue-framework`, and `@southneuhof/apostle` directly to `packages/*/src` through Vite and TypeScript aliases, so framework edits work with normal Vite HMR.
+Framework development is source-first. The sandbox web app resolves `@southneuhof/is-data-model`, `@southneuhof/is-vue-framework`, and `@southneuhof/apostle` directly to `packages/*/src` through Vite and TypeScript aliases, so framework edits work with normal Vite HMR. Landing framework work follows the same source-first pattern from `packages/landing-sveltekit-framework/src`.
 
 Published package consumption is build-first. The publishable packages emit to `dist`, expose only `package.json#exports`, and are configured for GitHub Packages under the `@southneuhof` scope.
 
@@ -66,7 +66,9 @@ This monorepo is the source of truth. The individual package repositories are ge
 ```txt
 packages/is-data-model    -> https://github.com/southneuhof/is-data-model
 packages/apostle       -> https://github.com/southneuhof/apostle
+packages/utilities     -> https://github.com/southneuhof/utilities
 packages/is-vue-framework -> https://github.com/southneuhof/is-vue-framework
+packages/landing-sveltekit-framework -> https://github.com/southneuhof/landing-sveltekit-framework
 ```
 
 Open framework issues and pull requests against this monorepo, not the mirror repositories.
@@ -77,7 +79,7 @@ Maintainers can sync mirrors manually:
 pnpm sync:package-repos
 ```
 
-CI also syncs mirrors from `main` through `.github/workflows/sync-package-repos.yml`. The workflow requires a `GH_PACKAGES_TOKEN` secret that can push to the three package repositories.
+CI also syncs mirrors from `main` through `.github/workflows/sync-package-repos.yml`. The workflow requires a `GH_PACKAGES_TOKEN` secret that can push to the package repositories.
 
 ## Client Package Versions And Rollback
 

@@ -1,7 +1,7 @@
-import schema from '@southneuhof/landing-section-schema/sections/data-list'
+import dataList from '@southneuhof/landing-section-schema/sections/data-list'
 import { defineSectionEditorOverlay } from './types'
 
-export default defineSectionEditorOverlay(schema, {
+export default defineSectionEditorOverlay(dataList, {
   group: 'Utility',
   meta: {
     inputConfig: {

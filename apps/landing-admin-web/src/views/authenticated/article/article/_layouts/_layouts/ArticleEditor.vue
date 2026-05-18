@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import Chip from '@southneuhof/is-vue-framework/components/base/Chip.vue'
+import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
+import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Popover from '@southneuhof/is-vue-framework/components/base/Popover.vue'
 import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composites/ConfirmationDialog.vue'
 import Form from '@southneuhof/is-vue-framework/components/composites/Form.vue'
@@ -7,7 +11,7 @@ import { keyManager } from '@/stores/keyManager'
 import { permissions } from '@/stores/permissions'
 import { toast } from 'vue-sonner'
 import { parseSlug } from '@/utils/common'
-import { parse } from '@/utils/common'
+import { parse } from '@southneuhof/utilities/parse'
 import services from '@/utils/services'
 import type { PropType } from 'vue'
 

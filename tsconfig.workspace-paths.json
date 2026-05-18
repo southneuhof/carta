@@ -1,0 +1,53 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@client/data-model": [
+        "./packages/data-model/src/index.ts"
+      ],
+      "@client/data-model/*": [
+        "./packages/data-model/src/*"
+      ],
+      "@client/data-model/models/*": [
+        "./packages/data-model/src/models/*"
+      ],
+      "@southneuhof/apostle": [
+        "./packages/apostle/src/index.ts"
+      ],
+      "@southneuhof/apostle/*": [
+        "./packages/apostle/src/*"
+      ],
+      "@southneuhof/is-data-model": [
+        "./packages/is-data-model/src/index.ts"
+      ],
+      "@southneuhof/is-data-model/*": [
+        "./packages/is-data-model/src/*"
+      ],
+      "@southneuhof/is-vue-framework": [
+        "./packages/is-vue-framework/src/index.ts"
+      ],
+      "@southneuhof/is-vue-framework/*": [
+        "./packages/is-vue-framework/src/*"
+      ],
+      "@southneuhof/landing-sveltekit-framework": [
+        "./packages/landing-sveltekit-framework/src/index.ts"
+      ],
+      "@southneuhof/landing-sveltekit-framework/*": [
+        "./packages/landing-sveltekit-framework/src/*"
+      ],
+      "@southneuhof/landing-section-schema": [
+        "./packages/landing-section-schema/src/index.ts"
+      ],
+      "@southneuhof/landing-section-schema/*": [
+        "./packages/landing-section-schema/src/*"
+      ],
+      "@southneuhof/utilities": [
+        "./packages/utilities/src/index.ts"
+      ],
+      "@southneuhof/utilities/*": [
+        "./packages/utilities/src/*"
+      ]
+    }
+  }
+}

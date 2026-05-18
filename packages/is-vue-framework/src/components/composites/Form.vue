@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { ref, type PropType, watch, provide, onMounted, nextTick } from 'vue'
 import { evaluateFieldDependencies, type FieldDependency, type InputConfig } from '@southneuhof/is-data-model'
-import { componentTypeMap, defaultBeforeSubmit, defaultFormGetData, defaultOnError, defaultOnSubmit, defaultOnSuccess } from '@southneuhof/is-vue-framework/behaviors/form'
+import { defaultBeforeSubmit, defaultFormGetData, defaultOnError, defaultOnSubmit, defaultOnSuccess } from '@southneuhof/is-vue-framework/behaviors/form'
 import { executeValidationRules } from '@southneuhof/is-vue-framework/behaviors/validations'
 import { toast } from 'vue-sonner'
 import { useRoute } from 'vue-router'
 import { componentTypeMap as typeConfigMap } from './common/properties'
 import { keyManager } from '@southneuhof/is-vue-framework/adapters/state'
 import { defaultFormConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
+import { resolveInputComponent } from '../../renderers/inputRegistry'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
@@ -391,7 +392,7 @@ onMounted(() => {
                   </template>
                 </Suspense>
               </div>
-              <div v-else-if="componentTypeMap[inputConfig[field]?.type]">
+              <div v-else-if="resolveInputComponent(inputConfig[field]?.type)">
                 <Suspense :timeout="500">
                   <component
                     enableHelperMessage
@@ -399,7 +400,7 @@ onMounted(() => {
                     :class="inputConfig[field].props?.class"
                     :key="keyManager().value[field]"
                     :formData="formData"
-                    :is="componentTypeMap[inputConfig[field].type]"
+                    :is="resolveInputComponent(inputConfig[field].type)"
                     @validation:touch="() => handleFieldTouch(field)"
                     v-bind="{ label: fieldsAlias[field] ?? field, ...inputConfig[field].props, ...fieldDependencyData[field]?.props?.value }"
                     v-model="formData[field]"

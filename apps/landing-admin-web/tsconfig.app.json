@@ -1,15 +1,28 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.workspace-paths.json",
   "include": [
     "env.d.ts",
     "src/**/*",
     "src/**/*.vue",
-    "../../packages/data-model/src/**/*"
+    "../../packages/apostle/src/**/*.ts",
+    "../../packages/data-model/src/**/*.ts",
+    "../../packages/is-data-model/src/**/*.ts",
+    "../../packages/is-vue-framework/env.d.ts",
+    "../../packages/is-vue-framework/src/**/*.ts",
+    "../../packages/is-vue-framework/src/**/*.tsx",
+    "../../packages/is-vue-framework/src/**/*.vue",
+    "../../packages/landing-section-schema/src/**/*.ts",
+    "../../packages/landing-sveltekit-framework/src/**/*.ts",
+    "../../packages/utilities/src/**/*.ts"
   ],
   "exclude": [
-    "src/**/__tests__/*"
+    "src/**/__tests__/*",
+    "../../packages/**/__tests__/**",
+    "../../packages/**/*.spec.*",
+    "../../packages/**/*.test.*"
   ],
   "compilerOptions": {
+    "baseUrl": ".",
     "composite": true,
     "moduleSuffixes": [
       ".web",
@@ -22,26 +35,50 @@
       "vue3-google-map": [
         "./node_modules/vue3-google-map/dist/types/index.d.ts"
       ],
+      "@client/data-model": [
+        "../../packages/data-model/src/index.ts"
+      ],
       "@client/data-model/*": [
         "../../packages/data-model/src/*"
       ],
       "@client/data-model/models/*": [
         "../../packages/data-model/src/models/*"
       ],
+      "@southneuhof/apostle": [
+        "../../packages/apostle/src/index.ts"
+      ],
+      "@southneuhof/apostle/*": [
+        "../../packages/apostle/src/*"
+      ],
+      "@southneuhof/is-data-model": [
+        "../../packages/is-data-model/src/index.ts"
+      ],
+      "@southneuhof/is-data-model/*": [
+        "../../packages/is-data-model/src/*"
+      ],
+      "@southneuhof/is-vue-framework": [
+        "../../packages/is-vue-framework/src/index.ts"
+      ],
+      "@southneuhof/is-vue-framework/*": [
+        "../../packages/is-vue-framework/src/*"
+      ],
+      "@southneuhof/landing-sveltekit-framework": [
+        "../../packages/landing-sveltekit-framework/src/index.ts"
+      ],
+      "@southneuhof/landing-sveltekit-framework/*": [
+        "../../packages/landing-sveltekit-framework/src/*"
+      ],
+      "@southneuhof/landing-section-schema": [
+        "../../packages/landing-section-schema/src/index.ts"
+      ],
+      "@southneuhof/landing-section-schema/*": [
+        "../../packages/landing-section-schema/src/*"
+      ],
+      "@southneuhof/utilities": [
+        "../../packages/utilities/src/index.ts"
+      ],
       "@southneuhof/utilities/*": [
         "../../packages/utilities/src/*"
-      ],
-      "@southneuhof/is-vue-framework/components/*": [
-        "../../packages/is-vue-framework/src/components/*"
-      ],
-      "@southneuhof/is-vue-framework/adapters/*": [
-        "../../packages/is-vue-framework/src/adapters/*"
-      ],
-      "@southneuhof/is-vue-framework/behaviors/*": [
-        "../../packages/is-vue-framework/src/behaviors/*"
-      ],
-      "@southneuhof/is-vue-framework/services/*": [
-        "../../packages/is-vue-framework/src/services/*"
       ]
     },
     "module": "esnext",

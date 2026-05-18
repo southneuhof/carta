@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { configureFrameworkBehaviors, resetFrameworkBehaviorsForTests } from '../behaviors'
-import { defaultDetailConfig, defaultFormConfig, defaultTableConfig } from '../defaults'
+import { resetFrameworkBehaviorsForTests } from '../behaviors'
+import { applyFrameworkDefaults, defaultDetailConfig, defaultFormConfig, defaultTableConfig } from '../defaults'
 
 describe('component default resolution compatibility', () => {
   beforeEach(() => {
@@ -8,14 +8,12 @@ describe('component default resolution compatibility', () => {
   })
 
   it('matches Table.vue default resolution shape', () => {
-    configureFrameworkBehaviors({
-      defaults: {
-        table: {
-          fieldsAlias: { name: 'Nama Kolom' },
-          fieldsClass: { name: 'truncate' },
-          fieldsType: { active: { type: 'chip' } },
-          fieldsAlign: { active: 'center' },
-        },
+    applyFrameworkDefaults({
+      table: {
+        fieldsAlias: { name: 'Nama Kolom' },
+        fieldsClass: { name: 'truncate' },
+        fieldsType: { active: { type: 'chip' } },
+        fieldsAlign: { active: 'center' },
       },
     })
 
@@ -33,12 +31,10 @@ describe('component default resolution compatibility', () => {
   })
 
   it('matches Detail.vue default resolution shape', () => {
-    configureFrameworkBehaviors({
-      defaults: {
-        detail: {
-          fieldsAlias: { name: 'Nama Detail' },
-          fieldsType: { name: { type: 'html' } },
-        },
+    applyFrameworkDefaults({
+      detail: {
+        fieldsAlias: { name: 'Nama Detail' },
+        fieldsType: { name: { type: 'html' } },
       },
     })
 
@@ -52,12 +48,10 @@ describe('component default resolution compatibility', () => {
   })
 
   it('matches Form.vue default resolution shape', () => {
-    configureFrameworkBehaviors({
-      defaults: {
-        form: {
-          fieldsAlias: { name: 'Nama Form' },
-          inputConfig: { name: { type: 'text', props: { required: true } } },
-        },
+    applyFrameworkDefaults({
+      form: {
+        fieldsAlias: { name: 'Nama Form' },
+        inputConfig: { name: { type: 'text', props: { required: true } } },
       },
     })
 

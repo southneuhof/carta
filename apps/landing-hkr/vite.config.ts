@@ -20,6 +20,32 @@ export default defineConfig({
 				replacement: fileURLToPath(
 					new URL('../../packages/landing-sveltekit-framework/src/', import.meta.url)
 				)
+			},
+			{
+				find: /^@southneuhof\/utilities$/,
+				replacement: fileURLToPath(new URL('../../packages/utilities/src/index.ts', import.meta.url))
+			},
+			{
+				find: '@southneuhof/utilities/',
+				replacement: fileURLToPath(new URL('../../packages/utilities/src/', import.meta.url))
+			},
+			{
+				find: /^@southneuhof\/apostle$/,
+				replacement: fileURLToPath(new URL('../../packages/apostle/src/index.ts', import.meta.url))
+			},
+			{
+				find: '@southneuhof/apostle/',
+				replacement: fileURLToPath(new URL('../../packages/apostle/src/', import.meta.url))
+			},
+			{
+				find: /^@southneuhof\/landing-section-schema$/,
+				replacement: fileURLToPath(
+					new URL('../../packages/landing-section-schema/src/index.ts', import.meta.url)
+				)
+			},
+			{
+				find: '@southneuhof/landing-section-schema/',
+				replacement: fileURLToPath(new URL('../../packages/landing-section-schema/src/', import.meta.url))
 			}
 		]
 	},

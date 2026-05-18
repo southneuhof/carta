@@ -14,7 +14,7 @@ type SectionSchema = {
 }
 type SectionSchemaRegistry = Record<string, SectionSchema>
 
-const schemaModules = import.meta.glob('../../../../../packages/landing-section-schema/src/sections/**/*.ts', {
+const schemaModules = import.meta.glob('@southneuhof/landing-section-schema/sections/**/*.ts', {
   eager: true,
   import: 'default',
 })

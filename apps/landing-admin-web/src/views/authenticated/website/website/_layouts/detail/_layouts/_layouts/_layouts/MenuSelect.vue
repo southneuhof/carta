@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
-import services from '@/utils/services'; // Assuming @ points to src/
+import services from '@/utils/services';
 
 // Define MenuItem and MenuItemTranslation interfaces based on the schema
 interface MenuItemTranslation {
