@@ -22,7 +22,6 @@
     "../../packages/**/*.test.*"
   ],
   "compilerOptions": {
-    "baseUrl": ".",
     "composite": true,
     "moduleSuffixes": [
       ".web",
