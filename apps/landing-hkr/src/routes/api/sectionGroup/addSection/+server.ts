@@ -4,7 +4,7 @@ import { ensureDraftState } from '$lib/utils/page'
 import { requirePermission } from '$lib/utils/routing'
 import { requirePageTranslationAccess } from '$lib/app/api/models/pageTranslation'
 import sectionSchemas from '@southneuhof/landing-section-schema'
-import { createSectionFromSchema } from '@southneuhof/landing-sveltekit-framework/server'
+import { createNestedSectionFromSchemaData, createSectionFromSchema } from '@southneuhof/landing-sveltekit-framework/server'
 
 export async function POST(event) {
   const { request, locals } = event;
@@ -13,7 +13,6 @@ export async function POST(event) {
     requirePermission(locals, 'create-section')
 
     if (!body.section_group_id) throw 'section_group_id is required'
-    if (!body.section_type_code) throw 'section_type_code is required'
     if (body.page_translation_id) {
       await requirePageTranslationAccess(event, { id: body.page_translation_id })
     }
@@ -44,15 +43,23 @@ export async function POST(event) {
       }
     }
 
-    const result = await createSectionFromSchema({
-      prisma,
-      sectionSchemas,
-      sectionGroupId,
-      sectionTypeCode: body.section_type_code,
-      name: body.name,
-      description: body.description,
-      meta: body.meta,
-    })
+    const result = body.section_type_code
+      ? await createSectionFromSchema({
+          prisma,
+          sectionSchemas,
+          sectionGroupId,
+          sectionTypeCode: body.section_type_code,
+          name: body.name,
+          description: body.description,
+          meta: body.meta,
+        })
+      : await createNestedSectionFromSchemaData({
+          prisma,
+          sectionSchemas,
+          sectionGroupId,
+          name: body.name,
+          description: body.description,
+        })
 
     return success({ message: 'Section created', data: result.section })
   } catch (err) {

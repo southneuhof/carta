@@ -179,6 +179,23 @@ export function buildCreateSectionPayload(input: { schemaCode: string; sectionGr
   }
 }
 
+export function buildCreateNestedSectionPayload(input: {
+  sectionGroupId: string
+  pageTranslationId?: string
+  name?: string
+  description?: string | null
+}) {
+  const payload: Record<string, string> = {
+    section_group_id: input.sectionGroupId,
+  }
+
+  if (input.pageTranslationId) payload.page_translation_id = input.pageTranslationId
+  if (input.name) payload.name = input.name
+  if (input.description) payload.description = input.description
+
+  return payload
+}
+
 export function matchSchemaSlotsToStructure(schemaCode: string, structure: SectionStructureItem[]): MatchedSlot[] {
   return matchRootSchemaSlotsToStructure(schemaCode, structure)
 }

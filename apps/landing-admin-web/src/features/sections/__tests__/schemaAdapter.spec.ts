@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   SUPPORTED_SECTION_SCHEMA_CODES,
+  buildCreateNestedSectionPayload,
   buildCreateSectionPayload,
   getAddSectionOptions,
   getSectionPanelState,
@@ -201,5 +202,18 @@ describe('section schema adapter', () => {
     expect(payload.page_translation_id).toBe('pt-1')
     expect(payload.meta).toMatchObject({ width_preset: 'md' })
     expect(payload).not.toHaveProperty('config')
+  })
+
+  it('builds nested section create payload without section type code', () => {
+    const payload = buildCreateNestedSectionPayload({
+      sectionGroupId: 'sg-nested',
+      pageTranslationId: 'pt-1',
+    })
+
+    expect(payload).toMatchObject({
+      section_group_id: 'sg-nested',
+      page_translation_id: 'pt-1',
+    })
+    expect(payload).not.toHaveProperty('section_type_code')
   })
 })

@@ -7,9 +7,13 @@ import SectionEditor from '../../SectionEditor.vue'
 import { keyManager } from '@/stores/keyManager'
 import Draggable from 'vuedraggable'
 import { toast } from 'vue-sonner'
+import type { MatchedSchemaSlot, SupportedSectionSlotEditorContext } from '@/features/sections/schemaAdapter'
+import type { SectionData } from '../../SectionEditor.vue'
 
 const props = defineProps<{
   sectionGroupID: string
+  nestedParentMatch?: MatchedSchemaSlot | SupportedSectionSlotEditorContext
+  parentSectionData?: SectionData | null
 }>()
 
 const { data: sectionGroupData } = await services.detail('sectionGroup', props.sectionGroupID)
@@ -58,6 +62,8 @@ function handleSectionReorder(event: any) {
         v-if="activeSectionIndex != null"
         asChild
         :sectionID="sectionGroupData.sections[activeSectionIndex].id"
+        :nestedParentMatch="nestedParentMatch"
+        :parentSectionDataOverride="parentSectionData"
         :key="`${keyManager().value[`section-${sectionGroupData.sections[activeSectionIndex].id}`]}${activeSectionIndex}`"
       />
     </Suspense>

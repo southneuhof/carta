@@ -6,15 +6,17 @@ import { toast } from 'vue-sonner'
 import { keyManager } from '@/stores/keyManager'
 import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composites/ConfirmationDialog.vue'
 import SectionSettings from './_layouts/Section/SectionSettings.vue'
-import { computed, inject, provide, ref, watch } from 'vue'
+import { computed, inject, provide, ref, unref, watch } from 'vue'
 import GalleryEditor from './_layouts/Gallery/GalleryEditor.vue'
 import SectionGroupEditor from './_layouts/SectionGroup/SectionGroupEditor.vue'
 import { parse } from '@southneuhof/utilities/parse'
 import {
   getSectionPanelState,
   getSupportedEditorConfig,
-  matchSchemaSlotsToStructure,
-  type SupportedSectionSlotEditor,
+  matchNestedSchemaSlotsToStructure,
+  matchRootSchemaSlotsToStructure,
+  type MatchedSchemaSlot,
+  type SupportedSectionSlotEditorContext,
 } from '@/features/sections/schemaAdapter'
 import UnsupportedSectionPanel from '@/components/sections/UnsupportedSectionPanel.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
@@ -46,26 +48,54 @@ export type SectionData = {
 const props = defineProps<{
   asChild?: boolean
   sectionID: string
+  nestedParentMatch?: MatchedSchemaSlot | SupportedSectionSlotEditorContext
+  parentSectionDataOverride?: SectionData | null
 }>()
 
 const pageTranslation = inject<any>('pageTranslation')
 const sectionData = ref<SectionData>((await services.detail('section', props.sectionID)).data)
 
+const injectedParentSectionData = inject<any>('sectionData', null)
+const parentSectionData = computed(() => {
+  if (props.parentSectionDataOverride !== undefined) return props.parentSectionDataOverride
+  return unref(injectedParentSectionData) ?? null
+})
+const providedSectionData = computed(() => ({
+  ...sectionData.value,
+  parentSectionData: parentSectionData.value,
+}))
+const currentSectionData = computed(() => sectionData.value)
+const nestedParentEditor = computed<SupportedSectionSlotEditorContext | null>(() => {
+  if (!props.nestedParentMatch) return null
+  return 'editor' in props.nestedParentMatch ? props.nestedParentMatch.editor : props.nestedParentMatch
+})
 
-const parentSectionData = inject<any>('sectionData')
+provide('sectionData', providedSectionData)
 
-provide('sectionData', computed(() => ({ ...sectionData.value, parentSectionData })))
-
-const panelState = computed(() => getSectionPanelState(sectionData.value))
+const isNestedSchemaMode = computed(() => Boolean(nestedParentEditor.value?.data))
+const panelState = computed(() => {
+  if (isNestedSchemaMode.value) return { kind: 'nested' as const }
+  return getSectionPanelState(sectionData.value)
+})
 const editorConfig = computed(() =>
   panelState.value.kind === 'supported' ? getSupportedEditorConfig(panelState.value.code) : null,
+)
+const unsupportedViewModel = computed(() =>
+  panelState.value.kind === 'unsupported' ? panelState.value.viewModel : null,
 )
 
 provide('sectionConfig', editorConfig)
 
-const matchedSlots = computed(() =>
-  editorConfig.value ? matchSchemaSlotsToStructure(editorConfig.value.code, sectionData.value.structure ?? []) : [],
-)
+const matchedSlots = computed<MatchedSchemaSlot[]>(() => {
+  if (nestedParentEditor.value?.data && props.nestedParentMatch) {
+    return matchNestedSchemaSlotsToStructure({
+      parentMatch: props.nestedParentMatch,
+      structure: sectionData.value.structure ?? [],
+    })
+  }
+  if (panelState.value.kind !== 'supported') return []
+  return matchRootSchemaSlotsToStructure(panelState.value.code, sectionData.value.structure ?? [])
+})
 
 const isOpen = ref(Boolean(props.asChild))
 
@@ -81,12 +111,12 @@ function firstItem(match: { items: Array<{ id?: string | number }> }) {
   return match.items[0]
 }
 
-function slotEditor(slotKey: string): SupportedSectionSlotEditor | undefined {
-  return editorConfig.value?.slots.find((slot) => slot.key === slotKey)
+function slotEditor(match: MatchedSchemaSlot): SupportedSectionSlotEditorContext {
+  return match.editor
 }
 
-function slotLabel(slotKey: string) {
-  return slotEditor(slotKey)?.label ?? slotKey
+function slotLabel(match: MatchedSchemaSlot) {
+  return match.editor.label ?? match.slotKey
 }
 </script>
 
@@ -159,22 +189,21 @@ function slotLabel(slotKey: string) {
 
       <template v-if="isOpen">
         <UnsupportedSectionPanel
-          v-if="panelState.kind === 'unsupported'"
-          :sectionName="panelState.viewModel.sectionName"
-          :sectionTypeCode="panelState.viewModel.sectionTypeCode"
-          :visible="panelState.viewModel.visible"
-          :updatedAt="panelState.viewModel.updatedAt"
-          :message="panelState.viewModel.message"
+          v-if="unsupportedViewModel"
+          :sectionName="unsupportedViewModel.sectionName"
+          :sectionTypeCode="unsupportedViewModel.sectionTypeCode"
+          :visible="unsupportedViewModel.visible"
+          :updatedAt="unsupportedViewModel.updatedAt"
+          :message="unsupportedViewModel.message"
         />
 
         <div v-else class="flex flex-col gap-2">
-          {{ {parentSectionData} }}
-          <div v-for="matched in matchedSlots" :key="matched.slotKey" class="flex flex-col gap-4">
+          <div v-for="matched in matchedSlots" :key="matched.pathKey" class="flex flex-col gap-4">
             <component
               v-if="matched.editor.component && matched.items.length"
               :is="matched.editor.component"
-              :slotConfig="slotEditor(matched.slotKey)"
-              :sectionData="{ ...sectionData, parentSectionData }"
+              :slotConfig="slotEditor(matched)"
+              :sectionData="providedSectionData"
               :objectID="String(matched.items[0].id)"
             />
 
@@ -183,9 +212,9 @@ function slotLabel(slotKey: string) {
                 v-if="firstItem(matched)?.id"
                 :contentID="String(firstItem(matched)?.id)"
                 :key="keyManager().value[`content-${firstItem(matched)?.id}`]"
-                :slotConfig="slotEditor(matched.slotKey)"
-                :sectionData="{ ...sectionData, parentSectionData }"
-                :name="slotLabel(matched.slotKey)"
+                :slotConfig="slotEditor(matched)"
+                :sectionData="providedSectionData"
+                :name="slotLabel(matched)"
               />
               <Card v-else class="text-sm text-muted">No data found for this slot.</Card>
             </template>
@@ -196,9 +225,9 @@ function slotLabel(slotKey: string) {
                   v-for="item in matched.items"
                   :galleryID="String(item.id)"
                   :key="keyManager().value[`gallery-${item.id}`]"
-                  :slotConfig="slotEditor(matched.slotKey)"
-                  :sectionData="{ ...sectionData, parentSectionData }"
-                  :name="slotLabel(matched.slotKey)"
+                  :slotConfig="slotEditor(matched)"
+                  :sectionData="providedSectionData"
+                  :name="slotLabel(matched)"
                 />
               </template>
               <Card v-else class="text-sm text-muted">No data found for this slot.</Card>
@@ -209,6 +238,8 @@ function slotLabel(slotKey: string) {
                 <SectionGroupEditor
                   v-for="item in matched.items"
                   :sectionGroupID="String(item.id)"
+                  :nestedParentMatch="matched.editor.data ? matched : undefined"
+                  :parentSectionData="currentSectionData"
                   :key="keyManager().value[`sectionGroupOrchestrator-${item.id}`]"
                 />
               </template>
@@ -221,6 +252,8 @@ function slotLabel(slotKey: string) {
                   v-for="item in matched.items"
                   asChild
                   :sectionID="String(item.id)"
+                  :nestedParentMatch="matched.editor.data ? matched : undefined"
+                  :parentSectionDataOverride="currentSectionData"
                   :key="keyManager().value[`section-${item.id}`]"
                 />
               </template>

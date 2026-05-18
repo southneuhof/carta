@@ -34,6 +34,11 @@ describe('shared section schema meta', () => {
   });
 
   it('defines recursive data-list child section group schema', () => {
+    expect(dataList.data.content).toMatchObject({
+      type: 'content',
+      order: 1,
+    });
+
     expect(dataList.data.childSections).toMatchObject({
       type: 'sectionGroup',
       order: 2,
@@ -46,7 +51,7 @@ describe('shared section schema meta', () => {
     });
   });
 
-  it('preserves nested data slot typing', () => {
+  it('preserves nested data-list slot typing', () => {
     type ChildSectionSlots = NonNullable<typeof dataList.data.childSections.data>;
     const nestedGalleryType: ChildSectionSlots['gallery']['type'] = 'gallery';
     expect(nestedGalleryType).toBe('gallery');
