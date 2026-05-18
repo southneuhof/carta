@@ -1,14 +1,24 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
-import { RECAPTCHA_SECRETKEY } from '$env/static/private';
+import { env } from '$env/dynamic/private';
+
+function getRecaptchaSecret() {
+  return env.RECAPTCHA_SECRETKEY ?? env.RECAPTCHA_SECRET_KEY ?? '';
+}
 
 async function verifyRecaptcha(token: string): Promise<{ success: boolean; score?: number; errorCodes?: string[] }> {
+  const recaptchaSecret = getRecaptchaSecret();
+
+  if (!recaptchaSecret) {
+    return { success: false, errorCodes: ['missing-secret'] };
+  }
+
   try {
     const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: `secret=${encodeURIComponent(RECAPTCHA_SECRETKEY)}&response=${encodeURIComponent(token)}`,
+      body: `secret=${encodeURIComponent(recaptchaSecret)}&response=${encodeURIComponent(token)}`,
     });
 
     return await response.json();
