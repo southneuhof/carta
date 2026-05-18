@@ -1,5 +1,26 @@
 # @southneuhof/is-vue-framework
 
+## 1.0.0
+
+### Major Changes
+
+- 92ab493: Extract framework utility modules into the new `@southneuhof/utilities` package.
+
+  ### Breaking changes
+
+  - Remove `@southneuhof/is-vue-framework/utils/*` exports.
+  - Migrate all utility imports to `@southneuhof/utilities/*`.
+
+  ### Added
+
+  - New publishable package `@southneuhof/utilities` with utility modules and tests moved from `@southneuhof/is-vue-framework`.
+  - Monorepo release and sync tooling now includes `@southneuhof/utilities` and repository sync to `https://github.com/southneuhof/utilities`.
+
+### Patch Changes
+
+- Updated dependencies [92ab493]
+  - @southneuhof/utilities@0.1.0
+
 ## 0.0.1
 
 ### Patch Changes
