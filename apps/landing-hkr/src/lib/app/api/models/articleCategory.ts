@@ -5,6 +5,7 @@ import { exception } from "$lib/utils/response";
 import prisma from "$lib/utils/prisma";
 import type { RequestEvent } from "@sveltejs/kit";
 import type { ArticleCategory, Language } from "@prisma/client";
+import { hasGlobalPermissionAccess } from "$lib/utils/routing";
 
 export async function requireArticleCategoryAccess(event: RequestEvent, input: Record<string, any>) {
   const id = input.id ?? input.article_category_id;
@@ -68,8 +69,7 @@ export default {
       }
     },
     where: ({locals}) => {
-      const isAdmin = Boolean(locals?.isPrivilegedRole);
-      if (isAdmin) return undefined
+      if (hasGlobalPermissionAccess(locals)) return undefined
       const roleId = locals.user?.role_id;
       if (!roleId) {
         return { id: '__no_access__' };

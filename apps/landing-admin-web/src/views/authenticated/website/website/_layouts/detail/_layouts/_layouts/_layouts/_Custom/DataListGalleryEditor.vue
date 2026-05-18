@@ -188,7 +188,7 @@ import { getSmallestChildObject } from '@/utils/common';
   <Card>
     <div class="flex flex-row items-center gap-4 justify-between">
       <div class="flex flex-row items-center gap-2">
-        <Icon>category</Icon>
+        <Icon name="folder">category</Icon>
         <p class="text-xl font-semibold">Data</p>
         <div v-if="loading" class="h-[34px] flex items-center justify-center">
           <Spinner/>
@@ -201,13 +201,25 @@ import { getSmallestChildObject } from '@/utils/common';
           }"
           variant="tonal"
           class="ml-4"
+          kind="icon"
         >
-          <Icon>chevron_left</Icon>Kembali
+          <template #icon>
+            <Icon name="arrow-right-s"></Icon>Kembali
+          </template>
         </Button>
       </div>
       <div v-if="!loading" class="flex flex-row items-center gap-4">
-        <Button v-if="isOpen && currentView === 'list' && pageTranslation?.status_code === 'DRAFT'" class="h-[34px]" @click="() => currentView = 'create'"><Icon>add</Icon>Tambah</Button>
-        <Button @click="() => isOpen = !isOpen" variant="standard"><Icon>{{ isOpen ? 'expand_less' : 'expand_more' }}</Icon></Button>
+        <Button v-if="isOpen && currentView === 'list' && pageTranslation?.status_code === 'DRAFT'" class="h-[34px]" @click="() => currentView = 'create'">
+          <template #icon>
+            <Icon name="add"></Icon>
+          </template>
+          Tambah
+        </Button>
+        <Button @click="() => isOpen = !isOpen" variant="standard" kind="icon">
+          <template #icon>
+            <Icon :name="isOpen ? 'arrow-up-s' : 'arrow-down-s'"></Icon>
+          </template>
+        </Button>
       </div>
     </div>
     <div v-show="isOpen" class="flex flex-col gap-4">
@@ -223,7 +235,7 @@ import { getSmallestChildObject } from '@/utils/common';
             >
               <template #list-rowActions="{data}">
                 <div class="flex flex-row items-center gap-2">
-                  <Icon v-if="pageTranslation?.status_code === 'DRAFT'" class="cursor-move mr-3">drag_indicator</Icon>
+                  <Icon v-if="pageTranslation?.status_code === 'DRAFT'" class="cursor-move mr-3" name="draggable"></Icon>
                   <Button
                     color="info"
 
@@ -232,7 +244,7 @@ import { getSmallestChildObject } from '@/utils/common';
                       currentView = 'detail'
                     }"
                   >
-                    <Icon>info</Icon>
+                    <Icon name="information"></Icon>
                   </Button>
                   <template v-if="pageTranslation?.status_code === 'DRAFT'">
                     <Button
@@ -243,7 +255,7 @@ import { getSmallestChildObject } from '@/utils/common';
                         currentView = 'update'
                       }"
                     >
-                      <Icon>edit</Icon>
+                      <Icon name="edit"></Icon>
                     </Button>
                     <ConfirmationDialog
                       :onConfirm="() => {
@@ -255,7 +267,7 @@ import { getSmallestChildObject } from '@/utils/common';
                       }"
                     >
                       <template #trigger>
-                        <Button color="error"><Icon>delete_forever</Icon></Button>
+                        <Button color="error"><Icon name="delete-bin"></Icon></Button>
                       </template>
                     </ConfirmationDialog>
                   </template>

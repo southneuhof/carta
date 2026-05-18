@@ -5,21 +5,10 @@ const articleCategoryModel: ModelConfig = withModelDefaults({
   name: 'articleCategory',
   title: 'Kategori Artikel',
   modelAPI: 'articleCategory',
-  fields: ['translations', 'articles', 'allowedRoles', 'created_at', 'updated_at'],
-  fieldsAlias: {
-    allowedRoles: 'Allowed Roles',
-  },
-  view: {
-    detail: {
-      fields: ['translations', 'allowedRoles', 'created_at', 'updated_at'],
-    },
-  },
+  fields: ['name', 'created_at', 'updated_at'],
   transaction: {
-    fields: ['translations'],
-    inputConfig: {
-      translations: { type: 'textarea' },
-    },
-  },
+    fields: ['name']
+  }
 })
 
 export default articleCategoryModel

@@ -14,7 +14,13 @@ import {
 export { isProtectedRoute };
 
 export function isBypassAllPermissionsEnabled(): boolean {
-  const value = env.BYPASS_ALL_PERMISSIONS?.trim().toLowerCase();
+  const value = (
+    env.BYPASS_ALL_PERMISSIONS ??
+    env.BYPASS_ALL_PERMISSION ??
+    env.VITE_APP_BYPASS_ALL_PERMISSIONS ??
+    env.VITE_APP_BYPASS_ALL_PERMISSION
+  )?.trim().toLowerCase();
+
   return value === 'true' || value === '1' || value === 'yes' || value === 'on';
 }
 

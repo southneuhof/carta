@@ -50,6 +50,8 @@ const props = defineProps<{
 
 const pageTranslation = inject<any>('pageTranslation')
 const sectionData = ref<SectionData>((await services.detail('section', props.sectionID)).data)
+
+
 const parentSectionData = inject<any>('sectionData')
 
 provide('sectionData', computed(() => ({ ...sectionData.value, parentSectionData })))
@@ -166,6 +168,7 @@ function slotLabel(slotKey: string) {
         />
 
         <div v-else class="flex flex-col gap-2">
+          {{ {parentSectionData} }}
           <div v-for="matched in matchedSlots" :key="matched.slotKey" class="flex flex-col gap-4">
             <component
               v-if="matched.editor.component && matched.items.length"
