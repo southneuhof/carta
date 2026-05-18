@@ -12,7 +12,7 @@
   import TextareaInput from "$lib/app/components/input/TextareaInput.svelte";
   import TextInput from "$lib/app/components/input/TextInput.svelte";
   import {Recaptcha, recaptcha, observer} from "$lib/app/components/util/Recaptcha";
-  import { PUBLIC_RECAPTCHA_SITEKEY } from "$env/static/public";
+  import { env } from "$env/dynamic/public";
   import { getLocale } from "$lib/paraglide/runtime";
   import { m } from "$lib/paraglide/messages";
 
@@ -95,6 +95,7 @@
   }
 
   let recaptchaError = $state<string | null>(null)
+  const recaptchaSiteKey = env.PUBLIC_RECAPTCHA_SITEKEY ?? env.PUBLIC_RECAPTCHA_SITE_KEY ?? '';
 
   const onCaptchaInitError = (event: any) => {
     console.log("recaptcha init has failed.", event);
@@ -107,7 +108,7 @@
 </script>
 
 <Recaptcha
-  sitekey={PUBLIC_RECAPTCHA_SITEKEY}
+  sitekey={recaptchaSiteKey}
   badge="topright"
   size="invisible"
   on:success={submitForm}
