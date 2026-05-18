@@ -109,9 +109,14 @@ export default defineSectionEditorOverlay(dataList, {
     },
     childSections: {
       label: 'Child Sections',
-      component: defineAsyncComponent(() =>
-        import('@/views/authenticated/website/website/_layouts/detail/_layouts/_layouts/_layouts/_Custom/DataListGalleryEditor.vue')
-      ),
+      slots: {
+        gallery: {
+          label: 'Data',
+          component: defineAsyncComponent(() =>
+            import('@/views/authenticated/website/website/_layouts/detail/_layouts/_layouts/_layouts/_Custom/DataListGalleryEditor.vue')
+          ),
+        },
+      },
     },
   },
 })

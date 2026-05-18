@@ -20,6 +20,13 @@ export default defineSectionSchema({
   },
   data: {
     content: { type: 'content', order: 1 },
-    childSections: { type: 'sectionGroup', order: 1, many: true },
+    childSections: {
+      type: 'sectionGroup',
+      order: 2,
+      many: true,
+      data: {
+        gallery: { type: 'gallery', order: 1 },
+      },
+    },
   },
 });

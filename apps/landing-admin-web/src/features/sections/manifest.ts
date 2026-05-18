@@ -3,6 +3,7 @@ type SectionSchemaSlot = {
   type: SectionSchemaSlotType
   order: number
   many?: boolean
+  data?: Record<string, SectionSchemaSlot>
 }
 type SectionSchema = {
   code: string

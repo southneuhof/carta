@@ -5,6 +5,9 @@ import {
   getAddSectionOptions,
   getSectionPanelState,
   getSupportedEditorConfig,
+  matchNestedSchemaSlotsToStructure,
+  matchRootSchemaSlotsToStructure,
+  matchSchemaDataToStructure,
   matchSchemaSlotsToStructure,
   supportedSectionSchemas,
 } from '../schemaAdapter'
@@ -64,7 +67,105 @@ describe('section schema adapter', () => {
 
     const dataListConfig = getSupportedEditorConfig('data-list')
     const childSections = dataListConfig?.slots.find((slot) => slot.key === 'childSections')
-    expect(childSections?.component).toBeDefined()
+    expect(childSections?.component).toBeUndefined()
+    expect(childSections?.slots?.gallery?.component).toBeDefined()
+  })
+
+  it('exposes recursive slot schema and nested overlay config', () => {
+    const dataListConfig = getSupportedEditorConfig('data-list')
+    const childSections = dataListConfig?.slots.find((slot) => slot.key === 'childSections')
+
+    expect(childSections?.type).toBe('sectionGroup')
+    expect(childSections?.order).toBe(2)
+    expect(childSections?.data?.gallery).toMatchObject({
+      type: 'gallery',
+      order: 1,
+    })
+    expect(childSections?.slots?.gallery?.component).toBeDefined()
+  })
+
+  it('matches root schema slots with path-aware context', () => {
+    const matches = matchRootSchemaSlotsToStructure('data-list', [
+      { id: 'content-1', type: 'content', order: 1 },
+      { id: 'group-1', type: 'sectionGroup', order: 2 },
+    ])
+
+    const content = matches.find((match) => match.pathKey === 'content')
+    const childSections = matches.find((match) => match.pathKey === 'childSections')
+
+    expect(content?.items.map((item) => item.id)).toEqual(['content-1'])
+    expect(content?.editor.path).toEqual(['content'])
+    expect(content?.editor.fields).toEqual(['subtitle', 'title', 'description'])
+
+    expect(childSections?.items.map((item) => item.id)).toEqual(['group-1'])
+    expect(childSections?.editor.path).toEqual(['childSections'])
+    expect(childSections?.editor.type).toBe('sectionGroup')
+    expect(childSections?.editor.data?.gallery).toMatchObject({ type: 'gallery', order: 1 })
+    expect(childSections?.editor.slots?.gallery?.component).toBeDefined()
+    expect(childSections?.editor.component).toBeUndefined()
+  })
+
+  it('matches nested sectionGroup-owned schema data against a child section structure', () => {
+    const rootMatches = matchRootSchemaSlotsToStructure('data-list', [
+      { id: 'group-1', type: 'sectionGroup', order: 2 },
+    ])
+
+    const childSections = rootMatches.find((match) => match.pathKey === 'childSections')
+    if (!childSections) throw new Error('Expected childSections match')
+
+    const nestedMatches = matchNestedSchemaSlotsToStructure({
+      parentMatch: childSections,
+      structure: [
+        { id: 'gallery-1', type: 'gallery', order: 1 },
+      ],
+    })
+
+    const gallery = nestedMatches.find((match) => match.pathKey === 'childSections.gallery')
+
+    expect(gallery?.slotKey).toBe('gallery')
+    expect(gallery?.path).toEqual(['childSections', 'gallery'])
+    expect(gallery?.items.map((item) => item.id)).toEqual(['gallery-1'])
+    expect(gallery?.editor.type).toBe('gallery')
+    expect(gallery?.editor.component).toBeDefined()
+  })
+
+  it('does not match nested custom gallery overlay against a non-gallery runtime item', () => {
+    const rootMatches = matchRootSchemaSlotsToStructure('data-list', [
+      { id: 'group-1', type: 'sectionGroup', order: 2 },
+    ])
+
+    const childSections = rootMatches.find((match) => match.pathKey === 'childSections')
+    if (!childSections) throw new Error('Expected childSections match')
+
+    const nestedMatches = matchNestedSchemaSlotsToStructure({
+      parentMatch: childSections,
+      structure: [
+        { id: 'wrong-1', type: 'sectionGroup', order: 1 },
+      ],
+    })
+
+    const gallery = nestedMatches.find((match) => match.pathKey === 'childSections.gallery')
+
+    expect(gallery?.items).toEqual([])
+    expect(gallery?.editor.component).toBeDefined()
+  })
+
+  it('preserves many=false and many=true behavior in generic schema data matching', () => {
+    const matches = matchSchemaDataToStructure({
+      schemaData: {
+        singleGallery: { type: 'gallery', order: 1 },
+        manyGallery: { type: 'gallery', order: 2, many: true },
+      },
+      structure: [
+        { id: 'single-a', type: 'gallery', order: 1 },
+        { id: 'single-b', type: 'gallery', order: 1 },
+        { id: 'many-a', type: 'gallery', order: 2 },
+        { id: 'many-b', type: 'gallery', order: 2 },
+      ],
+    })
+
+    expect(matches.find((match) => match.slotKey === 'singleGallery')?.items.map((item) => item.id)).toEqual(['single-a'])
+    expect(matches.find((match) => match.slotKey === 'manyGallery')?.items.map((item) => item.id)).toEqual(['many-a', 'many-b'])
   })
 
   it('exposes shared section meta settings to the editor config', () => {

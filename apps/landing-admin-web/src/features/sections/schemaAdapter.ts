@@ -4,7 +4,14 @@ import type { InputConfig } from '@southneuhof/is-data-model'
 import type { Component } from 'vue'
 
 type SectionSchemaSlotType = 'content' | 'gallery' | 'section' | 'sectionGroup'
-type SectionSchemaSlot = { type: SectionSchemaSlotType; order: number; many?: boolean }
+type SectionSchemaSlot = {
+  type: SectionSchemaSlotType
+  order: number
+  many?: boolean
+  data?: Record<string, SectionSchemaSlot>
+}
+export type SectionSchemaData = Record<string, SectionSchemaSlot>
+export type SectionSlotPath = string[]
 type SectionSchemaMeta = {
   fields?: readonly string[]
   inputConfig?: Record<string, any>
@@ -12,7 +19,7 @@ type SectionSchemaMeta = {
   defaultValues?: Record<string, unknown>
   getInitialData?: () => Promise<Record<string, unknown>>
 }
-type SectionSchema = { code: string; info?: { name?: string; description?: string }; meta?: SectionSchemaMeta; data: Record<string, SectionSchemaSlot> }
+type SectionSchema = { code: string; info?: { name?: string; description?: string }; meta?: SectionSchemaMeta; data: SectionSchemaData }
 type SectionSchemaRegistry = Record<string, SectionSchema>
 
 const sharedSectionSchemas = sectionSchemas as SectionSchemaRegistry
@@ -32,6 +39,22 @@ export type SupportedSectionSlotEditor = {
   inputConfig?: InputConfig
   fieldAliases?: Record<string, string>
   component?: Component
+  data?: SectionSchemaData
+  slots?: Record<string, SupportedSectionSlotOverlay>
+}
+export type SupportedSectionSlotOverlay = {
+  label?: string
+  fields?: string[]
+  fieldAliases?: Record<string, string>
+  inputConfig?: InputConfig
+  component?: Component
+  slots?: Record<string, SupportedSectionSlotOverlay>
+}
+export type SupportedSectionSlotEditorContext = SupportedSectionSlotEditor & {
+  path: SectionSlotPath
+  pathKey: string
+  data?: SectionSchemaData
+  slots?: Record<string, SupportedSectionSlotOverlay>
 }
 export type SupportedSectionEditorConfig = {
   code: SupportedSectionSchemaCode
@@ -43,6 +66,14 @@ export type AddSectionOption = { code: SupportedSectionSchemaCode; name: string;
 export type UnsupportedSectionViewModel = { sectionName: string; sectionTypeCode: string; visible: boolean; updatedAt: string | null; message: string }
 export type SectionPanelState = { kind: 'supported'; code: SupportedSectionSchemaCode } | { kind: 'unsupported'; viewModel: UnsupportedSectionViewModel }
 export type MatchedSlot = { slotKey: string; slot: SectionSchemaSlot; editor: SupportedSectionSlotEditor; items: SectionStructureItem[] }
+export type MatchedSchemaSlot = {
+  slotKey: string
+  path: SectionSlotPath
+  pathKey: string
+  slot: SectionSchemaSlot
+  editor: SupportedSectionSlotEditorContext
+  items: SectionStructureItem[]
+}
 
 const DEFAULT_CONTENT_FIELDS = ['media', 'media_type', 'title', 'subtitle', 'description', 'label', 'content', 'blurb', 'url', 'url_text', 'url_type', 'attachment', 'amount', 'status', 'collection', 'meta']
 const DEFAULT_GALLERY_FIELDS = ['media', 'media_type', 'title', 'subtitle', 'description', 'url', 'url_text', 'url_type']
@@ -58,19 +89,36 @@ function getDefaultFields(slotType: SectionSchemaSlotType): string[] {
   return []
 }
 
+function toSlotEditorContext(input: {
+  slotKey: string
+  slot: SectionSchemaSlot
+  path: SectionSlotPath
+  overlaySlot?: SupportedSectionSlotOverlay
+}): SupportedSectionSlotEditorContext {
+  return {
+    key: input.slotKey,
+    type: input.slot.type,
+    order: input.slot.order,
+    many: Boolean(input.slot.many),
+    label: input.overlaySlot?.label ?? BASE_SLOT_LABELS[input.slot.type] ?? input.slotKey,
+    fields: input.overlaySlot?.fields ?? getDefaultFields(input.slot.type),
+    inputConfig: input.overlaySlot?.inputConfig,
+    fieldAliases: input.overlaySlot?.fieldAliases,
+    component: input.overlaySlot?.component,
+    data: input.slot.data,
+    slots: input.overlaySlot?.slots,
+    path: input.path,
+    pathKey: input.path.join('.'),
+  }
+}
 function toSlotEditor(code: SupportedSectionSchemaCode, slotKey: string, slot: SectionSchemaSlot): SupportedSectionSlotEditor {
   const overlaySlot = overlayByCode[code]?.slots?.[slotKey]
-  return {
-    key: slotKey,
-    type: slot.type,
-    order: slot.order,
-    many: Boolean(slot.many),
-    label: overlaySlot?.label ?? BASE_SLOT_LABELS[slot.type] ?? slotKey,
-    fields: overlaySlot?.fields ?? getDefaultFields(slot.type),
-    inputConfig: overlaySlot?.inputConfig,
-    fieldAliases: overlaySlot?.fieldAliases,
-    component: overlaySlot?.component,
-  }
+  return toSlotEditorContext({
+    slotKey,
+    slot,
+    path: [slotKey],
+    overlaySlot,
+  })
 }
 
 export const supportedSectionSchemas = sharedSectionSchemas
@@ -132,11 +180,59 @@ export function buildCreateSectionPayload(input: { schemaCode: string; sectionGr
 }
 
 export function matchSchemaSlotsToStructure(schemaCode: string, structure: SectionStructureItem[]): MatchedSlot[] {
+  return matchRootSchemaSlotsToStructure(schemaCode, structure)
+}
+
+export function matchSchemaDataToStructure(input: {
+  schemaData: SectionSchemaData
+  structure: SectionStructureItem[]
+  overlaySlots?: Record<string, SupportedSectionSlotOverlay>
+  basePath?: SectionSlotPath
+}): MatchedSchemaSlot[] {
+  return (Object.entries(input.schemaData) as Array<[string, SectionSchemaSlot]>)
+    .sort(([, a], [, b]) => a.order - b.order)
+    .map(([slotKey, slot]) => {
+      const path = [...(input.basePath ?? []), slotKey]
+      const overlaySlot = input.overlaySlots?.[slotKey]
+      const editor = toSlotEditorContext({ slotKey, slot, path, overlaySlot })
+      const matches = input.structure
+        .filter((item) => item.type === slot.type && item.order === slot.order)
+        .sort((a, b) => a.order - b.order)
+
+      return {
+        slotKey,
+        path,
+        pathKey: path.join('.'),
+        slot,
+        editor,
+        items: slot.many ? matches : matches.slice(0, 1),
+      }
+    })
+}
+
+export function matchRootSchemaSlotsToStructure(schemaCode: string, structure: SectionStructureItem[]): MatchedSchemaSlot[] {
   if (!isSupportedSectionType(schemaCode)) return []
   const schema = supportedSectionSchemas[schemaCode]
-  return (Object.entries(schema.data) as Array<[string, SectionSchemaSlot]>).sort(([, a], [, b]) => a.order - b.order).map(([slotKey, slot]) => {
-    const editor = toSlotEditor(schemaCode, slotKey, slot)
-    const matches = structure.filter((item) => item.type === slot.type && item.order === slot.order).sort((a, b) => a.order - b.order)
-    return { slotKey, slot, editor, items: slot.many ? matches : matches.slice(0, 1) }
+  const overlay = overlayByCode[schemaCode]
+  return matchSchemaDataToStructure({
+    schemaData: schema.data,
+    structure,
+    overlaySlots: overlay?.slots,
+    basePath: [],
+  })
+}
+
+export function matchNestedSchemaSlotsToStructure(input: {
+  parentMatch: MatchedSchemaSlot | SupportedSectionSlotEditorContext
+  structure: SectionStructureItem[]
+}): MatchedSchemaSlot[] {
+  const parentEditor = 'editor' in input.parentMatch ? input.parentMatch.editor : input.parentMatch
+  if (!parentEditor.data) return []
+
+  return matchSchemaDataToStructure({
+    schemaData: parentEditor.data,
+    structure: input.structure,
+    overlaySlots: parentEditor.slots,
+    basePath: parentEditor.path,
   })
 }

@@ -6,6 +6,7 @@ type SectionSchemaSlot = {
   type: SectionSchemaSlotType
   order: number
   many?: boolean
+  data?: Record<string, SectionSchemaSlot>
 }
 type SectionSchema = {
   code: string
@@ -32,13 +33,16 @@ export type SectionEditorOverlay<TSchema extends SectionSchema> = {
     defaultValues?: Partial<Record<SectionMetaField<TSchema>, any>>
     getInitialData?: () => Promise<Record<string, any>>
   }
-  slots?: Partial<Record<SchemaSlotKey<TSchema>, {
-    label?: string
-    fields?: string[]
-    fieldAliases?: Record<string, string>
-    inputConfig?: InputConfig
-    component?: Component
-  }>>
+  slots?: Partial<Record<SchemaSlotKey<TSchema>, SectionEditorSlotOverlay>>
+}
+
+export type SectionEditorSlotOverlay = {
+  label?: string
+  fields?: string[]
+  fieldAliases?: Record<string, string>
+  inputConfig?: InputConfig
+  component?: Component
+  slots?: Record<string, SectionEditorSlotOverlay>
 }
 
 export function defineSectionEditorOverlay<const TSchema extends SectionSchema>(

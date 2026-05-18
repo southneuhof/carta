@@ -32,4 +32,23 @@ describe('shared section schema meta', () => {
     const typedField: ContentDefaultMetaField = 'width_preset';
     expect(typedField).toBe('width_preset');
   });
+
+  it('defines recursive data-list child section group schema', () => {
+    expect(dataList.data.childSections).toMatchObject({
+      type: 'sectionGroup',
+      order: 2,
+      many: true,
+    });
+
+    expect(dataList.data.childSections.data?.gallery).toMatchObject({
+      type: 'gallery',
+      order: 1,
+    });
+  });
+
+  it('preserves nested data slot typing', () => {
+    type ChildSectionSlots = NonNullable<typeof dataList.data.childSections.data>;
+    const nestedGalleryType: ChildSectionSlots['gallery']['type'] = 'gallery';
+    expect(nestedGalleryType).toBe('gallery');
+  });
 });
