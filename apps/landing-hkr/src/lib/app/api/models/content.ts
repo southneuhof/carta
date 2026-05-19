@@ -1,12 +1,27 @@
 import type { ModelConfig } from '@southneuhof/landing-sveltekit-framework/types';
+import { normalizeFileUploadValue } from '@southneuhof/landing-sveltekit-framework/server/files';
 import prisma from "$lib/utils/prisma";
 import type { Content } from "@prisma/client";
-import { copySectionGroupContent } from '$lib/utils/section';
 import { ensureDraftState } from '$lib/utils/page';
 import { exception } from '$lib/utils/response';
 
+function normalizeContentFileFields(body: Record<string, any>): Record<string, any> {
+  const next = { ...body };
+
+  for (const field of ['media', 'attachment']) {
+    if (!(field in next)) continue;
+    const normalized = normalizeFileUploadValue(next[field]);
+    if (typeof normalized === 'string') {
+      next[field] = normalized;
+    }
+  }
+
+  return next;
+}
+
 const ensureDraftPreHook = async (body: Record<string, any>, options?: { requireId?: boolean }) => {
-  const { id, page_translation_id, ...rest } = body;
+  const normalizedBody = normalizeContentFileFields(body);
+  const { id, page_translation_id, ...rest } = normalizedBody;
   const requireId = options?.requireId ?? false;
 
   if (requireId && !id) {
@@ -14,7 +29,7 @@ const ensureDraftPreHook = async (body: Record<string, any>, options?: { require
   }
 
   if (!page_translation_id) {
-    return body;
+    return normalizedBody;
   }
 
   const { idMap } = await ensureDraftState(page_translation_id);
@@ -30,11 +45,6 @@ const ensureDraftPreHook = async (body: Record<string, any>, options?: { require
 };
 
 export default {
-  // types: {
-  //   media: {
-  //     type: 'file'
-  //   }
-  // },
   detail: {
     allow: true,
     by: ['id']
@@ -51,29 +61,29 @@ export default {
     fields: ['media', 'title', 'subtitle', 'description', 'label', 'content', 'blurb', 'media_type', 'attachment', 'status', 'order', 'gallery_id', 'url', 'url_text', 'url_type', 'amount', 'collection', 'meta'],
     lifecycle: {
       pre: async (body) => {
-        const { page_translation_id } = body;
-        // Handle draft creation
+        const normalizedBody = normalizeContentFileFields(body);
+        const { page_translation_id } = normalizedBody;
+
         if (page_translation_id) {
           const { idMap } = await ensureDraftState(page_translation_id);
-          if (idMap && body.gallery_id) {
-            const newGalleryId = idMap.get(body.gallery_id);
+          if (idMap && normalizedBody.gallery_id) {
+            const newGalleryId = idMap.get(normalizedBody.gallery_id);
             if (newGalleryId) {
-              body.gallery_id = newGalleryId;
+              normalizedBody.gallery_id = newGalleryId;
             }
           }
         }
 
-        // Handle ordering
         const maxOrderItem = await prisma.content.findFirst({
           where: {
-            gallery_id: body.gallery_id || null
+            gallery_id: normalizedBody.gallery_id || null
           },
           orderBy: { order: 'desc' },
           select: { order: true }
         });
 
-        body.order = (maxOrderItem?.order ?? 0) + 1;
-        return page_translation_id ? await ensureDraftPreHook(body) : body;
+        normalizedBody.order = (maxOrderItem?.order ?? 0) + 1;
+        return page_translation_id ? await ensureDraftPreHook(normalizedBody) : normalizedBody;
       }
     }
   },

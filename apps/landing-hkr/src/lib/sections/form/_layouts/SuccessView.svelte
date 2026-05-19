@@ -1,10 +1,10 @@
 <script lang="ts">
-  import Button from "$lib/app/components/ui/Button.svelte";
   import { getContext } from "svelte";
+  import { assetUrl } from "$lib/utils/assets";
 
   const {onPrevious} = $props()
 
-  const section = getContext<Record<string, any>>('section')    
+  const section = getContext<Record<string, any>>('section')
 </script>
 
 <div class="flex flex-col gap-lg">
@@ -17,7 +17,7 @@
   </div>
   <div class="flex flex-row items-center gap-base">
     {#each section.data.postSubmission.gallery as attachment}
-      <a href={attachment.attachment} target="_blank" class="text-sm font-bold"><span class="underline">{attachment.title}</span> <i class="ri-download-line"></i></a>
+      <a href={assetUrl(attachment.attachment)} target="_blank" class="text-sm font-bold"><span class="underline">{attachment.title}</span> <i class="ri-download-line"></i></a>
     {/each}
   </div>
 </div>

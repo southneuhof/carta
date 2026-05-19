@@ -14,7 +14,6 @@ import prisma from '$lib/utils/prisma';
 const publicBaseUrl = process.env.PUBLIC_APP_URL;
 
 export const fileLocations = createStorageUrlLocationStrategy({
-  publicBaseUrl,
   basePath: '/storage',
   defaultVisibility: 'private',
 });
@@ -102,6 +101,7 @@ export const fileManager = createFileManager({
   upload: {
     allowedVisibilities: ['public', 'private'],
     defaultVisibility: 'private',
+    publicBaseUrl,
   },
 });
 
@@ -118,8 +118,7 @@ function toManifestPath(fileKey: string): string {
 }
 
 function toStorageUrl(fileKey: string): string {
-  const pathName = toManifestPath(fileKey);
-  return publicBaseUrl ? new URL(pathName, publicBaseUrl).toString() : pathName;
+  return toManifestPath(fileKey);
 }
 
 function normalizeVariants(fileKey: string, variants: any[]): ImageMetadata['variants'] {

@@ -12,6 +12,37 @@ function extractErrorMessage(error: any): string {
   return String(error?.message?.message || error?.message || error?.error || error?.statusText || 'Terjadi kesalahan')
 }
 
+function toStoredAssetPath(value: string): string {
+  if (typeof value !== 'string') return ''
+  const input = value.trim()
+  if (!input) return ''
+
+  if (/^\/storage\//.test(input)) {
+    return input
+  }
+
+  try {
+    const parsed = new URL(input)
+    if (parsed.pathname.startsWith('/storage/')) {
+      return parsed.pathname
+    }
+  } catch {
+    return input
+  }
+
+  return input
+}
+
+function toPublicAssetUrl(path: string, baseUrl?: string): string {
+  if (!path) return ''
+  if (!baseUrl) return path
+  try {
+    return new URL(path, baseUrl).toString()
+  } catch {
+    return path
+  }
+}
+
 async function notifyLogoutToServer(token: string) {
   try {
     await fetch(`${config.apiUrl}logout`, {
@@ -76,14 +107,23 @@ class AppServices extends FrameworkService {
       const formData = new FormData()
       formData.append('file', file)
 
-      const uploadedUrl = await this.post('public/upload/private', formData, options)
-      const url = typeof uploadedUrl === 'string' ? uploadedUrl : uploadedUrl?.url || uploadedUrl?.data || ''
+      const response = await this.post('upload/public', formData, options)
+      const path =
+        typeof response === 'string'
+          ? toStoredAssetPath(response)
+          : toStoredAssetPath(response?.path ?? response?.data?.path ?? response?.data ?? response?.url ?? '')
+
+      const url =
+        typeof response === 'object' && typeof response?.url === 'string'
+          ? response.url
+          : toPublicAssetUrl(path, config.apiUrl)
 
       return {
         success: true,
-        path: url,
-        data: url,
+        path,
+        data: path,
         url,
+        filename: file.name,
       }
     } catch (error) {
       console.error(error)
