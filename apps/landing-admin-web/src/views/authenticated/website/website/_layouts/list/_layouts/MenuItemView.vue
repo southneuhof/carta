@@ -258,7 +258,7 @@ function handleSectionReorder(event: any) {
                 "
               >
                 <template #trigger>
-                  <Card v-if="!menuItemData.page_id" class="h-fit w-full flex-row items-center justify-center gap-2 outline outline-1 outline-info bg-transparent" color="infoContainer">
+                  <Card v-if="!menuItemData.has_page" class="h-fit w-full flex-row items-center justify-center gap-2 outline outline-1 outline-info bg-transparent" color="infoContainer">
                     <Icon name="file-edit"></Icon>
                     <p><span class="">Buat halaman di</span> <span class="font-bold">{{ menuItemData.translations.find((item: any) => item.language === 'id')?.name }}</span></p>
                   </Card>
