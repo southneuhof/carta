@@ -22,6 +22,18 @@ describe('sdk createAPIClient', () => {
     expect(calls[3][0]).toContain('/users/update')
   })
 
+  it('detail supports composite identity in encoded path segments', async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } }))
+    const client = createAPIClient({
+      baseURL: 'https://example.com/api/',
+      fetchImpl: fetchMock as any,
+    })
+
+    await client.detail('articleTranslation', ['123', 'id with space/slash'])
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock.mock.calls[0][0]).toContain('/articleTranslation/123/id%20with%20space%2Fslash/show')
+  })
+
   it('calls unauthorized handler on 401', async () => {
     const onUnauthorized = vi.fn()
     const client = createAPIClient({

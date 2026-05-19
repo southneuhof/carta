@@ -30,7 +30,7 @@ export type ApiClient = {
   remove: (path: string, body?: unknown, query?: Record<string, any>, init?: RequestInit) => Promise<any>
   raw: (path: string, query?: Record<string, any>, init?: RequestInit) => Promise<Response>
   list: (path: string, query?: Record<string, any>, init?: RequestInit) => Promise<any>
-  detail: (path: string, id?: string | number, query?: Record<string, any>, init?: RequestInit) => Promise<any>
+  detail: (path: string, identity?: string | number | Array<string | number>, query?: Record<string, any>, init?: RequestInit) => Promise<any>
   create: (path: string, body?: unknown, query?: Record<string, any>, init?: RequestInit) => Promise<any>
   update: (path: string, body?: unknown, query?: Record<string, any>, init?: RequestInit) => Promise<any>
   dataset: (path: string, query?: Record<string, any>, init?: RequestInit) => Promise<any>
@@ -70,6 +70,12 @@ function parseURL(url: string, prefix: string = '', suffix: string = '') {
 
 export function createAPIClient(options: CreateAPIClientOptions): ApiClient {
   const fetchImpl = options.fetchImpl ?? fetch
+
+  function buildIdentityPath(identity?: string | number | Array<string | number>) {
+    if (identity === null || identity === undefined) return ''
+    const segments = Array.isArray(identity) ? identity : [identity]
+    return segments.map((segment) => encodeURIComponent(String(segment))).join('/')
+  }
 
   async function request({ method, path, query, body, headers, responseType, init }: ApiRequest) {
     const token = await options.getToken?.()
@@ -121,10 +127,12 @@ export function createAPIClient(options: CreateAPIClientOptions): ApiClient {
     remove: (path, body, query, init) => request({ method: 'DELETE', path, body, query, init }),
     raw: (path, query, init) => request({ method: 'GET', path, query, responseType: 'raw', init }),
     list: (path, query, init) => request({ method: 'GET', path: parseURL(path, '', '/list'), query, init }),
-    detail: (path, id, query, init) => request({ method: 'GET', path: parseURL(path, '', `${id ? `/${id}` : ''}/show`), query, init }),
+    detail: (path, identity, query, init) => {
+      const identityPath = buildIdentityPath(identity)
+      return request({ method: 'GET', path: parseURL(path, '', `${identityPath ? `/${identityPath}` : ''}/show`), query, init })
+    },
     create: (path, body, query, init) => request({ method: 'POST', path: parseURL(path, '', '/create'), body, query, init }),
     update: (path, body, query, init) => request({ method: 'PUT', path: parseURL(path, '', '/update'), body, query, init }),
     dataset: (path, query, init) => request({ method: 'GET', path: parseURL(path, '', '/dataset'), query, init }),
   }
 }
-

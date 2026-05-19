@@ -48,6 +48,11 @@ describe('FrameworkService', () => {
     expect(fetchImpl.mock.calls[0][0]).toContain('users/1/show')
   })
 
+  it('detail supports composite identity in encoded path segments', async () => {
+    await service.detail('articleTranslation', ['123', 'id with space/slash'])
+    expect(fetchImpl.mock.calls[0][0]).toContain('articleTranslation/123/id%20with%20space%2Fslash/show')
+  })
+
   it('create/update/remove/dataset route suffixes', async () => {
     await service.create('users', { a: 1 })
     await service.update('users', { a: 1 })

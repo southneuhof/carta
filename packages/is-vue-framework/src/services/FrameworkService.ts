@@ -5,7 +5,11 @@ import type { FrameworkServiceEndpoints, FrameworkServiceOptions, ServiceRequest
 
 const defaultEndpoints: FrameworkServiceEndpoints = {
   listSuffix: '/list',
-  detailSuffix: (id?: string | number) => `${id ? `/${id}` : ''}/show`,
+  detailSuffix: (identity?: string | number | Array<string | number>) => {
+    if (identity === null || identity === undefined) return '/show'
+    const segments = (Array.isArray(identity) ? identity : [identity]).map((segment) => encodeURIComponent(String(segment)))
+    return `/${segments.join('/')}/show`
+  },
   createSuffix: '/create',
   updateSuffix: '/update',
   deleteSuffix: '/delete',
@@ -122,8 +126,8 @@ export class FrameworkService {
     return this.get(this.parseURL(path, '', this.endpoints.listSuffix), query, options)
   }
 
-  detail(path: string, id?: string | number, query?: Record<string, any>, options?: ServiceRequestOptions): Promise<any> {
-    return this.get(this.parseURL(path, '', this.endpoints.detailSuffix(id)), query, options)
+  detail(path: string, identity?: string | number | Array<string | number>, query?: Record<string, any>, options?: ServiceRequestOptions): Promise<any> {
+    return this.get(this.parseURL(path, '', this.endpoints.detailSuffix(identity)), query, options)
   }
 
   create(path: string, data?: any, query?: Record<string, any>, options?: ServiceRequestOptions): Promise<any> {

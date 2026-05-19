@@ -18,7 +18,7 @@ const props = defineProps({
   fields: { type: Array as PropType<string[]>, required: true },
   fieldsAlias: { type: Object, default: () => ({}) },
   getDetailData: {
-    type: Function as PropType<({ getAPI, id, searchParameters }: { getAPI: string; id?: string | number; searchParameters?: object }) => Promise<object>>,
+    type: Function as PropType<({ getAPI, id, searchParameters }: { getAPI: string; id?: string | number | string[]; searchParameters?: object }) => Promise<object>>,
     default: defaultFormGetData,
   },
   getInitialData: { type: Function as PropType<() => Promise<Record<string, any>>>, default: async () => ({}) },
@@ -31,7 +31,7 @@ const props = defineProps({
   onError: { type: Function as PropType<({ formData, error }: { formData: object; error: Record<string, any> }) => void>, default: defaultOnError },
   targetAPI: { type: String, default: '' },
   getAPI: { type: String },
-  dataID: { type: String },
+  dataID: { type: Object as PropType<string | string[]> },
   formType: { type: String as PropType<'create' | 'update'>, default: 'create' },
   method: { type: String as PropType<'put' | 'post'> },
   searchParameters: { type: Object, default: () => ({}) },

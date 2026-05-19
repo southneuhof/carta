@@ -16,7 +16,7 @@ import services from '@/utils/services'
 import type { PropType } from 'vue'
 
 const props = defineProps({ article: { type: Object as PropType<Record<string, any>>, required: true }, language: { type: Object, required: true } })
-const { data: articleTranslation } = await services.detail('articleTranslation', undefined, { article_id: props.article.id, language: props.language.code })
+const { data: articleTranslation } = await services.detail('articleTranslation', [props.article.id, props.language.code])
 const {data: [latestLog]} = await services.list('verificationLog', { model: 'articleTranslation', data_id: articleTranslation.id, limit: 1 })
 </script>
 
@@ -29,7 +29,7 @@ const {data: [latestLog]} = await services.list('verificationLog', { model: 'art
           <div class="h-[16px] w-[1px] bg-muted"></div>
           <ConfirmationDialog
             :onConfirm="async (setOpen: Function) => {
-              const {data: {id: source}} = await services.detail('articleTranslation', undefined, {article_id: props.article.id, language: 'id'})
+              const {data: {id: source}} = await services.detail('articleTranslation', [props.article.id, 'id'])
               const target = articleTranslation.id;
               services.post('articleTranslation/copy', {source_id: source, destination_id: target}).then(res => {
                 toast.success('Berhasil menyalin data!')

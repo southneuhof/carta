@@ -14,10 +14,7 @@ const props = defineProps({
   language: { type: Object, required: true },
 })
 
-const { data } = await services.detail('adBanner', undefined, {
-  ad_banner_language_map_id: props.data.id,
-  language: props.language.code,
-})
+const { data } = await services.detail('adBanner', [props.data.id, props.language.code])
 
 const updateConfig = buildFormConfig(adBannerModel, 'update')
 </script>

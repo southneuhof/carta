@@ -5,6 +5,7 @@ import { languages } from '@/utils/common'
 import { keyManager } from '@/stores/keyManager'
 import { toast } from 'vue-sonner'
 import { computed, ref, type PropType } from 'vue'
+import { getDetailData } from '@/framework/behaviors/form'
 
 type AnyRecord = Record<string, any>
 
@@ -34,6 +35,7 @@ const searchParameters = computed(() => ({
       formType="update"
       :getAPI="getAPI ?? targetAPI"
       :targetAPI="targetAPI"
+      :dataID="[props.data.id, activeLanguage.code]"
       :searchParameters="searchParameters"
       :onSuccess="() => {
         toast.success('Berhasil mengubah data!')

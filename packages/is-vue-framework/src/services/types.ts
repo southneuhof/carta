@@ -8,7 +8,7 @@ export type ServiceRequestOptions = {
 
 export type FrameworkServiceEndpoints = {
   listSuffix: string
-  detailSuffix: (id?: string | number) => string
+  detailSuffix: (identity?: string | number | Array<string | number>) => string
   createSuffix: string
   updateSuffix: string
   deleteSuffix: string
