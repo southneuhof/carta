@@ -25,11 +25,11 @@ export default {
           muted: '#EFE9E7'
         },
         primary: {
-          DEFAULT: '#F68B1E',
+          DEFAULT: '#F70019',
           muted: '#FBD9AA'
         },
         secondary: {
-          DEFAULT: '#ED1C25',
+          DEFAULT: '#2B74DD',
           muted: '#F9B0B0'
         },
         outline: {

@@ -75,6 +75,8 @@ const uploadDetail = ref()
 const loading = ref(false)
 const images = ref<Array<any>>([])
 const isUploading = ref(false)
+const isDragActive = ref(false)
+const isReplaceDragActive = ref(false)
 
 if (modelValue.value) {
   if (Array.isArray(modelValue.value)) images.value = modelValue.value
@@ -87,17 +89,14 @@ const emitData = () => {
   } else emit('update:modelValue', images.value[0])
 }
 
-const handleFileUpload = (e: Event) => {
+const handleUpload = (file?: File, options: { replace?: boolean } = {}) => {
+  if (!file) return
   loading.value = true
-  const target = e.target as HTMLInputElement
-  const file: File = (target.files as FileList)[0]
-  const reader = new FileReader()
-  reader.readAsDataURL(file)
   if (file.size > props.maxSize * 1000000) {
     toast.error('Ukuran berkas terlalu besar')
+    loading.value = false
     return
   }
-  if (!file) return
   uploadPercentage.value = 0
   isUploading.value = true
   props.fileUpload(file, props.uploadPath, (event: any) => {
@@ -111,13 +110,65 @@ const handleFileUpload = (e: Event) => {
           delete res.data.data[key]
         }
       }
-      images.value.push(res)
+      if (options.replace && !props.multi && images.value.length) {
+        images.value.splice(0, 1, res)
+      } else {
+        images.value.push(res)
+      }
       emitData()
       loading.value = false
       isUploading.value = false
       emit('validation:touch')
     })
-    .catch((err) => {})
+    .catch(() => {
+      loading.value = false
+      isUploading.value = false
+    })
+}
+
+const handleFileUpload = (e: Event) => {
+  const target = e.target as HTMLInputElement
+  const file = target.files?.[0]
+  handleUpload(file)
+  target.value = ''
+}
+
+const handleDragOver = (event: DragEvent) => {
+  event.preventDefault()
+  if (isUploading.value) return
+  isDragActive.value = true
+}
+
+const handleDragLeave = (event: DragEvent) => {
+  event.preventDefault()
+  isDragActive.value = false
+}
+
+const handleDrop = (event: DragEvent) => {
+  event.preventDefault()
+  isDragActive.value = false
+  if (isUploading.value) return
+  const file = event.dataTransfer?.files?.[0]
+  handleUpload(file)
+}
+
+const handleReplaceDragOver = (event: DragEvent) => {
+  event.preventDefault()
+  if (isUploading.value || props.multi || !images.value[0]) return
+  isReplaceDragActive.value = true
+}
+
+const handleReplaceDragLeave = (event: DragEvent) => {
+  event.preventDefault()
+  isReplaceDragActive.value = false
+}
+
+const handleReplaceDrop = (event: DragEvent) => {
+  event.preventDefault()
+  isReplaceDragActive.value = false
+  if (isUploading.value || props.multi || !images.value[0]) return
+  const file = event.dataTransfer?.files?.[0]
+  handleUpload(file, { replace: true })
 }
 
 const removeItem = (index: number) => {
@@ -165,7 +216,13 @@ function resolveDragKey(item: ImageAssetValue, index: number): string {
           <div class="flex flex-row items-center gap-4">
             <Draggable v-if="images.length" v-model="images" :item-key="resolveDragKey" class="flex flex-row items-center gap-4" @change="handleChange">
               <template #item="{ element, index }">
-                <div class="w-fit cursor-move">
+                <div
+                  class="w-fit cursor-move rounded-xl transition-colors"
+                  :class="{ 'bg-tertiary/10 outline outline-1 outline-primary/[33%]': isReplaceDragActive && !props.multi && index === 0 }"
+                  @dragover="handleReplaceDragOver"
+                  @dragleave="handleReplaceDragLeave"
+                  @drop="handleReplaceDrop"
+                >
                   <ImagePreview v-if="element" :imageURL="resolvePreviewURLs(element).imageURL" :thumbnailURL="resolvePreviewURLs(element).thumbnailURL">
                     <template #actions>
                       <Button color="error" kind="icon" @click="removeItem(index)" type="button">
@@ -181,7 +238,13 @@ function resolveDragKey(item: ImageAssetValue, index: number): string {
             <template v-if="!isUploading">
               <label v-if="(props.multi && images.length != (props.limit == -1 ? 99999 : props.limit)) || (!props.multi && !images[0])">
                 <a class="h-4 w-full cursor-pointer">
-                  <div class="relative flex h-40 w-40 items-center justify-center rounded-xl outline-dashed outline-2 outline-outline">
+                  <div
+                    class="relative flex h-40 w-40 items-center justify-center rounded-xl outline-dashed outline-2 outline-outline transition-colors"
+                    :class="{ 'bg-primary/10 outline-primary/[33%]': isDragActive }"
+                    @dragover="handleDragOver"
+                    @dragleave="handleDragLeave"
+                    @drop="handleDrop"
+                  >
                     <Icon name="image-add" size="2xl" class="text-on-surface"></Icon>
                     <div class="absolute left-0 top-0 h-full w-full">
                       <div v-if="uploadPercentage != 0 && uploadPercentage != 100" class="absolute h-40 w-40 rounded-xl bg-tertiary/20" :style="{ width: uploadPercentage + '%' }"></div>

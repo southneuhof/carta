@@ -117,6 +117,13 @@
     xl: 'w-64 md:w-80',
   }
 
+  const ornamentBackgroundSizeClassMap: any = {
+    sm: 'w-[110%]',
+    md: 'w-[120%]',
+    lg: 'w-[130%]',
+    xl: 'w-[140%]',
+  }
+
   const ornamentPositionClassMap: any = {
     'top-left': '-top-8 -left-8',
     'top-right': '-top-8 -right-8',
@@ -262,13 +269,20 @@
 
 {#snippet Ornament(scope: string)}
   {#if section.meta.ornament_enabled && section.meta.ornament_media && ornamentScope === scope}
-    {#if ornamentPosition === 'corners'}
+    {#if ornamentLayer === 'behind'}
+      <img
+        src={section.meta.ornament_media}
+        alt=""
+        aria-hidden="true"
+        class="pointer-events-none absolute left-1/2 top-1/2 z-0 h-auto max-w-none -translate-x-1/2 -translate-y-1/2 {ornamentBackgroundSizeClassMap[ornamentSize]}"
+      />
+    {:else if ornamentPosition === 'corners'}
       {#each ornamentCornerClassList as cornerClass}
         <img
           src={section.meta.ornament_media}
           alt=""
           aria-hidden="true"
-          class="pointer-events-none absolute {ornamentSizeClassMap[ornamentSize]} {cornerClass} {ornamentLayer === 'behind' ? 'z-0' : 'z-[1]'}"
+          class="pointer-events-none absolute z-[1] {ornamentSizeClassMap[ornamentSize]} {cornerClass}"
         />
       {/each}
     {:else}
@@ -276,7 +290,7 @@
         src={section.meta.ornament_media}
         alt=""
         aria-hidden="true"
-        class="pointer-events-none absolute {ornamentSizeClassMap[ornamentSize]} {ornamentPositionClassMap[ornamentPosition]} {ornamentLayer === 'behind' ? 'z-0' : 'z-[1]'}"
+        class="pointer-events-none absolute z-[1] {ornamentSizeClassMap[ornamentSize]} {ornamentPositionClassMap[ornamentPosition]}"
       />
     {/if}
   {/if}
