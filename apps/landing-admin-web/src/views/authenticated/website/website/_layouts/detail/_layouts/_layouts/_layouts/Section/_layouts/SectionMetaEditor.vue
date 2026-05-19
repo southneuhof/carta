@@ -12,11 +12,14 @@ const sectionData = computed(() => unref(injectedSectionData) ?? {})
 const sectionConfig = computed(() => unref(injectedSectionConfig) ?? {})
 const pageTranslation = inject<Record<string, any>>('pageTranslation')
 
-async function submitSectionMetadata(payload: object, targetAPI: string, type: 'create' | 'update', searchParameters?: object): Promise<object> {
+async function submitSectionMetadata({ payload, method, targetAPI, type, searchParameters }: { payload: object; method?: 'put' | 'post'; targetAPI: string; type: 'create' | 'update'; searchParameters?: object }): Promise<object> {
   try {
-    return await services.update(targetAPI, { ...sectionData.value, meta: payload, ...(searchParameters || {}), page_translation_id: pageTranslation?.value?.id })
+    const body = { ...sectionData.value, meta: payload, ...(searchParameters || {}), page_translation_id: pageTranslation?.value?.id }
+
+    return await services.update(targetAPI, body)
   } catch (err: any) {
-    throw new Error(err)
+    console.error(err)
+    throw err
   }
 }
 

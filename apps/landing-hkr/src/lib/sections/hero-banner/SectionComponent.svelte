@@ -3,6 +3,7 @@
   import { Image } from "@southneuhof/landing-sveltekit-framework/client";
   import { onDestroy, onMount } from "svelte";
   import { fade } from "svelte/transition";
+  import Button from "./Button.svelte";
   import heroBannerSchema from "@southneuhof/landing-section-schema/sections/hero-banner";
   import type { LandingSectionForSchema } from "@southneuhof/landing-sveltekit-framework/types";
 
@@ -129,20 +130,18 @@
             {#if banner?.cta || banner?.url}
               <div class="mt-3 flex flex-wrap items-center gap-3 sm:gap-4">
                 {#if banner?.cta}
-                  <a
+                  <Button
                     href={banner.cta}
-                    class="inline-flex items-center justify-center h-12 px-8 rounded-full font-semibold text-lg bg-[#EF4444] text-white"
-                  >
-                    {banner.cta_text || "Hubungi Kami"}
-                  </a>
+                    label={banner.cta_text || "Hubungi Kami"}
+                    tone="primary"
+                  />
                 {/if}
                 {#if banner?.url}
-                  <a
+                  <Button
                     href={banner.url}
-                    class="inline-flex items-center justify-center h-12 px-8 rounded-full font-semibold text-lg bg-[#3B82F6] text-white"
-                  >
-                    {banner.url_text || "Produk"}
-                  </a>
+                    label={banner.url_text || "Produk"}
+                    tone="secondary"
+                  />
                 {/if}
               </div>
             {/if}

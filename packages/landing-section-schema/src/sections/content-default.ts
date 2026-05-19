@@ -16,14 +16,47 @@ export default defineSectionSchema({
       'width_preset',
       'content_order',
       'button_type',
+      'container_variant',
+      'container_color',
+      'container_custom_color',
+      'container_radius',
+      'container_padding',
+      'column_ratio',
+      'content_gap',
+      'media_aspect_ratio',
+      'media_radius',
+      'text_color_scheme',
+      'text_custom_color',
+      'title_size',
+      'ornament_enabled',
+      'ornament_media',
+      'ornament_scope',
+      'ornament_position',
+      'ornament_layer',
+      'ornament_size',
     ] as const,
     defaultValues: {
       content_align: 'left',
       button_type: 'button',
       url_justify: 'left',
-      width_preset: 'md',
+      width_preset: 'xl',
       content_order: 'image-text',
-      layout_direction: 'vertical',
+      layout_direction: 'horizontal',
+      container_variant: 'plain',
+      container_color: 'none',
+      container_radius: 'lg',
+      container_padding: 'lg',
+      column_ratio: 'equal',
+      content_gap: 'lg',
+      media_aspect_ratio: 'auto',
+      media_radius: 'lg',
+      text_color_scheme: 'default',
+      title_size: 'md',
+      ornament_enabled: false,
+      ornament_scope: 'media',
+      ornament_position: 'bottom-left',
+      ornament_layer: 'behind',
+      ornament_size: 'md',
     },
     editor: {
       inputConfig: {
@@ -93,6 +126,232 @@ export default defineSectionSchema({
             clearable: false,
           },
         },
+        container_variant: {
+          type: 'select',
+          props: {
+            data: [
+              { id: 'plain', name: 'Plain' },
+              { id: 'panel', name: 'Panel' },
+            ],
+            clearable: false,
+          },
+        },
+        container_color: {
+          type: 'select',
+          props: {
+            data: [
+              { id: 'none', name: 'None' },
+              { id: 'primary', name: 'Primary' },
+              { id: 'secondary', name: 'Secondary' },
+              { id: 'surface', name: 'Surface' },
+              { id: 'custom', name: 'Custom' },
+            ],
+            clearable: false,
+          },
+        },
+        container_custom_color: {
+          type: 'text',
+          dependency: {
+            fields: ['container_color'],
+            visibility: {
+              validator: ({ container_color }: any) => container_color === 'custom',
+              default: false,
+            },
+          },
+        },
+        container_radius: {
+          type: 'select',
+          props: {
+            data: [
+              { id: 'none', name: 'None' },
+              { id: 'sm', name: 'Small' },
+              { id: 'md', name: 'Medium' },
+              { id: 'lg', name: 'Large' },
+              { id: 'xl', name: 'Extra Large' },
+            ],
+            clearable: false,
+          },
+        },
+        container_padding: {
+          type: 'select',
+          props: {
+            data: [
+              { id: 'sm', name: 'Small' },
+              { id: 'md', name: 'Medium' },
+              { id: 'lg', name: 'Large' },
+              { id: 'xl', name: 'Extra Large' },
+            ],
+            clearable: false,
+          },
+        },
+        column_ratio: {
+          type: 'select',
+          props: {
+            data: [
+              { id: 'equal', name: 'Equal' },
+              { id: 'media-heavy', name: 'Media Heavy' },
+              { id: 'text-heavy', name: 'Text Heavy' },
+            ],
+            clearable: false,
+          },
+        },
+        content_gap: {
+          type: 'select',
+          props: {
+            data: [
+              { id: 'sm', name: 'Small' },
+              { id: 'md', name: 'Medium' },
+              { id: 'lg', name: 'Large' },
+              { id: 'xl', name: 'Extra Large' },
+            ],
+            clearable: false,
+          },
+        },
+        media_aspect_ratio: {
+          type: 'select',
+          props: {
+            data: [
+              { id: 'auto', name: 'Auto' },
+              { id: '16/9', name: '16:9' },
+              { id: '4/3', name: '4:3' },
+              { id: '1/1', name: '1:1' },
+            ],
+            clearable: false,
+          },
+        },
+        media_radius: {
+          type: 'select',
+          props: {
+            data: [
+              { id: 'none', name: 'None' },
+              { id: 'sm', name: 'Small' },
+              { id: 'md', name: 'Medium' },
+              { id: 'lg', name: 'Large' },
+              { id: 'xl', name: 'Extra Large' },
+            ],
+            clearable: false,
+          },
+        },
+        text_color_scheme: {
+          type: 'select',
+          props: {
+            data: [
+              { id: 'default', name: 'Default' },
+              { id: 'on-primary', name: 'On Primary' },
+              { id: 'on-secondary', name: 'On Secondary' },
+              { id: 'custom', name: 'Custom' },
+            ],
+            clearable: false,
+          },
+        },
+        text_custom_color: {
+          type: 'text',
+          dependency: {
+            fields: ['text_color_scheme'],
+            visibility: {
+              validator: ({ text_color_scheme }: any) => text_color_scheme === 'custom',
+              default: false,
+            },
+          },
+        },
+        title_size: {
+          type: 'select',
+          props: {
+            data: [
+              { id: 'sm', name: 'Small' },
+              { id: 'md', name: 'Medium' },
+              { id: 'lg', name: 'Large' },
+            ],
+            clearable: false,
+          },
+        },
+        ornament_enabled: { type: 'checkbox' },
+        ornament_media: {
+          type: 'image',
+          dependency: {
+            fields: ['ornament_enabled'],
+            visibility: {
+              validator: ({ ornament_enabled }: any) => Boolean(ornament_enabled),
+              default: false,
+            },
+          },
+        },
+        ornament_scope: {
+          type: 'select',
+          dependency: {
+            fields: ['ornament_enabled'],
+            visibility: {
+              validator: ({ ornament_enabled }: any) => Boolean(ornament_enabled),
+              default: false,
+            },
+          },
+          props: {
+            data: [
+              { id: 'section', name: 'Section' },
+              { id: 'container', name: 'Container' },
+              { id: 'media', name: 'Media' },
+            ],
+            clearable: false,
+          },
+        },
+        ornament_position: {
+          type: 'select',
+          dependency: {
+            fields: ['ornament_enabled'],
+            visibility: {
+              validator: ({ ornament_enabled }: any) => Boolean(ornament_enabled),
+              default: false,
+            },
+          },
+          props: {
+            data: [
+              { id: 'top-left', name: 'Top Left' },
+              { id: 'top-right', name: 'Top Right' },
+              { id: 'bottom-left', name: 'Bottom Left' },
+              { id: 'bottom-right', name: 'Bottom Right' },
+              { id: 'left-center', name: 'Left Center' },
+              { id: 'right-center', name: 'Right Center' },
+              { id: 'corners', name: 'Corners' },
+            ],
+            clearable: false,
+          },
+        },
+        ornament_layer: {
+          type: 'select',
+          dependency: {
+            fields: ['ornament_enabled'],
+            visibility: {
+              validator: ({ ornament_enabled }: any) => Boolean(ornament_enabled),
+              default: false,
+            },
+          },
+          props: {
+            data: [
+              { id: 'behind', name: 'Behind' },
+              { id: 'inside', name: 'Inside' },
+            ],
+            clearable: false,
+          },
+        },
+        ornament_size: {
+          type: 'select',
+          dependency: {
+            fields: ['ornament_enabled'],
+            visibility: {
+              validator: ({ ornament_enabled }: any) => Boolean(ornament_enabled),
+              default: false,
+            },
+          },
+          props: {
+            data: [
+              { id: 'sm', name: 'Small' },
+              { id: 'md', name: 'Medium' },
+              { id: 'lg', name: 'Large' },
+              { id: 'xl', name: 'Extra Large' },
+            ],
+            clearable: false,
+          },
+        },
       },
       fieldsAlias: {
         remove_margin: 'Hilangkan margin pada konten',
@@ -103,6 +362,24 @@ export default defineSectionSchema({
         width_preset: 'Lebar Konten',
         content_order: 'Urutan Konten',
         button_type: 'Tipe Tombol',
+        container_variant: 'Tipe Container',
+        container_color: 'Warna Container',
+        container_custom_color: 'Warna Custom Container',
+        container_radius: 'Radius Container',
+        container_padding: 'Padding Container',
+        column_ratio: 'Rasio Kolom',
+        content_gap: 'Jarak Konten',
+        media_aspect_ratio: 'Rasio Media',
+        media_radius: 'Radius Media',
+        text_color_scheme: 'Warna Teks',
+        text_custom_color: 'Warna Custom Teks',
+        title_size: 'Ukuran Judul',
+        ornament_enabled: 'Aktifkan Ornamen',
+        ornament_media: 'File Ornamen',
+        ornament_scope: 'Area Ornamen',
+        ornament_position: 'Posisi Ornamen',
+        ornament_layer: 'Layer Ornamen',
+        ornament_size: 'Ukuran Ornamen',
       },
     },
   },

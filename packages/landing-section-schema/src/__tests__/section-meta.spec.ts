@@ -23,6 +23,24 @@ describe('shared section schema', () => {
       'width_preset',
       'content_order',
       'button_type',
+      'container_variant',
+      'container_color',
+      'container_custom_color',
+      'container_radius',
+      'container_padding',
+      'column_ratio',
+      'content_gap',
+      'media_aspect_ratio',
+      'media_radius',
+      'text_color_scheme',
+      'text_custom_color',
+      'title_size',
+      'ornament_enabled',
+      'ornament_media',
+      'ornament_scope',
+      'ornament_position',
+      'ornament_layer',
+      'ornament_size',
     ])
   })
 
@@ -36,7 +54,11 @@ describe('shared section schema', () => {
   })
 
   it('keeps default values in schema meta', () => {
-    expect(contentDefault.meta?.defaultValues?.width_preset).toBe('md')
+    expect(contentDefault.meta?.defaultValues?.width_preset).toBe('xl')
+    expect(contentDefault.meta?.defaultValues?.container_variant).toBe('plain')
+    expect(contentDefault.meta?.defaultValues?.layout_direction).toBe('horizontal')
+    expect(contentDefault.meta?.defaultValues?.media_radius).toBe('lg')
+    expect(contentDefault.meta?.defaultValues?.ornament_enabled).toBe(false)
     expect(dataList.meta?.defaultValues?.type).toBe('list')
   })
 
@@ -52,6 +74,11 @@ describe('shared section schema', () => {
 
   it('stores editor config under schema editor nodes', () => {
     expect(contentDefault.meta?.editor?.inputConfig?.width_preset?.type).toBe('select')
+    expect(contentDefault.meta?.editor?.inputConfig?.container_variant?.type).toBe('select')
+    expect(contentDefault.meta?.editor?.inputConfig?.ornament_enabled?.type).toBe('checkbox')
+    expect(contentDefault.meta?.editor?.inputConfig?.ornament_media?.type).toBe('image')
+    expect(contentDefault.meta?.editor?.inputConfig?.container_custom_color?.dependency?.visibility?.default).toBe(false)
+    expect(contentDefault.meta?.editor?.inputConfig?.text_custom_color?.dependency?.visibility?.default).toBe(false)
     expect(contentDefault.data.content.editor?.label).toBe('Main Content')
     expect(dataList.data.childSections.schema?.data.gallery.editor?.resolveConfig).toBeTypeOf('function')
   })
@@ -67,8 +94,8 @@ describe('shared section schema', () => {
 
   it('preserves literal typing for meta and slot fields', () => {
     type ContentDefaultMetaField = typeof contentDefault.meta.fields[number]
-    const typedMetaField: ContentDefaultMetaField = 'width_preset'
-    expect(typedMetaField).toBe('width_preset')
+    const typedMetaField: ContentDefaultMetaField = 'container_variant'
+    expect(typedMetaField).toBe('container_variant')
 
     type ContentDefaultSlotField = NonNullable<typeof contentDefault.data.content.fields>[number]
     const typedSlotField: ContentDefaultSlotField = 'title'
