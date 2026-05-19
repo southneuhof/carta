@@ -131,6 +131,10 @@ class AppServices extends FrameworkService {
     }
   }
 
+  override dataset(path: string, query?: Record<string, any>, options?: ServiceRequestOptions): Promise<any> {
+    return this.list(path, query, options)
+  }
+
   // delete(url: string, data: object, options?: ServiceRequestOptions) {
   //   return this.remove(url, data, options)
   // }

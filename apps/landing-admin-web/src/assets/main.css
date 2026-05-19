@@ -31,7 +31,7 @@ span a,
 }
 
 .dp--menu-wrapper {
-  position: absolute;
+  /* position: absolute; */
   z-index: 999999;
   pointer-events: auto;
 }

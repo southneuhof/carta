@@ -28,7 +28,7 @@ const props = defineProps({
   },
   teleport: {
     type: [Boolean, String, HTMLElement],
-    default: false,
+    default: true,
   },
   ...commonProps,
 })

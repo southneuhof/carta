@@ -23,7 +23,7 @@ const articleModel: ModelConfig = withModelDefaults({
   transaction: {
     fields: ['categories', 'created_at'],
     inputConfig: {
-      categories: { type: 'tag' },
+      categories: { type: 'select', props: {getAPI: 'articleCategory', multi: true, required : true} },
       created_at: { type: 'date' },
     },
   },
