@@ -24,6 +24,8 @@ const ensureDraftPreHook = async (body: Record<string, any>, options?: { require
   const { id, page_translation_id, ...rest } = normalizedBody;
   const requireId = options?.requireId ?? false;
 
+  console.log('Pre-hook body:', body);
+
   if (requireId && !id) {
     throw exception('Missing content id', 400);
   }
@@ -58,7 +60,7 @@ export default {
   },
   create: {
     allow: true,
-    fields: ['media', 'title', 'subtitle', 'description', 'label', 'content', 'blurb', 'media_type', 'attachment', 'status', 'order', 'gallery_id', 'url', 'url_text', 'url_type', 'amount', 'collection', 'meta'],
+    fields: ['media', 'title', 'subtitle', 'description', 'label', 'content', 'blurb', 'media_type', 'attachment', 'status', 'order', 'gallery_id', 'cta', 'cta_text', 'url', 'url_text', 'url_type', 'amount', 'collection', 'meta'],
     lifecycle: {
       pre: async (body) => {
         const normalizedBody = normalizeContentFileFields(body);
@@ -90,7 +92,7 @@ export default {
   update: {
     allow: true,
     by: ['id'],
-    fields: ['media', 'title', 'subtitle', 'description', 'label', 'content', 'blurb', 'media_type', 'attachment', 'status', 'order', 'url', 'url_text', 'url_type', 'amount', 'collection', 'meta'],
+    fields: ['media', 'title', 'subtitle', 'description', 'label', 'content', 'blurb', 'media_type', 'attachment', 'status', 'order', 'cta', 'cta_text', 'url', 'url_text', 'url_type', 'amount', 'collection', 'meta'],
     lifecycle: {
       pre: async (body) => await ensureDraftPreHook(body, { requireId: true })
     }

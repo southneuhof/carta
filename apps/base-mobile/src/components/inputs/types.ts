@@ -91,7 +91,7 @@ export type ImageUploadResult = {
   path?: string
   data?: string
   url?: string
-  tumbnail_url?: string
+  thumbnail_url?: string
   thumbnail_url?: string
   [key: string]: any
 }

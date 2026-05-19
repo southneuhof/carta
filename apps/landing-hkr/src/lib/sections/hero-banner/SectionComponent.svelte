@@ -54,7 +54,7 @@
   });
 </script>
 
-<div class="h-screen flex items-end bg-black/80 text-white w-full relative">
+<div class="h-screen w-full relative overflow-hidden">
   {#each section.data.banner as banner, i}
     {#if preloadIndexes.includes(i) && banner?.media}
       {#if !banner?.media_type || banner?.media_type === "image"}
@@ -89,16 +89,11 @@
     {/if}
   {/each}
 
-  <div
-    class="w-full h-full absolute bottom-0 left-0 z-[1]"
-    style="background: linear-gradient(to top right, rgba(0, 0, 0, 0.36) 0%, rgba(0, 0, 0, 0.0) 30%);"
-  ></div>
-
-  <div class="w-full h-full absolute bottom-0 left-0 z-10 p-4 sm:p-8 flex items-end">
+  <div class="w-full h-full absolute bottom-0 left-0 z-10 p-6 sm:p-10 lg:p-16 flex items-center">
     <div class="relative w-full h-full z-[1]">
       {#each section.data.banner as banner, i (i)}
         <div
-          class="absolute pr-4 pt-4 bottom-0 left-0 max-w-[100ch] flex flex-col gap-4 transition-opacity duration-500 {activeBannerIndex ===
+          class="absolute left-0 top-1/2 -translate-y-1/2 max-w-[640px] flex flex-col gap-4 lg:gap-5 transition-opacity duration-500 {activeBannerIndex ===
           i
             ? 'opacity-100 z-10'
             : 'opacity-0 pointer-events-none z-0'}"
@@ -109,7 +104,7 @@
           "
         >
           <div
-            class="flex flex-col gap-4 text-left text-shadow-outline-variant"
+            class="flex flex-col gap-4 text-left text-[#1F2937]"
             style="
               transition: all 500ms cubic-bezier(0.4, 0, 0.2, 1);
               transform: translateZ(0);
@@ -118,22 +113,37 @@
               filter: {activeBannerIndex === i ? 'none' : 'blur(8px)'};
             "
           >
-            {#if section.meta.logo}
-              <img
-                src={section.meta.logo}
-                class="max-w-[72px]"
-                alt={banner.subtitle}
-              />
+            {#if banner?.subtitle}
+              <p class="text-base sm:text-lg lg:text-xl">{banner.subtitle}</p>
             {/if}
-            {#if banner?.subtitle}<p class="text-lg lg:text-xl">{banner.subtitle}</p>{/if}
             {#if banner?.title}
-              <h1 class="text-4xl lg:text-5xl 2xl:text-6xl font-bold">
+              <h1 class="text-4xl lg:text-6xl font-bold leading-tight">
                 {banner.title}
               </h1>
             {/if}
             {#if banner?.description}
-              <div class="rtf-content mt-4 text-sm">
+              <div class="rtf-content mt-2 text-sm sm:text-base max-w-[56ch]">
                 {@html banner.description}
+              </div>
+            {/if}
+            {#if banner?.cta || banner?.url}
+              <div class="mt-3 flex flex-wrap items-center gap-3 sm:gap-4">
+                {#if banner?.cta}
+                  <a
+                    href={banner.cta}
+                    class="inline-flex items-center justify-center h-12 px-8 rounded-full font-semibold text-lg bg-[#EF4444] text-white"
+                  >
+                    {banner.cta_text || "Hubungi Kami"}
+                  </a>
+                {/if}
+                {#if banner?.url}
+                  <a
+                    href={banner.url}
+                    class="inline-flex items-center justify-center h-12 px-8 rounded-full font-semibold text-lg bg-[#3B82F6] text-white"
+                  >
+                    {banner.url_text || "Produk"}
+                  </a>
+                {/if}
               </div>
             {/if}
           </div>

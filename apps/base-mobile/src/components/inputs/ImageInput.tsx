@@ -284,7 +284,7 @@ export function ImageInput({
 
           <View className="flex-row flex-wrap gap-2">
             {images.map((item, index) => {
-              const imageSource = item.tumbnail_url || item.thumbnail_url || item.url
+              const imageSource = item.thumbnail_url || item.thumbnail_url || item.url
               return (
                 <View
                   key={`uploaded-${index}-${imageSource || 'unknown'}`}

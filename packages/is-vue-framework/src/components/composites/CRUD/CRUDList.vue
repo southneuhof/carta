@@ -217,8 +217,9 @@ onMounted(() => {
                   <template #list-rowActions="{ data }">
                     <slot v-if="$slots['list-rowActions']" v-bind="{ data }"></slot>
                     <div v-else-if="data?.[listConfig.uid!]" class="flex flex-row items-center gap-2">
+                      <slot v-if="$slots['list-rowActions-detail']" name="list-rowActions-detail" v-bind="{data, permissions, config}"/>
                       <Button
-                        v-if="(config.actions?.detail ?? true) && permissions.detail"
+                        v-else-if="(config.actions?.detail ?? true) && permissions.detail"
                         color="info"
                         kind="icon"
                         @click="() => router.push({ name: String(route.name), query: { ...route.query, [`${config.name}_view`]: 'detail', [`${config.name}_id`]: data[listConfig.uid!] } })"
@@ -227,8 +228,9 @@ onMounted(() => {
                           <Icon name="information"></Icon>
                         </template>
                       </Button>
+                      <slot v-if="$slots['list-rowActions-update']" name="list-rowActions-update" v-bind="{data, permissions, config}"/>
                       <Button
-                        v-if="(config.actions?.update ?? true) && data.can_update != false && permissions.update"
+                        v-else-if="(config.actions?.update ?? true) && data.can_update != false && permissions.update"
                         color="warning"
                         kind="icon"
                         @click="() => router.push({ name: String(route.name), query: { ...route.query, [`${config.name}_view`]: 'update', [`${config.name}_id`]: data[listConfig.uid!] } })"
@@ -237,8 +239,9 @@ onMounted(() => {
                           <Icon name="edit"></Icon>
                         </template>
                       </Button>
+                      <slot v-if="$slots['list-rowActions-delete']" name="list-rowActions-delete" v-bind="{data, permissions, config}"/>
                       <ConfirmationDialog
-                        v-if="(config.actions?.delete ?? true) && data.can_delete != false && permissions.delete"
+                        v-else-if="(config.actions?.delete ?? true) && data.can_delete != false && permissions.delete"
                         :onConfirm="async () => await onDelete(config.name, data[listConfig.uid!])"
                         :onSuccess="() => {
                           toast.success(`${config.title || config.name} berhasil dihapus`)
@@ -254,7 +257,7 @@ onMounted(() => {
                           </Button>
                         </template>
                       </ConfirmationDialog>
-                      <slot v-if="$slots['list-rowAdditionalActions']" name="list-rowAdditionalActions" v-bind="{ data }"></slot>
+                      <slot v-if="$slots['list-rowAdditionalActions']" name="list-rowAdditionalActions" v-bind="{ data, permissions, config }"></slot>
                     </div>
                   </template>
                 </Table>

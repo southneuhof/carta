@@ -259,6 +259,8 @@ model Content {
   url_type    ContentUrlType?
   url         String?
   url_text    String?
+  cta         String?
+  cta_text    String?
   attachment  String?
   amount      Float?
   status      Boolean?

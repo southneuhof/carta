@@ -6,10 +6,10 @@ import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 
 const props = defineProps({
-  url: {
+  imageURL: {
     type: String,
   },
-  thumbnail: {
+  thumbnailURL: {
     type: String,
     required: false,
   },
@@ -37,7 +37,7 @@ const thumbnailError = ref(false)
 const detailError = ref(false)
 
 const imageCandidates = computed(() => {
-  const list = [props.thumbnail, props.url].filter((item): item is string => Boolean(item))
+  const list = [props.thumbnailURL, props.imageURL].filter((item): item is string => Boolean(item))
   return [...new Set(list)]
 })
 
@@ -56,7 +56,7 @@ const detailSrc = computed(() => {
 })
 
 watch(
-  () => [props.thumbnail, props.url],
+  () => [props.thumbnailURL, props.imageURL],
   () => {
     thumbnailError.value = false
     detailError.value = false
@@ -95,7 +95,7 @@ function closeDialog() {
 <template>
   <div v-if="!$slots.trigger" :class="twMerge('relative flex aspect-square h-40 min-h-[120px] items-center justify-center rounded-xl bg-surface-container-high ', $attrs.class as string)">
     <div
-      v-if="!props.disableControls && (props.thumbnail || props.url)"
+      v-if="!props.disableControls && (props.thumbnailURL || props.imageURL)"
       class="absolute flex h-full w-full flex-row items-center justify-center gap-2 rounded-xl bg-black/[12%] text-on-surface opacity-0 transition-opacity duration-100 hover:opacity-100"
     >
       <Button @click="() => openDialog()" color="info" kind="icon" type="button">

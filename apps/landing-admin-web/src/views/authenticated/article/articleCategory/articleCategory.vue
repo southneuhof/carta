@@ -16,23 +16,14 @@ import { permissions } from '@/stores/permissions';
     <template #list-name="{data}">
       <p>{{ data.translations.find((item: any) => item.language == 'id')?.name }}</p>
     </template>
-    <template #list-rowAdditionalActions="{data}">
-      <Modal v-if="permissions().has('update-articleCategory')">
-        <template #trigger>
-          <Button variant="tonal" color="warning"><Icon name="edit" /></Button>
-        </template>
-        <template #content>
-          <TranslationEditor
-            :data="data"
-            identifier="article_category_id"
-            :fields="['name']"
-            targetAPI="articleCategoryTranslation"
-          />
-        </template>
-      </Modal>
+    <template #list-rowActions-detail="{data}">
       <Modal v-if="permissions().has('list-mappingRoleArticleCategory')">
         <template #trigger>
-          <Button variant="tonal" color="info"><Icon name="information" /></Button>
+          <Button color="info" kind="icon">
+            <template #icon>
+              <Icon name="information" />
+            </template>
+          </Button>
         </template>
         <template #content>
           <CRUDComposite
@@ -67,6 +58,29 @@ import { permissions } from '@/stores/permissions';
               />
             </template>
           </CRUDComposite>
+        </template>
+      </Modal>
+    </template>
+    <template #list-rowActions-update="{data}">
+      <Modal v-if="permissions().has('update-articleCategory')">
+        <template #trigger>
+          <Button
+            v-if="permissions().has('update-articleCategory')"
+            color="warning"
+            kind="icon"
+          >
+            <template #icon>
+              <Icon name="edit"></Icon>
+            </template>
+          </Button>
+        </template>
+        <template #content>
+          <TranslationEditor
+            :data="data"
+            identifier="article_category_id"
+            :fields="['name']"
+            targetAPI="articleCategoryTranslation"
+          />
         </template>
       </Modal>
     </template>

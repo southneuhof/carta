@@ -8,7 +8,7 @@ const mappingRoleArticleCategoryModel: ModelConfig = {
   actions: { create: false, update: false, delete: false, detail: false },
   view: {
     list: {
-      getAPI: 'mappingRoleArticleCategory/list',
+      getAPI: 'mappingRoleArticleCategory',
       fields: ['name', 'active'],
     },
   },

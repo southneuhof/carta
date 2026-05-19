@@ -25,7 +25,17 @@ export default defineSectionSchema({
       type: 'gallery',
       order: 1,
       many: true,
-      fields: ['media_type', 'media', 'subtitle', 'title', 'description'] as const,
+      fields: [
+        'media_type',
+        'media',
+        'subtitle',
+        'title',
+        'description',
+        'cta',
+        'cta_text',
+        'url',
+        'url_text',
+      ] as const,
       editor: {
         label: 'Banner Items',
         inputConfig: {
@@ -56,6 +66,24 @@ export default defineSectionSchema({
               required: true,
             },
           },
+          cta: {
+            type: 'text',
+          },
+          cta_text: {
+            type: 'text',
+          },
+          url: {
+            type: 'text',
+          },
+          url_text: {
+            type: 'text',
+          },
+        },
+        fieldsAlias: {
+          cta: 'Primary Button URL',
+          cta_text: 'Primary Button Text',
+          url: 'Secondary Button URL',
+          url_text: 'Secondary Button Text',
         },
       },
     },

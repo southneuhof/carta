@@ -12,6 +12,7 @@ import * as fileManager from './fileManager'
 import * as dynamicForm from './dynamicForm'
 import * as crudList from './crudList'
 import * as crudDetail from './crudDetail'
+import { imageURLResolver } from './imageInput'
 
 export const frameworkBehaviors: FrameworkBehaviors = {
   form,
@@ -24,6 +25,7 @@ export const frameworkBehaviors: FrameworkBehaviors = {
   upload,
   imageInput: {
     fileUpload: upload.fileUpload,
+    imageURLResolver: imageURLResolver
   },
   fileInput: {
     fileUpload: upload.fileUpload,

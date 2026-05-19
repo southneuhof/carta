@@ -38,6 +38,7 @@ export interface FrameworkLookupBehaviors {
 }
 
 export type FrameworkFileUpload = (file: File, directory?: string, onUploadProgress?: (progress: { loaded: number; total: number }) => void) => Promise<any>
+export type FrameworkImageURLResolver = (payload: Record<string, any> | string) => { imageURL: string; thumbnailURL: string }
 
 export interface FrameworkFileInputBehaviors {
   fileUpload?: FrameworkFileUpload
@@ -45,6 +46,7 @@ export interface FrameworkFileInputBehaviors {
 
 export interface FrameworkImageInputBehaviors {
   fileUpload?: FrameworkFileUpload
+  imageURLResolver?: FrameworkImageURLResolver
 }
 
 export interface FrameworkUploadBehaviors {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, type PropType } from 'vue'
-import { defaultImageInputUpload, type ImageInputUploadBehavior } from '@southneuhof/is-vue-framework/behaviors/imageInput'
+import { defaultImageInputUpload, defaultImageURLResolver, type ImageInputUploadBehavior, type ImageInputURLResolverBehavior } from '@southneuhof/is-vue-framework/behaviors/imageInput'
 import { toast } from 'vue-sonner'
 import ImagePreview from '@southneuhof/is-vue-framework/components/base/ImagePreview.vue'
 import Draggable from 'vuedraggable'
@@ -52,6 +52,10 @@ const props = defineProps({
   fileUpload: {
     type: Function as PropType<ImageInputUploadBehavior>,
     default: defaultImageInputUpload,
+  },
+  imageURLResolver: {
+    type: Function as PropType<ImageInputURLResolverBehavior>,
+    default: defaultImageURLResolver,
   },
   ...commonProps,
 })
@@ -125,6 +129,10 @@ function handleChange(event: any) {
   if (!props.multi) return
   images.value = images.value.map((item, index) => ({ ...item, order_number: index + 1 }))
 }
+
+function resolvePreviewURLs(payload: Record<string, any>) {
+  return props.imageURLResolver(payload)
+}
 </script>
 
 <template>
@@ -147,7 +155,7 @@ function handleChange(event: any) {
             <Draggable v-if="images.length" v-model="images" item-key="url" class="flex flex-row items-center gap-4" @change="handleChange">
               <template #item="{ element, index }">
                 <div class="w-fit cursor-move">
-                  <ImagePreview v-if="element" :url="element.url" :thumbnail="element.tumbnail_url">
+                  <ImagePreview v-if="element" :imageURL="resolvePreviewURLs(element).imageURL" :thumbnailURL="resolvePreviewURLs(element).thumbnailURL">
                     <template #actions>
                       <Button color="error" kind="icon" @click="removeItem(index)" type="button">
                         <template #icon>

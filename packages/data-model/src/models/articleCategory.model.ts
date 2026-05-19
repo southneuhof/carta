@@ -8,7 +8,7 @@ const articleCategoryModel: ModelConfig = withModelDefaults({
   fields: ['name', 'created_at', 'updated_at'],
   transaction: {
     fields: ['name']
-  }
+  },
 })
 
 export default articleCategoryModel

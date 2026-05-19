@@ -5,8 +5,8 @@ export const componentTypeMap: Record<string, { component?: any; propKeyValue?: 
   image: {
     component: defineAsyncComponent(() => import('../../base/ImagePreview.vue')),
     propKeyValue: [
-      ['thumbnail', 'tumbnail_url'],
-      ['url', 'url'],
+      ['thumbnailURL', 'thumbnail_url'],
+      ['imageURL', 'url'],
     ],
   },
   location: {
