@@ -5,6 +5,7 @@ import { exception } from "$lib/utils/response";
 import prisma from "$lib/utils/prisma";
 import type { RequestEvent } from "@sveltejs/kit";
 import type { Prisma } from "@prisma/client";
+import { hasGlobalPermissionAccess } from "$lib/utils/routing";
 
 export async function requireMenuItemAccess(event: RequestEvent, input: Record<string, any>) {
   const id = input.id ?? input.menu_item_id;
@@ -139,6 +140,20 @@ export default {
 
   list: {
     permission: 'view-website',
+    where: ({ locals }) => {
+      if (hasGlobalPermissionAccess(locals)) return undefined;
+      const roleId = locals.user?.role_id;
+      if (!roleId) {
+        return { id: '__no_access__' };
+      }
+      return {
+        allowedRoles: {
+          some: {
+            id: roleId,
+          },
+        },
+      };
+    },
     searchableBy: ['id'],
     filterableBy: ['parent_id', "level"],
     orderBy: { order: 'asc' },

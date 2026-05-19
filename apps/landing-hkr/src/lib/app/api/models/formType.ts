@@ -4,6 +4,7 @@ import { exception } from '$lib/utils/response';
 import prisma from '$lib/utils/prisma';
 import type { RequestEvent } from '@sveltejs/kit';
 import type { FormType, Prisma } from '@prisma/client';
+import { hasGlobalPermissionAccess } from '$lib/utils/routing';
 
 export async function requireFormTypeAccess(event: RequestEvent, input: Record<string, any>) {
   const id = input.id ?? input.form_type_id;
@@ -41,8 +42,7 @@ export default {
     orderBy: { name: 'asc' },
     filterableBy: ['id'],
     where: ({locals}) => {
-      const isAdmin = Boolean(locals?.isPrivilegedRole);
-      if (isAdmin) return undefined
+      if (hasGlobalPermissionAccess(locals)) return undefined
       const roleId = locals.user?.role_id;
       if (!roleId) {
         return { id: '__no_access__' };

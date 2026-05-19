@@ -5,6 +5,7 @@ import { exception } from "$lib/utils/response";
 import prisma from "$lib/utils/prisma";
 import type { RequestEvent } from "@sveltejs/kit";
 import type { Prisma } from "@prisma/client";
+import { hasGlobalPermissionAccess } from "$lib/utils/routing";
 
 export async function requireArticleAccess(event: RequestEvent, input: Record<string, any>) {
   const id = input.id ?? input.article_id;
@@ -186,8 +187,8 @@ export default {
           }
         : undefined;
 
-      if (event.locals.isPrivilegedRole)
-        return event.url.searchParams.get("search")
+      if (hasGlobalPermissionAccess(event.locals))
+        return search
           ? { AND: [searchWhere] }
           : undefined;
 
@@ -198,36 +199,17 @@ export default {
         };
       }
 
-      // Get all category IDs that the user's role has access to
-      const roleWithCategories = await prisma.role.findUnique({
-        where: { id: roleId },
-        select: {
-          accessibleArticleCategory: {
-            select: { id: true },
-          },
-        },
-      });
-
-      const accessibleCategoryIds =
-        roleWithCategories?.accessibleArticleCategory.map(
-          (cat: { id: string }) => cat.id,
-        ) || [];
-
-      // If role has no accessible categories, return no results
-      if (accessibleCategoryIds.length === 0) {
-        return {
-          id: "non-existent-id",
-        };
-      }
-
-      // Check that the article has ALL the categories that the role has access to
       return {
         AND: [
           searchWhere,
           {
             categories: {
               some: {
-                id: { in: accessibleCategoryIds },
+                allowedRoles: {
+                  some: {
+                    id: roleId,
+                  },
+                },
               },
             },
           },

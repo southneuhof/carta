@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import { requireRoleScopedAccess } from '$lib/app/api/authorization';
 import { exception } from '$lib/utils/response';
 import prisma from '$lib/utils/prisma';
+import { hasGlobalPermissionAccess } from '$lib/utils/routing';
 
 export async function requireFormSubmissionAccess(event: RequestEvent, input: Record<string, any>) {
   const id = input.id;
@@ -59,48 +60,41 @@ export default {
     where: async (event) => {
       const start_date = event.url.searchParams.get('start_date');
       const end_date = event.url.searchParams.get('end_date');
-      const conditions: Condition<any>[] = [];
+      const and: Prisma.FormSubmissionWhereInput[] = [];
+      let submittedAtFilter: Prisma.DateTimeFilter | undefined;
 
-      if (!event.locals.isPrivilegedRole) {
-        const role = await prisma.role.findUnique({
-          where: { id: event.locals.user?.role_id },
-          select: {
-            accessibleFormTypes: {
-              select: {
-                id: true
+      if (!hasGlobalPermissionAccess(event.locals)) {
+        const roleId = event.locals.user?.role_id;
+        if (!roleId) {
+          and.push({ id: '__forbidden__' });
+        } else {
+          and.push({
+            formType: {
+              allowedRoles: {
+                some: { id: roleId }
               }
             }
-          }
-        });
-
-        const accessibleFormTypeIds = role?.accessibleFormTypes.map((formType) => formType.id) ?? [];
-
-        conditions.push({
-          field: 'form_type_id',
-          operator: 'in',
-          value: accessibleFormTypeIds.length ? accessibleFormTypeIds : ['__forbidden__']
-        });
+          });
+        }
       }
 
       if (start_date) {
-        conditions.push({
-          field: 'submitted_at',
-          operator: 'gte',
-          value: dayjs(start_date).startOf('day').toDate()
-        });
+        submittedAtFilter = {
+          ...(submittedAtFilter ?? {}),
+          gte: dayjs(start_date).startOf('day').toDate()
+        };
       }
 
       if (end_date) {
-        conditions.push({
-          field: 'submitted_at',
-          operator: 'lte',
-          value: dayjs(end_date).endOf('day').toDate()
-        });
+        submittedAtFilter = {
+          ...(submittedAtFilter ?? {}),
+          lte: dayjs(end_date).endOf('day').toDate()
+        };
       }
 
-      return {
-        AND: conditions
-      };
+      if (submittedAtFilter) and.push({ submitted_at: submittedAtFilter });
+      if (and.length === 0) return undefined;
+      return { AND: and };
     },
   },
 
