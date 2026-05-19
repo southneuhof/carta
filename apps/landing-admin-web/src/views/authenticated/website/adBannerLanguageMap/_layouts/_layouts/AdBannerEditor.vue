@@ -22,7 +22,7 @@ const updateConfig = buildFormConfig(adBannerModel, 'update')
 <template>
   <Card v-if="!data" class="flex-row items-center justify-between gap-2" color="infoContainer">
     <div class="flex flex-row items-center gap-2">
-      <Icon>info</Icon>
+      <Icon name="information" />
       <p>Konten promosi untuk bahasa {{ language.name }} belum dibuat.</p>
     </div>
     <Button
@@ -31,7 +31,7 @@ const updateConfig = buildFormConfig(adBannerModel, 'update')
           keyManager().triggerChange('articleCategoryEditor')
         })"
     >
-      Buat <Icon>chevron_right</Icon>
+      Buat <Icon name="arrow-right-s" />
     </Button>
   </Card>
   <Card v-else>

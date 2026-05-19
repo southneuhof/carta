@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 260" width="75" height="68">
+  <style>
+    .brand-text {
+      font-family: "Inter", "Montserrat", "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+      font-weight: 700;
+      font-size: 38px;
+      letter-spacing: -0.5px;
+    }
+  </style>
+
+  <g id="logo-mark">
+    <path d="M 136 66 Q 150 62 164 66 L 173 50 L 162 55 L 158 38 L 150 51 L 142 38 L 138 55 L 127 50 Z" 
+          fill="#E23730" 
+          stroke="#E23730" 
+          stroke-width="2" 
+          stroke-linejoin="round" />
+
+    <circle cx="150" cy="115" r="50" fill="#344994" />
+
+    <path d="M 174.5 97.8 A 30 30 0 1 0 174.5 132.2 L 196 115 Z" fill="#FFFFFF" />
+
+    <circle cx="152" cy="115" r="13" fill="#344994" />
+
+    <path d="M 152 115 L 165 110 A 13 13 0 0 1 165 120 Z" fill="#FFFFFF" />
+  </g>
+
+  <text x="150" y="215" text-anchor="middle" class="brand-text">
+    <tspan fill="#344994">Must</tspan><tspan fill="#E23730" dx="2">Chick</tspan>
+  </text>
+</svg>

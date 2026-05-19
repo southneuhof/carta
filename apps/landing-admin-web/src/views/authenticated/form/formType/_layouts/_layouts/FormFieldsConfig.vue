@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
-import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
-import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
-import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composites/ConfirmationDialog.vue';
-import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue';
-import { keyManager } from '@/stores/keyManager';
-import { toast } from 'vue-sonner';
-import { parseCode } from '@/utils/common';
-import services from '@/utils/services';
-import { inject, ref } from 'vue';
-import Draggable from 'vuedraggable'
+  import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+  import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
+  import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
+  import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composites/ConfirmationDialog.vue';
+  import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue';
+  import { keyManager } from '@/stores/keyManager';
+  import { toast } from 'vue-sonner';
+  import { parseCode } from '@/utils/common';
+  import services from '@/utils/services';
+  import { inject, ref } from 'vue';
+  import Draggable from 'vuedraggable'
 
   const formTypeData = inject<any>('data', {})
 
@@ -147,9 +147,7 @@ import Draggable from 'vuedraggable'
         }
       }
     },
-    getInitialData: {
-      col_span: 12
-    }
+    getInitialData: () => ({col_span: 12})
   }
 
   const isLoadingReordering = ref(false)
@@ -185,7 +183,7 @@ import Draggable from 'vuedraggable'
           >
             <template #item="{element: item, index}">
               <Card class="flex-row items-center gap-2">
-                <Icon class="-ml-2 cursor-move">drag_indicator</Icon>
+                <Icon class="-ml-2 cursor-move" name="draggable"></Icon>
                 <div class="flex flex-col w-full">
                   <p>{{ item.label }}<span v-if="item.required" class="text-sm font-bold text-error">*</span> <span class="text-muted">({{ item.type }} v. {{ item.validation_type_code || 'none' }})</span></p>
                 </div>
@@ -199,7 +197,11 @@ import Draggable from 'vuedraggable'
                     }"
                   >
                     <template #trigger>
-                      <Button variant="standard" color="error"><Icon>delete_forever</Icon></Button>
+                      <Button variant="standard" color="error" kind="icon">
+                        <template #icon>
+                          <Icon name="delete-bin"></Icon>
+                        </template>
+                      </Button>
                     </template>
                   </ConfirmationDialog>
                   <DialogForm
@@ -213,7 +215,11 @@ import Draggable from 'vuedraggable'
                     targetAPI="formField"
                   >
                     <template #trigger>
-                      <Button variant="standard" color="warning"><Icon>edit</Icon></Button>
+                      <Button variant="standard" color="warning">
+                        <template #icon>
+                          <Icon name="edit"></Icon>
+                        </template>
+                      </Button>
                     </template>
                   </DialogForm>
                 </div>
@@ -231,7 +237,12 @@ import Draggable from 'vuedraggable'
           targetAPI="formField"
         >
           <template #trigger>
-            <Button class="w-full" variant="standard"><Icon>add</Icon>Tambah</Button>
+            <Button class="w-full" variant="standard">
+              <template #icon>
+                <Icon name="add"></Icon>
+              </template>
+              Tambah
+            </Button>
           </template>
         </DialogForm>
       </div>

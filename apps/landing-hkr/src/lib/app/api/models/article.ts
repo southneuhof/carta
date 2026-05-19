@@ -83,12 +83,15 @@ export default {
 
   create: {
     allow: true,
-    fields: ["categories", "created_at"], // Changed 'article_category_id' to 'categories', added 'title' as it's used in post lifecycle
+    fields: ["categories", "created_at"], // Changed 'article_category_id' to 'categories'
     lifecycle: {
       post: async (body: any, data: any) => {
+        const title = typeof body.title === "string" ? body.title.trim() : "";
+        const fallbackTitle = "Untitled Article";
+        const fallbackSlug = `draft-${data.id}`;
         const translations = languages.map((language) => ({
-          title: body.title, // Ensure title is passed in body for create
-          slug: parseSlug(body.title),
+          title: title || fallbackTitle,
+          slug: title ? parseSlug(title) : fallbackSlug,
           language,
           status_code: "DRAFT",
           article_id: data.id,

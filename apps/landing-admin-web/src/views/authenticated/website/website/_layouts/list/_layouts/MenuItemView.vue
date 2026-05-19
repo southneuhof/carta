@@ -121,7 +121,7 @@ function handleSectionReorder(event: any) {
                   <div class="z-[50] flex flex-row items-center gap-2">
                     <div :class="index === activeTabIndex ? '' : 'text-muted'" class="flex flex-row items-center gap-4">
                       <!-- <div v-if="(item.page) && ((item.page?.['id']?.status_code != 'PUBLISHED') || (item.page?.['en']?.status_code != 'PUBLISHED'))" class="flex flex-row items-center gap-1">
-                        <Icon>warning</Icon>
+                        <Icon name="error-warning" />
                         <p v-if="item.page['id']?.status_code != 'PUBLISHED'">ID</p>
                         <p v-if="item.page['en']?.status_code != 'PUBLISHED'">EN</p>
                       </div> -->

@@ -39,7 +39,7 @@ const {data: [latestLog]} = await services.list('verificationLog', { model: 'art
             }"
           >
             <template #trigger>
-              <button class="text-sm underline font-semibold text-muted"><Icon :size="12" class="underline">content_copy</Icon> Reset dan Salin dari ID</button>
+              <button class="text-sm underline font-semibold text-muted"><Icon size="xs" class="underline" name="file-copy" /> Reset dan Salin dari ID</button>
             </template>
           </ConfirmationDialog>
         </template>        
@@ -57,7 +57,7 @@ const {data: [latestLog]} = await services.list('verificationLog', { model: 'art
         <template v-if="articleTranslation.status_code === 'PUBLISHED'">
           <Popover align="end">
             <template #trigger>
-              <Chip color="success">Published <Icon>expand_more</Icon> </Chip>
+              <Chip color="success">Published <Icon name="arrow-down-s" /> </Chip>
             </template>
             <template #content>
               <Card class="flex flex-col gap-1 p-1 outline outline-1 outline-outline/[24%]">
@@ -72,7 +72,7 @@ const {data: [latestLog]} = await services.list('verificationLog', { model: 'art
                   "
                 >
                   <template #trigger>
-                    <Button variant="standard" color="info" class="rounded-lg">Buat Draft <Icon>chevron_right</Icon> </Button>
+                    <Button variant="standard" color="info" class="rounded-lg">Buat Draft <Icon name="arrow-right-s" /> </Button>
                   </template>
                 </ConfirmationDialog>
               </Card>
@@ -83,8 +83,8 @@ const {data: [latestLog]} = await services.list('verificationLog', { model: 'art
         <template v-else-if="['DRAFT', 'REVIEW'].includes(articleTranslation.status_code)">
           <Popover align="end">
             <template #trigger>
-              <Chip v-if="articleTranslation.status_code === 'DRAFT'" color="neutral">Draft <Icon>expand_more</Icon> </Chip>
-              <Chip v-else color="warning">Review <Icon>expand_more</Icon></Chip>
+              <Chip v-if="articleTranslation.status_code === 'DRAFT'" color="neutral">Draft <Icon name="arrow-down-s" /> </Chip>
+              <Chip v-else color="warning">Review <Icon name="arrow-down-s" /></Chip>
             </template>
             <template #content>
               <Card class="flex flex-col gap-1 p-1 outline outline-1 outline-outline/[24%]">
@@ -104,13 +104,13 @@ const {data: [latestLog]} = await services.list('verificationLog', { model: 'art
                     <div class="flex flex-col gap-1">
                       <div class="flex flex-row items-center gap-2">
                         <p>Ajukan Verifikasi Artikel</p>
-                        <Icon>check</Icon>
+                        <Icon name="check" />
                       </div>
                       <p class="text-muted font-normal text-base">Setelah diajukan, artikel akan ditandai sebagai "selesai" dan dapat diverifikasi admin.</p>
                     </div>
                   </template>
                   <template #trigger>
-                    <Button variant="standard" color="info" class="rounded-lg">Ajukan Verifikasi <Icon>chevron_right</Icon></Button>
+                    <Button variant="standard" color="info" class="rounded-lg">Ajukan Verifikasi <Icon name="arrow-right-s" /></Button>
                   </template>
                 </DialogForm>
                 <DialogForm
@@ -129,13 +129,13 @@ const {data: [latestLog]} = await services.list('verificationLog', { model: 'art
                     <div class="flex flex-col gap-1">
                       <div class="flex flex-row items-center gap-2">
                         <p>Kembalikan ke Draft</p>
-                        <Icon>refresh</Icon>
+                        <Icon name="refresh" />
                       </div>
                       <p class="text-muted font-normal text-base">Setelah dilakukan aksi ini, status artikel akan kembali ke "draft".</p>
                     </div>
                   </template>
                   <template #trigger>
-                    <Button variant="standard" color="info" class="rounded-lg">Kembalikan ke Draft <Icon>refresh</Icon></Button>
+                    <Button variant="standard" color="info" class="rounded-lg">Kembalikan ke Draft <Icon name="refresh" /></Button>
                   </template>
                 </DialogForm>
                 <template v-if="permissions().has('verify-article')">
@@ -154,13 +154,13 @@ const {data: [latestLog]} = await services.list('verificationLog', { model: 'art
                       <div class="flex flex-col gap-1">
                         <div class="flex flex-row items-center gap-2">
                           <p>Terima Verifikasi Artikel</p>
-                          <Icon>check</Icon>
+                          <Icon name="check" />
                         </div>
                         <p class="text-base font-normal text-muted">Setelah diverifikasi, artikel akan dipublikasikan di landing page untuk dilihat publik.</p>
                       </div>
                     </template>
                     <template #trigger>
-                      <Button variant="standard" color="success" class="rounded-lg">Verifikasi Artikel <Icon>check</Icon> </Button>
+                      <Button variant="standard" color="success" class="rounded-lg">Verifikasi Artikel <Icon name="check" /> </Button>
                     </template>
                   </DialogForm>
                   <DialogForm
@@ -178,7 +178,7 @@ const {data: [latestLog]} = await services.list('verificationLog', { model: 'art
                       <div class="flex flex-col gap-1">
                         <div class="flex flex-row items-center gap-2">
                           <p>Hapus Draft</p>
-                          <Icon>close</Icon>
+                          <Icon name="close" />
                         </div>
                         <p class="text-base font-normal text-muted">
                           Setelah menghapus draft, artikel akan dikembalikan ke keadaan semula sebelum pengubahan. Artikel akan kembali ke bentuk published semula.
@@ -186,7 +186,7 @@ const {data: [latestLog]} = await services.list('verificationLog', { model: 'art
                       </div>
                     </template>
                     <template #trigger>
-                      <Button variant="standard" color="error" class="rounded-lg">Hapus Draft <Icon>close</Icon></Button>
+                      <Button variant="standard" color="error" class="rounded-lg">Hapus Draft <Icon name="close" /></Button>
                     </template>
                   </DialogForm>
                   <!-- <DialogForm
@@ -204,7 +204,7 @@ const {data: [latestLog]} = await services.list('verificationLog', { model: 'art
                       <div class="flex flex-col gap-1">
                         <div class="flex flex-row items-center gap-2">
                           <p>Ajukan Revisi</p>
-                          <Icon>history</Icon>
+                          <Icon name="history" />
                         </div>
                         <p class="text-base font-normal text-muted">
                           Setelah mengajukan revisi, halaman akan dikembalikan ke keadaan semula sebelum pengubahan. Halaman akan tetap dalam status draft.
@@ -212,7 +212,7 @@ const {data: [latestLog]} = await services.list('verificationLog', { model: 'art
                       </div>
                     </template>
                     <template #trigger>
-                      <Button variant="standard" color="warning" class="rounded-lg">Revisi <Icon>history</Icon></Button>
+                      <Button variant="standard" color="warning" class="rounded-lg">Revisi <Icon name="history" /></Button>
                     </template>
                   </DialogForm> -->
                 </template>

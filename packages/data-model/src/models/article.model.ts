@@ -13,15 +13,15 @@ const articleModel: ModelConfig = withModelDefaults({
   view: {
     list: {
       filter: {
-        fields: ['categories'],
+        fields: ['title', 'categories'],
       },
     },
     detail: {
-      fields: ['created_at', 'updated_at', 'categories', 'translations'],
+      fields: ['title', 'created_at', 'updated_at', 'categories', 'translations'],
     },
   },
   transaction: {
-    fields: ['categories', 'created_at'],
+    fields: ['title', 'categories', 'created_at'],
     inputConfig: {
       categories: { type: 'select', props: {getAPI: 'articleCategory', multi: true, required : true} },
       created_at: { type: 'date' },

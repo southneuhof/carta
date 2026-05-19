@@ -13,7 +13,16 @@ const menuItem = inject<any>('menuItem')
     <Form
       :getInitialData="async () => JSON.parse(JSON.stringify(menuItem))"
       formType="update"
-      :fields="menuItem.menu_item_type === 'page' ? ['role', 'slug', 'visible', 'show_submenu_below_navbar'] : ['role', 'url', 'visible']"
+      :fields="menuItem.menu_item_type === 'page' ? [
+        'role',
+        'slug',
+        'visible',
+        // 'show_submenu_below_navbar'
+      ] : [
+        'role', 
+        'url', 
+        'visible'
+      ]"
       :inputConfig="{
         role: {
           type: 'select',

@@ -118,9 +118,9 @@
       <a href="{page.data.primaryMenuPath}">
         <!-- {#if isMenuExpanded ? containerHeight + 152 : windowScrollY != 0 ? 88 : 0} -->
         {#if isMenuExpanded || windowScrollY != 0}
-          <img src="/assets/logo/hkr-sil.svg" class="w-[64px] h-[27px]" alt="HK Realtindo"/>
+          <img src="/assets/logo/mjl.svg" class="w-[75px] h-[68px]" alt="PT MJL"/>
         {:else}
-          <img src="/assets/logo/hkr-w.svg" class="w-[64px] h-[27px]" alt="HK Realtindo"/>
+          <img src="/assets/logo/mjl.svg" class="w-[75px] h-[68px]" alt="PT MJL"/>
         {/if}
       </a>
       <div class="flex flex-row items-center gap-base text-sm xl:text-base">

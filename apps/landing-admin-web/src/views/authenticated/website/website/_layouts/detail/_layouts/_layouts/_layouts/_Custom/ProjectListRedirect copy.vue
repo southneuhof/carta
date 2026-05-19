@@ -20,9 +20,9 @@ import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
     @click="() => $router.push({name: 'collection'})"
   >
     <div class="flex flex-row items-center gap-2">
-      <Icon>article</Icon>
+      <Icon name="article" />
       <p>Lihat pengaturan filter daftar proyek</p>
     </div>
-    <Icon>chevron_right</Icon>
+    <Icon name="arrow-right-s" />
   </Card>
 </template>

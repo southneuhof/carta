@@ -19,7 +19,7 @@ import { permissions } from '@/stores/permissions';
     <template #list-rowAdditionalActions="{data}">
       <Modal v-if="permissions().has('update-articleCategory')">
         <template #trigger>
-          <Button variant="tonal" color="warning"><Icon>edit</Icon></Button>
+          <Button variant="tonal" color="warning"><Icon name="edit" /></Button>
         </template>
         <template #content>
           <TranslationEditor
@@ -32,7 +32,7 @@ import { permissions } from '@/stores/permissions';
       </Modal>
       <Modal v-if="permissions().has('list-mappingRoleArticleCategory')">
         <template #trigger>
-          <Button variant="tonal" color="info"><Icon>info</Icon></Button>
+          <Button variant="tonal" color="info"><Icon name="information" /></Button>
         </template>
         <template #content>
           <CRUDComposite

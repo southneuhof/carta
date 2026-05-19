@@ -22,13 +22,13 @@ import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
     @click="() => $router.push({name: 'calculatorType', query: {'calculatorType_view': 'detail', 'calculatorType_id': sectionData.meta.calculator_type_id}})"
   >
     <div class="flex flex-row items-center gap-2">
-      <Icon>calculate</Icon>
+      <Icon name="calculator" />
       <p>Lihat pengaturan kalkulator</p>
     </div>
-    <Icon>chevron_right</Icon>
+    <Icon name="arrow-right-s" />
   </Card>
   <Card v-else class="flex-row items-center gap-2" color="warning">
-    <Icon>info</Icon>
+    <Icon name="information" />
     <p>Pilih tipe kalkulator dari pengaturan metadata</p>
   </Card>
 </template>
