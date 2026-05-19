@@ -31,6 +31,15 @@ describe('resolveSlotEditorConfig', () => {
     expect(resolver).toHaveBeenCalledWith(ctx)
   })
 
+  it('preserves resolved fieldSet marker', () => {
+    const config: ContentSlotEditorConfig = {
+      fields: ['title'],
+      resolveConfig: () => ({ fieldSet: 'list' }),
+    }
+    const resolved = resolveSlotEditorConfig(config, ctx)
+    expect(resolved?.fieldSet).toBe('list')
+  })
+
   it('ignores nested resolveConfig from resolver output', () => {
     const nested = vi.fn(() => ({ fields: ['other'] }))
     const base = vi.fn(() => ({ fields: ['title'], resolveConfig: nested }))

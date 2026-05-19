@@ -2,6 +2,7 @@ import type { InputConfig } from '@southneuhof/is-data-model'
 
 export type ContentSlotEditorConfig = {
   fields?: string[]
+  fieldSet?: string
   fieldAliases?: Record<string, string>
   inputConfig?: InputConfig
   fieldsDictionary?: Record<string, unknown>

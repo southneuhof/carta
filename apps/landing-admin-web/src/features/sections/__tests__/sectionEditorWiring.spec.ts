@@ -26,10 +26,12 @@ describe('section editor wiring', () => {
     expect(sectionEditor).not.toContain('editorRegistry')
   })
 
-  it('uses section overlay configs from adapter', () => {
+  it('uses shared schema manifest directly in adapter', () => {
     const adapterPath = join(appRoot, 'features/sections/schemaAdapter.ts')
     const adapter = readFileSync(adapterPath, 'utf-8')
-    expect(adapter).toContain('@/configs/sections')
+    expect(adapter).toContain('./manifest')
+    expect(adapter).toContain('resolveSectionEditorComponent')
+    expect(adapter).not.toContain('@/configs/sections')
   })
 
   it('uses add section options in add wizard', () => {

@@ -37,11 +37,11 @@ describe('app specific config wiring', () => {
     expect(adBannerView).toContain('adBannerLanguageMapModel')
   })
 
-  it('menu views use feature menu config', () => {
+  it('menu views use shared menu config', () => {
     const menuItemView = readFileSync(join(srcRoot, 'views/authenticated/website/website/_layouts/list/_layouts/MenuItemView.vue'), 'utf-8')
     const menuGeneralSettings = readFileSync(join(srcRoot, 'views/authenticated/website/website/_layouts/list/_layouts/_layouts/_layouts/MenuGeneralSettings.vue'), 'utf-8')
 
-    expect(menuItemView).toContain("@/features/menu/menuItemFormConfig")
-    expect(menuGeneralSettings).toContain("@/features/menu/menuItemFormConfig")
+    expect(menuItemView).toContain("@/configs/menuItemFormConfig")
+    expect(menuGeneralSettings).toContain("@/configs/menuItemFormConfig")
   })
 })

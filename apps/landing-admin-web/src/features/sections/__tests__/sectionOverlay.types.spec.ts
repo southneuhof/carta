@@ -1,67 +1,39 @@
 import contentDefaultSchema from '@southneuhof/landing-section-schema/sections/content-default'
 import dataListSchema from '@southneuhof/landing-section-schema/sections/data-list'
-import type { Component } from 'vue'
-import { describe, it } from 'vitest'
-import { defineSectionEditorOverlay } from '@/configs/sections'
-import { dataListGalleryConfigs } from '@/configs/sections/contentClassConfigs'
+import { describe, expect, it } from 'vitest'
 
-describe('section overlay typing', () => {
-  it('type-checks schema-aware slot and meta keys', () => {
-    defineSectionEditorOverlay(contentDefaultSchema, {
-      meta: {
-        inputConfig: {
-          width_preset: { type: 'select' },
-        },
-      },
-      slots: {
-        content: {
-          label: 'Content',
-          component: {} as Component,
-        },
-      },
-    })
+describe('section schema authoring types', () => {
+  it('type-checks schema slot/meta keys and token-based editor components', () => {
+    const contentFields = contentDefaultSchema.data.content.fields
+    expect(contentFields).toContain('title')
 
-    defineSectionEditorOverlay(contentDefaultSchema, {
-      slots: {
-        // @ts-expect-error invalid slot key should fail typing
-        invalidSlot: {
-          label: 'Invalid',
-        },
-      },
-    })
+    expect('componentToken' in (contentDefaultSchema.data.content.editor ?? {})).toBe(false)
 
-    defineSectionEditorOverlay(contentDefaultSchema, {
-      meta: {
-        inputConfig: {
-          // @ts-expect-error invalid meta key should fail typing
-          unknown_meta_key: { type: 'text' },
-        },
-      },
-    })
+    type ContentMetaField = NonNullable<typeof contentDefaultSchema.meta>['fields'][number]
+    const widthPresetField: ContentMetaField = 'width_preset'
+    expect(widthPresetField).toBe('width_preset')
 
-    defineSectionEditorOverlay(dataListSchema, {
-      slots: {
-        childSections: {
-          label: 'Child Sections',
-          slots: {
-            // Nested slot keys are intentionally string-keyed in Phase 1; recursive key inference is deferred.
-            gallery: {
-              label: 'Data',
-              fields: ['title'],
-              resolveConfig: ({ parentSectionData }) => dataListGalleryConfigs[parentSectionData?.meta?.type ?? 'list'],
-            },
-          },
-        },
-      },
-    })
+    type ContentSlotField = NonNullable<typeof contentDefaultSchema.data.content.fields>[number]
+    const titleField: ContentSlotField = 'title'
+    expect(titleField).toBe('title')
 
-    defineSectionEditorOverlay(dataListSchema, {
-      slots: {
-        // @ts-expect-error invalid top-level slot key should fail typing
-        gallery: {
-          label: 'Invalid Top Level Gallery',
-        },
-      },
-    })
+    // @ts-expect-error invalid meta field key should fail
+    const invalidMeta: ContentMetaField = 'unknown_meta_key'
+    expect(invalidMeta).toBe('unknown_meta_key')
+
+    // @ts-expect-error invalid slot field key should fail
+    const invalidSlotField: ContentSlotField = 'not_a_field'
+    expect(invalidSlotField).toBe('not_a_field')
+
+    const nestedGallery = dataListSchema.data.childSections.schema?.data.gallery
+    expect(nestedGallery?.fieldSets).toBeDefined()
+
+    type DataListSlotKey = keyof typeof dataListSchema.data
+    const childSectionsSlot: DataListSlotKey = 'childSections'
+    expect(childSectionsSlot).toBe('childSections')
+
+    // @ts-expect-error invalid top-level slot key should fail
+    const invalidSlotKey: DataListSlotKey = 'gallery'
+    expect(invalidSlotKey).toBe('gallery')
   })
 })

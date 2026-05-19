@@ -6,6 +6,7 @@ import {
   getAddSectionOptions,
   getSectionPanelState,
   getSupportedEditorConfig,
+  getSupportedSectionSchemaGroup,
   matchNestedSchemaSlotsToStructure,
   matchRootSchemaSlotsToStructure,
   matchSchemaDataToStructure,
@@ -66,15 +67,14 @@ describe('section schema adapter', () => {
     const projectCategorySlot = heroBannerConfig?.slots.find((slot) => slot.key === 'projectCategory')
     expect(projectCategorySlot?.component).toBeUndefined()
     expect(projectCategorySlot?.resolveConfig).toBeDefined()
+    expect(projectCategorySlot?.fieldSets).toBeDefined()
 
     const dataListConfig = getSupportedEditorConfig('data-list')
     const childSections = dataListConfig?.slots.find((slot) => slot.key === 'childSections')
     expect(childSections?.component).toBeUndefined()
-    expect(childSections?.slots?.gallery?.component).toBeUndefined()
-    expect(childSections?.slots?.gallery?.resolveConfig).toBeDefined()
   })
 
-  it('exposes recursive slot schema and nested overlay config', () => {
+  it('exposes recursive slot schema and nested schema config', () => {
     const dataListConfig = getSupportedEditorConfig('data-list')
     const childSections = dataListConfig?.slots.find((slot) => slot.key === 'childSections')
 
@@ -92,7 +92,7 @@ describe('section schema adapter', () => {
       type: 'gallery',
       order: 1,
     })
-    expect(childSections?.slots?.gallery?.resolveConfig).toBeDefined()
+    expect(childSections?.schema?.data.gallery.editor?.resolveConfig).toBeDefined()
   })
 
   it('matches root schema slots with path-aware context', () => {
@@ -114,7 +114,6 @@ describe('section schema adapter', () => {
     expect(childSections?.editor.schema?.info?.name).toBe('Data Item')
     expect(childSections?.editor.schema?.meta?.defaultValues).toEqual({})
     expect(childSections?.editor.schema?.data.gallery).toMatchObject({ type: 'gallery', order: 1 })
-    expect(childSections?.editor.slots?.gallery?.resolveConfig).toBeDefined()
     expect(childSections?.editor.component).toBeUndefined()
   })
 
@@ -162,28 +161,6 @@ describe('section schema adapter', () => {
     expect(nestedMatches).toEqual([])
   })
 
-  it('does not match nested gallery overlay against a non-gallery runtime item', () => {
-    const rootMatches = matchRootSchemaSlotsToStructure('data-list', [
-      { id: 'group-1', type: 'sectionGroup', order: 2 },
-    ])
-
-    const childSections = rootMatches.find((match) => match.pathKey === 'childSections')
-    if (!childSections) throw new Error('Expected childSections match')
-
-    const nestedMatches = matchNestedSchemaSlotsToStructure({
-      parentMatch: childSections,
-      structure: [
-        { id: 'wrong-1', type: 'sectionGroup', order: 1 },
-      ],
-    })
-
-    const gallery = nestedMatches.find((match) => match.pathKey === 'childSections.gallery')
-
-    expect(gallery?.items).toEqual([])
-    expect(gallery?.editor.component).toBeUndefined()
-    expect(gallery?.editor.resolveConfig).toBeDefined()
-  })
-
   it('preserves many=false and many=true behavior in generic schema data matching', () => {
     const matches = matchSchemaDataToStructure({
       schemaData: {
@@ -217,11 +194,16 @@ describe('section schema adapter', () => {
     expect(dataListConfig?.meta?.defaultValues?.type).toBe('list')
   })
 
+  it('derives section groups from schema editor.group', () => {
+    expect(getSupportedSectionSchemaGroup('hero-banner')).toBe('Banner')
+    expect(getSupportedSectionSchemaGroup('data-list')).toBe('Utility')
+  })
+
   it('keeps unknown section unsupported/read-only', () => {
     expect(getSupportedEditorConfig('legacy-unknown')).toBeNull()
   })
 
-  it('builds section create payload from supported schema only', () => {
+  it('builds section create payload from supported schema only and does not include default meta', () => {
     const payload = buildCreateSectionPayload({
       schemaCode: 'content-default',
       sectionGroupId: 'sg-1',
@@ -233,7 +215,7 @@ describe('section schema adapter', () => {
     expect(payload.description).toBe('Single content slot section')
     expect(payload.section_group_id).toBe('sg-1')
     expect(payload.page_translation_id).toBe('pt-1')
-    expect(payload.meta).toMatchObject({ width_preset: 'md' })
+    expect(payload).not.toHaveProperty('meta')
     expect(payload).not.toHaveProperty('config')
   })
 
