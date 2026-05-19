@@ -14,8 +14,8 @@
     <div class="w-full max-w-screen-xl px-12 grid grid-dynamic-[250px] gap-8">
       <div class="flex flex-col gap-base">
         <div class="flex flex-row items-center gap-base">
-          <img src="/assets/logo/danantara.png?{new Date().toJSON()}" alt="HK Realtindo" class="w-[128px]"/>
-          <img src="/assets/logo/hkr.svg?{new Date().toJSON()}" alt="HK Realtindo" class="w-[85px] h-[36px] mt-2"/>
+          <!-- <img src="/assets/logo/danantara.png?{new Date().toJSON()}" alt="HK Realtindo" class="w-[128px]"/> -->
+          <img src="/assets/logo/mjl.svg?{new Date().toJSON()}" alt="HK Realtindo" class="w-[75px] h-[68px] mt-2"/>
         </div>
         <div class="flex flex-col gap-sm">
           <p class="font-semibold">{page.data.companyProfile.name}</p>

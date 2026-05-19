@@ -60,7 +60,14 @@ const props = defineProps({
   ...commonProps,
 })
 
-const modelValue = defineModel<Record<string, string> | Array<Record<string, string>>>()
+type ImageAssetValue = {
+  path: string
+  data: string
+  url: string
+  [key: string]: any
+}
+
+const modelValue = defineModel<ImageAssetValue | Array<ImageAssetValue>>()
 const emit = defineEmits(['update:modelValue', 'update:uploadState', 'validation:touch'])
 
 const uploadPercentage = ref(0)
@@ -130,8 +137,12 @@ function handleChange(event: any) {
   images.value = images.value.map((item, index) => ({ ...item, order_number: index + 1 }))
 }
 
-function resolvePreviewURLs(payload: Record<string, any>) {
+function resolvePreviewURLs(payload: ImageAssetValue) {
   return props.imageURLResolver(payload)
+}
+
+function resolveDragKey(item: ImageAssetValue, index: number): string {
+  return item?.url || item?.path || item?.data || `image-${index}`
 }
 </script>
 
@@ -152,7 +163,7 @@ function resolvePreviewURLs(payload: Record<string, any>) {
             <div v-else class="font-semibold text-tertiary">{{ images.length }} gambar diunggah</div>
           </div>
           <div class="flex flex-row items-center gap-4">
-            <Draggable v-if="images.length" v-model="images" item-key="url" class="flex flex-row items-center gap-4" @change="handleChange">
+            <Draggable v-if="images.length" v-model="images" :item-key="resolveDragKey" class="flex flex-row items-center gap-4" @change="handleChange">
               <template #item="{ element, index }">
                 <div class="w-fit cursor-move">
                   <ImagePreview v-if="element" :imageURL="resolvePreviewURLs(element).imageURL" :thumbnailURL="resolvePreviewURLs(element).thumbnailURL">

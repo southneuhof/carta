@@ -1,10 +1,9 @@
 import * as upload from './upload'
 
 export const fileUpload = upload.fileUpload;
-export function imageURLResolver(image: string) {
-    console.log('Resolving image URL for:', image);
+export function imageURLResolver(image: { url: string; path: string; data: string }) {
     return {
-        imageURL: image,
-        thumbnailURL: image
-    };
+        imageURL: image?.url || '',
+        thumbnailURL: image?.url || '',
+    }
 }

@@ -3,7 +3,7 @@ import { configureFrameworkBehaviors, resetFrameworkBehaviorsForTests } from '@s
 import { defaultTableGetData } from '../table'
 import { defaultOnSubmit } from '../form'
 import { defaultFileInputUpload } from '../fileInput'
-import { defaultImageInputUpload } from '../imageInput'
+import { defaultImageInputUpload, defaultImageURLResolver } from '../imageInput'
 
 describe('registry-backed framework defaults', () => {
   beforeEach(() => {
@@ -60,5 +60,12 @@ describe('registry-backed framework defaults', () => {
     const file = new File(['image'], 'image.png', { type: 'image/png' })
 
     await expect(defaultImageInputUpload(file)).rejects.toThrow('Missing behavior: imageInput.fileUpload')
+  })
+
+  it('defaults image URL resolver to object contract url field', () => {
+    expect(defaultImageURLResolver({ path: '/storage/public/a.jpg', data: '/storage/public/a.jpg', url: 'https://landing.example.com/storage/public/a.jpg' })).toEqual({
+      imageURL: 'https://landing.example.com/storage/public/a.jpg',
+      thumbnailURL: 'https://landing.example.com/storage/public/a.jpg',
+    })
   })
 })

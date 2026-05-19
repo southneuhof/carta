@@ -103,7 +103,7 @@
   ></div>
 <div
   role="none" transition:blur onmouseenter="{() => debouncedMenuExpandMouseHover(-1, 'shrink')}"
-  class="z-[48] h-[88px] w-screen top-0 fixed bg-gradient-to-b from-on-surface/[16%] to-transparent"
+  class="z-[48] h-[116px] w-screen top-0 fixed bg-gradient-to-b from-on-surface/[16%] to-transparent"
   style="
     backdrop-filter: blur(0px);
     mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
@@ -116,7 +116,7 @@
   >
     <div class="flex flex-row items-center justify-between w-full px-12 py-6 max-w-screen-xl">
       <a href="{page.data.primaryMenuPath}">
-        <!-- {#if isMenuExpanded ? containerHeight + 152 : windowScrollY != 0 ? 88 : 0} -->
+        <!-- {#if isMenuExpanded ? containerHeight + 152 : windowScrollY != 0 ? 116 : 0} -->
         {#if isMenuExpanded || windowScrollY != 0}
           <img src="/assets/logo/mjl.svg" class="w-[75px] h-[68px]" alt="PT MJL"/>
         {:else}
@@ -167,7 +167,7 @@
     </div>
   </div>
   {#if currentLevel1Menu?.show_submenu_below_navbar && !isMenuExpanded}
-    <div transition:blur={{duration: 150}} class="w-full z-[51] py-1.5 flex flex-row items-center justify-center gap-4 fixed top-[88px] border-y transition-all {(windowScrollY != 0) ? 'bg-surface border-y-outline-variant mt-0' : 'border-transparent -mt-4'}">
+    <div transition:blur={{duration: 150}} class="w-full z-[51] py-1.5 flex flex-row items-center justify-center gap-4 fixed top-[116px] border-y transition-all {(windowScrollY != 0) ? 'bg-surface border-y-outline-variant mt-0' : 'border-transparent -mt-4'}">
       {#each currentLevel1Menu.children.filter((item: any) => item.visible) as menu}
         <a href={menu.menu_item_type == 'link' ? menu.url : `/${currentLevel1Menu.slug}/${menu.slug}`} class="text-start text-sm {windowScrollY != 0 ? 'text-on-surface' : 'text-[var(--navbar-initial-text-color)]'} {menu.slug === currentLevel2Menu?.slug ? 'font-semibold underline' : ''}">{menu.translations[0].name}</a>
       {/each}
@@ -175,9 +175,9 @@
   {/if}
   <div 
     class="fixed text-sm xl:text-base w-full bg-surface outline-0 z-[49] ease-in-out overflow-hidden {isMenuExpanded ? '' : 'pointer-events-none'}"
-    style="transition: height {HEIGHT_DURATION}ms, opacity {FADE_DURATION}ms; height: {isMenuExpanded ? containerHeight + 152 : windowScrollY != 0 ? 88 : 0}px"
+    style="transition: height {HEIGHT_DURATION}ms, opacity {FADE_DURATION}ms; height: {isMenuExpanded ? containerHeight + 152 : windowScrollY != 0 ? 116 : 0}px"
   >
-    <div class="h-[88px]"></div>
+    <div class="h-[116px]"></div>
     <div class="relative w-full h-full">
       <div class="w-full max-w-screen-xl mx-auto px-12 relative h-full">
         {#each page.data.menu as menu, level1Index}
