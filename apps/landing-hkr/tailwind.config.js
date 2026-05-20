@@ -17,20 +17,20 @@ export default {
       colors: {
         error: {
           DEFAULT: '#FF3B30',
-          muted: '#FFD1CF'
+          container: '#FFD1CF'
         },
         surface: {
           // DEFAULT: '#FFF9F5',
           DEFAULT: '#FFFFFF',
-          muted: '#EFE9E7'
+          container: '#EFE9E7'
         },
         primary: {
           DEFAULT: '#F70019',
-          muted: '#FBD9AA'
+          container: '#FBD9AA'
         },
         secondary: {
           DEFAULT: '#2B74DD',
-          muted: '#F9B0B0'
+          container: '#EAF9FF'
         },
         outline: {
           DEFAULT: '#656E95',
