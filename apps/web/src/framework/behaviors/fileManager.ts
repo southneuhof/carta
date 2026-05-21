@@ -2,7 +2,8 @@ import services from '@/utils/services'
 
 export async function listFiles(params: Record<string, any>) {
   const response = await services.get('files', params)
-  return response.data
+  console.log('listFiles response', response)
+  return response
 }
 
 export function uploadFile(file: File, directory?: string, onUploadProgress?: (progress: { loaded: number; total: number }) => void) {

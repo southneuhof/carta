@@ -63,7 +63,7 @@ export interface FrameworkLocationBehaviors {
 export interface FrameworkFileManagerBehaviors {
   listFiles?: (params: Record<string, any>) => Promise<any[]>
   uploadFile?: (file: File, directory?: string, onUploadProgress?: (progress: { loaded: number; total: number }) => void) => Promise<any>
-  syncFiles?: (directory?: string) => Promise<any>
+  createFolder?: (dir: string, folderName: string) => Promise<any>
   deleteFile?: (path: string) => Promise<any>
 }
 

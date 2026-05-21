@@ -235,7 +235,17 @@ export class FrameworkService {
       return this.withServiceOptions(Promise.reject(new Error(`Unsupported method: ${method}`)), options)
     }
 
-    return this.withServiceOptions(fn(path, payload, undefined, options?.responseType, { ...(options?.init || {}), onUploadProgress } as ApostleInit), options)
+    return this.withServiceOptions(
+      fn.call(
+        this.apostle,
+        path,
+        payload,
+        undefined,
+        options?.responseType,
+        { ...(options?.init || {}), onUploadProgress } as ApostleInit,
+      ),
+      options,
+    )
   }
 
   protected extractErrorMessage(error: any): string {

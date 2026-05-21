@@ -28,7 +28,7 @@ export const defaultGlobalConfig: {
         validation: z.string().email('Format email tidak valid!'),
       },
     },
-    media: {type: 'image'},
+    media: { type: 'file-manager' },
     subtitle: {type: 'text'},
     url: {type: 'text'},
     url_text: {
@@ -52,7 +52,7 @@ export const defaultGlobalConfig: {
         ]
       }
     },
-    attachment: {type: 'file'},
+    attachment: { type: 'file-manager' },
     amount: {type: 'number'},
     url_type: {
       type: 'radio',

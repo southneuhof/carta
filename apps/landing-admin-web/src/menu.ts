@@ -118,6 +118,19 @@ const menu: Modules = [
       },
     ],
   },
+  {
+    name: 'fileManager',
+    title: 'File Manager',
+    icon: 'folder',
+    description: 'File Manager',
+    routes: [
+      {
+        name: 'fileManager',
+        title: 'File Manager',
+        icon: 'corporate_fare',
+      },
+    ],
+  },
 ]
 
 export default menu
