@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import FileManager from '@/components/utilities/FileManager/FileManager.vue';
+import FileManager from '@southneuhof/is-vue-framework/components/utils/FileManager/FileManager.vue';
 
 
 </script>
 
 <template>
-  <div class="file-manager">
+  <div class="flex h-[70vh] flex-col">
     <FileManager/>
   </div>
 </template>

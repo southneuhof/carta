@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { ContextMenuContent, ContextMenuItem, ContextMenuPortal, ContextMenuTrigger, ContextMenuRoot } from 'radix-vue'
 
 interface FolderItem {
@@ -8,11 +8,11 @@ interface FolderItem {
   [key: string]: any
 }
 
-import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composites/ConfirmationDialog.vue'
 import { toast } from 'vue-sonner'
-import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue'
-import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composites/ConfirmationDialog.vue'
+import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue'
 
 const props = defineProps({
   item: {
@@ -46,10 +46,9 @@ async function fetchChildren() {
 
   isLoading.value = true
   try {
-    const listFiles = getFrameworkBehaviors().fileManager?.listFiles
-    if (!listFiles) missingBehavior('fileManager.listFiles')
-    children.value = (await listFiles({ dir: props.item?.path || '', type: 'folder' })) || []
-    console.log('children', children.value)
+    const behavior = getFrameworkBehaviors().fileManager?.listFiles
+    if (!behavior) missingBehavior('fileManager.listFiles')
+    children.value = (await behavior({ dir: props.item?.path || '', type: 'folder' })) || []
   } catch (error) {
     console.error('Error loading children:', error)
     children.value = []
@@ -62,6 +61,12 @@ function deleteFile(path: string) {
   const behavior = getFrameworkBehaviors().fileManager?.deleteFile
   if (!behavior) missingBehavior('fileManager.deleteFile')
   return behavior(path)
+}
+
+function createFolder(payload: Record<string, any>) {
+  const behavior = getFrameworkBehaviors().fileManager?.createFolder
+  if (!behavior) missingBehavior('fileManager.createFolder')
+  return behavior(payload.dir, payload.folder_name)
 }
 
 if (props.level === 0) {
@@ -106,7 +111,7 @@ if (props.level === 0) {
                 }"
                 class="w-full"
                 :extraData="{ dir: item.path }"
-                targetAPI="create-folder?custom"
+                :onSubmit="({ payload }) => createFolder(payload)"
                 :onSuccess="
                   () => {
                     toast.success('Folder created successfully')

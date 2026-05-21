@@ -2,11 +2,11 @@
 import FileManager from '@southneuhof/is-vue-framework/components/utils/FileManager/FileManager.vue'
 import BaseInput from '../BaseInput.vue'
 import { commonProps } from '../commonprops'
-import FileManagerDialogContent from './_layouts/FileManagerDialogContent.vue'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogScrollContent, DialogTitle, DialogTrigger, DialogClose } from '../../base/Dialog/index'
+import { Dialog, DialogContent, DialogTrigger } from '@southneuhof/is-vue-framework/components/base/Dialog/index'
 import { ref } from 'vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import frameworkDefaults from '@southneuhof/is-vue-framework/adapters/defaults'
 
 const props = defineProps({
   multi: {
@@ -17,15 +17,26 @@ const props = defineProps({
 })
 
 const modelValue = defineModel<any>()
-const emit = defineEmits<{
-  (event: 'validation:touch'): void
-}>()
 
 const open = ref(false)
+
+function isImageAsset(item: any): boolean {
+  return typeof item?.content_type === 'string' && item.content_type.startsWith('image/')
+}
+
+function itemPreviewUrl(item: any): string {
+  if (!item?.path) return ''
+  if (typeof item.url === 'string' && item.url) return item.url
+  try {
+    return new URL(item.path, frameworkDefaults.apiUrl).toString()
+  } catch {
+    return item.path
+  }
+}
 </script>
 
 <template>
-  <BaseInput v-bind="props">
+  <BaseInput v-bind="props" :error="error">
     <div class="flex flex-col gap-4">
       <div class="flex flex-row items-center gap-2 rounded-lg outline outline-1 outline-outline/[24%]">
         <Dialog v-model:open="open">
@@ -48,7 +59,6 @@ const open = ref(false)
                     @click="
                       () => {
                         modelValue = data
-                        emit('validation:touch')
                         open = false
                       }
                     "
@@ -59,7 +69,19 @@ const open = ref(false)
             </FileManager>
           </DialogContent>
         </Dialog>
-        {{ modelValue?.path }}
+        <div class="flex min-h-[40px] min-w-0 flex-1 items-center p-2">
+          <template v-if="modelValue?.path">
+            <div v-if="isImageAsset(modelValue)" class="flex items-center gap-3">
+              <img :src="itemPreviewUrl(modelValue)" :alt="modelValue?.filename || 'asset'" class="h-10 w-10 rounded-md object-cover" />
+              <p class="truncate text-sm">{{ modelValue?.filename || modelValue?.path }}</p>
+            </div>
+            <div v-else class="flex items-center gap-2">
+              <Icon name="file" />
+              <p class="truncate text-sm">{{ modelValue?.filename || modelValue?.path }}</p>
+            </div>
+          </template>
+          <p v-else class="text-sm text-muted">No asset selected</p>
+        </div>
       </div>
     </div>
   </BaseInput>

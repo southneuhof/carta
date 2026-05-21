@@ -5,11 +5,10 @@ import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-fram
 import { useDropZone } from '@vueuse/core'
 import { ContextMenuContent, ContextMenuItem, ContextMenuPortal, ContextMenuTrigger, ContextMenuRoot } from 'radix-vue'
 import { toast } from 'vue-sonner'
-import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composites/ConfirmationDialog.vue'
-import config from '@southneuhof/is-vue-framework/adapters/defaults'
-import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composites/ConfirmationDialog.vue'
+import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue'
 
 const props = defineProps({
   item: {
@@ -29,8 +28,6 @@ const props = defineProps({
 const data = ref()
 const modelValue = defineModel<any>()
 const searchParameters = ref({ dir: modelValue.value?.path, sort_by: 'updated_at', sort: 'desc', limit: 1000 })
-const contextMenuItem = ref()
-
 const dropZoneRef = ref<HTMLElement>()
 
 const columns = ref([
@@ -39,9 +36,9 @@ const columns = ref([
 ])
 
 async function getData() {
-  const listFiles = getFrameworkBehaviors().fileManager?.listFiles
-  if (!listFiles) missingBehavior('fileManager.listFiles')
-  const responseData = await listFiles(searchParameters.value)
+  const behavior = getFrameworkBehaviors().fileManager?.listFiles
+  if (!behavior) missingBehavior('fileManager.listFiles')
+  const responseData = await behavior(searchParameters.value)
 
   if (Array.isArray(responseData) && responseData.length > 0 && typeof responseData[0] === 'object' && responseData[0] !== null && '0' in responseData[0]) {
     data.value = responseData.map((item: any) => item[Object.keys(item)[0]])
@@ -74,7 +71,7 @@ function handleRowClick(item: any) {
 
 async function onDrop(files: File[] | null) {
   if (files && files.length > 0) {
-    const uploadFile = getFrameworkBehaviors().fileManager?.uploadFile ?? getFrameworkBehaviors().upload?.fileUpload
+    const uploadFile = getFrameworkBehaviors().fileManager?.uploadFile
     if (!uploadFile) missingBehavior('fileManager.uploadFile')
     const uploadPromises = files.map((file) => uploadFile(file, modelValue.value?.path))
 
@@ -95,16 +92,16 @@ await getData()
 
 const _window = window
 
-function syncFiles() {
-  const sync = getFrameworkBehaviors().fileManager?.syncFiles
-  if (!sync) missingBehavior('fileManager.syncFiles')
-  return sync(modelValue.value?.path)
-}
-
 function deleteFile(path: string) {
   const behavior = getFrameworkBehaviors().fileManager?.deleteFile
   if (!behavior) missingBehavior('fileManager.deleteFile')
   return behavior(path)
+}
+
+function createFolder(payload: Record<string, any>) {
+  const behavior = getFrameworkBehaviors().fileManager?.createFolder
+  if (!behavior) missingBehavior('fileManager.createFolder')
+  return behavior(payload.dir, payload.folder_name)
 }
 </script>
 
@@ -122,19 +119,12 @@ function deleteFile(path: string) {
               <div class="flex flex-row items-center gap-1">
                 <p class="text-xl font-semibold">{{ modelValue?.path.split('/').pop() }}</p>
                 <Button
-
-                  kind="icon" variant="standard"
+                  kind="icon"
+                  variant="standard"
                   class="!p-1"
                   @click="
                     () => {
-                      toast.promise(syncFiles(), {
-                        loading: 'Syncing files...',
-                        success: () => {
-                          getData()
-                          return 'Files synced successfully'
-                        },
-                        error: 'Failed to sync files',
-                      })
+                      getData()
                     }
                   "
                 >
@@ -190,7 +180,7 @@ function deleteFile(path: string) {
               </tr>
             </thead>
             <tbody>
-              <ContextMenuRoot v-for="item in data" :key="item.id">
+              <ContextMenuRoot v-for="item in data" :key="item.path">
                 <ContextMenuTrigger as-child>
                   <tr
                     @click="handleRowClick(item)"
@@ -212,7 +202,7 @@ function deleteFile(path: string) {
                       <ContextMenuItem
                         class="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-on-surface/10"
                         @select.prevent
-                        @click="() => _window.open(`${config.apiUrl}read-file/${item.path}`, '_blank')"
+                        @click="() => _window.open(item.url || item.path, '_blank')"
                       >
                         <Icon name="arrow-right-up"></Icon>
                         <p>Open</p>
@@ -225,8 +215,7 @@ function deleteFile(path: string) {
                           class="w-full"
                           :onConfirm="
                             () =>
-                              deleteFile(item.path)
-                                .then(() => {
+                              deleteFile(item.path).then(() => {
                                   toast.success('File deleted successfully')
                                   getData()
                                 })
@@ -273,14 +262,14 @@ function deleteFile(path: string) {
               }"
               class="w-full"
               :extraData="{ dir: item.path }"
-              targetAPI="create-folder?custom"
+              :onSubmit="({ payload }) => createFolder(payload)"
               :onSuccess="
                 () => {
                   toast.success('Folder created successfully')
                   getData()
                 }
-              "
-            >
+                "
+              >
               <template #trigger>
                 <div class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-on-surface/10">
                   <Icon name="add"></Icon>
