@@ -1,5 +1,15 @@
 # landing-hkr
 
+## 0.0.3
+
+### Patch Changes
+
+- Updated dependencies
+  - @southneuhof/apostle@0.0.2
+  - @southneuhof/utilities@0.1.1
+  - @southneuhof/landing-sveltekit-framework@0.0.3
+  - @southneuhof/landing-section-schema@0.0.2
+
 ## 0.0.2
 
 ### Patch Changes

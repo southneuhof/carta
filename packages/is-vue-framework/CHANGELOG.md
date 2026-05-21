@@ -1,5 +1,15 @@
 # @southneuhof/is-vue-framework
 
+## 1.0.1
+
+### Patch Changes
+
+- Release local package updates.
+- Updated dependencies
+  - @southneuhof/is-data-model@1.0.1
+  - @southneuhof/apostle@0.0.2
+  - @southneuhof/utilities@0.1.1
+
 ## 1.0.0
 
 ### Major Changes
