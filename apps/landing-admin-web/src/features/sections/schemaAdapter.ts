@@ -2,6 +2,7 @@ import sectionSchemas from './manifest'
 import { resolveSectionEditorComponent } from './componentRegistry'
 import type {
   NestedSectionSchema,
+  SectionSchemaMeta,
   SectionSchemaEditorInputConfig,
   SectionSchemaRegistry,
   SectionSchemaSlot,
@@ -68,6 +69,13 @@ export type MatchedSchemaSlot = {
   slot: SectionSchemaSlot
   editor: SupportedSectionSlotEditorContext
   items: SectionStructureItem[]
+}
+export type SupportedSectionMetaConfig = {
+  fields?: readonly string[]
+  defaultValues?: Record<string, unknown>
+  inputConfig?: SectionSchemaEditorInputConfig
+  fieldsAlias?: Record<string, string>
+  getInitialData?: () => Promise<Record<string, unknown>>
 }
 
 const BASE_SLOT_LABELS: Partial<Record<SectionSchemaSlotType, string>> = { content: 'Content', gallery: 'Gallery', sectionGroup: 'Section Group', section: 'Section' }
@@ -152,6 +160,16 @@ function toSlotEditor(slotKey: string, slot: SectionSchemaSlot): SupportedSectio
   }
 }
 
+function toMetaConfig(meta: SectionSchemaMeta | undefined): SupportedSectionMetaConfig {
+  return {
+    fields: meta?.fields ?? [],
+    defaultValues: meta?.defaultValues ?? {},
+    inputConfig: meta?.editor?.inputConfig ?? {},
+    fieldsAlias: meta?.editor?.fieldsAlias ?? {},
+    getInitialData: meta?.editor?.getInitialData,
+  }
+}
+
 export const supportedSectionSchemas = sharedSectionSchemas
 export function getSupportedSectionSchemaCodes(): SupportedSectionSchemaCode[] { return [...SUPPORTED_SECTION_SCHEMA_CODES] }
 export function getAddSectionOptions(): AddSectionOption[] {
@@ -166,14 +184,23 @@ export function getSupportedEditorConfig(code: string): SupportedSectionEditorCo
   return {
     code,
     info: { name: schema.info?.name ?? code, description: schema.info?.description ?? '' },
-    meta: {
-      fields: schema.meta?.fields ?? [],
-      defaultValues: schema.meta?.defaultValues ?? {},
-      inputConfig: schema.meta?.editor?.inputConfig ?? {},
-      fieldsAlias: schema.meta?.editor?.fieldsAlias ?? {},
-      getInitialData: schema.meta?.editor?.getInitialData,
-    },
+    meta: toMetaConfig(schema.meta),
     slots,
+  }
+}
+
+export function getNestedEditorConfig(
+  schema: NestedSectionSchema | null | undefined,
+): SupportedSectionEditorConfig | null {
+  if (!schema) return null
+  return {
+    code: '__nested_schema__',
+    info: {
+      name: schema.info?.name ?? 'Nested Section',
+      description: schema.info?.description ?? '',
+    },
+    meta: toMetaConfig(schema.meta),
+    slots: [],
   }
 }
 

@@ -11,6 +11,7 @@ import GalleryEditor from './_layouts/Gallery/GalleryEditor.vue'
 import SectionGroupEditor from './_layouts/SectionGroup/SectionGroupEditor.vue'
 import { parse } from '@southneuhof/utilities/parse'
 import {
+  getNestedEditorConfig,
   getSectionPanelState,
   getSupportedEditorConfig,
   matchNestedSchemaSlotsToStructure,
@@ -78,7 +79,9 @@ const panelState = computed(() => {
   return getSectionPanelState(sectionData.value)
 })
 const editorConfig = computed(() =>
-  panelState.value.kind === 'supported' ? getSupportedEditorConfig(panelState.value.code) : null,
+  panelState.value.kind === 'supported'
+    ? getSupportedEditorConfig(panelState.value.code)
+    : getNestedEditorConfig(nestedParentEditor.value?.schema),
 )
 const unsupportedViewModel = computed(() =>
   panelState.value.kind === 'unsupported' ? panelState.value.viewModel : null,

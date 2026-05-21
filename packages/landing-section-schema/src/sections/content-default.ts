@@ -1,4 +1,12 @@
 import { defineSectionSchema } from '../defineSectionSchema'
+import { containerColorOptions } from '../helpers/container-color-options'
+
+const isPanel = ({ container_variant }: any) => container_variant === 'panel'
+const isHorizontal = ({ layout_direction }: any) => layout_direction === 'horizontal'
+const isOrnamentEnabled = ({ ornament_enabled }: any) => Boolean(ornament_enabled)
+const isInsideOrnament = ({ ornament_enabled, ornament_layer }: any) => Boolean(ornament_enabled) && ornament_layer === 'inside'
+const isContainerBackgroundOrnament = ({ ornament_enabled, ornament_scope, ornament_layer }: any) => Boolean(ornament_enabled) && ornament_scope === 'container' && ornament_layer === 'behind'
+const usesPositionedOrnamentSize = ({ ornament_enabled, ornament_scope, ornament_layer }: any) => Boolean(ornament_enabled) && (ornament_layer === 'inside' || ornament_scope !== 'container')
 
 export default defineSectionSchema({
   code: 'content-default',
@@ -8,32 +16,31 @@ export default defineSectionSchema({
   },
   meta: {
     fields: [
-      'remove_margin',
-      'remove_outline_on_images',
+      'layout_direction',
+      'content_order',
+      'width_preset',
       'content_align',
       'url_justify',
-      'layout_direction',
-      'width_preset',
-      'content_order',
       'button_type',
       'container_variant',
       'container_color',
-      'container_custom_color',
       'container_radius',
       'container_padding',
       'column_ratio',
       'content_gap',
       'media_aspect_ratio',
       'media_radius',
+      'remove_outline_on_images',
       'text_color_scheme',
-      'text_custom_color',
       'title_size',
       'ornament_enabled',
       'ornament_media',
       'ornament_scope',
-      'ornament_position',
       'ornament_layer',
+      'ornament_offset',
       'ornament_size',
+      'ornament_position',
+      'remove_margin',
     ] as const,
     defaultValues: {
       content_align: 'left',
@@ -56,6 +63,7 @@ export default defineSectionSchema({
       ornament_scope: 'media',
       ornament_position: 'bottom-left',
       ornament_layer: 'behind',
+      ornament_offset: 'md',
       ornament_size: 'md',
     },
     editor: {
@@ -138,29 +146,27 @@ export default defineSectionSchema({
         },
         container_color: {
           type: 'select',
-          props: {
-            data: [
-              { id: 'none', name: 'None' },
-              { id: 'primary', name: 'Primary' },
-              { id: 'secondary', name: 'Secondary' },
-              { id: 'surface', name: 'Surface' },
-              { id: 'custom', name: 'Custom' },
-            ],
-            clearable: false,
-          },
-        },
-        container_custom_color: {
-          type: 'text',
           dependency: {
-            fields: ['container_color'],
+            fields: ['container_variant'],
             visibility: {
-              validator: ({ container_color }: any) => container_color === 'custom',
+              validator: isPanel,
               default: false,
             },
+          },
+          props: {
+            data: [...containerColorOptions],
+            clearable: false,
           },
         },
         container_radius: {
           type: 'select',
+          dependency: {
+            fields: ['container_variant'],
+            visibility: {
+              validator: isPanel,
+              default: false,
+            },
+          },
           props: {
             data: [
               { id: 'none', name: 'None' },
@@ -174,6 +180,13 @@ export default defineSectionSchema({
         },
         container_padding: {
           type: 'select',
+          dependency: {
+            fields: ['container_variant'],
+            visibility: {
+              validator: isPanel,
+              default: false,
+            },
+          },
           props: {
             data: [
               { id: 'sm', name: 'Small' },
@@ -186,6 +199,13 @@ export default defineSectionSchema({
         },
         column_ratio: {
           type: 'select',
+          dependency: {
+            fields: ['layout_direction'],
+            visibility: {
+              validator: isHorizontal,
+              default: true,
+            },
+          },
           props: {
             data: [
               { id: 'equal', name: 'Equal' },
@@ -234,24 +254,20 @@ export default defineSectionSchema({
         },
         text_color_scheme: {
           type: 'select',
+          dependency: {
+            fields: ['container_variant'],
+            visibility: {
+              validator: isPanel,
+              default: false,
+            },
+          },
           props: {
             data: [
               { id: 'default', name: 'Default' },
               { id: 'on-primary', name: 'On Primary' },
               { id: 'on-secondary', name: 'On Secondary' },
-              { id: 'custom', name: 'Custom' },
             ],
             clearable: false,
-          },
-        },
-        text_custom_color: {
-          type: 'text',
-          dependency: {
-            fields: ['text_color_scheme'],
-            visibility: {
-              validator: ({ text_color_scheme }: any) => text_color_scheme === 'custom',
-              default: false,
-            },
           },
         },
         title_size: {
@@ -271,7 +287,7 @@ export default defineSectionSchema({
           dependency: {
             fields: ['ornament_enabled'],
             visibility: {
-              validator: ({ ornament_enabled }: any) => Boolean(ornament_enabled),
+              validator: isOrnamentEnabled,
               default: false,
             },
           },
@@ -279,10 +295,32 @@ export default defineSectionSchema({
         ornament_scope: {
           type: 'select',
           dependency: {
-            fields: ['ornament_enabled'],
+            fields: ['ornament_enabled', 'container_variant'],
             visibility: {
-              validator: ({ ornament_enabled }: any) => Boolean(ornament_enabled),
+              validator: isOrnamentEnabled,
               default: false,
+            },
+            props: {
+              generator: ({ container_variant }: any) => ({
+                data: container_variant === 'panel'
+                  ? [
+                    { id: 'container', name: 'Container' },
+                    { id: 'media', name: 'Media' },
+                  ]
+                  : [
+                    { id: 'section', name: 'Section' },
+                    { id: 'media', name: 'Media' },
+                  ],
+                clearable: false,
+              }),
+              default: {
+                data: [
+                  { id: 'section', name: 'Section' },
+                  { id: 'container', name: 'Container' },
+                  { id: 'media', name: 'Media' },
+                ],
+                clearable: false,
+              },
             },
           },
           props: {
@@ -297,9 +335,9 @@ export default defineSectionSchema({
         ornament_position: {
           type: 'select',
           dependency: {
-            fields: ['ornament_enabled'],
+            fields: ['ornament_enabled', 'ornament_layer'],
             visibility: {
-              validator: ({ ornament_enabled }: any) => Boolean(ornament_enabled),
+              validator: isInsideOrnament,
               default: false,
             },
           },
@@ -321,7 +359,7 @@ export default defineSectionSchema({
           dependency: {
             fields: ['ornament_enabled'],
             visibility: {
-              validator: ({ ornament_enabled }: any) => Boolean(ornament_enabled),
+              validator: isOrnamentEnabled,
               default: false,
             },
           },
@@ -333,12 +371,30 @@ export default defineSectionSchema({
             clearable: false,
           },
         },
+        ornament_offset: {
+          type: 'select',
+          dependency: {
+            fields: ['ornament_enabled', 'ornament_scope', 'ornament_layer'],
+            visibility: {
+              validator: isContainerBackgroundOrnament,
+              default: false,
+            },
+          },
+          props: {
+            data: [
+              { id: 'sm', name: 'Small' },
+              { id: 'md', name: 'Medium' },
+              { id: 'xl', name: 'Extra Large' },
+            ],
+            clearable: false,
+          },
+        },
         ornament_size: {
           type: 'select',
           dependency: {
-            fields: ['ornament_enabled'],
+            fields: ['ornament_enabled', 'ornament_scope', 'ornament_layer'],
             visibility: {
-              validator: ({ ornament_enabled }: any) => Boolean(ornament_enabled),
+              validator: usesPositionedOrnamentSize,
               default: false,
             },
           },
@@ -364,7 +420,6 @@ export default defineSectionSchema({
         button_type: 'Tipe Tombol',
         container_variant: 'Tipe Container',
         container_color: 'Warna Container',
-        container_custom_color: 'Warna Custom Container',
         container_radius: 'Radius Container',
         container_padding: 'Padding Container',
         column_ratio: 'Rasio Kolom',
@@ -372,13 +427,13 @@ export default defineSectionSchema({
         media_aspect_ratio: 'Rasio Media',
         media_radius: 'Radius Media',
         text_color_scheme: 'Warna Teks',
-        text_custom_color: 'Warna Custom Teks',
         title_size: 'Ukuran Judul',
         ornament_enabled: 'Aktifkan Ornamen',
         ornament_media: 'File Ornamen',
         ornament_scope: 'Area Ornamen',
         ornament_position: 'Posisi Ornamen',
         ornament_layer: 'Layer Ornamen',
+        ornament_offset: 'Offset Ornamen Background',
         ornament_size: 'Ukuran Ornamen',
       },
     },

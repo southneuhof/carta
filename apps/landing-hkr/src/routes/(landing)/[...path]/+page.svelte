@@ -1,5 +1,5 @@
 <script lang="ts">
-  import LandingPage from '@southneuhof/landing-sveltekit-framework/components/LandingPage.svelte';
+  import LandingPage from '$lib/app/components/app/LandingPage.svelte';
   import { sectionComponents } from '$lib/sections/index.js';
 
   const {data} = $props()

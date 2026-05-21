@@ -32,6 +32,10 @@ export default {
           DEFAULT: '#2B74DD',
           container: '#EAF9FF'
         },
+        tertiary: {
+          DEFAULT: '#FFCB57',
+          container: '#FFFDE7'
+        },
         outline: {
           DEFAULT: '#656E95',
           variant: '#CDC9C9'

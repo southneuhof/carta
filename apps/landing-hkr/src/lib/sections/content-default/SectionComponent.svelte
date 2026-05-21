@@ -43,9 +43,13 @@
   const containerColorClassMap: any = {
     none: '',
     primary: 'bg-primary',
+    'primary-container': 'bg-primary-container',
     secondary: 'bg-secondary',
-    surface: 'bg-surface-container',
-    custom: '',
+    'secondary-container': 'bg-secondary-container',
+    tertiary: 'bg-tertiary',
+    'tertiary-container': 'bg-tertiary-container',
+    surface: 'bg-surface',
+    'surface-container': 'bg-surface-container',
   }
 
   const containerRadiusClassMap: any = {
@@ -101,7 +105,6 @@
     default: '',
     'on-primary': 'text-on-primary',
     'on-secondary': 'text-on-secondary',
-    custom: '',
   }
 
   const titleSizeClassMap: any = {
@@ -115,6 +118,12 @@
     md: 'w-36 md:w-48',
     lg: 'w-48 md:w-64',
     xl: 'w-64 md:w-80',
+  }
+
+  const ornamentBackgroundOffsetClassMap: any = {
+    sm: 'w-[90%]',
+    md: 'w-full',
+    xl: 'w-[110%]',
   }
 
   const ornamentBackgroundSizeClassMap: any = {
@@ -154,15 +163,8 @@
   const ornamentScope = section.meta.ornament_scope || 'media'
   const ornamentLayer = section.meta.ornament_layer || 'behind'
   const ornamentPosition = section.meta.ornament_position || 'bottom-left'
+  const ornamentOffset = section.meta.ornament_offset || 'md'
   const ornamentSize = section.meta.ornament_size || 'md'
-
-  const textStyle = textColorScheme === 'custom' && section.meta.text_custom_color
-    ? `color: ${section.meta.text_custom_color}`
-    : undefined
-
-  const containerStyle = containerColor === 'custom' && section.meta.container_custom_color
-    ? `background-color: ${section.meta.container_custom_color}`
-    : undefined
 
   const horizontalGridClass = contentOrder === 'text-image'
     ? reversedHorizontalLayoutClassMap[columnRatio]
@@ -179,7 +181,6 @@
     {#if containerVariant === 'panel'}
       <div
         class="relative overflow-hidden {containerColorClassMap[containerColor]} {containerRadiusClassMap[containerRadius]} {containerPaddingClassMap[containerPadding]}"
-        style={containerStyle}
       >
         {@render Ornament('container')}
         <div class="relative z-10 {layoutClass} {(contentAlignClassMap as any)[contentAlign].container} justify-center">
@@ -211,7 +212,6 @@
   {#if content.title || content.subtitle || content.description}
     <div
       class="relative z-10 flex flex-col gap-4 {(contentAlignClassMap as any)[contentAlign].content.container} {textColorClassMap[textColorScheme]}"
-      style={textStyle}
     >
       {#if content.title || content.subtitle}
         <div class="flex flex-col gap-xs">
@@ -269,7 +269,14 @@
 
 {#snippet Ornament(scope: string)}
   {#if section.meta.ornament_enabled && section.meta.ornament_media && ornamentScope === scope}
-    {#if ornamentLayer === 'behind'}
+    {#if ornamentLayer === 'behind' && scope === 'container'}
+      <img
+        src={section.meta.ornament_media}
+        alt=""
+        aria-hidden="true"
+        class="pointer-events-none absolute left-1/2 top-0 z-0 h-auto max-w-none -translate-x-1/2 {ornamentBackgroundOffsetClassMap[ornamentOffset]}"
+      />
+    {:else if ornamentLayer === 'behind'}
       <img
         src={section.meta.ornament_media}
         alt=""

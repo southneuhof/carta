@@ -5,6 +5,7 @@ import {
   buildCreateSectionPayload,
   getAddSectionOptions,
   getSectionPanelState,
+  getNestedEditorConfig,
   getSupportedEditorConfig,
   getSupportedSectionSchemaGroup,
   matchNestedSchemaSlotsToStructure,
@@ -47,31 +48,27 @@ describe('section schema adapter', () => {
       { id: 'a', type: 'gallery', order: 1 },
       { id: 'b', type: 'gallery', order: 1 },
       { id: 'c', type: 'gallery', order: 2 },
-      { id: 'd', type: 'gallery', order: 3 },
-      { id: 'e', type: 'content', order: 1 },
     ])
 
     const banner = matches.find((slot) => slot.slotKey === 'banner')
-    const quickAccess = matches.find((slot) => slot.slotKey === 'quickAccess')
-    const projectCategory = matches.find((slot) => slot.slotKey === 'projectCategory')
 
     expect(banner?.items.map((item) => item.id)).toEqual(['a', 'b'])
-    expect(quickAccess?.items.map((item) => item.id)).toEqual(['c'])
-    expect(projectCategory?.items.map((item) => item.id)).toEqual(['d'])
+    expect(matches).toHaveLength(1)
   })
 
   it('exposes schema-specific slot metadata and dynamic slot resolvers', () => {
     const heroBannerConfig = getSupportedEditorConfig('hero-banner')
     expect(heroBannerConfig).not.toBeNull()
 
-    const projectCategorySlot = heroBannerConfig?.slots.find((slot) => slot.key === 'projectCategory')
-    expect(projectCategorySlot?.component).toBeUndefined()
-    expect(projectCategorySlot?.resolveConfig).toBeDefined()
-    expect(projectCategorySlot?.fieldSets).toBeDefined()
+    const bannerSlot = heroBannerConfig?.slots.find((slot) => slot.key === 'banner')
+    expect(bannerSlot?.component).toBeUndefined()
+    expect(bannerSlot?.resolveConfig).toBeUndefined()
+    expect(bannerSlot?.fields).toContain('media')
 
     const dataListConfig = getSupportedEditorConfig('data-list')
     const childSections = dataListConfig?.slots.find((slot) => slot.key === 'childSections')
     expect(childSections?.component).toBeUndefined()
+    expect(childSections?.schema?.data.gallery.editor?.resolveConfig).toBeDefined()
   })
 
   it('exposes recursive slot schema and nested schema config', () => {
@@ -93,6 +90,15 @@ describe('section schema adapter', () => {
       order: 1,
     })
     expect(childSections?.schema?.data.gallery.editor?.resolveConfig).toBeDefined()
+  })
+
+  it('builds nested editor config from nested schema metadata', () => {
+    const dataListConfig = getSupportedEditorConfig('data-list')
+    const nestedSchema = dataListConfig?.slots.find((slot) => slot.key === 'childSections')?.schema
+    const nestedEditorConfig = getNestedEditorConfig(nestedSchema)
+
+    expect(nestedEditorConfig?.meta?.fields).toEqual([])
+    expect(nestedEditorConfig?.meta?.defaultValues).toEqual({})
   })
 
   it('matches root schema slots with path-aware context', () => {
@@ -181,14 +187,17 @@ describe('section schema adapter', () => {
 
   it('exposes shared section meta settings to the editor config', () => {
     const contentDefaultConfig = getSupportedEditorConfig('content-default')
+    expect(contentDefaultConfig?.meta?.fields?.[0]).toBe('section_background_color')
     expect(contentDefaultConfig?.meta?.fields).toContain('width_preset')
+    expect(contentDefaultConfig?.meta?.inputConfig?.section_background_color?.type).toBe('text')
     expect(contentDefaultConfig?.meta?.inputConfig?.width_preset?.type).toBe('select')
-    expect(contentDefaultConfig?.meta?.defaultValues?.width_preset).toBe('md')
+    expect(contentDefaultConfig?.meta?.defaultValues?.width_preset).toBe('xl')
     const contentSlot = contentDefaultConfig?.slots.find((slot) => slot.key === 'content')
     expect(contentSlot?.fields).toEqual(['media_type', 'media', 'attachment', 'subtitle', 'title', 'description', 'url', 'url_text'])
     expect(contentSlot?.inputConfig?.media?.dependency?.fields).toEqual(['media_type'])
 
     const dataListConfig = getSupportedEditorConfig('data-list')
+    expect(dataListConfig?.meta?.fields?.[0]).toBe('section_background_color')
     expect(dataListConfig?.meta?.fields).toContain('closed_on_initial')
     expect(dataListConfig?.meta?.inputConfig?.closed_on_initial?.dependency?.fields).toEqual(['collapsible'])
     expect(dataListConfig?.meta?.defaultValues?.type).toBe('list')

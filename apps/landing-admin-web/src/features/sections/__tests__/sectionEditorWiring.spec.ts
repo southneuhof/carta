@@ -52,6 +52,7 @@ describe('section editor wiring', () => {
     const legacyNestedParentData = 'nestedParentEditor.value?.' + 'data'
     const legacyMatchedEditorData = 'matched.editor.' + 'data ? matched : undefined'
     expect(sectionEditor).toContain('nestedParentEditor.value?.schema')
+    expect(sectionEditor).toContain('getNestedEditorConfig')
     expect(sectionEditor).toContain('matched.editor.schema ? matched : undefined')
     expect(sectionEditor).not.toContain(legacyNestedParentData)
     expect(sectionEditor).not.toContain(legacyMatchedEditorData)

@@ -9,6 +9,10 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./common-section-meta": {
+      "types": "./src/common-section-meta.ts",
+      "default": "./src/common-section-meta.ts"
+    },
     "./sections/*": {
       "types": "./src/sections/*.ts",
       "default": "./src/sections/*.ts"
