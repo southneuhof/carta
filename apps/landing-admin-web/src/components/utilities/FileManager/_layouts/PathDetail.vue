@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { parse } from '@/utils/filter'
-import services from '@/utils/services'
+import { parse } from '@southneuhof/utilities/parse'
 import { ref, watch } from 'vue'
+import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
 import { useDropZone } from '@vueuse/core'
 import { ContextMenuContent, ContextMenuItem, ContextMenuPortal, ContextMenuTrigger, ContextMenuRoot } from 'radix-vue'
 import { toast } from 'vue-sonner'
-import ConfirmationModal from '@/components/composites/ConfirmationModal.vue'
-import config from '@/config'
-import mode from '@/mode'
-import ModalForm from '@/components/composites/ModalForm.vue'
+import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
+import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composites/ConfirmationDialog.vue'
+import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue'
 
 const props = defineProps({
   item: {
@@ -28,8 +28,6 @@ const props = defineProps({
 const data = ref()
 const modelValue = defineModel<any>()
 const searchParameters = ref({ dir: modelValue.value?.path, sort_by: 'updated_at', sort: 'desc', limit: 1000 })
-const contextMenuItem = ref()
-
 const dropZoneRef = ref<HTMLElement>()
 
 const columns = ref([
@@ -38,8 +36,9 @@ const columns = ref([
 ])
 
 async function getData() {
-  const response = await services.get('files', searchParameters.value)
-  const responseData = response.data
+  const behavior = getFrameworkBehaviors().fileManager?.listFiles
+  if (!behavior) missingBehavior('fileManager.listFiles')
+  const responseData = await behavior(searchParameters.value)
 
   if (Array.isArray(responseData) && responseData.length > 0 && typeof responseData[0] === 'object' && responseData[0] !== null && '0' in responseData[0]) {
     data.value = responseData.map((item: any) => item[Object.keys(item)[0]])
@@ -72,7 +71,9 @@ function handleRowClick(item: any) {
 
 async function onDrop(files: File[] | null) {
   if (files && files.length > 0) {
-    const uploadPromises = files.map((file) => services.fileUpload(file, modelValue.value?.path))
+    const uploadFile = getFrameworkBehaviors().fileManager?.uploadFile
+    if (!uploadFile) missingBehavior('fileManager.uploadFile')
+    const uploadPromises = files.map((file) => uploadFile(file, modelValue.value?.path))
 
     toast.promise(Promise.all(uploadPromises), {
       loading: `Uploading ${files.length} file${files.length > 1 ? 's' : ''}...`,
@@ -90,6 +91,12 @@ const { isOverDropZone } = useDropZone(dropZoneRef as any, onDrop)
 await getData()
 
 const _window = window
+
+function deleteFile(path: string) {
+  const behavior = getFrameworkBehaviors().fileManager?.deleteFile
+  if (!behavior) missingBehavior('fileManager.deleteFile')
+  return behavior(path)
+}
 </script>
 
 <template>
@@ -106,19 +113,12 @@ const _window = window
               <div class="flex flex-row items-center gap-1">
                 <p class="text-xl font-semibold">{{ modelValue?.path.split('/').pop() }}</p>
                 <Button
-                  size="square"
-                  variant="icon"
+                  kind="icon"
+                  variant="standard"
                   class="!p-1"
                   @click="
                     () => {
-                      toast.promise(services.get('sync-file', { dir: modelValue.path }), {
-                        loading: 'Syncing files...',
-                        success: () => {
-                          getData()
-                          return 'Files synced successfully'
-                        },
-                        error: 'Failed to sync files',
-                      })
+                      getData()
                     }
                   "
                 >
@@ -128,20 +128,20 @@ const _window = window
               <div class="flex flex-row flex-wrap items-center gap-1">
                 <template v-for="(segment, index) in modelValue?.path.split('/')" :key="index">
                   <button
-                    v-if="index != modelValue?.path.split('/').length - 1"
+                    v-if="Number(index) != modelValue?.path.split('/').length - 1"
                     class="text-sm text-muted underline"
                     @click="
                       () =>
                         (modelValue.path = modelValue?.path
                           .split('/')
-                          .slice(0, index + 1)
+                          .slice(0, Number(index) + 1)
                           .join('/'))
                     "
                   >
                     {{ segment }}
                   </button>
                   <span v-else class="text-sm text-muted">{{ segment }}</span>
-                  <Icon v-if="index < modelValue?.path.split('/').length - 1" name="arrow-right-s" size="sm" class="text-muted"></Icon>
+                  <Icon v-if="Number(index) < modelValue?.path.split('/').length - 1" name="arrow-right-s" size="sm" class="text-muted"></Icon>
                 </template>
               </div>
             </div>
@@ -174,7 +174,7 @@ const _window = window
               </tr>
             </thead>
             <tbody>
-              <ContextMenuRoot v-for="item in data" :key="item.id">
+              <ContextMenuRoot v-for="item in data" :key="item.path">
                 <ContextMenuTrigger as-child>
                   <tr
                     @click="handleRowClick(item)"
@@ -196,7 +196,7 @@ const _window = window
                       <ContextMenuItem
                         class="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-on-surface/10"
                         @select.prevent
-                        @click="() => _window.open(`${config.server[mode]}read-file/${item.path}`, '_blank')"
+                        @click="() => _window.open(item.url || item.path, '_blank')"
                       >
                         <Icon name="arrow-right-up"></Icon>
                         <p>Open</p>
@@ -205,13 +205,11 @@ const _window = window
                         Download
                       </ContextMenuItem> -->
                       <ContextMenuItem @select.prevent>
-                        <ConfirmationModal
+                        <ConfirmationDialog
                           class="w-full"
                           :onConfirm="
                             () =>
-                              services
-                                .post('delete-file', { path: item.path })
-                                .then(() => {
+                              deleteFile(item.path).then(() => {
                                   toast.success('File deleted successfully')
                                   getData()
                                 })
@@ -224,7 +222,7 @@ const _window = window
                               <p>Delete</p>
                             </div>
                           </template>
-                        </ConfirmationModal>
+                        </ConfirmationDialog>
                       </ContextMenuItem>
                     </ContextMenuContent>
                   </Transition>
@@ -245,7 +243,7 @@ const _window = window
       <Transition name="fade">
         <ContextMenuContent class="z-1 min-w-[220px] rounded-md border border-outline-variant bg-surface-container-high p-1 text-sm text-on-surface shadow-md">
           <ContextMenuItem @select.prevent>
-            <ModalForm
+            <DialogForm
               :fields="['folder_name']"
               :fieldsAlias="{ folder_name: 'Nama Folder' }"
               :inputConfig="{
@@ -264,15 +262,15 @@ const _window = window
                   toast.success('Folder created successfully')
                   getData()
                 }
-              "
-            >
+                "
+              >
               <template #trigger>
                 <div class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-on-surface/10">
                   <Icon name="add"></Icon>
                   <p>Buat Folder Baru</p>
                 </div>
               </template>
-            </ModalForm>
+            </DialogForm>
           </ContextMenuItem>
         </ContextMenuContent>
       </Transition>

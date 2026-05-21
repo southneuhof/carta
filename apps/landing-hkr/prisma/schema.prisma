@@ -507,3 +507,17 @@ model Collection {
   code      String  @id @unique
   data      Json[]  @default([])
 }
+
+model ImageManifest {
+  id            String   @id @default(cuid())
+  original_path String   @unique
+  width         Int
+  height        Int
+  aspect_ratio  Float
+  format        String
+  size          Int
+  placeholder   String
+  variants      Json
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}

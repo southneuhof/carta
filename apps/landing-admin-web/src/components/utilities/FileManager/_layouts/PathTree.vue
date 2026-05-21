@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { ContextMenuContent, ContextMenuItem, ContextMenuPortal, ContextMenuTrigger, ContextMenuRoot } from 'radix-vue'
 
 interface FolderItem {
@@ -8,10 +8,11 @@ interface FolderItem {
   [key: string]: any
 }
 
-import services from '@/utils/services'
-import ConfirmationModal from '@/components/composites/ConfirmationModal.vue'
 import { toast } from 'vue-sonner'
-import ModalForm from '@/components/composites/ModalForm.vue'
+import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composites/ConfirmationDialog.vue'
+import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue'
 
 const props = defineProps({
   item: {
@@ -45,15 +46,21 @@ async function fetchChildren() {
 
   isLoading.value = true
   try {
-    const { data } = await services.get('files', { dir: props.item?.path || '', type: 'folder' })
-    children.value = data || []
-    console.log('children', children.value)
+    const behavior = getFrameworkBehaviors().fileManager?.listFiles
+    if (!behavior) missingBehavior('fileManager.listFiles')
+    children.value = (await behavior({ dir: props.item?.path || '', type: 'folder' })) || []
   } catch (error) {
     console.error('Error loading children:', error)
     children.value = []
   } finally {
     isLoading.value = false
   }
+}
+
+function deleteFile(path: string) {
+  const behavior = getFrameworkBehaviors().fileManager?.deleteFile
+  if (!behavior) missingBehavior('fileManager.deleteFile')
+  return behavior(path)
 }
 
 if (props.level === 0) {
@@ -85,7 +92,7 @@ if (props.level === 0) {
           <!-- <Transition name="fade"> -->
           <ContextMenuContent class="z-10 min-w-[220px] rounded-md border border-outline-variant bg-surface-container-high p-1 text-sm text-on-surface shadow-md">
             <ContextMenuItem @select.prevent>
-              <ModalForm
+              <DialogForm
                 :fields="['folder_name']"
                 :fieldsAlias="{ folder_name: 'Nama Folder' }"
                 :inputConfig="{
@@ -112,15 +119,14 @@ if (props.level === 0) {
                     <p>Buat Folder Baru</p>
                   </div>
                 </template>
-              </ModalForm>
+              </DialogForm>
             </ContextMenuItem>
             <ContextMenuItem @select.prevent>
-              <ConfirmationModal
+              <ConfirmationDialog
                 class="w-full"
                 :onConfirm="
                   () =>
-                    services
-                      .post('delete-file', { path: item.path })
+                    deleteFile(item.path)
                       .then(() => {
                         toast.success('File deleted successfully')
                         fetchChildren()
@@ -134,7 +140,7 @@ if (props.level === 0) {
                     <p>Delete</p>
                   </div>
                 </template>
-              </ConfirmationModal>
+              </ConfirmationDialog>
             </ContextMenuItem>
           </ContextMenuContent>
           <!-- </Transition> -->

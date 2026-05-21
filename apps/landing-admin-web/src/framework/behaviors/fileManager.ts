@@ -22,18 +22,22 @@ function toStoredAssetPath(value: string): string {
 }
 
 export async function listFiles(params: Record<string, any>) {
-  const response = await services.get('files', params)
-  return response.data
+  const response = await services.get('files/list', params)
+  return Array.isArray(response?.data) ? response.data : Array.isArray(response) ? response : []
 }
 
 export function uploadFile(file: File, directory?: string, onUploadProgress?: (progress: { loaded: number; total: number }) => void) {
-  return services.fileUpload(file, directory, onUploadProgress)
+  const formData = new FormData()
+  formData.append('file', file)
+  if (directory) formData.append('dir', directory)
+
+  return services.progress('post', 'files/upload', formData as any, onUploadProgress).then((response: any) => response?.data ?? response)
 }
 
-export function syncFiles(directory?: string) {
-  return services.get('sync-file', { dir: directory })
+export function createFolder(dir: string, folderName: string) {
+  return services.post('create-folder', { dir, folder_name: folderName }).then((response: any) => response?.data ?? response)
 }
 
 export function deleteFile(path: string) {
-  return services.post('delete-file', { path: toStoredAssetPath(path) })
+  return services.post('delete-file', { path: toStoredAssetPath(path) }).then((response: any) => response?.data ?? response)
 }

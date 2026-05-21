@@ -241,7 +241,7 @@ const {data: [latestLog]} = await services.list('verificationLog', { model: 'art
         },
         content: { type: 'rich-text' },
         excerpt: { type: 'text' },
-        thumbnail: { type: 'image' }
+        thumbnail: { type: 'file-manager' }
       }"
       :fieldsAlias="{
         title: 'Judul',

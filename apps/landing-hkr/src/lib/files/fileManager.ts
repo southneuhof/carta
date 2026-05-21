@@ -12,6 +12,7 @@ import {
 import prisma from '$lib/utils/prisma';
 
 const publicBaseUrl = process.env.PUBLIC_APP_URL;
+const inMemoryImageManifest = new Map<string, FileMetadataRecord>();
 
 export const fileLocations = createStorageUrlLocationStrategy({
   basePath: '/storage',
@@ -25,6 +26,7 @@ export const fileStorage = createLocalFileStorageDriver({
 export const fileMetadataStore: FileMetadataStore = {
   async get(fileKey: string, processor?: string): Promise<FileMetadataRecord | null> {
     if (processor && processor !== 'image') return null;
+    if (!(prisma as any).imageManifest) return inMemoryImageManifest.get(fileKey) ?? null;
 
     const row = await (prisma as any).imageManifest.findUnique({
       where: { original_path: toManifestPath(fileKey) },
@@ -60,6 +62,10 @@ export const fileMetadataStore: FileMetadataStore = {
   },
   async upsert(record: FileMetadataRecord): Promise<void> {
     if (record.processor !== 'image') return;
+    if (!(prisma as any).imageManifest) {
+      inMemoryImageManifest.set(record.fileKey, record);
+      return;
+    }
     const data = record.data as unknown as ImageMetadata;
 
     await (prisma as any).imageManifest.upsert({
@@ -87,6 +93,10 @@ export const fileMetadataStore: FileMetadataStore = {
   },
   async delete(fileKey: string, processor?: string): Promise<void> {
     if (processor && processor !== 'image') return;
+    if (!(prisma as any).imageManifest) {
+      inMemoryImageManifest.delete(fileKey);
+      return;
+    }
     await (prisma as any).imageManifest.delete({
       where: { original_path: toManifestPath(fileKey) },
     }).catch(() => undefined);

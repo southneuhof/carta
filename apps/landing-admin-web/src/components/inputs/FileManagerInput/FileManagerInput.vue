@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import FileManager from '@/components/utils/FileManager/FileManager.vue'
+import FileManager from '@/components/utilities/FileManager/FileManager.vue'
 import BaseInput from '../BaseInput.vue'
 import { commonProps } from '../commonprops'
-import FileManagerDialogContent from './_layouts/FileManagerDialogContent.vue'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogScrollContent, DialogTitle, DialogTrigger, DialogClose } from '@/components/base/Dialog'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/base/Dialog'
 import { ref } from 'vue'
+import config from '@/config'
 
 const props = defineProps({
   multi: {
@@ -17,6 +17,20 @@ const props = defineProps({
 const modelValue = defineModel<any>()
 
 const open = ref(false)
+
+function isImageAsset(item: any): boolean {
+  return typeof item?.content_type === 'string' && item.content_type.startsWith('image/')
+}
+
+function itemPreviewUrl(item: any): string {
+  if (!item?.path) return ''
+  if (typeof item.url === 'string' && item.url) return item.url
+  try {
+    return new URL(item.path, config.apiUrl).toString()
+  } catch {
+    return item.path
+  }
+}
 </script>
 
 <template>
@@ -53,7 +67,19 @@ const open = ref(false)
             </FileManager>
           </DialogContent>
         </Dialog>
-        {{ modelValue?.path }}
+        <div class="flex min-h-[40px] min-w-0 flex-1 items-center p-2">
+          <template v-if="modelValue?.path">
+            <div v-if="isImageAsset(modelValue)" class="flex items-center gap-3">
+              <img :src="itemPreviewUrl(modelValue)" :alt="modelValue?.filename || 'asset'" class="h-10 w-10 rounded-md object-cover" />
+              <p class="truncate text-sm">{{ modelValue?.filename || modelValue?.path }}</p>
+            </div>
+            <div v-else class="flex items-center gap-2">
+              <Icon name="file" />
+              <p class="truncate text-sm">{{ modelValue?.filename || modelValue?.path }}</p>
+            </div>
+          </template>
+          <p v-else class="text-sm text-muted">No asset selected</p>
+        </div>
       </div>
     </div>
   </BaseInput>

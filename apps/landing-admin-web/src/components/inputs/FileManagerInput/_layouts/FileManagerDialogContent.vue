@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import FileManager from '@/components/utils/FileManager/FileManager.vue'
+import FileManager from '@/components/utilities/FileManager/FileManager.vue'
 
 const props = defineProps({
   multi: {
