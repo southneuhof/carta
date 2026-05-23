@@ -462,6 +462,52 @@ model ArticleTranslation {
   @@unique([language, slug, status_code])
 }
 
+model ProductCategory {
+  id           String                       @id @default(cuid())
+  order        Int
+  active       Boolean                      @default(true)
+  created_at   DateTime                     @default(now())
+  updated_at   DateTime                     @updatedAt
+  translations ProductCategoryTranslation[]
+  products     Product[]
+}
+
+model ProductCategoryTranslation {
+  id                  String          @id @default(cuid())
+  product_category_id String
+  language            Language
+  name                String
+  description         String?
+  productCategory     ProductCategory @relation(fields: [product_category_id], references: [id], onDelete: Cascade)
+
+  @@unique([product_category_id, language])
+}
+
+model Product {
+  id                  String               @id @default(cuid())
+  product_category_id String
+  order               Int
+  active              Boolean              @default(true)
+  images              Json                 @default("[]")
+  created_at          DateTime             @default(now())
+  updated_at          DateTime             @updatedAt
+  productCategory     ProductCategory      @relation(fields: [product_category_id], references: [id], onDelete: Restrict)
+  translations        ProductTranslation[]
+}
+
+model ProductTranslation {
+  id          String   @id @default(cuid())
+  product_id  String
+  language    Language
+  name        String
+  slug        String
+  description String?  @db.Text
+  product     Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@unique([product_id, language])
+  @@unique([language, slug])
+}
+
 ///
 /// Misc
 ///
