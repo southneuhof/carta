@@ -7,6 +7,8 @@ import type { FormType, Prisma } from '@prisma/client';
 import { hasGlobalPermissionAccess } from '$lib/utils/routing';
 
 export async function requireFormTypeAccess(event: RequestEvent, input: Record<string, any>) {
+  if (hasGlobalPermissionAccess(event.locals)) return;
+
   const id = input.id ?? input.form_type_id;
   if (!id) return;
 

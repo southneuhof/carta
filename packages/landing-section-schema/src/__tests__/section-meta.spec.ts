@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import contentDefault from '../sections/content-default'
 import dataList from '../sections/data-list'
 import heroBanner from '../sections/hero-banner'
+import articleHighlights from '../sections/article-highlights'
 import sectionSchemas from '../index'
 import { dataListFieldSets } from '../helpers/data-list-field-sets'
 import { containerColorOptions } from '../helpers/container-color-options'
@@ -90,6 +91,42 @@ describe('shared section schema', () => {
   it('keeps slot fields in schema', () => {
     expect(contentDefault.data.content.fields).toContain('title')
     expect(heroBanner.data.banner.fields).toContain('media')
+  })
+
+  it('exports article-highlights schema with content+articles slots and articleCategory meta', () => {
+    expect(sectionSchemas['article-highlights']).toBeTruthy()
+    expect(Object.keys(articleHighlights.data)).toEqual(['content', 'articles'])
+    expect(articleHighlights.data.content.type).toBe('content')
+    expect(articleHighlights.data.content.fields).toEqual([
+      'subtitle',
+      'title',
+      'description',
+      'url',
+      'url_text',
+    ])
+    expect(articleHighlights.data.articles).toEqual({
+      type: 'resource',
+      source: 'article',
+      order: 2,
+      many: true,
+      fields: ['id', 'created_at', 'title', 'slug', 'excerpt', 'thumbnail', 'categories'],
+      params: {
+        strategy: 'latestPublished',
+        limit: 4,
+        categoryMetaField: 'articleCategory',
+        categoryMatch: 'any',
+      },
+    })
+    expect(articleHighlights.meta?.fields).toEqual(['articleCategory'])
+    expect(articleHighlights.meta?.defaultValues?.articleCategory).toBeNull()
+    expect(articleHighlights.meta?.editor?.inputConfig?.articleCategory).toEqual({
+      type: 'select',
+      props: {
+        getAPI: 'articleCategory',
+        multi: true,
+        clearable: true,
+      },
+    })
   })
 
   it('reuses field-set contract across hero-banner and nested data-list gallery', () => {

@@ -8,6 +8,8 @@ import type { ArticleCategory, Language } from "@prisma/client";
 import { hasGlobalPermissionAccess } from "$lib/utils/routing";
 
 export async function requireArticleCategoryAccess(event: RequestEvent, input: Record<string, any>) {
+  if (hasGlobalPermissionAccess(event.locals)) return;
+
   const id = input.id ?? input.article_category_id;
   if (!id) return;
 

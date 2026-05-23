@@ -39,6 +39,8 @@ export async function authorizeOperation<T>(
   config?: AuthorizableOperationConfig<T>,
   input: Record<string, any> = {},
 ) {
+  if (hasGlobalPermissionAccess(event.locals)) return;
+
   requirePermission(event.locals, resolvePermissionCode(model, operation, config?.permission));
 
   if (config?.authorize) {

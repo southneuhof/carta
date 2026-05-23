@@ -5,9 +5,12 @@ import type { RequestEvent } from "@sveltejs/kit";
 import prisma from '$lib/utils/prisma';
 import { ensureArticleDraftState } from '$lib/utils/article';
 import { exception } from '$lib/utils/response';
+import { hasGlobalPermissionAccess } from '$lib/utils/routing';
 import { requireArticleAccess } from './article';
 
 export async function requireArticleTranslationAccess(event: RequestEvent, input: Record<string, any>) {
+  if (hasGlobalPermissionAccess(event.locals)) return;
+
   const id = input.id;
   if (id) {
     const record = await prisma.articleTranslation.findUnique({
@@ -40,6 +43,7 @@ export default {
   },
 
   update: {
+    allow: true,
     permission: 'update-article',
     authorize: requireArticleTranslationAccess,
     by: ['id'],

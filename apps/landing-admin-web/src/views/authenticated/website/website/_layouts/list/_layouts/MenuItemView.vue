@@ -58,7 +58,7 @@ function handleSectionReorder(event: any) {
   if (!event.moved) return
   if (event.moved.newIndex != event.moved.oldIndex) {
     services
-      .put('menuItem/reorder', { old_order: event.moved.oldIndex + 1, new_order: event.moved.newIndex + 1, id: event.moved.element.id })
+      .put('menuItem/reorder', { from: event.moved.oldIndex + 1, to: event.moved.newIndex + 1, id: event.moved.element.id })
       .then(() => {
         isLoadingReordering.value = false
       })

@@ -38,7 +38,7 @@ export function onDragChange(reorderAPI: string, event: any) {
     model: reorderAPI,
     data: {
       ...event.moved.element,
-      new_order_number: event.moved.newIndex + 1,
+      to: event.moved.newIndex + 1,
     },
   })
 }

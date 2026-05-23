@@ -39,8 +39,8 @@ function handleSectionReorder(event: any) {
   if (event.moved.newIndex !== event.moved.oldIndex) {
     services
       .put('section/reorder', {
-        old_order: event.moved.oldIndex + 1,
-        new_order: event.moved.newIndex + 1,
+        from: event.moved.oldIndex + 1,
+        to: event.moved.newIndex + 1,
         id: event.moved.element.id,
         page_translation_id: pageTranslation?.value?.id,
       })

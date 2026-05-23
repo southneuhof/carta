@@ -8,6 +8,8 @@ import type { Prisma } from "@prisma/client";
 import { hasGlobalPermissionAccess } from "$lib/utils/routing";
 
 export async function requireArticleAccess(event: RequestEvent, input: Record<string, any>) {
+  if (hasGlobalPermissionAccess(event.locals)) return;
+
   const id = input.id ?? input.article_id;
   if (!id) return;
 

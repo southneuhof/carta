@@ -156,7 +156,7 @@
     isLoadingReordering.value = true
     if (!event.moved) return
     if (event.moved.newIndex != event.moved.oldIndex) {
-      services.put('formField/reorder', {old_order: event.moved.oldIndex+1, new_order: event.moved.newIndex+1, id: event.moved.element.id}).then(() => {
+      services.put('formField/reorder', {from: event.moved.oldIndex+1, to: event.moved.newIndex+1, id: event.moved.element.id}).then(() => {
         isLoadingReordering.value = false
       }).catch(err => {
         toast.error('Gagal mengubah urutan!')

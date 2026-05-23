@@ -42,8 +42,8 @@ const loading = ref(true)
 function onDragChange(model: string, event: any) {
   if (!event.moved) return
   services.put(`${model}/reorder`, {
-    old_order: event.moved.oldIndex + 1,
-    new_order: event.moved.newIndex + 1,
+    from: event.moved.oldIndex + 1,
+    to: event.moved.newIndex + 1,
     id: event.moved.element.id,
     page_translation_id: pageTranslation?.value?.id,
   })

@@ -2,10 +2,13 @@ import type { ModelConfig } from '@southneuhof/landing-sveltekit-framework/types
 import type { PageTranslation } from '@prisma/client';
 import type { RequestEvent } from '@sveltejs/kit';
 import { requireRoleScopedAccess } from '$lib/app/api/authorization';
+import { hasGlobalPermissionAccess } from '$lib/utils/routing';
 import prisma from '$lib/utils/prisma';
 import { exception } from '$lib/utils/response';
 
 export async function requirePageTranslationAccess(event: RequestEvent, input: Record<string, any>) {
+	if (hasGlobalPermissionAccess(event.locals)) return;
+
 	const id = input.id ?? input.page_translation_id;
 	if (!id) return;
 

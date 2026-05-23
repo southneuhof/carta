@@ -10,6 +10,7 @@ export default {
   },
 
   update: {
+    allow: true,
     by: ['id'],
     fields: ['name'],
     validation: {

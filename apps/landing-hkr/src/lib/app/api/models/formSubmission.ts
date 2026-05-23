@@ -8,6 +8,8 @@ import prisma from '$lib/utils/prisma';
 import { hasGlobalPermissionAccess } from '$lib/utils/routing';
 
 export async function requireFormSubmissionAccess(event: RequestEvent, input: Record<string, any>) {
+  if (hasGlobalPermissionAccess(event.locals)) return;
+
   const id = input.id;
   if (!id) return;
 
