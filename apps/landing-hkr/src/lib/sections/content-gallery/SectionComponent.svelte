@@ -1,5 +1,7 @@
 <script lang="ts">
   import Button from "$lib/app/components/ui/Button.svelte";
+  import * as Carousel from "$lib/app/components/ui/carousel";
+  import CenterNavigation from "$lib/app/components/ui/carousel/carousel-center-navigation.svelte";
   import { m } from "$lib/paraglide/messages";
   import { widthPresetClassMap } from "$lib/utils/uicommon";
   import contentGallerySchema from "@southneuhof/landing-section-schema/sections/content-gallery";
@@ -156,6 +158,12 @@
     xl: 'rounded-xl',
   }
 
+  const carouselItemWidthClassMap: any = {
+    narrow: 'basis-[82%] sm:basis-1/2 lg:basis-1/4',
+    medium: 'basis-[86%] sm:basis-1/2 lg:basis-1/3',
+    wide: 'basis-[90%] lg:basis-1/2',
+  }
+
   const ornamentSizeClassMap: any = {
     sm: 'w-24 md:w-32',
     md: 'w-36 md:w-48',
@@ -210,6 +218,11 @@
   const galleryIconSize = section.meta.gallery_icon_size || 'md'
   const galleryMediaRadius = section.meta.gallery_media_radius || 'sm'
   const galleryMediaAspectRatio = section.meta.gallery_media_aspect_ratio || 'auto'
+  const galleryDisplayMode = section.meta.gallery_display_mode || 'static'
+  const isCarouselMode = galleryDisplayMode === 'carousel'
+  const carouselNavigationPosition = section.meta.carousel_navigation_position || 'bottom'
+  const carouselNavigationStyle = section.meta.carousel_navigation_style || 'arrows'
+  const carouselItemWidth = section.meta.carousel_item_width || 'medium'
   const ornamentScope = section.meta.ornament_scope || 'container'
   const ornamentLayer = section.meta.ornament_layer || 'inside'
   const ornamentPosition = section.meta.ornament_position || 'top-left'
@@ -225,14 +238,15 @@
     : `flex flex-col ${gapClassMap[contentGap]}`
 
   const panelRadiusClass = containerRadiusClassMap[containerRadiusPattern]?.[containerRadius] || containerRadiusClassMap.all[containerRadius]
+  const carouselItemWidthClass = carouselItemWidthClassMap[carouselItemWidth] || carouselItemWidthClassMap.medium
 </script>
 
-<div class="relative flex w-full items-center justify-center overflow-hidden">
+<div class="relative flex w-full items-center justify-center {isCarouselMode ? 'overflow-x-clip overflow-y-visible' : 'overflow-hidden'}">
   {@render Ornament('section')}
   <div class="relative z-10 w-full {widthPresetClassMap[section.meta.width_preset || 'xl']} py-6 lg:py-12 px-6 lg:px-12">
     {#if containerVariant === 'panel'}
       <div
-        class="relative overflow-hidden {containerColorClassMap[containerColor]} {panelRadiusClass} {containerPaddingClassMap[containerPadding]} {textColorClassMap[textColorScheme]}"
+        class="relative {isCarouselMode ? 'overflow-visible' : 'overflow-hidden'} {containerColorClassMap[containerColor]} {panelRadiusClass} {containerPaddingClassMap[containerPadding]} {textColorClassMap[textColorScheme]}"
       >
         {@render Ornament('container')}
         <div class="relative z-10 {layoutClass} justify-center">
@@ -312,11 +326,7 @@
 {#snippet ContentIcon()}
   <div class="grid w-full {galleryGridClassMap[galleryColumns]} {galleryGapClassMap[galleryGap]}">
     {#each gallery as icon}
-      <div class="flex min-w-0 flex-col gap-sm {galleryItemAlignClassMap[galleryItemAlign]}">
-        {#if icon.media}<i class="{icon.media} {galleryIconSizeClassMap[galleryIconSize]}"></i>{/if}
-        {#if icon.title}<p class="font-bold text-lg">{icon.title}</p>{/if}
-        {#if icon.subtitle}<p>{icon.subtitle}</p>{/if}
-      </div>
+      {@render IconGalleryItem(icon)}
     {/each}
   </div>
 {/snippet}
@@ -324,23 +334,7 @@
 {#snippet ContentImage()}
   <div class="grid w-full {galleryGridClassMap[galleryColumns]} {galleryGapClassMap[galleryGap]}">
     {#each gallery as image}
-      <div class="flex min-w-0 flex-col gap-base {galleryItemAlignClassMap[galleryItemAlign]}">
-        {#if image.media}
-          <div class="w-full overflow-hidden {mediaRadiusClassMap[galleryMediaRadius]} {mediaAspectRatioClassMap[galleryMediaAspectRatio]}">
-            <img
-              src={image.media}
-              alt={image.title || ''}
-              class="h-full w-full object-cover object-center {!section.meta.remove_outline_on_images ? 'outline outline-outline-variant' : ''}"
-            />
-          </div>
-        {/if}
-        {#if image.title || image.subtitle}
-          <div class="flex flex-col gap-xs {galleryItemAlignClassMap[galleryItemAlign]}">
-            {#if image.title}<p class="font-bold text-lg">{image.title}</p>{/if}
-            {#if image.subtitle}<p>{image.subtitle}</p>{/if}
-          </div>
-        {/if}
-      </div>
+      {@render ImageGalleryItem(image)}
     {/each}
   </div>
 {/snippet}
@@ -348,34 +342,154 @@
 {#snippet ContentEmbed()}
   <div class="grid w-full {galleryGridClassMap[galleryColumns]} {galleryGapClassMap[galleryGap]}">
     {#each gallery as embed}
-      <div class="flex min-w-0 flex-col gap-base {galleryItemAlignClassMap[galleryItemAlign]}">
-        {#if embed.media}
-          <div class="min-h-[300px] w-full overflow-hidden {mediaRadiusClassMap[galleryMediaRadius]}">
-            <div class="embed-preview">
-              <div class="h-full w-full">{@html embed.media}</div>
-            </div>
-          </div>
-        {/if}
-        {#if embed.title || embed.subtitle}
-          <div class="flex flex-col gap-xs {galleryItemAlignClassMap[galleryItemAlign]}">
-            {#if embed.title}<p class="font-bold text-lg">{embed.title}</p>{/if}
-            {#if embed.subtitle}<p>{embed.subtitle}</p>{/if}
-          </div>
-        {/if}
-      </div>
+      {@render EmbedGalleryItem(embed)}
     {/each}
   </div>
 {/snippet}
 
 {#snippet ContentMedia()}
   {#if gallery.length}
-    {#if section.meta.gallery_media_type === 'embed'}
-      {@render ContentEmbed()}
-    {:else if section.meta.gallery_media_type === 'image'}
-      {@render ContentImage()}
+    {#if galleryDisplayMode === 'carousel'}
+      {@render CarouselGallery()}
     {:else}
-      {@render ContentIcon()}
+      {@render StaticGallery()}
     {/if}
+  {/if}
+{/snippet}
+
+{#snippet StaticGallery()}
+  {#if section.meta.gallery_media_type === 'embed'}
+    {@render ContentEmbed()}
+  {:else if section.meta.gallery_media_type === 'image'}
+    {@render ContentImage()}
+  {:else}
+    {@render ContentIcon()}
+  {/if}
+{/snippet}
+
+{#snippet CarouselGallery()}
+  <div class="relative left-1/2 w-screen max-w-none -translate-x-1/2 px-6 lg:px-12">
+    <Carousel.Root
+      opts={{
+        containScroll: false,
+        dragFree: section.meta.carousel_drag_free ?? true,
+        loop: Boolean(section.meta.carousel_loop),
+        watchDrag: gallery.length > 1,
+      }}
+      class="w-full flex flex-col {galleryGapClassMap[galleryGap]}"
+    >
+      {#if carouselNavigationPosition === 'top'}
+        {@render CarouselNavigation()}
+      {/if}
+      <div class="relative w-full">
+        <Carousel.Content>
+          {#each gallery as item, i (item.id || `content-gallery-carousel-${i}`)}
+            <Carousel.Item class="{carouselItemWidthClass} pl-4 first:pl-0">
+              {@render GalleryItem(item)}
+            </Carousel.Item>
+          {/each}
+        </Carousel.Content>
+        {#if carouselNavigationPosition === 'center' && carouselNavigationStyle !== 'none'}
+          <CenterNavigation />
+        {/if}
+      </div>
+      {#if carouselNavigationPosition === 'bottom'}
+        {@render CarouselNavigation()}
+      {/if}
+    </Carousel.Root>
+  </div>
+{/snippet}
+
+{#snippet GalleryItem(item: any)}
+  {#if section.meta.gallery_media_type === 'embed'}
+    {@render EmbedGalleryItem(item)}
+  {:else if section.meta.gallery_media_type === 'image'}
+    {@render ImageGalleryItem(item)}
+  {:else}
+    {@render IconGalleryItem(item)}
+  {/if}
+{/snippet}
+
+{#snippet IconGalleryItem(icon: any)}
+  <div class="flex min-w-0 flex-col gap-sm {galleryItemAlignClassMap[galleryItemAlign]}">
+    {#if icon.media}<i class="{icon.media} {galleryIconSizeClassMap[galleryIconSize]}"></i>{/if}
+    {#if icon.title}<p class="font-bold text-lg">{icon.title}</p>{/if}
+    {#if icon.subtitle}<p>{icon.subtitle}</p>{/if}
+  </div>
+{/snippet}
+
+{#snippet ImageGalleryItem(image: any)}
+  <div class="flex min-w-0 flex-col gap-base {galleryItemAlignClassMap[galleryItemAlign]}">
+    {#if image.media}
+      <div class="w-full overflow-hidden {mediaRadiusClassMap[galleryMediaRadius]} {mediaAspectRatioClassMap[galleryMediaAspectRatio]}">
+        <img
+          src={image.media}
+          alt={image.title || ''}
+          class="h-full w-full object-cover object-center {!section.meta.remove_outline_on_images ? 'outline outline-outline-variant' : ''}"
+        />
+      </div>
+    {/if}
+    {#if image.title || image.subtitle}
+      <div class="flex flex-col gap-xs {galleryItemAlignClassMap[galleryItemAlign]}">
+        {#if image.title}<p class="font-bold text-lg">{image.title}</p>{/if}
+        {#if image.subtitle}<p>{image.subtitle}</p>{/if}
+      </div>
+    {/if}
+  </div>
+{/snippet}
+
+{#snippet EmbedGalleryItem(embed: any)}
+  <div class="flex min-w-0 flex-col gap-base {galleryItemAlignClassMap[galleryItemAlign]}">
+    {#if embed.media}
+      <div class="min-h-[300px] w-full overflow-hidden {mediaRadiusClassMap[galleryMediaRadius]}">
+        <div class="embed-preview">
+          <div class="h-full w-full">{@html embed.media}</div>
+        </div>
+      </div>
+    {/if}
+    {#if embed.title || embed.subtitle}
+      <div class="flex flex-col gap-xs {galleryItemAlignClassMap[galleryItemAlign]}">
+        {#if embed.title}<p class="font-bold text-lg">{embed.title}</p>{/if}
+        {#if embed.subtitle}<p>{embed.subtitle}</p>{/if}
+      </div>
+    {/if}
+  </div>
+{/snippet}
+
+{#snippet CarouselNavigation()}
+  {#if carouselNavigationStyle === 'title'}
+    <Carousel.Navigation>
+      {#snippet navigation({ handleClick, currentIndex }: any)}
+        <div class="flex flex-wrap items-center justify-center gap-4">
+          {#each gallery as item, i}
+            <button onclick={() => handleClick(i)} class="{currentIndex === i ? 'text-on-surface font-semibold' : 'text-outline'}">{item.title}</button>
+          {/each}
+        </div>
+      {/snippet}
+    </Carousel.Navigation>
+  {:else if carouselNavigationStyle === 'arrows-dots'}
+    <Carousel.Navigation />
+  {:else if carouselNavigationStyle === 'arrows'}
+    <Carousel.Navigation>
+      {#snippet navigation({ scrollPrev, scrollNext }: any)}
+        <div class="flex items-center justify-center gap-4">
+          <button
+            onclick={scrollPrev}
+            aria-label="Previous slide"
+            class="flex aspect-square h-12 items-center justify-center rounded-full outline outline-1 outline-primary text-outline transition-colors hover:bg-primary hover:text-on-primary"
+          >
+            <i class="ri-arrow-left-s-line text-2xl"></i>
+          </button>
+          <button
+            onclick={scrollNext}
+            aria-label="Next slide"
+            class="flex aspect-square h-12 items-center justify-center rounded-full outline outline-1 outline-primary text-outline transition-colors hover:bg-primary hover:text-on-primary"
+          >
+            <i class="ri-arrow-right-s-line text-2xl"></i>
+          </button>
+        </div>
+      {/snippet}
+    </Carousel.Navigation>
   {/if}
 {/snippet}
 

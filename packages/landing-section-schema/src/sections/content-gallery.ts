@@ -5,6 +5,9 @@ const isPanel = ({ container_variant }: any) => container_variant === 'panel'
 const isHorizontal = ({ layout_direction }: any) => layout_direction === 'horizontal'
 const isImageGallery = ({ gallery_media_type }: any) => gallery_media_type === 'image'
 const isIconGallery = ({ gallery_media_type }: any) => gallery_media_type === 'icon'
+const isStaticGallery = ({ gallery_display_mode }: any) => gallery_display_mode !== 'carousel'
+const isCarouselGallery = ({ gallery_display_mode }: any) => gallery_display_mode === 'carousel'
+const usesCarouselNavigation = ({ gallery_display_mode, carousel_navigation_position }: any) => gallery_display_mode === 'carousel' && carousel_navigation_position !== 'none'
 const isOrnamentEnabled = ({ ornament_enabled }: any) => Boolean(ornament_enabled)
 const isInsideOrnament = ({ ornament_enabled, ornament_layer }: any) => Boolean(ornament_enabled) && ornament_layer === 'inside'
 const isContainerBackgroundOrnament = ({ ornament_enabled, ornament_scope, ornament_layer }: any) => Boolean(ornament_enabled) && ornament_scope === 'container' && ornament_layer === 'behind'
@@ -35,6 +38,7 @@ export default defineSectionSchema({
       'text_color_scheme',
       'title_size',
       'gallery_title_size',
+      'gallery_display_mode',
       'gallery_media_type',
       'gallery_columns',
       'gallery_gap',
@@ -42,6 +46,11 @@ export default defineSectionSchema({
       'gallery_icon_size',
       'gallery_media_radius',
       'gallery_media_aspect_ratio',
+      'carousel_loop',
+      'carousel_navigation_position',
+      'carousel_navigation_style',
+      'carousel_drag_free',
+      'carousel_item_width',
       'remove_outline_on_images',
       'ornament_enabled',
       'ornament_media',
@@ -70,6 +79,7 @@ export default defineSectionSchema({
       text_color_scheme: 'default',
       title_size: 'md',
       gallery_title_size: 'md',
+      gallery_display_mode: 'static',
       gallery_media_type: 'icon',
       gallery_columns: '3',
       gallery_gap: 'xl',
@@ -77,6 +87,11 @@ export default defineSectionSchema({
       gallery_icon_size: 'md',
       gallery_media_radius: 'sm',
       gallery_media_aspect_ratio: 'auto',
+      carousel_loop: false,
+      carousel_navigation_position: 'bottom',
+      carousel_navigation_style: 'arrows',
+      carousel_drag_free: true,
+      carousel_item_width: 'medium',
       remove_outline_on_images: false,
       ornament_enabled: false,
       ornament_scope: 'container',
@@ -336,8 +351,25 @@ export default defineSectionSchema({
             ],
           },
         },
+        gallery_display_mode: {
+          type: 'select',
+          props: {
+            data: [
+              { id: 'static', name: 'Static' },
+              { id: 'carousel', name: 'Carousel' },
+            ],
+            clearable: false,
+          },
+        },
         gallery_columns: {
           type: 'select',
+          dependency: {
+            fields: ['gallery_display_mode'],
+            visibility: {
+              validator: isStaticGallery,
+              default: true,
+            },
+          },
           props: {
             data: [
               { id: '2', name: '2 Kolom' },
@@ -423,6 +455,81 @@ export default defineSectionSchema({
               { id: '16/9', name: '16:9' },
               { id: '4/3', name: '4:3' },
               { id: '1/1', name: '1:1' },
+            ],
+            clearable: false,
+          },
+        },
+        carousel_loop: {
+          type: 'checkbox',
+          dependency: {
+            fields: ['gallery_display_mode'],
+            visibility: {
+              validator: isCarouselGallery,
+              default: false,
+            },
+          },
+        },
+        carousel_drag_free: {
+          type: 'checkbox',
+          dependency: {
+            fields: ['gallery_display_mode'],
+            visibility: {
+              validator: isCarouselGallery,
+              default: false,
+            },
+          },
+        },
+        carousel_navigation_position: {
+          type: 'select',
+          dependency: {
+            fields: ['gallery_display_mode'],
+            visibility: {
+              validator: isCarouselGallery,
+              default: false,
+            },
+          },
+          props: {
+            data: [
+              { id: 'top', name: 'Top' },
+              { id: 'center', name: 'Center' },
+              { id: 'bottom', name: 'Bottom' },
+              { id: 'none', name: 'None' },
+            ],
+            clearable: false,
+          },
+        },
+        carousel_navigation_style: {
+          type: 'select',
+          dependency: {
+            fields: ['gallery_display_mode', 'carousel_navigation_position'],
+            visibility: {
+              validator: usesCarouselNavigation,
+              default: false,
+            },
+          },
+          props: {
+            data: [
+              { id: 'arrows', name: 'Arrows' },
+              { id: 'arrows-dots', name: 'Arrows + Dots' },
+              { id: 'title', name: 'Title' },
+            ],
+            clearable: false,
+          },
+        },
+        carousel_item_width: {
+          type: 'select',
+          dependency: {
+            fields: ['gallery_display_mode'],
+            visibility: {
+              validator: isCarouselGallery,
+              default: false,
+            },
+          },
+          props: {
+            data: [
+              { id: 'wide', name: 'Wide' },
+              { id: 'medium', name: 'Medium' },
+              { id: 'narrow', name: 'Narrow' },
             ],
             clearable: false,
           },
@@ -579,6 +686,7 @@ export default defineSectionSchema({
         text_color_scheme: 'Warna Teks',
         title_size: 'Ukuran Judul',
         gallery_title_size: 'Ukuran Judul Galeri',
+        gallery_display_mode: 'Mode Tampilan Galeri',
         gallery_media_type: 'Tipe Media Galeri',
         gallery_columns: 'Kolom Galeri',
         gallery_gap: 'Jarak Galeri',
@@ -586,6 +694,11 @@ export default defineSectionSchema({
         gallery_icon_size: 'Ukuran Icon Galeri',
         gallery_media_radius: 'Radius Media Galeri',
         gallery_media_aspect_ratio: 'Rasio Media Galeri',
+        carousel_loop: 'Carousel Loop',
+        carousel_navigation_position: 'Posisi Navigasi Carousel',
+        carousel_navigation_style: 'Tipe Navigasi Carousel',
+        carousel_drag_free: 'Carousel Drag Free',
+        carousel_item_width: 'Lebar Item Carousel',
         ornament_enabled: 'Aktifkan Ornamen',
         ornament_media: 'File Ornamen',
         ornament_scope: 'Area Ornamen',

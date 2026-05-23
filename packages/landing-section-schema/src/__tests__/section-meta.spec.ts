@@ -77,6 +77,7 @@ describe('shared section schema', () => {
       'text_color_scheme',
       'title_size',
       'gallery_title_size',
+      'gallery_display_mode',
       'gallery_media_type',
       'gallery_columns',
       'gallery_gap',
@@ -84,6 +85,11 @@ describe('shared section schema', () => {
       'gallery_icon_size',
       'gallery_media_radius',
       'gallery_media_aspect_ratio',
+      'carousel_loop',
+      'carousel_navigation_position',
+      'carousel_navigation_style',
+      'carousel_drag_free',
+      'carousel_item_width',
       'remove_outline_on_images',
       'ornament_enabled',
       'ornament_media',
@@ -117,8 +123,14 @@ describe('shared section schema', () => {
     expect(contentDefault.meta?.defaultValues?.ornament_offset).toBe('md')
     expect(contentGallery.meta?.defaultValues?.container_variant).toBe('panel')
     expect(contentGallery.meta?.defaultValues?.container_radius_pattern).toBe('diagonal')
+    expect(contentGallery.meta?.defaultValues?.gallery_display_mode).toBe('static')
     expect(contentGallery.meta?.defaultValues?.gallery_media_type).toBe('icon')
     expect(contentGallery.meta?.defaultValues?.gallery_columns).toBe('3')
+    expect(contentGallery.meta?.defaultValues?.carousel_loop).toBe(false)
+    expect(contentGallery.meta?.defaultValues?.carousel_navigation_position).toBe('bottom')
+    expect(contentGallery.meta?.defaultValues?.carousel_navigation_style).toBe('arrows')
+    expect(contentGallery.meta?.defaultValues?.carousel_drag_free).toBe(true)
+    expect(contentGallery.meta?.defaultValues?.carousel_item_width).toBe('medium')
     expect(dataList.meta?.defaultValues?.type).toBe('list')
   })
 
@@ -270,6 +282,15 @@ describe('shared section schema', () => {
     expect(inputConfig?.gallery_media_radius?.dependency?.visibility?.validator({ gallery_media_type: 'image' })).toBe(true)
     expect(inputConfig?.gallery_media_aspect_ratio?.dependency?.visibility?.validator({ gallery_media_type: 'image' })).toBe(true)
     expect(inputConfig?.remove_outline_on_images?.dependency?.visibility?.validator({ gallery_media_type: 'image' })).toBe(true)
+    expect(inputConfig?.gallery_columns?.dependency?.visibility?.validator({ gallery_display_mode: 'static' })).toBe(true)
+    expect(inputConfig?.gallery_columns?.dependency?.visibility?.validator({ gallery_display_mode: 'carousel' })).toBe(false)
+    expect(inputConfig?.carousel_loop?.dependency?.visibility?.validator({ gallery_display_mode: 'static' })).toBe(false)
+    expect(inputConfig?.carousel_loop?.dependency?.visibility?.validator({ gallery_display_mode: 'carousel' })).toBe(true)
+    expect(inputConfig?.carousel_drag_free?.dependency?.visibility?.validator({ gallery_display_mode: 'carousel' })).toBe(true)
+    expect(inputConfig?.carousel_navigation_position?.dependency?.visibility?.validator({ gallery_display_mode: 'carousel' })).toBe(true)
+    expect(inputConfig?.carousel_navigation_style?.dependency?.visibility?.validator({ gallery_display_mode: 'carousel', carousel_navigation_position: 'bottom' })).toBe(true)
+    expect(inputConfig?.carousel_navigation_style?.dependency?.visibility?.validator({ gallery_display_mode: 'carousel', carousel_navigation_position: 'none' })).toBe(false)
+    expect(inputConfig?.carousel_item_width?.dependency?.visibility?.validator({ gallery_display_mode: 'carousel' })).toBe(true)
 
     expect(inputConfig?.ornament_media?.dependency?.visibility?.validator({ ornament_enabled: true })).toBe(true)
     expect(inputConfig?.ornament_scope?.dependency?.visibility?.validator({ ornament_enabled: false })).toBe(false)
