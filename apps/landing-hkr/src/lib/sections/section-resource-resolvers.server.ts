@@ -30,6 +30,36 @@ function normalizeImages(input: unknown): unknown[] {
 }
 
 export const sectionResourceResolvers: SectionResourceResolverRegistry = {
+  'form-template': async ({ section, slot, context }) => {
+    const params = (slot.params ?? {}) as Record<string, unknown>;
+    const formTypeMetaField = typeof params.formTypeMetaField === 'string'
+      ? params.formTypeMetaField
+      : 'form_type_id';
+    const formTypeId = typeof section?.meta?.[formTypeMetaField] === 'string'
+      ? section.meta[formTypeMetaField].trim()
+      : '';
+
+    if (!formTypeId) {
+      return {
+        form_type_id: '',
+        data: [],
+      };
+    }
+
+    const fields = await context.prisma.formField.findMany({
+      where: { form_type_id: formTypeId },
+      orderBy: { order: 'asc' },
+    });
+
+    return {
+      form_type_id: formTypeId,
+      data: fields.map((field: Record<string, unknown>) => ({
+        ...field,
+        form_type_id: undefined,
+        value: undefined,
+      })),
+    };
+  },
   article: async ({ section, slot, context }) => {
     const params = (slot.params ?? {}) as Record<string, unknown>;
     if (params.strategy !== 'latestPublished') {

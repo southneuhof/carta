@@ -16,7 +16,7 @@ import {
 } from '../schemaAdapter'
 
 describe('section schema adapter', () => {
-  it('loads exactly the 5 supported shared schemas', () => {
+  it('loads all supported shared schemas from the shared package', () => {
     expect(Object.keys(supportedSectionSchemas).sort()).toEqual([...SUPPORTED_SECTION_SCHEMA_CODES].sort())
   })
 
@@ -69,6 +69,10 @@ describe('section schema adapter', () => {
     const childSections = dataListConfig?.slots.find((slot) => slot.key === 'childSections')
     expect(childSections?.component).toBeUndefined()
     expect(childSections?.schema?.data.gallery.editor?.resolveConfig).toBeDefined()
+
+    const formConfig = getSupportedEditorConfig('form')
+    const formMetaSlot = formConfig?.slots.find((slot) => slot.key === 'config')
+    expect(formMetaSlot?.component).toBeDefined()
   })
 
   it('exposes recursive slot schema and nested schema config', () => {

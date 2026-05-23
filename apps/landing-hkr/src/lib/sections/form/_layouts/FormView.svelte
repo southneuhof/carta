@@ -22,7 +22,7 @@
 
   let isLoading = $state(false)
 
-  let formData = $state<Record<string, any>>(section.data.formDataTemplate)
+  let formData = $state<Record<string, any>>(section.data?.formDataTemplate ?? { form_type_id: '', data: [] })
 
   const componentTypeMap: Record<string, any> = {
     text: TextInput,
@@ -40,7 +40,7 @@
     for (const key in searchParams) {
       if (Object.prototype.hasOwnProperty.call(searchParams, key)) {
         const element = searchParams[key];
-        const formField = formData.data.find((formField: any) => formField.code === key)
+        const formField = formData.data?.find((formField: any) => formField.code === key)
         console.log('formField', formField, element)
         if (formField) {
           formField.value = element
@@ -52,7 +52,7 @@
   let formError: Record<string, any> = $state({})
 
   let isFormClientValid = $derived.by(() => {
-    return formData.data.every((field: any) => {
+    return (formData.data ?? []).every((field: any) => {
       // If field is not required, it's always valid
       if (!field.required) return true;
       
@@ -117,7 +117,7 @@
 <div class="grid grid-cols-6 gap-lg">
   <form class="flex flex-col gap-4 {section.meta.show_hkr_contact_detail ? 'col-span-4' : 'col-span-full'}" onsubmit={validateForm}>
     <div class="grid grid-cols-12 gap-4 max-w-screen-xl w-full">
-      {#each formData.data as formField}
+      {#each (formData.data ?? []) as formField}
         {@const InputComponent = componentTypeMap[formField.type]}
         {#if InputComponent}
           <div class="flex flex-col gap-4" style="grid-column: span {formField.col_span} / span {formField.col_span};">

@@ -1,6 +1,63 @@
 import { describe, expect, it, vi } from 'vitest'
 import { sectionResourceResolvers } from '../src/lib/sections/section-resource-resolvers.server'
 
+describe('sectionResourceResolvers.form-template', () => {
+  it('returns empty template when form type id meta is missing', async () => {
+    const result = await sectionResourceResolvers['form-template']({
+      section: { id: 'section-1', meta: {} },
+      slotKey: 'formDataTemplate',
+      slot: {
+        type: 'resource',
+        source: 'form-template',
+        order: 1,
+        params: { formTypeMetaField: 'form_type_id' },
+      } as any,
+      context: {
+        prisma: { formField: { findMany: vi.fn() } },
+        getLocale: () => 'id',
+        url: new URL('https://example.test'),
+      },
+    })
+
+    expect(result).toEqual({
+      form_type_id: '',
+      data: [],
+    })
+  })
+
+  it('returns template shaped for FormView', async () => {
+    const findMany = vi.fn().mockResolvedValue([
+      { id: 'field-1', form_type_id: 'ft-1', code: 'name', order: 1, type: 'text' },
+      { id: 'field-2', form_type_id: 'ft-1', code: 'email', order: 2, type: 'text' },
+    ])
+
+    const result = await sectionResourceResolvers['form-template']({
+      section: { id: 'section-1', meta: { form_type_id: 'ft-1' } },
+      slotKey: 'formDataTemplate',
+      slot: {
+        type: 'resource',
+        source: 'form-template',
+        order: 1,
+        params: { formTypeMetaField: 'form_type_id' },
+      } as any,
+      context: {
+        prisma: { formField: { findMany } },
+        getLocale: () => 'id',
+        url: new URL('https://example.test'),
+      },
+    })
+
+    expect(findMany).toHaveBeenCalledTimes(1)
+    expect(result).toEqual({
+      form_type_id: 'ft-1',
+      data: [
+        { id: 'field-1', form_type_id: undefined, code: 'name', order: 1, type: 'text', value: undefined },
+        { id: 'field-2', form_type_id: undefined, code: 'email', order: 2, type: 'text', value: undefined },
+      ],
+    })
+  })
+})
+
 describe('sectionResourceResolvers.product', () => {
   it('returns null when product id meta is missing', async () => {
     const result = await sectionResourceResolvers.product({

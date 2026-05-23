@@ -1,6 +1,5 @@
 <script lang="ts">
   import { getContext } from "svelte";
-  import { assetUrl } from "$lib/utils/assets";
 
   const {onPrevious} = $props()
 
@@ -11,13 +10,15 @@
   <div class="flex flex-col gap-base">
     <button class="text-sm text-start max-w-fit" onclick={onPrevious}><i class="ri-arrow-left-line"></i> <span class="underline">Kembali</span></button>
     <div class="flex flex-col gap-sm">
-      <p class="text-2xl font-bold">{section.data.postSubmission.content.title}</p>
-      <p class="rtf-content m-base">{@html section.data.postSubmission.content.description}</p>
+      <p class="text-2xl font-bold">{section.data?.postSubmission?.title}</p>
+      <p class="rtf-content m-base">{@html section.data?.postSubmission?.description}</p>
     </div>
   </div>
-  <div class="flex flex-row items-center gap-base">
-    {#each section.data.postSubmission.gallery as attachment}
-      <a href={assetUrl(attachment.attachment)} target="_blank" class="text-sm font-bold"><span class="underline">{attachment.title}</span> <i class="ri-download-line"></i></a>
+  <div class="flex flex-row items-center gap-base flex-wrap">
+    {#each (Array.isArray(section.data?.contactDetails) ? section.data.contactDetails : []) as attachment}
+      {#if attachment.url}
+        <a href={attachment.url?.startsWith('http') ? attachment.url : `https://${attachment.url}`} target="_blank" class="text-sm font-bold"><span class="underline">{attachment.title || attachment.url}</span> <i class="ri-download-line"></i></a>
+      {/if}
     {/each}
   </div>
 </div>

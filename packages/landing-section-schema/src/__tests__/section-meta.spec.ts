@@ -4,6 +4,7 @@ import contentGallery from '../sections/content-gallery'
 import dataList from '../sections/data-list'
 import heroBanner from '../sections/hero-banner'
 import articleHighlights from '../sections/article-highlights'
+import form from '../sections/form'
 import productCatalog from '../sections/product-catalog'
 import productShowcase from '../sections/product-showcase'
 import sectionSchemas from '../index'
@@ -303,6 +304,23 @@ describe('shared section schema', () => {
     expect(productShowcase.data.config.type).toBe('resource')
     expect(productShowcase.data.config.source).toBe('section-meta-editor')
     expect(productShowcase.data.config.editor?.componentToken).toBe('product-showcase-meta-editor')
+  })
+
+  it('exports form schema with header/contactDetails/postSubmission/formDataTemplate slots', () => {
+    expect(sectionSchemas['form']).toBeTruthy()
+    expect(Object.keys(form.data)).toEqual(['header', 'contactDetails', 'postSubmission', 'formDataTemplate', 'config'])
+    expect(form.data.header.type).toBe('content')
+    expect(form.data.contactDetails.type).toBe('gallery')
+    expect(form.data.contactDetails.many).toBe(true)
+    expect(form.data.contactDetails.fields).toEqual(['media', 'title', 'url'])
+    expect(form.data.postSubmission.type).toBe('content')
+    expect(form.data.postSubmission.fields).toEqual(['title', 'description'])
+    expect(form.data.formDataTemplate.type).toBe('resource')
+    expect(form.data.formDataTemplate.source).toBe('form-template')
+    expect(form.data.formDataTemplate.params).toEqual({ formTypeMetaField: 'form_type_id' })
+    expect(form.data.config.type).toBe('resource')
+    expect(form.data.config.source).toBe('section-meta-editor')
+    expect(form.data.config.editor?.componentToken).toBe('form-meta-editor')
   })
 
   it('reuses field-set contract across hero-banner and nested data-list gallery', () => {
