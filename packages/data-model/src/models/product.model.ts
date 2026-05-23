@@ -21,7 +21,12 @@ const productModel: ModelConfig = withModelDefaults({
     },
   },
   transaction: {
-    fields: ['product_category_id', 'name', 'url', 'active', 'images'],
+    create: {
+      fields: ['product_category_id', 'name', 'url', 'active', 'images'],
+    },
+    update: {
+      fields: ['product_category_id', 'url', 'active', 'images'],
+    },
     inputConfig: {
       product_category_id: { type: 'select', props: { getAPI: 'productCategory', required: true } },
       url: { type: 'menu-item' },

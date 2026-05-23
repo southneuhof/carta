@@ -138,22 +138,22 @@
                     onfocus="{() => {}}"
                     role="menu"
                     tabindex="{index}"
-                    onmouseover="{() => debouncedMenuExpandMouseHover(index, menu.children?.length ? 'expand' : 'shrink')}"
+                    onmouseover="{() => debouncedMenuExpandMouseHover(index, menu.children?.filter((c: any) => c.visible).length ? 'expand' : 'shrink')}"
                     class="flex flex-row gap-xs cursor-default"
                   >
                     <p>{menu.name}</p>
-                    {#if menu.children?.length}<i class="ri-arrow-down-s-line {activeLevel1Index === index ? 'rotate-180' : 'rotate-0'} transition-transform"></i>{/if}
+                    {#if menu.children?.filter((c: any) => c.visible).length}<i class="ri-arrow-down-s-line {activeLevel1Index === index ? 'rotate-180' : 'rotate-0'} transition-transform"></i>{/if}
                   </div>
                 {:else}
                   <a
                     onfocus="{() => {}}"
-                    onmouseover="{() => debouncedMenuExpandMouseHover(index, menu.children?.length ? 'expand' : 'shrink')}"
-                    onclick="{() => isMenuExpanded = false}"
+                    onmouseover="{() => debouncedMenuExpandMouseHover(index, menu.children?.filter((c: any) => c.visible).length ? 'expand' : 'shrink')}"
+                    onclick="{() => { isMenuExpanded = false; activeLevel1Index = null; activeLevel2Index = null; }}"
                     href="/{menu.slug}"
                     class="flex flex-row gap-xs"
                   > 
                   <p>{menu.name}</p>
-                    {#if menu.children?.length}<i class="ri-arrow-down-s-line {activeLevel1Index === index ? 'rotate-180' : 'rotate-0'} transition-transform"></i>{/if}
+                    {#if menu.children?.filter((c: any) => c.visible).length}<i class="ri-arrow-down-s-line {activeLevel1Index === index ? 'rotate-180' : 'rotate-0'} transition-transform"></i>{/if}
                   </a>
                 {/if}
               </div>
@@ -184,7 +184,7 @@
     <div class="relative w-full h-full">
       <div class="w-full max-w-screen-xl mx-auto px-12 relative h-full">
         {#each page.data.menu as menu, level1Index}
-          {#if menu.children?.length}
+          {#if menu.children?.filter((c: any) => c.visible).length}
             <div 
               class="absolute inset-x-0 transition-all ease-in-out {activeLevel1Index === level1Index && isContentVisible ? 'opacity-100 filter-none' : 'opacity-0 filter blur-sm pointer-events-none'}"
               style="transition-duration: {FADE_DURATION}ms"
