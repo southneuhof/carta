@@ -1,11 +1,11 @@
 import type { ModelConfig } from '@southneuhof/landing-sveltekit-framework/types';
-import { languages, parseSlug } from '$lib/utils/common';
+import { languages } from '$lib/utils/common';
 import prisma from '$lib/utils/prisma';
 import type { Prisma } from '@prisma/client';
 
 export default {
   allow: true,
-  fields: ['id', 'product_category_id', 'order', 'active', 'images', 'created_at', 'updated_at'],
+  fields: ['id', 'product_category_id', 'url', 'order', 'active', 'images', 'created_at', 'updated_at'],
   list: {
     allow: true,
     orderBy: { order: 'asc' },
@@ -20,7 +20,7 @@ export default {
         },
       },
       translations: {
-        fields: ['id', 'language', 'name', 'slug', 'description'],
+        fields: ['id', 'language', 'name', 'description'],
       },
     },
     where: async (event) => {
@@ -51,13 +51,13 @@ export default {
         },
       },
       translations: {
-        fields: ['id', 'language', 'name', 'slug', 'description'],
+        fields: ['id', 'language', 'name', 'description'],
       },
     },
   },
   create: {
     allow: true,
-    fields: ['product_category_id', 'name', 'order', 'active', 'images'],
+    fields: ['product_category_id', 'url', 'name', 'order', 'active', 'images'],
     validation: {
       product_category_id: [
         {
@@ -80,7 +80,6 @@ export default {
       },
       main: async (body: any) => {
         const name = typeof body.name === 'string' && body.name.trim().length > 0 ? body.name.trim() : 'Untitled Product';
-        const fallbackSlug = `product-${Date.now()}`;
         const { name: _omitName, ...productData } = body;
 
         return prisma.$transaction(async (tx) => {
@@ -93,7 +92,6 @@ export default {
               product_id: created.id,
               language,
               name,
-              slug: parseSlug(name) || fallbackSlug,
             })),
           });
 
@@ -105,7 +103,7 @@ export default {
   update: {
     allow: true,
     by: ['id'],
-    fields: ['product_category_id', 'active', 'images'],
+    fields: ['product_category_id', 'url', 'active', 'images'],
   },
   delete: {
     allow: true,

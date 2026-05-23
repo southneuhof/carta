@@ -81,7 +81,7 @@ export default {
         fields: ['id', 'order', 'active', 'images', 'product_category_id'],
         fieldsForeign: {
           translations: {
-            fields: ['language', 'name', 'slug'],
+            fields: ['language', 'name'],
           },
         },
       },

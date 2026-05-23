@@ -20,7 +20,7 @@ import { permissions } from '@/stores/permissions'
     <template #list-created_at="{ data }">
       <p class="whitespace-nowrap">{{ parse('date', data.created_at) }}</p>
     </template>
-    <template #list-rowActions-update="{ data }">
+    <!-- <template #list-rowActions-update="{ data }">
       <Modal v-if="permissions().has('update-product')">
         <template #trigger>
           <Button color="warning" kind="icon">
@@ -33,11 +33,11 @@ import { permissions } from '@/stores/permissions'
           <TranslationEditor
             :data="data"
             identifier="product_id"
-            :fields="['name', 'slug', 'description']"
+            :fields="['name', 'description']"
             targetAPI="productTranslation"
           />
         </template>
       </Modal>
-    </template>
+    </template> -->
   </CRUDComposite>
 </template>

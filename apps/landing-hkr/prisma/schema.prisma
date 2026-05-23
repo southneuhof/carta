@@ -486,6 +486,7 @@ model ProductCategoryTranslation {
 model Product {
   id                  String               @id @default(cuid())
   product_category_id String
+  url                 String?
   order               Int
   active              Boolean              @default(true)
   images              Json                 @default("[]")
@@ -500,12 +501,10 @@ model ProductTranslation {
   product_id  String
   language    Language
   name        String
-  slug        String
   description String?  @db.Text
   product     Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
 
   @@unique([product_id, language])
-  @@unique([language, slug])
 }
 
 ///

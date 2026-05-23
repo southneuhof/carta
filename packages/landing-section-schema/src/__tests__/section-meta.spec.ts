@@ -4,6 +4,7 @@ import contentGallery from '../sections/content-gallery'
 import dataList from '../sections/data-list'
 import heroBanner from '../sections/hero-banner'
 import articleHighlights from '../sections/article-highlights'
+import productCatalog from '../sections/product-catalog'
 import sectionSchemas from '../index'
 import { dataListFieldSets } from '../helpers/data-list-field-sets'
 import { containerColorOptions } from '../helpers/container-color-options'
@@ -248,6 +249,40 @@ describe('shared section schema', () => {
         clearable: true,
       },
     })
+  })
+
+  it('exports product-catalog schema with content+products slots and catalog meta', () => {
+    expect(sectionSchemas['product-catalog']).toBeTruthy()
+    expect(Object.keys(productCatalog.data)).toEqual(['content', 'products'])
+    expect(productCatalog.data.content.type).toBe('content')
+    expect(productCatalog.data.content.fields).toEqual([
+      'subtitle',
+      'title',
+      'description',
+      'url',
+      'url_text',
+    ])
+    expect(productCatalog.data.products).toEqual({
+      type: 'resource',
+      source: 'product',
+      order: 2,
+      many: true,
+      fields: ['id', 'name', 'url', 'thumbnail', 'category', 'product_category_id'],
+      params: {
+        limit: 8,
+      },
+    })
+    expect(productCatalog.meta?.fields).toEqual([
+      'section_background_color',
+      'section_ornament_media',
+      'section_ornament_offset',
+      'initialLimit',
+      'showSearch',
+      'showCategoryTabs',
+    ])
+    expect(productCatalog.meta?.defaultValues?.initialLimit).toBe(8)
+    expect(productCatalog.meta?.defaultValues?.showSearch).toBe(true)
+    expect(productCatalog.meta?.defaultValues?.showCategoryTabs).toBe(true)
   })
 
   it('reuses field-set contract across hero-banner and nested data-list gallery', () => {

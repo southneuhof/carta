@@ -5,9 +5,10 @@ const productModel: ModelConfig = withModelDefaults({
   name: 'product',
   title: 'Produk',
   modelAPI: 'product',
-  fields: ['product_category_id', 'name', 'order', 'active', 'images', 'created_at', 'updated_at', 'translations'],
+  fields: ['product_category_id', 'name', 'url', 'order', 'active', 'images', 'created_at', 'updated_at', 'translations'],
   fieldsAlias: {
     product_category_id: 'Kategori',
+    url: 'URL',
     translations: 'Terjemahan',
   },
   view: {
@@ -20,9 +21,10 @@ const productModel: ModelConfig = withModelDefaults({
     },
   },
   transaction: {
-    fields: ['product_category_id', 'name', 'active', 'images'],
+    fields: ['product_category_id', 'name', 'url', 'active', 'images'],
     inputConfig: {
       product_category_id: { type: 'select', props: { getAPI: 'productCategory', required: true } },
+      url: { type: 'menu-item' },
       images: { type: 'image', props: { multi: true } },
     },
   },

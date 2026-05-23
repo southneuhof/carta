@@ -15,6 +15,7 @@
   let activeLevel2Index = $state<number | null>(null)
   let level1MenuContentElements: (HTMLDivElement | null)[] = $state([])
   let level2MenuContentElements: (HTMLDivElement | null)[][] = $state(page.data.menu.map((item: any) => item.children.map(() => null)))
+  let level1PanelElements: (HTMLDivElement | null)[] = $state([])
   let containerHeight = $state(0)
   let isContentVisible = $state(false)
   let isAnimating = $state(false)
@@ -23,15 +24,17 @@
   const HEIGHT_DURATION = 150
 
   $effect(() => {
+    let activeLevel1PanelElement: any = null
     let activeLevel1ContentElement: any = null
     let activeLevel2ContentElement: any = null
     if (isMenuExpanded) {
+      if (activeLevel1Index != null) activeLevel1PanelElement = level1PanelElements[activeLevel1Index]
       if (activeLevel1Index != null) activeLevel1ContentElement = level1MenuContentElements[activeLevel1Index]
       if (activeLevel2Index != null && activeLevel1Index != null) activeLevel2ContentElement = level2MenuContentElements[activeLevel1Index][activeLevel2Index]
-      if (activeLevel1ContentElement && !activeLevel2ContentElement) {
-        return containerHeight = activeLevel1ContentElement.offsetHeight
-      } else if (activeLevel1ContentElement && activeLevel2ContentElement) {
-        return containerHeight = Math.max(activeLevel1ContentElement.offsetHeight, activeLevel2ContentElement.offsetHeight)
+      if (activeLevel1PanelElement && !activeLevel2ContentElement) {
+        return containerHeight = activeLevel1PanelElement.offsetHeight
+      } else if (activeLevel1PanelElement && activeLevel2ContentElement) {
+        return containerHeight = Math.max(activeLevel1PanelElement.offsetHeight, activeLevel2ContentElement.offsetHeight)
       }
     } else {
       containerHeight = 0
@@ -175,7 +178,7 @@
   {/if}
   <div 
     class="fixed text-sm xl:text-base w-full bg-surface outline-0 z-[49] ease-in-out overflow-hidden {isMenuExpanded ? '' : 'pointer-events-none'}"
-    style="transition: height {HEIGHT_DURATION}ms, opacity {FADE_DURATION}ms; height: {isMenuExpanded ? containerHeight + 152 : windowScrollY != 0 ? 116 : 0}px"
+    style="transition: height {HEIGHT_DURATION}ms, opacity {FADE_DURATION}ms; height: {isMenuExpanded ? containerHeight + 116 : windowScrollY != 0 ? 116 : 0}px"
   >
     <div class="h-[116px]"></div>
     <div class="relative w-full h-full">
@@ -188,6 +191,7 @@
             >
               <div 
                 class="w-full pt-6 pb-10 px-12 grid grid-cols-3 gap-lg"
+                bind:this="{level1PanelElements[level1Index]}"
               >
                 <div class="flex flex-col gap-xs">
                   <p class="text-lg xl:text-xl font-bold">{menu.name}</p>

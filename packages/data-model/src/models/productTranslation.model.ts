@@ -6,16 +6,15 @@ const productTranslationModel: ModelConfig = withModelDefaults({
   name: 'productTranslation',
   title: 'Terjemahan Produk',
   modelAPI: 'productTranslation',
-  fields: ['product_id', 'language', 'name', 'slug', 'description'],
+  fields: ['product_id', 'language', 'name', 'description'],
   fieldsAlias: {
     product_id: 'Produk',
   },
   transaction: {
-    fields: ['language', 'name', 'slug', 'description'],
+    fields: ['language', 'name', 'description'],
     inputConfig: {
       language: { type: 'radio', props: { data: languageOptions, required: true } },
       name: { type: 'text', props: { required: true } },
-      slug: { type: 'text' },
       description: { type: 'rich-text' },
     },
   },
