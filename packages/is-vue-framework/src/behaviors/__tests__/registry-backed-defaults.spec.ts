@@ -30,36 +30,56 @@ describe('registry-backed framework defaults', () => {
     expect(onSubmit).toHaveBeenCalledWith({ payload: { a: 1 }, method: 'post', targetAPI: 'users', type: 'create' })
   })
 
-  it('uses registered file input upload behavior', async () => {
+  it('prefers registered file-manager upload behavior for file input uploads', async () => {
     const file = new File(['file'], 'document.pdf', { type: 'application/pdf' })
     const onUploadProgress = vi.fn()
-    const fileUpload = vi.fn(async () => ({ url: '/document.pdf' }))
-    configureFrameworkBehaviors({ fileInput: { fileUpload } })
+    const uploadFile = vi.fn(async () => ({ url: '/document.pdf' }))
+    const legacyUpload = vi.fn(async () => ({ url: '/legacy.pdf' }))
+    configureFrameworkBehaviors({ fileManager: { uploadFile }, fileInput: { fileUpload: legacyUpload } })
 
     await expect(defaultFileInputUpload(file, 'documents', onUploadProgress)).resolves.toEqual({ url: '/document.pdf' })
-    expect(fileUpload).toHaveBeenCalledWith(file, 'documents', onUploadProgress)
+    expect(uploadFile).toHaveBeenCalledWith(file, 'documents', onUploadProgress)
+    expect(legacyUpload).not.toHaveBeenCalled()
+  })
+
+  it('falls back to registered legacy file input upload behavior', async () => {
+    const file = new File(['file'], 'document.pdf', { type: 'application/pdf' })
+    const fileUpload = vi.fn(async () => ({ url: '/legacy.pdf' }))
+    configureFrameworkBehaviors({ fileInput: { fileUpload } })
+
+    await expect(defaultFileInputUpload(file)).resolves.toEqual({ url: '/legacy.pdf' })
   })
 
   it('throws when required file input upload behavior is missing', async () => {
     const file = new File(['file'], 'document.pdf', { type: 'application/pdf' })
 
-    await expect(defaultFileInputUpload(file)).rejects.toThrow('Missing behavior: fileInput.fileUpload')
+    await expect(defaultFileInputUpload(file)).rejects.toThrow('Missing behavior: fileManager.uploadFile or fileInput.fileUpload')
   })
 
-  it('uses registered image input upload behavior', async () => {
+  it('prefers registered file-manager upload behavior for image input uploads', async () => {
     const file = new File(['image'], 'image.png', { type: 'image/png' })
     const onUploadProgress = vi.fn()
-    const fileUpload = vi.fn(async () => ({ url: '/image.png' }))
-    configureFrameworkBehaviors({ imageInput: { fileUpload } })
+    const uploadFile = vi.fn(async () => ({ url: '/image.png' }))
+    const legacyUpload = vi.fn(async () => ({ url: '/legacy.png' }))
+    configureFrameworkBehaviors({ fileManager: { uploadFile }, imageInput: { fileUpload: legacyUpload } })
 
     await expect(defaultImageInputUpload(file, 'images', onUploadProgress)).resolves.toEqual({ url: '/image.png' })
-    expect(fileUpload).toHaveBeenCalledWith(file, 'images', onUploadProgress)
+    expect(uploadFile).toHaveBeenCalledWith(file, 'images', onUploadProgress)
+    expect(legacyUpload).not.toHaveBeenCalled()
+  })
+
+  it('falls back to registered legacy image input upload behavior', async () => {
+    const file = new File(['image'], 'image.png', { type: 'image/png' })
+    const fileUpload = vi.fn(async () => ({ url: '/legacy.png' }))
+    configureFrameworkBehaviors({ imageInput: { fileUpload } })
+
+    await expect(defaultImageInputUpload(file)).resolves.toEqual({ url: '/legacy.png' })
   })
 
   it('throws when required image input upload behavior is missing', async () => {
     const file = new File(['image'], 'image.png', { type: 'image/png' })
 
-    await expect(defaultImageInputUpload(file)).rejects.toThrow('Missing behavior: imageInput.fileUpload')
+    await expect(defaultImageInputUpload(file)).rejects.toThrow('Missing behavior: fileManager.uploadFile or imageInput.fileUpload')
   })
 
   it('defaults image URL resolver to object contract url field', () => {

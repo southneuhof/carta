@@ -10,6 +10,10 @@ import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Chip from '@southneuhof/is-vue-framework/components/base/Chip.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
+import Popover from '@southneuhof/is-vue-framework/components/base/Popover.vue'
+import FileManager from '@southneuhof/is-vue-framework/components/utils/FileManager/FileManager.vue'
+import { Dialog, DialogContent } from '@southneuhof/is-vue-framework/components/base/Dialog/index'
+import { isImageAssetValue, normalizeFileAssetValue, type FileAssetValue } from './assetValue'
 
 const props = defineProps({
   modelValue: {
@@ -60,12 +64,7 @@ const props = defineProps({
   ...commonProps,
 })
 
-type ImageAssetValue = {
-  path: string
-  data: string
-  url: string
-  [key: string]: any
-}
+type ImageAssetValue = FileAssetValue & { order_number?: number }
 
 const modelValue = defineModel<ImageAssetValue | Array<ImageAssetValue>>()
 const emit = defineEmits(['update:modelValue', 'update:uploadState', 'validation:touch'])
@@ -77,10 +76,16 @@ const images = ref<Array<any>>([])
 const isUploading = ref(false)
 const isDragActive = ref(false)
 const isReplaceDragActive = ref(false)
+const fileInput = ref<HTMLInputElement>()
+const sourcePopoverOpen = ref(false)
+const fileManagerOpen = ref(false)
 
 if (modelValue.value) {
-  if (Array.isArray(modelValue.value)) images.value = modelValue.value
-  else images.value = [modelValue.value]
+  if (Array.isArray(modelValue.value)) images.value = modelValue.value.map((item) => normalizeImageAsset(item)).filter((item): item is ImageAssetValue => Boolean(item))
+  else {
+    const normalized = normalizeImageAsset(modelValue.value)
+    images.value = normalized ? [normalized] : []
+  }
 }
 
 const emitData = () => {
@@ -104,16 +109,12 @@ const handleUpload = (file?: File, options: { replace?: boolean } = {}) => {
       uploadPercentage.value = Math.round((100 * event.loaded) / event.total)
     })
     .then((res) => {
-      if (props.transform) {
-        for (const key of Object.keys(props.transform)) {
-          res.data.data[props.transform[key]] = res.data.data[key]
-          delete res.data.data[key]
-        }
-      }
+      const normalized = normalizeImageAsset(res)
+      if (!normalized) throw new Error('Invalid upload response')
       if (options.replace && !props.multi && images.value.length) {
-        images.value.splice(0, 1, res)
+        images.value.splice(0, 1, normalized)
       } else {
-        images.value.push(res)
+        images.value.push(normalized)
       }
       emitData()
       loading.value = false
@@ -131,6 +132,16 @@ const handleFileUpload = (e: Event) => {
   const file = target.files?.[0]
   handleUpload(file)
   target.value = ''
+}
+
+function openDevicePicker() {
+  sourcePopoverOpen.value = false
+  fileInput.value?.click()
+}
+
+function openFileManager() {
+  sourcePopoverOpen.value = false
+  fileManagerOpen.value = true
 }
 
 const handleDragOver = (event: DragEvent) => {
@@ -178,8 +189,11 @@ const removeItem = (index: number) => {
 }
 
 watch(modelValue, () => {
-  if (Array.isArray(modelValue.value)) images.value = [...modelValue.value]
-  else if (modelValue.value) images.value = [modelValue.value]
+  if (Array.isArray(modelValue.value)) images.value = modelValue.value.map((item) => normalizeImageAsset(item)).filter((item): item is ImageAssetValue => Boolean(item))
+  else if (modelValue.value) {
+    const normalized = normalizeImageAsset(modelValue.value)
+    images.value = normalized ? [normalized] : []
+  }
   else images.value = []
 })
 
@@ -194,6 +208,38 @@ function resolvePreviewURLs(payload: ImageAssetValue) {
 
 function resolveDragKey(item: ImageAssetValue, index: number): string {
   return item?.url || item?.path || item?.data || `image-${index}`
+}
+
+function normalizeImageAsset(payload: unknown): ImageAssetValue | null {
+  const normalized = normalizeFileAssetValue(payload)
+  if (!normalized) return null
+
+  if (props.transform) {
+    const transformed = { ...normalized }
+    for (const key of Object.keys(props.transform)) {
+      transformed[props.transform[key]] = transformed[key]
+    }
+    return transformed as ImageAssetValue
+  }
+
+  return normalized as ImageAssetValue
+}
+
+function selectFileManagerAsset(payload: unknown) {
+  if (!isImageAssetValue(payload)) {
+    toast.error('Berkas yang dipilih bukan gambar')
+    return
+  }
+
+  const normalized = normalizeImageAsset(payload)
+  if (!normalized) return
+
+  if (!props.multi) images.value = [normalized]
+  else if (props.limit === -1 || images.value.length < props.limit) images.value.push(normalized)
+
+  emitData()
+  emit('validation:touch')
+  fileManagerOpen.value = false
 }
 </script>
 
@@ -236,9 +282,10 @@ function resolveDragKey(item: ImageAssetValue, index: number): string {
               </template>
             </Draggable>
             <template v-if="!isUploading">
-              <label v-if="(props.multi && images.length != (props.limit == -1 ? 99999 : props.limit)) || (!props.multi && !images[0])">
-                <a class="h-4 w-full cursor-pointer">
-                  <div
+              <Popover v-if="(props.multi && images.length != (props.limit == -1 ? 99999 : props.limit)) || (!props.multi && !images[0])" v-model="sourcePopoverOpen">
+                <template #trigger>
+                  <button
+                    type="button"
                     class="relative flex h-40 w-40 items-center justify-center rounded-xl outline-dashed outline-2 outline-outline transition-colors"
                     :class="{ 'bg-primary/10 outline-primary/[33%]': isDragActive }"
                     @dragover="handleDragOver"
@@ -249,10 +296,22 @@ function resolveDragKey(item: ImageAssetValue, index: number): string {
                     <div class="absolute left-0 top-0 h-full w-full">
                       <div v-if="uploadPercentage != 0 && uploadPercentage != 100" class="absolute h-40 w-40 rounded-xl bg-tertiary/20" :style="{ width: uploadPercentage + '%' }"></div>
                     </div>
+                  </button>
+                </template>
+                <template #content>
+                  <div class="min-w-56 rounded-lg border border-outline/[12%] bg-surface-container p-1 text-on-surface shadow-elevation-3">
+                    <button type="button" class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-on-surface/[8%]" @click="openDevicePicker">
+                      <Icon name="upload-cloud" size="sm" />
+                      <span>Upload from device</span>
+                    </button>
+                    <button type="button" class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-on-surface/[8%]" @click="openFileManager">
+                      <Icon name="folder-2" size="sm" />
+                      <span>Choose from file manager</span>
+                    </button>
                   </div>
-                  <input type="file" hidden id="file" :accept="'image/*'" class="rounded-md p-2" @change="handleFileUpload($event)" />
-                </a>
-              </label>
+                </template>
+              </Popover>
+              <input ref="fileInput" type="file" hidden :accept="'image/*'" class="rounded-md p-2" @change="handleFileUpload($event)" />
             </template>
             <div v-else class="relative flex h-40 w-40 flex-col items-center justify-center rounded-xl outline-dashed outline-2 outline-outline">
               <Spinner />
@@ -263,4 +322,16 @@ function resolveDragKey(item: ImageAssetValue, index: number): string {
       </div>
     </div>
   </BaseInput>
+  <Dialog v-model:open="fileManagerOpen">
+    <DialogContent class="flex h-[60vh] max-w-[60vw] flex-col">
+      <FileManager :activePath="props.uploadPath || '/storage/public'">
+        <template #footer="{ data }">
+          <div class="flex flex-row items-center justify-end gap-2">
+            <Button kind="button" variant="text" type="button" @click="() => (fileManagerOpen = false)">Cancel</Button>
+            <Button type="button" :disabled="!data || data.type === 'folder'" @click="() => selectFileManagerAsset(data)">Open</Button>
+          </div>
+        </template>
+      </FileManager>
+    </DialogContent>
+  </Dialog>
 </template>

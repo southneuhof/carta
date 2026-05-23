@@ -24,11 +24,11 @@ export const frameworkBehaviors: FrameworkBehaviors = {
   lookup,
   upload,
   imageInput: {
-    fileUpload: upload.fileUpload,
+    fileUpload: fileManager.uploadFile,
     imageURLResolver: imageURLResolver
   },
   fileInput: {
-    fileUpload: upload.fileUpload,
+    fileUpload: fileManager.uploadFile,
   },
   location,
   fileManager,

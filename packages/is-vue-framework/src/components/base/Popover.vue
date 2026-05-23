@@ -38,7 +38,7 @@ function setOpen(value: boolean) {
   <slot v-if="disabled" name="trigger" v-bind="{ setOpen, disabled }"></slot>
   <PopoverRoot v-else v-model:open="open">
     <div class="flex grow">
-      <PopoverTrigger class="block w-full min-w-0 max-w-full text-left">
+      <PopoverTrigger class="block min-w-0 max-w-full text-left">
         <slot name="trigger" v-bind="{ setOpen, disabled }"></slot>
       </PopoverTrigger>
     </div>
