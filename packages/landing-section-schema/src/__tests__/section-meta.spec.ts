@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import contentDefault from '../sections/content-default'
+import contentGallery from '../sections/content-gallery'
 import dataList from '../sections/data-list'
 import heroBanner from '../sections/hero-banner'
 import articleHighlights from '../sections/article-highlights'
@@ -54,6 +55,47 @@ describe('shared section schema', () => {
     expect(dataList.meta?.fields).toContain('closed_on_initial')
   })
 
+  it('defines content-gallery meta field names', () => {
+    expect(contentGallery.meta?.fields).toEqual([
+      'section_background_color',
+      'section_ornament_media',
+      'section_ornament_offset',
+      'layout_direction',
+      'content_order',
+      'width_preset',
+      'content_align',
+      'gallery_header_align',
+      'url_justify',
+      'button_type',
+      'container_variant',
+      'container_color',
+      'container_radius',
+      'container_radius_pattern',
+      'container_padding',
+      'column_ratio',
+      'content_gap',
+      'text_color_scheme',
+      'title_size',
+      'gallery_title_size',
+      'gallery_media_type',
+      'gallery_columns',
+      'gallery_gap',
+      'gallery_item_align',
+      'gallery_icon_size',
+      'gallery_media_radius',
+      'gallery_media_aspect_ratio',
+      'remove_outline_on_images',
+      'ornament_enabled',
+      'ornament_media',
+      'ornament_scope',
+      'ornament_layer',
+      'ornament_offset',
+      'ornament_size',
+      'ornament_position',
+      'remove_margin',
+    ])
+  })
+
   it('does not apply common meta fields to nested schemas', () => {
     expect(dataList.data.childSections.schema?.meta?.fields).toEqual([])
   })
@@ -73,6 +115,10 @@ describe('shared section schema', () => {
     expect(contentDefault.meta?.defaultValues?.media_radius).toBe('lg')
     expect(contentDefault.meta?.defaultValues?.ornament_enabled).toBe(false)
     expect(contentDefault.meta?.defaultValues?.ornament_offset).toBe('md')
+    expect(contentGallery.meta?.defaultValues?.container_variant).toBe('panel')
+    expect(contentGallery.meta?.defaultValues?.container_radius_pattern).toBe('diagonal')
+    expect(contentGallery.meta?.defaultValues?.gallery_media_type).toBe('icon')
+    expect(contentGallery.meta?.defaultValues?.gallery_columns).toBe('3')
     expect(dataList.meta?.defaultValues?.type).toBe('list')
   })
 
@@ -88,9 +134,46 @@ describe('shared section schema', () => {
     expect(optionIds).toEqual(containerColorOptions.map((option) => option.id))
   })
 
+  it('uses shared container color options in content-gallery', () => {
+    const options = contentGallery.meta?.editor?.inputConfig?.container_color?.props?.data || []
+    const optionIds = options.map((option: any) => option.id)
+    expect(optionIds).toEqual(containerColorOptions.map((option) => option.id))
+  })
+
   it('keeps slot fields in schema', () => {
     expect(contentDefault.data.content.fields).toContain('title')
+    expect(contentGallery.data.content.fields).toContain('title')
+    expect(contentGallery.data.gallery_header.fields).toContain('title')
+    expect(contentGallery.data.gallery.fields).toEqual(['media', 'title', 'subtitle'])
     expect(heroBanner.data.banner.fields).toContain('media')
+  })
+
+  it('defines content-gallery three-slot structure', () => {
+    expect(Object.keys(contentGallery.data)).toEqual(['content', 'gallery_header', 'gallery'])
+    expect(contentGallery.data.content).toMatchObject({
+      type: 'content',
+      order: 1,
+      editor: { label: 'Main Content' },
+    })
+    expect(contentGallery.data.gallery_header).toMatchObject({
+      type: 'content',
+      order: 2,
+      editor: { label: 'Gallery Header' },
+    })
+    expect(contentGallery.data.gallery).toMatchObject({
+      type: 'gallery',
+      order: 3,
+      many: true,
+      editor: { label: 'Gallery Items' },
+    })
+  })
+
+  it('switches content-gallery gallery media input from section meta', () => {
+    const generator = contentGallery.data.gallery.editor?.inputConfig?.media?.dependency?.inputConfig?.generator
+
+    expect(generator?.({ meta: { gallery_media_type: 'embed' } })).toEqual({ type: 'embed' })
+    expect(generator?.({ meta: { gallery_media_type: 'icon' } })).toEqual({ type: 'icon-select' })
+    expect(generator?.({ meta: { gallery_media_type: 'image' } })).toEqual({ type: 'image' })
   })
 
   it('exports article-highlights schema with content+articles slots and articleCategory meta', () => {
@@ -117,7 +200,12 @@ describe('shared section schema', () => {
         categoryMatch: 'any',
       },
     })
-    expect(articleHighlights.meta?.fields).toEqual(['articleCategory'])
+    expect(articleHighlights.meta?.fields).toEqual([
+      'section_background_color',
+      'section_ornament_media',
+      'section_ornament_offset',
+      'articleCategory',
+    ])
     expect(articleHighlights.meta?.defaultValues?.articleCategory).toBeNull()
     expect(articleHighlights.meta?.editor?.inputConfig?.articleCategory).toEqual({
       type: 'select',
@@ -168,11 +256,41 @@ describe('shared section schema', () => {
     expect(inputConfig?.ornament_position?.dependency?.visibility?.validator({ ornament_enabled: true, ornament_layer: 'behind' })).toBe(false)
   })
 
+  it('defines contextual visibility for content-gallery meta controls', () => {
+    const inputConfig = contentGallery.meta?.editor?.inputConfig
+
+    expect(inputConfig?.container_color?.dependency?.visibility?.validator({ container_variant: 'plain' })).toBe(false)
+    expect(inputConfig?.container_color?.dependency?.visibility?.validator({ container_variant: 'panel' })).toBe(true)
+    expect(inputConfig?.container_radius_pattern?.dependency?.visibility?.validator({ container_variant: 'panel' })).toBe(true)
+    expect(inputConfig?.column_ratio?.dependency?.visibility?.validator({ layout_direction: 'horizontal' })).toBe(true)
+    expect(inputConfig?.column_ratio?.dependency?.visibility?.validator({ layout_direction: 'vertical' })).toBe(false)
+
+    expect(inputConfig?.gallery_icon_size?.dependency?.visibility?.validator({ gallery_media_type: 'icon' })).toBe(true)
+    expect(inputConfig?.gallery_icon_size?.dependency?.visibility?.validator({ gallery_media_type: 'image' })).toBe(false)
+    expect(inputConfig?.gallery_media_radius?.dependency?.visibility?.validator({ gallery_media_type: 'image' })).toBe(true)
+    expect(inputConfig?.gallery_media_aspect_ratio?.dependency?.visibility?.validator({ gallery_media_type: 'image' })).toBe(true)
+    expect(inputConfig?.remove_outline_on_images?.dependency?.visibility?.validator({ gallery_media_type: 'image' })).toBe(true)
+
+    expect(inputConfig?.ornament_media?.dependency?.visibility?.validator({ ornament_enabled: true })).toBe(true)
+    expect(inputConfig?.ornament_scope?.dependency?.visibility?.validator({ ornament_enabled: false })).toBe(false)
+    expect(inputConfig?.ornament_layer?.dependency?.visibility?.validator({ ornament_enabled: true })).toBe(true)
+    expect(inputConfig?.ornament_offset?.dependency?.visibility?.validator({ ornament_enabled: true, ornament_scope: 'container', ornament_layer: 'behind' })).toBe(true)
+    expect(inputConfig?.ornament_size?.dependency?.visibility?.validator({ ornament_enabled: true, ornament_scope: 'gallery', ornament_layer: 'behind' })).toBe(true)
+    expect(inputConfig?.ornament_position?.dependency?.visibility?.validator({ ornament_enabled: true, ornament_layer: 'inside' })).toBe(true)
+  })
+
   it('narrows ornament scope options by container variant', () => {
     const generator = contentDefault.meta?.editor?.inputConfig?.ornament_scope?.dependency?.props?.generator
 
     expect(generator?.({ container_variant: 'plain' }).data.map((option: any) => option.id)).toEqual(['section', 'media'])
     expect(generator?.({ container_variant: 'panel' }).data.map((option: any) => option.id)).toEqual(['container', 'media'])
+  })
+
+  it('narrows content-gallery ornament scope options by container variant', () => {
+    const generator = contentGallery.meta?.editor?.inputConfig?.ornament_scope?.dependency?.props?.generator
+
+    expect(generator?.({ container_variant: 'plain' }).data.map((option: any) => option.id)).toEqual(['section', 'content', 'gallery'])
+    expect(generator?.({ container_variant: 'panel' }).data.map((option: any) => option.id)).toEqual(['container', 'content', 'gallery'])
   })
 
   it('does not import vue or app-local modules in section schema files', async () => {

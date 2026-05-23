@@ -24,8 +24,12 @@ export async function load(section: Record<string, any>) {
       }
     }
   })
+  const contents = data?.contents ?? []
+  const galleries = data?.galleries ?? []
+
   return {
-    content: data?.contents[0],
-    gallery: data?.galleries[0].contents
+    content: contents.find((content) => content.order === 1) ?? null,
+    gallery_header: contents.find((content) => content.order === 2) ?? null,
+    gallery: galleries.find((gallery) => gallery.order === 3)?.contents ?? []
   }
 }

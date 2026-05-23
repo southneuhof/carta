@@ -6,138 +6,411 @@
   import type { LandingSectionForSchema } from "@southneuhof/landing-sveltekit-framework/types";
 
   type Section = LandingSectionForSchema<typeof contentGallerySchema>
+  type Content = NonNullable<Section['data']['content']>
+
   const { section }: { section: Section } = $props()
 
-  const contentAlignClassMap:any  = {
+  const content = (section.data.content || {}) as Content
+  const galleryHeader = (section.data.gallery_header || {}) as Content
+  const gallery = section.data.gallery || []
+
+  const contentAlignClassMap: any = {
     left: {
       container: 'items-start',
-      content: {
-        container: 'flex flex-col items-start justify-center',
-        content: 'text-left',
-      }
+      content: 'text-left',
     },
     center: {
       container: 'items-center',
-      content: {
-        container: 'flex flex-col items-center justify-center',
-        content: 'text-center',
-      }
+      content: 'text-center',
     },
     right: {
       container: 'items-end',
-      content: {
-        container: 'flex flex-col items-end justify-center',
-        content: 'text-right',
-      }
-    }
+      content: 'text-right',
+    },
   }
 
   const urlJustifyClassMap: any = {
     left: 'justify-start',
     center: 'justify-center',
-    right: 'justify-end'
+    right: 'justify-end',
   }
 
-  const layoutDirectionClassMap: any = {
-    horizontal: 'grid md:grid-cols-2 grid-cols-1 gap-lg',
-    vertical: 'flex flex-col gap-6'
+  const containerColorClassMap: any = {
+    none: '',
+    primary: 'bg-primary',
+    'primary-container': 'bg-primary-container',
+    secondary: 'bg-secondary',
+    'secondary-container': 'bg-secondary-container',
+    tertiary: 'bg-tertiary',
+    'tertiary-container': 'bg-tertiary-container',
+    surface: 'bg-surface',
+    'surface-container': 'bg-surface-container',
   }
+
+  const containerRadiusClassMap: any = {
+    all: {
+      none: 'rounded-none',
+      sm: 'rounded-sm',
+      md: 'rounded-md',
+      lg: 'rounded-lg',
+      xl: 'rounded-xl',
+    },
+    diagonal: {
+      none: 'rounded-none',
+      sm: 'rounded-tl-sm rounded-br-sm',
+      md: 'rounded-tl-2xl rounded-br-2xl',
+      lg: 'rounded-tl-[3rem] rounded-br-[3rem]',
+      xl: 'rounded-tl-[4rem] rounded-br-[4rem] md:rounded-tl-[7rem] md:rounded-br-[7rem]',
+    },
+    top: {
+      none: 'rounded-none',
+      sm: 'rounded-t-sm',
+      md: 'rounded-t-md',
+      lg: 'rounded-t-lg',
+      xl: 'rounded-t-xl',
+    },
+    bottom: {
+      none: 'rounded-none',
+      sm: 'rounded-b-sm',
+      md: 'rounded-b-md',
+      lg: 'rounded-b-lg',
+      xl: 'rounded-b-xl',
+    },
+  }
+
+  const containerPaddingClassMap: any = {
+    sm: 'p-4 md:p-6',
+    md: 'p-6 md:p-8',
+    lg: 'p-6 md:p-10 lg:p-12',
+    xl: 'p-8 md:p-12 lg:p-16',
+  }
+
+  const gapClassMap: any = {
+    sm: 'gap-4 md:gap-6',
+    md: 'gap-6 md:gap-8',
+    lg: 'gap-8 md:gap-12',
+    xl: 'gap-10 md:gap-16',
+  }
+
+  const horizontalLayoutClassMap: any = {
+    equal: 'grid-cols-1 md:grid-cols-2',
+    'content-heavy': 'grid-cols-1 md:grid-cols-[0.85fr_1.15fr]',
+    'gallery-heavy': 'grid-cols-1 md:grid-cols-[0.7fr_1.3fr]',
+  }
+
+  const reversedHorizontalLayoutClassMap: any = {
+    equal: 'grid-cols-1 md:grid-cols-2',
+    'content-heavy': 'grid-cols-1 md:grid-cols-[1.15fr_0.85fr]',
+    'gallery-heavy': 'grid-cols-1 md:grid-cols-[1.3fr_0.7fr]',
+  }
+
+  const textColorClassMap: any = {
+    default: '',
+    'on-primary': 'text-on-primary',
+    'on-secondary': 'text-on-secondary',
+  }
+
+  const titleSizeClassMap: any = {
+    sm: 'text-xl md:text-2xl',
+    md: 'text-2xl md:text-3xl',
+    lg: 'text-3xl md:text-5xl',
+  }
+
+  const galleryGridClassMap: any = {
+    '2': 'grid-cols-1 sm:grid-cols-2',
+    '3': 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+    '4': 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4',
+  }
+
+  const galleryGapClassMap: any = {
+    sm: 'gap-4',
+    md: 'gap-6',
+    lg: 'gap-8 md:gap-10',
+    xl: 'gap-10 md:gap-14',
+  }
+
+  const galleryItemAlignClassMap: any = {
+    left: 'items-start text-left',
+    center: 'items-center text-center',
+    right: 'items-end text-right',
+  }
+
+  const galleryIconSizeClassMap: any = {
+    sm: 'text-3xl',
+    md: 'text-4xl',
+    lg: 'text-5xl',
+  }
+
+  const mediaAspectRatioClassMap: any = {
+    auto: '',
+    '16/9': 'aspect-video',
+    '4/3': 'aspect-[4/3]',
+    '1/1': 'aspect-square',
+  }
+
+  const mediaRadiusClassMap: any = {
+    none: 'rounded-none',
+    sm: 'rounded-sm',
+    md: 'rounded-md',
+    lg: 'rounded-lg',
+    xl: 'rounded-xl',
+  }
+
+  const ornamentSizeClassMap: any = {
+    sm: 'w-24 md:w-32',
+    md: 'w-36 md:w-48',
+    lg: 'w-48 md:w-64',
+    xl: 'w-64 md:w-80',
+  }
+
+  const ornamentBackgroundOffsetClassMap: any = {
+    sm: 'w-[90%]',
+    md: 'w-full',
+    xl: 'w-[110%]',
+  }
+
+  const ornamentBackgroundSizeClassMap: any = {
+    sm: 'w-[110%]',
+    md: 'w-[120%]',
+    lg: 'w-[130%]',
+    xl: 'w-[140%]',
+  }
+
+  const ornamentPositionClassMap: any = {
+    'top-left': '-top-8 -left-8',
+    'top-right': '-top-8 -right-8',
+    'bottom-left': '-bottom-8 -left-8',
+    'bottom-right': '-bottom-8 -right-8',
+    'left-center': 'top-1/2 -translate-y-1/2 -left-8',
+    'right-center': 'top-1/2 -translate-y-1/2 -right-8',
+  }
+
+  const ornamentCornerClassList = [
+    '-top-8 -left-8',
+    '-bottom-8 -right-8 rotate-180',
+  ]
+
+  const contentAlign = section.meta.content_align || 'left'
+  const galleryHeaderAlign = section.meta.gallery_header_align || 'left'
+  const contentOrder = section.meta.content_order || 'content-gallery'
+  const layoutDirection = section.meta.layout_direction || 'horizontal'
+  const columnRatio = section.meta.column_ratio || 'content-heavy'
+  const contentGap = section.meta.content_gap || 'xl'
+  const containerVariant = section.meta.container_variant || 'panel'
+  const containerColor = section.meta.container_color || 'surface-container'
+  const containerRadius = section.meta.container_radius || 'xl'
+  const containerRadiusPattern = section.meta.container_radius_pattern || 'diagonal'
+  const containerPadding = section.meta.container_padding || 'xl'
+  const textColorScheme = section.meta.text_color_scheme || 'default'
+  const titleSize = section.meta.title_size || 'md'
+  const galleryTitleSize = section.meta.gallery_title_size || 'md'
+  const galleryColumns = section.meta.gallery_columns || '3'
+  const galleryGap = section.meta.gallery_gap || 'xl'
+  const galleryItemAlign = section.meta.gallery_item_align || 'left'
+  const galleryIconSize = section.meta.gallery_icon_size || 'md'
+  const galleryMediaRadius = section.meta.gallery_media_radius || 'sm'
+  const galleryMediaAspectRatio = section.meta.gallery_media_aspect_ratio || 'auto'
+  const ornamentScope = section.meta.ornament_scope || 'container'
+  const ornamentLayer = section.meta.ornament_layer || 'inside'
+  const ornamentPosition = section.meta.ornament_position || 'top-left'
+  const ornamentOffset = section.meta.ornament_offset || 'md'
+  const ornamentSize = section.meta.ornament_size || 'md'
+
+  const horizontalGridClass = contentOrder === 'gallery-content'
+    ? reversedHorizontalLayoutClassMap[columnRatio]
+    : horizontalLayoutClassMap[columnRatio]
+
+  const layoutClass = layoutDirection === 'horizontal'
+    ? `grid ${horizontalGridClass} ${gapClassMap[contentGap]}`
+    : `flex flex-col ${gapClassMap[contentGap]}`
+
+  const panelRadiusClass = containerRadiusClassMap[containerRadiusPattern]?.[containerRadius] || containerRadiusClassMap.all[containerRadius]
 </script>
 
-<div class="flex items-center justify-center w-full">
-  <div class="w-full {widthPresetClassMap[section.meta.width_preset]} {section.meta.layout_direction ? layoutDirectionClassMap[section.meta.layout_direction] : layoutDirectionClassMap['vertical']} lg:py-12 px-6 lg:px-12 {(contentAlignClassMap as any)[section.meta.content_align].container} justify-center">
-    {#if section.meta.content_order === 'image-text'}
-      {@render ContentMedia()}
-    {/if}
-    {#if section.data.content.title || section.data.content.subtitle || section.data.content.description}
-      <div class="flex flex-col gap-4 {(contentAlignClassMap as any)[section.meta.content_align].content.container}">
-        {#if section.data.content.title || section.data.content.subtitle}
-          <div class="flex flex-col gap-xs">
-            {#if section.data.content.subtitle}<p class="{(contentAlignClassMap as any)[section.meta.content_align].content.content}">{section.data.content.subtitle}</p>{/if}
-            {#if section.data.content.title}<p class="text-2xl md:text-3xl font-bold {(contentAlignClassMap as any)[section.meta.content_align].content.content}">{section.data.content.title}</p>{/if}
-          </div>
-        {/if}
-        {#if section.data.content.description}
-          <p class="rtf-content -mt-4 {section.meta.remove_margin ? 'm-base' : ''} {(contentAlignClassMap as any)[section.meta.content_align].content.content}">{@html section.data.content.description}</p>
-        {/if}
-        {#if section.data.content.url}
-          {#if section.meta.button_type === 'text'}
-            <div class="flex flex-row items-center w-full {(urlJustifyClassMap as any)[section.meta.url_justify]}">
-              <a href={section.data.content.url} class="font-semibold underline">{section.data.content.url_text || m.learn_more()}</a>
-              <i class="ri-arrow-right-line"></i>
-            </div>
-          {:else}
-            <div class="flex flex-row items-center w-full {(urlJustifyClassMap as any)[section.meta.url_justify]}">
-              <a href={section.data.content.url}>
-                <Button>{section.data.content.url_text || m.learn_more()} <i class="ri-arrow-right-line"></i></Button>
-              </a>
-            </div>
-          {/if}
-        {/if}
+<div class="relative flex w-full items-center justify-center overflow-hidden">
+  {@render Ornament('section')}
+  <div class="relative z-10 w-full {widthPresetClassMap[section.meta.width_preset || 'xl']} py-6 lg:py-12 px-6 lg:px-12">
+    {#if containerVariant === 'panel'}
+      <div
+        class="relative overflow-hidden {containerColorClassMap[containerColor]} {panelRadiusClass} {containerPaddingClassMap[containerPadding]} {textColorClassMap[textColorScheme]}"
+      >
+        {@render Ornament('container')}
+        <div class="relative z-10 {layoutClass} justify-center">
+          {@render OrderedContent()}
+        </div>
       </div>
-    {/if}
-    {#if section.meta.content_order === 'text-image'}
-      {@render ContentMedia()}
+    {:else}
+      <div class="relative {layoutClass} justify-center {textColorClassMap[textColorScheme]}">
+        {@render Ornament('container')}
+        {@render OrderedContent()}
+      </div>
     {/if}
   </div>
 </div>
 
+{#snippet OrderedContent()}
+  {#if contentOrder === 'gallery-content'}
+    {@render GalleryColumn()}
+    {@render MainContent()}
+  {:else}
+    {@render MainContent()}
+    {@render GalleryColumn()}
+  {/if}
+{/snippet}
+
+{#snippet MainContent()}
+  <div class="relative z-10 flex min-w-0 flex-col justify-center">
+    {@render Ornament('content')}
+    {@render ContentText(content, contentAlign, titleSize)}
+  </div>
+{/snippet}
+
+{#snippet GalleryColumn()}
+  <div class="relative z-10 flex min-w-0 flex-col {gapClassMap.md}">
+    {@render Ornament('gallery')}
+    {@render ContentText(galleryHeader, galleryHeaderAlign, galleryTitleSize)}
+    {@render ContentMedia()}
+  </div>
+{/snippet}
+
+{#snippet ContentText(item: Content, align: string, currentTitleSize: string)}
+  {#if item.title || item.subtitle || item.description}
+    <div class="relative z-10 flex flex-col gap-4 {contentAlignClassMap[align].container}">
+      {#if item.title || item.subtitle}
+        <div class="flex flex-col gap-xs {contentAlignClassMap[align].container}">
+          {#if item.subtitle}
+            <p class="{contentAlignClassMap[align].content}">{item.subtitle}</p>
+          {/if}
+          {#if item.title}
+            <p class="{titleSizeClassMap[currentTitleSize]} font-bold {contentAlignClassMap[align].content}">{item.title}</p>
+          {/if}
+        </div>
+      {/if}
+      {#if item.description}
+        <div class="rtf-content {section.meta.remove_margin ? 'm-base' : ''} {contentAlignClassMap[align].content}">
+          {@html item.description}
+        </div>
+      {/if}
+      {#if item.url}
+        {#if section.meta.button_type === 'text'}
+          <div class="flex w-full flex-row items-center {(urlJustifyClassMap as any)[section.meta.url_justify || 'left']}">
+            <a href={item.url} class="font-semibold underline">{item.url_text || m.learn_more()}</a>
+            <i class="ri-arrow-right-line"></i>
+          </div>
+        {:else}
+          <div class="flex w-full flex-row items-center {(urlJustifyClassMap as any)[section.meta.url_justify || 'left']}">
+            <a href={item.url}>
+              <Button>{item.url_text || m.learn_more()} <i class="ri-arrow-right-line"></i></Button>
+            </a>
+          </div>
+        {/if}
+      {/if}
+    </div>
+  {/if}
+{/snippet}
+
 {#snippet ContentIcon()}
-  <div class="flex flex-row gap-xl flex-wrap items-center justify-center">
-    {#each section.data.gallery as icon}
-      <div class="flex flex-col gap-sm items-center justify-center">
-        <i class={icon.media}></i>
-        <p class="font-bold text-lg">{icon.title}</p>
-        <p>{icon.subtitle}</p>
+  <div class="grid w-full {galleryGridClassMap[galleryColumns]} {galleryGapClassMap[galleryGap]}">
+    {#each gallery as icon}
+      <div class="flex min-w-0 flex-col gap-sm {galleryItemAlignClassMap[galleryItemAlign]}">
+        {#if icon.media}<i class="{icon.media} {galleryIconSizeClassMap[galleryIconSize]}"></i>{/if}
+        {#if icon.title}<p class="font-bold text-lg">{icon.title}</p>{/if}
+        {#if icon.subtitle}<p>{icon.subtitle}</p>{/if}
       </div>
     {/each}
   </div>
 {/snippet}
 
 {#snippet ContentImage()}
-  <div class="flex flex-col gap-base">
-    {#each section.data.gallery as image}
-      <div class="flex flex-col gap-base items-center justify-center">
-        <img src={image.media} alt={image.title} class="w-full object-cover object-center rounded-sm outline outline-outline-variant"/>
-        <!-- {#if image.title || image.subtitle}
-          <div class="flex flex-col gap-xs items-center justify-center">
-            {#if image.subtitle}<p class="text-sm">{image.subtitle}</p>{/if}
-            {#if image.title}<p class="text-2xl md:text-3xl font-bold">{image.title}</p>{/if}
+  <div class="grid w-full {galleryGridClassMap[galleryColumns]} {galleryGapClassMap[galleryGap]}">
+    {#each gallery as image}
+      <div class="flex min-w-0 flex-col gap-base {galleryItemAlignClassMap[galleryItemAlign]}">
+        {#if image.media}
+          <div class="w-full overflow-hidden {mediaRadiusClassMap[galleryMediaRadius]} {mediaAspectRatioClassMap[galleryMediaAspectRatio]}">
+            <img
+              src={image.media}
+              alt={image.title || ''}
+              class="h-full w-full object-cover object-center {!section.meta.remove_outline_on_images ? 'outline outline-outline-variant' : ''}"
+            />
           </div>
-        {/if} -->
+        {/if}
+        {#if image.title || image.subtitle}
+          <div class="flex flex-col gap-xs {galleryItemAlignClassMap[galleryItemAlign]}">
+            {#if image.title}<p class="font-bold text-lg">{image.title}</p>{/if}
+            {#if image.subtitle}<p>{image.subtitle}</p>{/if}
+          </div>
+        {/if}
       </div>
     {/each}
   </div>
 {/snippet}
 
 {#snippet ContentEmbed()}
-  <div class="flex flex-col gap-lg w-full">
-    {#each section.data.gallery as embed}
-      <div class="flex flex-col gap-base">
-        <div class="min-h-[300px] md:h-[450px] w-full">
-          <div class="embed-preview">
-            <div class="h-full w-full">{@html embed.media}</div>
+  <div class="grid w-full {galleryGridClassMap[galleryColumns]} {galleryGapClassMap[galleryGap]}">
+    {#each gallery as embed}
+      <div class="flex min-w-0 flex-col gap-base {galleryItemAlignClassMap[galleryItemAlign]}">
+        {#if embed.media}
+          <div class="min-h-[300px] w-full overflow-hidden {mediaRadiusClassMap[galleryMediaRadius]}">
+            <div class="embed-preview">
+              <div class="h-full w-full">{@html embed.media}</div>
+            </div>
           </div>
-        </div>
-        <!-- {#if embed.title || embed.subtitle}
-          <div class="flex flex-col gap-xs items-center justify-center">
-            {#if embed.subtitle}<p class="text-sm">{embed.subtitle}</p>{/if}
-            {#if embed.title}<p class="text-2xl md:text-3xl font-bold">{embed.title}</p>{/if}
+        {/if}
+        {#if embed.title || embed.subtitle}
+          <div class="flex flex-col gap-xs {galleryItemAlignClassMap[galleryItemAlign]}">
+            {#if embed.title}<p class="font-bold text-lg">{embed.title}</p>{/if}
+            {#if embed.subtitle}<p>{embed.subtitle}</p>{/if}
           </div>
-        {/if} -->
+        {/if}
       </div>
     {/each}
   </div>
 {/snippet}
 
 {#snippet ContentMedia()}
-  {#if section.data.gallery.length}
+  {#if gallery.length}
     {#if section.meta.gallery_media_type === 'embed'}
       {@render ContentEmbed()}
     {:else if section.meta.gallery_media_type === 'image'}
       {@render ContentImage()}
-    {:else if section.meta.gallery_media_type === 'icon'}
+    {:else}
       {@render ContentIcon()}
+    {/if}
+  {/if}
+{/snippet}
+
+{#snippet Ornament(scope: string)}
+  {#if section.meta.ornament_enabled && section.meta.ornament_media && ornamentScope === scope}
+    {#if ornamentLayer === 'behind' && scope === 'container'}
+      <img
+        src={section.meta.ornament_media}
+        alt=""
+        aria-hidden="true"
+        class="pointer-events-none absolute left-1/2 top-0 z-0 h-auto max-w-none -translate-x-1/2 {ornamentBackgroundOffsetClassMap[ornamentOffset]}"
+      />
+    {:else if ornamentLayer === 'behind'}
+      <img
+        src={section.meta.ornament_media}
+        alt=""
+        aria-hidden="true"
+        class="pointer-events-none absolute left-1/2 top-1/2 z-0 h-auto max-w-none -translate-x-1/2 -translate-y-1/2 {ornamentBackgroundSizeClassMap[ornamentSize]}"
+      />
+    {:else if ornamentPosition === 'corners'}
+      {#each ornamentCornerClassList as cornerClass}
+        <img
+          src={section.meta.ornament_media}
+          alt=""
+          aria-hidden="true"
+          class="pointer-events-none absolute z-[1] {ornamentSizeClassMap[ornamentSize]} {cornerClass}"
+        />
+      {/each}
+    {:else}
+      <img
+        src={section.meta.ornament_media}
+        alt=""
+        aria-hidden="true"
+        class="pointer-events-none absolute z-[1] {ornamentSizeClassMap[ornamentSize]} {ornamentPositionClassMap[ornamentPosition]}"
+      />
     {/if}
   {/if}
 {/snippet}
@@ -149,11 +422,11 @@
     min-height: 300px;
     height: 300px;
   }
-  
+
   @media (min-width: 768px) {
     .embed-preview {
       height: 100%;
-      min-height: auto;
+      min-height: 300px;
     }
   }
 
@@ -164,6 +437,6 @@
     width: 100%;
     height: 100%;
     border: none;
-    border-radius: 4px; /* Note: radius might be clipped by parent's overflow:hidden */
+    border-radius: inherit;
   }
 </style>

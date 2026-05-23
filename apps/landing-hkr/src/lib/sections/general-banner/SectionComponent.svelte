@@ -9,8 +9,8 @@
     !section.data.contents[0].description ||
     section.data.contents[0].description.trim() === "";
   const bgImage = section.meta.add_overlay
-    ? `linear-gradient(rgba(0,0,0,0.16), rgba(0,0,0,0.16)), url('${section.meta.background_image}')`
-    : `url('${section.meta.background_image}')`;
+    ? `linear-gradient(rgba(0,0,0,0.16), rgba(0,0,0,0.16)), url('${section.data.contents[0].media}')`
+    : `url('${section.data.contents[0].media}')`;
 
   let initialNavbarTextColor = section.meta.add_overlay
     ? "var(--colors-surface)"
@@ -47,35 +47,23 @@
     : 'text-on-surface'}"
 >
   <div
-    class="h-fit lg:h-[50vh] flex justify-center bg-cover bg-center border-b border-outline-variant {isEmptyDescription
-      ? 'items-end'
-      : 'items-center'}"
+    class="h-fit min-h-[260px] lg:h-[45vh] lg:min-h-[350px] flex items-center justify-center bg-cover bg-center border-b border-outline-variant"
     style="background-image: {bgImage}"
-    use:background={section.meta.background_image}
+    use:background={section.data.contents[0].media}
   >
     <div
-      class="px-6 mt-[48px] lg:mt-0 lg:px-12 {isEmptyDescription
-        ? 'pb-12 pt-24 lg:pt-0'
-        : 'pt-12 lg:pt-24 pb-12'} flex {isEmptyDescription
-        ? 'flex-col items-center text-center'
-        : 'md:flex-row flex-col items-center'} gap-4 max-w-screen-xl w-full"
+      class="px-6 mt-[48px] lg:mt-0 lg:px-12 py-12 lg:py-16 flex flex-col items-start text-left gap-4 max-w-screen-xl w-full"
     >
-      <div class="w-full">
-        <p class="text-2xl md:text-3xl font-bold">
+      <div class="max-w-[720px] flex flex-col gap-sm">
+        <p class="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight">
           {section.data.contents[0].title}
         </p>
-      </div>
-      {#if !isEmptyDescription}
-        <div class="w-full flex md:items-end md:justify-end">
-          <p class="max-w-[50ch]">
+        {#if !isEmptyDescription}
+          <div class="text-base md:text-lg opacity-90 rtf-content mt-2 leading-relaxed">
             {@html section.data.contents[0].description}
-          </p>
-        </div>
-      {/if}
+          </div>
+        {/if}
+      </div>
     </div>
   </div>
-  <!-- <div class="h-[12px] w-full flex items-center justify-center">
-    <div class="max-w-screen-xl w-full h-full relative">
-    </div>
-  </div> -->
 </div>

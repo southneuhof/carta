@@ -123,6 +123,25 @@ describe('section schema adapter', () => {
     expect(childSections?.editor.component).toBeUndefined()
   })
 
+  it('matches content-gallery content slots separately by order', () => {
+    const matches = matchRootSchemaSlotsToStructure('content-gallery', [
+      { id: 'left-content', type: 'content', order: 1 },
+      { id: 'gallery-title', type: 'content', order: 2 },
+      { id: 'gallery-items', type: 'gallery', order: 3 },
+    ])
+
+    const content = matches.find((match) => match.pathKey === 'content')
+    const galleryHeader = matches.find((match) => match.pathKey === 'gallery_header')
+    const gallery = matches.find((match) => match.pathKey === 'gallery')
+
+    expect(content?.items.map((item) => item.id)).toEqual(['left-content'])
+    expect(content?.editor.label).toBe('Main Content')
+    expect(galleryHeader?.items.map((item) => item.id)).toEqual(['gallery-title'])
+    expect(galleryHeader?.editor.label).toBe('Gallery Header')
+    expect(gallery?.items.map((item) => item.id)).toEqual(['gallery-items'])
+    expect(gallery?.editor.label).toBe('Gallery Items')
+  })
+
   it('matches nested sectionGroup-owned schema against a child section structure', () => {
     const rootMatches = matchRootSchemaSlotsToStructure('data-list', [
       { id: 'group-1', type: 'sectionGroup', order: 2 },
