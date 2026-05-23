@@ -72,8 +72,8 @@
 	});
 </script>
 
-<div class="bg-surface text-on-surface min-h-screen flex flex-col justify-between">
-	<div class="flex flex-col w-full">
+<div class="bg-surface text-on-surface min-h-screen flex flex-col">
+	<div class="flex flex-col w-full flex-1">
 		<NavbarDesktop/>
 		<NavbarMobile/>
 		<!-- {#if wInnerWidth >= 1024}
