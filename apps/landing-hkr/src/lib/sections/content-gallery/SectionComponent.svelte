@@ -241,7 +241,7 @@
   const carouselItemWidthClass = carouselItemWidthClassMap[carouselItemWidth] || carouselItemWidthClassMap.medium
 </script>
 
-<div class="relative flex w-full items-center justify-center {isCarouselMode ? 'overflow-x-clip overflow-y-visible' : 'overflow-hidden'}">
+<div class="relative flex w-full items-center justify-center {isCarouselMode ? 'overflow-visible' : 'overflow-hidden'}">
   {@render Ornament('section')}
   <div class="relative z-10 w-full {widthPresetClassMap[section.meta.width_preset || 'xl']} py-6 lg:py-12 px-6 lg:px-12">
     {#if containerVariant === 'panel'}
@@ -368,7 +368,7 @@
 {/snippet}
 
 {#snippet CarouselGallery()}
-  <div class="relative left-1/2 w-screen max-w-none -translate-x-1/2 px-6 lg:px-12">
+  <div class="relative left-1/2 w-screen max-w-none -translate-x-1/2">
     <Carousel.Root
       opts={{
         containScroll: false,
@@ -384,7 +384,7 @@
       <div class="relative w-full">
         <Carousel.Content>
           {#each gallery as item, i (item.id || `content-gallery-carousel-${i}`)}
-            <Carousel.Item class="{carouselItemWidthClass} pl-4 first:pl-0">
+            <Carousel.Item class="{carouselItemWidthClass} pl-4 first:pl-px">
               {@render GalleryItem(item)}
             </Carousel.Item>
           {/each}

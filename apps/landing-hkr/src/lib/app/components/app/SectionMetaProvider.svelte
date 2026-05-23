@@ -1,10 +1,29 @@
 <script lang="ts">
   import type { LandingSection } from '@southneuhof/landing-sveltekit-framework/types'
 
-  let { section, children } = $props<{
+  type SectionWrapperOverflow = 'hidden' | 'visible' | 'clip-x'
+  type SectionMetaProviderSchema = {
+    render?: {
+      wrapper?: {
+        overflow?: SectionWrapperOverflow
+      }
+      resolveWrapper?: (input: { section: LandingSection }) => {
+        overflow?: SectionWrapperOverflow
+      }
+    }
+  }
+
+  let { section, schema, children } = $props<{
     section: LandingSection & { meta?: Record<string, unknown> | null }
+    schema?: SectionMetaProviderSchema
     children: any
   }>()
+
+  const wrapperOverflowClassMap: Record<SectionWrapperOverflow, string> = {
+    hidden: 'overflow-hidden',
+    visible: 'overflow-visible',
+    'clip-x': 'overflow-x-clip overflow-y-visible',
+  }
 
   const ornamentBackgroundOffsetClassMap: Record<string, string> = {
     sm: 'w-[90%]',
@@ -32,9 +51,17 @@
   )
 
   const sectionStyle = $derived(backgroundColor ? `background-color: ${backgroundColor};` : undefined)
+
+  const wrapperOverflow = $derived(
+    (schema?.render?.resolveWrapper?.({ section }).overflow
+      ?? schema?.render?.wrapper?.overflow
+      ?? 'hidden') as SectionWrapperOverflow,
+  )
+
+  const wrapperOverflowClass = $derived(wrapperOverflowClassMap[wrapperOverflow] ?? wrapperOverflowClassMap.hidden)
 </script>
 
-<div class="relative w-full overflow-hidden" style={sectionStyle}>
+<div class="relative w-full {wrapperOverflowClass}" style={sectionStyle}>
   {#if ornamentMedia}
     <img
       src={ornamentMedia}

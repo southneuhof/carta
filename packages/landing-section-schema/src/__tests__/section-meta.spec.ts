@@ -180,6 +180,27 @@ describe('shared section schema', () => {
     })
   })
 
+  it('resolves content-gallery wrapper overflow from display mode', () => {
+    expect(contentGallery.render?.resolveWrapper?.({
+      section: {
+        id: 'static-gallery',
+        meta: { gallery_display_mode: 'static' },
+      },
+    }).overflow).toBe('hidden')
+    expect(contentGallery.render?.resolveWrapper?.({
+      section: {
+        id: 'default-gallery',
+        meta: {},
+      },
+    }).overflow).toBe('hidden')
+    expect(contentGallery.render?.resolveWrapper?.({
+      section: {
+        id: 'carousel-gallery',
+        meta: { gallery_display_mode: 'carousel' },
+      },
+    }).overflow).toBe('clip-x')
+  })
+
   it('switches content-gallery gallery media input from section meta', () => {
     const generator = contentGallery.data.gallery.editor?.inputConfig?.media?.dependency?.inputConfig?.generator
 

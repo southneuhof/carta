@@ -19,6 +19,11 @@ export default defineSectionSchema({
     name: 'Content Gallery',
     description: 'Two-column content section with a gallery',
   },
+  render: {
+    resolveWrapper: ({ section }) => ({
+      overflow: section.meta?.gallery_display_mode === 'carousel' ? 'clip-x' : 'hidden',
+    }),
+  },
   meta: {
     fields: [
       'layout_direction',
