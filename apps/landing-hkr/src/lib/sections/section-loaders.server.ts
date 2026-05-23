@@ -1,5 +1,7 @@
 import type { SectionDataLoader } from '@southneuhof/landing-sveltekit-framework/types';
 
+// Deprecated: this registry is kept temporarily for backward compatibility
+// with legacy per-section load.ts modules. Prefer schema resource resolvers.
 const dataModules = import.meta.glob('./*/load.ts');
 
 const sectionLoaders: Record<string, SectionDataLoader> = {};

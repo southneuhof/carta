@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest'
 import contentDefault from '../sections/content-default'
 import contentGallery from '../sections/content-gallery'
 import dataList from '../sections/data-list'
+import galleryTree from '../sections/gallery-tree'
 import heroBanner from '../sections/hero-banner'
 import articleHighlights from '../sections/article-highlights'
+import articleList from '../sections/article-list'
 import form from '../sections/form'
 import productCatalog from '../sections/product-catalog'
 import productShowcase from '../sections/product-showcase'
@@ -183,6 +185,44 @@ describe('shared section schema', () => {
     })
   })
 
+  it('registers gallery-tree with a two-level section group structure', () => {
+    expect(sectionSchemas['gallery-tree']).toBeTruthy()
+    expect(Object.keys(galleryTree.data)).toEqual(['content', 'sectionGroup'])
+    expect(galleryTree.data.content).toMatchObject({
+      type: 'content',
+      order: 1,
+      editor: { label: 'Header Content' },
+    })
+    expect(galleryTree.data.sectionGroup).toMatchObject({
+      type: 'sectionGroup',
+      order: 2,
+      many: true,
+      editor: { label: 'Section Groups' },
+    })
+
+    const levelOneSchema = galleryTree.data.sectionGroup.schema
+    expect(levelOneSchema?.data.sectionGroup).toMatchObject({
+      type: 'sectionGroup',
+      order: 1,
+      many: true,
+      editor: { label: 'Leaf Items' },
+    })
+
+    const leafSchema = levelOneSchema?.data.sectionGroup.schema
+    expect(leafSchema?.data.content).toMatchObject({
+      type: 'content',
+      order: 1,
+      editor: { label: 'Content' },
+    })
+    expect(leafSchema?.data.gallery).toMatchObject({
+      type: 'gallery',
+      order: 2,
+      many: true,
+      editor: { label: 'Gallery' },
+    })
+    expect(leafSchema?.data.gallery.fields).toEqual(['media', 'title', 'subtitle'])
+  })
+
   it('resolves content-gallery wrapper overflow from display mode', () => {
     expect(contentGallery.render?.resolveWrapper?.({
       section: {
@@ -244,6 +284,50 @@ describe('shared section schema', () => {
     ])
     expect(articleHighlights.meta?.defaultValues?.articleCategory).toBeNull()
     expect(articleHighlights.meta?.editor?.inputConfig?.articleCategory).toEqual({
+      type: 'select',
+      props: {
+        getAPI: 'articleCategory',
+        multi: true,
+        clearable: true,
+      },
+    })
+  })
+
+  it('exports article-list schema with resource category slot and filter meta', () => {
+    expect(sectionSchemas['article-list']).toBeTruthy()
+    expect(Object.keys(articleList.data)).toEqual(['articleCategory'])
+    expect(articleList.data.articleCategory).toEqual({
+      type: 'resource',
+      source: 'article-category',
+      order: 1,
+      many: true,
+      fields: ['id', 'name'],
+      params: {
+        strategy: 'localizedList',
+      },
+    })
+    expect(articleList.meta?.fields).toEqual([
+      'section_background_color',
+      'section_ornament_media',
+      'section_ornament_offset',
+      'type',
+      'allow_filter',
+      'allow_select_all',
+      'filter_style',
+      'filter_type',
+      'article_categories_filter',
+      'article_categories_main',
+    ])
+    expect(articleList.meta?.defaultValues).toMatchObject({
+      type: 'three-column',
+      allow_filter: true,
+      allow_select_all: true,
+      filter_style: 'tab',
+      filter_type: 'multi',
+      article_categories_filter: [],
+      article_categories_main: [],
+    })
+    expect(articleList.meta?.editor?.inputConfig?.article_categories_filter).toEqual({
       type: 'select',
       props: {
         getAPI: 'articleCategory',

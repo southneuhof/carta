@@ -111,6 +111,24 @@ export const sectionResourceResolvers: SectionResourceResolverRegistry = {
       categories: item.categories.map((category: any) => category.translations[0]?.name).filter(Boolean),
     }));
   },
+  'article-category': async ({ context }) => {
+    const locale = context.getLocale();
+    const categories = await context.prisma.articleCategory.findMany({
+      include: {
+        translations: {
+          where: { language: locale },
+          select: { name: true },
+        },
+      },
+      orderBy: { created_at: 'desc' },
+    });
+
+    return categories.map((category: any) => ({
+      ...category,
+      name: category.translations[0]?.name ?? '',
+      translations: undefined,
+    }));
+  },
   product: async ({ section, slot, context }) => {
     const params = (slot.params ?? {}) as Record<string, unknown>;
     const strategy = typeof params.strategy === 'string' ? params.strategy : undefined;

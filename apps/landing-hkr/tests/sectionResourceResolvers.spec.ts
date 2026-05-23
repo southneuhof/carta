@@ -58,6 +58,94 @@ describe('sectionResourceResolvers.form-template', () => {
   })
 })
 
+describe('sectionResourceResolvers.article-category', () => {
+  it('returns localized article categories', async () => {
+    const findMany = vi.fn().mockResolvedValue([
+      {
+        id: 'cat-1',
+        code: 'news',
+        translations: [{ name: 'Berita' }],
+      },
+      {
+        id: 'cat-2',
+        code: 'insight',
+        translations: [{ name: 'Insight' }],
+      },
+    ])
+
+    const result = await sectionResourceResolvers['article-category']({
+      section: { id: 'section-1', meta: {} },
+      slotKey: 'articleCategory',
+      slot: {
+        type: 'resource',
+        source: 'article-category',
+        order: 1,
+      } as any,
+      context: {
+        prisma: { articleCategory: { findMany } },
+        getLocale: () => 'id',
+        url: new URL('https://example.test'),
+      },
+    })
+
+    expect(findMany).toHaveBeenCalledTimes(1)
+    expect(result).toEqual([
+      { id: 'cat-1', code: 'news', name: 'Berita', translations: undefined },
+      { id: 'cat-2', code: 'insight', name: 'Insight', translations: undefined },
+    ])
+  })
+
+  it('handles missing translations safely', async () => {
+    const result = await sectionResourceResolvers['article-category']({
+      section: { id: 'section-1', meta: {} },
+      slotKey: 'articleCategory',
+      slot: {
+        type: 'resource',
+        source: 'article-category',
+        order: 1,
+      } as any,
+      context: {
+        prisma: {
+          articleCategory: {
+            findMany: vi.fn().mockResolvedValue([
+              { id: 'cat-1', code: 'news', translations: [] },
+            ]),
+          },
+        },
+        getLocale: () => 'id',
+        url: new URL('https://example.test'),
+      },
+    })
+
+    expect(result).toEqual([
+      { id: 'cat-1', code: 'news', name: '', translations: undefined },
+    ])
+  })
+
+  it('returns empty list when no categories exist', async () => {
+    const result = await sectionResourceResolvers['article-category']({
+      section: { id: 'section-1', meta: {} },
+      slotKey: 'articleCategory',
+      slot: {
+        type: 'resource',
+        source: 'article-category',
+        order: 1,
+      } as any,
+      context: {
+        prisma: {
+          articleCategory: {
+            findMany: vi.fn().mockResolvedValue([]),
+          },
+        },
+        getLocale: () => 'id',
+        url: new URL('https://example.test'),
+      },
+    })
+
+    expect(result).toEqual([])
+  })
+})
+
 describe('sectionResourceResolvers.product', () => {
   it('returns null when product id meta is missing', async () => {
     const result = await sectionResourceResolvers.product({

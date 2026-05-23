@@ -14,11 +14,4 @@
       <p class="rtf-content m-base">{@html section.data?.postSubmission?.description}</p>
     </div>
   </div>
-  <div class="flex flex-row items-center gap-base flex-wrap">
-    {#each (Array.isArray(section.data?.contactDetails) ? section.data.contactDetails : []) as attachment}
-      {#if attachment.url}
-        <a href={attachment.url?.startsWith('http') ? attachment.url : `https://${attachment.url}`} target="_blank" class="text-sm font-bold"><span class="underline">{attachment.title || attachment.url}</span> <i class="ri-download-line"></i></a>
-      {/if}
-    {/each}
-  </div>
 </div>

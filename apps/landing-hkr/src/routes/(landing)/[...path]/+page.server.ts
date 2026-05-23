@@ -5,6 +5,8 @@ import { sectionLoaders } from '$lib/sections/section-loaders.server.js';
 import { sectionResourceResolvers } from '$lib/sections/section-resource-resolvers.server.js';
 import prisma from '$lib/utils/prisma.js';
 
+// Deprecated: sectionLoaders is temporary compatibility wiring
+// until all legacy per-section load.ts modules are migrated.
 export const load = createLandingPageLoad({
   prisma,
   getLocale,

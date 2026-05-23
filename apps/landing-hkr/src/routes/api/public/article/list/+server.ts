@@ -10,6 +10,17 @@ export async function GET({ url }) {
   try {
     const locale = getLocale();
     const queryParams = qs.parse(url.searchParams.toString());
+    const toNumberOrUndefined = (value: unknown) => {
+      if (value == null || value === '') return undefined;
+      return Number(value);
+    };
+    const parsedPage = toNumberOrUndefined(queryParams.page);
+    const parsedLimit = toNumberOrUndefined(queryParams.limit);
+    const paginationOptions = {
+      ...queryParams,
+      page: parsedPage,
+      limit: parsedLimit,
+    };
     // Get array of category IDs from search params (e.g., article_category_ids[]=id1&article_category_ids[]=id2)
     const articleCategoryIds = queryParams.article_category_ids as string[] | undefined;
     const articleCategoryMainIds = queryParams.article_category_main_ids as string[] | undefined;
@@ -108,7 +119,7 @@ export async function GET({ url }) {
       });
 
       return { data: formattedArticles, total };
-    }, queryParams); // queryParams should contain page, limit, etc.
+    }, paginationOptions);
 
     return success(paginatedData);
   } catch (err) {
