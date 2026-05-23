@@ -17,7 +17,8 @@ const inMemoryImageManifest = new Map<string, FileMetadataRecord>();
 export const fileLocations = createStorageUrlLocationStrategy({
   basePath: '/storage',
   defaultVisibility: 'private',
-});
+  derivativeBaseKey: '_optimized',
+} as Parameters<typeof createStorageUrlLocationStrategy>[0] & { derivativeBaseKey: string });
 
 export const fileStorage = createLocalFileStorageDriver({
   root: path.join(process.cwd(), 'storage'),

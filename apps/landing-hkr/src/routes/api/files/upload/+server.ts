@@ -42,7 +42,8 @@ export const POST = async ({ locals, request }: any) => {
       visibility: 'public',
       size: bytes.length,
     }, bytes);
-    const writtenStat = await stat(toAbsolutePublicPath(written.url));
+    const writtenPath = `/storage/${written.key}`;
+    const writtenStat = await stat(toAbsolutePublicPath(writtenPath));
     const writtenContentType = written.contentType || file.type || (lookup(written.filename) || 'application/octet-stream');
     const item = {
       type: 'file' as const,

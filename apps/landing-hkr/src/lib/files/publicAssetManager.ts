@@ -163,17 +163,43 @@ export async function createPublicFolder(params: { dir: string; folderName: stri
   };
 }
 
-export async function deletePublicAsset(storagePath: string): Promise<void> {
+export async function deletePublicAsset(storagePath: string, options: {
+  deleteFile?: (path: string) => Promise<void>;
+} = {}): Promise<void> {
   const normalized = normalizePublicStoragePath(storagePath);
   const absolute = toAbsolutePublicPath(normalized);
   const stat = await fs.stat(absolute);
 
   if (stat.isDirectory()) {
+    if (options.deleteFile) {
+      await deleteContainedFiles(normalized, absolute, options.deleteFile);
+    }
     await fs.rm(absolute, { recursive: true, force: false });
     return;
   }
 
+  if (options.deleteFile) {
+    await options.deleteFile(normalized);
+    return;
+  }
+
   await fs.unlink(absolute);
+}
+
+async function deleteContainedFiles(storagePath: string, absolutePath: string, deleteFile: (path: string) => Promise<void>): Promise<void> {
+  const entries = await fs.readdir(absolutePath, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const childStoragePath = normalizePublicStoragePath(`${storagePath}/${entry.name}`);
+    const childAbsolutePath = path.join(absolutePath, entry.name);
+
+    if (entry.isDirectory()) {
+      await deleteContainedFiles(childStoragePath, childAbsolutePath, deleteFile);
+      continue;
+    }
+
+    await deleteFile(childStoragePath);
+  }
 }
 
 export async function savePublicUpload(file: File, dir?: string | null, baseUrl?: string): Promise<PublicAssetItem> {
