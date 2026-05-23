@@ -21,6 +21,7 @@ describe('section editor wiring', () => {
     expect(sectionEditor).toContain('matchRootSchemaSlotsToStructure')
     expect(sectionEditor).toContain('matchNestedSchemaSlotsToStructure')
     expect(sectionEditor).toContain('matched.editor.component')
+    expect(sectionEditor).toContain('v-if="matched.editor.component"')
     expect(sectionEditor).not.toContain('resolveSectionSlotEditor')
     expect(sectionEditor).not.toContain('customEditorKey')
     expect(sectionEditor).not.toContain('editorRegistry')

@@ -1,7 +1,8 @@
 import type { Component } from 'vue'
+import ProductShowcaseMetaEditor from '@/views/authenticated/website/website/_layouts/detail/_layouts/_layouts/_layouts/_Custom/ProductShowcaseMetaEditor.vue'
 
 export const sectionEditorComponentRegistry = {
-  // 'custom-token': ImportedComponent,
+  'product-showcase-meta-editor': ProductShowcaseMetaEditor,
 } satisfies Record<string, Component>
 
 export function resolveSectionEditorComponent(token?: string): Component | undefined {

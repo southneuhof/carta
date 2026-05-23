@@ -11,6 +11,24 @@ function normalizeCategoryIds(input: unknown) {
     .filter((item): item is string => Boolean(item));
 }
 
+function normalizeImageUrl(input: unknown): string {
+  if (!input) return '';
+  if (typeof input === 'string') return input;
+  if (typeof input !== 'object') return '';
+
+  const image = input as Record<string, unknown>;
+  for (const key of ['url', 'path', 'data']) {
+    const value = image[key];
+    if (typeof value === 'string' && value.length > 0) return value;
+  }
+
+  return '';
+}
+
+function normalizeImages(input: unknown): unknown[] {
+  return Array.isArray(input) ? input : [];
+}
+
 export const sectionResourceResolvers: SectionResourceResolverRegistry = {
   article: async ({ section, slot, context }) => {
     const params = (slot.params ?? {}) as Record<string, unknown>;
@@ -63,4 +81,68 @@ export const sectionResourceResolvers: SectionResourceResolverRegistry = {
       categories: item.categories.map((category: any) => category.translations[0]?.name).filter(Boolean),
     }));
   },
+  product: async ({ section, slot, context }) => {
+    const params = (slot.params ?? {}) as Record<string, unknown>;
+    const strategy = typeof params.strategy === 'string' ? params.strategy : undefined;
+    const locale = context.getLocale();
+
+    if (strategy !== 'detailById') {
+      return slot.many ? [] : null;
+    }
+
+    const idMetaField = typeof params.idMetaField === 'string' ? params.idMetaField : 'product_id';
+    const productId = typeof section?.meta?.[idMetaField] === 'string'
+      ? section.meta[idMetaField].trim()
+      : '';
+
+    if (!productId) return null;
+
+    const product = await context.prisma.product.findFirst({
+      where: {
+        id: productId,
+        active: true,
+        productCategory: {
+          active: true,
+          translations: {
+            some: { language: locale },
+          },
+        },
+        translations: {
+          some: { language: locale },
+        },
+      },
+      include: {
+        translations: {
+          where: { language: locale },
+          select: { name: true, description: true },
+        },
+        productCategory: {
+          select: {
+            id: true,
+            translations: {
+              where: { language: locale },
+              select: { name: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!product) return null;
+
+    const images = normalizeImages(product.images);
+    const translation = product.translations[0];
+
+    return {
+      id: product.id,
+      product_category_id: product.product_category_id,
+      name: translation?.name ?? '',
+      description: translation?.description ?? '',
+      url: product.url ?? undefined,
+      category: product.productCategory.translations[0]?.name ?? '',
+      thumbnail: normalizeImageUrl(images[0]),
+      images,
+    };
+  },
+  'section-meta-editor': async () => ({}),
 };

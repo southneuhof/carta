@@ -203,11 +203,11 @@ function slotLabel(match: MatchedSchemaSlot) {
         <div v-else class="flex flex-col gap-2">
           <div v-for="matched in matchedSlots" :key="matched.pathKey" class="flex flex-col gap-4">
             <component
-              v-if="matched.editor.component && matched.items.length"
+              v-if="matched.editor.component"
               :is="matched.editor.component"
               :slotConfig="slotEditor(matched)"
               :sectionData="providedSectionData"
-              :objectID="String(matched.items[0].id)"
+              :objectID="firstItem(matched)?.id ? String(firstItem(matched).id) : undefined"
             />
 
             <template v-else-if="matched.slot.type === 'content'">

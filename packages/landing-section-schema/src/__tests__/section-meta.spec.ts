@@ -5,6 +5,7 @@ import dataList from '../sections/data-list'
 import heroBanner from '../sections/hero-banner'
 import articleHighlights from '../sections/article-highlights'
 import productCatalog from '../sections/product-catalog'
+import productShowcase from '../sections/product-showcase'
 import sectionSchemas from '../index'
 import { dataListFieldSets } from '../helpers/data-list-field-sets'
 import { containerColorOptions } from '../helpers/container-color-options'
@@ -283,6 +284,25 @@ describe('shared section schema', () => {
     expect(productCatalog.meta?.defaultValues?.initialLimit).toBe(8)
     expect(productCatalog.meta?.defaultValues?.showSearch).toBe(true)
     expect(productCatalog.meta?.defaultValues?.showCategoryTabs).toBe(true)
+  })
+
+  it('exports product-showcase schema with resource-only slots', () => {
+    expect(sectionSchemas['product-showcase']).toBeTruthy()
+    expect(Object.keys(productShowcase.data)).toEqual(['product', 'config'])
+    expect(productShowcase.data.product).toEqual({
+      type: 'resource',
+      source: 'product',
+      order: 1,
+      many: false,
+      fields: ['id', 'name', 'description', 'url', 'category', 'thumbnail', 'images', 'product_category_id'],
+      params: {
+        strategy: 'detailById',
+        idMetaField: 'product_id',
+      },
+    })
+    expect(productShowcase.data.config.type).toBe('resource')
+    expect(productShowcase.data.config.source).toBe('section-meta-editor')
+    expect(productShowcase.data.config.editor?.componentToken).toBe('product-showcase-meta-editor')
   })
 
   it('reuses field-set contract across hero-banner and nested data-list gallery', () => {
