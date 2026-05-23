@@ -24,14 +24,19 @@ describe('sectionResourceResolvers.product', () => {
 
   it('returns normalized product detail for a valid id', async () => {
     const findFirst = vi.fn().mockResolvedValue({
-      id: 'prod-1',
-      product_category_id: 'cat-1',
-      url: 'https://example.test/product',
-      images: [{ url: 'https://example.test/1.png' }, { path: 'https://example.test/2.png' }],
-      translations: [{ name: 'Paha Ayam', description: 'Detail produk' }],
-      productCategory: {
-        id: 'cat-1',
-        translations: [{ name: 'Boneless' }],
+      name: 'Paha Ayam',
+      description: 'Detail produk',
+      product: {
+        id: 'prod-1',
+        active: true,
+        product_category_id: 'cat-1',
+        url: 'https://example.test/product',
+        images: [{ url: 'https://example.test/1.png' }, { path: 'https://example.test/2.png' }],
+        productCategory: {
+          id: 'cat-1',
+          active: true,
+          translations: [{ name: 'Boneless' }],
+        },
       },
     })
 
@@ -45,7 +50,7 @@ describe('sectionResourceResolvers.product', () => {
         params: { strategy: 'detailById', idMetaField: 'product_id' },
       } as any,
       context: {
-        prisma: { product: { findFirst } },
+        prisma: { productTranslation: { findFirst } },
         getLocale: () => 'id',
         url: new URL('https://example.test'),
       },
@@ -75,7 +80,7 @@ describe('sectionResourceResolvers.product', () => {
         params: { strategy: 'detailById', idMetaField: 'product_id' },
       } as any,
       context: {
-        prisma: { product: { findFirst: vi.fn().mockResolvedValue(null) } },
+        prisma: { productTranslation: { findFirst: vi.fn().mockResolvedValue(null) } },
         getLocale: () => 'id',
         url: new URL('https://example.test'),
       },
@@ -95,7 +100,7 @@ describe('sectionResourceResolvers.product', () => {
         many: true,
       } as any,
       context: {
-        prisma: { product: { findFirst: vi.fn() } },
+        prisma: { productTranslation: { findFirst: vi.fn() } },
         getLocale: () => 'id',
         url: new URL('https://example.test'),
       },

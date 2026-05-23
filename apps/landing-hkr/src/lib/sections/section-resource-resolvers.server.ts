@@ -97,47 +97,42 @@ export const sectionResourceResolvers: SectionResourceResolverRegistry = {
 
     if (!productId) return null;
 
-    const product = await context.prisma.product.findFirst({
+    const productTranslation = await context.prisma.productTranslation.findFirst({
       where: {
-        id: productId,
-        active: true,
-        productCategory: {
-          active: true,
-          translations: {
-            some: { language: locale },
-          },
-        },
-        translations: {
-          some: { language: locale },
-        },
+        product_id: productId,
+        language: locale,
       },
       include: {
-        translations: {
-          where: { language: locale },
-          select: { name: true, description: true },
-        },
-        productCategory: {
-          select: {
-            id: true,
-            translations: {
-              where: { language: locale },
-              select: { name: true },
+        product: {
+          include: {
+            productCategory: {
+              select: {
+                id: true,
+                active: true,
+                translations: {
+                  where: { language: locale },
+                  select: { name: true },
+                },
+              },
             },
           },
         },
       },
     });
 
+    const product = productTranslation?.product;
     if (!product) return null;
+    if (!product.active) return null;
+    if (!product.productCategory?.active) return null;
+    if (!product.productCategory?.translations?.[0]?.name) return null;
 
     const images = normalizeImages(product.images);
-    const translation = product.translations[0];
 
     return {
       id: product.id,
       product_category_id: product.product_category_id,
-      name: translation?.name ?? '',
-      description: translation?.description ?? '',
+      name: productTranslation.name ?? '',
+      description: productTranslation.description ?? '',
       url: product.url ?? undefined,
       category: product.productCategory.translations[0]?.name ?? '',
       thumbnail: normalizeImageUrl(images[0]),

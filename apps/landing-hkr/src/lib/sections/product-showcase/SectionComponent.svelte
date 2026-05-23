@@ -1,4 +1,5 @@
 <script lang="ts">
+  import * as Carousel from '$lib/app/components/ui/carousel';
   import type { LandingSectionForSchema } from '@southneuhof/landing-sveltekit-framework/types';
   import productShowcase from '@southneuhof/landing-section-schema/sections/product-showcase';
 
@@ -8,30 +9,87 @@
 
   const product = $derived(section?.data?.product ?? null);
   const images = $derived(Array.isArray(product?.images) ? product.images : []);
+  const normalizedImages = $derived(
+    images
+      .map((image) => {
+        if (typeof image === 'string') return image;
+        if (!image || typeof image !== 'object') return '';
+
+        const item = image as Record<string, unknown>;
+        if (typeof item.url === 'string' && item.url.length > 0) return item.url;
+        if (typeof item.path === 'string' && item.path.length > 0) return item.path;
+        if (typeof item.data === 'string' && item.data.length > 0) return item.data;
+        return '';
+      })
+      .filter((item) => item.length > 0),
+  );
+  let activeImageIndex = $state(0);
+  const activeImage = $derived(
+    normalizedImages[activeImageIndex] ??
+      normalizedImages[0] ??
+      (product?.thumbnail || ''),
+  );
 </script>
 
 {#if product}
-  <div class="flex w-full items-center justify-center">
+  <div class="relative flex w-full items-center justify-center overflow-hidden bg-[#F7F7F8]">
     <div class="w-full max-w-screen-xl px-6 py-8 lg:px-12 lg:py-12">
-      <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        <div class="rounded-3xl bg-[#F6ECEC] p-6 lg:p-10">
-          {#if product.thumbnail}
-            <img src={product.thumbnail} alt={product.name} class="mx-auto h-full max-h-[420px] w-full object-contain" />
-          {:else}
-            <div class="flex min-h-[280px] items-center justify-center rounded-2xl bg-white/70 text-sm text-outline">No Image</div>
+      <div class="grid grid-cols-1 gap-8 xl:grid-cols-[1.08fr_1fr]">
+        <div class="flex flex-col gap-6">
+          <div class="rounded-[2.25rem] bg-[#F4E8EA] p-6 lg:p-12">
+            {#if activeImage}
+              <img src={activeImage} alt={product.name} class="mx-auto h-[280px] w-full object-contain sm:h-[340px] lg:h-[420px]" />
+            {:else}
+              <div class="flex h-[280px] items-center justify-center rounded-2xl bg-white/70 text-sm text-outline sm:h-[340px] lg:h-[420px]">No Image</div>
+            {/if}
+          </div>
+
+          {#if normalizedImages.length > 0}
+            <Carousel.Root
+              opts={{
+                align: 'start',
+                containScroll: false,
+                dragFree: true,
+              }}
+              class="w-full"
+            >
+              <Carousel.Content class="ml-4 py-2">
+                {#each normalizedImages as image, index (`product-thumb-${index}`)}
+                  <Carousel.Item class="basis-[44%] sm:basis-[31%] lg:basis-[24%] pl-0">
+                    <button
+                      type="button"
+                      onclick={() => (activeImageIndex = index)}
+                      class="w-full rounded-[1.75rem] border p-4 transition {activeImageIndex === index ? 'border-[#D1B40A] bg-[#F1EFD8]' : 'border-transparent bg-[#EAF1F5]'}"
+                    >
+                      <img src={image} alt={`${product.name} ${index + 1}`} class="h-24 w-full object-contain sm:h-28" />
+                    </button>
+                  </Carousel.Item>
+                {/each}
+              </Carousel.Content>
+              <div class="mt-3">
+                <Carousel.Navigation />
+              </div>
+            </Carousel.Root>
           {/if}
         </div>
 
-        <div class="flex flex-col gap-5">
+        <div class="flex flex-col gap-6">
           {#if product.category}
             <span class="w-fit rounded-full border border-outline-variant px-4 py-1 text-sm text-on-surface/70">{product.category}</span>
           {/if}
-          <h2 class="text-3xl font-bold text-on-surface lg:text-5xl">{product.name}</h2>
+
+          <h2 class="text-3xl font-bold leading-tight text-on-surface/80 lg:text-6xl">{product.name}</h2>
+
+          <div class="border-t border-outline-variant"></div>
+
+          <h3 class="text-[2rem] font-semibold leading-tight text-[#F43C35]">Detail Produk</h3>
 
           {#if product.description}
-            <div class="border-t border-outline-variant pt-5">
-              <p class="rtf-content whitespace-pre-wrap text-on-surface/80">{product.description}</p>
+            <div class="rtf-content text-xl leading-relaxed text-on-surface/70">
+              {@html product.description}
             </div>
+          {:else}
+            <p class="text-lg text-on-surface/60">Deskripsi produk belum tersedia.</p>
           {/if}
 
           {#if product.url}
@@ -45,27 +103,6 @@
           {/if}
         </div>
       </div>
-
-      {#if images.length > 1}
-        <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {#each images.slice(1, 5) as image, index (`product-image-${index}`)}
-            {@const imageUrl = typeof image === 'string'
-              ? image
-              : image && typeof image === 'object' && 'url' in image && typeof image.url === 'string'
-                ? image.url
-                : image && typeof image === 'object' && 'path' in image && typeof image.path === 'string'
-                  ? image.path
-                  : ''}
-            <div class="rounded-2xl bg-[#F4F4F6] p-4">
-              {#if imageUrl}
-                <img src={imageUrl} alt={product.name} class="h-28 w-full object-contain" />
-              {:else}
-                <div class="flex h-28 items-center justify-center text-xs text-outline">No Image</div>
-              {/if}
-            </div>
-          {/each}
-        </div>
-      {/if}
     </div>
   </div>
 {/if}
