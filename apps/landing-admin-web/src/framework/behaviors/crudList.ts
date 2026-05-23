@@ -34,11 +34,9 @@ export async function onExport({ exportAPI, params, listConfig }: { exportAPI: s
 
 export function onDragChange(reorderAPI: string, event: any) {
   if (!event.moved) return
-  return services.post('reorder', {
-    model: reorderAPI,
-    data: {
-      ...event.moved.element,
-      to: event.moved.newIndex + 1,
-    },
+  return services.put(`${reorderAPI}/reorder`, {
+    ...event.moved.element,
+    from: event.moved.oldIndex + 1,
+    to: event.moved.newIndex + 1,
   })
 }

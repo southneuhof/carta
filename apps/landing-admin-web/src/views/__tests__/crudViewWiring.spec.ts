@@ -9,6 +9,8 @@ const srcRoot = join(__dirname, '..')
 const expectedCrudViews = [
   'authenticated/article/article/article.vue',
   'authenticated/article/articleCategory/articleCategory.vue',
+  'authenticated/article/product/product.vue',
+  'authenticated/article/productCategory/productCategory.vue',
   'authenticated/user/user/user.vue',
   'authenticated/user/role/role.vue',
   'authenticated/user/roleGroup/roleGroup.vue',

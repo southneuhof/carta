@@ -9,6 +9,8 @@ const expectedAuthenticatedRoutes = [
   { name: 'website', path: '/authenticated/website/website' },
   { name: 'articleCategory', path: '/authenticated/article/articleCategory' },
   { name: 'article', path: '/authenticated/article/article' },
+  { name: 'productCategory', path: '/authenticated/article/productCategory' },
+  { name: 'product', path: '/authenticated/article/product' },
   { name: 'user', path: '/authenticated/user/user' },
   { name: 'role', path: '/authenticated/user/role' },
   { name: 'roleGroup', path: '/authenticated/user/roleGroup' },

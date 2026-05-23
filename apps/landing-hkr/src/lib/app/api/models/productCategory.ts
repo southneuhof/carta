@@ -33,16 +33,25 @@ export default {
         }
         return body;
       },
-      post: async (body: any, data: any) => {
+      main: async (body: any) => {
         const baseName = typeof body.name === 'string' && body.name.trim().length > 0 ? body.name.trim() : 'Untitled Category';
-        await prisma.productCategoryTranslation.createMany({
-          data: languages.map((language) => ({
-            language,
-            name: baseName,
-            product_category_id: data.id,
-          })),
+        const { name: _omitName, ...categoryData } = body;
+
+        return prisma.$transaction(async (tx) => {
+          const created = await tx.productCategory.create({
+            data: categoryData,
+          });
+
+          await tx.productCategoryTranslation.createMany({
+            data: languages.map((language) => ({
+              language,
+              name: baseName,
+              product_category_id: created.id,
+            })),
+          });
+
+          return { ...created, name: baseName };
         });
-        return { ...data, ...body };
       },
     },
   },
@@ -84,6 +93,6 @@ export default {
   },
   reorder: {
     allow: true,
-    axis: [],
+    axis: ['*'],
   },
 } as ModelConfig<ProductCategory>;

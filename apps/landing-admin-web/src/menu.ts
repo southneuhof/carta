@@ -44,6 +44,82 @@ const menu: Modules = [
         title: 'Artikel',
         icon: 'folder',
       },
+      
+    ],
+  },
+  {
+    name: 'master',
+    title: 'Master Data',
+    icon: 'database-2',
+    description: 'Master Data',
+    routes: [
+    {
+        name: 'productCategory',
+        title: 'Kategori Produk',
+        icon: 'folder',
+      },
+      {
+        name: 'product',
+        title: 'Produk',
+        icon: 'folder',
+      },
+    ]
+  },
+  // {
+  //   name: 'collection',
+  //   title: 'Collection',
+  //   icon: 'folder',
+  //   description: 'Collection',
+  //   routes: [
+  //     {
+  //       name: 'collection',
+  //       title: 'Collection',
+  //       icon: 'folder',
+  //     },
+  //   ],
+  // },
+  {
+    name: 'form',
+    title: 'Form',
+    icon: 'mail',
+    description: 'Form',
+    routes: [
+      {
+        name: 'formType',
+        title: 'Jenis Formulir',
+        icon: 'folder',
+      },
+      {
+        name: 'formSubmission',
+        title: 'Inbox',
+        icon: 'folder',
+      },
+    ],
+  },
+  {
+    name: 'fileManager',
+    title: 'File Manager',
+    icon: 'folder',
+    description: 'File Manager',
+    routes: [
+      {
+        name: 'fileManager',
+        title: 'File Manager',
+        icon: 'corporate_fare',
+      },
+    ],
+  },
+  {
+    name: 'companyProfile',
+    title: 'Company Profile',
+    icon: 'building-3',
+    description: 'Company Profile',
+    routes: [
+      {
+        name: 'companyProfile',
+        title: 'Company Profile',
+        icon: 'corporate_fare',
+      },
     ],
   },
   {
@@ -71,63 +147,6 @@ const menu: Modules = [
         name: 'permission',
         title: 'Permission',
         icon: 'folder',
-      },
-    ],
-  },
-  {
-    name: 'collection',
-    title: 'Collection',
-    icon: 'folder',
-    description: 'Collection',
-    routes: [
-      {
-        name: 'collection',
-        title: 'Collection',
-        icon: 'folder',
-      },
-    ],
-  },
-  {
-    name: 'form',
-    title: 'Form',
-    icon: 'mail',
-    description: 'Form',
-    routes: [
-      {
-        name: 'formType',
-        title: 'Jenis Formulir',
-        icon: 'folder',
-      },
-      {
-        name: 'formSubmission',
-        title: 'Inbox',
-        icon: 'folder',
-      },
-    ],
-  },
-  {
-    name: 'companyProfile',
-    title: 'Company Profile',
-    icon: 'building-3',
-    description: 'Company Profile',
-    routes: [
-      {
-        name: 'companyProfile',
-        title: 'Company Profile',
-        icon: 'corporate_fare',
-      },
-    ],
-  },
-  {
-    name: 'fileManager',
-    title: 'File Manager',
-    icon: 'folder',
-    description: 'File Manager',
-    routes: [
-      {
-        name: 'fileManager',
-        title: 'File Manager',
-        icon: 'corporate_fare',
       },
     ],
   },
