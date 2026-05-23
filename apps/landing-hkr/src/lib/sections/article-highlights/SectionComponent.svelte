@@ -17,7 +17,6 @@
     
     {#if (articles.length > 0)}
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 w-full items-start">
-        <!-- Left Column: Featured Highlight (Large) -->
         <div class="w-full">
           <ArticleItem
             title={articles[0].title}
@@ -31,7 +30,6 @@
           />
         </div>
 
-        <!-- Right Column: Vertical List of Articles -->
         {#if articles.length > 1}
           <div class="w-full flex flex-col gap-5 sm:gap-6 lg:gap-7">
             {#each articles.slice(1, 4) as article (article.id)}
@@ -49,7 +47,6 @@
         {/if}
       </div>
 
-      <!-- Bottom Centered Brand Redirect Button -->
       {#if section?.data?.content?.url}
         <div class="flex justify-center mt-6 lg:mt-10 w-full">
           <a href={section.data.content.url}>
