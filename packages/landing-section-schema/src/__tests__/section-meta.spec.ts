@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import contentDefault from '../sections/content-default'
 import contentGallery from '../sections/content-gallery'
 import dataList from '../sections/data-list'
+import galleryStackArray from '../sections/gallery-stack-array'
 import galleryTree from '../sections/gallery-tree'
 import heroBanner from '../sections/hero-banner'
 import articleHighlights from '../sections/article-highlights'
@@ -221,6 +222,39 @@ describe('shared section schema', () => {
       editor: { label: 'Gallery' },
     })
     expect(leafSchema?.data.gallery.fields).toEqual(['media', 'title', 'subtitle'])
+  })
+
+  it('registers gallery-stack-array with content and gallery card sections', () => {
+    expect(sectionSchemas['gallery-stack-array']).toBeTruthy()
+    expect(Object.keys(galleryStackArray.data)).toEqual(['content', 'sectionGroup'])
+    expect(galleryStackArray.data.content).toMatchObject({
+      type: 'content',
+      order: 1,
+      editor: { label: 'Header Content' },
+    })
+    expect(galleryStackArray.data.content.fields).toEqual(['subtitle', 'title', 'description'])
+    expect(galleryStackArray.data.sectionGroup).toMatchObject({
+      type: 'sectionGroup',
+      order: 2,
+      many: true,
+      editor: { label: 'Gallery Cards' },
+    })
+
+    const cardSchema = galleryStackArray.data.sectionGroup.schema
+    expect(Object.keys(cardSchema?.data ?? {})).toEqual(['content', 'gallery'])
+    expect(cardSchema?.data.content).toMatchObject({
+      type: 'content',
+      order: 1,
+      editor: { label: 'Social Content' },
+    })
+    expect(cardSchema?.data.content.fields).toEqual(['media', 'title', 'subtitle'])
+    expect(cardSchema?.data.gallery).toMatchObject({
+      type: 'gallery',
+      order: 2,
+      many: true,
+      editor: { label: 'Gallery' },
+    })
+    expect(cardSchema?.data.gallery.fields).toEqual(['media', 'title', 'subtitle'])
   })
 
   it('resolves content-gallery wrapper overflow from display mode', () => {
