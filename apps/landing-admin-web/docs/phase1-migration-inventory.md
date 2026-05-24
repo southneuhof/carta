@@ -66,7 +66,7 @@ Grouped port targets:
 ## Section Type Inventory and Schema Gap
 Sources:
 - Old admin section configs: `apps/hkr-landing-admin-old-reference/src/app/configs/sectionTypes/**`
-- Backend runtime sections: `apps/landing-hkr/src/lib/sections/*`
+- Backend runtime sections: `apps/landing-mjl/src/lib/sections/*`
 - Shared schema package: `packages/landing-section-schema/src/sections/*`
 
 Old section type codes (non-calculator):
@@ -79,7 +79,7 @@ Old section type codes (non-calculator):
 - Utility: `chart`, `data-list`, `floating-contact-button`, `location-map`, `page-list`, `popup-banner`, `quick-access`
 - Excluded-calculator: `calculator`
 
-`landing-hkr` has all old types including calculator and `timeline-carousel`.
+`landing-mjl` has all old types including calculator and `timeline-carousel`.
 Shared schema package currently has only:
 - `content-default`, `content-gallery`, `data-list`, `hero-banner`, `hero-banner-two`
 
@@ -92,8 +92,8 @@ Admin metadata fields to preserve per section while porting:
 - `structure` tree (content/gallery/section/sectionGroup/custom)
 - Custom editor/component hooks (e.g. `ArticleList`, `FormDetail`, `DataListGalleryEditor`, mapping helpers)
 
-## Backend Model Contracts (`landing-hkr`)
-Source: `apps/landing-hkr/src/lib/app/api/models/*.ts`
+## Backend Model Contracts (`landing-mjl`)
+Source: `apps/landing-mjl/src/lib/app/api/models/*.ts`
 
 Generic contract pattern expected for included modules:
 - `/:model/list`, `/:model/detail`, `/:model/create`, `/:model/update`, `/:model/delete`, `/:model/reorder`, `/:model/verify`
@@ -129,7 +129,7 @@ Calculator models exist in backend but intentionally excluded from new admin con
 - `calculatorType`, `calculatorField`, `calculatorDetailField`.
 
 ## Custom Endpoint Contracts
-Source: `apps/landing-hkr/src/routes/api/**`
+Source: `apps/landing-mjl/src/routes/api/**`
 
 - `mappingPermissionRole/list` (`GET`): query `role_id` (+ pagination/search), returns permission rows with `active`.
 - `mappingPermissionRole/toggle` (`POST`): body `{ role_id, permission_code, active }`.
@@ -200,6 +200,5 @@ Status enum: `include`, `exclude-calculator`, `replace-with-framework`, `needs-c
 ## Validation Coverage (Phase 1)
 - Every old menu route accounted: yes (all include/exclude above).
 - Every old section type accounted: yes (`calculator` excluded, others mapped as schema-port candidates).
-- Included features have matching backend models/endpoints in `landing-hkr`: yes, recorded above.
+- Included features have matching backend models/endpoints in `landing-mjl`: yes, recorded above.
 - Calculator files removed from included target inventory: yes.
-

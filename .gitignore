@@ -34,3 +34,6 @@ apps/mobile/.expo/
 
 BaseCRUD (Classic).vue
 BaseCRUD (Postmodern).vue
+
+# Portable landing local provider overrides
+.local/

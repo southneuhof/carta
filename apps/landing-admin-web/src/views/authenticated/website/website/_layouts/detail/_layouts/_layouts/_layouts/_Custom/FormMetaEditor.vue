@@ -17,11 +17,11 @@ const props = defineProps({
 const pageTranslation = inject<Record<string, any>>('pageTranslation')
 const topmostSection = computed(() => getSmallestChildObject(props.sectionData, 'parentSectionData'))
 
-async function submitFormType({ payload }: { payload: Record<string, unknown> }) {
+async function submitFormType({ payload }: { payload: object }) {
   const { default: services } = await import('@/utils/services')
   const mergedMeta = {
     ...(props.sectionData?.meta || {}),
-    form_type_id: typeof payload.form_type_id === 'string' ? payload.form_type_id : '',
+    form_type_id: typeof (payload as Record<string, unknown>).form_type_id === 'string' ? String((payload as Record<string, unknown>).form_type_id) : '',
   }
 
   return services.update('section', {

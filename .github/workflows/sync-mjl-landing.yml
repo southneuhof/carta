@@ -1,0 +1,44 @@
+name: Sync MJL Landing
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - Release Packages
+    types:
+      - completed
+
+jobs:
+  sync-mjl-landing:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.8.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure Git identity
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Sync MJL landing repository
+        run: node scripts/sync-mjl-landing.mjs --target="$RUNNER_TEMP/mjl-landing" --push
+        env:
+          MJL_LANDING_REMOTE: https://x-access-token:${{ secrets.MJL_LANDING_TOKEN }}@github.com/sallliisa/mjl-landing.git

@@ -36,13 +36,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build publishable packages
-        run: pnpm --filter @southneuhof/is-data-model --filter @southneuhof/apostle --filter @southneuhof/utilities --filter @southneuhof/is-vue-framework --filter @southneuhof/landing-sveltekit-framework build
+        run: pnpm --filter @southneuhof/is-data-model --filter @southneuhof/apostle --filter @southneuhof/utilities --filter @southneuhof/is-vue-framework --filter @southneuhof/landing-section-schema --filter @southneuhof/landing-sveltekit-framework build
 
       - name: Test publishable packages
-        run: pnpm --filter @southneuhof/is-data-model --filter @southneuhof/apostle --filter @southneuhof/utilities --filter @southneuhof/is-vue-framework --filter @southneuhof/landing-sveltekit-framework test
+        run: pnpm --filter @southneuhof/is-data-model --filter @southneuhof/apostle --filter @southneuhof/utilities --filter @southneuhof/is-vue-framework --filter @southneuhof/landing-section-schema --filter @southneuhof/landing-sveltekit-framework test
 
       - name: Type check publishable packages
-        run: pnpm --filter @southneuhof/is-data-model --filter @southneuhof/apostle --filter @southneuhof/utilities --filter @southneuhof/is-vue-framework --filter @southneuhof/landing-sveltekit-framework type-check
+        run: pnpm --filter @southneuhof/is-data-model --filter @southneuhof/apostle --filter @southneuhof/utilities --filter @southneuhof/is-vue-framework --filter @southneuhof/landing-section-schema --filter @southneuhof/landing-sveltekit-framework type-check
 
       - name: Verify package contents
         run: pnpm release:verify

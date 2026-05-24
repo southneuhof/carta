@@ -2,7 +2,7 @@ import type {
   SectionSchema,
   SectionSchemaMeta,
 } from '@southneuhof/landing-sveltekit-framework/types'
-import { commonSectionMetaConfig } from './common-section-meta'
+import { commonSectionMetaConfig } from './common-section-meta.js'
 
 const COMMON_META_FIELDS = [...commonSectionMetaConfig.fields]
 

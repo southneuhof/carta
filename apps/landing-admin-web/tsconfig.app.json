@@ -4,16 +4,8 @@
     "env.d.ts",
     "src/**/*",
     "src/**/*.vue",
-    "../../packages/apostle/src/**/*.ts",
     "../../packages/data-model/src/**/*.ts",
-    "../../packages/is-data-model/src/**/*.ts",
-    "../../packages/is-vue-framework/env.d.ts",
-    "../../packages/is-vue-framework/src/**/*.ts",
-    "../../packages/is-vue-framework/src/**/*.tsx",
-    "../../packages/is-vue-framework/src/**/*.vue",
-    "../../packages/landing-section-schema/src/**/*.ts",
-    "../../packages/landing-sveltekit-framework/src/**/*.ts",
-    "../../packages/utilities/src/**/*.ts"
+    "../../packages/section-schema/src/**/*.ts"
   ],
   "exclude": [
     "src/**/__tests__/*",
@@ -43,41 +35,11 @@
       "@client/data-model/models/*": [
         "../../packages/data-model/src/models/*"
       ],
-      "@southneuhof/apostle": [
-        "../../packages/apostle/src/index.ts"
+      "@client/section-schema": [
+        "../../packages/section-schema/src/index.ts"
       ],
-      "@southneuhof/apostle/*": [
-        "../../packages/apostle/src/*"
-      ],
-      "@southneuhof/is-data-model": [
-        "../../packages/is-data-model/src/index.ts"
-      ],
-      "@southneuhof/is-data-model/*": [
-        "../../packages/is-data-model/src/*"
-      ],
-      "@southneuhof/is-vue-framework": [
-        "../../packages/is-vue-framework/src/index.ts"
-      ],
-      "@southneuhof/is-vue-framework/*": [
-        "../../packages/is-vue-framework/src/*"
-      ],
-      "@southneuhof/landing-sveltekit-framework": [
-        "../../packages/landing-sveltekit-framework/src/index.ts"
-      ],
-      "@southneuhof/landing-sveltekit-framework/*": [
-        "../../packages/landing-sveltekit-framework/src/*"
-      ],
-      "@southneuhof/landing-section-schema": [
-        "../../packages/landing-section-schema/src/index.ts"
-      ],
-      "@southneuhof/landing-section-schema/*": [
-        "../../packages/landing-section-schema/src/*"
-      ],
-      "@southneuhof/utilities": [
-        "../../packages/utilities/src/index.ts"
-      ],
-      "@southneuhof/utilities/*": [
-        "../../packages/utilities/src/*"
+      "@client/section-schema/*": [
+        "../../packages/section-schema/src/*"
       ]
     },
     "module": "esnext",
@@ -88,8 +50,6 @@
     "checkUnknownProps": false,
     "checkUnknownEvents": false,
     "checkUnknownDirectives": false,
-    "checkUnknownComponents": true,
-    // "checkUnknownSlots": false,
-    // "checkUnknownAttributes": false
+    "checkUnknownComponents": true
   }
 }

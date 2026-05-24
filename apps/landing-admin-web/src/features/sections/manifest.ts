@@ -6,7 +6,7 @@ import type {
 
 type SectionSchemaModule = Record<string, unknown>
 
-const schemaModules = import.meta.glob('@southneuhof/landing-section-schema/sections/**/*.ts', {
+const schemaModules = import.meta.glob('@client/section-schema/sections/**/*.ts', {
   eager: true,
   import: 'default',
 })

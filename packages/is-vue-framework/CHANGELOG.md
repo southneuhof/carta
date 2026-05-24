@@ -1,5 +1,11 @@
 # @southneuhof/is-vue-framework
 
+## 1.0.3
+
+### Patch Changes
+
+- Fix deep component subpath exports for Vue single-file components.
+
 ## 1.0.1
 
 ### Patch Changes

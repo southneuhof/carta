@@ -51,6 +51,20 @@ const packages = [
     ],
   },
   {
+    name: '@southneuhof/landing-section-schema',
+    root: 'packages/landing-section-schema',
+    verifyNodeEsmImports: true,
+    requiredFiles: [
+      'dist/index.js',
+      'dist/index.js.map',
+      'dist/index.d.ts',
+      'dist/index.d.ts.map',
+      'dist/defineSectionSchema.js',
+      'dist/common-section-meta.js',
+      'src/index.ts',
+    ],
+  },
+  {
     name: '@southneuhof/landing-sveltekit-framework',
     root: 'packages/landing-sveltekit-framework',
     requiredFiles: [
@@ -75,6 +89,7 @@ const forbiddenTarballPatterns = [
 
 const missing = []
 const forbidden = []
+const invalidImports = []
 
 async function verifyLocalFile(packageRoot, file) {
   try {
@@ -98,11 +113,27 @@ async function packageTarballPath(pkg) {
   return `${pkg.root}/${tarballName}`
 }
 
+async function verifyDistImports(pkg, file) {
+  if (!pkg.verifyNodeEsmImports) return
+  if (!file.startsWith('dist/') || !file.endsWith('.js')) return
+
+  const text = await readFile(`${pkg.root}/${file}`, 'utf8')
+  const importPattern = /(?:from\s*['"]|import\s*\(\s*['"])(\.{1,2}\/[^'"]+)/g
+
+  for (const match of text.matchAll(importPattern)) {
+    const specifier = match[1]
+    if (!/\.(?:js|mjs|cjs|json|css|svelte|vue)(?:$|[?#])/.test(specifier)) {
+      invalidImports.push(`${pkg.root}/${file}: extensionless relative import "${specifier}"`)
+    }
+  }
+}
+
 for (const pkg of packages) {
   const tarball = await packageTarballPath(pkg)
 
   for (const file of pkg.requiredFiles) {
     await verifyLocalFile(pkg.root, file)
+    await verifyDistImports(pkg, file)
   }
 
   let entries
@@ -130,7 +161,7 @@ for (const pkg of packages) {
   }
 }
 
-if (missing.length > 0 || forbidden.length > 0) {
+if (missing.length > 0 || forbidden.length > 0 || invalidImports.length > 0) {
   const sections = []
 
   if (missing.length > 0) {
@@ -139,6 +170,10 @@ if (missing.length > 0 || forbidden.length > 0) {
 
   if (forbidden.length > 0) {
     sections.push(`Forbidden packed files:\n${forbidden.join('\n')}`)
+  }
+
+  if (invalidImports.length > 0) {
+    sections.push(`Invalid dist imports:\n${invalidImports.join('\n')}`)
   }
 
   throw new Error(`Package verification failed.\n${sections.join('\n\n')}`)

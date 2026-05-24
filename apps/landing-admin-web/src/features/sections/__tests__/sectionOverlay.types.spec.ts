@@ -1,5 +1,5 @@
-import contentDefaultSchema from '@southneuhof/landing-section-schema/sections/content-default'
-import dataListSchema from '@southneuhof/landing-section-schema/sections/data-list'
+import contentDefaultSchema from '@client/section-schema/sections/content-default'
+import dataListSchema from '@client/section-schema/sections/data-list'
 import { describe, expect, it } from 'vitest'
 
 describe('section schema authoring types', () => {

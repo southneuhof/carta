@@ -1,5 +1,11 @@
 # @southneuhof/landing-section-schema
 
+## 0.0.3
+
+### Patch Changes
+
+- Emit Node-compatible relative ESM imports from the published package.
+
 ## 0.0.2
 
 ### Patch Changes

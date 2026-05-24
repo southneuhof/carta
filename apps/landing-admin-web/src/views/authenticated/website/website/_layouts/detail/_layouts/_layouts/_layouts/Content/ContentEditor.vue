@@ -48,7 +48,7 @@ import Button from '@southneuhof/is-vue-framework/components/base/Button.vue';
     resolveSlotEditorConfig(props.slotConfig, {
       slot: {
         key: props.slotConfig?.key ?? '',
-        type: props.slotConfig?.type ?? 'content',
+        type: (props.slotConfig?.type === 'resource' ? 'content' : (props.slotConfig?.type ?? 'content')),
         order: props.slotConfig?.order ?? 0,
         many: props.slotConfig?.many ?? false,
       },

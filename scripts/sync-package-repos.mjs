@@ -30,6 +30,13 @@ const packages = [
     tempBranch: 'sync/is-vue-framework',
   },
   {
+    name: '@southneuhof/landing-section-schema',
+    prefix: 'packages/landing-section-schema',
+    repo: 'https://github.com/southneuhof/landing-section-schema.git',
+    branch: 'main',
+    tempBranch: 'sync/landing-section-schema',
+  },
+  {
     name: '@southneuhof/landing-sveltekit-framework',
     prefix: 'packages/landing-sveltekit-framework',
     repo: 'https://github.com/southneuhof/landing-sveltekit-framework.git',

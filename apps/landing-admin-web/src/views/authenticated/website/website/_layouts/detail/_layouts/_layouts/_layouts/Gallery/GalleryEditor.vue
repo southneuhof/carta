@@ -58,7 +58,7 @@ const resolvedSlotConfig = computed(() =>
   resolveSlotEditorConfig(props.slotConfig, {
     slot: {
       key: props.slotConfig?.key ?? '',
-      type: props.slotConfig?.type ?? 'gallery',
+      type: (props.slotConfig?.type === 'resource' ? 'gallery' : (props.slotConfig?.type ?? 'gallery')),
       order: props.slotConfig?.order ?? 0,
       many: props.slotConfig?.many ?? false,
     },
