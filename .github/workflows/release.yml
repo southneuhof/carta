@@ -34,6 +34,8 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Build publishable packages
         run: pnpm --filter @southneuhof/is-data-model --filter @southneuhof/apostle --filter @southneuhof/utilities --filter @southneuhof/is-vue-framework --filter @southneuhof/landing-section-schema --filter @southneuhof/landing-sveltekit-framework build
