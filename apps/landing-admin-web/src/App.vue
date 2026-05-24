@@ -17,7 +17,7 @@ onErrorCaptured((err, instance, info) => {
 
 const handleResize = debounce(useScreenStore().handleResize, 300)
 
-onMounted(() => { 
+onMounted(() => {
   window.addEventListener('resize', handleResize)
   useScreenStore().handleResize()
   document.title = config.name
