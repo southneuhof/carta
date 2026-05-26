@@ -20,13 +20,13 @@ export default {
       ],
       minimum_education: [
         {
-          validator: (value: string) => typeof value === 'string',
+          validator: (value: string) => typeof value === 'string' && value.length > 0,
           message: 'Minimum education is required',
         },
       ],
       location: [
         {
-          validator: (value: string) => typeof value === 'string',
+          validator: (value: string) => typeof value === 'string' && value.length > 0,
           message: 'Location is required',
         },
       ],

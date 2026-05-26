@@ -65,6 +65,24 @@ const menu: Modules = [
       },
     ]
   },
+  {
+    name: 'careers',
+    title: 'Karir',
+    icon: 'briefcase',
+    description: 'Karir',
+    routes: [
+      {
+        name: 'jobCategory',
+        title: 'Kategori Lowongan',
+        icon: 'folder',
+      },
+      {
+        name: 'job',
+        title: 'Lowongan',
+        icon: 'folder',
+      },
+    ],
+  },
   // {
   //   name: 'collection',
   //   title: 'Collection',
