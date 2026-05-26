@@ -23,6 +23,18 @@
   --colors-outline-variant: #CDC9C9;
 }
 
+:root {
+  --topbarHeight: 49px;
+  --navigatorHeight: 52px;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --topbarHeight: 116px;
+    --navigatorHeight: 52px;
+  }
+}
+
 
 
 @layer base {

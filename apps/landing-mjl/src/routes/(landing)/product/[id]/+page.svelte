@@ -4,4 +4,8 @@
   const { data } = $props();
 </script>
 
-<ProductShowcaseSection section={data.section} />
+<div class="flex flex-col w-full min-h-screen h-full lg:mt-[88px] text-on-surface">
+  <div class="w-full" style="margin-top: var(--topbarHeight);">
+    <ProductShowcaseSection section={data.section} />
+  </div>
+</div>

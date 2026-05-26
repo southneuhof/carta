@@ -42,7 +42,6 @@
 
 <div class={className}>
   {#each sections as section, index (section.id)}
-    <SectionRenderer {section} {index} {sectionComponents} />
+    <SectionRenderer {section} {sections} {index} {sectionComponents} />
   {/each}
 </div>
-

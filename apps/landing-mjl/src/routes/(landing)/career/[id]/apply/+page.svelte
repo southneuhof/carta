@@ -23,8 +23,8 @@
   setContext('section', sectionContext);
 </script>
 
-<div class="flex flex-col w-full min-h-screen h-full text-on-surface" style="margin-top: var(--topbarHeight);">
-  <div class="flex justify-center w-full py-8 lg:py-12">
+<div class="flex flex-col w-full min-h-screen h-full lg:mt-[88px] text-on-surface">
+  <div class="flex justify-center w-full py-8 lg:py-12" style="margin-top: var(--topbarHeight);">
     <div class="flex flex-col w-full max-w-screen-xl px-6 lg:px-12 gap-8">
       <div>
         <a href={`/career/${data.career.id}`} class="inline-flex items-center gap-2 text-primary font-semibold text-sm md:text-base hover:opacity-90 transition">
@@ -44,8 +44,6 @@
         </div>
 
         <div class="lg:col-span-8">
-          <!-- <h2 class="text-3xl md:text-5xl font-bold text-center mb-8 lg:mb-10">Lengkapi Data Diri</h2> -->
-
           {#if viewIndex === 0}
             <FormView onSubmit={() => (viewIndex = 1)} />
           {:else}

@@ -2,8 +2,8 @@
   const { data } = $props();
 </script>
 
-<div class="flex flex-col w-full min-h-screen h-full text-on-surface" style="margin-top: var(--topbarHeight);">
-  <div class="flex justify-center w-full py-8 lg:py-12">
+<div class="flex flex-col w-full min-h-screen h-full lg:mt-[88px] text-on-surface">
+  <div class="flex justify-center w-full py-8 lg:py-12" style="margin-top: var(--topbarHeight);">
     <div class="flex flex-col w-full max-w-screen-xl px-6 lg:px-12 gap-8">
       
       <!-- Back Button -->
@@ -36,9 +36,9 @@
         <div class="flex flex-col gap-3">
           <h2 class="text-xl md:text-2xl font-semibold text-on-surface/95">Deskripsi</h2>
           {#if data.career.description}
-            <div class="rtf-content text-sm leading-relaxed font-medium">{@html data.career.description}</div>
+            <div class="rtf-content text-outline text-sm leading-relaxed">{@html data.career.description}</div>
           {:else}
-            <p class="text-sm font-medium">Belum ada deskripsi.</p>
+            <p class="text-sm text-outline">Belum ada deskripsi.</p>
           {/if}
         </div>
 
@@ -46,9 +46,9 @@
         <div class="flex flex-col gap-3">
           <h2 class="text-xl md:text-2xl font-semibold text-on-surface/95">Kualifikasi Pekerjaan</h2>
           {#if data.career.qualification}
-            <div class="rtf-content text-sm leading-relaxed font-medium">{@html data.career.qualification}</div>
+            <div class="rtf-content text-outline text-sm leading-relaxed">{@html data.career.qualification}</div>
           {:else}
-            <p class="text-sm font-medium">Belum ada kualifikasi.</p>
+            <p class="text-sm text-outline">Belum ada kualifikasi.</p>
           {/if}
         </div>
 
@@ -56,7 +56,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-16 w-full pt-2">
           <div class="flex flex-col gap-3">
             <h3 class="text-xl md:text-2xl font-semibold text-on-surface/95">Minimal Pendidikan</h3>
-            <p class="inline-flex items-center gap-2 text-sm font-semibold">
+            <p class="inline-flex items-center gap-2 text-sm text-outline">
               <i class="ri-book-open-line text-lg"></i>
               {data.career.minimum_education}
             </p>
@@ -64,7 +64,7 @@
 
           <div class="flex flex-col gap-3">
             <h3 class="text-xl md:text-2xl font-semibold text-on-surface/95">Penempatan</h3>
-            <p class="inline-flex items-center gap-2 text-sm font-semibold">
+            <p class="inline-flex items-center gap-2 text-sm text-outline">
               <i class="ri-map-pin-line text-lg"></i>
               {data.career.location}
             </p>
