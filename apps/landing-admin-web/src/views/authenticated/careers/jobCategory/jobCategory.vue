@@ -13,7 +13,7 @@ import { permissions } from '@/stores/permissions'
     <template #list-name="{ data }">
       <p>{{ data.translations.find((item: any) => item.language === 'id')?.name }}</p>
     </template>
-    <template #list-rowActions-update="{ data }">
+    <!-- <template #list-rowActions-update="{ data }">
       <Modal v-if="permissions().has('update-jobCategory')">
         <template #trigger>
           <Button color="warning" kind="icon">
@@ -31,6 +31,6 @@ import { permissions } from '@/stores/permissions'
           />
         </template>
       </Modal>
-    </template>
+    </template> -->
   </CRUDComposite>
 </template>

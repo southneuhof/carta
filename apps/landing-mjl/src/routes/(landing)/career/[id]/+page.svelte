@@ -1,11 +1,5 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-
   const { data } = $props();
-
-  const companyWebsite = $derived(($page.data.companyProfile as any)?.website || 'bit.ly/formpelamarmjl');
-  const applyHref = $derived(companyWebsite.startsWith('http') ? companyWebsite : `https://${companyWebsite}`);
-  const companyEmail = $derived($page.data.companyProfile?.email || 'hrd.recruitment@ptmjl.co.id');
 </script>
 
 <div class="flex flex-col w-full min-h-screen h-full text-on-surface" style="margin-top: var(--topbarHeight);">
@@ -28,9 +22,7 @@
         </div>
 
         <a
-          href={applyHref}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={`/career/${data.career.id}/apply`}
           class="inline-flex h-12 w-fit min-w-[180px] items-center justify-center gap-3 rounded-full bg-primary px-8 text-white text-base font-semibold transition hover:scale-[1.01] active:scale-95 lg:min-w-[220px]"
         >
           Apply
@@ -79,8 +71,6 @@
           </div>
         </div>
       </section>
-      
     </div>
   </div>
 </div>
-
