@@ -284,7 +284,6 @@ describe('shared section schema', () => {
   it('switches content-gallery gallery media input from section meta', () => {
     const generator = contentGallery.data.gallery.editor?.inputConfig?.media?.dependency?.inputConfig?.generator
 
-    expect(generator?.({ meta: { gallery_item_type: 'navigation-card', gallery_media_type: 'image' } })).toEqual({ type: 'icon-select' })
     expect(generator?.({ meta: { gallery_media_type: 'embed' } })).toEqual({ type: 'embed' })
     expect(generator?.({ meta: { gallery_media_type: 'icon' } })).toEqual({ type: 'icon-select' })
     expect(generator?.({ meta: { gallery_media_type: 'image' } })).toEqual({ type: 'image' })

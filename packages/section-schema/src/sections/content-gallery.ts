@@ -405,7 +405,6 @@ export default defineSectionSchema({
             data: [
               { id: 'plain', name: 'Plain' },
               { id: 'content-card', name: 'Content Card' },
-              { id: 'navigation-card', name: 'Navigation Card' },
             ],
             clearable: false,
           },
@@ -779,9 +778,7 @@ export default defineSectionSchema({
               fields: ['meta'],
               inputConfig: {
                 generator: ({ meta }: any) => ({
-                  type: meta?.gallery_item_type === 'navigation-card'
-                    ? 'icon-select'
-                    : meta?.gallery_media_type === 'embed'
+                  type: meta?.gallery_media_type === 'embed'
                     ? 'embed'
                     : meta?.gallery_media_type === 'icon'
                       ? 'icon-select'

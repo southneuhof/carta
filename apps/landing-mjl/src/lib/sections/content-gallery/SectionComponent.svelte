@@ -146,31 +146,26 @@
   const galleryItemTypeClassMap: any = {
     plain: '',
     'content-card': 'h-full rounded-[2rem] px-8 py-10 md:px-10 md:py-12 border border-1 border-outline-variant/60',
-    'navigation-card': '',
   }
 
   const galleryItemContentClassMap: any = {
     plain: '',
     'content-card': 'items-center text-center',
-    'navigation-card': '',
   }
 
   const galleryCardMediaWrapClassMap: any = {
     plain: '',
     'content-card': 'mb-4 flex min-h-20 items-center justify-center rounded-2xl p-4',
-    'navigation-card': '',
   }
 
   const galleryCardTitleClassMap: any = {
     plain: 'font-bold text-lg',
     'content-card': 'font-bold text-xl md:text-2xl',
-    'navigation-card': 'font-bold text-lg',
   }
 
   const galleryCardSubtitleClassMap: any = {
     plain: '',
     'content-card': 'text-base leading-relaxed text-on-surface/80',
-    'navigation-card': '',
   }
 
   const mediaAspectRatioClassMap: any = {
@@ -439,39 +434,13 @@
 {/snippet}
 
 {#snippet GalleryItem(item: any)}
-  {#if galleryItemType === 'navigation-card'}
-    {@render NavigationCardItem(item)}
-  {:else if section.meta.gallery_media_type === 'embed'}
+  {#if section.meta.gallery_media_type === 'embed'}
     {@render EmbedGalleryItem(item)}
   {:else if section.meta.gallery_media_type === 'image'}
     {@render ImageGalleryItem(item)}
   {:else}
     {@render IconGalleryItem(item)}
   {/if}
-{/snippet}
-
-{#snippet NavigationCardItem(item: any)}
-  <a href={item.url || undefined} class="block h-full w-full rounded-[2rem] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-    <div class="flex h-full min-w-0 flex-col items-center justify-start rounded-[2rem] border border-outline-variant/60 bg-surface px-6 py-8 text-center md:px-8 md:py-10">
-      {#if item.title}
-        <p class="text-2xl font-bold uppercase tracking-wide md:text-3xl">{item.title}</p>
-      {/if}
-      {#if item.subtitle}
-        <p class="mt-3 text-base md:text-lg">{item.subtitle}</p>
-      {/if}
-      {#if item.url_text}
-        <p class="mt-4 rounded-full border border-primary px-4 py-1 text-sm font-semibold text-primary">{item.url_text}</p>
-      {/if}
-      {#if item.media}
-        <div class="mt-6 flex items-center gap-2 text-outline">
-          <i class="{item.media} text-lg"></i>
-          {#if item.url}
-            <span class="text-sm md:text-base">{item.url}</span>
-          {/if}
-        </div>
-      {/if}
-    </div>
-  </a>
 {/snippet}
 
 {#snippet IconGalleryItem(icon: any)}
