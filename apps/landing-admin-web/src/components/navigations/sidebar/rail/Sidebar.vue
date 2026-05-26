@@ -24,6 +24,7 @@ onClickOutside(
 <template>
   <div ref="sidebar" id="sidebar" class="sticky top-0 z-50 flex flex-row lg:left-0 lg:z-0 py-3 pl-3 h-screen max-h-screen bg-surface">
     <div :key="'sidebar'" class="sticky top-0 flex w-24 flex-col items-center justify-between gap-6 overflow-auto h-full rounded-xl bg-surface-container py-8">
+      asd
       <Logo class="w-12"></Logo>
       <div class="flex h-full w-full flex-col items-start gap-4 overflow-auto">
         <RailItem
