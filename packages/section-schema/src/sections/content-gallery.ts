@@ -48,15 +48,16 @@ export default defineSectionSchema({
       'gallery_columns',
       'gallery_gap',
       'gallery_item_align',
+      'gallery_item_type',
       'gallery_icon_size',
       'gallery_media_radius',
+      'gallery_media_size',
       'gallery_media_aspect_ratio',
       'carousel_loop',
       'carousel_navigation_position',
       'carousel_navigation_style',
       'carousel_drag_free',
       'carousel_item_width',
-      'remove_outline_on_images',
       'ornament_enabled',
       'ornament_media',
       'ornament_scope',
@@ -89,15 +90,16 @@ export default defineSectionSchema({
       gallery_columns: '3',
       gallery_gap: 'xl',
       gallery_item_align: 'left',
+      gallery_item_type: 'plain',
       gallery_icon_size: 'md',
       gallery_media_radius: 'sm',
+      gallery_media_size: 'md',
       gallery_media_aspect_ratio: 'auto',
       carousel_loop: false,
       carousel_navigation_position: 'bottom',
       carousel_navigation_style: 'arrows',
       carousel_drag_free: true,
       carousel_item_width: 'medium',
-      remove_outline_on_images: false,
       ornament_enabled: false,
       ornament_scope: 'container',
       ornament_position: 'top-left',
@@ -108,16 +110,6 @@ export default defineSectionSchema({
     editor: {
       inputConfig: {
         remove_margin: { type: 'checkbox' },
-        remove_outline_on_images: {
-          type: 'checkbox',
-          dependency: {
-            fields: ['gallery_media_type'],
-            visibility: {
-              validator: isImageGallery,
-              default: false,
-            },
-          },
-        },
         content_align: {
           type: 'select',
           props: {
@@ -407,6 +399,17 @@ export default defineSectionSchema({
             clearable: false,
           },
         },
+        gallery_item_type: {
+          type: 'select',
+          props: {
+            data: [
+              { id: 'plain', name: 'Plain' },
+              { id: 'content-card', name: 'Content Card' },
+              { id: 'navigation-card', name: 'Navigation Card' },
+            ],
+            clearable: false,
+          },
+        },
         gallery_icon_size: {
           type: 'select',
           dependency: {
@@ -441,6 +444,24 @@ export default defineSectionSchema({
               { id: 'md', name: 'Medium' },
               { id: 'lg', name: 'Large' },
               { id: 'xl', name: 'Extra Large' },
+            ],
+            clearable: false,
+          },
+        },
+        gallery_media_size: {
+          type: 'select',
+          dependency: {
+            fields: ['gallery_media_type'],
+            visibility: {
+              validator: isImageGallery,
+              default: false,
+            },
+          },
+          props: {
+            data: [
+              { id: 'sm', name: 'Small' },
+              { id: 'md', name: 'Medium' },
+              { id: 'lg', name: 'Large' },
             ],
             clearable: false,
           },
@@ -673,7 +694,6 @@ export default defineSectionSchema({
       },
       fieldsAlias: {
         remove_margin: 'Hilangkan margin pada konten',
-        remove_outline_on_images: 'Hilangkan outline pada gambar',
         content_align: 'Align Konten',
         gallery_header_align: 'Align Header Galeri',
         url_justify: 'Justify URL',
@@ -696,8 +716,10 @@ export default defineSectionSchema({
         gallery_columns: 'Kolom Galeri',
         gallery_gap: 'Jarak Galeri',
         gallery_item_align: 'Align Item Galeri',
+        gallery_item_type: 'Tipe Item Galeri',
         gallery_icon_size: 'Ukuran Icon Galeri',
         gallery_media_radius: 'Radius Media Galeri',
+        gallery_media_size: 'Ukuran Media Galeri',
         gallery_media_aspect_ratio: 'Rasio Media Galeri',
         carousel_loop: 'Carousel Loop',
         carousel_navigation_position: 'Posisi Navigasi Carousel',
@@ -747,7 +769,7 @@ export default defineSectionSchema({
       type: 'gallery',
       order: 3,
       many: true,
-      fields: ['media', 'title', 'subtitle'] as const,
+      fields: ['media', 'title', 'subtitle', 'url', 'url_text'] as const,
       editor: {
         label: 'Gallery Items',
         inputConfig: {
@@ -757,7 +779,9 @@ export default defineSectionSchema({
               fields: ['meta'],
               inputConfig: {
                 generator: ({ meta }: any) => ({
-                  type: meta?.gallery_media_type === 'embed'
+                  type: meta?.gallery_item_type === 'navigation-card'
+                    ? 'icon-select'
+                    : meta?.gallery_media_type === 'embed'
                     ? 'embed'
                     : meta?.gallery_media_type === 'icon'
                       ? 'icon-select'
@@ -769,6 +793,8 @@ export default defineSectionSchema({
           },
           title: { type: 'text' },
           subtitle: { type: 'text' },
+          url: { type: 'menu-item' },
+          url_text: { type: 'text' },
         },
       },
     },

@@ -88,15 +88,16 @@ describe('shared section schema', () => {
       'gallery_columns',
       'gallery_gap',
       'gallery_item_align',
+      'gallery_item_type',
       'gallery_icon_size',
       'gallery_media_radius',
+      'gallery_media_size',
       'gallery_media_aspect_ratio',
       'carousel_loop',
       'carousel_navigation_position',
       'carousel_navigation_style',
       'carousel_drag_free',
       'carousel_item_width',
-      'remove_outline_on_images',
       'ornament_enabled',
       'ornament_media',
       'ornament_scope',
@@ -131,7 +132,9 @@ describe('shared section schema', () => {
     expect(contentGallery.meta?.defaultValues?.container_radius_pattern).toBe('diagonal')
     expect(contentGallery.meta?.defaultValues?.gallery_display_mode).toBe('static')
     expect(contentGallery.meta?.defaultValues?.gallery_media_type).toBe('icon')
+    expect(contentGallery.meta?.defaultValues?.gallery_media_size).toBe('md')
     expect(contentGallery.meta?.defaultValues?.gallery_columns).toBe('3')
+    expect(contentGallery.meta?.defaultValues?.gallery_item_type).toBe('plain')
     expect(contentGallery.meta?.defaultValues?.carousel_loop).toBe(false)
     expect(contentGallery.meta?.defaultValues?.carousel_navigation_position).toBe('bottom')
     expect(contentGallery.meta?.defaultValues?.carousel_navigation_style).toBe('arrows')
@@ -162,7 +165,7 @@ describe('shared section schema', () => {
     expect(contentDefault.data.content.fields).toContain('title')
     expect(contentGallery.data.content.fields).toContain('title')
     expect(contentGallery.data.gallery_header.fields).toContain('title')
-    expect(contentGallery.data.gallery.fields).toEqual(['media', 'title', 'subtitle'])
+    expect(contentGallery.data.gallery.fields).toEqual(['media', 'title', 'subtitle', 'url', 'url_text'])
     expect(heroBanner.data.banner.fields).toContain('media')
   })
 
@@ -281,6 +284,7 @@ describe('shared section schema', () => {
   it('switches content-gallery gallery media input from section meta', () => {
     const generator = contentGallery.data.gallery.editor?.inputConfig?.media?.dependency?.inputConfig?.generator
 
+    expect(generator?.({ meta: { gallery_item_type: 'navigation-card', gallery_media_type: 'image' } })).toEqual({ type: 'icon-select' })
     expect(generator?.({ meta: { gallery_media_type: 'embed' } })).toEqual({ type: 'embed' })
     expect(generator?.({ meta: { gallery_media_type: 'icon' } })).toEqual({ type: 'icon-select' })
     expect(generator?.({ meta: { gallery_media_type: 'image' } })).toEqual({ type: 'image' })
@@ -492,8 +496,8 @@ describe('shared section schema', () => {
     expect(inputConfig?.gallery_icon_size?.dependency?.visibility?.validator({ gallery_media_type: 'icon' })).toBe(true)
     expect(inputConfig?.gallery_icon_size?.dependency?.visibility?.validator({ gallery_media_type: 'image' })).toBe(false)
     expect(inputConfig?.gallery_media_radius?.dependency?.visibility?.validator({ gallery_media_type: 'image' })).toBe(true)
+    expect(inputConfig?.gallery_media_size?.dependency?.visibility?.validator({ gallery_media_type: 'image' })).toBe(true)
     expect(inputConfig?.gallery_media_aspect_ratio?.dependency?.visibility?.validator({ gallery_media_type: 'image' })).toBe(true)
-    expect(inputConfig?.remove_outline_on_images?.dependency?.visibility?.validator({ gallery_media_type: 'image' })).toBe(true)
     expect(inputConfig?.gallery_columns?.dependency?.visibility?.validator({ gallery_display_mode: 'static' })).toBe(true)
     expect(inputConfig?.gallery_columns?.dependency?.visibility?.validator({ gallery_display_mode: 'carousel' })).toBe(false)
     expect(inputConfig?.carousel_loop?.dependency?.visibility?.validator({ gallery_display_mode: 'static' })).toBe(false)

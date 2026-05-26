@@ -143,6 +143,36 @@
     lg: 'text-5xl',
   }
 
+  const galleryItemTypeClassMap: any = {
+    plain: '',
+    'content-card': 'h-full rounded-[2rem] px-8 py-10 md:px-10 md:py-12 border border-1 border-outline-variant/60',
+    'navigation-card': '',
+  }
+
+  const galleryItemContentClassMap: any = {
+    plain: '',
+    'content-card': 'items-center text-center',
+    'navigation-card': '',
+  }
+
+  const galleryCardMediaWrapClassMap: any = {
+    plain: '',
+    'content-card': 'mb-4 flex min-h-20 items-center justify-center rounded-2xl p-4',
+    'navigation-card': '',
+  }
+
+  const galleryCardTitleClassMap: any = {
+    plain: 'font-bold text-lg',
+    'content-card': 'font-bold text-xl md:text-2xl',
+    'navigation-card': 'font-bold text-lg',
+  }
+
+  const galleryCardSubtitleClassMap: any = {
+    plain: '',
+    'content-card': 'text-base leading-relaxed text-on-surface/80',
+    'navigation-card': '',
+  }
+
   const mediaAspectRatioClassMap: any = {
     auto: '',
     '16/9': 'aspect-video',
@@ -156,6 +186,12 @@
     md: 'rounded-md',
     lg: 'rounded-lg',
     xl: 'rounded-xl',
+  }
+
+  const galleryMediaSizeClassMap: any = {
+    sm: 'max-w-[180px]',
+    md: 'max-w-[240px]',
+    lg: 'max-w-[320px]',
   }
 
   const carouselItemWidthClassMap: any = {
@@ -215,9 +251,11 @@
   const galleryColumns = section.meta.gallery_columns || '3'
   const galleryGap = section.meta.gallery_gap || 'xl'
   const galleryItemAlign = section.meta.gallery_item_align || 'left'
+  const galleryItemType = section.meta.gallery_item_type || 'plain'
   const galleryIconSize = section.meta.gallery_icon_size || 'md'
   const galleryMediaRadius = section.meta.gallery_media_radius || 'sm'
   const galleryMediaAspectRatio = section.meta.gallery_media_aspect_ratio || 'auto'
+  const galleryMediaSize = section.meta.gallery_media_size || 'md'
   const galleryDisplayMode = section.meta.gallery_display_mode || 'static'
   const isCarouselMode = galleryDisplayMode === 'carousel'
   const carouselNavigationPosition = section.meta.carousel_navigation_position || 'bottom'
@@ -401,7 +439,9 @@
 {/snippet}
 
 {#snippet GalleryItem(item: any)}
-  {#if section.meta.gallery_media_type === 'embed'}
+  {#if galleryItemType === 'navigation-card'}
+    {@render NavigationCardItem(item)}
+  {:else if section.meta.gallery_media_type === 'embed'}
     {@render EmbedGalleryItem(item)}
   {:else if section.meta.gallery_media_type === 'image'}
     {@render ImageGalleryItem(item)}
@@ -410,50 +450,91 @@
   {/if}
 {/snippet}
 
+{#snippet NavigationCardItem(item: any)}
+  <a href={item.url || undefined} class="block h-full w-full rounded-[2rem] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+    <div class="flex h-full min-w-0 flex-col items-center justify-start rounded-[2rem] border border-outline-variant/60 bg-surface px-6 py-8 text-center md:px-8 md:py-10">
+      {#if item.title}
+        <p class="text-2xl font-bold uppercase tracking-wide md:text-3xl">{item.title}</p>
+      {/if}
+      {#if item.subtitle}
+        <p class="mt-3 text-base md:text-lg">{item.subtitle}</p>
+      {/if}
+      {#if item.url_text}
+        <p class="mt-4 rounded-full border border-primary px-4 py-1 text-sm font-semibold text-primary">{item.url_text}</p>
+      {/if}
+      {#if item.media}
+        <div class="mt-6 flex items-center gap-2 text-outline">
+          <i class="{item.media} text-lg"></i>
+          {#if item.url}
+            <span class="text-sm md:text-base">{item.url}</span>
+          {/if}
+        </div>
+      {/if}
+    </div>
+  </a>
+{/snippet}
+
 {#snippet IconGalleryItem(icon: any)}
-  <div class="flex min-w-0 flex-col gap-sm {galleryItemAlignClassMap[galleryItemAlign]}">
-    {#if icon.media}<i class="{icon.media} {galleryIconSizeClassMap[galleryIconSize]}"></i>{/if}
-    {#if icon.title}<p class="font-bold text-lg">{icon.title}</p>{/if}
-    {#if icon.subtitle}<p>{icon.subtitle}</p>{/if}
+  <div class="flex min-w-0 flex-col gap-sm {galleryItemTypeClassMap[galleryItemType]} {galleryItemAlignClassMap[galleryItemAlign]} {galleryItemContentClassMap[galleryItemType]}">
+    {#if icon.media}
+      <div class="{galleryCardMediaWrapClassMap[galleryItemType]}"><i class="{icon.media} {galleryIconSizeClassMap[galleryIconSize]}"></i></div>
+    {/if}
+    {#if icon.title}<p class="{galleryCardTitleClassMap[galleryItemType]}">{icon.title}</p>{/if}
+    {#if icon.subtitle}<p class="{galleryCardSubtitleClassMap[galleryItemType]}">{icon.subtitle}</p>{/if}
+    {@render GalleryItemLink(icon)}
   </div>
 {/snippet}
 
 {#snippet ImageGalleryItem(image: any)}
-  <div class="flex min-w-0 flex-col gap-base {galleryItemAlignClassMap[galleryItemAlign]}">
+  <div class="flex min-w-0 flex-col gap-base {galleryItemTypeClassMap[galleryItemType]} {galleryItemAlignClassMap[galleryItemAlign]} {galleryItemContentClassMap[galleryItemType]}">
     {#if image.media}
-      <div class="w-full overflow-hidden {mediaRadiusClassMap[galleryMediaRadius]} {mediaAspectRatioClassMap[galleryMediaAspectRatio]}">
+      <div class="w-full overflow-hidden {mediaRadiusClassMap[galleryMediaRadius]} {mediaAspectRatioClassMap[galleryMediaAspectRatio]} {galleryCardMediaWrapClassMap[galleryItemType]}">
         <img
           src={image.media}
           alt={image.title || ''}
-          class="h-full w-full object-cover object-center {!section.meta.remove_outline_on_images ? 'outline outline-outline-variant' : ''}"
+          class="h-full w-full object-cover object-center {galleryItemType === 'content-card' ? 'mx-auto ' + (galleryMediaSizeClassMap[galleryMediaSize] || galleryMediaSizeClassMap.md) : ''}"
         />
       </div>
     {/if}
     {#if image.title || image.subtitle}
-      <div class="flex flex-col gap-xs {galleryItemAlignClassMap[galleryItemAlign]}">
-        {#if image.title}<p class="font-bold text-lg">{image.title}</p>{/if}
-        {#if image.subtitle}<p>{image.subtitle}</p>{/if}
+      <div class="flex flex-col gap-xs {galleryItemAlignClassMap[galleryItemAlign]} {galleryItemContentClassMap[galleryItemType]}">
+        {#if image.title}<p class="{galleryCardTitleClassMap[galleryItemType]}">{image.title}</p>{/if}
+        {#if image.subtitle}<p class="{galleryCardSubtitleClassMap[galleryItemType]}">{image.subtitle}</p>{/if}
       </div>
     {/if}
+    {@render GalleryItemLink(image)}
   </div>
 {/snippet}
 
 {#snippet EmbedGalleryItem(embed: any)}
-  <div class="flex min-w-0 flex-col gap-base {galleryItemAlignClassMap[galleryItemAlign]}">
+  <div class="flex min-w-0 flex-col gap-base {galleryItemTypeClassMap[galleryItemType]} {galleryItemAlignClassMap[galleryItemAlign]} {galleryItemContentClassMap[galleryItemType]}">
     {#if embed.media}
-      <div class="min-h-[300px] w-full overflow-hidden {mediaRadiusClassMap[galleryMediaRadius]}">
+      <div class="min-h-[300px] w-full overflow-hidden {mediaRadiusClassMap[galleryMediaRadius]} {galleryCardMediaWrapClassMap[galleryItemType]}">
         <div class="embed-preview">
           <div class="h-full w-full">{@html embed.media}</div>
         </div>
       </div>
     {/if}
     {#if embed.title || embed.subtitle}
-      <div class="flex flex-col gap-xs {galleryItemAlignClassMap[galleryItemAlign]}">
-        {#if embed.title}<p class="font-bold text-lg">{embed.title}</p>{/if}
-        {#if embed.subtitle}<p>{embed.subtitle}</p>{/if}
+      <div class="flex flex-col gap-xs {galleryItemAlignClassMap[galleryItemAlign]} {galleryItemContentClassMap[galleryItemType]}">
+        {#if embed.title}<p class="{galleryCardTitleClassMap[galleryItemType]}">{embed.title}</p>{/if}
+        {#if embed.subtitle}<p class="{galleryCardSubtitleClassMap[galleryItemType]}">{embed.subtitle}</p>{/if}
       </div>
     {/if}
+    {@render GalleryItemLink(embed)}
   </div>
+{/snippet}
+
+{#snippet GalleryItemLink(item: any)}
+  {#if item.url}
+    <div class="mt-2 flex w-full flex-row items-center {galleryItemType === 'content-card' ? 'justify-center' : (urlJustifyClassMap[galleryItemAlign] || urlJustifyClassMap.left)}">
+      <a href={item.url}>
+        <Button class={galleryItemType === 'content-card' ? 'min-w-[180px] px-7 py-3 text-base md:text-lg' : ''}>
+          {item.url_text || m.learn_more()} <i class="ri-arrow-right-line"></i>
+        </Button>
+      </a>
+    </div>
+  {/if}
 {/snippet}
 
 {#snippet CarouselNavigation()}
