@@ -37,3 +37,9 @@ BaseCRUD (Postmodern).vue
 
 # Portable landing local provider overrides
 .local/
+
+# Asset storage
+/apps/landing-mjl/storage/_optimized/public/*
+/apps/landing-mjl/storage/private/*
+/apps/landing-mjl/storage/public/*
+/apps/landing-mjl/storage/temp/*
