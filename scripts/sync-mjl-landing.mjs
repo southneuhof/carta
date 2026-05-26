@@ -39,6 +39,22 @@ const providerPackageNames = [
   '@southneuhof/utilities',
 ]
 
+const syncedFiles = [
+  'package.json',
+  'pnpm-workspace.yaml',
+  'tsconfig.base.json',
+  'turbo.json',
+  '.npmrc',
+  '.gitignore',
+  'scripts/check-portable-landing.mjs',
+  'scripts/package-resolution.mjs',
+  'scripts/package-resolution.d.ts',
+]
+
+function runGit(args, options = {}) {
+  return execFileSync('git', args, { cwd: targetRoot, stdio: 'inherit', ...options })
+}
+
 function readJson(file) {
   return JSON.parse(fs.readFileSync(path.join(repoRoot, file), 'utf8'))
 }
@@ -84,6 +100,51 @@ function rewritePackageJson(relativeFile) {
   fs.writeFileSync(file, `${JSON.stringify(pkg, null, 2)}\n`)
 }
 
+function isEmptyDirectory(dir) {
+  return !fs.existsSync(dir) || fs.readdirSync(dir).length === 0
+}
+
+function ensureGitRepository() {
+  const gitDir = path.join(targetRoot, '.git')
+
+  if (fs.existsSync(gitDir)) {
+    if (remote) {
+      const remotes = execFileSync('git', ['remote'], { cwd: targetRoot, encoding: 'utf8' }).split('\n')
+      if (!remotes.includes('origin')) runGit(['remote', 'add', 'origin', remote])
+      else runGit(['remote', 'set-url', 'origin', remote])
+    }
+
+    if (push) {
+      runGit(['fetch', 'origin', 'main'])
+      runGit(['checkout', '-B', 'main', 'origin/main'])
+    }
+    return
+  }
+
+  if (push && remote) {
+    if (!isEmptyDirectory(targetRoot)) {
+      throw new Error(`${targetRoot} is not a git repository and is not empty.`)
+    }
+
+    fs.mkdirSync(path.dirname(targetRoot), { recursive: true })
+    execFileSync('git', ['clone', '--branch', 'main', remote, targetRoot], { stdio: 'inherit' })
+    return
+  }
+
+  fs.mkdirSync(targetRoot, { recursive: true })
+  runGit(['init'])
+}
+
+function removeSyncedContent() {
+  for (const root of includedRoots) {
+    fs.rmSync(path.join(targetRoot, root), { recursive: true, force: true })
+  }
+
+  for (const file of syncedFiles) {
+    fs.rmSync(path.join(targetRoot, file), { recursive: true, force: true })
+  }
+}
+
 function writeRootFiles() {
   const rootPkg = readJson('package.json')
   const deployPkg = {
@@ -123,12 +184,8 @@ if (dryRun) {
   process.exit(0)
 }
 
-fs.mkdirSync(targetRoot, { recursive: true })
-for (const entry of fs.readdirSync(targetRoot)) {
-  if (entry === '.git') continue
-  if (excludedNames.has(entry)) continue
-  fs.rmSync(path.join(targetRoot, entry), { recursive: true, force: true })
-}
+ensureGitRepository()
+removeSyncedContent()
 
 for (const root of includedRoots) {
   copyDir(path.join(repoRoot, root), path.join(targetRoot, root))
@@ -144,18 +201,14 @@ for (const file of [
   rewritePackageJson(file)
 }
 
-if (!fs.existsSync(path.join(targetRoot, '.git'))) {
-  execFileSync('git', ['init'], { cwd: targetRoot, stdio: 'inherit' })
-}
-
-execFileSync('git', ['add', '.'], { cwd: targetRoot, stdio: 'inherit' })
+runGit(['add', '--', ...includedRoots, ...syncedFiles])
 const stagedDiff = spawnSync('git', ['diff', '--cached', '--quiet'], {
   cwd: targetRoot,
   stdio: 'inherit',
 })
 
 if (stagedDiff.status === 1) {
-  execFileSync('git', ['commit', '-m', 'Sync landing apps'], { cwd: targetRoot, stdio: 'inherit' })
+  runGit(['commit', '-m', 'Sync landing apps'])
 } else if (stagedDiff.status === 0) {
   console.log('No landing sync changes to commit.')
 } else {
@@ -163,11 +216,14 @@ if (stagedDiff.status === 1) {
 }
 
 if (push) {
-  if (remote) {
-    const remotes = execFileSync('git', ['remote'], { cwd: targetRoot, encoding: 'utf8' }).split('\n')
-    if (!remotes.includes('origin')) execFileSync('git', ['remote', 'add', 'origin', remote], { cwd: targetRoot, stdio: 'inherit' })
+  try {
+    runGit(['push', '-u', 'origin', 'HEAD:main'])
+  } catch (error) {
+    console.log('Push was rejected; rebasing onto the latest origin/main and retrying.')
+    runGit(['fetch', 'origin', 'main'])
+    runGit(['rebase', 'origin/main'])
+    runGit(['push', '-u', 'origin', 'HEAD:main'])
   }
-  execFileSync('git', ['push', '-u', 'origin', 'HEAD:main'], { cwd: targetRoot, stdio: 'inherit' })
 }
 
 console.log(`Generated ${targetRoot}`)
