@@ -309,6 +309,7 @@ model FormType {
   description  String?
   fields       FormField[]
   submissions  FormSubmission[]
+  jobCategories JobCategory[]
   // Many-to-many relation to Role for access control.
   allowedRoles Role[]           @relation("FormTypeAccess")
 }
@@ -504,6 +505,54 @@ model ProductTranslation {
   product     Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
 
   @@unique([product_id, language])
+}
+
+model JobCategory {
+  id           String                   @id @default(cuid())
+  form_type_id String
+  order        Int
+  active       Boolean                  @default(true)
+  created_at   DateTime                 @default(now())
+  updated_at   DateTime                 @updatedAt
+  formType     FormType                 @relation(fields: [form_type_id], references: [id], onDelete: Restrict)
+  translations JobCategoryTranslation[]
+  jobs         Job[]
+}
+
+model JobCategoryTranslation {
+  id              String      @id @default(cuid())
+  job_category_id String
+  language        Language
+  name            String
+  description     String?
+  jobCategory     JobCategory @relation(fields: [job_category_id], references: [id], onDelete: Cascade)
+
+  @@unique([job_category_id, language])
+}
+
+model Job {
+  id              String           @id @default(cuid())
+  job_category_id String
+  order           Int
+  active          Boolean          @default(true)
+  created_at      DateTime         @default(now())
+  updated_at      DateTime         @updatedAt
+  jobCategory     JobCategory      @relation(fields: [job_category_id], references: [id], onDelete: Restrict)
+  translations    JobTranslation[]
+}
+
+model JobTranslation {
+  id                String   @id @default(cuid())
+  job_id            String
+  language          Language
+  name              String
+  minimum_education String
+  location          String
+  description       String?  @db.Text
+  qualification     String?  @db.Text
+  job               Job      @relation(fields: [job_id], references: [id], onDelete: Cascade)
+
+  @@unique([job_id, language])
 }
 
 ///
