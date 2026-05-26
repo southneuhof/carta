@@ -187,5 +187,69 @@ export const sectionResourceResolvers: SectionResourceResolverRegistry = {
       images,
     };
   },
+  job: async ({ slot, context }) => {
+    const params = (slot.params ?? {}) as Record<string, unknown>;
+    const strategy = typeof params.strategy === 'string' ? params.strategy : undefined;
+    const locale = context.getLocale();
+
+    if (strategy !== 'activeList') {
+      return slot.many ? [] : null;
+    }
+
+    const jobs = await context.prisma.job.findMany({
+      where: {
+        active: true,
+        jobCategory: {
+          active: true,
+          translations: {
+            some: {
+              language: locale,
+            },
+          },
+        },
+        translations: {
+          some: {
+            language: locale,
+          },
+        },
+      },
+      orderBy: { order: 'asc' },
+      include: {
+        translations: {
+          where: { language: locale },
+          select: { name: true, minimum_education: true, location: true },
+        },
+        jobCategory: {
+          select: {
+            active: true,
+            translations: {
+              where: { language: locale },
+              select: { name: true },
+            },
+          },
+        },
+      },
+    });
+
+    return jobs
+      .filter((job: any) => job.jobCategory?.active)
+      .map((job: any) => {
+        const translation = job.translations?.[0];
+        const categoryName = job.jobCategory?.translations?.[0]?.name ?? '';
+
+        if (!translation?.name || !translation?.minimum_education || !translation?.location || !categoryName) {
+          return null;
+        }
+
+        return {
+          id: job.id,
+          name: translation.name,
+          minimum_education: translation.minimum_education,
+          location: translation.location,
+          category: categoryName,
+        };
+      })
+      .filter(Boolean);
+  },
   'section-meta-editor': async () => ({}),
 };

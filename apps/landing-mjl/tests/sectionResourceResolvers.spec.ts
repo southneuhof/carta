@@ -254,3 +254,108 @@ describe('sectionResourceResolvers.product', () => {
     expect(result).toEqual([])
   })
 })
+
+describe('sectionResourceResolvers.job', () => {
+  it('returns localized active jobs sorted by order', async () => {
+    const findMany = vi.fn().mockResolvedValue([
+      {
+        id: 'job-1',
+        order: 1,
+        jobCategory: {
+          active: true,
+          translations: [{ name: 'SALES' }],
+        },
+        translations: [{ name: 'Staff', minimum_education: 'S1', location: 'Semarang' }],
+      },
+      {
+        id: 'job-2',
+        order: 2,
+        jobCategory: {
+          active: true,
+          translations: [{ name: 'FINANCE STAFF' }],
+        },
+        translations: [{ name: 'Operator', minimum_education: 'D3', location: 'Bandung' }],
+      },
+    ])
+
+    const result = await sectionResourceResolvers.job({
+      section: { id: 'section-1', meta: {} },
+      slotKey: 'jobs',
+      slot: {
+        type: 'resource',
+        source: 'job',
+        order: 1,
+        many: true,
+        params: { strategy: 'activeList' },
+      } as any,
+      context: {
+        prisma: { job: { findMany } },
+        getLocale: () => 'id',
+        url: new URL('https://example.test'),
+      },
+    })
+
+    expect(findMany).toHaveBeenCalledTimes(1)
+    expect(result).toEqual([
+      { id: 'job-1', name: 'Staff', minimum_education: 'S1', location: 'Semarang', category: 'SALES' },
+      { id: 'job-2', name: 'Operator', minimum_education: 'D3', location: 'Bandung', category: 'FINANCE STAFF' },
+    ])
+  })
+
+  it('filters out inactive category and incomplete localized data', async () => {
+    const result = await sectionResourceResolvers.job({
+      section: { id: 'section-1', meta: {} },
+      slotKey: 'jobs',
+      slot: {
+        type: 'resource',
+        source: 'job',
+        order: 1,
+        many: true,
+        params: { strategy: 'activeList' },
+      } as any,
+      context: {
+        prisma: {
+          job: {
+            findMany: vi.fn().mockResolvedValue([
+              {
+                id: 'job-1',
+                jobCategory: { active: false, translations: [{ name: 'TECHNICAL SUPPORT' }] },
+                translations: [{ name: 'Staff', minimum_education: 'S1', location: 'Solo' }],
+              },
+              {
+                id: 'job-2',
+                jobCategory: { active: true, translations: [{ name: 'TECHNICAL SUPPORT' }] },
+                translations: [{ name: '', minimum_education: 'S1', location: 'Solo' }],
+              },
+            ]),
+          },
+        },
+        getLocale: () => 'id',
+        url: new URL('https://example.test'),
+      },
+    })
+
+    expect(result).toEqual([])
+  })
+
+  it('returns empty list for unsupported strategy when many=true', async () => {
+    const result = await sectionResourceResolvers.job({
+      section: { id: 'section-1', meta: {} },
+      slotKey: 'jobs',
+      slot: {
+        type: 'resource',
+        source: 'job',
+        order: 1,
+        many: true,
+        params: { strategy: 'detailById' },
+      } as any,
+      context: {
+        prisma: { job: { findMany: vi.fn() } },
+        getLocale: () => 'id',
+        url: new URL('https://example.test'),
+      },
+    })
+
+    expect(result).toEqual([])
+  })
+})

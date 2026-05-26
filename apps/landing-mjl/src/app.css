@@ -111,7 +111,7 @@
   }
 
   .rtf-content p {
-    @apply m-[revert]
+    /* @apply m-[revert] */
   }
 
   .rtf-content.m-base p {

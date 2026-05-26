@@ -8,6 +8,7 @@ import heroBanner from '../sections/hero-banner'
 import articleHighlights from '../sections/article-highlights'
 import articleList from '../sections/article-list'
 import form from '../sections/form'
+import jobCatalog from '../sections/job-catalog'
 import productCatalog from '../sections/product-catalog'
 import productShowcase from '../sections/product-showcase'
 import sectionSchemas from '../index'
@@ -406,6 +407,27 @@ describe('shared section schema', () => {
     expect(productCatalog.meta?.defaultValues?.initialLimit).toBe(8)
     expect(productCatalog.meta?.defaultValues?.showSearch).toBe(true)
     expect(productCatalog.meta?.defaultValues?.showCategoryTabs).toBe(true)
+  })
+
+  it('exports job-catalog schema with content+jobs slots', () => {
+    expect(sectionSchemas['job-catalog']).toBeTruthy()
+    expect(Object.keys(jobCatalog.data)).toEqual(['content', 'jobs'])
+    expect(jobCatalog.data.content.type).toBe('content')
+    expect(jobCatalog.data.content.fields).toEqual([
+      'subtitle',
+      'title',
+      'description',
+    ])
+    expect(jobCatalog.data.jobs).toEqual({
+      type: 'resource',
+      source: 'job',
+      order: 2,
+      many: true,
+      fields: ['id', 'name', 'minimum_education', 'location', 'category'],
+      params: {
+        strategy: 'activeList',
+      },
+    })
   })
 
   it('exports product-showcase schema with resource-only slots', () => {
