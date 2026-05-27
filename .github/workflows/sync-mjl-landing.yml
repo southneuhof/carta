@@ -45,4 +45,5 @@ jobs:
       - name: Sync MJL landing repository
         run: node scripts/sync-mjl-landing.mjs --target="$RUNNER_TEMP/mjl-landing" --push
         env:
+          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
           MJL_LANDING_REMOTE: https://x-access-token:${{ secrets.MJL_LANDING_TOKEN }}@github.com/sallliisa/mjl-landing.git

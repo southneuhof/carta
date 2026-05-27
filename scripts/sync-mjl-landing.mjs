@@ -100,6 +100,18 @@ function rewritePackageJson(relativeFile) {
   fs.writeFileSync(file, `${JSON.stringify(pkg, null, 2)}\n`)
 }
 
+function runInTarget(command, args, options = {}) {
+  const result = spawnSync(command, args, {
+    cwd: targetRoot,
+    stdio: 'inherit',
+    ...options,
+  })
+
+  if (result.status !== 0) {
+    throw new Error(`Command failed: ${command} ${args.join(' ')}`)
+  }
+}
+
 function isEmptyDirectory(dir) {
   return !fs.existsSync(dir) || fs.readdirSync(dir).length === 0
 }
@@ -201,7 +213,10 @@ for (const file of [
   rewritePackageJson(file)
 }
 
-runGit(['add', '--', ...includedRoots, ...syncedFiles])
+// Keep lockfile aligned with updated package specifiers for frozen-lockfile CI installs.
+runInTarget('pnpm', ['install', '--lockfile-only'])
+
+runGit(['add', '--', ...includedRoots, ...syncedFiles, 'pnpm-lock.yaml'])
 const stagedDiff = spawnSync('git', ['diff', '--cached', '--quiet'], {
   cwd: targetRoot,
   stdio: 'inherit',
