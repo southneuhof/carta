@@ -1,5 +1,13 @@
 # @southneuhof/is-vue-framework
 
+## 1.0.4
+
+### Patch Changes
+
+- 26d215c: Improve framework field behavior and renderer consistency, and align section schema updates with the latest landing/editor changes.
+
+  Update SvelteKit framework typing integration for the latest section data and schema usage.
+
 ## 1.0.3
 
 ### Patch Changes

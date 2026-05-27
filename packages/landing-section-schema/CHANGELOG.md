@@ -1,5 +1,16 @@
 # @southneuhof/landing-section-schema
 
+## 0.0.6
+
+### Patch Changes
+
+- 26d215c: Improve framework field behavior and renderer consistency, and align section schema updates with the latest landing/editor changes.
+
+  Update SvelteKit framework typing integration for the latest section data and schema usage.
+
+- Updated dependencies [26d215c]
+  - @southneuhof/landing-sveltekit-framework@0.0.6
+
 ## 0.0.5
 
 ### Patch Changes

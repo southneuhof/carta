@@ -1,5 +1,13 @@
 # landing-mjl
 
+## 0.0.7
+
+### Patch Changes
+
+- Updated dependencies [26d215c]
+  - @southneuhof/landing-sveltekit-framework@0.0.6
+  - @client/section-schema@0.0.4
+
 ## 0.0.6
 
 ### Patch Changes

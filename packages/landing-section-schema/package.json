@@ -1,7 +1,7 @@
 {
   "name": "@southneuhof/landing-section-schema",
   "private": false,
-  "version": "0.0.5",
+  "version": "0.0.6",
   "type": "module",
   "description": "Section schema helpers and conventions for South Neuhof landing applications.",
   "repository": {
