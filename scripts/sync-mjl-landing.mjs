@@ -111,6 +111,7 @@ function validateTarget() {
 
   runInTarget('pnpm', ['install', '--frozen-lockfile'])
   runInTarget('pnpm', ['landing:check-portable'])
+  runInTarget('pnpm', ['--dir', 'apps/landing-mjl', 'exec', 'prisma', 'generate'])
   runInTarget('pnpm', ['--dir', 'apps/landing-mjl', 'build'])
   runInTarget('pnpm', ['--dir', 'apps/landing-admin-web', 'build'])
 }
