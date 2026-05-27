@@ -129,9 +129,13 @@ describe('PathDetail view mode', () => {
     mountPathDetail()
     await flush()
 
-    const listToggle = document.body.querySelector('button[aria-label="List view"]') as HTMLButtonElement
-    expect(listToggle).toBeTruthy()
+    const menuToggle = document.body.querySelector('button[aria-label="View mode menu"]') as HTMLButtonElement
+    expect(menuToggle).toBeTruthy()
+    menuToggle.click()
+    await flush()
 
+    const listToggle = document.body.querySelector('[data-testid="view-mode-list"]') as HTMLButtonElement
+    expect(listToggle).toBeTruthy()
     listToggle.click()
     await flush()
 
