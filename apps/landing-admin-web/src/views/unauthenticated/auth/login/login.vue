@@ -57,11 +57,11 @@ onMounted(() => {
 <template>
   <Card class="flex flex-col gap-16 p-8">
     <div class="flex flex-row items-center gap-8">
-      <Logo class="w-16"/>
+      <Logo class="w-24 -ml-4"/>
     </div>
     <div class="flex flex-col gap-4">
       <div class="text-lg">Welcome to</div>
-      <div class="text-4xl font-bold">Demo App</div>
+      <div class="text-4xl font-bold">Must Chick Website Manager</div>
     </div>
     <form class="flex flex-col items-center gap-4" @submit.prevent="() => login()">
       <TextInput

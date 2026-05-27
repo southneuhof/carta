@@ -52,7 +52,7 @@ onClickOutside(
           sidebarState.index = -1
         }"
       >
-        <Icon size="3xl" :fill="sidebarState.index === -1" name="user"></Icon>
+        <Icon size="3xl" :fill="sidebarState.index === -1" name="account-circle"></Icon>
       </RailItem>
     </div>
   </div>
