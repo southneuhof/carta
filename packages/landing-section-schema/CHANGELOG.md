@@ -1,5 +1,11 @@
 # @southneuhof/landing-section-schema
 
+## 0.0.5
+
+### Patch Changes
+
+- Keep the root export browser-safe by moving `readSectionSchemas` to the explicit `server` subpath.
+
 ## 0.0.4
 
 ### Patch Changes

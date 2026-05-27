@@ -1,5 +1,11 @@
 # landing-mjl
 
+## 0.0.6
+
+### Patch Changes
+
+- @client/section-schema@0.0.3
+
 ## 0.0.5
 
 ### Patch Changes

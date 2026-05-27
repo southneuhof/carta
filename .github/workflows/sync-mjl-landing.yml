@@ -2,15 +2,12 @@ name: Sync MJL Landing
 
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows:
-      - Release Packages
-    types:
-      - completed
+  push:
+    tags:
+      - '@southneuhof/**'
 
 jobs:
   sync-mjl-landing:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
