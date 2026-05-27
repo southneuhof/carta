@@ -6,6 +6,7 @@
     size = 'wide',
     variant = 'filled',
     color = 'primary',
+    effect = 'default',
     href,
     type = 'button',
     ...restProps
@@ -13,6 +14,7 @@
     size?: 'wide' | 'square' | 'hero';
     variant?: 'filled' | 'tonal' | 'outlined' | 'text' | 'tab';
     color?: 'primary' | 'primary-container' | 'secondary' | 'secondary-container' | 'tertiary' | 'tertiary-container';
+    effect?: 'default' | 'none' | 'strong';
     href?: HTMLAnchorAttributes['href'];
     type?: HTMLButtonAttributes['type'],
     [key: string]: any;
@@ -38,6 +40,11 @@
       square: 'p-3 aspect-square',
       wide: 'px-6 py-3 text-sm font-semibold',
       hero: 'h-12 px-8 text-lg font-semibold',
+    },
+    effect: {
+      default: 'shadow-sm transition-all duration-200 ease-out hover:shadow-md hover:scale-[1.01] active:scale-[0.99]',
+      none: '',
+      strong: 'shadow-sm transition-all duration-200 ease-out hover:shadow-md hover:scale-[1.02] active:scale-95',
     }
   }
 </script>
@@ -46,7 +53,7 @@
   <a
     {...restProps}
     {href}
-    class="inline-flex flex-row gap-2 items-center justify-center rounded-full {!restProps.disabled ? 'overlay' : ''} {restProps.class} {classMap.color[color]} {classMap.variant[variant]} {classMap.size[size]}"
+    class="inline-flex flex-row gap-2 items-center justify-center rounded-full {!restProps.disabled ? 'overlay' : ''} {restProps.class} {classMap.color[color]} {classMap.variant[variant]} {classMap.size[size]} {classMap.effect[effect]}"
   >
     {@render children()}
   </a>
@@ -54,7 +61,7 @@
   <button
     {...restProps}
     {type}
-    class="inline-flex flex-row gap-2 items-center justify-center rounded-full disabled:bg-outline-variant disabled:text-on-surface/50 {!restProps.disabled ? 'overlay' : ''} {restProps.class} {classMap.color[color]} {classMap.variant[variant]} {classMap.size[size]}"
+    class="inline-flex flex-row gap-2 items-center justify-center rounded-full disabled:bg-outline-variant disabled:text-on-surface/50 disabled:shadow-none {!restProps.disabled ? 'overlay' : ''} {restProps.class} {classMap.color[color]} {classMap.variant[variant]} {classMap.size[size]} {classMap.effect[effect]}"
   >
     {@render children()}
   </button>

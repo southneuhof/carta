@@ -165,7 +165,7 @@
                 href={getProductDetailHref(product.id)}
                 color="primary"
                 size="square"
-                class="absolute bottom-6 right-6 h-14 w-14 text-2xl transition hover:scale-105 active:scale-95"
+                class="absolute bottom-6 right-6 h-14 w-14 text-2xl"
                 aria-label={`Buka ${product.name}`}
               >
                 <i class="ri-arrow-right-line"></i>
@@ -185,7 +185,7 @@
         <Button
           href={section.data.content.url}
           color="primary"
-          class="min-h-14 px-8 py-4 text-center text-base transition hover:scale-[1.02] active:scale-95 sm:min-w-[360px]"
+          class="min-h-14 px-8 py-4 text-center text-base sm:min-w-[360px]"
         >
           {section.data.content.url_text || 'Lihat Lebih Banyak Produk'}
           <i class="ri-arrow-right-line text-xl"></i>

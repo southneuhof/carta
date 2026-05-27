@@ -57,7 +57,7 @@
             data-analytics-contact={whatsappDetail.url} 
             aria-label="WhatsApp Contact" 
             color="primary-container"
-            class="w-full justify-start py-4 px-6 shadow-sm hover:shadow-md hover:scale-[101%] active:scale-[99%] transition duration-200 group"
+            class="w-full justify-start py-4 px-6 group"
           >
             <!-- WhatsApp Icon (Remix Icon ri-whatsapp-fill in green) -->
             <i class="ri-whatsapp-fill text-3xl text-[#25D366]"></i>

@@ -49,7 +49,7 @@
 
       {#if section?.data?.content?.url}
         <div class="flex justify-center mt-6 lg:mt-10 w-full">
-          <Button href={section.data.content.url} color="primary" class="shadow-sm transition-transform active:scale-95">
+          <Button href={section.data.content.url} color="primary">
             {section.data.content.url_text || 'Lihat Lebih Banyak Berita & Artikel'}
             <i class="ri-arrow-right-line ml-2 text-base"></i>
           </Button>
