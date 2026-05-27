@@ -1,7 +1,7 @@
 {
   "name": "@southneuhof/is-vue-framework",
   "private": false,
-  "version": "1.0.4",
+  "version": "1.0.5",
   "type": "module",
   "description": "Vue application framework components and patterns for South Neuhof information systems.",
   "repository": {
