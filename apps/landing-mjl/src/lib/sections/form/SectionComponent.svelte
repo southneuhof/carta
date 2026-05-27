@@ -2,6 +2,7 @@
   import { setContext } from "svelte";
   import FormView from "./_layouts/FormView.svelte";
   import SuccessView from "./_layouts/SuccessView.svelte";
+  import Button from "$lib/app/components/ui/Button.svelte";
 
   const {section} = $props();
   setContext('section', section)
@@ -50,12 +51,13 @@
       <!-- WhatsApp prominent pill button -->
       {#if whatsappDetail}
         <div class="relative z-10 w-full">
-          <a 
+          <Button 
             href={whatsappDetail.url.startsWith('http') ? whatsappDetail.url : `https://${whatsappDetail.url}`} 
             target="_blank" 
             data-analytics-contact={whatsappDetail.url} 
             aria-label="WhatsApp Contact" 
-            class="flex items-center justify-center gap-4 bg-white py-4 px-6 rounded-full shadow-sm hover:shadow-md hover:scale-[101%] active:scale-[99%] transition duration-200 w-full group"
+            color="primary-container"
+            class="w-full justify-start py-4 px-6 shadow-sm hover:shadow-md hover:scale-[101%] active:scale-[99%] transition duration-200 group"
           >
             <!-- WhatsApp Icon (Remix Icon ri-whatsapp-fill in green) -->
             <i class="ri-whatsapp-fill text-3xl text-[#25D366]"></i>
@@ -63,7 +65,7 @@
               <span class="text-base font-bold text-neutral-900">WhatsApp</span>
               <span class="text-xs text-[#25D366] font-semibold mt-1">Klik To Chat</span>
             </div>
-          </a>
+          </Button>
         </div>
       {/if}
 

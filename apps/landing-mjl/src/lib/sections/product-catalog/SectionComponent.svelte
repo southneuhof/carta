@@ -1,6 +1,7 @@
 <script lang="ts">
   import { browser } from '$app/environment';
   import SectionHeader from '$lib/app/components/app/SectionHeader.svelte';
+  import Button from '$lib/app/components/ui/Button.svelte';
   import productCatalog from '@client/section-schema/sections/product-catalog';
   import type { LandingSectionForSchema } from '@southneuhof/landing-sveltekit-framework/types';
 
@@ -46,6 +47,7 @@
   const initialLimit = $derived(Number(section?.meta?.initialLimit) > 0 ? Number(section.meta.initialLimit) : 8);
   const showSearch = $derived(section?.meta?.showSearch !== false);
   const showCategoryTabs = $derived(section?.meta?.showCategoryTabs !== false);
+  const getProductDetailHref = (id: string) => `/product/${encodeURIComponent(id)}`;
 
   async function fetchProducts(includeCategories = false) {
     const currentRequestId = ++requestId;
@@ -158,14 +160,16 @@
               <p class="mt-2 text-base text-on-surface/45">{product.category}</p>
             </div>
 
-            {#if product.url}
-              <a
-                href={product.url}
-                class="absolute bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-[#F43C35] text-2xl text-white transition hover:scale-105 active:scale-95"
+            {#if product.id}
+              <Button
+                href={getProductDetailHref(product.id)}
+                color="primary"
+                size="square"
+                class="absolute bottom-6 right-6 h-14 w-14 text-2xl transition hover:scale-105 active:scale-95"
                 aria-label={`Buka ${product.name}`}
               >
                 <i class="ri-arrow-right-line"></i>
-              </a>
+              </Button>
             {:else}
               <span class="absolute bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-[#F43C35]/35 text-2xl text-white" aria-hidden="true">
                 <i class="ri-arrow-right-line"></i>
@@ -178,13 +182,14 @@
 
     {#if section?.data?.content?.url}
       <div class="mt-10 flex justify-center lg:mt-12">
-        <a
+        <Button
           href={section.data.content.url}
-          class="inline-flex min-h-14 items-center justify-center gap-3 rounded-full bg-[#F43C35] px-8 py-4 text-center text-base font-semibold text-white transition hover:scale-[1.02] active:scale-95 sm:min-w-[360px]"
+          color="primary"
+          class="min-h-14 px-8 py-4 text-center text-base transition hover:scale-[1.02] active:scale-95 sm:min-w-[360px]"
         >
           {section.data.content.url_text || 'Lihat Lebih Banyak Produk'}
           <i class="ri-arrow-right-line text-xl"></i>
-        </a>
+        </Button>
       </div>
     {/if}
   </div>

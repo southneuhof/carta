@@ -13,7 +13,7 @@
   <meta name="description" content="{data.article.excerpt}"/>
 </svelte:head>
 
-<div class="flex flex-col w-full min-h-screen h-full lg:mt-[88px] text-on-surface">
+<div class="flex flex-col w-full min-h-screen h-full text-on-surface">
   <div class="flex items-center justify-center w-full bg-center bg-cover py-6 lg:py-12" style="margin-top: var(--topbarHeight);">
     <div class="flex flex-col gap-16 max-w-screen-xl px-12 w-full justify-center pt-8 lg:pt-0">
       <div class="flex flex-col items-center justify-center gap-8">

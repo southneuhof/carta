@@ -49,12 +49,10 @@
 
       {#if section?.data?.content?.url}
         <div class="flex justify-center mt-6 lg:mt-10 w-full">
-          <a href={section.data.content.url}>
-            <Button variant="filled" class="font-semibold text-sm shadow-sm transition-transform active:scale-95">
-              {section.data.content.url_text || 'Lihat Lebih Banyak Berita & Artikel'}
-              <i class="ri-arrow-right-line ml-2 text-base"></i>
-            </Button>
-          </a>
+          <Button href={section.data.content.url} color="primary" class="shadow-sm transition-transform active:scale-95">
+            {section.data.content.url_text || 'Lihat Lebih Banyak Berita & Artikel'}
+            <i class="ri-arrow-right-line ml-2 text-base"></i>
+          </Button>
         </div>
       {/if}
     {:else}
@@ -62,4 +60,3 @@
     {/if}
   </div>
 </div>
-

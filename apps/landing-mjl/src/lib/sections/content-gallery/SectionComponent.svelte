@@ -346,9 +346,7 @@
           </div>
         {:else}
           <div class="flex w-full flex-row items-center {(urlJustifyClassMap as any)[section.meta.url_justify || 'left']}">
-            <a href={item.url}>
-              <Button>{item.url_text || m.learn_more()} <i class="ri-arrow-right-line"></i></Button>
-            </a>
+            <Button href={item.url} color="primary">{item.url_text || m.learn_more()} <i class="ri-arrow-right-line"></i></Button>
           </div>
         {/if}
       {/if}
@@ -497,11 +495,9 @@
 {#snippet GalleryItemLink(item: any)}
   {#if item.url}
     <div class="mt-2 flex w-full flex-row items-center {galleryItemType === 'content-card' ? 'justify-center' : (urlJustifyClassMap[galleryItemAlign] || urlJustifyClassMap.left)}">
-      <a href={item.url}>
-        <Button class={galleryItemType === 'content-card' ? 'min-w-[180px] px-7 py-3 text-base md:text-lg' : ''}>
-          {item.url_text || m.learn_more()} <i class="ri-arrow-right-line"></i>
-        </Button>
-      </a>
+      <Button href={item.url} color="primary" class={galleryItemType === 'content-card' ? 'min-w-[180px] px-7 py-3 text-base md:text-lg' : ''}>
+        {item.url_text || m.learn_more()} <i class="ri-arrow-right-line"></i>
+      </Button>
     </div>
   {/if}
 {/snippet}

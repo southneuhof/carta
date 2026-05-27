@@ -236,9 +236,7 @@
           </div>
         {:else}
           <div class="flex flex-row items-center w-full {(urlJustifyClassMap as any)[section.meta.url_justify || 'left']}">
-            <a href={content.url}>
-              <Button>{content.url_text || m.learn_more()} <i class="ri-arrow-right-line"></i></Button>
-            </a>
+            <Button href={content.url} color="primary">{content.url_text || m.learn_more()} <i class="ri-arrow-right-line"></i></Button>
           </div>
         {/if}
       {/if}

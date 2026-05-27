@@ -3,7 +3,7 @@
   import { Image } from "@southneuhof/landing-sveltekit-framework/client";
   import { onDestroy, onMount } from "svelte";
   import { fade } from "svelte/transition";
-  import Button from "./Button.svelte";
+  import Button from "$lib/app/components/ui/Button.svelte";
   import heroBannerSchema from "@client/section-schema/sections/hero-banner";
   import type { LandingSectionForSchema } from "@southneuhof/landing-sveltekit-framework/types";
 
@@ -132,16 +132,16 @@
                 {#if banner?.cta}
                   <Button
                     href={banner.cta}
-                    label={banner.cta_text || "Hubungi Kami"}
-                    tone="primary"
-                  />
+                    color="primary"
+                    size="hero"
+                  >{banner.cta_text || "Hubungi Kami"}</Button>
                 {/if}
                 {#if banner?.url}
                   <Button
                     href={banner.url}
-                    label={banner.url_text || "Produk"}
-                    tone="secondary"
-                  />
+                    color="secondary"
+                    size="hero"
+                  >{banner.url_text || "Produk"}</Button>
                 {/if}
               </div>
             {/if}

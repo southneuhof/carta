@@ -2,7 +2,7 @@
   const { data } = $props();
 </script>
 
-<div class="flex flex-col w-full min-h-screen h-full lg:mt-[88px] text-on-surface">
+<div class="flex flex-col w-full min-h-screen h-full text-on-surface">
   <div class="flex justify-center w-full py-8 lg:py-12" style="margin-top: var(--topbarHeight);">
     <div class="flex flex-col w-full max-w-screen-xl px-6 lg:px-12 gap-8">
       
