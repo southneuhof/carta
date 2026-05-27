@@ -50,6 +50,11 @@ function runGit(args, options = {}) {
   return execFileSync('git', args, { cwd: targetRoot, stdio: 'inherit', ...options })
 }
 
+function configureTargetGitIdentity() {
+  runGit(['config', 'user.name', 'github-actions[bot]'])
+  runGit(['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'])
+}
+
 function readJson(file) {
   return JSON.parse(fs.readFileSync(path.join(repoRoot, file), 'utf8'))
 }
@@ -262,6 +267,7 @@ function generateAndCommit() {
 }
 
 ensureGitRepository()
+configureTargetGitIdentity()
 generateAndCommit()
 
 if (push) {
