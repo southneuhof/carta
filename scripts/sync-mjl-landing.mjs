@@ -2,11 +2,13 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { execFileSync, spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
+import { publishablePackages, publishablePackageNames } from './release-packages.mjs'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const args = new Set(process.argv.slice(2))
 const dryRun = args.has('--dry-run')
 const push = args.has('--push')
+const validate = args.has('--validate')
 const targetArg = process.argv.find((arg) => arg.startsWith('--target='))
 const targetRoot = path.resolve(targetArg ? targetArg.slice('--target='.length) : '/Users/gamer/Documents/projects/mjl-landing')
 const remoteArg = process.argv.find((arg) => arg.startsWith('--remote='))
@@ -30,14 +32,7 @@ const excludedNames = new Set([
   '.DS_Store',
 ])
 
-const providerPackageNames = [
-  '@southneuhof/apostle',
-  '@southneuhof/is-data-model',
-  '@southneuhof/is-vue-framework',
-  '@southneuhof/landing-section-schema',
-  '@southneuhof/landing-sveltekit-framework',
-  '@southneuhof/utilities',
-]
+const providerPackageNames = publishablePackageNames
 
 const syncedFiles = [
   'package.json',
@@ -60,10 +55,9 @@ function readJson(file) {
 }
 
 const providerVersions = Object.fromEntries(
-  providerPackageNames.map((name) => {
-    const dir = name.replace('@southneuhof/', '')
-    const pkg = readJson(`packages/${dir}/package.json`)
-    return [name, `^${pkg.version}`]
+  publishablePackages.map((providerPackage) => {
+    const pkg = readJson(`${providerPackage.root}/package.json`)
+    return [providerPackage.name, `^${pkg.version}`]
   }),
 )
 
@@ -110,6 +104,15 @@ function runInTarget(command, args, options = {}) {
   if (result.status !== 0) {
     throw new Error(`Command failed: ${command} ${args.join(' ')}`)
   }
+}
+
+function validateTarget() {
+  if (!validate) return
+
+  runInTarget('pnpm', ['install', '--frozen-lockfile'])
+  runInTarget('pnpm', ['landing:check-portable'])
+  runInTarget('pnpm', ['--dir', 'apps/landing-mjl', 'build'])
+  runInTarget('pnpm', ['--dir', 'apps/landing-admin-web', 'build'])
 }
 
 function isEmptyDirectory(dir) {
@@ -196,39 +199,48 @@ if (dryRun) {
   process.exit(0)
 }
 
-ensureGitRepository()
-removeSyncedContent()
+function generateAndCommit() {
+  removeSyncedContent()
 
-for (const root of includedRoots) {
-  copyDir(path.join(repoRoot, root), path.join(targetRoot, root))
-}
-writeRootFiles()
+  for (const root of includedRoots) {
+    copyDir(path.join(repoRoot, root), path.join(targetRoot, root))
+  }
+  writeRootFiles()
 
-for (const file of [
-  'apps/landing-mjl/package.json',
-  'apps/landing-admin-web/package.json',
-  'packages/section-schema/package.json',
-  'packages/data-model/package.json',
-]) {
-  rewritePackageJson(file)
-}
+  for (const file of [
+    'apps/landing-mjl/package.json',
+    'apps/landing-admin-web/package.json',
+    'packages/section-schema/package.json',
+    'packages/data-model/package.json',
+  ]) {
+    rewritePackageJson(file)
+  }
 
-// Keep lockfile aligned with updated package specifiers for frozen-lockfile CI installs.
-runInTarget('pnpm', ['install', '--lockfile-only'])
+  // Keep lockfile aligned with updated package specifiers for frozen-lockfile CI installs.
+  runInTarget('pnpm', ['install', '--lockfile-only'])
+  validateTarget()
 
-runGit(['add', '--', ...includedRoots, ...syncedFiles, 'pnpm-lock.yaml'])
-const stagedDiff = spawnSync('git', ['diff', '--cached', '--quiet'], {
-  cwd: targetRoot,
-  stdio: 'inherit',
-})
+  runGit(['add', '--', ...includedRoots, ...syncedFiles, 'pnpm-lock.yaml'])
+  const stagedDiff = spawnSync('git', ['diff', '--cached', '--quiet'], {
+    cwd: targetRoot,
+    stdio: 'inherit',
+  })
 
-if (stagedDiff.status === 1) {
-  runGit(['commit', '-m', 'Sync landing apps'])
-} else if (stagedDiff.status === 0) {
-  console.log('No landing sync changes to commit.')
-} else {
+  if (stagedDiff.status === 1) {
+    runGit(['commit', '-m', 'Sync landing apps'])
+    return true
+  }
+
+  if (stagedDiff.status === 0) {
+    console.log('No landing sync changes to commit.')
+    return false
+  }
+
   process.exit(stagedDiff.status ?? 1)
 }
+
+ensureGitRepository()
+generateAndCommit()
 
 if (push) {
   try {
@@ -237,6 +249,7 @@ if (push) {
     console.log('Push was rejected; rebasing onto the latest origin/main and retrying.')
     runGit(['fetch', 'origin', 'main'])
     runGit(['rebase', 'origin/main'])
+    generateAndCommit()
     runGit(['push', '-u', 'origin', 'HEAD:main'])
   }
 }

@@ -1,49 +1,5 @@
 import { execFileSync } from 'node:child_process'
-
-const packages = [
-  {
-    name: '@southneuhof/is-data-model',
-    prefix: 'packages/is-data-model',
-    repo: 'https://github.com/southneuhof/is-data-model.git',
-    branch: 'main',
-    tempBranch: 'sync/is-data-model',
-  },
-  {
-    name: '@southneuhof/apostle',
-    prefix: 'packages/apostle',
-    repo: 'https://github.com/southneuhof/apostle.git',
-    branch: 'main',
-    tempBranch: 'sync/apostle',
-  },
-  {
-    name: '@southneuhof/utilities',
-    prefix: 'packages/utilities',
-    repo: 'https://github.com/southneuhof/utilities.git',
-    branch: 'main',
-    tempBranch: 'sync/utilities',
-  },
-  {
-    name: '@southneuhof/is-vue-framework',
-    prefix: 'packages/is-vue-framework',
-    repo: 'https://github.com/southneuhof/is-vue-framework.git',
-    branch: 'main',
-    tempBranch: 'sync/is-vue-framework',
-  },
-  {
-    name: '@southneuhof/landing-section-schema',
-    prefix: 'packages/landing-section-schema',
-    repo: 'https://github.com/southneuhof/landing-section-schema.git',
-    branch: 'main',
-    tempBranch: 'sync/landing-section-schema',
-  },
-  {
-    name: '@southneuhof/landing-sveltekit-framework',
-    prefix: 'packages/landing-sveltekit-framework',
-    repo: 'https://github.com/southneuhof/landing-sveltekit-framework.git',
-    branch: 'main',
-    tempBranch: 'sync/landing-sveltekit-framework',
-  },
-]
+import { publishablePackages as packages } from './release-packages.mjs'
 
 const args = new Set(process.argv.slice(2))
 const allowAnyBranch = args.has('--allow-any-branch')
@@ -122,10 +78,10 @@ assertCleanWorkingTree()
 const pushed = []
 
 for (const pkg of packages) {
-  console.log(`Syncing ${pkg.name} from ${pkg.prefix}`)
+  console.log(`Syncing ${pkg.name} from ${pkg.root}`)
   cleanupTempBranch(pkg.tempBranch)
 
-  const splitSha = run(`git subtree split --prefix=${pkg.prefix} -b ${pkg.tempBranch}`)
+  const splitSha = run(`git subtree split --prefix=${pkg.root} -b ${pkg.tempBranch}`)
   const pushUrl = withToken(pkg.repo)
   const expectedRemoteSha = remoteHead(pushUrl, pkg.branch)
   const lease = expectedRemoteSha ? `--force-with-lease=refs/heads/${pkg.branch}:${expectedRemoteSha}` : ''
