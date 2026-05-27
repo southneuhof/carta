@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import LoginBackground from '@/assets/app/login/login-background.svg'
+import LoginBackground from '@/assets/app/login/login-background.png'
 import AppRouterView from '@/components/routing/AppRouterView.vue'
 </script>
 
