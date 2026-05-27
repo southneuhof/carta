@@ -61,12 +61,12 @@ function activePath(): string {
 <template>
   <BaseInput v-bind="props" :error="error">
     <div class="flex flex-col gap-4">
-      <div class="flex flex-row items-center gap-2 rounded-lg outline outline-1 outline-outline/[24%]">
+      <div class="flex flex-row gap-2 rounded-lg outline outline-1 outline-outline/[24%]">
         <Dialog v-model:open="open">
-          <DialogTrigger class="flex items-start justify-start">
+          <DialogTrigger class="flex items-center justify-start">
             <button
               type="button"
-              class="overlay flex flex-row items-center gap-2 rounded-bl-lg rounded-tl-lg bg-primary px-4 py-2 text-on-primary after:bg-on-primary/[8%] active:after:bg-on-primary/[12%]"
+              class="overlay flex flex-row items-center h-full gap-2 rounded-bl-lg rounded-tl-lg bg-primary px-4 py-2 text-on-primary after:bg-on-primary/[8%] active:after:bg-on-primary/[12%]"
             >
               <p>Browse Files</p>
               <Icon name="folder-2" />

@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { configureFrameworkBehaviors, resetFrameworkBehaviorsForTests } from '@southneuhof/is-vue-framework/adapters/behaviors'
-import { defaultTableGetData } from '../table'
+import { defaultTableGetData, getTableFieldTypes, tableFieldTypes } from '../table'
 import { defaultOnSubmit } from '../form'
 import { defaultFileInputUpload } from '../fileInput'
 import { defaultImageInputUpload, defaultImageURLResolver } from '../imageInput'
+import { getDetailFieldTypes, detailFieldTypes } from '../detail'
 
 describe('registry-backed framework defaults', () => {
   beforeEach(() => {
@@ -16,6 +17,28 @@ describe('registry-backed framework defaults', () => {
 
     await expect(defaultTableGetData('users', { page: 1 })).resolves.toEqual({ data: [{ id: 1 }], total: 1, totalPage: 1 })
     expect(getData).toHaveBeenCalledWith('users', { page: 1 })
+  })
+
+  it('resolves table fieldTypes at runtime even when read before behavior registration', () => {
+    expect(Object.keys(getTableFieldTypes())).toEqual([])
+    expect((tableFieldTypes as any).image).toBeUndefined()
+
+    const imageRenderer = () => null
+    configureFrameworkBehaviors({ table: { fieldTypes: { image: imageRenderer } } })
+
+    expect(getTableFieldTypes().image).toBe(imageRenderer)
+    expect((tableFieldTypes as any).image).toBe(imageRenderer)
+  })
+
+  it('resolves detail fieldTypes at runtime even when read before behavior registration', () => {
+    expect(Object.keys(getDetailFieldTypes())).toEqual([])
+    expect((detailFieldTypes as any).html).toBeUndefined()
+
+    const htmlRenderer = () => null
+    configureFrameworkBehaviors({ detail: { fieldTypes: { html: htmlRenderer } } })
+
+    expect(getDetailFieldTypes().html).toBe(htmlRenderer)
+    expect((detailFieldTypes as any).html).toBe(htmlRenderer)
   })
 
   it('throws when required table behavior is missing', async () => {

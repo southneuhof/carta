@@ -64,6 +64,7 @@ describe('section schema adapter', () => {
     expect(bannerSlot?.component).toBeUndefined()
     expect(bannerSlot?.resolveConfig).toBeUndefined()
     expect(bannerSlot?.fields).toContain('media')
+    expect(bannerSlot?.fieldAliases?.cta).toBe('Primary Button URL')
 
     const dataListConfig = getSupportedEditorConfig('data-list')
     const childSections = dataListConfig?.slots.find((slot) => slot.key === 'childSections')

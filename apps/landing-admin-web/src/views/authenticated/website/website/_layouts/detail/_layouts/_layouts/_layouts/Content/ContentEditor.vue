@@ -58,7 +58,7 @@ import Button from '@southneuhof/is-vue-framework/components/base/Button.vue';
     }),
   )
   const fields = computed(() => resolvedSlotConfig.value?.fields ?? [])
-  const fieldsAlias = computed(() => resolvedSlotConfig.value?.fieldAliases ?? {})
+  const fieldsAlias = computed(() => (resolvedSlotConfig.value as any)?.fieldAliases ?? (resolvedSlotConfig.value as any)?.fieldsAlias ?? {})
 
   const updateFormConfig = computed(() => ({
     fields: fields.value,

@@ -1,6 +1,6 @@
 export * from './form'
-export { defaultTableGetData, defaultOnDataLoaded as defaultTableOnDataLoaded, tableFieldTypes } from './table'
-export { defaultDetailGetData, defaultOnDataLoaded as defaultDetailOnDataLoaded, detailFieldTypes } from './detail'
+export { defaultTableGetData, defaultOnDataLoaded as defaultTableOnDataLoaded, getTableFieldTypes, tableFieldTypes } from './table'
+export { defaultDetailGetData, defaultOnDataLoaded as defaultDetailOnDataLoaded, getDetailFieldTypes, detailFieldTypes } from './detail'
 export { defaultGetData as defaultSelectGetData } from './select'
 export { defaultGetData as defaultLookupGetData, defaultGetDetail, defaultDataFormatter, defaultFieldsAlias } from './lookup'
 export { defaultGetData as defaultCheckboxGroupGetData } from './checkboxGroup'

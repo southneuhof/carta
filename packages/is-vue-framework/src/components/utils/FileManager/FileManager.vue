@@ -32,7 +32,13 @@ const props = defineProps({
   },
 })
 
-const activePath = ref<any>({ path: props.activePath })
+const DEFAULT_ACCESSIBLE_PATH = '/storage/public'
+
+function resolveActivePath(path?: string) {
+  return path && path.trim() ? path : DEFAULT_ACCESSIBLE_PATH
+}
+
+const activePath = ref<any>({ path: resolveActivePath(props.activePath) })
 const treeRenderKey = ref(0)
 
 async function createFolder(payload: Record<string, any>) {
@@ -44,7 +50,7 @@ async function createFolder(payload: Record<string, any>) {
 watch(
   () => props.activePath,
   () => {
-    activePath.value = { ...activePath.value, path: props.activePath }
+    activePath.value = { ...activePath.value, path: resolveActivePath(props.activePath) }
   }
 )
 </script>

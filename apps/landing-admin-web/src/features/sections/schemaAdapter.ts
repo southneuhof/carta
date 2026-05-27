@@ -30,6 +30,8 @@ export type SupportedSectionSlotEditor = {
   fields: string[]
   fieldSets?: Record<string, { fields: readonly string[] }>
   inputConfig?: SectionSchemaEditorInputConfig
+  // Legacy key kept for backward compatibility with older section schemas.
+  fieldsAlias?: Record<string, string>
   fieldAliases?: Record<string, string>
   fieldsDictionary?: Record<string, unknown>
   fieldsParse?: Record<string, unknown>
@@ -110,6 +112,9 @@ function toSlotEditorContext(input: {
   resolved?: ContentSlotEditorConfig
 }): SupportedSectionSlotEditorContext {
   const slotEditor: SectionSchemaSlotEditor | undefined = input.slot.editor
+  const resolvedFieldAliases = (input.resolved as any)?.fieldAliases ?? (input.resolved as any)?.fieldsAlias
+  const slotFieldAliases = (slotEditor as any)?.fieldAliases ?? (slotEditor as any)?.fieldsAlias
+  const fieldAliases = resolvedFieldAliases ?? slotFieldAliases
 
   return {
     key: input.slotKey,
@@ -120,7 +125,8 @@ function toSlotEditorContext(input: {
     fields: getResolvedFields(input.slot, input.resolved),
     fieldSets: input.slot.fieldSets,
     inputConfig: (input.resolved?.inputConfig ?? slotEditor?.inputConfig) as SectionSchemaEditorInputConfig | undefined,
-    fieldAliases: input.resolved?.fieldAliases ?? slotEditor?.fieldAliases,
+    fieldsAlias: fieldAliases,
+    fieldAliases,
     fieldsDictionary: input.resolved?.fieldsDictionary ?? slotEditor?.fieldsDictionary,
     fieldsParse: input.resolved?.fieldsParse ?? slotEditor?.fieldsParse,
     fieldsProxy: input.resolved?.fieldsProxy ?? slotEditor?.fieldsProxy,
@@ -148,6 +154,7 @@ function toSlotEditor(slotKey: string, slot: SectionSchemaSlot): SupportedSectio
     fields: editor.fields,
     fieldSets: editor.fieldSets,
     inputConfig: editor.inputConfig,
+    fieldsAlias: editor.fieldsAlias,
     fieldAliases: editor.fieldAliases,
     fieldsDictionary: editor.fieldsDictionary,
     fieldsParse: editor.fieldsParse,

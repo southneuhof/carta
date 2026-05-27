@@ -104,6 +104,8 @@ export const defaultGlobalConfig: {
     year: { type: 'year' },
   },
   fieldsAlias: {
+    media_type: 'Tipe Media',
+    attachment: 'Lampiran',
     id: 'ID',
     name: 'Nama',
     subtitle: 'Subtitle',

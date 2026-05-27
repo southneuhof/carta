@@ -92,6 +92,7 @@ export default defineSectionSchema({
         },
         fieldsType: {
           description: { type: 'html' },
+          media: {type: 'image'}
         },
       },
     },

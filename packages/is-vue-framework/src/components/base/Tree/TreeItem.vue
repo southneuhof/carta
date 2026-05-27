@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import type { PropType } from 'vue'
-import { defaultTableGetData, tableFieldTypes } from '@southneuhof/is-vue-framework/behaviors/table'
+import { defaultTableGetData, getTableFieldTypes } from '@southneuhof/is-vue-framework/behaviors/table'
 import { defaultTableConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
 import { parse } from '@southneuhof/utilities/parse'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
@@ -34,6 +34,7 @@ const fieldsProxy = { ...defaultTableConfig.fieldsProxy, ...props.fieldsProxy }
 
 const children = ref<any[]>([])
 const expanded = ref(false)
+const tableFieldTypes = computed(() => getTableFieldTypes())
 
 function formatTableData(data: Record<string, any>[]) {
   const res: any[] = []

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defaultDetailGetData, defaultOnDataLoaded, detailFieldTypes } from '@southneuhof/is-vue-framework/behaviors/detail'
+import { defaultDetailGetData, defaultOnDataLoaded, getDetailFieldTypes } from '@southneuhof/is-vue-framework/behaviors/detail'
 import { parse } from '@southneuhof/utilities/parse'
 import { computed, onMounted, ref, type PropType } from 'vue'
 import { componentTypeMap, parsedTypes } from './common/properties'
@@ -27,6 +27,7 @@ const fieldsAlias = { ...defaultDetailConfig.fieldsAlias, ...props.fieldsAlias }
 const fieldsProxy = { ...defaultDetailConfig.fieldsProxy, ...props.fieldsProxy }
 const fieldsType = { ...defaultDetailConfig.fieldsType, ...props.fieldsType }
 const fieldsParse = { ...defaultDetailConfig.fieldsParse, ...props.fieldsParse }
+const detailFieldTypes = computed(() => getDetailFieldTypes())
 
 // const fields = computed(() => props.fields.filter(field => field.slice(0, 2) !== 'S|'))
 const detailData = ref<{ data: Record<string, any>; rawData: Record<string, any> }>({ data: {}, rawData: {} })

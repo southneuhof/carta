@@ -10,4 +10,23 @@ export function defaultOnDataLoaded(data?: any) {
   return getFrameworkBehaviors().table?.onDataLoaded?.(data)
 }
 
-export const tableFieldTypes: Record<string, any> = getFrameworkBehaviors().table?.fieldTypes ?? {}
+export function getTableFieldTypes(): Record<string, any> {
+  return getFrameworkBehaviors().table?.fieldTypes ?? {}
+}
+
+// Backward compatibility: previous API exported a constant.
+export const tableFieldTypes: Record<string, any> = new Proxy(
+  {},
+  {
+    get(_target, prop) {
+      return getTableFieldTypes()[prop as any]
+    },
+    ownKeys() {
+      return Reflect.ownKeys(getTableFieldTypes())
+    },
+    getOwnPropertyDescriptor(_target, prop) {
+      const descriptor = Object.getOwnPropertyDescriptor(getTableFieldTypes(), prop)
+      return descriptor ? { ...descriptor, configurable: true } : undefined
+    },
+  },
+)

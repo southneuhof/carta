@@ -7,6 +7,7 @@ import { ContextMenuContent, ContextMenuItem, ContextMenuPortal, ContextMenuTrig
 import { toast } from 'vue-sonner'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import Popover from '@southneuhof/is-vue-framework/components/base/Popover.vue'
 import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composites/ConfirmationDialog.vue'
 import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue'
 
@@ -29,6 +30,10 @@ const data = ref()
 const modelValue = defineModel<any>()
 const searchParameters = ref({ dir: modelValue.value?.path, sort_by: 'updated_at', sort: 'desc', limit: 1000 })
 const dropZoneRef = ref<HTMLElement>()
+const VIEW_MODE_STORAGE_KEY = 'fileManager.viewMode'
+const viewMode = ref<'list' | 'thumbnail'>(getInitialViewMode())
+const viewModePopoverOpen = ref(false)
+const brokenPreviewPaths = ref<Set<string>>(new Set())
 
 const columns = ref([
   { label: 'Name', key: 'name', width: 'auto' },
@@ -48,6 +53,38 @@ async function getData() {
 }
 
 watch(searchParameters, getData, { deep: true })
+
+function getInitialViewMode(): 'list' | 'thumbnail' {
+  if (typeof window === 'undefined') return 'thumbnail'
+  const savedMode = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY)
+  return savedMode === 'list' || savedMode === 'thumbnail' ? savedMode : 'thumbnail'
+}
+
+function setViewMode(mode: 'list' | 'thumbnail') {
+  viewMode.value = mode
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode)
+  }
+}
+
+function isImageItem(item: Record<string, any>) {
+  if (String(item?.type || '').toLowerCase() === 'folder') return false
+  const mime = String(item?.mime_type || item?.mimeType || '').toLowerCase()
+  if (mime.startsWith('image/')) return true
+
+  const source = String(item?.url || item?.path || '')
+  return /\.(avif|bmp|gif|ico|jpe?g|png|svg|webp)(\?.*)?$/i.test(source)
+}
+
+function hasPreview(item: Record<string, any>) {
+  const path = String(item?.path || '')
+  return Boolean(item?.url) && isImageItem(item) && !brokenPreviewPaths.value.has(path)
+}
+
+function onPreviewError(path?: string) {
+  if (!path) return
+  brokenPreviewPaths.value = new Set([...brokenPreviewPaths.value, path])
+}
 
 function sort(columnKey: string) {
   if (searchParameters.value.sort_by === columnKey) {
@@ -103,6 +140,13 @@ function createFolder(payload: Record<string, any>) {
   if (!behavior) missingBehavior('fileManager.createFolder')
   return behavior(payload.dir, payload.folder_name)
 }
+
+watch(
+  () => modelValue.value?.path,
+  () => {
+    brokenPreviewPaths.value = new Set()
+  }
+)
 </script>
 
 <template>
@@ -115,21 +159,67 @@ function createFolder(payload: Record<string, any>) {
         <div class="p-4">
           <div class="flex flex-row items-center gap-4">
             <!-- <div class="flex flex-row items-center"></div> -->
-            <div>
-              <div class="flex flex-row items-center gap-1">
-                <p class="text-xl font-semibold">{{ modelValue?.path.split('/').pop() }}</p>
-                <Button
-                  kind="icon"
-                  variant="standard"
-                  class="!p-1"
-                  @click="
-                    () => {
-                      getData()
-                    }
-                  "
-                >
-                  <Icon name="refresh" size="md" class="text-on-surface"></Icon>
-                </Button>
+            <div class="w-full">
+              <div class="flex flex-row items-center justify-between">
+                <div class="flex flex-row items-center gap-1">
+                  <p class="text-xl font-semibold">{{ modelValue?.path.split('/').pop() }}</p>
+                  <Button
+                    kind="icon"
+                    variant="standard"
+                    aria-label="Refresh files"
+                    class="!p-1"
+                    @click="
+                      () => {
+                        getData()
+                      }
+                    "
+                  >
+                    <template #icon>
+                      <Icon name="refresh" size="md" class="text-on-surface"></Icon>
+                    </template>
+                  </Button>
+                </div>
+                <Popover v-model="viewModePopoverOpen" align="end">
+                  <template #trigger>
+                    <div class="ml-2">
+                      <Button kind="icon" variant="standard" aria-label="View mode menu">
+                        <template #icon>
+                          <Icon :name="viewMode === 'list' ? 'file-list' : 'image'" class="text-on-surface"></Icon>
+                        </template>
+                      </Button>
+                    </div>
+                  </template>
+                  <template #content="{ setOpen }">
+                    <div class="min-w-[180px] rounded-md border border-outline-variant bg-surface-container-high p-1">
+                      <button
+                        class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-on-surface/10"
+                        data-testid="view-mode-list"
+                        @click="
+                          () => {
+                            setViewMode('list')
+                            setOpen(false)
+                          }
+                        "
+                      >
+                        <Icon name="file-list" class="text-on-surface"></Icon>
+                        <span>List view</span>
+                      </button>
+                      <button
+                        class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-on-surface/10"
+                        data-testid="view-mode-thumbnail"
+                        @click="
+                          () => {
+                            setViewMode('thumbnail')
+                            setOpen(false)
+                          }
+                        "
+                      >
+                        <Icon name="image" class="text-on-surface"></Icon>
+                        <span>Thumbnail view</span>
+                      </button>
+                    </div>
+                  </template>
+                </Popover>
               </div>
               <div class="flex flex-row flex-wrap items-center gap-1">
                 <template v-for="(segment, index) in modelValue?.path.split('/')" :key="index">
@@ -161,7 +251,7 @@ function createFolder(payload: Record<string, any>) {
             }
           "
         >
-          <table ref="tableRef" class="w-full table-fixed border-collapse" v-columns-resizable>
+          <table v-if="viewMode === 'list'" ref="tableRef" class="w-full table-fixed border-collapse" data-testid="file-list-table" v-columns-resizable>
             <thead>
               <tr>
                 <th
@@ -175,7 +265,6 @@ function createFolder(payload: Record<string, any>) {
                     <p>{{ column.label }}</p>
                     <Icon v-if="searchParameters.sort_by === column.key" :name="searchParameters.sort === 'asc' ? 'arrow-up-s' : 'arrow-down-s'" class="text-muted"></Icon>
                   </div>
-                  <!-- <div class="absolute top-0 right-0 w-[5px] cursor-col-resize h-full bg-transparent" @mousedown.stop="startResize($event, index)"></div> -->
                 </th>
               </tr>
             </thead>
@@ -199,17 +288,10 @@ function createFolder(payload: Record<string, any>) {
                 <ContextMenuPortal>
                   <Transition name="fade">
                     <ContextMenuContent class="z-1 min-w-[220px] rounded-md border border-outline-variant bg-surface-container-high p-1 text-sm text-on-surface shadow-md">
-                      <ContextMenuItem
-                        class="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-on-surface/10"
-                        @select.prevent
-                        @click="() => _window.open(item.url || item.path, '_blank')"
-                      >
+                      <ContextMenuItem class="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-on-surface/10" @select.prevent @click="() => _window.open(item.url || item.path, '_blank')">
                         <Icon name="arrow-right-up"></Icon>
                         <p>Open</p>
                       </ContextMenuItem>
-                      <!-- <ContextMenuItem class="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-on-surface/10 cursor-pointer" @select.prevent>
-                        Download
-                      </ContextMenuItem> -->
                       <ContextMenuItem @select.prevent>
                         <ConfirmationDialog
                           class="w-full"
@@ -236,7 +318,64 @@ function createFolder(payload: Record<string, any>) {
               </ContextMenuRoot>
             </tbody>
           </table>
-          <div v-if="data.length === 0" class="flex flex-col items-center justify-center text-muted">
+          <div v-else class="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6" data-testid="file-thumbnail-grid">
+            <ContextMenuRoot v-for="item in data" :key="item.path">
+              <ContextMenuTrigger as-child>
+                <button
+                  type="button"
+                  class="flex w-full flex-col overflow-hidden rounded-md border border-outline-variant bg-surface-container-high text-start transition-colors hover:bg-on-surface/[8%]"
+                  :class="{ 'ring-1 ring-outline': item.path === selectedObject?.path }"
+                  @click="handleRowClick(item)"
+                >
+                  <div class="flex aspect-square w-full items-center justify-center bg-surface-container">
+                    <img
+                      v-if="hasPreview(item)"
+                      :src="item.url"
+                      :alt="item.path.split('/').pop()"
+                      class="h-full w-full object-cover"
+                      @error="() => onPreviewError(item.path)"
+                    />
+                    <Icon v-else :name="item.type === 'folder' ? 'folder' : 'file'" class="text-3xl text-muted" />
+                  </div>
+                  <div class="flex w-full flex-col gap-1 p-2">
+                    <p class="line-clamp-2 break-all text-sm">{{ item.path.split('/').pop() }}</p>
+                    <p class="text-xs text-muted">{{ parse('datetime', item.updated_at) }}</p>
+                  </div>
+                </button>
+              </ContextMenuTrigger>
+              <ContextMenuPortal>
+                <Transition name="fade">
+                  <ContextMenuContent class="z-1 min-w-[220px] rounded-md border border-outline-variant bg-surface-container-high p-1 text-sm text-on-surface shadow-md">
+                    <ContextMenuItem class="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-on-surface/10" @select.prevent @click="() => _window.open(item.url || item.path, '_blank')">
+                      <Icon name="arrow-right-up"></Icon>
+                      <p>Open</p>
+                    </ContextMenuItem>
+                    <ContextMenuItem @select.prevent>
+                      <ConfirmationDialog
+                        class="w-full"
+                        :onConfirm="
+                          () =>
+                            deleteFile(item.path).then(() => {
+                                toast.success('File deleted successfully')
+                                getData()
+                              })
+                              .catch(() => toast.error('Failed to delete file'))
+                        "
+                      >
+                        <template #trigger>
+                          <div class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-error hover:bg-on-surface/10">
+                            <Icon name="delete-bin"></Icon>
+                            <p>Delete</p>
+                          </div>
+                        </template>
+                      </ConfirmationDialog>
+                    </ContextMenuItem>
+                  </ContextMenuContent>
+                </Transition>
+              </ContextMenuPortal>
+            </ContextMenuRoot>
+          </div>
+          <div v-if="(data || []).length === 0" class="flex flex-col items-center justify-center text-muted">
             <p>This folder is empty</p>
           </div>
         </div>

@@ -457,12 +457,12 @@ export default defineSectionSchema({
             },
           },
           media: {
-            type: 'file-manager',
+            type: 'image',
             dependency: {
               fields: ['media_type'],
               inputConfig: {
-                generator: ({ media_type }: any) => ({ type: media_type === 'embed' ? 'embed' : 'file-manager' }),
-                default: { type: 'file-manager' },
+                generator: ({ media_type }: any) => ({ type: media_type === 'embed' ? 'embed' : 'image' }),
+                default: { type: 'image' },
               },
             },
           },

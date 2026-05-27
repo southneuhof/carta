@@ -1,1 +1,1 @@
-export { tableFieldTypes as tableFieldRenderers } from '@southneuhof/is-vue-framework/behaviors/table'
+export { getTableFieldTypes as tableFieldRenderers } from '@southneuhof/is-vue-framework/behaviors/table'

@@ -68,7 +68,7 @@ const resolvedSlotConfig = computed(() =>
   }),
 )
 const fields = computed(() => resolvedSlotConfig.value?.fields ?? ['title', 'description', 'media', 'url'])
-const fieldsAlias = computed(() => resolvedSlotConfig.value?.fieldAliases ?? {})
+const fieldsAlias = computed(() => (resolvedSlotConfig.value as any)?.fieldAliases ?? (resolvedSlotConfig.value as any)?.fieldsAlias ?? {})
 
 const listConfig = computed(() => ({
   getAPI: 'content',
