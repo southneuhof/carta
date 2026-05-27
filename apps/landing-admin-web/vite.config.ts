@@ -22,6 +22,14 @@ export default defineConfig({
         find: '@',
         replacement: fileURLToPath(new URL('./src', import.meta.url)),
       },
+      {
+        find: /^@southneuhof\/is-vue-framework$/,
+        replacement: fileURLToPath(new URL('../../packages/is-vue-framework/src/index.ts', import.meta.url)),
+      },
+      {
+        find: '@southneuhof/is-vue-framework/',
+        replacement: fileURLToPath(new URL('../../packages/is-vue-framework/src/', import.meta.url)),
+      },
       ...createPortablePackageAliases(),
     ],
   },

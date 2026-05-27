@@ -4,11 +4,11 @@ import { useVirtualList } from '@vueuse/core'
 import BaseInput from './BaseInput.vue'
 import { commonProps } from './commonprops'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
-import { Dialog, DialogContent } from '@southneuhof/is-vue-framework/components/base/Dialog/index'
+import Dialog from '../base/Dialog.vue'
 import { extractRemixiconClassNamesFromStyleSheets, filterRemixiconClassNames, normalizeRemixiconClass, toIconRows } from './iconSelect.utils'
 
-const GRID_COLUMNS = 6
-const ROW_HEIGHT = 56
+const GRID_COLUMNS = 12
+const ROW_HEIGHT = 44
 
 const props = defineProps({
   ...commonProps,
@@ -37,7 +37,6 @@ const { list: virtualRows, containerProps, wrapperProps } = useVirtualList(iconR
 function pickIcon(iconClass: string) {
   modelValue.value = iconClass
   emit('validation:touch')
-  open.value = false
 }
 
 function clearSelection() {
@@ -67,89 +66,72 @@ onMounted(() => {
 <template>
   <BaseInput v-bind="props">
     <div class="flex w-full flex-col gap-2">
-      <button
-        type="button"
-        :disabled="disabled"
-        @click="openPicker"
-        :class="`flex min-h-10 w-full items-center justify-between gap-3 rounded-lg bg-surface-container px-3 py-2 text-left outline outline-1 outline-outline/[24%] ${
-          disabled ? 'cursor-not-allowed bg-surface-variant/50 text-on-surface/[38%]' : ''
-        }`"
-      >
-        <div class="flex min-w-0 items-center gap-3">
-          <i v-if="selectedClass" :class="selectedClass" class="text-xl"></i>
-          <p v-else class="text-muted">Pilih icon...</p>
-          <p v-if="selectedClass" class="truncate text-sm">{{ selectedClass }}</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <Button
-            v-if="selectedClass"
-            kind="icon"
-            variant="standard"
-            type="button"
-            aria-label="Clear icon"
-            :disabled="disabled"
-            @click.stop="clearSelection"
-          >
-            <template #icon>
-              <i class="ri-close-line text-lg"></i>
-            </template>
-          </Button>
-          <i class="ri-arrow-down-s-line text-xl"></i>
-        </div>
-      </button>
+      <div class="flex items-center gap-3">
+        <Dialog v-model="open" :disabled="disabled">
+          <template #trigger>
+            <div
+              :key="`${selectedClass}`"
+              class="overlay flex max-w-fit cursor-pointer flex-row items-center justify-between gap-3 rounded-lg bg-surface-container-high px-4 py-2 after:bg-on-surface/[8%] after:active:bg-on-surface/[12%]"
+              @click="openPicker"
+            >
+              <template v-if="selectedClass">
+                <i :class="selectedClass" class="text-lg"></i>
+                <p class="min-w-max">{{ selectedClass }}</p>
+              </template>
+              <p v-else class="min-w-max">Select icon</p>
+            </div>
+          </template>
+          <template #content>
+            <div class="flex items-center gap-3 border-b border-outline-variant pb-4">
+              <input
+                v-model="query"
+                type="text"
+                placeholder="Cari icon..."
+                class="w-full rounded-lg bg-surface-container px-3 py-2 text-sm outline outline-1 outline-outline/[24%]"
+              />
+              <Button type="button" variant="outlined" @click="clearSelection" :disabled="disabled || !selectedClass">Clear</Button>
+            </div>
 
-      <Dialog v-model:open="open">
-        <DialogContent class="flex h-[70vh] max-w-[860px] flex-col">
-          <div class="flex items-center gap-3 border-b border-outline-variant pb-4">
-            <input
-              v-model="query"
-              type="text"
-              placeholder="Cari icon..."
-              class="w-full rounded-lg bg-surface-container px-3 py-2 text-sm outline outline-1 outline-outline/[24%]"
-            />
-            <Button type="button" variant="outlined" @click="clearSelection" :disabled="disabled || !selectedClass">Clear</Button>
-          </div>
+            <div v-if="loadingIcons" class="flex h-full items-center justify-center text-sm text-muted">
+              Memuat icon...
+            </div>
 
-          <div v-if="loadingIcons" class="flex h-full items-center justify-center text-sm text-muted">
-            Memuat icon...
-          </div>
+            <div v-else-if="!filteredIcons.length" class="flex h-full items-center justify-center text-sm text-muted">
+              Icon tidak ditemukan.
+            </div>
 
-          <div v-else-if="!filteredIcons.length" class="flex h-full items-center justify-center text-sm text-muted">
-            Icon tidak ditemukan.
-          </div>
-
-          <div
-            v-else
-            v-bind="containerProps"
-            class="h-full overflow-y-auto"
-          >
-            <div v-bind="wrapperProps">
-              <div
-                v-for="row in virtualRows"
-                :key="row.index"
-                class="grid grid-cols-6 gap-2 px-1 py-1"
-                :style="{ height: `${ROW_HEIGHT}px` }"
-              >
-                <button
-                  v-for="iconClass in row.data"
-                  :key="iconClass"
-                  type="button"
-                  :aria-label="iconClass"
-                  :title="iconClass"
-                  @click="pickIcon(iconClass)"
-                  :class="`flex h-12 flex-col items-center justify-center rounded-lg border px-2 text-center transition-colors ${
-                    selectedClass === iconClass
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-outline/[24%] bg-surface-container hover:bg-surface-container-high'
-                  }`"
+            <div
+              v-else
+              v-bind="containerProps"
+              class="h-[60vh] overflow-y-auto"
+            >
+              <div v-bind="wrapperProps">
+                <div
+                  v-for="row in virtualRows"
+                  :key="row.index"
+                  class="grid grid-cols-12 gap-1"
+                  :style="{ height: `${ROW_HEIGHT}px` }"
                 >
-                  <i :class="iconClass" class="text-xl"></i>
-                </button>
+                  <Button
+                    v-for="iconClass in row.data"
+                    :key="iconClass"
+                    kind="icon"
+                    :variant="selectedClass === iconClass ? 'outlined' : 'standard'"
+                    type="button"
+                    :aria-label="iconClass"
+                    :title="iconClass"
+                    @click="pickIcon(iconClass)"
+                  >
+                    <template #icon>
+                      <i :class="iconClass" class="text-xl"></i>
+                    </template>
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </template>
+        </Dialog>
+      </div>
     </div>
   </BaseInput>
 </template>
