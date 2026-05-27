@@ -5,9 +5,20 @@ on:
   push:
     tags:
       - '@southneuhof/**'
+  workflow_run:
+    workflows:
+      - Release Packages
+    types:
+      - completed
 
 jobs:
   sync-mjl-landing:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/@southneuhof/')) ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
