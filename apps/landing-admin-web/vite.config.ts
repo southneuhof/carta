@@ -1,8 +1,15 @@
 import { fileURLToPath, URL } from 'node:url'
+import fs from 'node:fs'
+import path from 'node:path'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { createPortablePackageAliases } from '../../scripts/package-resolution.mjs'
+
+const appRootDir = fileURLToPath(new URL('.', import.meta.url))
+const localFrameworkSourceDir = path.resolve(appRootDir, '..', '..', 'packages', 'is-vue-framework', 'src')
+const localFrameworkSourceEntry = path.join(localFrameworkSourceDir, 'index.ts')
+const useLocalFrameworkSource = fs.existsSync(localFrameworkSourceEntry)
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -22,14 +29,18 @@ export default defineConfig({
         find: '@',
         replacement: fileURLToPath(new URL('./src', import.meta.url)),
       },
-      {
-        find: /^@southneuhof\/is-vue-framework$/,
-        replacement: fileURLToPath(new URL('../../packages/is-vue-framework/src/index.ts', import.meta.url)),
-      },
-      {
-        find: '@southneuhof/is-vue-framework/',
-        replacement: fileURLToPath(new URL('../../packages/is-vue-framework/src/', import.meta.url)),
-      },
+      ...(useLocalFrameworkSource
+        ? [
+            {
+              find: /^@southneuhof\/is-vue-framework$/,
+              replacement: localFrameworkSourceEntry,
+            },
+            {
+              find: '@southneuhof/is-vue-framework/',
+              replacement: localFrameworkSourceDir,
+            },
+          ]
+        : []),
       ...createPortablePackageAliases(),
     ],
   },
