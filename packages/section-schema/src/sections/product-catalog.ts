@@ -42,6 +42,16 @@ export default defineSectionSchema({
       fields: ['subtitle', 'title', 'description', 'url', 'url_text'] as const,
       editor: {
         label: 'Content',
+        fieldAliases: {
+          subtitle: 'Subtitle',
+          title: 'Title',
+          description: 'Description',
+          url: 'URL',
+          url_text: 'URL Text',
+        },
+        fieldsType: {
+          description: { type: 'html' },
+        },
       },
     },
     products: {
@@ -52,6 +62,16 @@ export default defineSectionSchema({
       fields: ['id', 'name', 'url', 'thumbnail', 'category', 'product_category_id'] as const,
       params: {
         limit: 8,
+      },
+      editor: {
+        fieldAliases: {
+          id: 'ID',
+          name: 'Name',
+          url: 'URL',
+          thumbnail: 'Thumbnail',
+          category: 'Category',
+          product_category_id: 'Product Category',
+        },
       },
     },
   },

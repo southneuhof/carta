@@ -44,7 +44,7 @@ export default defineSectionSchema({
             props: {
               required: true,
               data: [
-                { name: 'Gambar', id: 'image' },
+                { name: 'Image', id: 'image' },
                 { name: 'Video', id: 'video' },
               ],
             },
@@ -80,10 +80,18 @@ export default defineSectionSchema({
           },
         },
         fieldsAlias: {
+          media_type: 'Media Type',
+          media: 'Media',
+          subtitle: 'Subtitle',
+          title: 'Title',
+          description: 'Description',
           cta: 'Primary Button URL',
           cta_text: 'Primary Button Text',
           url: 'Secondary Button URL',
           url_text: 'Secondary Button Text',
+        },
+        fieldsType: {
+          description: { type: 'html' },
         },
       },
     },

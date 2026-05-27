@@ -12,6 +12,10 @@ export default defineSectionSchema({
   meta: {
     fields: [] as const,
     defaultValues: {},
+    editor: {
+      fieldsAlias: {},
+      fieldsType: {},
+    },
   },
   data: {
     content: {
@@ -20,6 +24,14 @@ export default defineSectionSchema({
       fields: ['subtitle', 'title', 'description'] as const,
       editor: {
         label: 'Header Content',
+        fieldAliases: {
+          subtitle: 'Subtitle',
+          title: 'Title',
+          description: 'Description',
+        },
+        fieldsType: {
+          description: { type: 'html' },
+        },
         inputConfig: {
           subtitle: { type: 'text' },
           title: { type: 'text' },
@@ -39,6 +51,10 @@ export default defineSectionSchema({
         meta: {
           fields: [] as const,
           defaultValues: {},
+          editor: {
+            fieldsAlias: {},
+            fieldsType: {},
+          },
         },
         data: {
           sectionGroup: {
@@ -53,6 +69,10 @@ export default defineSectionSchema({
               meta: {
                 fields: [] as const,
                 defaultValues: {},
+                editor: {
+                  fieldsAlias: {},
+                  fieldsType: {},
+                },
               },
               data: {
                 content: {
@@ -61,6 +81,14 @@ export default defineSectionSchema({
                   fields: ['subtitle', 'title', 'description'] as const,
                   editor: {
                     label: 'Content',
+                    fieldAliases: {
+                      subtitle: 'Subtitle',
+                      title: 'Title',
+                      description: 'Description',
+                    },
+                    fieldsType: {
+                      description: { type: 'html' },
+                    },
                     inputConfig: {
                       subtitle: { type: 'text' },
                       title: { type: 'text' },
@@ -75,6 +103,11 @@ export default defineSectionSchema({
                   fields: ['media', 'title', 'subtitle'] as const,
                   editor: {
                     label: 'Gallery',
+                    fieldAliases: {
+                      media: 'Image',
+                      title: 'Title',
+                      subtitle: 'Subtitle',
+                    },
                     inputConfig: {
                       media: { type: 'image' },
                       title: { type: 'text' },

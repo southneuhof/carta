@@ -37,6 +37,16 @@ export default defineSectionSchema({
       fields: ['subtitle', 'title', 'description', 'url', 'url_text'] as const,
       editor: {
         label: 'Content',
+        fieldAliases: {
+          subtitle: 'Subtitle',
+          title: 'Title',
+          description: 'Description',
+          url: 'URL',
+          url_text: 'URL Text',
+        },
+        fieldsType: {
+          description: { type: 'html' },
+        },
       },
     },
     articles: {
@@ -50,6 +60,21 @@ export default defineSectionSchema({
         limit: 4,
         categoryMetaField: 'articleCategory',
         categoryMatch: 'any',
+      },
+      editor: {
+        fieldAliases: {
+          id: 'ID',
+          created_at: 'Created At',
+          title: 'Title',
+          slug: 'Slug',
+          excerpt: 'Excerpt',
+          thumbnail: 'Thumbnail',
+          categories: 'Categories',
+        },
+        fieldsType: {
+          excerpt: { type: 'html' },
+          categories: { type: 'array' },
+        },
       },
     },
   },

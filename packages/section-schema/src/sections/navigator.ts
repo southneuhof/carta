@@ -14,5 +14,13 @@ export default defineSectionSchema({
       overflow: 'visible',
     },
   },
+  meta: {
+    fields: [] as const,
+    defaultValues: {},
+    editor: {
+      fieldsAlias: {},
+      fieldsType: {},
+    },
+  },
   data: {},
 })

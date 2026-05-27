@@ -113,6 +113,10 @@ export default defineSectionSchema({
         article_categories_filter: 'Filter Categories',
         article_categories_main: 'Main Categories',
       },
+      fieldsType: {
+        allow_filter: { type: 'chip', props: { options: { true: { color: 'success', label: 'Enabled' }, false: { color: 'neutral', label: 'Disabled' } } } },
+        allow_select_all: { type: 'chip', props: { options: { true: { color: 'success', label: 'Enabled' }, false: { color: 'neutral', label: 'Disabled' } } } },
+      },
     },
   },
   data: {
@@ -124,6 +128,12 @@ export default defineSectionSchema({
       fields: ['id', 'name'] as const,
       params: {
         strategy: 'localizedList',
+      },
+      editor: {
+        fieldAliases: {
+          id: 'ID',
+          name: 'Name',
+        },
       },
     },
   },

@@ -19,7 +19,10 @@ export default defineSectionSchema({
         add_overlay: { type: 'checkbox' },
       },
       fieldsAlias: {
-        add_overlay: 'Gunakan Overlay Gelap',
+        add_overlay: 'Use Dark Overlay',
+      },
+      fieldsType: {
+        add_overlay: { type: 'chip', props: { options: { true: { color: 'success', label: 'Enabled' }, false: { color: 'neutral', label: 'Disabled' } } } },
       },
     },
   },
@@ -30,14 +33,17 @@ export default defineSectionSchema({
       many: true,
       fields: ['media', 'title', 'description'] as const,
       editor: {
-        label: 'Daftar Konten',
+        label: 'Content List',
         inputConfig: {
           media: { type: 'image' },
           title: { type: 'text' },
           description: { type: 'rich-text' },
         },
         fieldsAlias: {
-          media: 'Gambar Background',
+          media: 'Background Image',
+        },
+        fieldsType: {
+          description: { type: 'html' },
         },
       },
     },

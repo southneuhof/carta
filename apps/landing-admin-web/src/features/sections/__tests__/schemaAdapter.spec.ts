@@ -223,6 +223,7 @@ describe('section schema adapter', () => {
     expect(dataListConfig?.meta?.fields?.[0]).toBe('section_background_color')
     expect(dataListConfig?.meta?.fields).toContain('closed_on_initial')
     expect(dataListConfig?.meta?.inputConfig?.closed_on_initial?.dependency?.fields).toEqual(['collapsible'])
+    expect(dataListConfig?.meta?.fieldsType?.collapsible).toBeTruthy()
     expect(dataListConfig?.meta?.defaultValues?.type).toBe('list')
   })
 

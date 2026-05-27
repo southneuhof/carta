@@ -9,6 +9,20 @@ export default defineSectionSchema({
   editor: {
     group: 'Product',
   },
+  meta: {
+    fields: ['product_id'] as const,
+    defaultValues: {
+      product_id: null,
+    },
+    editor: {
+      fieldsAlias: {
+        product_id: 'Product',
+      },
+      fieldsType: {
+        product_id: { type: 'text' },
+      },
+    },
+  },
   data: {
     product: {
       type: 'resource',
@@ -19,6 +33,22 @@ export default defineSectionSchema({
       params: {
         strategy: 'detailById',
         idMetaField: 'product_id',
+      },
+      editor: {
+        fieldAliases: {
+          id: 'ID',
+          name: 'Name',
+          description: 'Description',
+          url: 'URL',
+          category: 'Category',
+          thumbnail: 'Thumbnail',
+          images: 'Images',
+          product_category_id: 'Product Category',
+        },
+        fieldsType: {
+          description: { type: 'html' },
+          images: { type: 'array' },
+        },
       },
     },
     config: {

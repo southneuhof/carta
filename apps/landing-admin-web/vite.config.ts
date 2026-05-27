@@ -10,6 +10,12 @@ const appRootDir = fileURLToPath(new URL('.', import.meta.url))
 const localFrameworkSourceDir = path.resolve(appRootDir, '..', '..', 'packages', 'is-vue-framework', 'src')
 const localFrameworkSourceEntry = path.join(localFrameworkSourceDir, 'index.ts')
 const useLocalFrameworkSource = fs.existsSync(localFrameworkSourceEntry)
+const portableAliases = createPortablePackageAliases()
+const portableAliasesWithoutFramework = portableAliases.filter((alias) => {
+  const find = alias.find
+  if (find instanceof RegExp) return !find.test('@southneuhof/is-vue-framework')
+  return find !== '@southneuhof/is-vue-framework/'
+})
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -37,11 +43,12 @@ export default defineConfig({
             },
             {
               find: '@southneuhof/is-vue-framework/',
-              replacement: localFrameworkSourceDir,
+              replacement: `${localFrameworkSourceDir}/`,
             },
           ]
         : []),
-      ...createPortablePackageAliases(),
+      // Keep a single framework module instance so behavior registry is shared app-wide.
+      ...portableAliasesWithoutFramework,
     ],
   },
   optimizeDeps: {

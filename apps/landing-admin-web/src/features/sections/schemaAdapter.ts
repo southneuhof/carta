@@ -54,6 +54,7 @@ export type SupportedSectionEditorConfig = {
     defaultValues?: Record<string, unknown>
     inputConfig?: SectionSchemaEditorInputConfig
     fieldsAlias?: Record<string, string>
+    fieldsType?: Record<string, unknown>
     getInitialData?: () => Promise<Record<string, unknown>>
   }
   slots: SupportedSectionSlotEditor[]
@@ -75,6 +76,7 @@ export type SupportedSectionMetaConfig = {
   defaultValues?: Record<string, unknown>
   inputConfig?: SectionSchemaEditorInputConfig
   fieldsAlias?: Record<string, string>
+  fieldsType?: Record<string, unknown>
   getInitialData?: () => Promise<Record<string, unknown>>
 }
 
@@ -166,6 +168,7 @@ function toMetaConfig(meta: SectionSchemaMeta | undefined): SupportedSectionMeta
     defaultValues: meta?.defaultValues ?? {},
     inputConfig: meta?.editor?.inputConfig ?? {},
     fieldsAlias: meta?.editor?.fieldsAlias ?? {},
+    fieldsType: meta?.editor?.fieldsType ?? {},
     getInitialData: meta?.editor?.getInitialData,
   }
 }

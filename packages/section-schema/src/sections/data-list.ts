@@ -105,14 +105,20 @@ export default defineSectionSchema({
         },
       },
       fieldsAlias: {
-        type: 'Tipe Tampilan',
-        width_preset: 'Lebar Konten',
-        hide_outline: 'Hilangkan Outline',
-        media_aspect_ratio: 'Rasio Gambar',
-        collapsible: 'Dapat Diklik untuk Menyembunyikan Isi',
-        closed_on_initial: 'Tutup Semua di Awal',
-        searchable: 'Aktifkan Kolom Pencarian',
-        title: 'Judul',
+        type: 'Display Type',
+        width_preset: 'Content Width',
+        hide_outline: 'Hide Outline',
+        media_aspect_ratio: 'Media Aspect Ratio',
+        collapsible: 'Enable Collapsible',
+        closed_on_initial: 'Closed on Initial Load',
+        searchable: 'Enable Search',
+        title: 'Search Placeholder',
+      },
+      fieldsType: {
+        hide_outline: { type: 'chip', props: { options: { true: { color: 'success', label: 'Enabled' }, false: { color: 'neutral', label: 'Disabled' } } } },
+        collapsible: { type: 'chip', props: { options: { true: { color: 'success', label: 'Enabled' }, false: { color: 'neutral', label: 'Disabled' } } } },
+        closed_on_initial: { type: 'chip', props: { options: { true: { color: 'success', label: 'Enabled' }, false: { color: 'neutral', label: 'Disabled' } } } },
+        searchable: { type: 'chip', props: { options: { true: { color: 'success', label: 'Enabled' }, false: { color: 'neutral', label: 'Disabled' } } } },
       },
     },
   },
@@ -123,6 +129,14 @@ export default defineSectionSchema({
       fields: ['subtitle', 'title', 'description'] as const,
       editor: {
         label: 'Header Content',
+        fieldAliases: {
+          subtitle: 'Subtitle',
+          title: 'Title',
+          description: 'Description',
+        },
+        fieldsType: {
+          description: { type: 'html' },
+        },
         inputConfig: {
           title: { type: 'text' },
           description: { type: 'rich-text' },
@@ -141,6 +155,10 @@ export default defineSectionSchema({
         meta: {
           fields: [] as const,
           defaultValues: {},
+          editor: {
+            fieldsAlias: {},
+            fieldsType: {},
+          },
         },
         data: {
           gallery: {
@@ -150,6 +168,18 @@ export default defineSectionSchema({
             fieldSets: dataListFieldSets,
             editor: {
               label: 'Data',
+              fieldAliases: {
+                media: 'Media',
+                attachment: 'Attachment',
+                subtitle: 'Subtitle',
+                title: 'Title',
+                description: 'Description',
+                url: 'URL',
+                url_text: 'URL Text',
+              },
+              fieldsType: {
+                description: { type: 'html' },
+              },
               resolveConfig: ({ parentSectionData }) => resolveDataListFieldSetConfig((parentSectionData as any)?.meta?.type),
             },
           },

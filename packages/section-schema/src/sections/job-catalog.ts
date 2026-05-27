@@ -9,6 +9,14 @@ export default defineSectionSchema({
   editor: {
     group: 'Careers',
   },
+  meta: {
+    fields: [] as const,
+    defaultValues: {},
+    editor: {
+      fieldsAlias: {},
+      fieldsType: {},
+    },
+  },
   data: {
     content: {
       type: 'content',
@@ -16,6 +24,14 @@ export default defineSectionSchema({
       fields: ['subtitle', 'title', 'description'] as const,
       editor: {
         label: 'Content',
+        fieldAliases: {
+          subtitle: 'Subtitle',
+          title: 'Title',
+          description: 'Description',
+        },
+        fieldsType: {
+          description: { type: 'html' },
+        },
       },
     },
     jobs: {
@@ -26,6 +42,15 @@ export default defineSectionSchema({
       fields: ['id', 'name', 'minimum_education', 'location', 'category'] as const,
       params: {
         strategy: 'activeList',
+      },
+      editor: {
+        fieldAliases: {
+          id: 'ID',
+          name: 'Job Title',
+          minimum_education: 'Minimum Education',
+          location: 'Location',
+          category: 'Category',
+        },
       },
     },
   },

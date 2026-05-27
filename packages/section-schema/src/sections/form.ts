@@ -9,6 +9,20 @@ export default defineSectionSchema({
   editor: {
     group: 'Utility',
   },
+  meta: {
+    fields: ['form_type_id'] as const,
+    defaultValues: {
+      form_type_id: null,
+    },
+    editor: {
+      fieldsAlias: {
+        form_type_id: 'Form Type',
+      },
+      fieldsType: {
+        form_type_id: { type: 'text' },
+      },
+    },
+  },
   data: {
     header: {
       type: 'content',
@@ -16,6 +30,14 @@ export default defineSectionSchema({
       fields: ['subtitle', 'title', 'description'] as const,
       editor: {
         label: 'Header',
+        fieldAliases: {
+          subtitle: 'Subtitle',
+          title: 'Title',
+          description: 'Description',
+        },
+        fieldsType: {
+          description: { type: 'html' },
+        },
         inputConfig: {
           title: { type: 'text' },
           description: { type: 'rich-text' },
@@ -29,6 +51,11 @@ export default defineSectionSchema({
       fields: ['media', 'title', 'url'] as const,
       editor: {
         label: 'Contact Details',
+        fieldAliases: {
+          media: 'Icon',
+          title: 'Title',
+          url: 'URL',
+        },
         inputConfig: {
           media: {type: 'icon-select'}
         },
@@ -40,6 +67,13 @@ export default defineSectionSchema({
       fields: ['title', 'description'] as const,
       editor: {
         label: 'Post Submission',
+        fieldAliases: {
+          title: 'Title',
+          description: 'Description',
+        },
+        fieldsType: {
+          description: { type: 'html' },
+        },
         inputConfig: {
           title: { type: 'text' },
           description: { type: 'rich-text' },
@@ -53,6 +87,12 @@ export default defineSectionSchema({
       many: false,
       params: {
         formTypeMetaField: 'form_type_id',
+      },
+      editor: {
+        fieldAliases: {
+          id: 'ID',
+          name: 'Name',
+        },
       },
     },
     config: {

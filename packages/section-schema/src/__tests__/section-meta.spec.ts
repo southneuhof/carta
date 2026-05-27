@@ -301,7 +301,7 @@ describe('shared section schema', () => {
       'url',
       'url_text',
     ])
-    expect(articleHighlights.data.articles).toEqual({
+    expect(articleHighlights.data.articles).toMatchObject({
       type: 'resource',
       source: 'article',
       order: 2,
@@ -334,7 +334,7 @@ describe('shared section schema', () => {
   it('exports article-list schema with resource category slot and filter meta', () => {
     expect(sectionSchemas['article-list']).toBeTruthy()
     expect(Object.keys(articleList.data)).toEqual(['articleCategory'])
-    expect(articleList.data.articleCategory).toEqual({
+    expect(articleList.data.articleCategory).toMatchObject({
       type: 'resource',
       source: 'article-category',
       order: 1,
@@ -386,7 +386,7 @@ describe('shared section schema', () => {
       'url',
       'url_text',
     ])
-    expect(productCatalog.data.products).toEqual({
+    expect(productCatalog.data.products).toMatchObject({
       type: 'resource',
       source: 'product',
       order: 2,
@@ -418,7 +418,7 @@ describe('shared section schema', () => {
       'title',
       'description',
     ])
-    expect(jobCatalog.data.jobs).toEqual({
+    expect(jobCatalog.data.jobs).toMatchObject({
       type: 'resource',
       source: 'job',
       order: 2,
@@ -433,7 +433,7 @@ describe('shared section schema', () => {
   it('exports product-showcase schema with resource-only slots', () => {
     expect(sectionSchemas['product-showcase']).toBeTruthy()
     expect(Object.keys(productShowcase.data)).toEqual(['product', 'config'])
-    expect(productShowcase.data.product).toEqual({
+    expect(productShowcase.data.product).toMatchObject({
       type: 'resource',
       source: 'product',
       order: 1,
@@ -478,6 +478,15 @@ describe('shared section schema', () => {
     expect(contentDefault.meta?.editor?.inputConfig?.ornament_media?.type).toBe('image')
     expect(contentDefault.data.content.editor?.label).toBe('Main Content')
     expect(dataList.data.childSections.schema?.data.gallery.editor?.resolveConfig).toBeTypeOf('function')
+    expect(dataList.meta?.editor?.fieldsType?.collapsible).toBeTruthy()
+  })
+
+  it('adds alias and type metadata for utility/resource-heavy schemas', () => {
+    expect(form.meta?.editor?.fieldsAlias?.form_type_id).toBe('Form Type')
+    expect(productShowcase.meta?.editor?.fieldsAlias?.product_id).toBe('Product')
+    expect(jobCatalog.data.jobs.editor?.fieldAliases?.minimum_education).toBe('Minimum Education')
+    expect(galleryTree.data.content.editor?.fieldAliases?.title).toBe('Title')
+    expect(galleryStackArray.data.content.editor?.fieldsType?.description).toEqual({ type: 'html' })
   })
 
   it('defines contextual visibility for content-default meta controls', () => {
