@@ -1,5 +1,12 @@
 # @client/web
 
+## 0.0.9
+
+### Patch Changes
+
+- Updated dependencies
+  - @southneuhof/is-vue-framework@1.0.6
+
 ## 0.0.8
 
 ### Patch Changes
