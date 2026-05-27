@@ -106,14 +106,35 @@ function runInTarget(command, args, options = {}) {
   }
 }
 
+function validationEnv() {
+  return {
+    ...process.env,
+    DATABASE_URL: process.env.DATABASE_URL || 'postgresql://mjl_landing:mjl_landing@127.0.0.1:5432/mjl_landing',
+    PUBLIC_APP_URL: process.env.PUBLIC_APP_URL || 'http://localhost:5173',
+    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL || process.env.PUBLIC_APP_URL || 'http://localhost:5173',
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET || 'local-validation-secret-change-before-production',
+    BETTER_AUTH_TRUSTED_ORIGINS: process.env.BETTER_AUTH_TRUSTED_ORIGINS || 'http://localhost:5174',
+    PUBLIC_RECAPTCHA_SITEKEY: process.env.PUBLIC_RECAPTCHA_SITEKEY || 'local-validation-site-key',
+    RECAPTCHA_SECRETKEY: process.env.RECAPTCHA_SECRETKEY || 'local-validation-secret-key',
+    BYPASS_ALL_PERMISSIONS: process.env.BYPASS_ALL_PERMISSIONS || 'true',
+    VITE_API_URL: process.env.VITE_API_URL || 'http://localhost:5173/api/',
+    VITE_APP_BYPASS_ALL_PERMISSIONS: process.env.VITE_APP_BYPASS_ALL_PERMISSIONS || 'true',
+    VITE_APP_MODE: process.env.VITE_APP_MODE || 'local',
+    VITE_GOOGLE_MAPS_API_KEY: process.env.VITE_GOOGLE_MAPS_API_KEY || 'local-validation-google-maps-key',
+    BODY_SIZE_LIMIT: process.env.BODY_SIZE_LIMIT || 'Infinity',
+  }
+}
+
 function validateTarget() {
   if (!validate) return
 
-  runInTarget('pnpm', ['install', '--frozen-lockfile'])
-  runInTarget('pnpm', ['landing:check-portable'])
-  runInTarget('pnpm', ['--dir', 'apps/landing-mjl', 'exec', 'prisma', 'generate'])
-  runInTarget('pnpm', ['--dir', 'apps/landing-mjl', 'build'])
-  runInTarget('pnpm', ['--dir', 'apps/landing-admin-web', 'build'])
+  const env = validationEnv()
+
+  runInTarget('pnpm', ['install', '--frozen-lockfile'], { env })
+  runInTarget('pnpm', ['landing:check-portable'], { env })
+  runInTarget('pnpm', ['--dir', 'apps/landing-mjl', 'exec', 'prisma', 'generate'], { env })
+  runInTarget('pnpm', ['--dir', 'apps/landing-mjl', 'build'], { env })
+  runInTarget('pnpm', ['--dir', 'apps/landing-admin-web', 'build'], { env })
 }
 
 function isEmptyDirectory(dir) {

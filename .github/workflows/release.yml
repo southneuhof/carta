@@ -116,16 +116,3 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
           MJL_LANDING_REMOTE: https://x-access-token:${{ secrets.MJL_LANDING_TOKEN }}@github.com/sallliisa/mjl-landing.git
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          PUBLIC_APP_URL: ${{ secrets.PUBLIC_APP_URL }}
-          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
-          BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL }}
-          BETTER_AUTH_TRUSTED_ORIGINS: ${{ secrets.BETTER_AUTH_TRUSTED_ORIGINS }}
-          PUBLIC_RECAPTCHA_SITEKEY: ${{ secrets.PUBLIC_RECAPTCHA_SITEKEY }}
-          RECAPTCHA_SECRETKEY: ${{ secrets.RECAPTCHA_SECRETKEY }}
-          BYPASS_ALL_PERMISSIONS: ${{ secrets.BYPASS_ALL_PERMISSIONS }}
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
-          VITE_APP_BYPASS_ALL_PERMISSIONS: ${{ secrets.VITE_APP_BYPASS_ALL_PERMISSIONS }}
-          VITE_APP_MODE: ${{ secrets.VITE_APP_MODE }}
-          VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
-          BODY_SIZE_LIMIT: Infinity
