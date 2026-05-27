@@ -1,5 +1,12 @@
 # @southneuhof/landing-section-schema
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated dependencies [f2803d6]
+  - @southneuhof/landing-sveltekit-framework@0.0.5
+
 ## 0.0.3
 
 ### Patch Changes
