@@ -14,7 +14,7 @@ import productShowcase from '../sections/product-showcase'
 import sectionSchemas from '../index'
 import { dataListFieldSets } from '../helpers/data-list-field-sets'
 import { containerColorOptions } from '../helpers/container-color-options'
-import { defineSectionSchema } from '@southneuhof/landing-section-schema'
+import { defineSectionSchema } from '@southneuhof/landing-section-schema/defineSectionSchema'
 
 describe('shared section schema', () => {
   it('exports valid schemas with code and data', () => {

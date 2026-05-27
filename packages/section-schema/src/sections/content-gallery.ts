@@ -1,4 +1,4 @@
-import { defineSectionSchema } from '@southneuhof/landing-section-schema'
+import { defineSectionSchema } from '@southneuhof/landing-section-schema/defineSectionSchema'
 import { containerColorOptions } from '../helpers/container-color-options'
 
 const isPanel = ({ container_variant }: any) => container_variant === 'panel'

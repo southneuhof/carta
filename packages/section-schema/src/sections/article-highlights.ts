@@ -1,4 +1,4 @@
-import { defineSectionSchema } from '@southneuhof/landing-section-schema'
+import { defineSectionSchema } from '@southneuhof/landing-section-schema/defineSectionSchema'
 
 export default defineSectionSchema({
   code: 'article-highlights',
