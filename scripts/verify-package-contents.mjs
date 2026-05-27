@@ -1,6 +1,11 @@
 import { access, readFile } from 'node:fs/promises'
 import { execFileSync } from 'node:child_process'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { publishablePackages as packages } from './release-packages.mjs'
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+const packDestination = path.resolve(process.env.PACKAGE_TARBALL_DIR || path.join(repoRoot, '.local', 'package-tarballs'))
 
 const forbiddenTarballPatterns = [
   /\/__tests__\//,
@@ -31,7 +36,7 @@ async function packageTarballPath(pkg) {
   const manifest = JSON.parse(await readFile(`${pkg.root}/package.json`, 'utf8'))
   const tarballName = `${manifest.name.replace(/^@/, '').replace('/', '-')}-${manifest.version}.tgz`
 
-  return `${pkg.root}/${tarballName}`
+  return path.join(packDestination, tarballName)
 }
 
 async function verifyDistImports(pkg, file) {
