@@ -115,7 +115,7 @@
 ></div>
 <div class="lg:flex flex-col hidden" style="--navbar-initial-text-color: var(--initial-text-color, var(--colors-on-surface));">
   <div 
-    class="w-full flex flex-col items-center justify-center fixed z-[50] box-border transition-all {isMenuExpanded ? 'text-on-surface' : windowScrollY != 0 ? 'text-on-surface' : 'text-[var(--navbar-initial-text-color)] text-shadow-outline-variant'}"
+    class="w-full flex flex-col items-center justify-center fixed z-[50] box-border transition-all {isMenuExpanded ? 'text-on-surface' : windowScrollY != 0 ? 'text-on-surface' : 'text-on-surface navbar-top-contrast-subtle'}"
   >
     <div class="flex flex-row items-center justify-between w-full px-12 py-6 max-w-screen-xl">
       <a href="{page.data.primaryMenuPath}">
@@ -278,4 +278,12 @@
     </div>
   </div>
 </div>
+
+<style>
+  .navbar-top-contrast-subtle {
+    text-shadow:
+      0 0 1px rgb(255 255 255 / 0.7),
+      0 1px 1px rgb(255 255 255 / 0.35);
+  }
+</style>
 <!-- <p class="z-[100]">{JSON.stringify(level2MenuContentElements)}</p> -->
