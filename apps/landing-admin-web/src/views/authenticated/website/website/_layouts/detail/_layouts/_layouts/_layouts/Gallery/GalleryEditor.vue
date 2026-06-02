@@ -69,6 +69,7 @@ const resolvedSlotConfig = computed(() =>
 )
 const fields = computed(() => resolvedSlotConfig.value?.fields ?? ['title', 'description', 'media', 'url'])
 const fieldsAlias = computed(() => (resolvedSlotConfig.value as any)?.fieldAliases ?? (resolvedSlotConfig.value as any)?.fieldsAlias ?? {})
+const galleryMetaDependencyKey = computed(() => JSON.stringify(props.sectionData?.meta ?? {}))
 
 const listConfig = computed(() => ({
   getAPI: 'content',
@@ -87,11 +88,15 @@ const listConfig = computed(() => ({
 const createFormConfig = computed(() => ({
   fields: fields.value,
   targetAPI: 'content',
-    fieldsAlias: fieldsAlias.value,
-    inputConfig: {
-      content: { type: 'rich-text' },
-      ...(resolvedSlotConfig.value?.inputConfig ?? {}),
-    },
+  fieldsAlias: fieldsAlias.value,
+  inputConfig: {
+    content: { type: 'rich-text' },
+    ...(resolvedSlotConfig.value?.inputConfig ?? {}),
+  },
+  beforeSubmit: ({ formData }: { formData: Record<string, unknown> }) => {
+    const { meta: _meta, ...payload } = formData
+    return payload
+  },
   extraData: {
     ...(resolvedSlotConfig.value?.defaultValues ?? {}),
     gallery_id: props.galleryID,
@@ -102,11 +107,15 @@ const createFormConfig = computed(() => ({
 const updateFormConfig = computed(() => ({
   fields: fields.value,
   targetAPI: 'content',
-    fieldsAlias: fieldsAlias.value,
-    inputConfig: {
-      content: { type: 'rich-text' },
-      ...(resolvedSlotConfig.value?.inputConfig ?? {}),
-    },
+  fieldsAlias: fieldsAlias.value,
+  inputConfig: {
+    content: { type: 'rich-text' },
+    ...(resolvedSlotConfig.value?.inputConfig ?? {}),
+  },
+  beforeSubmit: ({ formData }: { formData: Record<string, unknown> }) => {
+    const { meta: _meta, ...payload } = formData
+    return payload
+  },
   extraData: { page_translation_id: pageTranslation?.value?.id },
 }))
 
@@ -206,6 +215,7 @@ const topmostSection = getSmallestChildObject(sectionData, 'parentSectionData')
           </template>
           <template v-else-if="currentView === 'create'">
             <Form
+              :key="`gallery-create-${galleryID}-${galleryMetaDependencyKey}`"
               v-bind="createFormConfig"
               :getInitialData="async () => ({ ...(resolvedSlotConfig?.defaultValues ?? {}), meta: props.sectionData.meta  })"
               :disabled="pageTranslation?.status_code !== 'DRAFT'"
@@ -219,9 +229,10 @@ const topmostSection = getSmallestChildObject(sectionData, 'parentSectionData')
           </template>
           <template v-else-if="currentView === 'update'">
             <Form
+              :key="`gallery-update-${activeData?.id ?? 'new'}-${galleryMetaDependencyKey}`"
               v-bind="updateFormConfig"
               formType="update"
-              :getInitialData="async () => JSON.parse(JSON.stringify(activeData))"
+              :getInitialData="async () => JSON.parse(JSON.stringify({ ...(activeData ?? {}), meta: props.sectionData.meta }))"
               :disabled="pageTranslation?.status_code !== 'DRAFT'"
               :onSuccess="() => {
                 toast.success('Berhasil mengubah data!')

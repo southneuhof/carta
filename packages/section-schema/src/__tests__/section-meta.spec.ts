@@ -43,7 +43,6 @@ describe('shared section schema', () => {
       'content_gap',
       'media_aspect_ratio',
       'media_radius',
-      'remove_outline_on_images',
       'text_color_scheme',
       'title_size',
       'ornament_enabled',
@@ -53,7 +52,6 @@ describe('shared section schema', () => {
       'ornament_offset',
       'ornament_size',
       'ornament_position',
-      'remove_margin',
     ])
   })
 
@@ -106,7 +104,6 @@ describe('shared section schema', () => {
       'ornament_offset',
       'ornament_size',
       'ornament_position',
-      'remove_margin',
     ])
   })
 

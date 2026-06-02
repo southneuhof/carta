@@ -1,4 +1,20 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+
+const localStorageMock = vi.hoisted(() => ({
+  getItem: vi.fn(() => null),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+}))
+
+vi.stubGlobal('localStorage', localStorageMock)
+vi.mock('@/views/authenticated/website/website/_layouts/detail/_layouts/_layouts/_layouts/_Custom/FormMetaEditor.vue', () => ({
+  default: { name: 'MockFormMetaEditor' },
+}))
+vi.mock('@/views/authenticated/website/website/_layouts/detail/_layouts/_layouts/_layouts/_Custom/ProductShowcaseMetaEditor.vue', () => ({
+  default: { name: 'MockProductShowcaseMetaEditor' },
+}))
+
 import {
   SUPPORTED_SECTION_SCHEMA_CODES,
   buildCreateNestedSectionPayload,
@@ -217,7 +233,7 @@ describe('section schema adapter', () => {
     expect(contentDefaultConfig?.meta?.inputConfig?.width_preset?.type).toBe('select')
     expect(contentDefaultConfig?.meta?.defaultValues?.width_preset).toBe('xl')
     const contentSlot = contentDefaultConfig?.slots.find((slot) => slot.key === 'content')
-    expect(contentSlot?.fields).toEqual(['media_type', 'media', 'attachment', 'subtitle', 'title', 'description', 'url', 'url_text'])
+    expect(contentSlot?.fields).toEqual(['media_type', 'media', 'subtitle', 'title', 'description', 'url', 'url_text'])
     expect(contentSlot?.inputConfig?.media?.dependency?.fields).toEqual(['media_type'])
 
     const dataListConfig = getSupportedEditorConfig('data-list')

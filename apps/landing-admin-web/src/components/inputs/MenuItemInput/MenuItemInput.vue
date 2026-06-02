@@ -124,7 +124,8 @@ function confirmSelection(setOpen: Function) {
 function clearSelection() {
   selectedItems.value = [undefined, undefined, undefined]
   currentSelectedIds.value = [undefined, undefined, undefined]
-  // modelValue.value = undefined; // Optionally clear modelValue immediately or only on confirm
+  selectedItems.value = [...selectedItems.value]
+  currentSelectedIds.value = [...currentSelectedIds.value]
 }
 
 function openModal() {

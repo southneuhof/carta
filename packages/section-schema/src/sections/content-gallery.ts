@@ -65,7 +65,6 @@ export default defineSectionSchema({
       'ornament_offset',
       'ornament_size',
       'ornament_position',
-      'remove_margin',
     ] as const,
     defaultValues: {
       layout_direction: 'horizontal',
@@ -109,7 +108,6 @@ export default defineSectionSchema({
     },
     editor: {
       inputConfig: {
-        remove_margin: { type: 'checkbox' },
         content_align: {
           type: 'select',
           props: {
@@ -692,7 +690,6 @@ export default defineSectionSchema({
         },
       },
       fieldsAlias: {
-        remove_margin: 'Hilangkan margin pada konten',
         content_align: 'Align Konten',
         gallery_header_align: 'Align Header Galeri',
         url_justify: 'Justify URL',

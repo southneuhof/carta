@@ -30,7 +30,6 @@ export default defineSectionSchema({
       'content_gap',
       'media_aspect_ratio',
       'media_radius',
-      'remove_outline_on_images',
       'text_color_scheme',
       'title_size',
       'ornament_enabled',
@@ -40,7 +39,6 @@ export default defineSectionSchema({
       'ornament_offset',
       'ornament_size',
       'ornament_position',
-      'remove_margin',
     ] as const,
     defaultValues: {
       content_align: 'left',
@@ -68,8 +66,6 @@ export default defineSectionSchema({
     },
     editor: {
       inputConfig: {
-        remove_margin: { type: 'checkbox' },
-        remove_outline_on_images: { type: 'checkbox' },
         content_align: {
           type: 'select',
           props: {
@@ -410,8 +406,6 @@ export default defineSectionSchema({
         },
       },
       fieldsAlias: {
-        remove_margin: 'Hilangkan margin pada konten',
-        remove_outline_on_images: 'Hilangkan outline pada gambar',
         content_align: 'Align Konten',
         url_justify: 'Justify URL',
         layout_direction: 'Arah Layout',
@@ -442,7 +436,7 @@ export default defineSectionSchema({
     content: {
       type: 'content',
       order: 1,
-      fields: ['media_type', 'media', 'attachment', 'subtitle', 'title', 'description', 'url', 'url_text'] as const,
+      fields: ['media_type', 'media', 'subtitle', 'title', 'description', 'url', 'url_text'] as const,
       editor: {
         label: 'Main Content',
         inputConfig: {

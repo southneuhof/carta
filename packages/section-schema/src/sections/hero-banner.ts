@@ -9,17 +9,6 @@ export default defineSectionSchema({
   editor: {
     group: 'Banner',
   },
-  meta: {
-    fields: ['logo'] as const,
-    editor: {
-      inputConfig: {
-        logo: { type: 'image' },
-      },
-      fieldsAlias: {
-        logo: 'Logo',
-      },
-    },
-  },
   data: {
     banner: {
       type: 'gallery',

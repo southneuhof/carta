@@ -5,6 +5,7 @@ import { toast } from 'vue-sonner'
 import { getSmallestChildObject } from '@/utils/common'
 import services from '@/utils/services'
 import { computed, inject, unref } from 'vue'
+import { normalizeSectionMetaForSubmit, mergeSectionMetaWithDefaults } from '@/features/sections/sectionMetaForm'
 
 const injectedSectionData = inject<any>('sectionData', {})
 const injectedSectionConfig = inject<any>('sectionConfig', {})
@@ -14,7 +15,12 @@ const pageTranslation = inject<Record<string, any>>('pageTranslation')
 
 async function submitSectionMetadata({ payload, method, targetAPI, type, searchParameters }: { payload: object; method?: 'put' | 'post'; targetAPI: string; type: 'create' | 'update'; searchParameters?: object }): Promise<object> {
   try {
-    const body = { ...sectionData.value, meta: payload, ...(searchParameters || {}), page_translation_id: pageTranslation?.value?.id }
+    const normalizedMeta = normalizeSectionMetaForSubmit({
+      meta: payload as Record<string, unknown>,
+      inputConfig: sectionConfig.value.meta?.inputConfig,
+      defaultValues: sectionConfig.value.meta?.defaultValues,
+    })
+    const body = { ...sectionData.value, meta: normalizedMeta, ...(searchParameters || {}), page_translation_id: pageTranslation?.value?.id }
 
     return await services.update(targetAPI, body)
   } catch (err: any) {
@@ -32,7 +38,12 @@ const topmostSection = computed(() => getSmallestChildObject(sectionData.value, 
       v-bind="sectionConfig.meta"
       :getInitialData="async () => {
         const metaDefaults = sectionConfig.meta?.getInitialData ? await sectionConfig.meta.getInitialData() : {}
-        return JSON.parse(JSON.stringify({ ...metaDefaults, ...sectionData.meta }))
+        return JSON.parse(JSON.stringify(
+          mergeSectionMetaWithDefaults(
+            { ...(sectionConfig.meta?.defaultValues ?? {}), ...metaDefaults },
+            sectionData.meta,
+          ),
+        ))
       }"
       formType="update"
       targetAPI="section"
