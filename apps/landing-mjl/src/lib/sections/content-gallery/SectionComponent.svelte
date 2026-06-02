@@ -334,7 +334,7 @@
         </div>
       {/if}
       {#if item.description}
-        <div class="rtf-content {section.meta.remove_margin ? 'm-base' : ''} {contentAlignClassMap[align].content}">
+        <div class="rtf-content {contentAlignClassMap[align].content}">
           {@html item.description}
         </div>
       {/if}

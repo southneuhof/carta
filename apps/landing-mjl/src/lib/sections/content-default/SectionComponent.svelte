@@ -224,7 +224,7 @@
         </div>
       {/if}
       {#if content.description}
-        <div class="rtf-content {section.meta.remove_margin ? 'm-base' : ''} {(contentAlignClassMap as any)[contentAlign].content.content}">
+        <div class="rtf-content {(contentAlignClassMap as any)[contentAlign].content.content}">
           {@html content.description}
         </div>
       {/if}
@@ -257,7 +257,7 @@
           <img
             src={content.media}
             alt={content.title || ''}
-            class="h-full w-full object-cover object-center {!section.meta.remove_outline_on_images ? 'outline outline-outline-variant' : ''}"
+            class="h-full w-full object-cover object-center"
           />
         {/if}
       </div>
