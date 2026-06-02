@@ -29,7 +29,7 @@
           href="{page.data.primaryMenuPath}"
           onclick="{() => isMenuExpanded = false}"
         >
-          <img src="/assets/logo/hkr.svg" class="w-[51.2px] h-[21.6px]" alt="HK Realtindo"/>
+          <img src="/assets/logo/hkr.svg" class="w-[51.2px] h-[21.6px]" alt="Must Chick"/>
         </a>
       {/if}
       <div class="flex flex-row items-center gap-2">

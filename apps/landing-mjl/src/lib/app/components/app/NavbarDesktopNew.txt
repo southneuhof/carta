@@ -90,7 +90,7 @@
   >
     <div class="flex flex-row items-center justify-between w-full px-12 py-6 max-w-screen-xl">
       <a href="{page.data.primaryMenuPath}">
-        <img src="/assets/logo/hkr.svg" class="w-[64px] h-[27px]" alt="HK Realtindo"/>
+        <img src="/assets/logo/hkr.svg" class="w-[64px] h-[27px]" alt="Must Chick"/>
       </a>
       <div class="flex flex-row items-center gap-base text-sm xl:text-base">
         {#each page.data.menu as menu, index}

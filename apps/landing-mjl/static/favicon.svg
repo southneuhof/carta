@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 260" width="75" height="68"><metadata><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"><rdf:Description><dc:creator>RealFaviconGenerator</dc:creator><dc:source>https://realfavicongenerator.net</dc:source></rdf:Description></rdf:RDF></metadata><style>
+    .brand-text {
+      font-family: "Inter", "Montserrat", "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+      font-weight: 700;
+      font-size: 38px;
+      letter-spacing: -0.5px;
+    }
+  </style><g id="logo-mark">
+    <path d="M 136 66 Q 150 62 164 66 L 173 50 L 162 55 L 158 38 L 150 51 L 142 38 L 138 55 L 127 50 Z" fill="#E23730" stroke="#E23730" stroke-width="2" stroke-linejoin="round"></path>
+
+    <circle cx="150" cy="115" r="50" fill="#344994"></circle>
+
+    <path d="M 174.5 97.8 A 30 30 0 1 0 174.5 132.2 L 196 115 Z" fill="#FFFFFF"></path>
+
+    <circle cx="152" cy="115" r="13" fill="#344994"></circle>
+
+    <path d="M 152 115 L 165 110 A 13 13 0 0 1 165 120 Z" fill="#FFFFFF"></path>
+  </g></svg>

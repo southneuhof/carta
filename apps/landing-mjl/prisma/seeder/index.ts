@@ -230,8 +230,8 @@ const main = async () => {
 
     const companyProfile = await prisma.companyProfile.create({
       data: {
-        name: "HK Realtindo",
-        slogan: "Membangun Properti Untuk Negeri",
+        name: "PT Mustika Jaya Lestari",
+        slogan: "Membangun Untuk Negeri",
         address:
           "HK TOWER Lantai 17 Jl. Letjen M.T Haryono Kav 8, Cawang. Jakarta Timur 13340",
         email: "corporate@hkrealtindo.com",
