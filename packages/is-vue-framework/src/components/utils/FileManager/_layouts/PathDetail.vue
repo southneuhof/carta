@@ -24,6 +24,26 @@ const props = defineProps({
     type: Object,
     default: () => null,
   },
+  onDirectoryDeleted: {
+    type: Function,
+    default: () => {},
+  },
+  onNavigateBack: {
+    type: Function,
+    default: () => {},
+  },
+  onNavigateForward: {
+    type: Function,
+    default: () => {},
+  },
+  canNavigateBack: {
+    type: Boolean,
+    default: false,
+  },
+  canNavigateForward: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const data = ref()
@@ -39,6 +59,8 @@ const columns = ref([
   { label: 'Name', key: 'name', width: 'auto' },
   { label: 'Updated At', key: 'updated_at', width: '200px' },
 ])
+const ROOT_VISIBLE_SEGMENTS = ['storage', 'public']
+const ROOT_STORAGE_PATH = '/storage/public'
 
 async function getData() {
   const behavior = getFrameworkBehaviors().fileManager?.listFiles
@@ -135,10 +157,76 @@ function deleteFile(path: string) {
   return behavior(path)
 }
 
-function createFolder(payload: Record<string, any>) {
+async function ensureFolderNameAvailable(dir: string, folderName: string) {
+  const behavior = getFrameworkBehaviors().fileManager?.listFiles
+  if (!behavior) missingBehavior('fileManager.listFiles')
+
+  const existingItems = (await behavior({ dir, limit: 1000 })) || []
+  const normalizedFolderName = String(folderName || '').trim()
+  const alreadyExists = existingItems.some((item: Record<string, any>) => item?.path?.split('/').pop() === normalizedFolderName)
+
+  if (alreadyExists) {
+    toast.error('Folder name already exists')
+    throw new Error('Folder name already exists')
+  }
+}
+
+async function createFolder(payload: Record<string, any>) {
+  await ensureFolderNameAvailable(payload.dir, payload.folder_name)
   const behavior = getFrameworkBehaviors().fileManager?.createFolder
   if (!behavior) missingBehavior('fileManager.createFolder')
   return behavior(payload.dir, payload.folder_name)
+}
+
+function handleDeleteItem(item: Record<string, any>) {
+  return deleteFile(item.path)
+    .then(() => {
+      toast.success('File deleted successfully')
+
+      if (selectedObject.value?.path === item.path) {
+        selectedObject.value = null
+      }
+
+      getData()
+
+      if (item.type === 'folder') {
+        props.onDirectoryDeleted(item.path)
+      }
+    })
+    .catch(() => toast.error('Failed to delete file'))
+}
+
+function navigateToPath(path: string) {
+  modelValue.value = {
+    ...modelValue.value,
+    path,
+  }
+}
+
+function getVisiblePathSegments(path?: string) {
+  const segments = String(path || '')
+    .split('/')
+    .filter(Boolean)
+  const rootIndex = segments.findIndex((segment, index) => ROOT_VISIBLE_SEGMENTS[index] !== undefined && segment === ROOT_VISIBLE_SEGMENTS[index])
+
+  if (rootIndex !== 0 || segments.length < ROOT_VISIBLE_SEGMENTS.length) {
+    return segments
+  }
+
+  return segments.slice(ROOT_VISIBLE_SEGMENTS.length - 1)
+}
+
+function buildVisiblePath(index: number) {
+  const visibleSegments = getVisiblePathSegments(modelValue.value?.path)
+  return `/${['storage', ...visibleSegments.slice(0, index + 1)].join('/')}`
+}
+
+function getDisplayPathName(path?: string) {
+  return path === ROOT_STORAGE_PATH ? 'Storage' : path?.split('/').pop()
+}
+
+function getBreadcrumbLabel(segment: string, index: number) {
+  return index === 0 && segment === 'public' ? 'Storage' : segment
 }
 
 watch(
@@ -152,18 +240,30 @@ watch(
 <template>
   <ContextMenuRoot class="h-full">
     <ContextMenuTrigger class="h-full">
-      <div ref="dropZoneRef" class="relative flex h-full flex-col gap-4">
+      <div ref="dropZoneRef" class="relative flex h-full flex-col">
         <div v-if="isOverDropZone" class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-lg border-2 border-dashed border-primary bg-primary/10">
           <p class="font-semibold text-primary">Drop files to upload</p>
         </div>
-        <div class="p-4">
-          <div class="flex flex-row items-center gap-4">
-            <!-- <div class="flex flex-row items-center"></div> -->
-            <div class="w-full">
-              <div class="flex flex-row items-center justify-between">
+        <div class="p-4 border-b border-outline-variant">
+          <div class="flex flex-row items-center justify-between gap-4">
+            <div class="flex min-w-0 flex-row items-center gap-3">
+              <div class="flex items-center rounded-full border border-outline-variant bg-surface-container-high px-1 py-1">
+                <Button kind="icon" variant="standard" aria-label="Go back" :disabled="!props.canNavigateBack" @click="() => props.onNavigateBack()">
+                  <template #icon>
+                    <Icon name="arrow-left-s" :class="props.canNavigateBack ? 'text-on-surface' : 'text-muted'"></Icon>
+                  </template>
+                </Button>
+                <div class="mx-1 h-6 w-px bg-outline-variant"></div>
+                <Button kind="icon" variant="standard" aria-label="Go forward" :disabled="!props.canNavigateForward" @click="() => props.onNavigateForward()">
+                  <template #icon>
+                    <Icon name="arrow-right-s" :class="props.canNavigateForward ? 'text-on-surface' : 'text-muted'"></Icon>
+                  </template>
+                </Button>
+              </div>
+              <div class="min-w-0">
                 <div class="flex flex-row items-center gap-1">
-                  <p class="text-xl font-semibold">{{ modelValue?.path.split('/').pop() }}</p>
-                  <Button
+                  <p class="text-xl font-semibold">{{ getDisplayPathName(modelValue?.path) }}</p>
+                  <!-- <Button
                     kind="icon"
                     variant="standard"
                     aria-label="Refresh files"
@@ -177,70 +277,66 @@ watch(
                     <template #icon>
                       <Icon name="refresh" size="md" class="text-on-surface"></Icon>
                     </template>
-                  </Button>
+                  </Button> -->
                 </div>
-                <Popover v-model="viewModePopoverOpen" align="end">
-                  <template #trigger>
-                    <div class="ml-2">
-                      <Button kind="icon" variant="standard" aria-label="View mode menu">
-                        <template #icon>
-                          <Icon :name="viewMode === 'list' ? 'file-list' : 'image'" class="text-on-surface"></Icon>
-                        </template>
-                      </Button>
-                    </div>
-                  </template>
-                  <template #content="{ setOpen }">
-                    <div class="min-w-[180px] rounded-md border border-outline-variant bg-surface-container-high p-1">
-                      <button
-                        class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-on-surface/10"
-                        data-testid="view-mode-list"
-                        @click="
-                          () => {
-                            setViewMode('list')
-                            setOpen(false)
-                          }
-                        "
-                      >
-                        <Icon name="file-list" class="text-on-surface"></Icon>
-                        <span>List view</span>
-                      </button>
-                      <button
-                        class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-on-surface/10"
-                        data-testid="view-mode-thumbnail"
-                        @click="
-                          () => {
-                            setViewMode('thumbnail')
-                            setOpen(false)
-                          }
-                        "
-                      >
-                        <Icon name="image" class="text-on-surface"></Icon>
-                        <span>Thumbnail view</span>
-                      </button>
-                    </div>
-                  </template>
-                </Popover>
-              </div>
-              <div class="flex flex-row flex-wrap items-center gap-1">
-                <template v-for="(segment, index) in modelValue?.path.split('/')" :key="index">
-                  <button
-                    v-if="Number(index) != modelValue?.path.split('/').length - 1"
-                    class="text-sm text-muted underline"
-                    @click="
-                      () =>
-                        (modelValue.path = modelValue?.path
-                          .split('/')
-                          .slice(0, Number(index) + 1)
-                          .join('/'))
-                    "
-                  >
-                    {{ segment }}
-                  </button>
-                  <span v-else class="text-sm text-muted">{{ segment }}</span>
-                  <Icon v-if="Number(index) < modelValue?.path.split('/').length - 1" name="arrow-right-s" size="sm" class="text-muted"></Icon>
-                </template>
               </div>
             </div>
+            <Popover v-model="viewModePopoverOpen" align="end">
+              <template #trigger>
+                <div class="ml-2">
+                  <Button kind="icon" variant="standard" aria-label="View mode menu">
+                    <template #icon>
+                      <Icon :name="viewMode === 'list' ? 'file-list' : 'image'" class="text-on-surface"></Icon>
+                    </template>
+                  </Button>
+                </div>
+              </template>
+              <template #content="{ setOpen }">
+                <div class="min-w-[180px] rounded-md border border-outline-variant bg-surface-container-high p-1">
+                  <button
+                    class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-on-surface/10"
+                    data-testid="view-mode-list"
+                    @click="
+                      () => {
+                        setViewMode('list')
+                        setOpen(false)
+                      }
+                    "
+                  >
+                    <Icon name="file-list" class="text-on-surface"></Icon>
+                    <span>List view</span>
+                  </button>
+                  <button
+                    class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-on-surface/10"
+                    data-testid="view-mode-thumbnail"
+                    @click="
+                      () => {
+                        setViewMode('thumbnail')
+                        setOpen(false)
+                      }
+                    "
+                  >
+                    <Icon name="image" class="text-on-surface"></Icon>
+                    <span>Thumbnail view</span>
+                  </button>
+                </div>
+              </template>
+            </Popover>
+          </div>
+        </div>
+        <div class="border-b border-outline-variant bg-surface-container-high px-4 py-2">
+          <div class="flex flex-row flex-wrap items-center gap-1" data-testid="file-manager-breadcrumbs">
+            <template v-for="(segment, index) in getVisiblePathSegments(modelValue?.path)" :key="index">
+              <button
+                v-if="Number(index) != getVisiblePathSegments(modelValue?.path).length - 1"
+                class="rounded-md px-2 py-1 text-sm text-muted transition-colors hover:bg-on-surface/10 hover:text-on-surface"
+                @click="() => navigateToPath(buildVisiblePath(Number(index)))"
+              >
+                {{ getBreadcrumbLabel(segment, Number(index)) }}
+              </button>
+              <span v-else class="rounded-md bg-on-surface/[6%] px-2 py-1 text-sm text-on-surface">{{ getBreadcrumbLabel(segment, Number(index)) }}</span>
+              <Icon v-if="Number(index) < getVisiblePathSegments(modelValue?.path).length - 1" name="arrow-right-s" size="sm" class="text-muted"></Icon>
+            </template>
           </div>
         </div>
         <div
@@ -287,7 +383,7 @@ watch(
                 </ContextMenuTrigger>
                 <ContextMenuPortal>
                   <Transition name="fade">
-                    <ContextMenuContent class="z-1 min-w-[220px] rounded-md border border-outline-variant bg-surface-container-high p-1 text-sm text-on-surface shadow-md">
+                    <ContextMenuContent class="z-10 min-w-[220px] rounded-md border border-outline-variant bg-surface-container-high p-1 text-sm text-on-surface shadow-md">
                       <ContextMenuItem class="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-on-surface/10" @select.prevent @click="() => _window.open(item.url || item.path, '_blank')">
                         <Icon name="arrow-right-up"></Icon>
                         <p>Open</p>
@@ -295,14 +391,7 @@ watch(
                       <ContextMenuItem @select.prevent>
                         <ConfirmationDialog
                           class="w-full"
-                          :onConfirm="
-                            () =>
-                              deleteFile(item.path).then(() => {
-                                  toast.success('File deleted successfully')
-                                  getData()
-                                })
-                                .catch(() => toast.error('Failed to delete file'))
-                          "
+                          :onConfirm="() => handleDeleteItem(item)"
                         >
                           <template #trigger>
                             <div class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-error hover:bg-on-surface/10">
@@ -335,7 +424,7 @@ watch(
                       class="h-full w-full object-cover"
                       @error="() => onPreviewError(item.path)"
                     />
-                    <Icon v-else :name="item.type === 'folder' ? 'folder' : 'file'" class="text-3xl text-muted" />
+                    <Icon v-else :name="item.type === 'folder' ? 'folder' : 'file'" size="6xl" class="text-muted" />
                   </div>
                   <div class="flex w-full flex-col gap-1 p-2">
                     <p class="line-clamp-2 break-all text-sm">{{ item.path.split('/').pop() }}</p>
@@ -345,7 +434,7 @@ watch(
               </ContextMenuTrigger>
               <ContextMenuPortal>
                 <Transition name="fade">
-                  <ContextMenuContent class="z-1 min-w-[220px] rounded-md border border-outline-variant bg-surface-container-high p-1 text-sm text-on-surface shadow-md">
+                  <ContextMenuContent class="z-10 min-w-[220px] rounded-md border border-outline-variant bg-surface-container-high p-1 text-sm text-on-surface shadow-md">
                     <ContextMenuItem class="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-on-surface/10" @select.prevent @click="() => _window.open(item.url || item.path, '_blank')">
                       <Icon name="arrow-right-up"></Icon>
                       <p>Open</p>
@@ -353,14 +442,7 @@ watch(
                     <ContextMenuItem @select.prevent>
                       <ConfirmationDialog
                         class="w-full"
-                        :onConfirm="
-                          () =>
-                            deleteFile(item.path).then(() => {
-                                toast.success('File deleted successfully')
-                                getData()
-                              })
-                              .catch(() => toast.error('Failed to delete file'))
-                        "
+                        :onConfirm="() => handleDeleteItem(item)"
                       >
                         <template #trigger>
                           <div class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-error hover:bg-on-surface/10">
@@ -386,7 +468,7 @@ watch(
     </ContextMenuTrigger>
     <ContextMenuPortal>
       <Transition name="fade">
-        <ContextMenuContent class="z-1 min-w-[220px] rounded-md border border-outline-variant bg-surface-container-high p-1 text-sm text-on-surface shadow-md">
+        <ContextMenuContent class="z-10 min-w-[220px] rounded-md border border-outline-variant bg-surface-container-high p-1 text-sm text-on-surface shadow-md">
           <ContextMenuItem @select.prevent>
             <DialogForm
               :fields="['folder_name']"

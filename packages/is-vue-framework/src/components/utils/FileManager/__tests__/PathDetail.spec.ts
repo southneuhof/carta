@@ -47,7 +47,16 @@ async function flush() {
   await nextTick()
 }
 
-function mountPathDetail(options: { initialPath?: string; onSelectFile?: (value: any) => void } = {}) {
+function mountPathDetail(
+  options: {
+    initialPath?: string
+    onSelectFile?: (value: any) => void
+    canNavigateBack?: boolean
+    canNavigateForward?: boolean
+    onNavigateBack?: () => void
+    onNavigateForward?: () => void
+  } = {}
+) {
   const host = document.createElement('div')
   document.body.append(host)
 
@@ -67,6 +76,10 @@ function mountPathDetail(options: { initialPath?: string; onSelectFile?: (value:
               },
               onSelectFile,
               activeObject: null,
+              canNavigateBack: options.canNavigateBack ?? false,
+              canNavigateForward: options.canNavigateForward ?? false,
+              onNavigateBack: options.onNavigateBack || vi.fn(),
+              onNavigateForward: options.onNavigateForward || vi.fn(),
             }),
           fallback: () => h('div', 'loading'),
         })
@@ -178,5 +191,70 @@ describe('PathDetail view mode', () => {
 
     expect(document.body.querySelector('[data-testid="file-list-table"]')).toBeTruthy()
     expect(document.body.textContent || '').toContain('photo.jpg')
+  })
+
+  it('breadcrumb navigation replaces the active-path object instead of mutating it in place', async () => {
+    const { getModel } = mountPathDetail({ initialPath: '/storage/public/folder-a' })
+    await flush()
+
+    const previousModel = getModel()
+    const breadcrumbButton = Array.from(document.body.querySelectorAll('button')).find((button) => button.textContent?.trim() === 'Storage') as HTMLButtonElement | undefined
+    expect(breadcrumbButton).toBeTruthy()
+
+    breadcrumbButton?.click()
+    await flush()
+
+    const nextModel = getModel()
+    expect(nextModel).not.toBe(previousModel)
+    expect(previousModel.path).toBe('/storage/public/folder-a')
+    expect(nextModel.path).toBe('/storage/public')
+  })
+
+  it('breadcrumb starts at Storage and never shows storage', async () => {
+    mountPathDetail({ initialPath: '/storage/public/folder-a' })
+    await flush()
+
+    const breadcrumbText = document.body.textContent || ''
+    expect(breadcrumbText).toContain('Storage')
+    expect(breadcrumbText).toContain('folder-a')
+    expect(Array.from(document.body.querySelectorAll('button')).some((button) => button.textContent?.trim() === 'public')).toBe(false)
+    expect(Array.from(document.body.querySelectorAll('button')).some((button) => button.textContent?.trim() === 'storage')).toBe(false)
+  })
+
+  it('renders breadcrumbs in a dedicated bottom bar', async () => {
+    mountPathDetail({ initialPath: '/storage/public/folder-a' })
+    await flush()
+
+    const breadcrumbBar = document.body.querySelector('[data-testid="file-manager-breadcrumbs"]')
+    expect(breadcrumbBar).toBeTruthy()
+    expect(breadcrumbBar?.textContent || '').toContain('Storage')
+    expect(breadcrumbBar?.textContent || '').toContain('folder-a')
+  })
+
+  it('renders always-visible navigation buttons with disabled state and click handlers', async () => {
+    const onNavigateBack = vi.fn()
+    const onNavigateForward = vi.fn()
+    mountPathDetail({
+      initialPath: '/storage/public/folder-a',
+      canNavigateBack: true,
+      canNavigateForward: false,
+      onNavigateBack,
+      onNavigateForward,
+    })
+    await flush()
+
+    const backButton = document.body.querySelector('button[aria-label="Go back"]') as HTMLButtonElement | null
+    const forwardButton = document.body.querySelector('button[aria-label="Go forward"]') as HTMLButtonElement | null
+
+    expect(backButton).toBeTruthy()
+    expect(forwardButton).toBeTruthy()
+    expect(backButton?.disabled).toBe(false)
+    expect(forwardButton?.disabled).toBe(true)
+
+    backButton?.click()
+    forwardButton?.click()
+
+    expect(onNavigateBack).toHaveBeenCalledTimes(1)
+    expect(onNavigateForward).not.toHaveBeenCalled()
   })
 })
