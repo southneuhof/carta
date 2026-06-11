@@ -1,5 +1,11 @@
 # @southneuhof/is-vue-framework
 
+## 1.0.8
+
+### Patch Changes
+
+- Automated patch release for changed framework packages.
+
 ## 1.0.7
 
 ### Patch Changes
