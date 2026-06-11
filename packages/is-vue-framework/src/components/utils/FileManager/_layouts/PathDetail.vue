@@ -242,7 +242,7 @@ watch(
     <ContextMenuTrigger class="h-full">
       <div ref="dropZoneRef" class="relative flex h-full flex-col">
         <div v-if="isOverDropZone" class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-lg border-2 border-dashed border-primary bg-primary/10">
-          <p class="font-semibold text-primary">Drop files to upload</p>
+          <p class="font-semibold text-primary">Drop files to upload</p> 
         </div>
         <div class="p-4 border-b border-outline-variant">
           <div class="flex flex-row items-center justify-between gap-4">
