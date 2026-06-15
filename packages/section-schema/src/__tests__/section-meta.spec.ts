@@ -142,7 +142,7 @@ describe('shared section schema', () => {
   })
 
   it('registers common meta editor input config', () => {
-    expect(contentDefault.meta?.editor?.inputConfig?.section_background_color?.type).toBe('text')
+    expect(contentDefault.meta?.editor?.inputConfig?.section_background_color?.type).toBe('color')
     expect(contentDefault.meta?.editor?.inputConfig?.section_ornament_media?.type).toBe('image')
     expect(contentDefault.meta?.editor?.inputConfig?.section_ornament_offset?.type).toBe('select')
   })

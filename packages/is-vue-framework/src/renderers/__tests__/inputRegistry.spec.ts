@@ -28,6 +28,10 @@ describe('input registry', () => {
     expect(resolveInputComponent('text')).toBeDefined()
   })
 
+  it('resolves built-in renderer for color', () => {
+    expect(resolveInputComponent('color')).toBeDefined()
+  })
+
   it('resolves registered direct component by custom key', () => {
     const MoneyInput = DummyComponent('MoneyInput')
     registerInputComponents({ money: MoneyInput })

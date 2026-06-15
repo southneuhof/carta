@@ -1,5 +1,6 @@
 <script lang="ts">
   import { browser } from '$app/environment';
+  import { beforeNavigate } from '$app/navigation';
   import { page } from '$app/stores';
   import type { LandingSection, SectionComponentRegistry } from '@southneuhof/landing-sveltekit-framework/types';
   import SectionRenderer from './SectionRenderer.svelte';
@@ -14,11 +15,18 @@
     class?: string;
   }>();
 
+  let lastNavigationType: 'enter' | 'form' | 'link' | 'goto' | 'popstate' | 'leave' = 'enter';
+
+  beforeNavigate((navigation) => {
+    lastNavigationType = navigation.type;
+  });
+
   $effect(() => {
     if (!browser) return;
 
     const hash = $page.url.hash;
     if (!hash) return;
+    if (lastNavigationType === 'popstate') return;
 
     const id = hash.substring(1);
     const scrollToElement = () => {

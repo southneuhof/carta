@@ -14,7 +14,7 @@ export const commonSectionMetaConfig = {
   editor: {
     inputConfig: {
       section_background_color: {
-        type: 'text',
+        type: 'color',
       },
       section_ornament_media: {
         type: 'image',

@@ -11,6 +11,7 @@ import type {
 } from '@southneuhof/landing-sveltekit-framework/types'
 import type { ContentSlotEditorConfig, SlotConfigContext } from './slotEditorConfig'
 import type { Component } from 'vue'
+import { landingThemeColors } from '../../../../landing-mjl/theme/colors.js'
 
 type SectionSchemaData = Record<string, SectionSchemaSlot>
 export type SectionSlotPath = string[]
@@ -81,6 +82,22 @@ export type SupportedSectionMetaConfig = {
   fieldsType?: Record<string, unknown>
   getInitialData?: () => Promise<Record<string, unknown>>
 }
+
+export const landingSectionBackgroundPresetColors = [
+  { id: 'primary-default', label: 'Primary', value: landingThemeColors.primary.DEFAULT },
+  { id: 'primary-container', label: 'Primary Container', value: landingThemeColors.primary.container },
+  { id: 'secondary-default', label: 'Secondary', value: landingThemeColors.secondary.DEFAULT },
+  { id: 'secondary-container', label: 'Secondary Container', value: landingThemeColors.secondary.container },
+  { id: 'tertiary-default', label: 'Tertiary', value: landingThemeColors.tertiary.DEFAULT },
+  { id: 'tertiary-container', label: 'Tertiary Container', value: landingThemeColors.tertiary.container },
+  { id: 'surface-default', label: 'Surface', value: landingThemeColors.surface.DEFAULT },
+  { id: 'surface-container', label: 'Surface Container', value: landingThemeColors.surface.container },
+  { id: 'outline-default', label: 'Outline', value: landingThemeColors.outline.DEFAULT },
+  { id: 'outline-variant', label: 'Outline Variant', value: landingThemeColors.outline.variant },
+].map((preset) => ({
+  ...preset,
+  value: `${preset.value}FF`,
+}))
 
 const BASE_SLOT_LABELS: Partial<Record<SectionSchemaSlotType, string>> = { content: 'Content', gallery: 'Gallery', sectionGroup: 'Section Group', section: 'Section' }
 
@@ -170,10 +187,24 @@ function toSlotEditor(slotKey: string, slot: SectionSchemaSlot): SupportedSectio
 }
 
 function toMetaConfig(meta: SectionSchemaMeta | undefined): SupportedSectionMetaConfig {
+  const inputConfig = meta?.editor?.inputConfig ?? {}
+  const sectionBackgroundColorConfig = inputConfig.section_background_color
+
   return {
     fields: meta?.fields ?? [],
     defaultValues: meta?.defaultValues ?? {},
-    inputConfig: meta?.editor?.inputConfig ?? {},
+    inputConfig: sectionBackgroundColorConfig
+      ? {
+          ...inputConfig,
+          section_background_color: {
+            ...sectionBackgroundColorConfig,
+            props: {
+              ...sectionBackgroundColorConfig.props,
+              presetColors: landingSectionBackgroundPresetColors,
+            },
+          },
+        }
+      : inputConfig,
     fieldsAlias: meta?.editor?.fieldsAlias ?? {},
     fieldsType: meta?.editor?.fieldsType ?? {},
     getInitialData: meta?.editor?.getInitialData,

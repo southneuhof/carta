@@ -160,7 +160,7 @@
 
   const galleryCardTitleClassMap: any = {
     plain: 'font-bold text-lg',
-    'content-card': 'font-bold text-xl md:text-2xl',
+    'content-card': 'font-bold text-xl',
   }
 
   const galleryCardSubtitleClassMap: any = {

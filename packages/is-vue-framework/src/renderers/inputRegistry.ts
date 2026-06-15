@@ -6,6 +6,7 @@ export type FrameworkInputRegistry = Record<string, FrameworkInputComponent>
 const builtInInputComponents: Record<string, Component> = {
   text: defineAsyncComponent(() => import('../components/inputs/TextInput.vue')),
   textarea: defineAsyncComponent(() => import('../components/inputs/TextareaInput.vue')),
+  color: defineAsyncComponent(() => import('../components/inputs/ColorInput.vue')),
   password: defineAsyncComponent(() => import('../components/inputs/PasswordInput.vue')),
   file: defineAsyncComponent(() => import('../components/inputs/FileInput.vue')),
   image: defineAsyncComponent(() => import('../components/inputs/ImageInput.vue')),

@@ -24,6 +24,7 @@ import {
   getNestedEditorConfig,
   getSupportedEditorConfig,
   getSupportedSectionSchemaGroup,
+  landingSectionBackgroundPresetColors,
   matchNestedSchemaSlotsToStructure,
   matchRootSchemaSlotsToStructure,
   matchSchemaDataToStructure,
@@ -229,7 +230,7 @@ describe('section schema adapter', () => {
     const contentDefaultConfig = getSupportedEditorConfig('content-default')
     expect(contentDefaultConfig?.meta?.fields?.[0]).toBe('section_background_color')
     expect(contentDefaultConfig?.meta?.fields).toContain('width_preset')
-    expect(contentDefaultConfig?.meta?.inputConfig?.section_background_color?.type).toBe('text')
+    expect(contentDefaultConfig?.meta?.inputConfig?.section_background_color?.type).toBe('color')
     expect(contentDefaultConfig?.meta?.inputConfig?.width_preset?.type).toBe('select')
     expect(contentDefaultConfig?.meta?.defaultValues?.width_preset).toBe('xl')
     const contentSlot = contentDefaultConfig?.slots.find((slot) => slot.key === 'content')
@@ -242,6 +243,26 @@ describe('section schema adapter', () => {
     expect(dataListConfig?.meta?.inputConfig?.closed_on_initial?.dependency?.fields).toEqual(['collapsible'])
     expect(dataListConfig?.meta?.fieldsType?.collapsible).toBeTruthy()
     expect(dataListConfig?.meta?.defaultValues?.type).toBe('list')
+  })
+
+  it('injects landing preset colors for section background color', () => {
+    const contentDefaultConfig = getSupportedEditorConfig('content-default')
+    const presetColors = contentDefaultConfig?.meta?.inputConfig?.section_background_color?.props?.presetColors
+
+    expect(presetColors).toEqual(landingSectionBackgroundPresetColors)
+    expect(presetColors?.map((preset: { id: string }) => preset.id)).toEqual([
+      'primary-default',
+      'primary-container',
+      'secondary-default',
+      'secondary-container',
+      'tertiary-default',
+      'tertiary-container',
+      'surface-default',
+      'surface-container',
+      'outline-default',
+      'outline-variant',
+    ])
+    expect(presetColors?.find((preset: { id: string }) => preset.id === 'outline-variant')?.value).toBe('#CDC9C9FF')
   })
 
   it('derives section groups from schema editor.group', () => {
