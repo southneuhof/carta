@@ -12,7 +12,7 @@ import jobCatalog from '../sections/job-catalog'
 import productCatalog from '../sections/product-catalog'
 import productShowcase from '../sections/product-showcase'
 import sectionSchemas from '../index'
-import { dataListFieldSets } from '../helpers/data-list-field-sets'
+import { dataListEditorFields } from '../helpers/data-list-field-sets'
 import { containerColorOptions } from '../helpers/container-color-options'
 import { defineSectionSchema } from '@southneuhof/landing-section-schema/defineSectionSchema'
 
@@ -167,12 +167,12 @@ describe('shared section schema', () => {
     expect(heroBanner.data.banner.fields).toContain('media')
   })
 
-  it('hides companion button text fields from editor field sets', () => {
-    expect(contentDefault.data.content.fieldSets?.editor.fields).toEqual(['media_type', 'media', 'subtitle', 'title', 'description', 'url'])
-    expect(heroBanner.data.banner.fieldSets?.editor.fields).toEqual(['media_type', 'media', 'subtitle', 'title', 'description', 'cta', 'url'])
-    expect(dataListFieldSets.list.fields).toEqual(['title', 'description', 'media', 'url', 'status', 'attachment'])
-    expect(dataListFieldSets.media.fields).toEqual(['subtitle', 'title', 'description', 'media', 'url', 'status', 'attachment'])
-    expect(dataListFieldSets.card.fields).toEqual(['media', 'attachment', 'subtitle', 'title', 'description', 'url_type', 'url'])
+  it('hides companion button text fields from direct editor field lists', () => {
+    expect(contentDefault.data.content.editor?.fields).toEqual(['media_type', 'media', 'subtitle', 'title', 'description', 'url'])
+    expect(heroBanner.data.banner.editor?.fields).toEqual(['media_type', 'media', 'subtitle', 'title', 'description', 'cta', 'url'])
+    expect(dataListEditorFields.list).toEqual(['title', 'description', 'media', 'url', 'status', 'attachment'])
+    expect(dataListEditorFields.media).toEqual(['subtitle', 'title', 'description', 'media', 'url', 'status', 'attachment'])
+    expect(dataListEditorFields.card).toEqual(['media', 'attachment', 'subtitle', 'title', 'description', 'url_type', 'url'])
   })
 
   it('defines content-gallery three-slot structure', () => {
@@ -193,9 +193,9 @@ describe('shared section schema', () => {
       many: true,
       editor: { label: 'Gallery Items' },
     })
-    expect(contentGallery.data.content.fieldSets?.editor.fields).toEqual(['subtitle', 'title', 'description', 'url'])
-    expect(contentGallery.data.gallery_header.fieldSets?.editor.fields).toEqual(['subtitle', 'title', 'description', 'url'])
-    expect(contentGallery.data.gallery.fieldSets?.editor.fields).toEqual(['media', 'title', 'subtitle', 'url'])
+    expect(contentGallery.data.content.editor?.fields).toEqual(['subtitle', 'title', 'description', 'url'])
+    expect(contentGallery.data.gallery_header.editor?.fields).toEqual(['subtitle', 'title', 'description', 'url'])
+    expect(contentGallery.data.gallery.editor?.fields).toEqual(['media', 'title', 'subtitle', 'url'])
   })
 
   it('registers gallery-tree with a two-level section group structure', () => {
@@ -309,7 +309,7 @@ describe('shared section schema', () => {
       'url',
       'url_text',
     ])
-    expect(articleHighlights.data.content.fieldSets?.editor.fields).toEqual(['subtitle', 'title', 'description', 'url'])
+    expect(articleHighlights.data.content.editor?.fields).toEqual(['subtitle', 'title', 'description', 'url'])
     expect(articleHighlights.data.content.editor?.inputConfig?.url).toEqual({
       type: 'button-config',
       bind: {
@@ -406,7 +406,7 @@ describe('shared section schema', () => {
       'url',
       'url_text',
     ])
-    expect(productCatalog.data.content.fieldSets?.editor.fields).toEqual(['subtitle', 'title', 'description', 'url'])
+    expect(productCatalog.data.content.editor?.fields).toEqual(['subtitle', 'title', 'description', 'url'])
     expect(productCatalog.data.content.editor?.inputConfig?.url).toEqual({
       type: 'button-config',
       bind: {
@@ -498,10 +498,12 @@ describe('shared section schema', () => {
     expect(form.data.config.editor?.componentToken).toBe('form-meta-editor')
   })
 
-  it('reuses field-set contract across hero-banner and nested data-list gallery', () => {
-    expect(heroBanner.data.banner.editor?.resolveConfig).toBeTypeOf('function')
+  it('reuses direct editor field config across hero-banner and nested data-list gallery', () => {
+    expect(heroBanner.data.banner.editor?.fields).toEqual(['media_type', 'media', 'subtitle', 'title', 'description', 'cta', 'url'])
     expect(dataList.data.childSections.schema?.data.gallery.editor?.resolveConfig).toBeTypeOf('function')
-    expect(dataList.data.childSections.schema?.data.gallery.fieldSets).toEqual(dataListFieldSets)
+    expect(dataList.data.childSections.schema?.data.gallery.editor?.resolveConfig?.({
+      parentSectionData: { meta: { type: 'gallery' } } as any,
+    })?.fields).toEqual([...dataListEditorFields.gallery])
   })
 
   it('stores editor config under schema editor nodes', () => {

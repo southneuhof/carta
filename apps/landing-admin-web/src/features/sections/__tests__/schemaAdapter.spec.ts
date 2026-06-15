@@ -79,7 +79,8 @@ describe('section schema adapter', () => {
 
     const bannerSlot = heroBannerConfig?.slots.find((slot) => slot.key === 'banner')
     expect(bannerSlot?.component).toBeUndefined()
-    expect(bannerSlot?.resolveConfig).toBeDefined()
+    expect(bannerSlot?.resolveConfig).toBeUndefined()
+    expect(bannerSlot?.fields).toEqual(['media_type', 'media', 'subtitle', 'title', 'description', 'cta', 'url'])
     expect(bannerSlot?.fields).toContain('media')
     expect(bannerSlot?.fieldAliases?.cta).toBe('Primary Button')
 
@@ -234,7 +235,7 @@ describe('section schema adapter', () => {
     expect(contentDefaultConfig?.meta?.inputConfig?.width_preset?.type).toBe('select')
     expect(contentDefaultConfig?.meta?.defaultValues?.width_preset).toBe('xl')
     const contentSlot = contentDefaultConfig?.slots.find((slot) => slot.key === 'content')
-    expect(contentSlot?.fields).toEqual(['media_type', 'media', 'subtitle', 'title', 'description', 'url', 'url_text'])
+    expect(contentSlot?.fields).toEqual(['media_type', 'media', 'subtitle', 'title', 'description', 'url'])
     expect(contentSlot?.inputConfig?.media?.dependency?.fields).toEqual(['media_type'])
     expect(contentSlot?.inputConfig?.url).toEqual({
       type: 'button-config',

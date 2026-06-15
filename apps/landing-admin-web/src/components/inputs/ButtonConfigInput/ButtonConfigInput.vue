@@ -4,6 +4,7 @@ import type { InputConfig } from '@southneuhof/is-data-model'
 import BaseInput from '@southneuhof/is-vue-framework/components/inputs/BaseInput.vue'
 import { commonProps } from '@southneuhof/is-vue-framework/components/inputs/commonprops'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
+import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import { resolveInputComponent } from '@southneuhof/is-vue-framework/renderers/inputRegistry'
 
@@ -82,22 +83,20 @@ function touchValidation() {
 
 <template>
   <BaseInput v-bind="props">
-    <div class="flex flex-col gap-3 rounded-xl border border-outline/[16%] bg-surface-container-low p-3">
-      <Button
-        class="w-full justify-between"
-        variant="tonal"
-        color="primary"
+    <div class="flex flex-col">
+      <Card
+        class="w-full flex-row items-center gap-4 justify-between"
+        color="surfaceContainerHigh"
+        variant="outlined"
         type="button"
         :disabled="disabled"
         @click="isOpen = !isOpen"
       >
         <span class="truncate text-left">{{ summary }}</span>
-        <template #icon>
-          <Icon :name="isOpen ? 'arrow-up-s' : 'arrow-down-s'" />
-        </template>
-      </Button>
+        <Icon :name="isOpen ? 'arrow-up-s' : 'arrow-down-s'" />
+      </Card>
 
-      <div v-show="isOpen" class="grid gap-3">
+      <div v-show="isOpen" class="grid gap-3 border border-outline-variant bg-transparent p-4 rounded-b-xl pt-6 -mt-2">
         <component
           :is="urlRenderer"
           v-if="urlRenderer"

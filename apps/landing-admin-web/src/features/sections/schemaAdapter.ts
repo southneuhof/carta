@@ -29,7 +29,6 @@ export type SupportedSectionSlotEditor = {
   many: boolean
   label: string
   fields: string[]
-  fieldSets?: Record<string, { fields: readonly string[] }>
   inputConfig?: SectionSchemaEditorInputConfig
   // Legacy key kept for backward compatibility with older section schemas.
   fieldsAlias?: Record<string, string>
@@ -105,20 +104,9 @@ function assertSupportedSchema(code: string): asserts code is SupportedSectionSc
   if (!(SUPPORTED_SECTION_SCHEMA_CODES as readonly string[]).includes(code)) throw new Error(`Unsupported section schema code: ${code}`)
 }
 
-function getResolvedFields(slot: SectionSchemaSlot, resolved: ContentSlotEditorConfig | undefined): string[] {
-  const resolvedFieldSet = (resolved as { fieldSet?: string } | undefined)?.fieldSet
-  if (resolvedFieldSet && slot.fieldSets?.[resolvedFieldSet]) {
-    return [...slot.fieldSets[resolvedFieldSet].fields]
-  }
-
-  if (resolvedFieldSet && !slot.fieldSets?.[resolvedFieldSet]) {
-    const message = `[sections] Unknown fieldSet "${resolvedFieldSet}" for slot`
-    if (import.meta.env.DEV || import.meta.env.MODE === 'test') {
-      throw new Error(message)
-    }
-    console.warn(message)
-  }
-
+function getResolvedFields(slot: SectionSchemaSlot, slotEditor: SectionSchemaSlotEditor | undefined, resolved: ContentSlotEditorConfig | undefined): string[] {
+  if (resolved?.fields) return [...resolved.fields]
+  if (slotEditor?.fields) return [...slotEditor.fields]
   return slot.fields ? [...slot.fields] : []
 }
 
@@ -139,8 +127,7 @@ function toSlotEditorContext(input: {
     order: input.slot.order,
     many: Boolean(input.slot.many),
     label: slotEditor?.label ?? BASE_SLOT_LABELS[input.slot.type] ?? input.slotKey,
-    fields: getResolvedFields(input.slot, input.resolved),
-    fieldSets: input.slot.fieldSets,
+    fields: getResolvedFields(input.slot, slotEditor, input.resolved),
     inputConfig: (input.resolved?.inputConfig ?? slotEditor?.inputConfig) as SectionSchemaEditorInputConfig | undefined,
     fieldsAlias: fieldAliases,
     fieldAliases,
@@ -169,7 +156,6 @@ function toSlotEditor(slotKey: string, slot: SectionSchemaSlot): SupportedSectio
     many: editor.many,
     label: editor.label,
     fields: editor.fields,
-    fieldSets: editor.fieldSets,
     inputConfig: editor.inputConfig,
     fieldsAlias: editor.fieldsAlias,
     fieldAliases: editor.fieldAliases,

@@ -31,27 +31,21 @@ describe('resolveSlotEditorConfig', () => {
     expect(resolver).toHaveBeenCalledWith(ctx)
   })
 
-  it('preserves resolved fieldSet marker', () => {
+  it('preserves resolved fields returned by resolveConfig', () => {
     const config: ContentSlotEditorConfig = {
       fields: ['title'],
-      resolveConfig: () => ({ fieldSet: 'list' }),
+      resolveConfig: () => ({ fields: ['description'] }),
     }
     const resolved = resolveSlotEditorConfig(config, ctx)
-    expect(resolved?.fieldSet).toBe('list')
+    expect(resolved?.fields).toEqual(['description'])
   })
 
-  it('resolves visible fields from the selected fieldSet', () => {
+  it('resolves visible fields directly from config fields', () => {
     const fields = resolveSlotEditorFields({
       fields: ['title', 'url', 'url_text'],
-      fieldSet: 'editor',
-      fieldSets: {
-        editor: {
-          fields: ['title', 'url'],
-        },
-      },
     })
 
-    expect(fields).toEqual(['title', 'url'])
+    expect(fields).toEqual(['title', 'url', 'url_text'])
   })
 
   it('ignores nested resolveConfig from resolver output', () => {

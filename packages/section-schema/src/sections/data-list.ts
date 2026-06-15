@@ -1,5 +1,5 @@
 import { defineSectionSchema } from '@southneuhof/landing-section-schema/defineSectionSchema'
-import { dataListFieldSetFields, dataListFieldSets, resolveDataListFieldSetConfig } from '../helpers/data-list-field-sets'
+import { dataListFieldSetFields, resolveDataListEditorConfig } from '../helpers/data-list-field-sets'
 
 export default defineSectionSchema({
   code: 'data-list',
@@ -165,7 +165,6 @@ export default defineSectionSchema({
             type: 'gallery',
             order: 1,
             fields: dataListFieldSetFields,
-            fieldSets: dataListFieldSets,
             editor: {
               label: 'Data',
               fieldAliases: {
@@ -180,7 +179,7 @@ export default defineSectionSchema({
               fieldsType: {
                 description: { type: 'html' },
               },
-              resolveConfig: ({ parentSectionData }) => resolveDataListFieldSetConfig((parentSectionData as any)?.meta?.type),
+              resolveConfig: ({ parentSectionData }) => resolveDataListEditorConfig((parentSectionData as any)?.meta?.type),
             },
           },
         },

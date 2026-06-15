@@ -1,22 +1,12 @@
-import type { SectionSchemaSlot, SectionSchemaSlotEditorResolvedConfig } from '@southneuhof/landing-sveltekit-framework/types'
+import type { SectionSchemaSlotEditorResolvedConfig } from '@southneuhof/landing-sveltekit-framework/types'
 
-export const dataListFieldSets = {
-  list: {
-    fields: ['title', 'description', 'media', 'url', 'status', 'attachment'] as const,
-  },
-  media: {
-    fields: ['subtitle', 'title', 'description', 'media', 'url', 'status', 'attachment'] as const,
-  },
-  gallery: {
-    fields: ['media', 'subtitle', 'title', 'description'] as const,
-  },
-  content: {
-    fields: ['title', 'description'] as const,
-  },
-  card: {
-    fields: ['media', 'attachment', 'subtitle', 'title', 'description', 'url_type', 'url'] as const,
-  },
-} satisfies NonNullable<SectionSchemaSlot['fieldSets']>
+export const dataListEditorFields = {
+  list: ['title', 'description', 'media', 'url', 'status', 'attachment'] as const,
+  media: ['subtitle', 'title', 'description', 'media', 'url', 'status', 'attachment'] as const,
+  gallery: ['media', 'subtitle', 'title', 'description'] as const,
+  content: ['title', 'description'] as const,
+  card: ['media', 'attachment', 'subtitle', 'title', 'description', 'url_type', 'url'] as const,
+}
 
 export const dataListFieldSetFields = [
   'title',
@@ -30,9 +20,9 @@ export const dataListFieldSetFields = [
   'url_type',
 ] as const
 
-const dataListFieldSetResolvedConfigs: Record<string, SectionSchemaSlotEditorResolvedConfig> = {
+const dataListEditorResolvedConfigs: Record<string, SectionSchemaSlotEditorResolvedConfig> = {
   list: {
-    fieldSet: 'list',
+    fields: [...dataListEditorFields.list],
     fieldAliases: {
       status: 'Dokumen Privat (Memerlukan Request)',
     },
@@ -52,7 +42,7 @@ const dataListFieldSetResolvedConfigs: Record<string, SectionSchemaSlotEditorRes
     },
   },
   media: {
-    fieldSet: 'media',
+    fields: [...dataListEditorFields.media],
     fieldAliases: {
       status: 'Dokumen Privat (Memerlukan Request)',
     },
@@ -72,16 +62,16 @@ const dataListFieldSetResolvedConfigs: Record<string, SectionSchemaSlotEditorRes
     },
   },
   gallery: {
-    fieldSet: 'gallery',
+    fields: [...dataListEditorFields.gallery],
   },
   content: {
-    fieldSet: 'content',
+    fields: [...dataListEditorFields.content],
     inputConfig: {
       description: { type: 'rich-text' },
     },
   },
   card: {
-    fieldSet: 'card',
+    fields: [...dataListEditorFields.card],
     inputConfig: {
       url: {
         type: 'button-config',
@@ -102,7 +92,7 @@ const dataListFieldSetResolvedConfigs: Record<string, SectionSchemaSlotEditorRes
   },
 }
 
-export function resolveDataListFieldSetConfig(type: unknown): SectionSchemaSlotEditorResolvedConfig {
+export function resolveDataListEditorConfig(type: unknown): SectionSchemaSlotEditorResolvedConfig {
   const key = typeof type === 'string' ? type : 'list'
-  return dataListFieldSetResolvedConfigs[key] ?? dataListFieldSetResolvedConfigs.list
+  return dataListEditorResolvedConfigs[key] ?? dataListEditorResolvedConfigs.list
 }

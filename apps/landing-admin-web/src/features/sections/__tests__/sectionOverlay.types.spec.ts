@@ -26,7 +26,7 @@ describe('section schema authoring types', () => {
     expect(invalidSlotField).toBe('not_a_field')
 
     const nestedGallery = dataListSchema.data.childSections.schema?.data.gallery
-    expect(nestedGallery?.fieldSets).toBeDefined()
+    expect(nestedGallery?.editor?.resolveConfig).toBeDefined()
 
     type DataListSlotKey = keyof typeof dataListSchema.data
     const childSectionsSlot: DataListSlotKey = 'childSections'

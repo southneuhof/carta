@@ -1,7 +1,6 @@
 <script lang="ts">
   import { browser } from '$app/environment';
-  import { beforeNavigate } from '$app/navigation';
-  import { page } from '$app/stores';
+  import { afterNavigate } from '$app/navigation';
   import type { LandingSection, SectionComponentRegistry } from '@southneuhof/landing-sveltekit-framework/types';
   import SectionRenderer from './SectionRenderer.svelte';
 
@@ -15,18 +14,8 @@
     class?: string;
   }>();
 
-  let lastNavigationType: 'enter' | 'form' | 'link' | 'goto' | 'popstate' | 'leave' = 'enter';
-
-  beforeNavigate((navigation) => {
-    lastNavigationType = navigation.type;
-  });
-
-  $effect(() => {
-    if (!browser) return;
-
-    const hash = $page.url.hash;
+  function scrollToHash(hash: string) {
     if (!hash) return;
-    if (lastNavigationType === 'popstate') return;
 
     const id = hash.substring(1);
     const scrollToElement = () => {
@@ -45,6 +34,13 @@
 
     observer.observe(document.body, { childList: true, subtree: true });
     return () => observer.disconnect();
+  }
+
+  afterNavigate((navigation) => {
+    if (!browser) return;
+    if (navigation.type === 'popstate') return;
+
+    return scrollToHash(navigation.to?.url.hash ?? '');
   });
 </script>
 

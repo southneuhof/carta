@@ -437,16 +437,9 @@ export default defineSectionSchema({
       type: 'content',
       order: 1,
       fields: ['media_type', 'media', 'subtitle', 'title', 'description', 'url', 'url_text'] as const,
-      fieldSets: {
-        editor: {
-          fields: ['media_type', 'media', 'subtitle', 'title', 'description', 'url'] as const,
-        },
-      },
       editor: {
         label: 'Main Content',
-        resolveConfig: () => ({
-          fieldSet: 'editor',
-        }),
+        fields: ['media_type', 'media', 'subtitle', 'title', 'description', 'url'] as const,
         inputConfig: {
           media_type: {
             type: 'radio',

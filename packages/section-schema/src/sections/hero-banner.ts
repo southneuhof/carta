@@ -25,16 +25,9 @@ export default defineSectionSchema({
         'url',
         'url_text',
       ] as const,
-      fieldSets: {
-        editor: {
-          fields: ['media_type', 'media', 'subtitle', 'title', 'description', 'cta', 'url'] as const,
-        },
-      },
       editor: {
         label: 'Banner Items',
-        resolveConfig: () => ({
-          fieldSet: 'editor',
-        }),
+        fields: ['media_type', 'media', 'subtitle', 'title', 'description', 'cta', 'url'] as const,
         inputConfig: {
           media_type: {
             type: 'radio',

@@ -16,6 +16,7 @@ import {
   unitAlphaToPercent,
   type HsvaColor,
 } from './color.utils'
+import Button from '../base/Button.vue'
 
 type PresetColor = {
   id: string
@@ -280,7 +281,7 @@ onBeforeUnmount(() => {
 
           <div class="mt-4 flex items-stretch overflow-hidden rounded-xl border border-outline/[24%] bg-surface">
             <div class="flex min-w-0 flex-1 items-center gap-2 px-3 py-2.5">
-              <span class="rounded-md text-sm font-medium text-on-surface/[67%]">Hex</span>
+              <span class="rounded-md text-sm font-medium text-outline-variant">HEX</span>
               <input
                 v-model="draftHex"
                 class="min-w-0 flex-1 bg-transparent font-medium uppercase outline-none"
@@ -290,6 +291,11 @@ onBeforeUnmount(() => {
                 @blur="commitHexInput"
                 @keydown.enter.prevent="commitHexInput"
               />
+              <Button v-if="currentValue" kind="icon" variant="text" class="!p-0 !w-[16px] !h-[16px] !min-w-[16px]" type="button" @click="clearColor">
+                <template #icon>
+                  <Icon name="close" size="sm"></Icon>
+                </template>
+              </Button>
             </div>
             <div class="flex items-center gap-2 border-l border-outline/[24%] px-3 py-2.5">
               <input
@@ -303,17 +309,6 @@ onBeforeUnmount(() => {
               />
               <span class="text-on-surface/[67%]">%</span>
             </div>
-          </div>
-
-          <div v-if="currentValue" class="mt-3 flex justify-end">
-            <button
-              type="button"
-              class="rounded-lg px-3 py-2 text-sm font-medium text-error transition-colors hover:bg-error/[8%]"
-              data-testid="color-clear-button"
-              @click="clearColor"
-            >
-              Clear color
-            </button>
           </div>
 
           <div v-if="presetColors.length" class="mt-4 border-t border-outline/[24%] pt-4">

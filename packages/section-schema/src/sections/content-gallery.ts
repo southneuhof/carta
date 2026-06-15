@@ -737,16 +737,9 @@ export default defineSectionSchema({
       type: 'content',
       order: 1,
       fields: ['subtitle', 'title', 'description', 'url', 'url_text'] as const,
-      fieldSets: {
-        editor: {
-          fields: ['subtitle', 'title', 'description', 'url'] as const,
-        },
-      },
       editor: {
         label: 'Main Content',
-        resolveConfig: () => ({
-          fieldSet: 'editor',
-        }),
+        fields: ['subtitle', 'title', 'description', 'url'] as const,
         inputConfig: {
           title: { type: 'text' },
           subtitle: { type: 'text' },
@@ -769,16 +762,9 @@ export default defineSectionSchema({
       type: 'content',
       order: 2,
       fields: ['subtitle', 'title', 'description', 'url', 'url_text'] as const,
-      fieldSets: {
-        editor: {
-          fields: ['subtitle', 'title', 'description', 'url'] as const,
-        },
-      },
       editor: {
         label: 'Gallery Header',
-        resolveConfig: () => ({
-          fieldSet: 'editor',
-        }),
+        fields: ['subtitle', 'title', 'description', 'url'] as const,
         inputConfig: {
           title: { type: 'text' },
           subtitle: { type: 'text' },
@@ -802,16 +788,9 @@ export default defineSectionSchema({
       order: 3,
       many: true,
       fields: ['media', 'title', 'subtitle', 'url', 'url_text'] as const,
-      fieldSets: {
-        editor: {
-          fields: ['media', 'title', 'subtitle', 'url'] as const,
-        },
-      },
       editor: {
         label: 'Gallery Items',
-        resolveConfig: () => ({
-          fieldSet: 'editor',
-        }),
+        fields: ['media', 'title', 'subtitle', 'url'] as const,
         inputConfig: {
           media: {
             type: 'image',
