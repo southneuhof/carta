@@ -25,8 +25,16 @@ export default defineSectionSchema({
         'url',
         'url_text',
       ] as const,
+      fieldSets: {
+        editor: {
+          fields: ['media_type', 'media', 'subtitle', 'title', 'description', 'cta', 'url'] as const,
+        },
+      },
       editor: {
         label: 'Banner Items',
+        resolveConfig: () => ({
+          fieldSet: 'editor',
+        }),
         inputConfig: {
           media_type: {
             type: 'radio',
@@ -56,13 +64,29 @@ export default defineSectionSchema({
             },
           },
           cta: {
-            type: 'text',
+            type: 'button-config',
+            bind: {
+              buttonUrl: 'cta',
+              buttonText: 'cta_text',
+            },
+            props: {
+              textField: 'cta_text',
+              urlInputConfig: { type: 'text' },
+            },
           },
           cta_text: {
             type: 'text',
           },
           url: {
-            type: 'text',
+            type: 'button-config',
+            bind: {
+              buttonUrl: 'url',
+              buttonText: 'url_text',
+            },
+            props: {
+              textField: 'url_text',
+              urlInputConfig: { type: 'text' },
+            },
           },
           url_text: {
             type: 'text',
@@ -74,9 +98,9 @@ export default defineSectionSchema({
           subtitle: 'Subtitle',
           title: 'Title',
           description: 'Description',
-          cta: 'Primary Button URL',
+          cta: 'Primary Button',
           cta_text: 'Primary Button Text',
-          url: 'Secondary Button URL',
+          url: 'Secondary Button',
           url_text: 'Secondary Button Text',
         },
         fieldsType: {

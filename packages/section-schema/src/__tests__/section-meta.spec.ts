@@ -167,6 +167,14 @@ describe('shared section schema', () => {
     expect(heroBanner.data.banner.fields).toContain('media')
   })
 
+  it('hides companion button text fields from editor field sets', () => {
+    expect(contentDefault.data.content.fieldSets?.editor.fields).toEqual(['media_type', 'media', 'subtitle', 'title', 'description', 'url'])
+    expect(heroBanner.data.banner.fieldSets?.editor.fields).toEqual(['media_type', 'media', 'subtitle', 'title', 'description', 'cta', 'url'])
+    expect(dataListFieldSets.list.fields).toEqual(['title', 'description', 'media', 'url', 'status', 'attachment'])
+    expect(dataListFieldSets.media.fields).toEqual(['subtitle', 'title', 'description', 'media', 'url', 'status', 'attachment'])
+    expect(dataListFieldSets.card.fields).toEqual(['media', 'attachment', 'subtitle', 'title', 'description', 'url_type', 'url'])
+  })
+
   it('defines content-gallery three-slot structure', () => {
     expect(Object.keys(contentGallery.data)).toEqual(['content', 'gallery_header', 'gallery'])
     expect(contentGallery.data.content).toMatchObject({
@@ -185,6 +193,9 @@ describe('shared section schema', () => {
       many: true,
       editor: { label: 'Gallery Items' },
     })
+    expect(contentGallery.data.content.fieldSets?.editor.fields).toEqual(['subtitle', 'title', 'description', 'url'])
+    expect(contentGallery.data.gallery_header.fieldSets?.editor.fields).toEqual(['subtitle', 'title', 'description', 'url'])
+    expect(contentGallery.data.gallery.fieldSets?.editor.fields).toEqual(['media', 'title', 'subtitle', 'url'])
   })
 
   it('registers gallery-tree with a two-level section group structure', () => {
@@ -298,6 +309,18 @@ describe('shared section schema', () => {
       'url',
       'url_text',
     ])
+    expect(articleHighlights.data.content.fieldSets?.editor.fields).toEqual(['subtitle', 'title', 'description', 'url'])
+    expect(articleHighlights.data.content.editor?.inputConfig?.url).toEqual({
+      type: 'button-config',
+      bind: {
+        buttonUrl: 'url',
+        buttonText: 'url_text',
+      },
+      props: {
+        textField: 'url_text',
+        urlInputConfig: { type: 'text' },
+      },
+    })
     expect(articleHighlights.data.articles).toMatchObject({
       type: 'resource',
       source: 'article',
@@ -383,6 +406,18 @@ describe('shared section schema', () => {
       'url',
       'url_text',
     ])
+    expect(productCatalog.data.content.fieldSets?.editor.fields).toEqual(['subtitle', 'title', 'description', 'url'])
+    expect(productCatalog.data.content.editor?.inputConfig?.url).toEqual({
+      type: 'button-config',
+      bind: {
+        buttonUrl: 'url',
+        buttonText: 'url_text',
+      },
+      props: {
+        textField: 'url_text',
+        urlInputConfig: { type: 'text' },
+      },
+    })
     expect(productCatalog.data.products).toMatchObject({
       type: 'resource',
       source: 'product',
@@ -464,6 +499,7 @@ describe('shared section schema', () => {
   })
 
   it('reuses field-set contract across hero-banner and nested data-list gallery', () => {
+    expect(heroBanner.data.banner.editor?.resolveConfig).toBeTypeOf('function')
     expect(dataList.data.childSections.schema?.data.gallery.editor?.resolveConfig).toBeTypeOf('function')
     expect(dataList.data.childSections.schema?.data.gallery.fieldSets).toEqual(dataListFieldSets)
   })
@@ -484,6 +520,8 @@ describe('shared section schema', () => {
     expect(jobCatalog.data.jobs.editor?.fieldAliases?.minimum_education).toBe('Minimum Education')
     expect(galleryTree.data.content.editor?.fieldAliases?.title).toBe('Title')
     expect(galleryStackArray.data.content.editor?.fieldsType?.description).toEqual({ type: 'html' })
+    expect(heroBanner.data.banner.editor?.fieldsAlias?.cta).toBe('Primary Button')
+    expect(heroBanner.data.banner.editor?.fieldsAlias?.url).toBe('Secondary Button')
   })
 
   it('defines contextual visibility for content-default meta controls', () => {

@@ -3,6 +3,7 @@ import type { InputConfig } from '@southneuhof/is-data-model'
 export type ContentSlotEditorConfig = {
   fields?: string[]
   fieldSet?: string
+  fieldSets?: Record<string, { fields: readonly string[] }>
   // Legacy key kept for backward compatibility with older section schemas.
   fieldsAlias?: Record<string, string>
   fieldAliases?: Record<string, string>
@@ -41,4 +42,15 @@ export function resolveSlotEditorConfig<TConfig extends ContentSlotEditorConfig>
     ...safeResolved,
     resolveConfig: slotConfig.resolveConfig,
   } as TConfig
+}
+
+export function resolveSlotEditorFields(slotConfig: ContentSlotEditorConfig | undefined): string[] {
+  if (!slotConfig) return []
+
+  const resolvedFieldSet = slotConfig.fieldSet
+  if (resolvedFieldSet && slotConfig.fieldSets?.[resolvedFieldSet]) {
+    return [...slotConfig.fieldSets[resolvedFieldSet].fields]
+  }
+
+  return slotConfig.fields ? [...slotConfig.fields] : []
 }

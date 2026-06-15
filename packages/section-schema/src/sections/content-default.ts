@@ -437,8 +437,16 @@ export default defineSectionSchema({
       type: 'content',
       order: 1,
       fields: ['media_type', 'media', 'subtitle', 'title', 'description', 'url', 'url_text'] as const,
+      fieldSets: {
+        editor: {
+          fields: ['media_type', 'media', 'subtitle', 'title', 'description', 'url'] as const,
+        },
+      },
       editor: {
         label: 'Main Content',
+        resolveConfig: () => ({
+          fieldSet: 'editor',
+        }),
         inputConfig: {
           media_type: {
             type: 'radio',
@@ -463,7 +471,17 @@ export default defineSectionSchema({
           title: { type: 'text' },
           subtitle: { type: 'text' },
           description: { type: 'rich-text' },
-          url: { type: 'menu-item' },
+          url: {
+            type: 'button-config',
+            bind: {
+              buttonUrl: 'url',
+              buttonText: 'url_text',
+            },
+            props: {
+              textField: 'url_text',
+              urlInputConfig: { type: 'menu-item' },
+            },
+          },
         },
       },
     },

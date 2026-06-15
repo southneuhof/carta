@@ -2,10 +2,10 @@ import type { SectionSchemaSlot, SectionSchemaSlotEditorResolvedConfig } from '@
 
 export const dataListFieldSets = {
   list: {
-    fields: ['title', 'description', 'media', 'url', 'url_text', 'status', 'attachment'] as const,
+    fields: ['title', 'description', 'media', 'url', 'status', 'attachment'] as const,
   },
   media: {
-    fields: ['subtitle', 'title', 'description', 'media', 'url', 'url_text', 'status', 'attachment'] as const,
+    fields: ['subtitle', 'title', 'description', 'media', 'url', 'status', 'attachment'] as const,
   },
   gallery: {
     fields: ['media', 'subtitle', 'title', 'description'] as const,
@@ -14,7 +14,7 @@ export const dataListFieldSets = {
     fields: ['title', 'description'] as const,
   },
   card: {
-    fields: ['media', 'attachment', 'subtitle', 'title', 'description', 'url_type', 'url', 'url_text'] as const,
+    fields: ['media', 'attachment', 'subtitle', 'title', 'description', 'url_type', 'url'] as const,
   },
 } satisfies NonNullable<SectionSchemaSlot['fieldSets']>
 
@@ -37,6 +37,16 @@ const dataListFieldSetResolvedConfigs: Record<string, SectionSchemaSlotEditorRes
       status: 'Dokumen Privat (Memerlukan Request)',
     },
     inputConfig: {
+      url: {
+        type: 'button-config',
+        bind: {
+          buttonUrl: 'url',
+          buttonText: 'url_text',
+        },
+        props: {
+          textField: 'url_text',
+        },
+      },
       status: { type: 'checkbox' },
       attachment: { type: 'file' },
     },
@@ -47,6 +57,16 @@ const dataListFieldSetResolvedConfigs: Record<string, SectionSchemaSlotEditorRes
       status: 'Dokumen Privat (Memerlukan Request)',
     },
     inputConfig: {
+      url: {
+        type: 'button-config',
+        bind: {
+          buttonUrl: 'url',
+          buttonText: 'url_text',
+        },
+        props: {
+          textField: 'url_text',
+        },
+      },
       status: { type: 'checkbox' },
       attachment: { type: 'file' },
     },
@@ -63,6 +83,16 @@ const dataListFieldSetResolvedConfigs: Record<string, SectionSchemaSlotEditorRes
   card: {
     fieldSet: 'card',
     inputConfig: {
+      url: {
+        type: 'button-config',
+        bind: {
+          buttonUrl: 'url',
+          buttonText: 'url_text',
+        },
+        props: {
+          textField: 'url_text',
+        },
+      },
       attachment: { type: 'image' },
     },
     fieldAliases: {

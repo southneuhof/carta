@@ -35,8 +35,29 @@ export default defineSectionSchema({
       type: 'content',
       order: 1,
       fields: ['subtitle', 'title', 'description', 'url', 'url_text'] as const,
+      fieldSets: {
+        editor: {
+          fields: ['subtitle', 'title', 'description', 'url'] as const,
+        },
+      },
       editor: {
         label: 'Content',
+        resolveConfig: () => ({
+          fieldSet: 'editor',
+        }),
+        inputConfig: {
+          url: {
+            type: 'button-config',
+            bind: {
+              buttonUrl: 'url',
+              buttonText: 'url_text',
+            },
+            props: {
+              textField: 'url_text',
+              urlInputConfig: { type: 'text' },
+            },
+          },
+        },
         fieldAliases: {
           subtitle: 'Subtitle',
           title: 'Title',

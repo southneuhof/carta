@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { resolveSlotEditorConfig, type ContentSlotEditorConfig } from '@/features/sections/slotEditorConfig'
+import { resolveSlotEditorConfig, resolveSlotEditorFields, type ContentSlotEditorConfig } from '@/features/sections/slotEditorConfig'
 
 describe('resolveSlotEditorConfig', () => {
   const ctx = {
@@ -38,6 +38,20 @@ describe('resolveSlotEditorConfig', () => {
     }
     const resolved = resolveSlotEditorConfig(config, ctx)
     expect(resolved?.fieldSet).toBe('list')
+  })
+
+  it('resolves visible fields from the selected fieldSet', () => {
+    const fields = resolveSlotEditorFields({
+      fields: ['title', 'url', 'url_text'],
+      fieldSet: 'editor',
+      fieldSets: {
+        editor: {
+          fields: ['title', 'url'],
+        },
+      },
+    })
+
+    expect(fields).toEqual(['title', 'url'])
   })
 
   it('ignores nested resolveConfig from resolver output', () => {

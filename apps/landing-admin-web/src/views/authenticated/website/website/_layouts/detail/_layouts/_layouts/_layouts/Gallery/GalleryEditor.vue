@@ -9,7 +9,7 @@ import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composi
 import Detail from '@southneuhof/is-vue-framework/components/composites/Detail.vue'
 import { getSmallestChildObject } from '@/utils/common'
 import type { SupportedSectionSlotEditor } from '@/features/sections/schemaAdapter'
-import { resolveSlotEditorConfig } from '@/features/sections/slotEditorConfig'
+import { resolveSlotEditorConfig, resolveSlotEditorFields } from '@/features/sections/slotEditorConfig'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
@@ -67,7 +67,10 @@ const resolvedSlotConfig = computed(() =>
     rootSectionData: rootSectionData.value,
   }),
 )
-const fields = computed(() => resolvedSlotConfig.value?.fields ?? ['title', 'description', 'media', 'url'])
+const fields = computed(() => {
+  const resolvedFields = resolveSlotEditorFields(resolvedSlotConfig.value)
+  return resolvedFields.length ? resolvedFields : ['title', 'description', 'media', 'url']
+})
 const fieldsAlias = computed(() => (resolvedSlotConfig.value as any)?.fieldAliases ?? (resolvedSlotConfig.value as any)?.fieldsAlias ?? {})
 const galleryMetaDependencyKey = computed(() => JSON.stringify(props.sectionData?.meta ?? {}))
 

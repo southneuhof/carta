@@ -56,6 +56,7 @@ const formData = ref<Record<string, any>>({
 const fieldErrors = ref<Record<string, string>>({})
 const fieldTouched = ref<Record<string, boolean>>({})
 const submitAttempted = ref(false)
+type FieldBindMap = Record<string, string>
 
 const loading = ref({
   get: true,
@@ -156,8 +157,27 @@ function handleFieldTouch(field: string) {
   validateField(field)
 }
 
+function resolveFieldBindMap(field: string) {
+  const activeInputConfig = inputConfig.value[field] as (typeof inputConfig.value)[string] & { bind?: FieldBindMap } | undefined
+  return {
+    modelValue: field,
+    ...(activeInputConfig?.bind || {}),
+  }
+}
+
+function resolveFieldModelBindings(field: string) {
+  return Object.fromEntries(Object.entries(resolveFieldBindMap(field) as FieldBindMap).map(([modelName, targetField]) => [modelName, formData.value[targetField]]))
+}
+
+function resolveFieldModelListeners(field: string) {
+  return Object.fromEntries(
+    Object.entries(resolveFieldBindMap(field) as FieldBindMap).map(([modelName, targetField]) => [`onUpdate:${modelName}`, (value: unknown) => (formData.value[targetField] = value)])
+  )
+}
+
 provide('formData', formData)
 provide('formInputConfig', inputConfig)
+provide('formFieldsAlias', fieldsAlias)
 provide('formValidation', {
   formData,
   fieldErrors,
@@ -381,11 +401,16 @@ onMounted(() => {
                     :field="field"
                     :key="keyManager().value[field]"
                     :is="inputConfig[field].component"
-                    v-model="formData[field]"
                     :formData="formData"
                     :formType="formType"
                     @validation:touch="() => handleFieldTouch(field)"
-                    v-bind="{ label: fieldsAlias[field] ?? field, ...inputConfig[field].props, ...fieldDependencyData[field]?.props?.value }"
+                    v-bind="{
+                      label: fieldsAlias[field] ?? field,
+                      ...inputConfig[field].props,
+                      ...fieldDependencyData[field]?.props?.value,
+                      ...resolveFieldModelBindings(field),
+                      ...resolveFieldModelListeners(field),
+                    }"
                   />
                   <template #fallback>
                     <Spinner />
@@ -402,8 +427,13 @@ onMounted(() => {
                     :formData="formData"
                     :is="resolveInputComponent(inputConfig[field].type)"
                     @validation:touch="() => handleFieldTouch(field)"
-                    v-bind="{ label: fieldsAlias[field] ?? field, ...inputConfig[field].props, ...fieldDependencyData[field]?.props?.value }"
-                    v-model="formData[field]"
+                    v-bind="{
+                      label: fieldsAlias[field] ?? field,
+                      ...inputConfig[field].props,
+                      ...fieldDependencyData[field]?.props?.value,
+                      ...resolveFieldModelBindings(field),
+                      ...resolveFieldModelListeners(field),
+                    }"
                   />
                   <template #fallback>
                     <Spinner />

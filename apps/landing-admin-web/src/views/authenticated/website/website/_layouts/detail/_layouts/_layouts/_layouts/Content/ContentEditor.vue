@@ -6,7 +6,7 @@ import { getSmallestChildObject } from '@/utils/common';
 import services from '@/utils/services';
 import { computed, inject, onMounted, ref, type PropType } from 'vue';
 import type { SupportedSectionSlotEditor } from '@/features/sections/schemaAdapter';
-import { resolveSlotEditorConfig } from '@/features/sections/slotEditorConfig';
+import { resolveSlotEditorConfig, resolveSlotEditorFields } from '@/features/sections/slotEditorConfig';
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue';
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue';
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue';
@@ -57,7 +57,7 @@ import Button from '@southneuhof/is-vue-framework/components/base/Button.vue';
       rootSectionData: rootSectionData.value,
     }),
   )
-  const fields = computed(() => resolvedSlotConfig.value?.fields ?? [])
+  const fields = computed(() => resolveSlotEditorFields(resolvedSlotConfig.value))
   const fieldsAlias = computed(() => (resolvedSlotConfig.value as any)?.fieldAliases ?? (resolvedSlotConfig.value as any)?.fieldsAlias ?? {})
 
   const updateFormConfig = computed(() => ({

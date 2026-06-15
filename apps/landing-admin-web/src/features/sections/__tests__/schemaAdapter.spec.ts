@@ -79,9 +79,9 @@ describe('section schema adapter', () => {
 
     const bannerSlot = heroBannerConfig?.slots.find((slot) => slot.key === 'banner')
     expect(bannerSlot?.component).toBeUndefined()
-    expect(bannerSlot?.resolveConfig).toBeUndefined()
+    expect(bannerSlot?.resolveConfig).toBeDefined()
     expect(bannerSlot?.fields).toContain('media')
-    expect(bannerSlot?.fieldAliases?.cta).toBe('Primary Button URL')
+    expect(bannerSlot?.fieldAliases?.cta).toBe('Primary Button')
 
     const dataListConfig = getSupportedEditorConfig('data-list')
     const childSections = dataListConfig?.slots.find((slot) => slot.key === 'childSections')
@@ -236,6 +236,17 @@ describe('section schema adapter', () => {
     const contentSlot = contentDefaultConfig?.slots.find((slot) => slot.key === 'content')
     expect(contentSlot?.fields).toEqual(['media_type', 'media', 'subtitle', 'title', 'description', 'url', 'url_text'])
     expect(contentSlot?.inputConfig?.media?.dependency?.fields).toEqual(['media_type'])
+    expect(contentSlot?.inputConfig?.url).toEqual({
+      type: 'button-config',
+      bind: {
+        buttonUrl: 'url',
+        buttonText: 'url_text',
+      },
+      props: {
+        textField: 'url_text',
+        urlInputConfig: { type: 'menu-item' },
+      },
+    })
 
     const dataListConfig = getSupportedEditorConfig('data-list')
     expect(dataListConfig?.meta?.fields?.[0]).toBe('section_background_color')

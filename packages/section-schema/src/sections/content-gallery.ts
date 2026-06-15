@@ -737,13 +737,31 @@ export default defineSectionSchema({
       type: 'content',
       order: 1,
       fields: ['subtitle', 'title', 'description', 'url', 'url_text'] as const,
+      fieldSets: {
+        editor: {
+          fields: ['subtitle', 'title', 'description', 'url'] as const,
+        },
+      },
       editor: {
         label: 'Main Content',
+        resolveConfig: () => ({
+          fieldSet: 'editor',
+        }),
         inputConfig: {
           title: { type: 'text' },
           subtitle: { type: 'text' },
           description: { type: 'rich-text' },
-          url: { type: 'menu-item' },
+          url: {
+            type: 'button-config',
+            bind: {
+              buttonUrl: 'url',
+              buttonText: 'url_text',
+            },
+            props: {
+              textField: 'url_text',
+              urlInputConfig: { type: 'menu-item' },
+            },
+          },
         },
       },
     },
@@ -751,13 +769,31 @@ export default defineSectionSchema({
       type: 'content',
       order: 2,
       fields: ['subtitle', 'title', 'description', 'url', 'url_text'] as const,
+      fieldSets: {
+        editor: {
+          fields: ['subtitle', 'title', 'description', 'url'] as const,
+        },
+      },
       editor: {
         label: 'Gallery Header',
+        resolveConfig: () => ({
+          fieldSet: 'editor',
+        }),
         inputConfig: {
           title: { type: 'text' },
           subtitle: { type: 'text' },
           description: { type: 'rich-text' },
-          url: { type: 'menu-item' },
+          url: {
+            type: 'button-config',
+            bind: {
+              buttonUrl: 'url',
+              buttonText: 'url_text',
+            },
+            props: {
+              textField: 'url_text',
+              urlInputConfig: { type: 'menu-item' },
+            },
+          },
         },
       },
     },
@@ -766,8 +802,16 @@ export default defineSectionSchema({
       order: 3,
       many: true,
       fields: ['media', 'title', 'subtitle', 'url', 'url_text'] as const,
+      fieldSets: {
+        editor: {
+          fields: ['media', 'title', 'subtitle', 'url'] as const,
+        },
+      },
       editor: {
         label: 'Gallery Items',
+        resolveConfig: () => ({
+          fieldSet: 'editor',
+        }),
         inputConfig: {
           media: {
             type: 'image',
@@ -787,7 +831,17 @@ export default defineSectionSchema({
           },
           title: { type: 'text' },
           subtitle: { type: 'text' },
-          url: { type: 'menu-item' },
+          url: {
+            type: 'button-config',
+            bind: {
+              buttonUrl: 'url',
+              buttonText: 'url_text',
+            },
+            props: {
+              textField: 'url_text',
+              urlInputConfig: { type: 'menu-item' },
+            },
+          },
           url_text: { type: 'text' },
         },
       },
