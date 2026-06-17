@@ -51,7 +51,7 @@ const formFieldsAlias = inject<Record<string, string>>('formFieldsAlias', {})
 
 const isOpen = ref(false)
 
-const resolvedUrlConfig = computed<InlineInputConfig>(() => props.urlInputConfig ?? { type: 'text' })
+const resolvedUrlConfig = computed<InlineInputConfig>(() => props.urlInputConfig ?? { type: 'url' })
 const resolvedTextConfig = computed<InlineInputConfig>(() => {
   const injectedConfig = formInputConfig?.value?.[props.textField]
   if (injectedConfig) return injectedConfig as InlineInputConfig

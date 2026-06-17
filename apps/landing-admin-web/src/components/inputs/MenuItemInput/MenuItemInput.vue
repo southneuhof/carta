@@ -7,6 +7,7 @@ import BaseInput from '@southneuhof/is-vue-framework/components/inputs/BaseInput
 import { commonProps } from '@southneuhof/is-vue-framework/components/inputs/commonprops'
 import Dialog from '@southneuhof/is-vue-framework/components/base/Dialog.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import { buildMenuPathFromSelectedItems, createEmptyMenuPathSelection, initializeMenuPathSelection } from './menuPath'
 
 const modelValue = defineModel<string | undefined>() // Relative URL: /slug1/slug2/slug3 or undefined
 
@@ -16,10 +17,8 @@ const props = defineProps({
 
 const isOpen = ref(false)
 
-// Stores {id, slug, name} for selected items at each level
-const selectedItems = ref<Array<{ id: string; slug: string; name: string } | undefined>>([undefined, undefined, undefined])
-// Stores just the ID for v-model:selectedId binding with MenuItemInputView
-const currentSelectedIds = ref<Array<string | undefined>>([undefined, undefined, undefined])
+const selectedItems = ref<Array<{ id: string; slug: string; name: string } | undefined>>(createEmptyMenuPathSelection().selectedItems)
+const currentSelectedIds = ref<Array<string | undefined>>(createEmptyMenuPathSelection().currentSelectedIds)
 const isLoadingInitialPath = ref(false)
 
 const pathPreview = computed(() => {
@@ -41,46 +40,19 @@ const displayValue = computed(() => {
 
 async function initializeFromModelValue(path: string | undefined) {
   isLoadingInitialPath.value = true
-  let newSelectedItems: Array<{ id: string; slug: string; name: string } | undefined> = [undefined, undefined, undefined]
-  let newCurrentSelectedIds: Array<string | undefined> = [undefined, undefined, undefined]
-
-  if (path && path.startsWith('/')) {
-    const slugs = path.substring(1).split('/')
-    let currentParentId: string | undefined = undefined
-
-    try {
-      for (let i = 0; i < Math.min(slugs.length, 3); i++) {
-        const queryParams: any = { level: i + 1, limit: 999, order_by: 'display_order', order_direction: 'asc' }
-        if (i > 0) {
-          // For level > 1, parent_id is the ID of the item from the previous level
-          if (!currentParentId) break // Stop if previous level item was not found
-          queryParams.parent_id = currentParentId
-        }
-        // For level 1, parent_id is not set or should be handled as null by API
-
-        const { data: itemsAtLevel } = await services.list('menuItem', queryParams)
-        const matchedItem = itemsAtLevel?.find((it: any) => it.slug === slugs[i])
-
-        if (matchedItem) {
-          newSelectedItems[i] = { id: matchedItem.id, slug: matchedItem.slug, name: matchedItem.translations?.find((t: any) => t.language === 'id')?.name || matchedItem.name }
-          newCurrentSelectedIds[i] = matchedItem.id
-          currentParentId = matchedItem.id
-        } else {
-          // If a slug doesn't match at any point, the path is invalid or incomplete from this point
-          console.warn(`Could not find menu item for slug '${slugs[i]}' at level ${i + 1} ${currentParentId ? `with parent ${currentParentId}` : ''}.`)
-          break
-        }
-      }
-    } catch (error) {
-      console.error('Error initializing MenuItemInput from modelValue:', error)
-      // Reset to empty if error occurs
-      newSelectedItems = [undefined, undefined, undefined]
-      newCurrentSelectedIds = [undefined, undefined, undefined]
-    }
+  try {
+    const selection = await initializeMenuPathSelection(path, async (params) => {
+      const { data } = await services.list('menuItem', { ...params, limit: 999, order_by: 'display_order', order_direction: 'asc' })
+      return data || []
+    })
+    selectedItems.value = selection.selectedItems
+    currentSelectedIds.value = selection.currentSelectedIds
+  } catch (error) {
+    console.error('Error initializing MenuItemInput from modelValue:', error)
+    const empty = createEmptyMenuPathSelection()
+    selectedItems.value = empty.selectedItems
+    currentSelectedIds.value = empty.currentSelectedIds
   }
-
-  selectedItems.value = newSelectedItems
-  currentSelectedIds.value = newCurrentSelectedIds
   isLoadingInitialPath.value = false
 }
 
@@ -113,17 +85,14 @@ function handleItemSelected(itemSelection: { id: string; slug: string; name: str
 }
 
 function confirmSelection(setOpen: Function) {
-  const finalPath = selectedItems.value
-    .filter((item) => item && item.slug)
-    .map((item) => item!.slug)
-    .join('/')
-  modelValue.value = finalPath ? `/${finalPath}` : undefined
+  modelValue.value = buildMenuPathFromSelectedItems(selectedItems.value)
   isOpen.value = false
 }
 
 function clearSelection() {
-  selectedItems.value = [undefined, undefined, undefined]
-  currentSelectedIds.value = [undefined, undefined, undefined]
+  const empty = createEmptyMenuPathSelection()
+  selectedItems.value = empty.selectedItems
+  currentSelectedIds.value = empty.currentSelectedIds
   selectedItems.value = [...selectedItems.value]
   currentSelectedIds.value = [...currentSelectedIds.value]
 }

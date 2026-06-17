@@ -64,7 +64,7 @@ export default defineSectionSchema({
             },
             props: {
               textField: 'cta_text',
-              urlInputConfig: { type: 'text' },
+              urlInputConfig: { type: 'url' },
             },
           },
           cta_text: {
@@ -78,7 +78,7 @@ export default defineSectionSchema({
             },
             props: {
               textField: 'url_text',
-              urlInputConfig: { type: 'text' },
+              urlInputConfig: { type: 'url' },
             },
           },
           url_text: {

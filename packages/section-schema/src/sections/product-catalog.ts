@@ -52,7 +52,7 @@ export default defineSectionSchema({
             },
             props: {
               textField: 'url_text',
-              urlInputConfig: { type: 'text' },
+              urlInputConfig: { type: 'url' },
             },
           },
         },

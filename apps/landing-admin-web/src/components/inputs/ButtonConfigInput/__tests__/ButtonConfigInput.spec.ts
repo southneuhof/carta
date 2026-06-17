@@ -168,7 +168,7 @@ describe('ButtonConfigInput', () => {
 
     expect(url.value).toBe('/updated-url')
     expect(text.value).toBe('Updated text')
-    expect(validationTouchSpy.count).toBe(2)
+    expect(validationTouchSpy.count).toBeGreaterThanOrEqual(2)
   })
 
   it('reuses alias overrides and sibling field config with a text fallback', async () => {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, type PropType } from 'vue';
 import services from '@/utils/services';
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue';
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue';
@@ -7,7 +7,15 @@ import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue';
 const props = defineProps({
   level: { type: Number, required: true },
   parentId: { type: String, default: undefined },
-  selectedId: { type: String, default: undefined }
+  selectedId: { type: String, default: undefined },
+  allowedMenuItemTypes: {
+    type: Array as PropType<string[]>,
+    default: () => [],
+  },
+  requireSlug: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(['update:selectedId', 'item-selected']);
@@ -28,7 +36,12 @@ async function fetchMenuItems() {
       // Assuming parent_id: undefined works for level 1.
     }
     const { data } = await services.list('menuItem', params);
-    menuItems.value = data || [];
+    const fetchedItems = data || [];
+    menuItems.value = fetchedItems.filter((item: any) => {
+      if (props.requireSlug && !item?.slug) return false;
+      if (props.allowedMenuItemTypes.length && !props.allowedMenuItemTypes.includes(String(item?.menu_item_type))) return false;
+      return true;
+    });
   } catch (error) {
     console.error(`Failed to fetch menu items for level ${props.level} ${props.parentId ? `with parent ${props.parentId}` : ''}:`, error);
     menuItems.value = [];
