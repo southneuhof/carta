@@ -1,5 +1,16 @@
 # @client/web
 
+## 0.0.12
+
+### Patch Changes
+
+- Updated dependencies
+  - @southneuhof/is-data-model@1.0.9
+  - @southneuhof/is-vue-framework@1.0.9
+  - @southneuhof/landing-sveltekit-framework@0.0.7
+  - @client/data-model@0.0.0
+  - @client/section-schema@0.0.5
+
 ## 0.0.11
 
 ### Patch Changes

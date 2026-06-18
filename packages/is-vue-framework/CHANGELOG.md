@@ -1,5 +1,13 @@
 # @southneuhof/is-vue-framework
 
+## 1.0.9
+
+### Patch Changes
+
+- Automated patch release for changed framework packages.
+- Updated dependencies
+  - @southneuhof/is-data-model@1.0.9
+
 ## 1.0.8
 
 ### Patch Changes

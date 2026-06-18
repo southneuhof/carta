@@ -1,5 +1,13 @@
 # @client/section-schema
 
+## 0.0.5
+
+### Patch Changes
+
+- Updated dependencies
+  - @southneuhof/landing-section-schema@0.0.7
+  - @southneuhof/landing-sveltekit-framework@0.0.7
+
 ## 0.0.4
 
 ### Patch Changes
