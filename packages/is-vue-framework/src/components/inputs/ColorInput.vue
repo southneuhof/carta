@@ -291,7 +291,16 @@ onBeforeUnmount(() => {
                 @blur="commitHexInput"
                 @keydown.enter.prevent="commitHexInput"
               />
-              <Button v-if="currentValue" kind="icon" variant="text" class="!p-0 !w-[16px] !h-[16px] !min-w-[16px]" type="button" @click="clearColor">
+              <Button
+                v-if="currentValue"
+                kind="icon"
+                variant="standard"
+                aria-label="Clear color"
+                class="!p-0 !w-[16px] !h-[16px] !min-w-[16px]"
+                type="button"
+                data-testid="color-clear-button"
+                @click="clearColor"
+              >
                 <template #icon>
                   <Icon name="close" size="sm"></Icon>
                 </template>

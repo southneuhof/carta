@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { onClickOutside } from '@vueuse/core'
-import { ref, type PropType } from 'vue'
-import { PopoverArrow, PopoverClose, PopoverContent, PopoverPortal, PopoverRoot, PopoverTrigger } from 'radix-vue'
+import { type PropType } from 'vue'
+import { PopoverContent, PopoverPortal, PopoverRoot, PopoverTrigger } from 'radix-vue'
 
 const props = defineProps({
   align: {
@@ -30,7 +29,6 @@ const open = defineModel({ default: false })
 
 function setOpen(value: boolean) {
   open.value = value
-  console.log('set open', open.value)
 }
 </script>
 
