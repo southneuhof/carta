@@ -1,6 +1,5 @@
 {
   "name": "@southneuhof/landing-section-schema",
-  "private": false,
   "version": "0.0.7",
   "type": "module",
   "description": "Section schema helpers and conventions for South Neuhof landing applications.",
@@ -8,38 +7,11 @@
     "type": "git",
     "url": "git+https://github.com/southneuhof/landing-section-schema.git"
   },
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./common-section-meta": {
-      "types": "./dist/common-section-meta.d.ts",
-      "import": "./dist/common-section-meta.js"
-    },
-    "./defineSectionSchema": {
-      "types": "./dist/defineSectionSchema.d.ts",
-      "import": "./dist/defineSectionSchema.js"
-    },
-    "./server": {
-      "types": "./dist/server.d.ts",
-      "import": "./dist/server.js"
-    }
-  },
-  "files": [
-    "dist",
-    "src",
-    "!dist/**/*.tsbuildinfo",
-    "!src/**/__tests__/**",
-    "!src/**/*.spec.*",
-    "!src/**/*.test.*",
-    "README.md"
-  ],
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    ".": "./src/index.ts",
+    "./common-section-meta": "./src/common-section-meta.ts",
+    "./defineSectionSchema": "./src/defineSectionSchema.ts",
+    "./server": "./src/server.ts"
   },
   "dependencies": {
     "@southneuhof/landing-sveltekit-framework": "workspace:^"
@@ -49,11 +21,8 @@
     "@types/node": "^18.16.16"
   },
   "scripts": {
-    "build": "pnpm clean && pnpm build:js && pnpm clean:build-info",
-    "clean": "node ../../scripts/clean-package.mjs dist",
-    "clean:build-info": "node ../../scripts/clean-package.mjs dist/tsconfig.build.tsbuildinfo",
-    "build:js": "tsc -p tsconfig.build.json",
-    "type-check": "tsc --noEmit -p tsconfig.build.json",
+    "build": "pnpm run type-check",
+    "type-check": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run"
   }
 }

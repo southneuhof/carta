@@ -8,67 +8,19 @@
     "type": "git",
     "url": "git+https://github.com/southneuhof/is-vue-framework.git"
   },
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./services": {
-      "types": "./dist/services/index.d.ts",
-      "import": "./dist/services/index.js"
-    },
-    "./adapters/defaults": {
-      "types": "./dist/adapters/defaults.d.ts",
-      "import": "./dist/adapters/defaults.js"
-    },
-    "./adapters/state": {
-      "types": "./dist/adapters/state.d.ts",
-      "import": "./dist/adapters/state.js"
-    },
-    "./adapters/behaviors": {
-      "types": "./dist/adapters/behaviors.d.ts",
-      "import": "./dist/adapters/behaviors.js"
-    },
-    "./adapters/*": {
-      "types": "./dist/adapters/*.d.ts",
-      "import": "./dist/adapters/*.js"
-    },
-    "./components/*": {
-      "types": "./dist/components/*.d.ts",
-      "import": "./dist/components/*"
-    },
-    "./renderers/*": {
-      "types": "./dist/renderers/*.d.ts",
-      "import": "./dist/renderers/*.js"
-    },
-    "./behaviors/*": {
-      "types": "./dist/behaviors/*.d.ts",
-      "import": "./dist/behaviors/*.js"
-    },
-    "./styles/*": "./dist/styles/*",
-    "./router": {
-      "types": "./dist/router/index.d.ts",
-      "import": "./dist/router/index.js"
-    },
-    "./router/*": {
-      "types": "./dist/router/*.d.ts",
-      "import": "./dist/router/*.js"
-    }
-  },
-  "files": [
-    "dist",
-    "src",
-    "!dist/**/*.tsbuildinfo",
-    "!src/**/__tests__/**",
-    "!src/**/*.spec.*",
-    "!src/**/*.test.*",
-    "README.md"
-  ],
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    ".": "./src/index.ts",
+    "./services": "./src/services/index.ts",
+    "./adapters/defaults": "./src/adapters/defaults.ts",
+    "./adapters/state": "./src/adapters/state.ts",
+    "./adapters/behaviors": "./src/adapters/behaviors.ts",
+    "./adapters/*": "./src/adapters/*",
+    "./components/*": "./src/components/*",
+    "./renderers/*": "./src/renderers/*",
+    "./behaviors/*": "./src/behaviors/*",
+    "./styles/*": "./src/styles/*",
+    "./router": "./src/router/index.ts",
+    "./router/*": "./src/router/*"
   },
   "peerDependencies": {
     "@southneuhof/is-data-model": "workspace:^",
@@ -107,13 +59,8 @@
     "vitest": "^2.1.9"
   },
   "scripts": {
-    "build": "pnpm clean && pnpm build:js && pnpm build:types && pnpm copy:assets && pnpm clean:build-info",
-    "clean": "node ../../scripts/clean-package.mjs dist",
-    "clean:build-info": "node ../../scripts/clean-package.mjs dist/tsconfig.build.tsbuildinfo",
-    "build:js": "tsc -p tsconfig.build.json",
-    "build:types": "vue-tsc --declaration --declarationMap --emitDeclarationOnly -p tsconfig.build.json",
-    "copy:assets": "node ../../scripts/copy-package-assets.mjs packages/is-vue-framework/src packages/is-vue-framework/dist",
-    "type-check": "vue-tsc --noEmit -p tsconfig.build.json",
+    "build": "pnpm run type-check",
+    "type-check": "vue-tsc --noEmit -p tsconfig.json",
     "test": "vitest run --environment jsdom"
   }
 }

@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "FormField" ADD COLUMN     "colSpan" INTEGER NOT NULL DEFAULT 12;

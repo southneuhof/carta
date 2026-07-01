@@ -2,8 +2,10 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
-    "rootDir": "./src",
+    "baseUrl": ".",
     "module": "esnext",
+    "resolvePackageJsonExports": false,
+    "resolvePackageJsonImports": false,
     "paths": {
       "@southneuhof/is-vue-framework": [
         "./src/index.ts"
@@ -18,10 +20,10 @@
         "../is-data-model/src/*"
       ],
       "@southneuhof/apostle": [
-        "../apostle/dist/index.d.ts"
+        "../apostle/src/index.ts"
       ],
       "@southneuhof/apostle/*": [
-        "../apostle/dist/*"
+        "../apostle/src/*"
       ],
       "@southneuhof/utilities": [
         "../utilities/src/index.ts"
@@ -33,7 +35,15 @@
   },
   "include": [
     "src/**/*",
-    "env.d.ts"
+    "env.d.ts",
+    "../apostle/src/**/*",
+    "../is-data-model/src/**/*",
+    "../utilities/src/**/*"
+  ],
+  "exclude": [
+    "src/**/__tests__/**",
+    "src/**/*.spec.*",
+    "src/**/*.test.*"
   ],
   "vueCompilerOptions": {
     "strictTemplates": true,

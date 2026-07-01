@@ -3,7 +3,6 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const localConfigPath = path.join(repoRoot, '.local', 'provider-packages.json')
 
 const clientPackages = {
   '@client/data-model': 'packages/data-model/src',
@@ -21,15 +20,6 @@ const providerPackages = {
 
 function toPosix(value) {
   return value.split(path.sep).join('/')
-}
-
-function readLocalProviderConfig() {
-  if (!fs.existsSync(localConfigPath)) return { packages: {} }
-
-  const parsed = JSON.parse(fs.readFileSync(localConfigPath, 'utf8'))
-  return {
-    packages: parsed && typeof parsed.packages === 'object' && parsed.packages ? parsed.packages : {},
-  }
 }
 
 function packageAlias(name, sourceDir) {
@@ -53,31 +43,9 @@ export function createWorkspacePackageAliases() {
 }
 
 export function createProviderSourceAliases() {
-  const config = readLocalProviderConfig()
-
-  return Object.entries(config.packages).flatMap(([name, configuredPath]) => {
-    if (!providerPackages[name]) return []
-
-    const sourceDir = typeof configuredPath === 'string' && configuredPath.trim()
-      ? configuredPath
-      : providerPackages[name]
-
-    return packageAlias(name, sourceDir)
-  })
-}
-
-export function createWorkspaceProviderDistAliases() {
-  const config = readLocalProviderConfig()
-  const localized = new Set(Object.keys(config.packages))
-
   return Object.entries(providerPackages).flatMap(([name, sourceDir]) => {
-    if (localized.has(name)) return []
-
-    const packageRoot = path.resolve(repoRoot, sourceDir, '..')
-    const distDir = path.join(packageRoot, 'dist')
-    if (!fs.existsSync(distDir)) return []
-
-    return packageAlias(name, path.relative(repoRoot, distDir))
+    const absoluteSource = path.resolve(repoRoot, sourceDir)
+    return fs.existsSync(absoluteSource) ? packageAlias(name, sourceDir) : []
   })
 }
 
@@ -85,8 +53,7 @@ export function createPortablePackageAliases() {
   return [
     ...createWorkspacePackageAliases(),
     ...createProviderSourceAliases(),
-    ...createWorkspaceProviderDistAliases(),
   ]
 }
 
-export { clientPackages, providerPackages, localConfigPath }
+export { clientPackages, providerPackages }
