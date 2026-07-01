@@ -1,13 +1,10 @@
 {
-  "name": "base-frontend-monorepo",
+  "name": "is-framework",
   "private": true,
   "version": "0.0.0",
   "packageManager": "pnpm@10.8.0",
   "scripts": {
     "dev": "pnpm --filter @southneuhof/framework-web dev",
-    "landing:dev": "sh -c 'pnpm run landing:dev:server & pnpm run landing:dev:admin & wait'",
-    "landing:dev:server": "pnpm --dir apps/landing-mjl dev -- --port 5173 --strictPort",
-    "landing:dev:admin": "pnpm --dir apps/landing-admin-web dev -- --port 5174 --strictPort",
     "dev:mobile": "pnpm --filter base-mobile start",
     "dev:mobile:legacy": "pnpm --filter base-mobile start",
     "build": "turbo run build --filter=@southneuhof/is-data-model --filter=@southneuhof/apostle --filter=@southneuhof/utilities --filter=@southneuhof/is-vue-framework --filter=@southneuhof/landing-section-schema --filter=@southneuhof/landing-sveltekit-framework",
@@ -19,9 +16,7 @@
     "packages:pull": "node scripts/package-repos.mjs pull",
     "packages:push": "node scripts/package-repos.mjs push",
     "packages:status": "node scripts/package-repos.mjs status",
-    "push:all": "node scripts/package-repos.mjs push-all",
-    "landing:localize": "node scripts/localize-provider-packages.mjs",
-    "landing:check-portable": "node scripts/check-portable-landing.mjs"
+    "push:all": "node scripts/package-repos.mjs push-all"
   },
   "devDependencies": {
     "turbo": "^2.0.14",
