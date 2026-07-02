@@ -1,6 +1,6 @@
 import { defineDomainSchema } from '@southneuhof/domain/model'
-import './domains/users/user.entity'
-import './domains/product-variants/product-variant.entity'
-import './domains/products/product.entity'
+import * as productVariantEntity from './domains/product-variants/product-variant.entity'
+import * as productEntity from './domains/products/product.entity'
+import * as userEntity from './domains/users/user.entity'
 
-export const domainSchema = defineDomainSchema()
+export const domainSchema = defineDomainSchema([userEntity, productVariantEntity, productEntity])

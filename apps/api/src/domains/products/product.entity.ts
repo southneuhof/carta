@@ -1,5 +1,5 @@
-import { createEntity, registerEntity, registerRelations, registerTable } from '@southneuhof/domain/model'
-import { relations } from 'drizzle-orm'
+import { createEntity } from '@southneuhof/domain/model'
+import { defineRelationsPart } from 'drizzle-orm'
 import { pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { z } from 'zod/v4'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
@@ -14,19 +14,17 @@ export const products = pgTable('products', {
   createdAt: timestamp('created_at', { mode: 'string' }).notNull().defaultNow(),
 })
 
-export const productRelations = relations(products, ({ one, many }) => ({
-  author: one(users, {
-    fields: [products.ownerId],
-    references: [users.id],
-  }),
-  variants: many(productVariants),
-}))
-
-export const productVariantRelations = relations(productVariants, ({ one }) => ({
-  product: one(products, {
-    fields: [productVariants.productId],
-    references: [products.id],
-  }),
+export const productRelations = defineRelationsPart({ products, users, productVariants }, (r) => ({
+  products: {
+    author: r.one.users({
+      from: r.products.ownerId,
+      to: r.users.id,
+    }),
+    variants: r.many.productVariants({
+      from: r.products.id,
+      to: r.productVariants.productId,
+    }),
+  },
 }))
 
 export const product = createEntity({
@@ -36,12 +34,7 @@ export const product = createEntity({
     update: createUpdateSchema(products).omit({ id: true }),
     select: createSelectSchema(products).extend({
       author: user.schemas.select.nullable(),
-      variants: z.array(z.lazy(() => productVariant.schemas.select)),
+      variants: z.array(productVariant.schemas.select),
     }),
   },
 })
-
-registerTable(products)
-registerRelations(productRelations)
-registerRelations(productVariantRelations)
-registerEntity(product)

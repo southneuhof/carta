@@ -1,8 +1,8 @@
-import { relations } from 'drizzle-orm'
+import { defineRelationsPart } from 'drizzle-orm'
 import { pgTable, text } from 'drizzle-orm/pg-core'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
-import { createEntity, defineDomainSchema, registerEntity, registerRelations, registerTable, resetDomainRegistryForTests } from '../domain-schema'
+import { createEntity, defineDomainSchema } from '../domain-schema'
 
 const users = pgTable('users', {
   id: text('id').primaryKey(),
@@ -37,18 +37,36 @@ const comment = createEntity({
   },
 })
 
-const postRelations = relations(posts, ({ one }) => ({
-  author: one(users, {
-    fields: [posts.authorId],
-    references: [users.id],
-  }),
+const postRelations = defineRelationsPart({ posts, users, comments }, (r) => ({
+  posts: {
+    author: r.one.users({
+      from: r.posts.authorId,
+      to: r.users.id,
+    }),
+    comments: r.many.comments({
+      from: r.posts.id,
+      to: r.comments.postId,
+    }),
+  },
 }))
 
-const commentRelations = relations(comments, ({ one }) => ({
-  post: one(posts, {
-    fields: [comments.postId],
-    references: [posts.id],
-  }),
+const aliasedPostRelations = defineRelationsPart({ posts, users }, (r) => ({
+  posts: {
+    author: r.one.users({
+      from: r.posts.authorId,
+      to: r.users.id,
+      alias: 'createdBy',
+    }),
+  },
+}))
+
+const badTargetRelations = defineRelationsPart({ posts, users, comments }, (r) => ({
+  posts: {
+    author: r.one.comments({
+      from: r.posts.authorId,
+      to: r.comments.id,
+    }),
+  },
 }))
 
 function postWithSelect(select: z.ZodRawShape) {
@@ -62,49 +80,24 @@ function postWithSelect(select: z.ZodRawShape) {
   })
 }
 
-function registerBase(post = postWithSelect({ author: user.schemas.select.nullable() })) {
-  registerTable(users)
-  registerTable(posts)
-  registerEntity(user)
-  registerEntity(post)
-  registerRelations(postRelations)
-  return post
+function defineWith(post = postWithSelect({ author: user.schemas.select.nullable() }), relations: Record<string, unknown> = postRelations) {
+  return defineDomainSchema([{ users, user }, { posts, post, relations }, { comments, comment }])
 }
 
-beforeEach(() => {
-  resetDomainRegistryForTests()
-})
-
 describe('defineDomainSchema', () => {
-  it('accepts relation fields that match Drizzle relation keys', () => {
-    registerBase()
+  it('discovers tables, relation parts, and entities from module exports', () => {
+    const post = postWithSelect({
+      author: user.schemas.select.nullable(),
+      comments: z.array(z.lazy(() => comment.schemas.select)),
+    })
 
-    expect(() => defineDomainSchema()).not.toThrow()
-  })
+    const schema = defineWith(post)
 
-  it('accepts multiple relations from one registration scope', () => {
-    const post = registerBase()
-    registerTable(comments)
-    registerEntity(comment)
-    registerRelations(commentRelations)
-
-    const schema = defineDomainSchema()
-
+    expect(schema.schema).toMatchObject({ users, posts, comments })
+    expect(schema.relations.posts).toBeTruthy()
     expect(schema.entities).toEqual([user, post, comment])
     expect(schema.relationsByTable.has(posts)).toBe(true)
-    expect(schema.relationsByTable.has(comments)).toBe(true)
-  })
-
-  it('rejects duplicate table registration', () => {
-    registerTable(users)
-
-    expect(() => registerTable(users)).toThrow('Table "users" is already registered.')
-  })
-
-  it('rejects duplicate relation registration for a table', () => {
-    registerRelations(postRelations)
-
-    expect(() => registerRelations(postRelations)).toThrow('Relations for table "posts" are already registered.')
+    expect(schema.relationFieldsByEntity.get(post)).toEqual(['author', 'comments'])
   })
 
   it('rejects createEntity relations input', () => {
@@ -119,22 +112,31 @@ describe('defineDomainSchema', () => {
 
   it('rejects missing relation keys', () => {
     const post = postWithSelect({ createdBy: user.schemas.select.nullable() })
-    registerBase(post)
 
-    expect(() => defineDomainSchema()).toThrow('Missing Drizzle relation for select field "createdBy"')
+    expect(() => defineWith(post)).toThrow('Missing Drizzle relation for select field "createdBy"')
   })
 
-  it('rejects cardinality mismatch', () => {
-    const post = postWithSelect({ author: z.array(user.schemas.select) })
-    registerBase(post)
+  it('rejects alias-as-field-name', () => {
+    const post = postWithSelect({ createdBy: user.schemas.select.nullable() })
 
-    expect(() => defineDomainSchema()).toThrow('Cardinality mismatch for relation "author"')
+    expect(() => defineWith(post, aliasedPostRelations)).toThrow('"createdBy" is a Drizzle alias')
+  })
+
+  it('rejects one/many cardinality mismatch', () => {
+    const post = postWithSelect({ author: z.array(user.schemas.select) })
+
+    expect(() => defineWith(post)).toThrow('Cardinality mismatch for relation "author"')
+  })
+
+  it('rejects target entity mismatch', () => {
+    const post = postWithSelect({ author: user.schemas.select.nullable() })
+
+    expect(() => defineWith(post, badTargetRelations)).toThrow('Target entity mismatch for relation "author"')
   })
 
   it('rejects unknown extra object fields', () => {
     const post = postWithSelect({ displayName: z.object({ value: z.string() }) })
-    registerBase(post)
 
-    expect(() => defineDomainSchema()).toThrow('Unknown nested object field "displayName"')
+    expect(() => defineWith(post)).toThrow('Unknown nested object field "displayName"')
   })
 })

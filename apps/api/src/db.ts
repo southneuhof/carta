@@ -11,7 +11,7 @@ export function getDb() {
   if (!connectionString) throw new Error('DATABASE_URL is required.')
 
   pool ??= new Pool({ connectionString })
-  db ??= drizzle(pool, { schema: domainSchema.drizzleSchema })
+  db ??= drizzle({ client: pool, relations: domainSchema.relations as never })
   bindDomainDatabase(domainSchema, db)
   return db
 }

@@ -1,5 +1,4 @@
-import { getTableColumns, getTableName, is, Many, One, Relations, Table } from 'drizzle-orm'
-import { createTableRelationsHelpers } from 'drizzle-orm/relations'
+import { getTableColumns, getTableName, is, Many, One, Table } from 'drizzle-orm'
 import { createDrizzleSource } from '../source/drizzle-source'
 import type { ModelRuntimeEntity, ModelSource } from '../source/model-source'
 
@@ -25,24 +24,16 @@ type CreateEntityConfig<TTable, TSchemas extends EntitySchemas> = {
   relations?: never
 }
 
-type DomainRegistry = {
-  tables: Map<unknown, string>
-  relations: Map<unknown, Relations>
-  entities: Set<DomainEntity>
-}
+type DomainModule = Record<string, unknown>
+type RelationConfig = { table: unknown; name?: string; relations: Record<string, unknown> }
 
 export type DomainSchema = {
-  drizzleSchema: Record<string, unknown>
+  schema: Record<string, unknown>
+  relations: Record<string, RelationConfig>
   entities: DomainEntity[]
   relationsByTable: Map<unknown, Record<string, unknown>>
   relationFieldsByEntity: Map<DomainEntity, string[]>
   tableKeyByEntity: Map<DomainEntity, string>
-}
-
-const registry: DomainRegistry = {
-  tables: new Map(),
-  relations: new Map(),
-  entities: new Set(),
 }
 
 export function createEntity<TTable, TSchemas extends EntitySchemas>(config: CreateEntityConfig<TTable, TSchemas>): DomainEntity<TTable, TSchemas> {
@@ -57,67 +48,48 @@ export function createEntity<TTable, TSchemas extends EntitySchemas>(config: Cre
   }
 }
 
-function isDomainEntity(value: unknown): value is DomainEntity {
+export function isDomainEntity(value: unknown): value is DomainEntity {
   return Boolean(value && typeof value === 'object' && (value as { [ENTITY_MARK]?: true })[ENTITY_MARK])
 }
 
-export function registerTable(table: unknown) {
-  if (!isDrizzleTable(table)) throw new Error('registerTable() expects a Drizzle table.')
-  if (registry.tables.has(table)) throw new Error(`Table "${getTableName(table as never)}" is already registered.`)
-  registry.tables.set(table, getTableName(table as never))
-}
-
-export function registerRelations(relations: unknown) {
-  if (!isDrizzleRelations(relations)) throw new Error('registerRelations() expects Drizzle relations().')
-  if (registry.relations.has(relations.table)) throw new Error(`Relations for table "${getTableName(relations.table as never)}" are already registered.`)
-  registry.relations.set(relations.table, relations)
-}
-
-export function registerEntity(entity: DomainEntity) {
-  if (!isDomainEntity(entity)) throw new Error('registerEntity() expects an entity from createEntity().')
-  if (registry.entities.has(entity)) throw new Error(`Entity "${entity.name}" is already registered.`)
-  registry.entities.add(entity)
-}
-
-export function defineDomainSchema(): DomainSchema {
-  const drizzleSchema: Record<string, unknown> = {}
-  const entities = [...registry.entities]
+export function defineDomainSchema(modules: DomainModule[]): DomainSchema {
+  const schema: Record<string, unknown> = {}
+  const relations: Record<string, RelationConfig> = {}
+  const entities: DomainEntity[] = []
   const relationsByTable = new Map<unknown, Record<string, unknown>>()
   const relationFieldsByEntity = new Map<DomainEntity, string[]>()
   const tableKeyByEntity = new Map<DomainEntity, string>()
-  const entityByTable = new Map<unknown, DomainEntity>()
   const entityBySelectSchema = new Map<unknown, DomainEntity>()
 
-  for (const [table, key] of registry.tables) {
-    drizzleSchema[key] = table
-  }
-
-  for (const [table, relation] of registry.relations) {
-    drizzleSchema[`${registry.tables.get(table) ?? getTableName(table as never)}Relations`] = relation
+  for (const module of modules) {
+    for (const [key, value] of Object.entries(module)) {
+      if (isDrizzleTable(value)) schema[key] = value
+      if (isDomainEntity(value)) entities.push(value)
+      if (isRelationConfigMap(value)) {
+        for (const [relationKey, config] of Object.entries(value)) {
+          const previous = relations[relationKey]
+          relations[relationKey] = previous ? { ...config, relations: { ...previous.relations, ...config.relations } } : config
+        }
+      }
+    }
   }
 
   for (const entity of entities) {
-    entityByTable.set(entity.table, entity)
     entityBySelectSchema.set(entity.schemas.select, entity)
-    const tableKey = registry.tables.get(entity.table)
-    if (tableKey) tableKeyByEntity.set(entity, tableKey)
+    const tableKey = Object.entries(schema).find(([, table]) => table === entity.table)?.[0]
+    if (!tableKey) throw new Error(`Missing Drizzle table export for entity "${entity.name}".`)
+    tableKeyByEntity.set(entity, tableKey)
   }
 
-  for (const relation of registry.relations.values()) {
-    relationsByTable.set(relation.table, relation.config(createTableRelationsHelpers(relation.table as never)))
+  for (const relation of Object.values(relations)) {
+    relationsByTable.set(relation.table, relation.relations)
   }
 
   for (const entity of entities) {
     relationFieldsByEntity.set(entity, validateEntitySelect({ entity, relationsByTable, entityBySelectSchema }))
   }
 
-  return { drizzleSchema, entities, relationsByTable, relationFieldsByEntity, tableKeyByEntity }
-}
-
-export function resetDomainRegistryForTests() {
-  registry.tables.clear()
-  registry.relations.clear()
-  registry.entities.clear()
+  return { schema, relations, entities, relationsByTable, relationFieldsByEntity, tableKeyByEntity }
 }
 
 export function bindDomainDatabase(domainSchema: DomainSchema, db: unknown) {
@@ -146,22 +118,23 @@ function validateEntitySelect({
   const relations = relationsByTable.get(entity.table) ?? {}
   const aliases = new Map(
     Object.entries(relations)
-      .map(([key, relation]) => [(relation as { relationName?: string }).relationName, key] as const)
+      .map(([key, relation]) => [(relation as { alias?: string }).alias, key] as const)
       .filter(([alias]) => alias),
   )
 
   for (const [field, schema] of Object.entries(getZodShape(entity.schemas.select))) {
     if (field in columns) continue
 
+    const aliasFor = aliases.get(field)
+    if (aliasFor) throw new Error(`Invalid relation field "${field}" on entity "${entity.name}".\n\n"${field}" is a Drizzle alias. Use the relation key "${aliasFor}" in schemas.select.`)
+
     const nested = getNestedEntitySchema(schema, entityBySelectSchema)
     if (!nested) {
-      const aliasFor = aliases.get(field)
-      if (aliasFor) throw new Error(`Invalid relation field "${field}" on entity "${entity.name}".\n\n"${field}" is a Drizzle alias. Use the relation key "${aliasFor}" in schemas.select.`)
       throw new Error(`Unknown nested object field "${field}" on entity "${entity.name}".\n\nNested relation fields must use another entity's schemas.select.`)
     }
 
     const relation = relations[field]
-    if (!relation) throw new Error(`Missing Drizzle relation for select field "${field}" on entity "${entity.name}".\nAdd a relation named "${field}" in relations().`)
+    if (!relation) throw new Error(`Missing Drizzle relation for select field "${field}" on entity "${entity.name}".\nAdd a relation named "${field}" in defineRelationsPart().`)
 
     if (nested.isArray && !is(relation, Many)) {
       throw new Error(`Cardinality mismatch for relation "${field}" on entity "${entity.name}".\n\nDrizzle relation "${field}" is one, but schemas.select.${field} is an array.`)
@@ -169,8 +142,9 @@ function validateEntitySelect({
     if (!nested.isArray && !is(relation, One)) {
       throw new Error(`Cardinality mismatch for relation "${field}" on entity "${entity.name}".\n\nDrizzle relation "${field}" is many, but schemas.select.${field} is not an array.`)
     }
-    if ((relation as { referencedTable?: unknown }).referencedTable !== nested.entity.table) {
-      throw new Error(`Target entity mismatch for relation "${field}" on entity "${entity.name}".\n\nDrizzle relation "${field}" targets table "${getTableName((relation as { referencedTable: never }).referencedTable)}".\nschemas.select.${field} uses entity "${nested.entity.name}".`)
+    const targetTable = (relation as { targetTable?: unknown }).targetTable
+    if (targetTable !== nested.entity.table) {
+      throw new Error(`Target entity mismatch for relation "${field}" on entity "${entity.name}".\n\nDrizzle relation "${field}" targets table "${getTableName(targetTable as never)}".\nschemas.select.${field} uses entity "${nested.entity.name}".`)
     }
 
     relationFields.push(field)
@@ -228,8 +202,19 @@ function isDrizzleTable(value: unknown): value is Table {
   return is(value, Table)
 }
 
-function isDrizzleRelations(value: unknown): value is Relations {
-  return is(value, Relations)
+function isRelationConfigMap(value: unknown): value is Record<string, RelationConfig> {
+  if (!value || typeof value !== 'object' || Array.isArray(value) || isDrizzleTable(value)) return false
+  return Object.values(value).some(isRelationConfig)
+}
+
+function isRelationConfig(value: unknown): value is RelationConfig {
+  return Boolean(
+    value &&
+      typeof value === 'object' &&
+      isDrizzleTable((value as RelationConfig).table) &&
+      (value as RelationConfig).relations &&
+      typeof (value as RelationConfig).relations === 'object',
+  )
 }
 
 function unboundSource(): ModelSource {

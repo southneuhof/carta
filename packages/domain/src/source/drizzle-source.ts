@@ -60,13 +60,18 @@ export function createDrizzleSource<TRecord, TCreate, TUpdate>({
   schemas,
 }: CreateDrizzleSourceConfig<TRecord, TCreate, TUpdate>): ModelSource<TRecord> {
   const database = db as DrizzleDb
-  const primaryKey = getPrimaryKeyColumns(table)
+  const primaryKey = getPrimaryKeyEntries(table)
+  const primaryKeyColumns = primaryKey.map((entry) => entry.column)
   const tableKey = entity && domainSchema?.tableKeyByEntity.get(entity)
   const relationFields = entity ? (domainSchema?.relationFieldsByEntity.get(entity) ?? []) : []
   const withRelations = relationFields.length ? Object.fromEntries(relationFields.map((field) => [field, true])) : undefined
   const wherePrimaryKey = (id: unknown) => {
-    const values = primaryKey.length === 1 ? { [primaryKey[0].name]: id } : parseCompositeId(id)
-    return and(...primaryKey.map((column) => eq(column, values[column.name])))
+    const values = primaryKey.length === 1 ? { [primaryKey[0].key]: id } : parseCompositeId(id)
+    return and(...primaryKey.map(({ key, column }) => eq(column, values[key])))
+  }
+  const wherePrimaryKeyObject = (id: unknown) => {
+    if (primaryKey.length === 1) return { [primaryKey[0].key]: id }
+    return parseCompositeId(id)
   }
 
   return {
@@ -77,7 +82,7 @@ export function createDrizzleSource<TRecord, TCreate, TUpdate>({
     },
     async detail({ id }) {
       if (tableKey && withRelations) {
-        const row = await database.query?.[tableKey]?.findFirst({ where: wherePrimaryKey(id), with: withRelations })
+        const row = await database.query?.[tableKey]?.findFirst({ where: wherePrimaryKeyObject(id), with: withRelations })
         return row ? schemas.select.parse(row) : null
       }
       const rows = await database.select().from(table).where(wherePrimaryKey(id)).limit(1)
@@ -85,7 +90,7 @@ export function createDrizzleSource<TRecord, TCreate, TUpdate>({
     },
     async create({ input }) {
       const rows = await database.insert(table).values(schemas.create.parse(input)).returning()
-      if (rows[0] && tableKey && withRelations) return this.detail({ id: getReturnedId(rows[0], primaryKey) as never, context: undefined as never }) as Promise<TRecord>
+      if (rows[0] && tableKey && withRelations) return this.detail({ id: getReturnedId(rows[0], primaryKeyColumns) as never, context: undefined as never }) as Promise<TRecord>
       return schemas.select.parse(rows[0])
     },
     async update({ id, input }) {
@@ -101,8 +106,14 @@ export function createDrizzleSource<TRecord, TCreate, TUpdate>({
 }
 
 export function getPrimaryKeyColumns(table: unknown): AnyColumn[] {
+  return getPrimaryKeyEntries(table).map((entry) => entry.column)
+}
+
+function getPrimaryKeyEntries(table: unknown): { key: string; column: AnyColumn }[] {
   const columns = getTableColumns(table as never) as Record<string, AnyColumn>
-  const inline = Object.values(columns).filter((column) => column.primary)
+  const inline = Object.entries(columns)
+    .filter(([, column]) => column.primary)
+    .map(([key, column]) => ({ key, column }))
   if (inline.length) return inline
 
   const extraConfigBuilder = (table as { [tableSymbols.ExtraConfigBuilder]?: (columns: unknown) => unknown })[tableSymbols.ExtraConfigBuilder]
@@ -112,7 +123,13 @@ export function getPrimaryKeyColumns(table: unknown): AnyColumn[] {
     | { columns: { name: string }[] }
     | undefined
   const names = primaryKey?.columns.map((column) => column.name) ?? []
-  if (names.length) return names.map((name) => columns[name])
+  if (names.length) {
+    return names.map((name) => {
+      const entry = Object.entries(columns).find(([, column]) => column.name === name)
+      if (!entry) throw new Error(`Primary key column "${name}" not found for table "${getTableName(table as never)}"`)
+      return { key: entry[0], column: entry[1] }
+    })
+  }
 
   throw new Error(`Primary key not found for table "${getTableName(table as never)}"`)
 }

@@ -1,4 +1,4 @@
-import { createEntity, registerEntity, registerTable } from '@southneuhof/domain/model'
+import { createEntity } from '@southneuhof/domain/model'
 import { pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
 
@@ -16,6 +16,3 @@ export const user = createEntity({
     select: createSelectSchema(users),
   },
 })
-
-registerTable(users)
-registerEntity(user)
