@@ -25,12 +25,24 @@ type CreateEntityConfig<TTable, TSchemas extends EntitySchemas> = {
   relations?: never
 }
 
+type DomainRegistry = {
+  tables: Map<unknown, string>
+  relations: Map<unknown, Relations>
+  entities: Set<DomainEntity>
+}
+
 export type DomainSchema = {
   drizzleSchema: Record<string, unknown>
   entities: DomainEntity[]
   relationsByTable: Map<unknown, Record<string, unknown>>
   relationFieldsByEntity: Map<DomainEntity, string[]>
   tableKeyByEntity: Map<DomainEntity, string>
+}
+
+const registry: DomainRegistry = {
+  tables: new Map(),
+  relations: new Map(),
+  entities: new Set(),
 }
 
 export function createEntity<TTable, TSchemas extends EntitySchemas>(config: CreateEntityConfig<TTable, TSchemas>): DomainEntity<TTable, TSchemas> {
@@ -45,40 +57,54 @@ export function createEntity<TTable, TSchemas extends EntitySchemas>(config: Cre
   }
 }
 
-export function isDomainEntity(value: unknown): value is DomainEntity {
+function isDomainEntity(value: unknown): value is DomainEntity {
   return Boolean(value && typeof value === 'object' && (value as { [ENTITY_MARK]?: true })[ENTITY_MARK])
 }
 
-export function defineDomainSchema(modules: Record<string, unknown>[]): DomainSchema {
+export function registerTable(table: unknown) {
+  if (!isDrizzleTable(table)) throw new Error('registerTable() expects a Drizzle table.')
+  if (registry.tables.has(table)) throw new Error(`Table "${getTableName(table as never)}" is already registered.`)
+  registry.tables.set(table, getTableName(table as never))
+}
+
+export function registerRelations(relations: unknown) {
+  if (!isDrizzleRelations(relations)) throw new Error('registerRelations() expects Drizzle relations().')
+  if (registry.relations.has(relations.table)) throw new Error(`Relations for table "${getTableName(relations.table as never)}" are already registered.`)
+  registry.relations.set(relations.table, relations)
+}
+
+export function registerEntity(entity: DomainEntity) {
+  if (!isDomainEntity(entity)) throw new Error('registerEntity() expects an entity from createEntity().')
+  if (registry.entities.has(entity)) throw new Error(`Entity "${entity.name}" is already registered.`)
+  registry.entities.add(entity)
+}
+
+export function defineDomainSchema(): DomainSchema {
   const drizzleSchema: Record<string, unknown> = {}
-  const entities: DomainEntity[] = []
+  const entities = [...registry.entities]
   const relationsByTable = new Map<unknown, Record<string, unknown>>()
   const relationFieldsByEntity = new Map<DomainEntity, string[]>()
   const tableKeyByEntity = new Map<DomainEntity, string>()
   const entityByTable = new Map<unknown, DomainEntity>()
   const entityBySelectSchema = new Map<unknown, DomainEntity>()
 
-  for (const moduleExports of modules) {
-    for (const [key, value] of Object.entries(moduleExports)) {
-      if (isDomainEntity(value)) {
-        entities.push(value)
-        entityByTable.set(value.table, value)
-        entityBySelectSchema.set(value.schemas.select, value)
-      } else if (isDrizzleTable(value) || isDrizzleRelations(value)) {
-        drizzleSchema[key] = value
-      }
-    }
+  for (const [table, key] of registry.tables) {
+    drizzleSchema[key] = table
   }
 
-  for (const [key, value] of Object.entries(drizzleSchema)) {
-    if (!isDrizzleTable(value)) continue
-    const entity = entityByTable.get(value)
-    if (entity) tableKeyByEntity.set(entity, key)
+  for (const [table, relation] of registry.relations) {
+    drizzleSchema[`${registry.tables.get(table) ?? getTableName(table as never)}Relations`] = relation
   }
 
-  for (const value of Object.values(drizzleSchema)) {
-    if (!isDrizzleRelations(value)) continue
-    relationsByTable.set(value.table, value.config(createTableRelationsHelpers(value.table as never)))
+  for (const entity of entities) {
+    entityByTable.set(entity.table, entity)
+    entityBySelectSchema.set(entity.schemas.select, entity)
+    const tableKey = registry.tables.get(entity.table)
+    if (tableKey) tableKeyByEntity.set(entity, tableKey)
+  }
+
+  for (const relation of registry.relations.values()) {
+    relationsByTable.set(relation.table, relation.config(createTableRelationsHelpers(relation.table as never)))
   }
 
   for (const entity of entities) {
@@ -86,6 +112,12 @@ export function defineDomainSchema(modules: Record<string, unknown>[]): DomainSc
   }
 
   return { drizzleSchema, entities, relationsByTable, relationFieldsByEntity, tableKeyByEntity }
+}
+
+export function resetDomainRegistryForTests() {
+  registry.tables.clear()
+  registry.relations.clear()
+  registry.entities.clear()
 }
 
 export function bindDomainDatabase(domainSchema: DomainSchema, db: unknown) {

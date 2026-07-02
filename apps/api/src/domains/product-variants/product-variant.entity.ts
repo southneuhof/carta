@@ -1,8 +1,6 @@
-import { createEntity } from '@southneuhof/domain/model'
-import { relations } from 'drizzle-orm'
+import { createEntity, registerEntity, registerTable } from '@southneuhof/domain/model'
 import { pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
-import { products } from '../products/product.entity'
 
 export const productVariants = pgTable('product_variants', {
   id: text('id').primaryKey(),
@@ -10,13 +8,6 @@ export const productVariants = pgTable('product_variants', {
   sku: text('sku').notNull(),
   createdAt: timestamp('created_at', { mode: 'string' }).notNull().defaultNow(),
 })
-
-export const productVariantRelations = relations(productVariants, ({ one }) => ({
-  product: one(products, {
-    fields: [productVariants.productId],
-    references: [products.id],
-  }),
-}))
 
 export const productVariant = createEntity({
   table: productVariants,
@@ -26,3 +17,6 @@ export const productVariant = createEntity({
     select: createSelectSchema(productVariants),
   },
 })
+
+registerTable(productVariants)
+registerEntity(productVariant)

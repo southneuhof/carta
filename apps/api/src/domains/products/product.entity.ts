@@ -1,4 +1,4 @@
-import { createEntity } from '@southneuhof/domain/model'
+import { createEntity, registerEntity, registerRelations, registerTable } from '@southneuhof/domain/model'
 import { relations } from 'drizzle-orm'
 import { pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { z } from 'zod/v4'
@@ -22,6 +22,13 @@ export const productRelations = relations(products, ({ one, many }) => ({
   variants: many(productVariants),
 }))
 
+export const productVariantRelations = relations(productVariants, ({ one }) => ({
+  product: one(products, {
+    fields: [productVariants.productId],
+    references: [products.id],
+  }),
+}))
+
 export const product = createEntity({
   table: products,
   schemas: {
@@ -33,3 +40,8 @@ export const product = createEntity({
     }),
   },
 })
+
+registerTable(products)
+registerRelations(productRelations)
+registerRelations(productVariantRelations)
+registerEntity(product)
