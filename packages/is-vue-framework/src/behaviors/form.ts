@@ -19,7 +19,7 @@ export function defaultOnError({ payload, error }: { payload: object; error: any
   return getFrameworkBehaviors().form?.onError?.({ payload, error }) ?? { payload, error }
 }
 
-export async function defaultFormGetData({ getAPI, id, searchParameters }: { getAPI: string; id?: string | number; searchParameters?: object }) {
+export async function defaultFormGetData({ getAPI, id, searchParameters }: { getAPI: string; id?: string | number | string[]; searchParameters?: object }) {
   const getDetailData = getFrameworkBehaviors().form?.getDetailData
   if (!getDetailData) missingBehavior('form.getDetailData')
   return getDetailData({ getAPI, id, searchParameters })

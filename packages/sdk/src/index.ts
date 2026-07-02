@@ -1,2 +1,3 @@
-export { createAPIClient } from './client'
-export type { ApiClient, ApiMethod, ApiRequest, ApiResponseType, CreateAPIClientOptions } from './client'
+export { createRpcClient } from './client'
+export type { RpcClient } from './client'
+export type { AppType } from '@southneuhof/contracts'

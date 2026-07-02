@@ -1,9 +1,10 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { configureParser, parse } from '@southneuhof/utilities/parse'
-import { createFrameworkPlugin } from '@southneuhof/is-vue-framework'
+import { createFrameworkPlugin, createIsApiClient, installIsApiClient } from '@southneuhof/is-vue-framework'
 import { frameworkBehaviors } from './framework/behaviors'
 import { dictionary } from '@/configs/dictionary'
+import config from '@/config'
 import App from './App.vue'
 import router from './router'
 import '@vuepic/vue-datepicker/dist/main.css'
@@ -58,6 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       behaviors: frameworkBehaviors,
     }),
   )
+  installIsApiClient(app, createIsApiClient(config.apiUrl || 'http://localhost:8787'))
   app.use(
     VueTippy,
     // optional

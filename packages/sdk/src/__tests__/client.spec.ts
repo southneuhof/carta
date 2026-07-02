@@ -1,48 +1,32 @@
-import { describe, expect, it, vi } from 'vitest'
-import { createAPIClient } from '../client'
+import { describe, expect, it } from 'vitest'
+import { createRpcClient, type RpcClient } from '../client'
 
-describe('sdk createAPIClient', () => {
-  it('uses normalized list/detail/create/update endpoints', async () => {
-    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } }))
-    const client = createAPIClient({
-      baseURL: 'https://example.com/api/',
-      fetchImpl: fetchMock as any,
-    })
-
-    await client.list('users', { search: 'a' })
-    await client.detail('users', 10)
-    await client.create('users', { name: 'A' })
-    await client.update('users', { id: 10 })
-
-    expect(fetchMock).toHaveBeenCalledTimes(4)
-    const calls = fetchMock.mock.calls as any[]
-    expect(calls[0][0]).toContain('/users/list')
-    expect(calls[1][0]).toContain('/users/10/show')
-    expect(calls[2][0]).toContain('/users/create')
-    expect(calls[3][0]).toContain('/users/update')
+describe('sdk createRpcClient', () => {
+  it('creates native Hono RPC client shape', () => {
+    const client = createRpcClient('http://localhost:8787')
+    expect(client.products.list.$get).toBeTypeOf('function')
+    expect(client.products.nested.test.versionTest.$get).toBeTypeOf('function')
   })
 
-  it('detail supports composite identity in encoded path segments', async () => {
-    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } }))
-    const client = createAPIClient({
-      baseURL: 'https://example.com/api/',
-      fetchImpl: fetchMock as any,
-    })
+  it('keeps product proof calls typed', () => {
+    const client = createRpcClient('http://localhost:8787')
+    const typedClient: RpcClient = client
 
-    await client.detail('articleTranslation', ['123', 'id with space/slash'])
-    expect(fetchMock).toHaveBeenCalledTimes(1)
-    expect(fetchMock.mock.calls[0][0]).toContain('/articleTranslation/123/id%20with%20space%2Fslash/show')
-  })
+    function proofCalls(proofClient: RpcClient) {
+      // @ts-expect-error missing route must stay absent
+      proofClient.products.missing.$get()
+      // @ts-expect-error missing nested route must stay absent
+      proofClient.products.nested.test.missing.$get()
 
-  it('calls unauthorized handler on 401', async () => {
-    const onUnauthorized = vi.fn()
-    const client = createAPIClient({
-      baseURL: 'https://example.com/api/',
-      fetchImpl: vi.fn(async () => new Response(JSON.stringify({ message: 'unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } })) as any,
-      onUnauthorized,
-    })
+      return [
+        proofClient.products.list.$get({ query: { page: '1', limit: '20' } }),
+        proofClient.products.nested.version1.$get(),
+        proofClient.products.nested.test.versionTest.$get(),
+        proofClient.products.detail[':id'].$get({ param: { id: 'product-1' } }),
+      ]
+    }
 
-    await expect(client.get('me')).rejects.toBeTruthy()
-    expect(onUnauthorized).toHaveBeenCalledTimes(1)
+    expect(proofCalls).toBeTypeOf('function')
+    expect(typedClient.products.customProductAction.$post).toBeTypeOf('function')
   })
 })

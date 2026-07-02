@@ -1,4 +1,3 @@
-import { createAPIClient } from '@repo/sdk'
 import { getAuthToken } from './storage'
 import type { ImageUploadResult } from '../components/inputs'
 
@@ -22,18 +21,47 @@ export function setUnauthorizedHandler(handler: () => Promise<void> | void) {
   unauthorizedHandler = handler
 }
 
-export const api = createAPIClient({
-  baseURL: resolveAPIBaseURL(),
-  defaultHeaders: {
-    Accept: 'application/json, text/plain, */*',
+function buildURL(path: string, query?: Record<string, any>) {
+  const url = new URL(path, resolveAPIBaseURL())
+  for (const [key, value] of Object.entries(query || {})) {
+    if (value === null || value === undefined) continue
+    url.searchParams.set(key, String(value))
+  }
+  return url.toString()
+}
+
+async function request(method: string, path: string, body?: unknown, query?: Record<string, any>) {
+  const token = await getAuthToken()
+  const headers = new Headers({ Accept: 'application/json, text/plain, */*' })
+  const isObjectBody = body !== null && body !== undefined && typeof body === 'object' && !(body instanceof FormData) && !(body instanceof Blob)
+  if (isObjectBody) headers.set('Content-Type', 'application/json')
+  if (token) headers.set('Authorization', `Bearer ${token}`)
+
+  const response = await fetch(buildURL(path, query), {
+    method,
+    headers,
+    body: body === undefined ? undefined : isObjectBody ? JSON.stringify(body) : (body as BodyInit),
+  })
+
+  if (!response.ok) {
+    if (response.status === 401 && unauthorizedHandler) await unauthorizedHandler()
+    throw await response.json().catch(() => response.text())
+  }
+
+  return response.json()
+}
+
+export const api = {
+  post: (path: string, body?: unknown) => request('POST', path, body),
+  put: (path: string, body?: unknown) => request('PUT', path, body),
+  list: (path: string, query?: Record<string, any>) => request('GET', `${path}/list`, undefined, query),
+  detail: (path: string, identity?: string | number | Array<string | number>, query?: Record<string, any>) => {
+    const segments = identity == null ? [] : Array.isArray(identity) ? identity : [identity]
+    const identityPath = segments.map((segment) => encodeURIComponent(String(segment))).join('/')
+    return request('GET', `${path}${identityPath ? `/${identityPath}` : ''}/show`, undefined, query)
   },
-  getToken: async () => (await getAuthToken()) ?? undefined,
-  onUnauthorized: async () => {
-    if (unauthorizedHandler) {
-      await unauthorizedHandler()
-    }
-  },
-})
+  dataset: (path: string, query?: Record<string, any>) => request('GET', `${path}/dataset`, undefined, query),
+}
 
 export type MobileUploadFile = {
   uri: string

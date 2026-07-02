@@ -8,8 +8,7 @@
     "../../packages/data-model/src/**/*",
     "../../packages/sdk/src/**/*",
     "../../packages/is-vue-framework/src/**/*",
-    "../../packages/utilities/src/**/*",
-    "../../packages/apostle/src/**/*"
+    "../../packages/utilities/src/**/*"
   ],
   "exclude": [
     "src/**/__tests__/*",
@@ -20,6 +19,7 @@
   ],
   "compilerOptions": {
     "composite": true,
+    "baseUrl": ".",
     "moduleSuffixes": [
       ".web",
       ""
@@ -34,14 +34,32 @@
       "@southneuhof/is-data-model/*": [
         "../../packages/is-data-model/src/*"
       ],
-      "@repo/sdk": [
-        "../../packages/sdk/src/index.ts"
-      ],
-      "@repo/sdk/*": [
-        "../../packages/sdk/src/*"
-      ],
       "vue3-google-map": [
         "./node_modules/vue3-google-map/dist/types/index.d.ts"
+      ],
+      "@southneuhof/api": [
+        "../api/src/index.ts"
+      ],
+      "@southneuhof/api/*": [
+        "../api/src/*"
+      ],
+      "@southneuhof/contracts": [
+        "../../packages/contracts/src/index.ts"
+      ],
+      "@southneuhof/contracts/*": [
+        "../../packages/contracts/src/*"
+      ],
+      "@southneuhof/domain": [
+        "../../packages/domain/src/index.ts"
+      ],
+      "@southneuhof/domain/*": [
+        "../../packages/domain/src/*"
+      ],
+      "@southneuhof/sdk": [
+        "../../packages/sdk/src/index.ts"
+      ],
+      "@southneuhof/sdk/*": [
+        "../../packages/sdk/src/*"
       ],
       "@southneuhof/is-vue-framework": [
         "../../packages/is-vue-framework/src/index.ts"
@@ -54,12 +72,6 @@
       ],
       "@southneuhof/utilities/*": [
         "../../packages/utilities/src/*"
-      ],
-      "@southneuhof/apostle": [
-        "../../packages/apostle/src/index.ts"
-      ],
-      "@southneuhof/apostle/*": [
-        "../../packages/apostle/src/*"
       ],
       "@client/data-model/*": [
         "../../packages/data-model/src/*"

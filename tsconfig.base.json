@@ -1,12 +1,23 @@
 {
   "compilerOptions": {
     "target": "es2022",
+    "baseUrl": ".",
     "moduleResolution": "bundler",
     "jsx": "preserve",
     "lib": ["dom", "es2022"],
     "verbatimModuleSyntax": true,
     "strict": false,
     "noImplicitAny": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "@southneuhof/api": ["apps/api/src/index.ts"],
+      "@southneuhof/api/*": ["apps/api/src/*"],
+      "@southneuhof/contracts": ["packages/contracts/src/index.ts"],
+      "@southneuhof/contracts/*": ["packages/contracts/src/*"],
+      "@southneuhof/domain": ["packages/domain/src/index.ts"],
+      "@southneuhof/domain/*": ["packages/domain/src/*"],
+      "@southneuhof/sdk": ["packages/sdk/src/index.ts"],
+      "@southneuhof/sdk/*": ["packages/sdk/src/*"]
+    }
   }
 }

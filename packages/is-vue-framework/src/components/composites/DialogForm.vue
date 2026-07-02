@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Form from '@southneuhof/is-vue-framework/components/composites/Form.vue'
 import type { InputConfig } from '@southneuhof/is-data-model'
-import type { PropType } from 'vue'
+import { computed, type PropType } from 'vue'
 import { defaultFormGetData, defaultBeforeSubmit, defaultOnSubmit, defaultOnSuccess, defaultOnError } from '@southneuhof/is-vue-framework/behaviors/form'
 import Dialog from '../base/Dialog.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
@@ -12,7 +12,7 @@ const props = defineProps({
   fields: { type: Array as PropType<string[]>, required: true },
   fieldsAlias: { type: Object, default: () => ({}) },
   getDetailData: {
-    type: Function as PropType<({ getAPI, id, searchParameters }: { getAPI: string; id?: string | number; searchParameters?: object }) => Promise<object>>,
+    type: Function as PropType<({ getAPI, id, searchParameters }: { getAPI: string; id?: string | number | string[]; searchParameters?: object }) => Promise<object>>,
     default: defaultFormGetData,
   },
   getInitialData: { type: Function as PropType<() => Promise<Record<string, any>>>, default: async () => ({}) },
@@ -25,13 +25,18 @@ const props = defineProps({
   onError: { type: Function as PropType<({ formData, error }: { formData: object; error: Record<string, any> }) => void>, default: defaultOnError },
   targetAPI: { type: String, default: '' },
   getAPI: { type: String },
-  dataID: { type: String },
+  dataID: { type: [String, Array] as PropType<string | string[]> },
   formType: { type: String as PropType<'create' | 'update'>, default: 'create' },
   method: { type: String as PropType<'put' | 'post'> },
   searchParameters: { type: Object, default: () => ({}) },
   extraData: { type: Object, default: () => ({}) },
   static: { type: Boolean },
   disabled: { type: Boolean },
+})
+
+const formProps = computed<Record<string, any>>(() => {
+  const { onSuccess: _onSuccess, ...rest } = props
+  return rest
 })
 </script>
 
@@ -47,7 +52,7 @@ const props = defineProps({
       <div class="flex flex-col gap-8">
         <slot v-if="$slots.header" name="header"></slot>
         <Form
-          v-bind="{ ...props, onSuccess: null }"
+          v-bind="(formProps as any)"
           :onSuccess="
             ({ formData, res }) => {
               props.onSuccess({ formData, res })

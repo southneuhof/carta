@@ -49,7 +49,7 @@ const listConfig = ref<ListConfig>(
   })
 )
 
-const filterProps = {
+const filterProps: Record<string, any> = {
   fields: props.config.view?.list?.filter?.fields,
   fieldsAlias: listConfig.value.fieldsAlias,
   inputConfig: {
@@ -116,7 +116,15 @@ onMounted(() => {
                         </template>
                         <template #content>
                           <Card class="w-[350px]" variant="outlined">
-                            <Form :key="keyManager().value[`sys_${config.name}_name`]" static v-model="searchParameters" v-bind="(filterProps as any)" />
+                            <Form
+                              :key="keyManager().value[`sys_${config.name}_name`]"
+                              static
+                              :modelValue="searchParameters"
+                              @update:modelValue="(value) => (searchParameters = value as Record<string, any>)"
+                              :fields="filterProps.fields || []"
+                              :fieldsAlias="filterProps.fieldsAlias"
+                              :inputConfig="(filterProps.inputConfig as any)"
+                            />
                             <Button
                               @click="
                                 () => {

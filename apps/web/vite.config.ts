@@ -42,16 +42,36 @@ export default defineConfig({
         replacement: fileURLToPath(new URL('../../packages/is-vue-framework/src/', import.meta.url)),
       },
       {
-        find: /^@southneuhof\/apostle$/,
-        replacement: fileURLToPath(new URL('../../packages/apostle/src/index.ts', import.meta.url)),
+        find: /^@southneuhof\/api$/,
+        replacement: fileURLToPath(new URL('../api/src/index.ts', import.meta.url)),
       },
       {
-        find: '@southneuhof/apostle/',
-        replacement: fileURLToPath(new URL('../../packages/apostle/src/', import.meta.url)),
+        find: '@southneuhof/api/',
+        replacement: fileURLToPath(new URL('../api/src/', import.meta.url)),
       },
       {
-        find: /^@repo\/sdk$/,
+        find: /^@southneuhof\/contracts$/,
+        replacement: fileURLToPath(new URL('../../packages/contracts/src/index.ts', import.meta.url)),
+      },
+      {
+        find: '@southneuhof/contracts/',
+        replacement: fileURLToPath(new URL('../../packages/contracts/src/', import.meta.url)),
+      },
+      {
+        find: /^@southneuhof\/domain$/,
+        replacement: fileURLToPath(new URL('../../packages/domain/src/index.ts', import.meta.url)),
+      },
+      {
+        find: '@southneuhof/domain/',
+        replacement: fileURLToPath(new URL('../../packages/domain/src/', import.meta.url)),
+      },
+      {
+        find: /^@southneuhof\/sdk$/,
         replacement: fileURLToPath(new URL('../../packages/sdk/src/index.ts', import.meta.url)),
+      },
+      {
+        find: '@southneuhof/sdk/',
+        replacement: fileURLToPath(new URL('../../packages/sdk/src/', import.meta.url)),
       },
     ],
   },

@@ -14,9 +14,9 @@ const props = defineProps({
   },
 })
 
-const modelValue = defineModel<string>()
+const modelValue = defineModel<string>({ default: '' })
 
-const value = ref(modelValue.value)
+const value = ref<string>(modelValue.value)
 const debouncedSetValue = debounce(() => (modelValue.value = value.value), 300)
 
 watch(value, () => {

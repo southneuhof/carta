@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
-import type { MaterialScheme } from '@repo/domain'
+import type { MaterialScheme } from '@southneuhof/domain'
 import { MOBILE_MATERIAL_COLORS, type MobileMaterialPalette } from './material'
 
 type MaterialThemeContextValue = {

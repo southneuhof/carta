@@ -1,15 +1,26 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "strict": true,
     "moduleSuffixes": [".server", ""],
     "paths": {
       "@client/data-model/*": ["../../packages/data-model/src/*"],
+      "@southneuhof/api": ["./src/index.ts"],
+      "@southneuhof/api/*": ["./src/*"],
+      "@southneuhof/contracts": ["../../packages/contracts/src/index.ts"],
+      "@southneuhof/contracts/*": ["../../packages/contracts/src/*"],
+      "@southneuhof/domain": ["../../packages/domain/src/index.ts"],
+      "@southneuhof/domain/*": ["../../packages/domain/src/*"],
       "@southneuhof/is-data-model": ["../../packages/is-data-model/src/index.ts"],
-      "@southneuhof/is-data-model/*": ["../../packages/is-data-model/src/*"]
+      "@southneuhof/is-data-model/*": ["../../packages/is-data-model/src/*"],
+      "@southneuhof/sdk": ["../../packages/sdk/src/index.ts"],
+      "@southneuhof/sdk/*": ["../../packages/sdk/src/*"]
     }
   },
   "include": [
     "src/**/*",
+    "scripts/**/*",
+    "drizzle.config.ts",
     "../../packages/data-model/src/**/*",
     "../../packages/is-data-model/src/**/*"
   ]

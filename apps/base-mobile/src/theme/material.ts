@@ -1,4 +1,4 @@
-import { MATERIAL_THEME_TOKENS, type MaterialScheme, type MaterialThemeTokens } from '@repo/domain'
+import { MATERIAL_THEME_TOKENS, type MaterialScheme, type MaterialThemeTokens } from '@southneuhof/domain'
 
 type MaterialColorToken = `${number} ${number} ${number}`
 

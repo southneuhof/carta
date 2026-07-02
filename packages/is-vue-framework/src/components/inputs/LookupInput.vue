@@ -140,7 +140,7 @@ const combinedSearchParameters = computed(() => ({
   ...filterParameters.value,
 }))
 
-const filterProps = computed(() => ({
+const filterProps = computed<Record<string, any>>(() => ({
   fields: props.filterConfig?.fields || [],
   fieldsAlias: props.filterConfig?.fieldsAlias || {},
   inputConfig: props.filterConfig?.inputConfig || {},
@@ -344,7 +344,15 @@ function handleClick(data: Record<string, any>) {
                 </template>
                 <template #content>
                   <Card class="w-[350px] outline outline-1 outline-outline" color="surface">
-                    <Form :key="keyManager().value['sys_lookupinput_filter']" static v-model="filterParameters" v-bind="(filterProps as any)" />
+                    <Form
+                      :key="keyManager().value['sys_lookupinput_filter']"
+                      static
+                      :modelValue="filterParameters"
+                      @update:modelValue="(value) => (filterParameters = value as Record<string, any>)"
+                      :fields="filterProps.fields"
+                      :fieldsAlias="filterProps.fieldsAlias"
+                      :inputConfig="(filterProps.inputConfig as any)"
+                    />
                     <Button
                       @click="
                         () => {

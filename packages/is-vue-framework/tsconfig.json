@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
+    "strict": true,
     "baseUrl": ".",
     "module": "esnext",
     "resolvePackageJsonExports": false,
@@ -13,17 +14,35 @@
       "@southneuhof/is-vue-framework/*": [
         "./src/*"
       ],
+      "@southneuhof/api": [
+        "../../apps/api/src/index.ts"
+      ],
+      "@southneuhof/api/*": [
+        "../../apps/api/src/*"
+      ],
+      "@southneuhof/contracts": [
+        "../contracts/src/index.ts"
+      ],
+      "@southneuhof/contracts/*": [
+        "../contracts/src/*"
+      ],
+      "@southneuhof/domain": [
+        "../domain/src/index.ts"
+      ],
+      "@southneuhof/domain/*": [
+        "../domain/src/*"
+      ],
+      "@southneuhof/sdk": [
+        "../sdk/src/index.ts"
+      ],
+      "@southneuhof/sdk/*": [
+        "../sdk/src/*"
+      ],
       "@southneuhof/is-data-model": [
         "../is-data-model/src/index.ts"
       ],
       "@southneuhof/is-data-model/*": [
         "../is-data-model/src/*"
-      ],
-      "@southneuhof/apostle": [
-        "../apostle/src/index.ts"
-      ],
-      "@southneuhof/apostle/*": [
-        "../apostle/src/*"
       ],
       "@southneuhof/utilities": [
         "../utilities/src/index.ts"
@@ -36,7 +55,8 @@
   "include": [
     "src/**/*",
     "env.d.ts",
-    "../apostle/src/**/*",
+    "../contracts/src/**/*",
+    "../sdk/src/**/*",
     "../is-data-model/src/**/*",
     "../utilities/src/**/*"
   ],

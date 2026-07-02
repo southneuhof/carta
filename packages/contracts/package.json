@@ -1,9 +1,16 @@
 {
-  "name": "@repo/contracts",
-  "private": true,
+  "name": "@southneuhof/contracts",
+  "private": false,
   "version": "0.0.0",
   "type": "module",
   "exports": {
     ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "pnpm run type-check",
+    "type-check": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "hono": "^4.12.27"
   }
 }

@@ -28,7 +28,7 @@
     "vue-router": "^4.2.2"
   },
   "dependencies": {
-    "@southneuhof/apostle": "workspace:^",
+    "@southneuhof/sdk": "workspace:*",
     "@southneuhof/utilities": "workspace:^",
     "clsx": "^2.1.1",
     "tailwind-merge": "^1.13.1",

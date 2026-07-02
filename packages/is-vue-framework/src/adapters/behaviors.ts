@@ -1,6 +1,6 @@
 import { resetFrameworkDefaultsForTests } from './defaults'
 
-export type FrameworkFormGetData = (params: { getAPI: string; id?: string | number; searchParameters?: object }) => Promise<object | undefined>
+export type FrameworkFormGetData = (params: { getAPI: string; id?: string | number | string[]; searchParameters?: object }) => Promise<object | undefined>
 export type FrameworkFormBeforeSubmit = (params: { formData: object }) => object
 export type FrameworkFormSubmit = (params: { payload: object; method: 'put' | 'post'; targetAPI: string; type: 'create' | 'update' }) => Promise<object | void>
 export type FrameworkFormSuccess = (params: { formData?: object; payload?: object; res?: Record<string, any>; response?: object }) => void | object
