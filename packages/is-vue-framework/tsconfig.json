@@ -29,9 +29,6 @@
       "@southneuhof/domain": [
         "../domain/src/index.ts"
       ],
-      "@southneuhof/domain/*": [
-        "../domain/src/*"
-      ],
       "@southneuhof/sdk": [
         "../sdk/src/index.ts"
       ],

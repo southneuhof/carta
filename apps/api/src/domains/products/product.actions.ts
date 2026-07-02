@@ -1,4 +1,4 @@
-import { defineAction } from '@southneuhof/domain/actions'
+import { defineAction } from '@southneuhof/sprindle/actions'
 
 export const customProductAction = defineAction({
   method: 'post',

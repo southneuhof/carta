@@ -15,9 +15,10 @@
       "@southneuhof/contracts": ["packages/contracts/src/index.ts"],
       "@southneuhof/contracts/*": ["packages/contracts/src/*"],
       "@southneuhof/domain": ["packages/domain/src/index.ts"],
-      "@southneuhof/domain/*": ["packages/domain/src/*"],
       "@southneuhof/sdk": ["packages/sdk/src/index.ts"],
-      "@southneuhof/sdk/*": ["packages/sdk/src/*"]
+      "@southneuhof/sdk/*": ["packages/sdk/src/*"],
+      "@southneuhof/sprindle": ["packages/sprindle/src/index.ts"],
+      "@southneuhof/sprindle/*": ["packages/sprindle/src/*"]
     }
   }
 }

@@ -2,7 +2,7 @@ import { getTableColumns, getTableName, is, Many, One, Table } from 'drizzle-orm
 import { createDrizzleSource } from '../source/drizzle-source'
 import type { ModelRuntimeEntity, ModelSource } from '../source/model-source'
 
-const ENTITY_MARK = Symbol.for('@southneuhof/domain/entity')
+const ENTITY_MARK = Symbol.for('@southneuhof/sprindle/entity')
 
 type AnySchema = { parse: (input: unknown) => unknown }
 

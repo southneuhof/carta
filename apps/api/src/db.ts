@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
-import { bindDomainDatabase } from '@southneuhof/domain/model'
+import { bindDomainDatabase } from '@southneuhof/sprindle/model'
 import { domainSchema } from './domain-schema'
 
 let pool: Pool | undefined

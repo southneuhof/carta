@@ -38,6 +38,12 @@ const packages = [
     remoteName: 'pkg-landing-sveltekit-framework',
   },
   {
+    name: '@southneuhof/sprindle',
+    dir: 'packages/sprindle',
+    remote: 'https://github.com/southneuhof/sprindle.git',
+    remoteName: 'pkg-sprindle',
+  },
+  {
     name: '@southneuhof/utilities',
     dir: 'packages/utilities',
     remote: 'https://github.com/southneuhof/utilities.git',

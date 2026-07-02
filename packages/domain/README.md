@@ -1,8 +1,7 @@
-# @repo/domain
+# @southneuhof/domain
 
-Placeholder package for future shared domain primitives, enums, and permission keys.
+Shared domain constants for South Neuhof apps.
 
 Current state:
 
-- package boundary only
-- no shared domain exports yet
+- Material theme tokens for mobile

@@ -1,4 +1,4 @@
-import { createEntity } from '@southneuhof/domain/model'
+import { createEntity } from '@southneuhof/sprindle/model'
 import { defineRelationsPart } from 'drizzle-orm'
 import { pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { z } from 'zod/v4'

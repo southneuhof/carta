@@ -4,24 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./actions": "./src/actions/index.ts",
-    "./model": "./src/model/index.ts",
-    "./source": "./src/source/index.ts",
-    "./validation": "./src/validation/index.ts"
+    ".": "./src/index.ts"
   },
   "scripts": {
     "build": "pnpm run type-check",
-    "type-check": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run"
-  },
-  "dependencies": {
-    "@hono/zod-validator": "^0.8.0",
-    "drizzle-orm": "1.0.0-rc.4",
-    "hono": "^4.12.27",
-    "zod": "^3.25.0"
-  },
-  "devDependencies": {
-    "vitest": "^2.1.9"
+    "type-check": "tsc -p tsconfig.json --noEmit"
   }
 }

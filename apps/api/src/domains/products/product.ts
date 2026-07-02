@@ -1,5 +1,5 @@
-import { create, deleteAction, detail, list, update } from '@southneuhof/domain/actions'
-import { defineModel } from '@southneuhof/domain/model'
+import { create, deleteAction, detail, list, update } from '@southneuhof/sprindle/actions'
+import { defineModel } from '@southneuhof/sprindle/model'
 import { customProductAction, version1, versionTest } from './product.actions'
 import { product } from './product.entity'
 

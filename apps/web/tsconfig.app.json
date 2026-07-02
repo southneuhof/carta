@@ -52,9 +52,6 @@
       "@southneuhof/domain": [
         "../../packages/domain/src/index.ts"
       ],
-      "@southneuhof/domain/*": [
-        "../../packages/domain/src/*"
-      ],
       "@southneuhof/sdk": [
         "../../packages/sdk/src/index.ts"
       ],

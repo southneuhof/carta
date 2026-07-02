@@ -8,6 +8,7 @@ import CRUDCreate from './CRUD/CRUDCreate.vue'
 import CRUDUpdate from './CRUD/CRUDUpdate.vue'
 import { permissions } from '@southneuhof/is-vue-framework/adapters/state'
 import Spinner from '../base/Spinner.vue'
+import { useIsApiClient } from '@southneuhof/is-vue-framework/services'
 
 const [router, route] = [useRouter(), useRoute()]
 

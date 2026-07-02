@@ -1,4 +1,4 @@
-import { createEntity } from '@southneuhof/domain/model'
+import { createEntity } from '@southneuhof/sprindle/model'
 import { pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
 
