@@ -1,11 +1,19 @@
 import { and, eq, getTableColumns, getTableName, Table } from 'drizzle-orm'
 import type { AnyColumn } from 'drizzle-orm'
 import { PrimaryKeyBuilder } from 'drizzle-orm/pg-core'
+import type { DomainEntity, DomainSchema } from '../model/domain-schema'
 import type { ModelRuntimeEntity, ModelSource } from './model-source'
 
 const tableSymbols = (Table as unknown as { Symbol: Record<'ExtraConfigBuilder' | 'ExtraConfigColumns', symbol> }).Symbol
 
 type DrizzleDb = {
+  query?: Record<
+    string,
+    {
+      findMany: (config?: unknown) => Promise<unknown[]>
+      findFirst: (config?: unknown) => Promise<unknown | undefined>
+    }
+  >
   select: () => {
     from: (table: unknown) => {
       where: (condition: unknown) => {
@@ -35,6 +43,8 @@ type DrizzleDb = {
 export type CreateDrizzleSourceConfig<TRecord, TCreate, TUpdate> = {
   db: unknown
   table: unknown
+  domainSchema?: DomainSchema
+  entity?: DomainEntity
   schemas: {
     create: { parse: (input: unknown) => TCreate }
     update: { parse: (input: unknown) => TUpdate }
@@ -45,10 +55,15 @@ export type CreateDrizzleSourceConfig<TRecord, TCreate, TUpdate> = {
 export function createDrizzleSource<TRecord, TCreate, TUpdate>({
   db,
   table,
+  domainSchema,
+  entity,
   schemas,
 }: CreateDrizzleSourceConfig<TRecord, TCreate, TUpdate>): ModelSource<TRecord> {
   const database = db as DrizzleDb
   const primaryKey = getPrimaryKeyColumns(table)
+  const tableKey = entity && domainSchema?.tableKeyByEntity.get(entity)
+  const relationFields = entity ? (domainSchema?.relationFieldsByEntity.get(entity) ?? []) : []
+  const withRelations = relationFields.length ? Object.fromEntries(relationFields.map((field) => [field, true])) : undefined
   const wherePrimaryKey = (id: unknown) => {
     const values = primaryKey.length === 1 ? { [primaryKey[0].name]: id } : parseCompositeId(id)
     return and(...primaryKey.map((column) => eq(column, values[column.name])))
@@ -56,24 +71,31 @@ export function createDrizzleSource<TRecord, TCreate, TUpdate>({
 
   return {
     async list() {
-      const rows = await database.select().from(table)
+      const rows = tableKey && withRelations ? await database.query?.[tableKey]?.findMany({ with: withRelations }) : await database.select().from(table)
+      if (!rows) throw new Error(`Drizzle relational query not found for table "${tableKey}".`)
       return { data: rows.map((row) => schemas.select.parse(row)) }
     },
     async detail({ id }) {
+      if (tableKey && withRelations) {
+        const row = await database.query?.[tableKey]?.findFirst({ where: wherePrimaryKey(id), with: withRelations })
+        return row ? schemas.select.parse(row) : null
+      }
       const rows = await database.select().from(table).where(wherePrimaryKey(id)).limit(1)
       return rows[0] ? schemas.select.parse(rows[0]) : null
     },
     async create({ input }) {
       const rows = await database.insert(table).values(schemas.create.parse(input)).returning()
+      if (rows[0] && tableKey && withRelations) return this.detail({ id: getReturnedId(rows[0], primaryKey) as never, context: undefined as never }) as Promise<TRecord>
       return schemas.select.parse(rows[0])
     },
     async update({ id, input }) {
       const rows = await database.update(table).set(schemas.update.parse(input)).where(wherePrimaryKey(id)).returning()
+      if (rows[0] && tableKey && withRelations) return this.detail({ id, context: undefined as never }) as Promise<TRecord>
       return rows[0] ? schemas.select.parse(rows[0]) : null
     },
     async delete({ id }) {
       const rows = await database.delete(table).where(wherePrimaryKey(id)).returning()
-      return rows[0] ? schemas.select.parse(rows[0]) : null
+      return Boolean(rows[0])
     },
   }
 }
@@ -102,6 +124,12 @@ function parseCompositeId(id: unknown): Record<string, unknown> {
     if (value && typeof value === 'object' && !Array.isArray(value)) return value
   }
   throw new Error('Composite primary key id must be an object or JSON object string')
+}
+
+function getReturnedId(row: unknown, primaryKey: AnyColumn[]) {
+  if (!row || typeof row !== 'object') return undefined
+  if (primaryKey.length === 1) return (row as Record<string, unknown>)[primaryKey[0].name] as string
+  return Object.fromEntries(primaryKey.map((column) => [column.name, (row as Record<string, unknown>)[column.name]]))
 }
 
 export function createDrizzleModel<TTable, TRecord, TCreate, TUpdate>({

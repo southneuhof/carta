@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { getDb } from './db'
 import { productModel } from './domains/products/product'
 
 export const app = new Hono()
@@ -11,6 +12,11 @@ app.use(
     credentials: true,
   }),
 )
+
+app.use('*', async (_c, next) => {
+  getDb()
+  await next()
+})
 
 app.route('/products', productModel.route)
 

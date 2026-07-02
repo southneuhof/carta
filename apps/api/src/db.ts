@@ -1,5 +1,7 @@
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
+import { bindDomainDatabase } from '@southneuhof/domain/model'
+import { domainSchema } from './domain-schema'
 
 let pool: Pool | undefined
 let db: ReturnType<typeof drizzle> | undefined
@@ -9,7 +11,8 @@ export function getDb() {
   if (!connectionString) throw new Error('DATABASE_URL is required.')
 
   pool ??= new Pool({ connectionString })
-  db ??= drizzle(pool)
+  db ??= drizzle(pool, { schema: domainSchema.drizzleSchema })
+  bindDomainDatabase(domainSchema, db)
   return db
 }
 
