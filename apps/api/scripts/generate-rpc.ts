@@ -51,9 +51,9 @@ async function main() {
     const model = module[definition.exportName] as RuntimeModel | undefined
     if (!model?.actions) throw new Error(`Missing exported model "${definition.exportName}" in ${definition.file}`)
 
-    const entityAlias = `${pascal(model.name)}Entity`
+    const entityAlias = `${pascal(model.name)}EntityModule`
     imports.set(entityAlias, importLine(definition, entityAlias))
-    routes.push(...collectRoutes(model, entityAlias))
+    routes.push(...collectRoutes(model, `${entityAlias}.${definition.entityImport.imported}`))
   }
 
   routes.sort((a, b) => a.path.localeCompare(b.path) || a.method.localeCompare(b.method))
@@ -141,10 +141,7 @@ function getObjectIdentifier(object: ts.ObjectLiteralExpression, key: string) {
 function importLine(definition: ModelDefinition, alias: string) {
   const resolved = path.resolve(path.dirname(definition.file), definition.entityImport.moduleSpecifier)
   const specifier = toRelativeImport(path.dirname(generatedPath), resolved)
-  const imported = definition.entityImport.imported
-  return imported === alias
-    ? `import type { ${imported} } from '${specifier}'`
-    : `import type { ${imported} as ${alias} } from '${specifier}'`
+  return `import type * as ${alias} from '${specifier}'`
 }
 
 function toRelativeImport(fromDir: string, targetNoExtension: string) {

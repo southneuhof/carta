@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
+    "composite": false,
     "strict": true,
     "baseUrl": ".",
     "module": "esnext",
@@ -35,6 +35,12 @@
       "@southneuhof/sdk/*": [
         "../sdk/src/*"
       ],
+      "@southneuhof/sprindle": [
+        "../sprindle/src/index.ts"
+      ],
+      "@southneuhof/sprindle/*": [
+        "../sprindle/src/*"
+      ],
       "@southneuhof/is-data-model": [
         "../is-data-model/src/index.ts"
       ],
@@ -53,14 +59,15 @@
     "src/**/*",
     "env.d.ts",
     "../contracts/src/**/*",
-    "../sdk/src/**/*",
     "../is-data-model/src/**/*",
     "../utilities/src/**/*"
   ],
   "exclude": [
     "src/**/__tests__/**",
     "src/**/*.spec.*",
-    "src/**/*.test.*"
+    "src/**/*.test.*",
+    "../is-data-model/src/**/__tests__/**",
+    "../utilities/src/**/__tests__/**"
   ],
   "vueCompilerOptions": {
     "strictTemplates": true,

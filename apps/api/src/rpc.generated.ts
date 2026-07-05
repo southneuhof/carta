@@ -3,7 +3,7 @@
 
 import type { Hono } from 'hono'
 import type { z } from 'zod/v4'
-import type { product as ProductsEntity } from './domains/products/product.entity'
+import type * as ProductsEntityModule from './domains/products/product.entity'
 
 type ListQuery = {
   page?: string
@@ -20,7 +20,7 @@ type JsonEndpoint<TInput, TStatus extends number = 200> = {
 
 export type RpcSchema = {
   '/products/create': {
-    '$post': JsonEndpoint<{ json: z.input<typeof ProductsEntity.schemas.create> }, 201>
+    '$post': JsonEndpoint<{ json: z.input<typeof ProductsEntityModule.product.schemas.create> }, 201>
   }
   '/products/customProductAction': {
     '$post': JsonEndpoint<{}, 200>
@@ -44,7 +44,7 @@ export type RpcSchema = {
     '$get': JsonEndpoint<{}, 200>
   }
   '/products/update/:id': {
-    '$patch': JsonEndpoint<{ json: z.input<typeof ProductsEntity.schemas.update> } & { param: { id: string } }, 200>
+    '$patch': JsonEndpoint<{ json: z.input<typeof ProductsEntityModule.product.schemas.update> } & { param: { id: string } }, 200>
   }
 }
 

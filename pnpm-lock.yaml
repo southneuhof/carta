@@ -651,9 +651,6 @@ importers:
       '@southneuhof/api':
         specifier: workspace:*
         version: link:../../apps/api
-      '@southneuhof/contracts':
-        specifier: workspace:*
-        version: link:../contracts
       hono:
         specifier: ^4.12.27
         version: 4.12.27

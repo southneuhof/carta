@@ -16,7 +16,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@southneuhof/contracts": "workspace:*",
+    "@southneuhof/api": "workspace:*",
     "hono": "^4.12.27"
   },
   "devDependencies": {

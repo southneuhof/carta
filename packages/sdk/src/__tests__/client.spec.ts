@@ -17,6 +17,14 @@ describe('sdk createRpcClient', () => {
       proofClient.products.missing.$get()
       // @ts-expect-error missing nested route must stay absent
       proofClient.products.nested.test.missing.$get()
+      // @ts-expect-error create only supports POST
+      proofClient.products.create.$get({})
+      // @ts-expect-error id param is required
+      proofClient.products.detail[':id'].$get()
+      // @ts-expect-error body must be under json
+      proofClient.products.create.$post({ name: 'Product' })
+      // @ts-expect-error product name must be a string
+      proofClient.products.create.$post({ json: { name: 1 } })
 
       return [
         proofClient.products.list.$get({ query: { page: '1', limit: '20' } }),

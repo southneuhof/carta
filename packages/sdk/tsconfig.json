@@ -5,5 +5,5 @@
     "rootDir": "../..",
     "strict": true
   },
-  "include": ["src/**/*", "../contracts/src/**/*"]
+  "include": ["src/**/*", "../../apps/api/src/**/*", "../sprindle/src/**/*"]
 }
