@@ -1,6 +1,6 @@
 import { createEntity } from '@southneuhof/sprindle/model'
 import { defineRelationsPart } from 'drizzle-orm'
-import { pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core'
 import { z } from 'zod/v4'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
 import { productVariant, productVariants } from '../product-variants/product-variant.entity'
@@ -14,15 +14,28 @@ export const products = pgTable('products', {
   createdAt: timestamp('created_at', { mode: 'string' }).notNull().defaultNow(),
 })
 
-export const productRelations = defineRelationsPart({ products, users, productVariants }, (r) => ({
+export const productVariantAssignments = pgTable(
+  'product_variant_assignments',
+  {
+    productId: text('product_id')
+      .notNull()
+      .references(() => products.id),
+    variantId: text('variant_id')
+      .notNull()
+      .references(() => productVariants.id),
+  },
+  (t) => [primaryKey({ columns: [t.productId, t.variantId] })],
+)
+
+export const productRelations = defineRelationsPart({ products, users, productVariants, productVariantAssignments }, (r) => ({
   products: {
     author: r.one.users({
       from: r.products.ownerId,
       to: r.users.id,
     }),
     variants: r.many.productVariants({
-      from: r.products.id,
-      to: r.productVariants.productId,
+      from: r.products.id.through(r.productVariantAssignments.productId),
+      to: r.productVariants.id.through(r.productVariantAssignments.variantId),
     }),
   },
 }))

@@ -1,6 +1,6 @@
 import { create, deleteAction, detail, list, update } from '@southneuhof/sprindle/actions'
 import { defineModel } from '@southneuhof/sprindle/model'
-import { customProductAction, version1, versionTest } from './product.actions'
+import { customProductAction, customProductMaterialize, version1, versionTest } from './product.actions'
 import { product } from './product.entity'
 
 export const productModel = defineModel({
@@ -18,5 +18,6 @@ export const productModel = defineModel({
       },
     },
     customProductAction,
+    customProductMaterialize,
   },
 })

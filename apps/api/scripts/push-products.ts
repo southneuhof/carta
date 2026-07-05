@@ -23,9 +23,14 @@ async function main() {
 
     create table if not exists product_variants (
       id text primary key,
-      product_id text not null references products(id),
-      sku text not null,
+      name text not null,
       created_at timestamp not null default now()
+    );
+
+    create table if not exists product_variant_assignments (
+      product_id text not null references products(id),
+      variant_id text not null references product_variants(id),
+      primary key (product_id, variant_id)
     );
   `))
 

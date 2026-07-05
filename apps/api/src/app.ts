@@ -29,6 +29,7 @@ const productContractRoute = new Hono()
   .get('/nested/version1', (c) => c.json({ version: 1 }))
   .get('/nested/test/versionTest', (c) => c.json({ ok: true, version: 'test' }))
   .post('/customProductAction', (c) => c.json({ ok: true, action: 'products' }))
+  .get('/customProductMaterialize', (c) => c.json({ data: [] }))
 
 const contractApp = new Hono().route('/products', productContractRoute)
 

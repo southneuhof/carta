@@ -4,8 +4,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'driz
 
 export const productVariants = pgTable('product_variants', {
   id: text('id').primaryKey(),
-  productId: text('product_id').notNull(),
-  sku: text('sku').notNull(),
+  name: text('name').notNull(),
   createdAt: timestamp('created_at', { mode: 'string' }).notNull().defaultNow(),
 })
 
