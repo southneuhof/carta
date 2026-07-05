@@ -12,6 +12,12 @@ const userFixture = {
   createdAt: '2026-01-01T00:00:00.000Z',
 }
 
+const secondUserFixture = {
+  id: 'user-2',
+  name: 'Second Owner',
+  createdAt: '2026-01-01T00:00:00.000Z',
+}
+
 const productFixture = {
   id: 'product-1',
   name: 'Example Product',
@@ -49,7 +55,7 @@ describe('products API', () => {
         created_at timestamp not null default now()
       );
     `))
-    await db.insert(users).values(userFixture)
+    await db.insert(users).values([userFixture, secondUserFixture])
     await db.insert(products).values(productFixture)
     await db.insert(productVariants).values([
       { id: 'variant-1', productId: 'product-1', sku: 'EXAMPLE-1-A', createdAt: '2026-01-01T00:00:00.000Z' },
@@ -110,6 +116,50 @@ describe('products API', () => {
         },
       ],
     })
+  })
+
+  it('writes relation fields on create and update', async () => {
+    const created = await app.request('/products/create', {
+      method: 'POST',
+      body: JSON.stringify({
+        id: 'product-2',
+        name: 'Second',
+        sku: 'SECOND-2',
+        author: { id: 'user-2' },
+        variants: [{ id: 'variant-1' }],
+      }),
+      headers: { 'Content-Type': 'application/json' },
+    })
+    expect(created.status).toBe(201)
+    expect(await created.json()).toMatchObject({
+      data: {
+        id: 'product-2',
+        author: { id: 'user-2', name: 'Second Owner' },
+        variants: [{ id: 'variant-1' }],
+      },
+    })
+
+    const updateWithoutVariants = await app.request('/products/update/product-2', {
+      method: 'PATCH',
+      body: JSON.stringify({ name: 'Second Updated', author: { id: 'user-1' } }),
+      headers: { 'Content-Type': 'application/json' },
+    })
+    expect(updateWithoutVariants.status).toBe(200)
+    expect(await updateWithoutVariants.json()).toMatchObject({
+      data: {
+        name: 'Second Updated',
+        author: { id: 'user-1' },
+        variants: [{ id: 'variant-1' }],
+      },
+    })
+
+    const clearVariants = await app.request('/products/update/product-2', {
+      method: 'PATCH',
+      body: JSON.stringify({ variants: [] }),
+      headers: { 'Content-Type': 'application/json' },
+    })
+    expect(clearVariants.status).toBe(400)
+    expect(await clearVariants.json()).toEqual({ error: 'Relation "variants" cannot be cleared because "productId" is not nullable.' })
   })
 
   it('serves nested and custom actions', async () => {

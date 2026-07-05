@@ -30,8 +30,14 @@ export const productRelations = defineRelationsPart({ products, users, productVa
 export const product = createEntity({
   table: products,
   schemas: {
-    create: createInsertSchema(products),
-    update: createUpdateSchema(products).omit({ id: true }),
+    create: createInsertSchema(products).extend({
+      author: user.schemas.select.pick({ id: true }).nullable().optional(),
+      variants: z.array(productVariant.schemas.select.pick({ id: true })).optional(),
+    }),
+    update: createUpdateSchema(products).omit({ id: true }).extend({
+      author: user.schemas.select.pick({ id: true }).nullable().optional(),
+      variants: z.array(productVariant.schemas.select.pick({ id: true })).optional(),
+    }),
     select: createSelectSchema(products).extend({
       author: user.schemas.select.nullable(),
       variants: z.array(productVariant.schemas.select),
