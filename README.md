@@ -1,11 +1,11 @@
-# South Neuhof Information System Framework
+# Carta
 
-Canonical framework monorepo for South Neuhof information system frontends.
+Canonical Carta monorepo for South Neuhof information system frontends.
 
 Clone this repository to contribute to the framework packages and reference apps:
 
 ```sh
-git clone https://github.com/southneuhof/is-framework
+git clone https://github.com/southneuhof/carta
 ```
 
 Current status:
@@ -51,9 +51,9 @@ The repository is standardized on `pnpm`.
 - `pnpm packages:push` - push `packages/*` source to package branches
 - `pnpm push:all` - push package branches and the current repo branch
 
-## Framework Package Flow
+## Carta Package Flow
 
-Framework development is source-first. The sandbox web app resolves `@southneuhof/is-data-model`, `@southneuhof/is-vue-framework`, and `@southneuhof/apostle` directly to `packages/*/src` through Vite and TypeScript aliases, so framework edits work with normal Vite HMR. Landing framework work follows the same source-first pattern from `packages/landing-sveltekit-framework/src`.
+Carta development is source-first. The sandbox web app resolves `@southneuhof/is-data-model`, `@southneuhof/is-vue-framework`, and `@southneuhof/apostle` directly to `packages/*/src` through Vite and TypeScript aliases, so framework edits work with normal Vite HMR. Landing framework work follows the same source-first pattern from `packages/landing-sveltekit-framework/src`.
 
 Package manifests export source files from `src`. Generated `dist` output and local pack tarballs are not source artifacts.
 
@@ -70,7 +70,7 @@ packages/landing-section-schema -> https://github.com/southneuhof/landing-sectio
 packages/landing-sveltekit-framework -> https://github.com/southneuhof/landing-sveltekit-framework
 ```
 
-Open framework issues and pull requests against this monorepo, not the mirror repositories.
+Open Carta issues and pull requests against this monorepo, not the mirror repositories.
 
 Maintainers can sync package branches manually:
 
