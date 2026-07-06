@@ -80,6 +80,10 @@ describe('products API', () => {
   afterAll(() => closeDb())
 
   it('serves product framework routes', async () => {
+    const health = await app.request('/health')
+    expect(health.status).toBe(200)
+    expect(await health.json()).toEqual({ ok: true })
+
     const list = await app.request('/products/list')
     expect(list.status).toBe(200)
     expect(await list.json()).toMatchObject({ page: 1, limit: 20 })

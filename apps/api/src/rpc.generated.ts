@@ -3,6 +3,8 @@
 
 import type { Hono } from 'hono'
 import type { z } from 'zod/v4'
+import type { CustomRoutesSchema } from '@southneuhof/sprindle/routes'
+import type { routes } from './routes'
 import type * as ProductsEntityModule from './domains/products/product.entity'
 
 type ListQuery = {
@@ -18,7 +20,7 @@ type JsonEndpoint<TInput, TStatus extends number = 200> = {
   status: TStatus
 }
 
-export type RpcSchema = {
+export type ModelRpcSchema = {
   '/products/create': {
     '$post': JsonEndpoint<{ json: z.input<typeof ProductsEntityModule.product.schemas.create> }, 201>
   }
@@ -47,5 +49,7 @@ export type RpcSchema = {
     '$patch': JsonEndpoint<{ json: z.input<typeof ProductsEntityModule.product.schemas.update> } & { param: { id: string } }, 200>
   }
 }
+
+export type RpcSchema = ModelRpcSchema & CustomRoutesSchema<typeof routes>
 
 export type AppType = Hono<{}, RpcSchema>

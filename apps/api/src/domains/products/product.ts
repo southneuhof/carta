@@ -15,13 +15,13 @@ export const productModel = defineModel({
     update: update(),
     delete: deleteAction(),
     nested: {
-      version1,
+      version1: version1(),
       test: {
-        versionTest,
+        versionTest: versionTest(),
       },
     },
-    customProductAction,
-    customProductMaterialize,
+    customProductAction: customProductAction(),
+    customProductMaterialize: customProductMaterialize(),
   },
 })
 

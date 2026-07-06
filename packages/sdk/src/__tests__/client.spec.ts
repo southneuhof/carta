@@ -4,6 +4,7 @@ import { createRpcClient, type RpcClient } from '../client'
 describe('sdk createRpcClient', () => {
   it('creates native Hono RPC client shape', () => {
     const client = createRpcClient('http://localhost:8787')
+    expect(client.health.$get).toBeTypeOf('function')
     expect(client.products.list.$get).toBeTypeOf('function')
     expect(client.products.nested.test.versionTest.$get).toBeTypeOf('function')
   })
@@ -13,6 +14,8 @@ describe('sdk createRpcClient', () => {
     const typedClient: RpcClient = client
 
     function proofCalls(proofClient: RpcClient) {
+      // @ts-expect-error missing root route must stay absent
+      proofClient.missing.$get()
       // @ts-expect-error missing route must stay absent
       proofClient.products.missing.$get()
       // @ts-expect-error missing nested route must stay absent
@@ -27,6 +30,7 @@ describe('sdk createRpcClient', () => {
       proofClient.products.create.$post({ json: { name: 1 } })
 
       return [
+        proofClient.health.$get(),
         proofClient.products.list.$get({ query: { page: '1', limit: '20' } }),
         proofClient.products.nested.version1.$get(),
         proofClient.products.nested.test.versionTest.$get(),

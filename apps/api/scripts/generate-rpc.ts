@@ -27,6 +27,18 @@ type ModelDefinition = {
   entityImport: ImportBinding
 }
 
+type RouteDefinition = {
+  file: string
+  path: string
+  modelImport: ImportBinding
+}
+
+type RuntimeDefinedRoute = {
+  kind: 'model' | 'custom'
+  path: string
+  model?: RuntimeModel
+}
+
 type Route = {
   path: string
   method: string
@@ -36,30 +48,70 @@ type Route = {
 
 const cwd = process.cwd()
 const srcDir = path.join(cwd, 'src')
-const domainsDir = path.join(srcDir, 'domains')
+const routesDir = path.join(srcDir, 'routes')
 const generatedPath = path.join(srcDir, 'rpc.generated.ts')
 const dynamicImport = new Function('specifier', 'return import(specifier)') as (specifier: string) => Promise<Record<string, unknown>>
 
 async function main() {
-  const files = await findFiles(domainsDir)
-  const definitions = (await Promise.all(files.map(readModelDefinitions))).flat()
+  const files = await findFiles(routesDir)
+  const definitions = (await Promise.all(files.map(readRouteDefinitions))).flat()
+  const routeModule = await dynamicImport(`${pathToFileURL(path.join(routesDir, 'index.ts')).href}?t=${Date.now()}`)
+  const routeDefinitions = routeModule.routes as readonly RuntimeDefinedRoute[] | undefined
+  if (!Array.isArray(routeDefinitions)) throw new Error('src/routes/index.ts must export a routes array.')
+
   const routes: Route[] = []
   const imports = new Map<string, string>()
 
-  for (const definition of definitions) {
-    const module = await dynamicImport(`${pathToFileURL(definition.file).href}?t=${Date.now()}`)
-    const model = module[definition.exportName] as RuntimeModel | undefined
-    if (!model?.actions) throw new Error(`Missing exported model "${definition.exportName}" in ${definition.file}`)
+  for (const route of routeDefinitions) {
+    if (route.kind !== 'model') continue
+
+    const definition = definitions.find((item) => item.path === route.path)
+    if (!definition) throw new Error(`Missing defineRoute({ path: '${route.path}', model }) declaration.`)
+
+    const modelDefinitions = await readModelDefinitions(resolveTsImport(definition.file, definition.modelImport.moduleSpecifier))
+    const modelDefinition = modelDefinitions.find((item) => item.exportName === definition.modelImport.imported)
+    if (!modelDefinition) throw new Error(`Missing exported model "${definition.modelImport.imported}" for route "${route.path}".`)
+
+    const model = route.model
+    if (!model?.actions) throw new Error(`Missing model for route "${route.path}".`)
 
     const entityAlias = `${pascal(model.name)}EntityModule`
-    imports.set(entityAlias, importLine(definition, entityAlias))
-    routes.push(...collectRoutes(model, `${entityAlias}.${definition.entityImport.imported}`))
+    imports.set(entityAlias, importLine(modelDefinition, entityAlias))
+    routes.push(...collectRoutes(model, route.path, `${entityAlias}.${modelDefinition.entityImport.imported}`))
   }
 
   routes.sort((a, b) => a.path.localeCompare(b.path) || a.method.localeCompare(b.method))
   await mkdir(path.dirname(generatedPath), { recursive: true })
   await writeFile(generatedPath, renderGenerated([...imports.values()].sort(), routes))
   console.log(`Generated ${path.relative(cwd, generatedPath)} (${routes.length} routes)`)
+}
+
+async function readRouteDefinitions(file: string): Promise<RouteDefinition[]> {
+  const text = await readFile(file, 'utf8')
+  if (!text.includes('defineRoute')) return []
+
+  const sourceFile = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
+  const imports = readImports(sourceFile)
+  const definitions: RouteDefinition[] = []
+
+  sourceFile.forEachChild((node) => {
+    if (!ts.isVariableStatement(node) || !hasExport(node)) return
+    for (const declaration of node.declarationList.declarations) {
+      if (!declaration.initializer) continue
+      const config = getDefineRouteConfig(declaration.initializer)
+      if (!config) continue
+
+      const routePath = getObjectStringLiteral(config, 'path')
+      const modelName = getObjectIdentifier(config, 'model')
+      if (!routePath || !modelName) continue
+
+      const modelImport = imports.get(modelName)
+      if (!modelImport) throw new Error(`Model "${modelName}" in ${file} must be imported for RPC generation.`)
+      definitions.push({ file, path: routePath, modelImport })
+    }
+  })
+
+  return definitions
 }
 
 async function findFiles(dir: string): Promise<string[]> {
@@ -130,10 +182,25 @@ function getDefineModelConfig(expression: ts.Expression) {
   return config && ts.isObjectLiteralExpression(config) ? config : undefined
 }
 
+function getDefineRouteConfig(expression: ts.Expression) {
+  if (!ts.isCallExpression(expression)) return undefined
+  if (!ts.isIdentifier(expression.expression) || expression.expression.text !== 'defineRoute') return undefined
+  const [config] = expression.arguments
+  return config && ts.isObjectLiteralExpression(config) ? config : undefined
+}
+
 function getObjectIdentifier(object: ts.ObjectLiteralExpression, key: string) {
   for (const property of object.properties) {
     if (!ts.isPropertyAssignment(property) || !ts.isIdentifier(property.name)) continue
     if (property.name.text === key && ts.isIdentifier(property.initializer)) return property.initializer.text
+  }
+  return undefined
+}
+
+function getObjectStringLiteral(object: ts.ObjectLiteralExpression, key: string) {
+  for (const property of object.properties) {
+    if (!ts.isPropertyAssignment(property) || !ts.isIdentifier(property.name)) continue
+    if (property.name.text === key && ts.isStringLiteral(property.initializer)) return property.initializer.text
   }
   return undefined
 }
@@ -149,9 +216,14 @@ function toRelativeImport(fromDir: string, targetNoExtension: string) {
   return relative.startsWith('.') ? relative : `./${relative}`
 }
 
-function collectRoutes(model: RuntimeModel, entityAlias: string) {
+function resolveTsImport(fromFile: string, moduleSpecifier: string) {
+  const resolved = path.resolve(path.dirname(fromFile), moduleSpecifier)
+  return resolved.endsWith('.ts') ? resolved : `${resolved}.ts`
+}
+
+function collectRoutes(model: RuntimeModel, basePath: string, entityAlias: string) {
   const routes: Route[] = []
-  walkActions(model.actions, [model.name], entityAlias, routes)
+  walkActions(model.actions, [basePath], entityAlias, routes)
   return routes
 }
 
@@ -167,6 +239,8 @@ function walkActions(actions: Record<string, unknown>, segments: string[], entit
       })
       continue
     }
+
+    if (typeof value === 'function') throw new Error(`Action "${[...segments, key].join('/')}" must be called before registration.`)
 
     if (isPlainObject(value)) walkActions(value, [...segments, key], entityAlias, routes)
   }
@@ -216,6 +290,8 @@ function renderGenerated(imports: string[], routes: Route[]) {
 
 import type { Hono } from 'hono'
 import type { z } from 'zod/v4'
+import type { CustomRoutesSchema } from '@southneuhof/sprindle/routes'
+import type { routes } from './routes'
 ${imports.join('\n')}
 
 type ListQuery = {
@@ -231,9 +307,11 @@ type JsonEndpoint<TInput, TStatus extends number = 200> = {
   status: TStatus
 }
 
-export type RpcSchema = {
+export type ModelRpcSchema = {
 ${routes.map(renderRoute).join('\n')}
 }
+
+export type RpcSchema = ModelRpcSchema & CustomRoutesSchema<typeof routes>
 
 export type AppType = Hono<{}, RpcSchema>
 `
