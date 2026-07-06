@@ -108,6 +108,20 @@ describe('products API', () => {
     expect(await deleted.json()).toEqual({ ok: true })
   })
 
+  it('runs declarative product authorization and validation hooks', async () => {
+    const denied = await app.request('/products/list', { headers: { 'x-product-access': 'denied' } })
+    expect(denied.status).toBe(403)
+    expect(await denied.json()).toEqual({ error: 'forbidden', issues: [{ message: 'Product access denied.' }] })
+
+    const invalid = await app.request('/products/create', {
+      method: 'POST',
+      body: JSON.stringify({ id: 'product-reserved', name: 'Reserved', sku: 'RESERVED' }),
+      headers: { 'Content-Type': 'application/json' },
+    })
+    expect(invalid.status).toBe(400)
+    expect(await invalid.json()).toEqual({ error: 'validation_error', issues: [{ field: 'sku', message: 'SKU is reserved.' }] })
+  })
+
   it('returns relation-aware product reads', async () => {
     const detail = await app.request('/products/detail/product-1')
     expect(detail.status).toBe(200)

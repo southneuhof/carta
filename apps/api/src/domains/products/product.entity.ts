@@ -1,4 +1,4 @@
-import { createEntity, defineEntitySchemas } from '@southneuhof/sprindle/model'
+import { createEntity } from '@southneuhof/sprindle/model'
 import { defineRelationsPart } from 'drizzle-orm'
 import { pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core'
 import { z } from 'zod/v4'
@@ -40,44 +40,20 @@ export const productRelations = defineRelationsPart({ products, users, productVa
   },
 }))
 
-type ProductCreateInput = typeof products.$inferInsert & {
-  author?: Pick<typeof users.$inferSelect, 'id'> | null
-  variants?: Pick<typeof productVariants.$inferSelect, 'id'>[]
-}
-
-type ProductUpdateInput = Partial<Omit<typeof products.$inferInsert, 'id'>> & {
-  author?: Pick<typeof users.$inferSelect, 'id'> | null
-  variants?: Pick<typeof productVariants.$inferSelect, 'id'>[]
-}
-
-type ProductSelectInput = typeof products.$inferSelect & {
-  author: typeof users.$inferSelect | null
-  variants: (typeof productVariants.$inferSelect)[]
-}
-
-const productCreateSchema = z.object({
-  ...createInsertSchema(products).shape,
-  author: user.schemas.select.pick({ id: true }).nullable().optional(),
-  variants: z.array(productVariant.schemas.select.pick({ id: true })).optional(),
-}) as unknown as z.ZodType<ProductCreateInput, ProductCreateInput>
-
-const productUpdateSchema = z.object({
-  ...createUpdateSchema(products).omit({ id: true }).shape,
-  author: user.schemas.select.pick({ id: true }).nullable().optional(),
-  variants: z.array(productVariant.schemas.select.pick({ id: true })).optional(),
-}) as unknown as z.ZodType<ProductUpdateInput, ProductUpdateInput>
-
-const productSelectSchema = z.object({
-  ...createSelectSchema(products).shape,
-  author: user.schemas.select.nullable(),
-  variants: z.array(productVariant.schemas.select),
-}) as unknown as z.ZodType<ProductSelectInput, ProductSelectInput>
-
 export const product = createEntity({
   table: products,
-  schemas: defineEntitySchemas({
-    create: productCreateSchema,
-    update: productUpdateSchema,
-    select: productSelectSchema,
-  }),
+  schemas: {
+    create: createInsertSchema(products).extend({
+      author: user.schemas.select.pick({ id: true }).nullable().optional(),
+      variants: z.array(productVariant.schemas.select.pick({ id: true })).optional(),
+    }),
+    update: createUpdateSchema(products).omit({ id: true }).extend({
+      author: user.schemas.select.pick({ id: true }).nullable().optional(),
+      variants: z.array(productVariant.schemas.select.pick({ id: true })).optional(),
+    }),
+    select: createSelectSchema(products).extend({
+      author: user.schemas.select.nullable(),
+      variants: z.array(productVariant.schemas.select),
+    }),
+  },
 })

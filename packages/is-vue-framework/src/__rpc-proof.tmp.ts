@@ -1,4 +1,4 @@
-import { useIsApiClient } from './services'
+import { useIsApiClient } from '@southneuhof/is-vue-framework/services'
 
 const api = useIsApiClient()
 api.products.create.$post({

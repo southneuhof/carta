@@ -57,6 +57,7 @@
   },
   "include": [
     "src/**/*",
+    "src/**/*.vue",
     "env.d.ts",
     "../contracts/src/**/*",
     "../is-data-model/src/**/*",

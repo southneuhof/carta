@@ -5,10 +5,13 @@ import { product } from './product.entity'
 
 export const productModel = defineModel({
   entity: product,
+  authorize: [({ c }) => (c.req.header('x-product-access') === 'denied' ? 'Product access denied.' : undefined)],
   actions: {
     list: list(),
     detail: detail(),
-    create: create(),
+    create: create({
+      validate: [({ state }) => (isReservedSku(state.input) ? { field: 'sku', message: 'SKU is reserved.' } : undefined)],
+    }),
     update: update(),
     delete: deleteAction(),
     nested: {
@@ -21,3 +24,7 @@ export const productModel = defineModel({
     customProductMaterialize,
   },
 })
+
+function isReservedSku(input: unknown) {
+  return Boolean(input && typeof input === 'object' && !Array.isArray(input) && (input as { sku?: unknown }).sku === 'RESERVED')
+}
