@@ -1,6 +1,6 @@
 import type { z } from 'zod/v4'
 import { createRpcClient } from '@southneuhof/sdk'
-import type { product } from '@southneuhof/api/domains/products/product.entity'
+import type { product } from '@southneuhof/api/routes/products/products.entity'
 
 type ProductCreate = z.input<typeof product.schemas.create>
 

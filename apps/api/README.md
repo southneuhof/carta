@@ -1,6 +1,22 @@
 # API
 
-`src/routes/` is the public API surface.
+`src/routes/` is the public API surface. Group related route files in folders.
+
+Naming:
+
+- `*.ts`: route entry
+- `*.model.ts`: model entry
+- `*.entity.ts`: entity entry
+- `*.actions.ts`: custom model actions
+
+Example:
+
+```txt
+src/routes/products/products.ts
+src/routes/products/products.model.ts
+src/routes/products/products.entity.ts
+src/routes/products/products.actions.ts
+```
 
 Declare every first-class endpoint group with `defineRoute()`:
 

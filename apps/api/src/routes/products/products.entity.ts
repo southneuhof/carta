@@ -3,8 +3,8 @@ import { defineRelationsPart } from 'drizzle-orm'
 import { pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core'
 import { z } from 'zod/v4'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
-import { productVariant, productVariants } from '../product-variants/product-variant.entity'
-import { user, users } from '../users/user.entity'
+import { productVariant, productVariants } from '../product-variants/product-variants.entity'
+import { user, users } from '../users/users.entity'
 
 export const products = pgTable('products', {
   id: text('id').primaryKey(),

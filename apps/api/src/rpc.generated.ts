@@ -5,7 +5,7 @@ import type { Hono } from 'hono'
 import type { z } from 'zod/v4'
 import type { CustomRoutesSchema } from '@southneuhof/sprindle/routes'
 import type { routes } from './routes'
-import type * as ProductsEntityModule from './domains/products/product.entity'
+import type * as ProductsEntityModule from './routes/products/products.entity'
 
 type ListQuery = {
   page?: string

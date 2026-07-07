@@ -1,6 +1,6 @@
 import { defineAction } from '@southneuhof/sprindle/actions'
 import { getDb } from '../../db'
-import { products } from './product.entity'
+import { products } from './products.entity'
 
 export const customProductAction = defineAction({
   method: 'post',

@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "strict": true,
+    "module": "esnext",
     "moduleSuffixes": [".server", ""],
     "paths": {
       "@client/data-model/*": ["../../packages/data-model/src/*"],

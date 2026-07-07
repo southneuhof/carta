@@ -2,9 +2,9 @@ import { sql } from 'drizzle-orm'
 import { afterAll, beforeEach, describe, expect, it } from 'vitest'
 import { app } from '../app'
 import { closeDb, getDb } from '../db'
-import { productVariants } from '../domains/product-variants/product-variant.entity'
-import { productVariantAssignments, products } from '../domains/products/product.entity'
-import { users } from '../domains/users/user.entity'
+import { productVariants } from '../routes/product-variants/product-variants.entity'
+import { productVariantAssignments, products } from '../routes/products/products.entity'
+import { users } from '../routes/users/users.entity'
 
 const userFixture = {
   id: 'user-1',
