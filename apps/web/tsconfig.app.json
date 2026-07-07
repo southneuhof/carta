@@ -20,6 +20,7 @@
   "compilerOptions": {
     "composite": true,
     "baseUrl": ".",
+    "strictNullChecks": true,
     "moduleSuffixes": [
       ".web",
       ""
