@@ -32,4 +32,4 @@ export const healthRoute = defineRoute({
 })
 ```
 
-Register routes explicitly in `src/routes/index.ts`. Model routes generate RPC types from their Sprindle action tree. Custom Hono routes are typed from the route value itself, so use route-level validation such as `zValidator` for body, query, and param inputs.
+Register routes explicitly in `src/routes/index.ts`, then install them with `installSprindle(app, routes)`. Model route RPC types come from their Sprindle action tree. Custom Hono routes are typed from the route value itself, so use route-level validation such as `zValidator` for body, query, and param inputs.

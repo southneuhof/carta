@@ -6,7 +6,7 @@ describe('sdk createRpcClient', () => {
     const client = createRpcClient('http://localhost:8787')
     expect(client.health.$get).toBeTypeOf('function')
     expect(client.products.list.$get).toBeTypeOf('function')
-    expect(client.products.nested.test.versionTest.$get).toBeTypeOf('function')
+    expect(client.products.gamer.test.versionTest.$get).toBeTypeOf('function')
   })
 
   it('keeps product proof calls typed', () => {
@@ -19,7 +19,7 @@ describe('sdk createRpcClient', () => {
       // @ts-expect-error missing route must stay absent
       proofClient.products.missing.$get()
       // @ts-expect-error missing nested route must stay absent
-      proofClient.products.nested.test.missing.$get()
+      proofClient.products.gamer.test.missing.$get()
       // @ts-expect-error create only supports POST
       proofClient.products.create.$get({})
       // @ts-expect-error id param is required
@@ -32,8 +32,8 @@ describe('sdk createRpcClient', () => {
       return [
         proofClient.health.$get(),
         proofClient.products.list.$get({ query: { page: '1', limit: '20' } }),
-        proofClient.products.nested.version1.$get(),
-        proofClient.products.nested.test.versionTest.$get(),
+        proofClient.products.gamer.version1.$get(),
+        proofClient.products.gamer.test.versionTest.$get(),
         proofClient.products.detail[':id'].$get({ param: { id: 'product-1' } }),
       ]
     }

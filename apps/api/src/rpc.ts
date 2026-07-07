@@ -1,1 +1,1 @@
-export type { AppType } from './rpc.generated'
+export type { AppType } from './app'

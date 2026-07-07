@@ -5,10 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx scripts/dev.ts",
-    "rpc:generate": "tsx scripts/generate-rpc.ts",
-    "rpc:watch": "tsx watch --include src/routes scripts/generate-rpc.ts",
-    "build": "pnpm run rpc:generate && tsc -p tsconfig.json --noEmit",
-    "type-check": "pnpm run rpc:generate && tsc -p tsconfig.json --noEmit",
+    "build": "tsc -p tsconfig.json --noEmit",
+    "type-check": "tsc -p tsconfig.json --noEmit",
     "test": "node --env-file-if-exists=.env ./node_modules/vitest/vitest.mjs run",
     "db:push": "tsx --env-file-if-exists=.env scripts/push-products.ts",
     "db:reset": "tsx --env-file-if-exists=.env scripts/drop-products.ts && pnpm run db:push",

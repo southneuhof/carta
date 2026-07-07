@@ -211,11 +211,11 @@ describe('products API', () => {
   })
 
   it('serves nested and custom actions', async () => {
-    const version = await app.request('/products/nested/version1')
+    const version = await app.request('/products/gamer/version1')
     expect(version.status).toBe(200)
     expect(await version.json()).toEqual({ version: 1 })
 
-    const versionTest = await app.request('/products/nested/test/versionTest')
+    const versionTest = await app.request('/products/gamer/test/versionTest')
     expect(versionTest.status).toBe(200)
     expect(await versionTest.json()).toEqual({ ok: true, version: 'test' })
 

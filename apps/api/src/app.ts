@@ -1,10 +1,10 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { installSprindle } from '@southneuhof/sprindle/hono'
 import { getDb } from './db'
-import { mountRoutes } from './routes'
-export type { AppType } from './rpc.generated'
+import { routes } from './routes'
 
-export const app = mountRoutes(
+export const app = installSprindle(
   new Hono()
     .use(
       '*',
@@ -17,4 +17,7 @@ export const app = mountRoutes(
       getDb()
       await next()
     }),
+  routes,
 )
+
+export type AppType = typeof app
