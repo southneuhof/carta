@@ -14,7 +14,7 @@ export const productModel = defineModel({
     }),
     update: update(),
     delete: deleteAction(),
-    nested: {
+    gamer: {
       version1: version1(),
       test: {
         versionTest: versionTest(),

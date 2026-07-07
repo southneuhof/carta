@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process'
 
 const children = [
-  spawn('tsx', ['watch', 'scripts/generate-rpc.ts'], { stdio: 'inherit' }),
+  spawn('tsx', ['watch', '--include', 'src/routes', 'scripts/generate-rpc.ts'], { stdio: 'inherit' }),
   spawn('tsx', ['watch', '--env-file-if-exists=.env', 'src/server.ts'], { stdio: 'inherit' }),
 ]
 
