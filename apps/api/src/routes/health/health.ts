@@ -1,11 +1,14 @@
 import { Hono } from 'hono'
-import { mountRoute } from '@southneuhof/sprindle/routes'
+import { defineRoute, mountRoute } from '@southneuhof/sprindle/routes'
 
-const honoRoute = new Hono().get('/', (c) => c.json({ ok: true }))
+// const honoRoute = new Hono().get('/', (c) => c.json({ ok: true }))
 
 export const mount = mountRoute({
   path: '/health',
-  route: honoRoute,
+  route: defineRoute({
+    method: 'get',
+    action: async () => ({ ok: true }),
+  }),
 })
 
 export default { mount }
