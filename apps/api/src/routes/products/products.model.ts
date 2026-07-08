@@ -15,13 +15,13 @@ export const productModel = defineModel({
     update: update(),
     delete: deleteRoute(),
     gamer: {
-      version1: version1(),
+      version1,
       test: {
-        versionTest: versionTest(),
+        versionTest,
       },
     },
-    customProductRoute: customProductRoute(),
-    customProductMaterialize: customProductMaterialize(),
+    customProductRoute,
+    customProductMaterialize,
   },
 })
 
