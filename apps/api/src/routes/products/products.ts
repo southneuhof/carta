@@ -1,5 +1,4 @@
 import { defineDomainPart } from '@southneuhof/sprindle/model'
-import { mountRoute } from '@southneuhof/sprindle/routes'
 import { product, productRelations, products, productVariantAssignments } from './products.entity'
 import { productModel } from './products.model'
 
@@ -9,9 +8,6 @@ export const domain = defineDomainPart({
   relations: [productRelations],
 })
 
-export const mount = mountRoute({
-  path: '/products',
-  model: productModel,
-})
+export { productModel }
 
-export default { domain, mount }
+export default { domain, productModel }

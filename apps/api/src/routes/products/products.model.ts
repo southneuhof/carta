@@ -4,6 +4,7 @@ import { customProductMaterialize, customProductRoute, version1, versionTest } f
 import { product } from './products.entity'
 
 export const productModel = defineModel({
+  path: '/products',
   entity: product,
   authorize: [({ c }) => (c.req.header('x-product-access') === 'denied' ? 'Product access denied.' : undefined)],
   routes: {

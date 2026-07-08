@@ -1,11 +1,9 @@
-import { defineRoute, mountRoute } from '@southneuhof/sprindle/routes'
+import { defineRoute } from '@southneuhof/sprindle/routes'
 
-export const mount = mountRoute({
+export const healthRoute = defineRoute({
   path: '/health',
-  route: defineRoute({
-    method: 'get',
-    action: async () => ({ ok: true }),
-  }),
+  method: 'get',
+  action: async () => ({ ok: true }),
 })
 
-export default { mount }
+export default { healthRoute }

@@ -18,18 +18,20 @@ src/routes/products/products.entity.ts
 src/routes/products/products.routes.ts
 ```
 
-Mount every first-class endpoint group with `mountRoute()`:
+Export first-class routes and models directly:
 
 ```ts
-export const productsMount = mountRoute({
+export const productModel = defineModel({
   path: '/products',
-  model: productModel,
+  entity: product,
+  routes: { list: list(), detail: detail() },
 })
 
-export const healthMount = mountRoute({
+export const healthRoute = defineRoute({
   path: '/health',
-  route: new Hono().get('/', (c) => c.json({ ok: true })),
+  method: 'get',
+  action: () => ({ ok: true }),
 })
 ```
 
-Register mounts explicitly in `src/routes/index.ts`, then install them with `installSprindle(app, mounts)`. Model route RPC types come from their Sprindle route tree. Custom Hono routes are typed from the route value itself, so use route-level validation such as `zValidator` for body, query, and param inputs.
+Register routes explicitly in `src/routes/index.ts`, then install them with `installSprindle(app, routes)`. Model route RPC types come from their Sprindle route tree.
