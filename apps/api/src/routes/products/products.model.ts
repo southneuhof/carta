@@ -1,26 +1,26 @@
-import { create, deleteAction, detail, list, update } from '@southneuhof/sprindle/actions'
+import { create, deleteRoute, detail, list, update } from '@southneuhof/sprindle/routes'
 import { defineModel } from '@southneuhof/sprindle/model'
-import { customProductAction, customProductMaterialize, version1, versionTest } from './products.actions'
+import { customProductMaterialize, customProductRoute, version1, versionTest } from './products.routes'
 import { product } from './products.entity'
 
 export const productModel = defineModel({
   entity: product,
   authorize: [({ c }) => (c.req.header('x-product-access') === 'denied' ? 'Product access denied.' : undefined)],
-  actions: {
+  routes: {
     list: list(),
     detail: detail(),
     create: create({
       validate: [({ state }) => (isReservedSku(state.input) ? { field: 'sku', message: 'SKU is reserved.' } : undefined)],
     }),
     update: update(),
-    delete: deleteAction(),
+    delete: deleteRoute(),
     gamer: {
       version1: version1(),
       test: {
         versionTest: versionTest(),
       },
     },
-    customProductAction: customProductAction(),
+    customProductRoute: customProductRoute(),
     customProductMaterialize: customProductMaterialize(),
   },
 })

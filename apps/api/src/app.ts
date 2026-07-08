@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { installSprindle } from '@southneuhof/sprindle/hono'
 import { getDb } from './db'
-import { routes } from './routes'
+import { mounts } from './routes'
 
 export const app = installSprindle(
   new Hono()
@@ -17,7 +17,7 @@ export const app = installSprindle(
       getDb()
       await next()
     }),
-  routes,
+  mounts,
 )
 
 export type AppType = typeof app

@@ -7,7 +7,7 @@ Naming:
 - `*.ts`: route entry
 - `*.model.ts`: model entry
 - `*.entity.ts`: entity entry
-- `*.actions.ts`: custom model actions
+- `*.routes.ts`: custom model routes
 
 Example:
 
@@ -15,21 +15,21 @@ Example:
 src/routes/products/products.ts
 src/routes/products/products.model.ts
 src/routes/products/products.entity.ts
-src/routes/products/products.actions.ts
+src/routes/products/products.routes.ts
 ```
 
-Declare every first-class endpoint group with `defineRoute()`:
+Mount every first-class endpoint group with `mountRoute()`:
 
 ```ts
-export const productsRoute = defineRoute({
+export const productsMount = mountRoute({
   path: '/products',
   model: productModel,
 })
 
-export const healthRoute = defineRoute({
+export const healthMount = mountRoute({
   path: '/health',
   route: new Hono().get('/', (c) => c.json({ ok: true })),
 })
 ```
 
-Register routes explicitly in `src/routes/index.ts`, then install them with `installSprindle(app, routes)`. Model route RPC types come from their Sprindle action tree. Custom Hono routes are typed from the route value itself, so use route-level validation such as `zValidator` for body, query, and param inputs.
+Register mounts explicitly in `src/routes/index.ts`, then install them with `installSprindle(app, mounts)`. Model route RPC types come from their Sprindle route tree. Custom Hono routes are typed from the route value itself, so use route-level validation such as `zValidator` for body, query, and param inputs.

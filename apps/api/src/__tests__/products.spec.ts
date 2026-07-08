@@ -210,7 +210,7 @@ describe('products API', () => {
     expect(await clearVariants.json()).toMatchObject({ data: { variants: [] } })
   })
 
-  it('serves nested and custom actions', async () => {
+  it('serves nested and custom routes', async () => {
     const version = await app.request('/products/gamer/version1')
     expect(version.status).toBe(200)
     expect(await version.json()).toEqual({ version: 1 })
@@ -219,9 +219,9 @@ describe('products API', () => {
     expect(versionTest.status).toBe(200)
     expect(await versionTest.json()).toEqual({ ok: true, version: 'test' })
 
-    const custom = await app.request('/products/customProductAction', { method: 'POST' })
+    const custom = await app.request('/products/customProductRoute', { method: 'POST' })
     expect(custom.status).toBe(200)
-    expect(await custom.json()).toEqual({ ok: true, action: 'products' })
+    expect(await custom.json()).toEqual({ ok: true, route: 'products' })
 
     const customMaterialize = await app.request('/products/customProductMaterialize')
     expect(customMaterialize.status).toBe(200)
