@@ -1,4 +1,3 @@
-import config from '@/config'
 import router from '../router'
 import { modules } from '@/stores/modules'
 import { storage } from '@southneuhof/utilities/storage'
@@ -13,6 +12,11 @@ type ServiceRequestOptions = {
   init?: RequestInit
 }
 
+const apiUrl = (() => {
+  const raw = import.meta.env.VITE_API_URL || ''
+  return raw && !raw.endsWith('/') ? `${raw}/` : raw
+})()
+
 function extractErrorMessage(error: any): string {
   return String(error?.message?.message || error?.message || error?.error || error?.statusText || 'Terjadi kesalahan')
 }
@@ -23,7 +27,7 @@ function parseURL(url: string, prefix: string = '', suffix: string = '') {
 }
 
 function buildURL(path: string, query?: Record<string, any>) {
-  const url = new URL(path, config.apiUrl || 'http://localhost:8787/')
+  const url = new URL(path, apiUrl)
   for (const [key, value] of Object.entries(query || {})) {
     if (value === undefined || value === null) continue
     if (Array.isArray(value)) value.forEach((item) => url.searchParams.append(key, String(item)))
@@ -40,7 +44,7 @@ async function parseResponse(response: Response, responseType?: ServiceRequestOp
 
 async function notifyLogoutToServer(token: string) {
   try {
-    await fetch(`${config.apiUrl}logout`, {
+    await fetch(`${apiUrl}logout`, {
       method: 'GET',
       headers: {
         Accept: 'application/json, text/plain, */*',

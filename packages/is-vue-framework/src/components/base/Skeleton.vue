@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { PropType } from 'vue'
-import { useColorPreference } from '@southneuhof/is-vue-framework/adapters/state'
-import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
+import Card from './Card.vue'
 
 const props = defineProps({
   color: {
@@ -24,28 +23,15 @@ const props = defineProps({
 </script>
 
 <template>
-  <Card :color="props.color" :class="useColorPreference().value === 'dark' ? 'color-breathe-dark' : 'color-breathe-light'"></Card>
+  <Card :color="props.color" class="color-breathe"></Card>
 </template>
 
 <style scoped>
-.color-breathe-dark {
-  animation: 1s infinite alternate ease-out breathing-color-dark;
+.color-breathe {
+  animation: 1s infinite alternate ease-out breathing-color;
 }
 
-.color-breathe-light {
-  animation: 1s infinite alternate ease-out breathing-color-light;
-}
-
-@keyframes breathing-color-dark {
-  from {
-    filter: brightness(100%);
-  }
-  to {
-    filter: brightness(120%);
-  }
-}
-
-@keyframes breathing-color-light {
+@keyframes breathing-color {
   from {
     filter: brightness(100%);
   }

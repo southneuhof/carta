@@ -1,16 +1,19 @@
 <script setup lang="ts">
-import { type HTMLAttributes, computed } from 'vue'
+import { type HTMLAttributes, computed, useAttrs } from 'vue'
 import { DialogClose, DialogContent, type DialogContentEmits, type DialogContentProps, DialogOverlay, DialogPortal, useForwardPropsEmits } from 'radix-vue'
 import { twMerge } from 'tailwind-merge'
-import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import Icon from '../Icon.vue'
 
 const props = defineProps<DialogContentProps & { class?: HTMLAttributes['class'] }>()
 const emits = defineEmits<DialogContentEmits>()
+const attrs = useAttrs()
+
+defineOptions({ inheritAttrs: false })
 
 const delegatedProps = computed(() => {
   const { class: _, ...delegated } = props
 
-  return delegated
+  return { ...delegated, ...attrs }
 })
 
 const forwarded = useForwardPropsEmits(delegatedProps, emits) as any

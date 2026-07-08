@@ -53,7 +53,7 @@ envPrefix: ['VITE_', 'GOOGLE_MAP_API_KEY']
 
 ## Runtime Configuration Notes
 
-- API base URL comes from `VITE_API_URL` (normalized in `src/config.ts`)
+- API base URL comes from `VITE_API_URL`
 - Permission bypass comes from `VITE_APP_BYPASS_ALL_PERMISSIONS`
 - Company code is set in `src/company.ts`
 

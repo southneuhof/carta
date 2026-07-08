@@ -4,7 +4,6 @@ import { configureParser, parse } from '@southneuhof/utilities/parse'
 import { createFrameworkPlugin, createIsApiClient, installIsApiClient } from '@southneuhof/is-vue-framework'
 import { frameworkBehaviors } from './framework/behaviors'
 import { dictionary } from '@/configs/dictionary'
-import config from '@/config'
 import App from './App.vue'
 import router from './router'
 import '@vuepic/vue-datepicker/dist/main.css'
@@ -44,6 +43,10 @@ Chart.register(FunnelController, TrapezoidElement, LinearScale, CategoryScale)
 
 const app = createApp(App)
 configureParser({ dictionary })
+const apiUrl = (() => {
+  const raw = import.meta.env.VITE_API_URL || ''
+  return raw && !raw.endsWith('/') ? `${raw}/` : raw
+})()
 
 declare module 'vue' {
   export interface ComponentCustomProperties {
@@ -59,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       behaviors: frameworkBehaviors,
     }),
   )
-  installIsApiClient(app, createIsApiClient(config.apiUrl || 'http://localhost:8787'))
+  installIsApiClient(app, createIsApiClient(apiUrl))
   app.use(
     VueTippy,
     // optional

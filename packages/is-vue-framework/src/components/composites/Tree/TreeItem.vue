@@ -4,8 +4,8 @@ import type { PropType } from 'vue'
 import { defaultTableGetData, getTableFieldTypes } from '@southneuhof/is-vue-framework/behaviors/table'
 import { defaultTableConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
 import { parse } from '@southneuhof/utilities/parse'
-import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
-import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import Button from '../../base/Button.vue'
+import Icon from '../../base/Icon.vue'
 
 const props = defineProps({
   data: { type: Object, required: true },

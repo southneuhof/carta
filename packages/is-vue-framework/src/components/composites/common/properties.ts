@@ -10,14 +10,14 @@ export const componentTypeMap: Record<string, { component?: any; propKeyValue?: 
     ],
   },
   location: {
-    component: defineAsyncComponent(() => import('../../base/MapView.vue')),
+    component: defineAsyncComponent(() => import('../../utils/MapView.vue')),
     propKeyValue: [
       ['lat', 'latitude'],
       ['lng', 'longitude'],
     ],
   },
   file: {
-    component: defineAsyncComponent(() => import('../../base/FileComponent.vue')),
+    component: defineAsyncComponent(() => import('../../utils/FileComponent.vue')),
     propKeyValue: [
       ['url', 'url'],
       ['filename', 'filename'],

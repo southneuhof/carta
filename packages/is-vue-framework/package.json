@@ -46,7 +46,6 @@
     "uuid": "^11.0.2",
     "vue3-google-map": "^0.15.0",
     "vue-to-print": "^1.2.1",
-    "@headlessui/vue": "^1.7.14",
     "vaul-vue": "^0.3.0",
     "vue-tippy": "^6.7.1"
   },

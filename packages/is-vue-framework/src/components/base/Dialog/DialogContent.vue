@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import { type HTMLAttributes, computed } from 'vue'
+import { type HTMLAttributes, computed, useAttrs } from 'vue'
 import { DialogClose, DialogContent, type DialogContentEmits, type DialogContentProps, DialogOverlay, DialogPortal, useForwardPropsEmits } from 'radix-vue'
 import { twMerge } from 'tailwind-merge'
 
 const props = defineProps<DialogContentProps & { class?: HTMLAttributes['class'] }>()
 const emits = defineEmits<DialogContentEmits>()
+const attrs = useAttrs()
+
+defineOptions({ inheritAttrs: false })
 
 const delegatedProps = computed(() => {
   const { class: _, ...delegated } = props
 
-  return delegated
+  return { ...delegated, ...attrs }
 })
 
 const forwarded = useForwardPropsEmits(delegatedProps, emits) as any

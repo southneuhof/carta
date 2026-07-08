@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, watch, type PropType } from 'vue'
-import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
-import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
-import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import Button from './Button.vue'
+import Card from './Card.vue'
+import Icon from './Icon.vue'
 
 const props = defineProps({
   isOpen: {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
+import { DropdownMenuContent, DropdownMenuItem, DropdownMenuPortal, DropdownMenuRoot, DropdownMenuTrigger } from 'radix-vue'
 import type { Component } from 'vue'
 
 type MenuItem = {
@@ -17,31 +17,29 @@ const props = defineProps({
 </script>
 
 <template>
-  <Menu as="div" class="relative inline-block text-left">
-    <div>
-      <MenuButton>
+  <DropdownMenuRoot>
+    <DropdownMenuTrigger as-child>
+      <div class="inline-block">
         <slot name="trigger"></slot>
-      </MenuButton>
-    </div>
+      </div>
+    </DropdownMenuTrigger>
 
-    <transition
-      enter-active-class="transition duration-100 ease-out"
-      enter-from-class="transform scale-95 opacity-0"
-      enter-to-class="transform scale-100 opacity-100"
-      leave-active-class="transition duration-75 ease-in"
-      leave-from-class="transform scale-100 opacity-100"
-      leave-to-class="transform scale-95 opacity-0"
-    >
-      <MenuItems class="absolute -top-2 right-0 w-56 origin-top-right -translate-y-full translate-x-[80%] transform divide-y divide-gray-100 rounded-md bg-white shadow-lg focus:outline-none">
+    <DropdownMenuPortal>
+      <DropdownMenuContent
+        align="end"
+        side="top"
+        :side-offset="8"
+        class="z-50 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg transition duration-100 ease-out data-[state=closed]:scale-95 data-[state=closed]:opacity-0 data-[state=open]:scale-100 data-[state=open]:opacity-100"
+      >
         <div class="px-1 py-1">
-          <MenuItem v-for="item in items" v-slot="{ active }" @click="item.action">
-            <button :class="[active ? 'bg-violet-500 text-white' : 'text-gray-900', 'group flex w-full items-center rounded-md px-2 py-2 text-sm']">
+          <DropdownMenuItem v-for="item in items" :key="item.name" as-child @select="item.action">
+            <button class="group flex w-full items-center rounded-md px-2 py-2 text-sm text-gray-900 data-[highlighted]:bg-violet-500 data-[highlighted]:text-white">
               <component v-if="item.icon" :is="item.icon" class="mr-2 h-5 w-5 text-violet-400"></component>
               {{ item.name }}
             </button>
-          </MenuItem>
+          </DropdownMenuItem>
         </div>
-      </MenuItems>
-    </transition>
-  </Menu>
+      </DropdownMenuContent>
+    </DropdownMenuPortal>
+  </DropdownMenuRoot>
 </template>

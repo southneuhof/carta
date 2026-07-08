@@ -1,4 +1,4 @@
-<script setup lang="ts">import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+<script setup lang="ts">import Icon from './Icon.vue'
 
 
 const props = defineProps({

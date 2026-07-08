@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, computed, type PropType } from 'vue'
 import { defaultFileInputUpload, type FileInputUploadBehavior } from '@southneuhof/is-vue-framework/behaviors/fileInput'
-import FileComponent from '@southneuhof/is-vue-framework/components/base/FileComponent.vue'
+import FileComponent from '@southneuhof/is-vue-framework/components/utils/FileComponent.vue'
 import { toast } from 'vue-sonner'
 import BaseInput from './BaseInput.vue'
 import { commonProps } from './commonprops'

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogScrollContent, DialogTitle, DialogTrigger, DialogClose } from './Dialog'
-import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import Icon from './Icon.vue'
 
 const props = defineProps({
   disabled: {

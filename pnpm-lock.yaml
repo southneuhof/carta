@@ -507,9 +507,6 @@ importers:
 
   packages/is-vue-framework:
     dependencies:
-      '@headlessui/vue':
-        specifier: ^1.7.14
-        version: 1.7.23(vue@3.5.34(typescript@5.9.3))
       '@southneuhof/is-data-model':
         specifier: workspace:^
         version: link:../is-data-model
