@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import UploadDropzone from '@southneuhof/is-vue-framework/components/inputs/UploadDropzone.vue'
+import UploadDropzone from '@southneuhof/is-vue-framework/components/utils/UploadDropzone.vue'
 import * as XLSX from 'xlsx'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'

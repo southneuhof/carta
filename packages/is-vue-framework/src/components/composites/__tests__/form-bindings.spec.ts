@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createApp, defineComponent, h, markRaw, nextTick, ref } from 'vue'
 import Form from '../Form.vue'
 import FormBindingTestInput from './FormBindingTestInput.vue'
-import { registerInputComponents, resetInputComponentRegistryForTests } from '../../../renderers/inputRegistry'
+import { registerInputComponents, resetInputComponentRegistryForTests } from '../formInputRegistry'
 import { resetFrameworkDefaultsForTests } from '../../../adapters/defaults'
 
 vi.mock('vue-router', () => ({

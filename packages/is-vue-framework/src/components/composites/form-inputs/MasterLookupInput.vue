@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import SelectInput from './SelectInput.vue'
-import { commonProps } from './commonprops'
+import SelectInput from '../../inputs/SelectInput.vue'
+import { commonProps } from '../../inputs/commonprops'
 
 //  { "type": "master-lookup", "props": { "module": "iso-competencies" }, "label": "test", "helperMessage": "test", "required": true }
 const props = defineProps({

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { defineComponent } from 'vue'
-import { registerInputComponents, resetInputComponentRegistryForTests, resolveInputComponent } from '../../../renderers/inputRegistry'
+import { registerInputComponents, resetInputComponentRegistryForTests, resolveInputComponent } from '../formInputRegistry'
 
 function resolveRenderer(inputConfig: { type: string; component?: unknown }) {
   if (inputConfig.type === 'custom' && inputConfig.component) return inputConfig.component

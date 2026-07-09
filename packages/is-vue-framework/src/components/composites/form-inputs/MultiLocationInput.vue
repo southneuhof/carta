@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, type PropType } from 'vue'
 import LocationInput from './LocationInput.vue'
-import BaseInput from './BaseInput.vue'
-import { commonProps } from './commonprops'
-import Dialog from '../base/Dialog.vue'
+import BaseInput from '../../inputs/BaseInput.vue'
+import { commonProps } from '../../inputs/commonprops'
+import Dialog from '../../base/Dialog.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'

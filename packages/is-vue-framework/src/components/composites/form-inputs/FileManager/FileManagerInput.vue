@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import FileManager from '@southneuhof/is-vue-framework/components/utils/FileManager/FileManager.vue'
-import BaseInput from '../BaseInput.vue'
-import { commonProps } from '../commonprops'
+import BaseInput from '../../../inputs/BaseInput.vue'
+import { commonProps } from '../../../inputs/commonprops'
 import { Dialog, DialogContent, DialogTrigger } from '@southneuhof/is-vue-framework/components/base/Dialog/index'
 import { computed, ref } from 'vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import frameworkDefaults from '@southneuhof/is-vue-framework/adapters/defaults'
-import { normalizeFileAssetValue } from '../assetValue'
+import { normalizeFileAssetValue } from '../../../inputs/assetValue'
 
 const props = defineProps({
   multi: {

@@ -1,15 +1,15 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { createApp, defineComponent } from 'vue'
-import { getFrameworkBehaviors } from '../../adapters/behaviors'
-import frameworkConfig, { defaultTableConfig } from '../../adapters/defaults'
+import { getFrameworkBehaviors } from '../../../adapters/behaviors'
+import frameworkConfig, { defaultTableConfig } from '../../../adapters/defaults'
 import {
   getInputComponentRegistry,
   registerInputComponents,
   resetInputComponentRegistryForTests,
   resolveInputComponent,
   type FrameworkInputComponent,
-} from '../inputRegistry'
-import { createFrameworkPlugin } from '../../adapters/plugin'
+} from '../formInputRegistry'
+import { createFrameworkPlugin } from '../../../adapters/plugin'
 
 describe('input registry', () => {
   const DummyComponent = (name: string) =>

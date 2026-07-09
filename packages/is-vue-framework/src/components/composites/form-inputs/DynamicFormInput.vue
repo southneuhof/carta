@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import RadioGroup from '@southneuhof/is-vue-framework/components/inputs/RadioGroupInput.vue'
 import { onMounted, ref, type PropType } from 'vue'
 import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
 

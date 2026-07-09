@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import type { PropType } from 'vue'
-import { commonProps } from './commonprops'
-import BaseInput from './BaseInput.vue'
-import DialogForm from '../composites/DialogForm.vue'
-import Table from '../composites/Table.vue'
+import { commonProps } from '../../inputs/commonprops'
+import BaseInput from '../../inputs/BaseInput.vue'
+import DialogForm from '../DialogForm.vue'
+import Table from '../Table.vue'
 import { keyManager } from '@southneuhof/is-vue-framework/adapters/state'
 import { useId } from 'radix-vue'
-import ConfirmationDialog from '../composites/ConfirmationDialog.vue'
+import ConfirmationDialog from '../ConfirmationDialog.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 
