@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, expectTypeOf, it } from 'vitest'
 import { createRpcClient, type RpcClient } from '../client'
+import type { InferRequestType, InferResponseType } from 'hono/client'
 
 describe('sdk createRpcClient', () => {
   it('creates native Hono RPC client shape', () => {
@@ -39,6 +40,12 @@ describe('sdk createRpcClient', () => {
     }
 
     expect(proofCalls).toBeTypeOf('function')
-    expect(typedClient.products.customProductAction.$post).toBeTypeOf('function')
+    expect(typedClient.products.customProductRoute.$post).toBeTypeOf('function')
+    type ListResponse = InferResponseType<RpcClient['products']['list']['$get'], 200>
+    type CreateRequest = InferRequestType<RpcClient['products']['create']['$post']>
+    type CustomResponse = InferResponseType<RpcClient['products']['customProductRoute']['$post'], 200>
+    expectTypeOf<ListResponse>().toMatchTypeOf<{ data: Array<{ id: string; name: string; sku: string }> }>()
+    expectTypeOf<CreateRequest>().toMatchTypeOf<{ json: { name: string; sku: string } }>()
+    expectTypeOf<CustomResponse>().toMatchTypeOf<{ ok: true; route: string }>()
   })
 })
