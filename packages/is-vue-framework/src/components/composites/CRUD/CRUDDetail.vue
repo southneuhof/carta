@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { provide, ref } from 'vue'
-import { buildDetailConfig } from '@southneuhof/is-data-model'
+import { buildDetailConfig } from '../../../model-config'
 import { resolveCRUDOperations, type CRUDCompositeConfig, type CRUDOperationOverrides } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 import Detail from '../Detail.vue'
 import { useRoute, useRouter } from 'vue-router'

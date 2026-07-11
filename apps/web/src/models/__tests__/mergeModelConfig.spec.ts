@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mergeModelConfig, type ModelConfig } from '@southneuhof/is-data-model'
+import { mergeModelConfig, type ModelConfig } from '@southneuhof/is-vue-framework'
 
 describe('mergeModelConfig', () => {
   it('deep merges nested objects and preserves untouched branches', () => {

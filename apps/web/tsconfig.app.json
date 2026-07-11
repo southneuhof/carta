@@ -4,8 +4,6 @@
     "env.d.ts",
     "src/**/*",
     "src/**/*.vue",
-    "../../packages/is-data-model/src/**/*",
-    "../../packages/data-model/src/**/*",
     "../../packages/sdk/src/**/*",
     "../../packages/is-vue-framework/src/**/*",
     "../../packages/utilities/src/**/*"
@@ -28,12 +26,6 @@
     "paths": {
       "@/*": [
         "./src/*"
-      ],
-      "@southneuhof/is-data-model": [
-        "../../packages/is-data-model/src/index.ts"
-      ],
-      "@southneuhof/is-data-model/*": [
-        "../../packages/is-data-model/src/*"
       ],
       "vue3-google-map": [
         "./node_modules/vue3-google-map/dist/types/index.d.ts"

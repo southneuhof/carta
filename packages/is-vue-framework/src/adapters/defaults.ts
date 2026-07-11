@@ -1,4 +1,4 @@
-import type { InputConfig } from '@southneuhof/is-data-model'
+import type { InputConfig } from '../model-config'
 
 export interface FrameworkGlobalDefaults {
   fieldsAlias?: Record<string, string>

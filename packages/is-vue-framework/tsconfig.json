@@ -41,12 +41,6 @@
       "@southneuhof/sprindle/*": [
         "../sprindle/src/*"
       ],
-      "@southneuhof/is-data-model": [
-        "../is-data-model/src/index.ts"
-      ],
-      "@southneuhof/is-data-model/*": [
-        "../is-data-model/src/*"
-      ],
       "@southneuhof/utilities": [
         "../utilities/src/index.ts"
       ],
@@ -60,14 +54,12 @@
     "src/**/*.vue",
     "env.d.ts",
     "../contracts/src/**/*",
-    "../is-data-model/src/**/*",
     "../utilities/src/**/*"
   ],
   "exclude": [
     "src/**/__tests__/**",
     "src/**/*.spec.*",
     "src/**/*.test.*",
-    "../is-data-model/src/**/__tests__/**",
     "../utilities/src/**/__tests__/**"
   ],
   "vueCompilerOptions": {

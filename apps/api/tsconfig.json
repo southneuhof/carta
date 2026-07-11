@@ -5,13 +5,10 @@
     "module": "esnext",
     "moduleSuffixes": [".server", ""],
     "paths": {
-      "@client/data-model/*": ["../../packages/data-model/src/*"],
       "@southneuhof/api": ["./src/index.ts"],
       "@southneuhof/api/*": ["./src/*"],
       "@southneuhof/contracts": ["../../packages/contracts/src/index.ts"],
       "@southneuhof/contracts/*": ["../../packages/contracts/src/*"],
-      "@southneuhof/is-data-model": ["../../packages/is-data-model/src/index.ts"],
-      "@southneuhof/is-data-model/*": ["../../packages/is-data-model/src/*"],
       "@southneuhof/sdk": ["../../packages/sdk/src/index.ts"],
       "@southneuhof/sdk/*": ["../../packages/sdk/src/*"],
       "@southneuhof/sprindle": ["../../packages/sprindle/src/index.ts"],
@@ -21,8 +18,6 @@
   "include": [
     "src/**/*",
     "scripts/**/*",
-    "drizzle.config.ts",
-    "../../packages/data-model/src/**/*",
-    "../../packages/is-data-model/src/**/*"
+    "drizzle.config.ts"
   ]
 }

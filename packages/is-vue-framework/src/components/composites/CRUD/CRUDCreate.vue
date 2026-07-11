@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
-import { buildFormConfig } from '@southneuhof/is-data-model'
+import { buildFormConfig } from '../../../model-config'
 import { resolveCRUDOperations, type CRUDCompositeConfig, type CRUDOperationOverrides } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 import Form from '../Form.vue'
 import { useRoute, useRouter } from 'vue-router'

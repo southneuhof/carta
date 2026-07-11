@@ -1,6 +1,6 @@
 import type { Component } from 'vue'
 import type { FormField } from './form'
-import type { FieldDependency as SharedFieldDependency, InputConfig as SharedInputConfig, ModelConfig as SharedModelConfig } from '@southneuhof/is-data-model'
+import type { FieldDependency as SharedFieldDependency, InputConfig as SharedInputConfig, ModelConfig as SharedModelConfig } from '@southneuhof/is-vue-framework'
 
 export {}
 

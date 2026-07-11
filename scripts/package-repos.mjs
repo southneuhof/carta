@@ -14,12 +14,6 @@ const packages = [
     remoteName: 'pkg-apostle',
   },
   {
-    name: '@southneuhof/is-data-model',
-    dir: 'packages/is-data-model',
-    remote: 'https://github.com/southneuhof/is-data-model.git',
-    remoteName: 'pkg-is-data-model',
-  },
-  {
     name: '@southneuhof/is-vue-framework',
     dir: 'packages/is-vue-framework',
     remote: 'https://github.com/southneuhof/is-vue-framework.git',

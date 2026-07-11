@@ -14,10 +14,8 @@ Current status:
 - `apps/api` is a placeholder for the future backend app.
 - `apps/base-mobile` is the active Expo mobile baseline.
 - `packages/contracts`, `packages/sdk`, and `packages/domain` are scaffolded package boundaries only.
-- `packages/is-data-model` contains shared model config types and runtime helpers.
-- `packages/is-vue-framework` contains Vue components, services, and app patterns.
+- `packages/is-vue-framework` contains Vue components, services, app patterns, and model-config runtime helpers.
 - `packages/apostle` contains HTTP helpers used by `vue-framework`.
-- `packages/data-model` contains project-owned model definitions (base/web/mobile).
 
 ## Workspace Layout
 
@@ -30,10 +28,8 @@ packages/
   contracts/        # future generated API contracts
   sdk/              # shared API client wrapper
   domain/           # future shared domain primitives
-  is-data-model/       # shared model metadata + runtime config builders
   is-vue-framework/    # Vue framework components and patterns
   apostle/          # HTTP helper package
-  data-model/       # project-owned model definitions (base/web/mobile)
 ```
 
 ## Commands
@@ -53,7 +49,7 @@ The repository is standardized on `pnpm`.
 
 ## Carta Package Flow
 
-Carta development is source-first. The sandbox web app resolves `@southneuhof/is-data-model`, `@southneuhof/is-vue-framework`, and `@southneuhof/apostle` directly to `packages/*/src` through Vite and TypeScript aliases, so framework edits work with normal Vite HMR. Landing framework work follows the same source-first pattern from `packages/landing-sveltekit-framework/src`.
+Carta development is source-first. The sandbox web app resolves `@southneuhof/is-vue-framework` and `@southneuhof/apostle` directly to `packages/*/src` through Vite and TypeScript aliases, so framework edits work with normal Vite HMR. Landing framework work follows the same source-first pattern from `packages/landing-sveltekit-framework/src`.
 
 Package manifests export source files from `src`. Generated `dist` output and local pack tarballs are not source artifacts.
 
@@ -62,7 +58,6 @@ Package manifests export source files from `src`. Generated `dist` output and lo
 This monorepo is the source of truth. The individual package repositories are generated mirrors of package source folders:
 
 ```txt
-packages/is-data-model    -> https://github.com/southneuhof/is-data-model
 packages/apostle       -> https://github.com/southneuhof/apostle
 packages/utilities     -> https://github.com/southneuhof/utilities
 packages/is-vue-framework -> https://github.com/southneuhof/is-vue-framework
@@ -71,6 +66,8 @@ packages/landing-sveltekit-framework -> https://github.com/southneuhof/landing-s
 ```
 
 Open Carta issues and pull requests against this monorepo, not the mirror repositories.
+
+Shared `data-model` and `is-data-model` packages were removed. Dormant model definitions remain recoverable from Git history; `base-mobile` source still references them until its local config migration.
 
 Maintainers can sync package branches manually:
 

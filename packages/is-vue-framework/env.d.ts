@@ -28,10 +28,10 @@ type CRUDPermissions = {
   delete: boolean
 }
 
-type CreateConfig = import('@southneuhof/is-data-model').CreateConfig
-type UpdateConfig = import('@southneuhof/is-data-model').UpdateConfig
-type ListConfig = import('@southneuhof/is-data-model').ListConfig
-type DetailConfig = import('@southneuhof/is-data-model').DetailConfig
+type CreateConfig = import('./src/model-config').CreateConfig
+type UpdateConfig = import('./src/model-config').UpdateConfig
+type ListConfig = import('./src/model-config').ListConfig
+type DetailConfig = import('./src/model-config').DetailConfig
 
 type CRUDCreateProps = Partial<CreateConfig> & {
   onSuccess?: (formData: Record<string, any>, res: Record<string, any>) => void
@@ -42,4 +42,4 @@ type CRUDListProps = Partial<ListConfig> & {
   filter?: Partial<CRUDCreateProps>
 }
 type CRUDDetailProps = Partial<DetailConfig>
-type FrameworkInputConfig = import('@southneuhof/is-data-model').InputConfig
+type FrameworkInputConfig = import('./src/model-config').InputConfig

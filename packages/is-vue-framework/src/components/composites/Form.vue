@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, type PropType, watch, provide, onMounted, nextTick } from 'vue'
-import { evaluateFieldDependencies, type FieldDependency, type InputConfig } from '@southneuhof/is-data-model'
+import { evaluateFieldDependencies, type FieldDependency, type InputConfig } from '../../model-config'
 import { defaultBeforeSubmit, defaultFormGetData, defaultOnError, defaultOnSubmit, defaultOnSuccess } from '@southneuhof/is-vue-framework/behaviors/form'
 import { executeValidationRules } from '@southneuhof/is-vue-framework/behaviors/validations'
 import { toast } from 'vue-sonner'

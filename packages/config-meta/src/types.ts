@@ -1,4 +1,7 @@
-import type { InputConfig } from '@southneuhof/is-data-model'
+export type InputConfig = Record<string, {
+  type: string
+  [key: string]: any
+}>
 
 export type DeepPartial<T> = T extends (...args: any[]) => any
   ? T

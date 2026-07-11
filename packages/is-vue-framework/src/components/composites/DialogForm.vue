@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Form from '@southneuhof/is-vue-framework/components/composites/Form.vue'
-import type { InputConfig } from '@southneuhof/is-data-model'
+import type { InputConfig } from '../../model-config'
 import { computed, type PropType } from 'vue'
 import { defaultFormGetData, defaultBeforeSubmit, defaultOnSubmit, defaultOnSuccess, defaultOnError } from '@southneuhof/is-vue-framework/behaviors/form'
 import Dialog from '../base/Dialog.vue'

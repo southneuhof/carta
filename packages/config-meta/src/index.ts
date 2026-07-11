@@ -6,6 +6,7 @@ export type {
   DefaultDetailConfig,
   DefaultFormConfig,
   DefaultsConfigBundle,
+  InputConfig,
 } from './types'
 
 export {

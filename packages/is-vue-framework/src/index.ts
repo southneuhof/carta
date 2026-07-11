@@ -1,6 +1,7 @@
 export * from './behaviors'
 export * from './renderers'
 export * from './router'
+export * from './model-config'
 export * from './adapters/behaviors'
 export * from './adapters/plugin'
 export {

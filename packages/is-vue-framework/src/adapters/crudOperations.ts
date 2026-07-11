@@ -1,4 +1,4 @@
-import type { ModelConfig } from '@southneuhof/is-data-model'
+import type { ModelConfig } from '../model-config'
 import { getFrameworkBehaviors, missingBehavior } from './behaviors'
 
 export type CRUDIdentity = string | number

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Popover from '@southneuhof/is-vue-framework/components/base/Popover.vue'
-import { buildListConfig } from '@southneuhof/is-data-model'
+import { buildListConfig } from '../../../model-config'
 import SearchBox from '../SearchBox.vue'
 import { onMounted, ref } from 'vue'
 import { keyManager } from '@southneuhof/is-vue-framework/adapters/state'

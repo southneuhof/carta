@@ -10,7 +10,6 @@ const forbiddenImports = [
   ['@southneuhof/is-vue-framework', 'services'].join('/'),
   ['@southneuhof/is-vue-framework', 'router'].join('/'),
   ['@southneuhof/is-vue-framework', 'components', 'composites'].join('/'),
-  '@southneuhof/is-data-model',
   'vue-router',
 ]
 
