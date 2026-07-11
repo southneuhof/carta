@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { inject } from 'vue'
 import Switch from '@southneuhof/is-vue-framework/components/inputs/Switch.vue'
-import tasks from '@/configs/crud/tasks'
 import CRUDComposite from '@southneuhof/is-vue-framework/components/composites/CRUDComposite.vue'
 import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue'
 import { toast } from 'vue-sonner'
@@ -32,7 +31,7 @@ const rolePermissionsConfig = defineCRUDCompositeConfig({
   operations: rolePermissionOperations,
   actions: { create: false, update: false, delete: false, detail: false },
   fields: ['name'],
-  fieldsAlias: tasks.fieldsAlias,
+  fieldsAlias: { name: 'Permission' },
 })
 </script>
 

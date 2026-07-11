@@ -3,16 +3,16 @@ import { configureFrameworkBehaviors, type FrameworkBehaviors } from './behavior
 import { applyFrameworkConfig, applyFrameworkDefaults, type FrameworkAppConfigDefaults, type FrameworkDefaultsInput } from './defaults'
 import { registerInputComponents, type FrameworkInputRegistry } from '../components/composites/formInputRegistry'
 
-export interface FrameworkPluginOptions {
+export interface FrameworkPluginOptions<TCRUDResource = unknown> {
   extension?: {
     inputs?: FrameworkInputRegistry
   }
   config?: FrameworkAppConfigDefaults
   defaults?: FrameworkDefaultsInput
-  behaviors?: FrameworkBehaviors
+  behaviors?: FrameworkBehaviors<TCRUDResource>
 }
 
-export function createFrameworkPlugin(options: FrameworkPluginOptions = {}): Plugin {
+export function createFrameworkPlugin<TCRUDResource = unknown>(options: FrameworkPluginOptions<TCRUDResource> = {}): Plugin {
   return {
     install() {
       if (options.extension?.inputs) registerInputComponents(options.extension.inputs)

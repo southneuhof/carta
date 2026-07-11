@@ -31,19 +31,8 @@ const menu: Modules = [
         title: 'Roles',
         icon: 'folder',
       },
-      {
-        name: 'tasks',
-        title: 'Tasks',
-        icon: 'folder',
-      },
-      // {
-      //   name: 'categories',
-      //   title: 'Kategori',
-      //   icon: 'folder',
-      // }
     ],
   },
 ]
 
 export default menu
-

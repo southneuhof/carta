@@ -12,8 +12,11 @@ import * as fileManager from './fileManager'
 import * as dynamicForm from './dynamicForm'
 import * as crudList from './crudList'
 import * as crudDetail from './crudDetail'
+import * as crud from './crud'
+import type { RpcCRUDResource } from './crud'
 
-export const frameworkBehaviors: FrameworkBehaviors = {
+export const frameworkBehaviors: FrameworkBehaviors<RpcCRUDResource> = {
+  crud,
   form,
   table,
   detail,

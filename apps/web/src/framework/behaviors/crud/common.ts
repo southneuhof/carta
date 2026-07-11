@@ -1,3 +1,17 @@
+import type { RpcClient } from '@southneuhof/sdk'
+
+type WithCRUDRoutes<T> = T extends {
+  list: unknown
+  detail: unknown
+  create: unknown
+  update: unknown
+  delete: unknown
+}
+  ? T
+  : never
+
+export type RpcCRUDResource = WithCRUDRoutes<RpcClient[keyof RpcClient]>
+
 export async function parseRpcResponse<T>(response: Response): Promise<T> {
   const payload = await response.json()
   if (!response.ok) throw payload

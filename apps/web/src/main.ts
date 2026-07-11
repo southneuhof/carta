@@ -1,8 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { configureParser, parse } from '@southneuhof/utilities/parse'
-import { configureCRUDOperationAdapter, createFrameworkPlugin } from '@southneuhof/is-vue-framework'
-import { createRpcCRUDOperations, type RpcCRUDResource } from '@/framework/crud'
+import { createFrameworkPlugin } from '@southneuhof/is-vue-framework'
 import { frameworkBehaviors } from './framework/behaviors'
 import { dictionary } from '@/configs/dictionary'
 import App from './App.vue'
@@ -43,7 +42,6 @@ Chart.register(annotationPlugin)
 Chart.register(FunnelController, TrapezoidElement, LinearScale, CategoryScale)
 
 const app = createApp(App)
-configureCRUDOperationAdapter<RpcCRUDResource>({ createOperations: createRpcCRUDOperations })
 configureParser({ dictionary })
 declare module 'vue' {
   export interface ComponentCustomProperties {

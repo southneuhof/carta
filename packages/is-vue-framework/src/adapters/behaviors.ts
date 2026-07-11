@@ -1,4 +1,15 @@
 import { resetFrameworkDefaultsForTests } from './defaults'
+import type { CRUDIdentity, CRUDListResult, CRUDQuery, CRUDRecord } from './crudOperations'
+
+export interface FrameworkCRUDBehaviors<TResource = unknown> {
+  list?: (params: { resource: TResource; query?: CRUDQuery }) => Promise<CRUDListResult>
+  detail?: (params: { resource: TResource; id: CRUDIdentity | CRUDIdentity[]; query?: CRUDQuery }) => Promise<CRUDRecord | undefined>
+  create?: (params: { resource: TResource; input: CRUDRecord }) => Promise<CRUDRecord | void>
+  update?: (params: { resource: TResource; id: CRUDIdentity | CRUDIdentity[]; input: CRUDRecord }) => Promise<CRUDRecord | void>
+  delete?: (params: { resource: TResource; id: CRUDIdentity }) => Promise<unknown>
+  export?: (params: { resource: TResource; query: CRUDQuery; config: Record<string, any> }) => Promise<unknown>
+  reorder?: (params: { resource: TResource; event: any }) => Promise<unknown> | unknown
+}
 
 export type FrameworkFormGetData = (params: { getAPI: string; id?: string | number | string[]; searchParameters?: object }) => Promise<object | undefined>
 export type FrameworkFormBeforeSubmit = (params: { formData: object }) => object
@@ -81,7 +92,8 @@ export interface FrameworkCrudDetailBehaviors {
   onExport?: (detailConfig: any, id: number) => Promise<any>
 }
 
-export interface FrameworkBehaviors {
+export interface FrameworkBehaviors<TCRUDResource = unknown> {
+  crud?: FrameworkCRUDBehaviors<TCRUDResource>
   form?: FrameworkFormBehaviors
   table?: FrameworkTableBehaviors
   detail?: FrameworkDetailBehaviors
@@ -99,16 +111,16 @@ export interface FrameworkBehaviors {
   crudDetail?: FrameworkCrudDetailBehaviors
 }
 
-const behaviors: FrameworkBehaviors = {}
+const behaviors: FrameworkBehaviors<any> = {}
 
 function mergeBehaviorGroup<K extends keyof FrameworkBehaviors>(key: K, value: FrameworkBehaviors[K]) {
   if (!value) return
   behaviors[key] = { ...((behaviors[key] || {}) as object), ...(value as object) } as FrameworkBehaviors[K]
 }
 
-export function configureFrameworkBehaviors(nextBehaviors: FrameworkBehaviors) {
+export function configureFrameworkBehaviors<TCRUDResource>(nextBehaviors: FrameworkBehaviors<TCRUDResource>) {
   for (const key of Object.keys(nextBehaviors) as Array<keyof FrameworkBehaviors>) {
-    mergeBehaviorGroup(key, nextBehaviors[key])
+    mergeBehaviorGroup(key, nextBehaviors[key] as any)
   }
 }
 

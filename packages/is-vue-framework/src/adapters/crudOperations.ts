@@ -1,4 +1,5 @@
 import type { ModelConfig } from '@southneuhof/is-data-model'
+import { getFrameworkBehaviors, missingBehavior } from './behaviors'
 
 export type CRUDIdentity = string | number
 export type CRUDQuery = Record<string, any>
@@ -39,24 +40,18 @@ export function defineCRUDCompositeConfig<const TResource, const TConfig extends
   return config
 }
 
-export interface CRUDOperationAdapter<TResource = unknown> {
-  createOperations(resource: TResource): CRUDOperations
-}
-
-let adapter: CRUDOperationAdapter<any> | undefined
-
-export function configureCRUDOperationAdapter<TResource>(nextAdapter: CRUDOperationAdapter<TResource>) {
-  adapter = nextAdapter
-}
-
 export function resolveCRUDOperations<TResource>(config: CRUDCompositeConfig<TResource>, direct: CRUDOperationOverrides = {}): CRUDOperations {
   const overrides = { ...config.operations, ...direct }
   const complete = overrides.list && overrides.detail && overrides.create && overrides.update && overrides.delete
   if (complete) return overrides as CRUDOperations
-  if (!adapter) throw new Error('[vue-framework] Missing CRUD operation adapter. Register it with configureCRUDOperationAdapter().')
-  return { ...adapter.createOperations(config.resource), ...overrides }
-}
-
-export function resetCRUDOperationAdapterForTests() {
-  adapter = undefined
+  const crud = getFrameworkBehaviors().crud
+  return {
+    list: overrides.list || (async (query) => (crud?.list || missingBehavior('crud.list'))({ resource: config.resource, query })),
+    detail: overrides.detail || (async (id, query) => (crud?.detail || missingBehavior('crud.detail'))({ resource: config.resource, id, query })),
+    create: overrides.create || (async (input) => (crud?.create || missingBehavior('crud.create'))({ resource: config.resource, input })),
+    update: overrides.update || (async (id, input) => (crud?.update || missingBehavior('crud.update'))({ resource: config.resource, id, input })),
+    delete: overrides.delete || (async (id) => (crud?.delete || missingBehavior('crud.delete'))({ resource: config.resource, id })),
+    export: overrides.export || (crud?.export ? (({ query, config: operationConfig }) => crud.export!({ resource: config.resource, query, config: operationConfig })) : undefined),
+    reorder: overrides.reorder || (crud?.reorder ? ((event) => crud.reorder!({ resource: config.resource, event })) : undefined),
+  }
 }

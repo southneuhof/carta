@@ -1,0 +1,6 @@
+export { list } from './list'
+export { detail } from './detail'
+export { create } from './create'
+export { update } from './update'
+export { deleteOperation as delete } from './delete'
+export type { RpcCRUDResource } from './common'
