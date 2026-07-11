@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Popover from '@southneuhof/is-vue-framework/components/base/Popover.vue'
-import { buildListConfig, type ModelConfig } from '@southneuhof/is-data-model'
+import { buildListConfig } from '@southneuhof/is-data-model'
 import SearchBox from '../SearchBox.vue'
 import { onMounted, ref } from 'vue'
 import { keyManager } from '@southneuhof/is-vue-framework/adapters/state'
@@ -8,7 +8,8 @@ import Table from '../Table.vue'
 import ConfirmationDialog from '../ConfirmationDialog.vue'
 import Switch from '@southneuhof/is-vue-framework/components/inputs/Switch.vue'
 import { useRoute, useRouter } from 'vue-router'
-import { defaultOnExport, defaultOnDragChange, onDelete } from '@southneuhof/is-vue-framework/behaviors/crudList'
+import { defaultOnExport } from '@southneuhof/is-vue-framework/behaviors/crudList'
+import { resolveCRUDOperations, type CRUDCompositeConfig, type CRUDOperationOverrides } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 import Form from '../Form.vue'
 import Dialog from '@southneuhof/is-vue-framework/components/base/Dialog.vue'
 import { defaultTableConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
@@ -20,11 +21,13 @@ import Tooltip from '@southneuhof/is-vue-framework/components/base/Tooltip.vue'
 import { toast } from 'vue-sonner'
 
 const props = defineProps<{
-  config: ModelConfig
+  config: CRUDCompositeConfig
+  operations?: CRUDOperationOverrides
   permissions: CRUDPermissions
 }>()
 
 const [route, router] = [useRoute(), useRouter()]
+const crudOperations = resolveCRUDOperations(props.config, props.operations)
 
 if (!props.config.title) props.config.title = String(route.meta.title)
 
@@ -40,11 +43,12 @@ const listConfig = ref<ListConfig>(
     fieldsProxy: defaultTableConfig.fieldsProxy,
     fieldsType: defaultTableConfig.fieldsType as Record<string, { type: string; props?: any }>,
     fieldsAlign: defaultTableConfig.fieldsAlign,
-    onDragChange: (event: any) =>
-      defaultOnDragChange(props.config.view?.list?.getAPI || props.config.view?.getAPI || props.config.modelAPI || props.config.name, event),
+    onDragChange: crudOperations.reorder,
     export: {
       allow: true,
-      onExport: defaultOnExport,
+      onExport: crudOperations.export
+        ? ({ params, listConfig }: any) => crudOperations.export!({ query: params, config: listConfig })
+        : defaultOnExport,
     },
   })
 )
@@ -207,6 +211,7 @@ onMounted(() => {
             <Card v-else class="flex h-full flex-col">
               <div class="min-h-0 flex-1 overflow-auto">
                 <Table
+                  :operation="crudOperations.list"
                   :key="keyManager().value[`${config.name}_table`]"
                   v-bind="listConfig"
                   :fields="listConfig.fields!"
@@ -250,7 +255,7 @@ onMounted(() => {
                       <slot v-if="$slots['list-rowActions-delete']" name="list-rowActions-delete" v-bind="{data, permissions, config}"/>
                       <ConfirmationDialog
                         v-else-if="(config.actions?.delete ?? true) && data.can_delete != false && permissions.delete"
-                        :onConfirm="async () => await onDelete(config.name, data[listConfig.uid!])"
+                        :onConfirm="async () => await crudOperations.delete(data[listConfig.uid!])"
                         :onSuccess="() => {
                           toast.success(`${config.title || config.name} berhasil dihapus`)
                           keyManager().triggerChange(`${config.name}_table`)

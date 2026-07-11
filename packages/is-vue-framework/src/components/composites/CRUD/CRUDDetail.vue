@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { provide, ref } from 'vue'
-import { buildDetailConfig, type ModelConfig } from '@southneuhof/is-data-model'
+import { buildDetailConfig } from '@southneuhof/is-data-model'
+import { resolveCRUDOperations, type CRUDCompositeConfig, type CRUDOperationOverrides } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 import Detail from '../Detail.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { defaultOnExport } from '@southneuhof/is-vue-framework/behaviors/crudDetail'
@@ -13,11 +14,13 @@ import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
 
 const props = defineProps<{
-  config: ModelConfig
+  config: CRUDCompositeConfig
+  operations?: CRUDOperationOverrides
   permissions: CRUDPermissions
 }>()
 
 const [route, router] = [useRoute(), useRouter()]
+const crudOperations = resolveCRUDOperations(props.config, props.operations)
 
 const detailConfig: DetailConfig = {
   ...buildDetailConfig(props.config, {
@@ -272,7 +275,7 @@ const { handlePrint } = useVueToPrint({
             <Suspense v-if="$slots['detail-main']">
               <slot name="detail-main"></slot>
             </Suspense>
-            <Detail v-else v-bind="(detailConfig as any)" :onDataLoaded="(data: any) => activeData = data">
+            <Detail v-else v-bind="(detailConfig as any)" :operation="crudOperations.detail" :onDataLoaded="(data: any) => activeData = data">
               <template v-for="slotname in Object.keys($slots)" v-slot:[String(slotname)]="data">
                 <slot v-if="slotname.slice(0, 7) === 'detail-'" :name="slotname" v-bind="(data as any)"></slot>
               </template>

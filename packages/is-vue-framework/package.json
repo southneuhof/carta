@@ -14,6 +14,7 @@
     "./adapters/defaults": "./src/adapters/defaults.ts",
     "./adapters/state": "./src/adapters/state.ts",
     "./adapters/behaviors": "./src/adapters/behaviors.ts",
+    "./adapters/crud-operations": "./src/adapters/crudOperations.ts",
     "./adapters/*": "./src/adapters/*",
     "./components/*": "./src/components/*",
     "./renderers/*": "./src/renderers/*",
@@ -28,7 +29,6 @@
     "vue-router": "^4.2.2"
   },
   "dependencies": {
-    "@southneuhof/sdk": "workspace:*",
     "@southneuhof/utilities": "workspace:^",
     "clsx": "^2.1.1",
     "tailwind-merge": "^1.13.1",

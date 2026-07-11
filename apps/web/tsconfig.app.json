@@ -71,12 +71,6 @@
       "@southneuhof/utilities/*": [
         "../../packages/utilities/src/*"
       ],
-      "@client/data-model/*": [
-        "../../packages/data-model/src/*"
-      ],
-      "@client/data-model/models/*": [
-        "../../packages/data-model/src/models/*"
-      ]
     },
     "module": "esnext",
     "target": "es2017"

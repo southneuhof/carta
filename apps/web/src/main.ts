@@ -1,7 +1,8 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { configureParser, parse } from '@southneuhof/utilities/parse'
-import { createFrameworkPlugin, createIsApiClient, installIsApiClient } from '@southneuhof/is-vue-framework'
+import { configureCRUDOperationAdapter, createFrameworkPlugin } from '@southneuhof/is-vue-framework'
+import { createRpcCRUDOperations, type RpcCRUDResource } from '@/framework/crud'
 import { frameworkBehaviors } from './framework/behaviors'
 import { dictionary } from '@/configs/dictionary'
 import App from './App.vue'
@@ -42,12 +43,8 @@ Chart.register(annotationPlugin)
 Chart.register(FunnelController, TrapezoidElement, LinearScale, CategoryScale)
 
 const app = createApp(App)
+configureCRUDOperationAdapter<RpcCRUDResource>({ createOperations: createRpcCRUDOperations })
 configureParser({ dictionary })
-const apiUrl = (() => {
-  const raw = import.meta.env.VITE_API_URL || ''
-  return raw && !raw.endsWith('/') ? `${raw}/` : raw
-})()
-
 declare module 'vue' {
   export interface ComponentCustomProperties {
     $parse: (key: string, value: string | number, mode?: 'dictionary' | 'parser') => any
@@ -62,7 +59,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       behaviors: frameworkBehaviors,
     }),
   )
-  installIsApiClient(app, createIsApiClient(apiUrl))
   app.use(
     VueTippy,
     // optional

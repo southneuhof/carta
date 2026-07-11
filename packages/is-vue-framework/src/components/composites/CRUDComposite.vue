@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, type PropType, computed, provide } from 'vue'
-import type { ModelConfig } from '@southneuhof/is-data-model'
+import type { CRUDCompositeConfig, CRUDOperationOverrides } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 import { useRoute, useRouter } from 'vue-router'
 import CRUDList from './CRUD/CRUDList.vue'
 import CRUDDetail from './CRUD/CRUDDetail.vue'
@@ -13,8 +13,12 @@ const [router, route] = [useRouter(), useRoute()]
 
 const props = defineProps({
   config: {
-    type: Object as PropType<ModelConfig>,
+    type: Object as PropType<CRUDCompositeConfig>,
     required: false,
+    default: () => ({}),
+  },
+  operations: {
+    type: Object as PropType<CRUDOperationOverrides>,
     default: () => ({}),
   },
   main: {
@@ -30,12 +34,12 @@ const props = defineProps({
 })
 
 const actionsPermission = {
-  view: permissions().has(`view-${props.config.permission || props.config.name || props.config.modelAPI}`),
-  lookup: permissions().has(`lookup-${props.config.permission || props.config.name || props.config.modelAPI}`),
-  detail: permissions().has(`show-${props.config.permission || props.config.name || props.config.modelAPI}`),
-  create: permissions().has(`create-${props.config.permission || props.config.name || props.config.modelAPI}`),
-  update: permissions().has(`update-${props.config.permission || props.config.name || props.config.modelAPI}`),
-  delete: permissions().has(`delete-${props.config.permission || props.config.name || props.config.modelAPI}`),
+  view: permissions().has(`view-${props.config.permission || props.config.name}`),
+  lookup: permissions().has(`lookup-${props.config.permission || props.config.name}`),
+  detail: permissions().has(`show-${props.config.permission || props.config.name}`),
+  create: permissions().has(`create-${props.config.permission || props.config.name}`),
+  update: permissions().has(`update-${props.config.permission || props.config.name}`),
+  delete: permissions().has(`delete-${props.config.permission || props.config.name}`),
 }
 
 provide('actionsPermission', actionsPermission)
@@ -57,7 +61,7 @@ onMounted(async () => {
         <div v-if="actionsPermission.view" :key="`${currentView}${config.name}`" class="flex flex-col gap-4">
           <template v-if="currentView === 'list'">
             <slot v-if="$slots['list-content']" name="list-content"></slot>
-            <CRUDList v-else :config="config" :permissions="actionsPermission">
+            <CRUDList v-else :config="config" :operations="operations" :permissions="actionsPermission">
               <template v-for="slotname in Object.keys($slots)" v-slot:[String(slotname)]="data">
                 <slot v-if="slotname.slice(0, 5) === 'list-'" :name="slotname" v-bind="(data as any)"></slot>
               </template>
@@ -66,7 +70,7 @@ onMounted(async () => {
 
           <template v-else-if="currentView === 'detail'">
             <slot v-if="$slots['detail-content']" name="detail-content"></slot>
-            <CRUDDetail v-else :config="config" :permissions="actionsPermission">
+            <CRUDDetail v-else :config="config" :operations="operations" :permissions="actionsPermission">
               <template v-for="slotname in Object.keys($slots)" v-slot:[String(slotname)]="data">
                 <slot v-if="slotname.slice(0, 7) === 'detail-'" :name="slotname" v-bind="(data as any)"></slot>
               </template>
@@ -75,7 +79,7 @@ onMounted(async () => {
 
           <template v-else-if="currentView === 'create'">
             <slot v-if="$slots['create-content']" name="create-content"></slot>
-            <CRUDCreate v-else :config="config" :permissions="actionsPermission">
+            <CRUDCreate v-else :config="config" :operations="operations" :permissions="actionsPermission">
               <template v-for="slotname in Object.keys($slots)" v-slot:[String(slotname)]="data">
                 <slot v-if="slotname.slice(0, 7) === 'create-'" :name="slotname" v-bind="(data as any)"></slot>
               </template>
@@ -84,7 +88,7 @@ onMounted(async () => {
 
           <template v-else-if="currentView === 'update'">
             <slot v-if="$slots['update-content']" name="update-content"></slot>
-            <CRUDUpdate v-else :config="config" :permissions="actionsPermission">
+            <CRUDUpdate v-else :config="config" :operations="operations" :permissions="actionsPermission">
               <template v-for="slotname in Object.keys($slots)" v-slot:[String(slotname)]="data">
                 <slot v-if="slotname.slice(0, 7) === 'update-'" :name="slotname" v-bind="(data as any)"></slot>
               </template>

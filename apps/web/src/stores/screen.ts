@@ -1,7 +1,5 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { useIsApiClient } from '@southneuhof/is-vue-framework'
-
 const state = ref(0)
 const windowSize = ref({ width: 0, height: 0 })
 

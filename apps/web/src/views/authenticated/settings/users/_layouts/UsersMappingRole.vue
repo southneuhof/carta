@@ -2,7 +2,7 @@
 import CRUDComposite from '@southneuhof/is-vue-framework/components/composites/CRUDComposite.vue'
 import Switch from '@southneuhof/is-vue-framework/components/inputs/Switch.vue'
 import services from '@/utils/services'
-import type { ModelConfig } from '@southneuhof/is-data-model'
+import { defineCRUDCompositeConfig, type CRUDOperations } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 import { inject } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -14,10 +14,14 @@ function resolveUserId() {
   return Number(id || 0)
 }
 
-const usersMappingRoleConfig: ModelConfig = {
+const unavailable = async () => { throw new Error('User-role mapping is unavailable because the current RPC does not expose this resource.') }
+const unavailableOperations: CRUDOperations = { list: unavailable, detail: unavailable, create: unavailable, update: unavailable, delete: unavailable }
+
+const usersMappingRoleConfig = defineCRUDCompositeConfig({
   name: 'mapping-role-users',
   title: 'Role',
-  modelAPI: 'mapping-user-roles/list?custom',
+  resource: null,
+  operations: unavailableOperations,
   fields: ['role_name', 'role_code', 'description'],
   fieldsAlias: {
     role_name: 'Nama Role',
@@ -35,7 +39,7 @@ const usersMappingRoleConfig: ModelConfig = {
       searchParameters: { user_id: resolveUserId() },
     },
   },
-}
+})
 </script>
 
 <template>

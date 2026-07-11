@@ -10,6 +10,7 @@ import Draggable from 'vuedraggable'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import type { CRUDListOperation } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 
 const props = defineProps({
   fields: { type: Array as PropType<string[]>, required: true },
@@ -23,6 +24,7 @@ const props = defineProps({
   fieldsHeaderClass: { type: Object as PropType<Record<string, string>>, default: () => ({}) },
   data: { type: Array as PropType<any[]>, required: false },
   getAPI: { type: String, required: false },
+  operation: { type: Function as PropType<CRUDListOperation>, required: false },
   searchParameters: { type: Object as PropType<Record<string, any>>, required: false, default: () => ({}) },
   onDataLoaded: { type: Function as PropType<(data: any[]) => void>, required: false, default: () => ({}) },
   getData: {
@@ -100,8 +102,10 @@ function handleFieldFilter(field: string) {
 
 async function loadData() {
   loading.value = true
-  if (props.getAPI) {
-    const { data, total, totalPage } = await props.getData(props.getAPI!, localsearchParameters.value)
+  if (props.operation || props.getAPI) {
+    const { data, total, totalPage } = props.operation
+      ? await props.operation(localsearchParameters.value)
+      : await props.getData(props.getAPI!, localsearchParameters.value)
     tableData.value = { ...data, data: formatTableData(data), rawData: data }
     dataInfo.value = { total, totalPage, length: data?.length || data.length }
   } else if (props.data) tableData.value = { ...props.data, data: formatTableData(props.data), rawData: props.data }

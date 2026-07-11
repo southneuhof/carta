@@ -1,48 +1,54 @@
 <script setup lang="ts">
 import { inject } from 'vue'
 import Switch from '@southneuhof/is-vue-framework/components/inputs/Switch.vue'
-import tasks from '@client/data-model/models/tasks.model'
+import tasks from '@/configs/crud/tasks'
 import CRUDComposite from '@southneuhof/is-vue-framework/components/composites/CRUDComposite.vue'
-import services from '@/utils/services'
 import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue'
 import { toast } from 'vue-sonner'
 import { keyManager } from '@/stores/keyManager'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import { defineCRUDCompositeConfig, type CRUDListResult, type CRUDOperations } from '@southneuhof/is-vue-framework/adapters/crud-operations'
+import { rpc } from '@/framework/rpc'
 
 const data = inject<any>('data', {})
+const unavailable = async () => { throw new Error('This operation is not available for role permissions.') }
+const rolePermissionOperations: CRUDOperations = {
+  async list() {
+    const response = await rpc.roles[':roleId'].permissions.$get({ param: { roleId: String(data.value?.id || data.id) } })
+    if (!response.ok) throw await response.json()
+    return response.json() as Promise<CRUDListResult>
+  },
+  detail: unavailable,
+  create: unavailable,
+  update: unavailable,
+  delete: unavailable,
+}
+const rolePermissionsConfig = defineCRUDCompositeConfig({
+  name: 'mapping-role-permission',
+  title: 'Permissions',
+  permission: 'mapping-role-permission',
+  resource: rpc.roles[':roleId'].permissions,
+  operations: rolePermissionOperations,
+  actions: { create: false, update: false, delete: false, detail: false },
+  fields: ['name'],
+  fieldsAlias: tasks.fieldsAlias,
+})
 </script>
 
 <template>
   <CRUDComposite
-    :config="{
-      name: 'mapping-role-permission',
-      title: 'Permissions',
-      permission: 'mapping-role-permission',
-      modelAPI: 'custom/mappingrolepermission',
-      actions: {
-        create: false,
-        update: false,
-        delete: false,
-        detail: false,
-      },
-      fields: ['task_name', 'task_code', 'description'],
-      fieldsAlias: tasks.fieldsAlias,
-      view: {
-        list: {
-          searchParameters: {
-            role_id: data.id,
-          },
-        },
-      },
-    }"
+    :config="rolePermissionsConfig"
   >
     <template #list-rowActions="{ data: rowData }">
       <Switch
         v-model="rowData.active"
         :onToggle="
           (nextValue: boolean) => {
-            services.update('custom/mappingrolepermission', { task_id: rowData.id, role_id: data.id, active: nextValue })
+            const route = rpc.roles[':roleId'].permissions[':permissionId']
+            const request = { param: { roleId: String(data.value?.id || data.id), permissionId: String(rowData.id) } }
+            if (nextValue) route.$put(request)
+            else route.$delete(request)
           }
         "
       />

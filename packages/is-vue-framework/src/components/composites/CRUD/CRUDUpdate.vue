@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
-import { buildFormConfig, type ModelConfig } from '@southneuhof/is-data-model'
+import { buildFormConfig } from '@southneuhof/is-data-model'
+import { resolveCRUDOperations, type CRUDCompositeConfig, type CRUDOperationOverrides } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 import Form from '../Form.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { defaultFormConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
@@ -10,11 +11,13 @@ import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
 
 const props = defineProps<{
-  config: ModelConfig
+  config: CRUDCompositeConfig
+  operations?: CRUDOperationOverrides
   permissions: CRUDPermissions
 }>()
 
 const [route, router] = [useRoute(), useRouter()]
+const crudOperations = resolveCRUDOperations(props.config, props.operations)
 
 if (!props.config.title) props.config.title = String(route.meta.title)
 
@@ -53,6 +56,8 @@ const updateFormConfig: UpdateConfig = buildFormConfig(props.config, 'update', {
         <Card v-else>
           <Form
             v-bind="(updateFormConfig as any)"
+            :detailOperation="crudOperations.detail"
+            :updateOperation="crudOperations.update"
             formType="update"
             :dataID="String(route.query[`${props.config.name}_id`])"
             :onSuccess="

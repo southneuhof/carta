@@ -4,6 +4,7 @@ import { parse } from '@southneuhof/utilities/parse'
 import { computed, onMounted, ref, type PropType } from 'vue'
 import { componentTypeMap, parsedTypes } from './common/properties'
 import { defaultDetailConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
+import type { CRUDDetailOperation } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 
 const props = defineProps({
   fields: { type: Array as PropType<string[]>, required: true },
@@ -15,6 +16,7 @@ const props = defineProps({
   fieldsParse: { type: Object as PropType<Record<string, string>>, default: () => ({}) },
   data: { type: Object as PropType<Record<string, any>> },
   getAPI: { type: String },
+  operation: { type: Function as PropType<CRUDDetailOperation> },
   dataID: { type: String },
   searchParameters: { type: Object as PropType<Record<string, any>> },
   getData: { type: Function as PropType<(getAPI: string, searchParameters?: Record<string, any>, dataID?: string) => Promise<Record<string, any>>>, default: defaultDetailGetData },
@@ -46,8 +48,12 @@ function formatDetailData(data: Record<string, any>) {
 }
 
 async function getData() {
-  if (!props.data && props.getAPI) {
-    await props.getData(props.getAPI, props.searchParameters, props.dataID).then((data) => {
+  if (!props.data && (props.operation || props.getAPI)) {
+    const request = props.operation
+      ? props.operation(props.dataID || '', props.searchParameters)
+      : props.getData(props.getAPI!, props.searchParameters, props.dataID)
+    await request.then((data) => {
+      if (!data) return
       detailData.value = { data: formatDetailData(data), rawData: data }
       props.onDataLoaded(data)
       loading.value = false

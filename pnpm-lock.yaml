@@ -217,9 +217,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@client/data-model':
-        specifier: workspace:*
-        version: link:../../packages/data-model
       '@fullcalendar/core':
         specifier: ^6.1.19
         version: 6.1.20
@@ -241,6 +238,9 @@ importers:
       '@southneuhof/is-vue-framework':
         specifier: workspace:*
         version: link:../../packages/is-vue-framework
+      '@southneuhof/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
       '@southneuhof/utilities':
         specifier: workspace:*
         version: link:../../packages/utilities
@@ -510,9 +510,6 @@ importers:
       '@southneuhof/is-data-model':
         specifier: workspace:^
         version: link:../is-data-model
-      '@southneuhof/sdk':
-        specifier: workspace:*
-        version: link:../sdk
       '@southneuhof/utilities':
         specifier: workspace:^
         version: link:../utilities

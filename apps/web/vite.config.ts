@@ -22,10 +22,6 @@ export default defineConfig({
         replacement: fileURLToPath(new URL('./src', import.meta.url)),
       },
       {
-        find: '@client/data-model/',
-        replacement: fileURLToPath(new URL('../../packages/data-model/src/', import.meta.url)),
-      },
-      {
         find: /^@southneuhof\/is-data-model$/,
         replacement: fileURLToPath(new URL('../../packages/is-data-model/src/index.ts', import.meta.url)),
       },

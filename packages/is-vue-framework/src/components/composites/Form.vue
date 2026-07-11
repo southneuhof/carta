@@ -12,6 +12,7 @@ import { getInputComponentRegistry, resolveInputComponent } from './formInputReg
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
+import type { CRUDDetailOperation, CRUDMutationOperation, CRUDUpdateOperation } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 
 const props = defineProps({
   inputConfig: { type: Object as PropType<InputConfig>, default: () => ({}) },
@@ -21,6 +22,9 @@ const props = defineProps({
     type: Function as PropType<({ getAPI, id, searchParameters }: { getAPI: string; id?: string | number | string[]; searchParameters?: object }) => Promise<object>>,
     default: defaultFormGetData,
   },
+  detailOperation: { type: Function as PropType<CRUDDetailOperation> },
+  createOperation: { type: Function as PropType<CRUDMutationOperation> },
+  updateOperation: { type: Function as PropType<CRUDUpdateOperation> },
   getInitialData: { type: Function as PropType<() => Promise<Record<string, any>>>, default: async () => ({}) },
   beforeSubmit: { type: Function as PropType<({ formData }: { formData: object }) => object>, default: defaultBeforeSubmit },
   onSubmit: {
@@ -248,7 +252,9 @@ async function preflight() {
   loading.value.get = true
   formData.value = (await props.getInitialData()) || {}
   if (props.formType === 'update') {
-    const detailData = await props.getDetailData({ getAPI: props.getAPI || '', id: props.dataID, searchParameters: props.searchParameters })
+    const detailData = props.detailOperation
+      ? await props.detailOperation(props.dataID || '', props.searchParameters)
+      : await props.getDetailData({ getAPI: props.getAPI || '', id: props.dataID, searchParameters: props.searchParameters })
     formData.value = { ...formData.value, ...detailData }
   }
 
@@ -289,7 +295,11 @@ async function submitForm() {
   const payload = props.beforeSubmit({ formData: { ...formData.value, ...props.extraData } })
   loading.value.post = true
   try {
-    const res = await props.onSubmit({ payload, method: props.method || (props.formType === 'update' ? 'put' : 'post'), targetAPI: props.targetAPI, type: props.formType })
+    const res = props.formType === 'update' && props.updateOperation
+      ? await props.updateOperation(props.dataID || '', payload as Record<string, any>)
+      : props.formType === 'create' && props.createOperation
+        ? await props.createOperation(payload as Record<string, any>)
+        : await props.onSubmit({ payload, method: props.method || (props.formType === 'update' ? 'put' : 'post'), targetAPI: props.targetAPI, type: props.formType })
     props.onSuccess({ formData: payload, res: res || {} })
   } catch (error: any) {
     props.onError({ formData: payload, error })
