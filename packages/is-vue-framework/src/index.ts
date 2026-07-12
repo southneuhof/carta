@@ -14,5 +14,10 @@ export type {
   CRUDResource,
   CRUDOperations,
   CRUDOperationOverrides,
+  ResourceRecord,
+  ResourceCreateInput,
+  ResourceUpdateInput,
+  ResourceQuery,
+  ResourceIdentity,
 } from './adapters/crudOperations'
 export { parseURL as parseServiceURL } from './services'

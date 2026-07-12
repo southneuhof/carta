@@ -1,4 +1,4 @@
-import type { CRUDCompositeConfig } from '@southneuhof/is-vue-framework/adapters/crud-operations'
+import type { CRUDCompositeConfig, ResourceCreateInput, ResourceQuery, ResourceRecord } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 import { resources } from './rpc'
 
 const usersConfig = {
@@ -8,8 +8,19 @@ const usersConfig = {
   fields: ['name', 'email'],
 } satisfies CRUDCompositeConfig<typeof resources.users>
 
-usersConfig.resource.list({ page: '1' })
-usersConfig.resource.detail('user-1')
+const resourceName: string = usersConfig.resource
+void resourceName
+type UserRecord = ResourceRecord<typeof resources.users>
+type UsersQuery = ResourceQuery<typeof resources.users>
+type UsersCreateInput = ResourceCreateInput<typeof resources.users>
+const userName: UserRecord['name'] = 'Ada'
+const page: UsersQuery['page'] = '1'
+void userName
+void page
+// Users RPC has no create route, so create input is statically unavailable.
+// @ts-expect-error no create input can be constructed
+const createInput: UsersCreateInput = { name: 'Ada' }
+void createInput
 
 // @ts-expect-error fields are limited to keys returned by the resource
 const invalidRecordField = { name: 'users-proof', title: 'Users', resource: resources.users, fields: ['missing'] } satisfies CRUDCompositeConfig<typeof resources.users>
@@ -19,5 +30,5 @@ void invalidRecordField
 const invalidRecordAlias = { name: 'users-proof', title: 'Users', resource: resources.users, fieldsAlias: { missing: 'Missing' } } satisfies CRUDCompositeConfig<typeof resources.users>
 void invalidRecordAlias
 
-// @ts-expect-error RPC registry only exposes full CRUD branches
-resources.health.list()
+// @ts-expect-error RPC registry only exposes CRUD-shaped branches
+void resources.health

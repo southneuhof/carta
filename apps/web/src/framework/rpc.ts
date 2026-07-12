@@ -1,5 +1,5 @@
-import { createRpcClient } from '@southneuhof/sdk'
-import { defineRPCResources } from './adapters/crud'
+import { createRpcClient, type RpcClient } from '@southneuhof/sdk'
+import { defineRPCResources } from './adapters/crud/resources'
 
 const apiUrl = (() => {
   const raw = import.meta.env.VITE_API_URL || ''
@@ -7,4 +7,4 @@ const apiUrl = (() => {
 })()
 
 export const rpc = createRpcClient(apiUrl)
-export const resources = defineRPCResources(rpc)
+export const resources = defineRPCResources<RpcClient>()

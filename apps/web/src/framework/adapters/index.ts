@@ -12,8 +12,10 @@ import * as fileManager from './fileManager'
 import * as dynamicForm from './dynamicForm'
 import * as crudList from './crudList'
 import * as crudDetail from './crudDetail'
+import * as crud from './crud'
 
 export const frameworkRuntimeCapabilities = {
+  crud,
   form,
   table,
   detail,

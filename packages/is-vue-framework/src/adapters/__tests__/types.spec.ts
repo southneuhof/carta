@@ -8,6 +8,7 @@ describe('type surface', () => {
 })
 
 const runtimeValid: FrameworkRuntime = {
+  crud: {},
   form: {},
   table: {},
 }

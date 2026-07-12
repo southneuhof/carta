@@ -1,4 +1,15 @@
 import type { InjectionKey } from 'vue'
+import type { CRUDIdentity, CRUDListResult, CRUDQuery, CRUDRecord, CRUDResource } from './adapters/crudOperations'
+
+export interface FrameworkCRUDRuntime {
+  list?: (params: { resource: CRUDResource; query?: CRUDQuery }) => Promise<CRUDListResult>
+  detail?: (params: { resource: CRUDResource; id: CRUDIdentity | CRUDIdentity[]; query?: CRUDQuery }) => Promise<CRUDRecord | undefined>
+  create?: (params: { resource: CRUDResource; input: CRUDRecord }) => Promise<CRUDRecord | void>
+  update?: (params: { resource: CRUDResource; id: CRUDIdentity | CRUDIdentity[]; input: CRUDRecord }) => Promise<CRUDRecord | void>
+  delete?: (params: { resource: CRUDResource; id: CRUDIdentity }) => Promise<unknown>
+  export?: (params: { resource: CRUDResource; query: CRUDQuery; config: Record<string, any> }) => Promise<unknown>
+  reorder?: (params: { resource: CRUDResource; event: any }) => Promise<unknown> | unknown
+}
 
 export type FrameworkFormGetData = (params: { getAPI: string; id?: string | number | string[]; searchParameters?: object }) => Promise<object | undefined>
 export type FrameworkFormBeforeSubmit = (params: { formData: object }) => object
@@ -23,6 +34,7 @@ export interface FrameworkCRUDListRuntime { onDelete?: (endpoint: string, id: st
 export interface FrameworkCRUDDetailRuntime { onExport?: (detailConfig: any, id: number) => Promise<any> }
 
 export interface FrameworkRuntime {
+  crud?: FrameworkCRUDRuntime
   form?: FrameworkFormRuntime
   table?: FrameworkTableRuntime
   detail?: FrameworkDetailRuntime

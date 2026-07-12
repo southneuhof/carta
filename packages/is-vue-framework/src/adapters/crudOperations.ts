@@ -1,4 +1,6 @@
 import type { ModelConfig } from '../model-config'
+import { missingRuntimeCapability, type FrameworkCRUDRuntime } from '../runtime'
+import { useFrameworkRuntime } from '../runtimeHooks'
 
 export type CRUDIdentity = string | number
 export type CRUDQuery = Record<string, any>
@@ -18,32 +20,44 @@ export type CRUDDeleteOperation<TIdentity extends CRUDIdentity = CRUDIdentity> =
 export type CRUDExportOperation<TQuery extends CRUDQuery = CRUDQuery> = (params: { query: TQuery; config: Record<string, any> }) => Promise<unknown>
 export type CRUDReorderOperation = (event: any) => Promise<unknown> | unknown
 
-export interface CRUDResource<
+declare const crudResourceMetadata: unique symbol
+
+/** Inert endpoint identity carrying CRUD contract metadata only at compile time. */
+export type CRUDResource<
+  TName extends string = string,
   TRecord extends CRUDRecord = CRUDRecord,
   TCreateInput extends CRUDRecord = CRUDRecord,
   TUpdateInput extends CRUDRecord = TCreateInput,
   TQuery extends CRUDQuery = CRUDQuery,
   TIdentity extends CRUDIdentity = CRUDIdentity,
-> {
-  list: CRUDListOperation<TRecord, TQuery>
-  detail: CRUDDetailOperation<TRecord, TQuery, TIdentity>
-  create: CRUDMutationOperation<TRecord, TCreateInput>
-  update: CRUDUpdateOperation<TRecord, TUpdateInput, TIdentity>
-  delete: CRUDDeleteOperation<TIdentity>
+> = TName & {
+  readonly [crudResourceMetadata]: {
+    record: TRecord
+    createInput: TCreateInput
+    updateInput: TUpdateInput
+    query: TQuery
+    identity: TIdentity
+  }
 }
 
-export type CRUDOperations<TResource extends CRUDResource = CRUDResource> = TResource & {
+type ResourceMetadata<T extends CRUDResource> = T[typeof crudResourceMetadata]
+export type ResourceRecord<T extends CRUDResource> = ResourceMetadata<T>['record']
+export type ResourceCreateInput<T extends CRUDResource> = ResourceMetadata<T>['createInput']
+export type ResourceUpdateInput<T extends CRUDResource> = ResourceMetadata<T>['updateInput']
+export type ResourceQuery<T extends CRUDResource> = ResourceMetadata<T>['query']
+export type ResourceIdentity<T extends CRUDResource> = ResourceMetadata<T>['identity']
+
+export type CRUDOperations<TResource extends CRUDResource = CRUDResource> = {
+  list: CRUDListOperation<ResourceRecord<TResource>, ResourceQuery<TResource>>
+  detail: CRUDDetailOperation<ResourceRecord<TResource>, ResourceQuery<TResource>, ResourceIdentity<TResource>>
+  create: CRUDMutationOperation<ResourceRecord<TResource>, ResourceCreateInput<TResource>>
+  update: CRUDUpdateOperation<ResourceRecord<TResource>, ResourceUpdateInput<TResource>, ResourceIdentity<TResource>>
+  delete: CRUDDeleteOperation<ResourceIdentity<TResource>>
   export?: CRUDExportOperation<ResourceQuery<TResource>>
   reorder?: CRUDReorderOperation
 }
 
 export type CRUDOperationOverrides<TResource extends CRUDResource = CRUDResource> = Partial<CRUDOperations<TResource>>
-
-export type ResourceRecord<T extends CRUDResource> = Awaited<ReturnType<T['list']>>['data'][number]
-export type ResourceCreateInput<T extends CRUDResource> = Parameters<T['create']>[0]
-export type ResourceUpdateInput<T extends CRUDResource> = Parameters<T['update']>[1]
-export type ResourceQuery<T extends CRUDResource> = NonNullable<Parameters<T['list']>[0]>
-export type ResourceIdentity<T extends CRUDResource> = Exclude<Parameters<T['detail']>[0], readonly CRUDIdentity[]>
 
 type ResourceConfig<TResource extends CRUDResource> = Omit<ModelConfig<ResourceRecord<TResource>, ResourceCreateInput<TResource>, ResourceUpdateInput<TResource>>, 'modelAPI'> & {
   resource: TResource
@@ -57,15 +71,24 @@ type ResourceLessConfig<TResource extends CRUDResource> = Omit<ModelConfig<Resou
 
 export type CRUDCompositeConfig<TResource extends CRUDResource = CRUDResource> = ResourceConfig<TResource> | ResourceLessConfig<TResource>
 
-export function resolveCRUDOperations<TResource extends CRUDResource>(config: CRUDCompositeConfig<TResource>, direct: CRUDOperationOverrides<TResource> = {}): CRUDOperations<TResource> {
-  const resource = 'resource' in config ? config.resource : undefined
-  const operations = { ...resource, ...config.operations, ...direct }
-  const required = ['list', 'detail', 'create', 'update', 'delete'] as const
-  const missing = required.find(operation => typeof operations[operation] !== 'function')
-  if (missing) throw new Error(`[vue-framework] Missing CRUD operation: ${missing}. Supply a resource or complete operations.`)
-  return operations as CRUDOperations<TResource>
+export function resolveCRUDOperations<TResource extends CRUDResource>(config: CRUDCompositeConfig<TResource>, direct: CRUDOperationOverrides<TResource> = {}, crud?: FrameworkCRUDRuntime): CRUDOperations<TResource> {
+  const overrides = { ...config.operations, ...direct }
+  const complete = overrides.list && overrides.detail && overrides.create && overrides.update && overrides.delete
+  if (complete) return overrides as CRUDOperations<TResource>
+  const resource = config.resource
+  if (!resource) throw new Error('[vue-framework] Resource-less CRUD config requires complete operations.')
+
+  return {
+    list: overrides.list || (async query => (crud?.list || missingRuntimeCapability('crud.list'))({ resource, query })),
+    detail: overrides.detail || (async (id, query) => (crud?.detail || missingRuntimeCapability('crud.detail'))({ resource, id, query })),
+    create: overrides.create || (async input => (crud?.create || missingRuntimeCapability('crud.create'))({ resource, input })),
+    update: overrides.update || (async (id, input) => (crud?.update || missingRuntimeCapability('crud.update'))({ resource, id, input })),
+    delete: overrides.delete || (async id => (crud?.delete || missingRuntimeCapability('crud.delete'))({ resource, id })),
+    export: overrides.export || (crud?.export ? ({ query, config: operationConfig }) => crud.export!({ resource, query, config: operationConfig }) : undefined),
+    reorder: overrides.reorder || (crud?.reorder ? event => crud.reorder!({ resource, event }) : undefined),
+  } as CRUDOperations<TResource>
 }
 
 export function useCRUDOperations<TResource extends CRUDResource>(config: CRUDCompositeConfig<TResource>, direct: CRUDOperationOverrides<TResource> = {}): CRUDOperations<TResource> {
-  return resolveCRUDOperations(config, direct)
+  return resolveCRUDOperations(config, direct, useFrameworkRuntime().crud)
 }
