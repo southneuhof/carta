@@ -15,7 +15,13 @@ describe('file-based routes', () => {
   })
 
   it('resolves unknown paths to the file-based catch-all', () => {
-    expect(router.resolve('/missing/deep').name).toBe('not-found')
+    const missing = router.resolve('/missing/deep')
+    expect(missing.name).toBe('not-found')
+    expect(missing.matched.length).toBeGreaterThan(0)
+
+    const known = router.resolve('/settings/users')
+    expect(known.name).toBe('users')
+    expect(known.matched.some((route) => route.name === 'not-found')).toBe(false)
   })
 
   it('does not retain layout-prefixed legacy URLs', () => {
