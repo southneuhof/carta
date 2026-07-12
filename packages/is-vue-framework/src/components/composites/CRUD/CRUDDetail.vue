@@ -6,11 +6,11 @@ import Detail from '../Detail.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useVueToPrint } from 'vue-to-print'
 import { parse } from '@southneuhof/utilities/parse'
-import { defaultDetailConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
+import { useFrameworkDefaults } from '@southneuhof/is-vue-framework'
 
 const props = defineProps<{
   config: CRUDCompositeConfig
@@ -20,6 +20,7 @@ const props = defineProps<{
 
 const [route, router] = [useRoute(), useRouter()]
 const crudOperations = useCRUDOperations(props.config, props.operations)
+const defaultDetailConfig = useFrameworkDefaults().detail
 
 const detailConfig: DetailConfig = {
   ...buildDetailConfig(props.config, {

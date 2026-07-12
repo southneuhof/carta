@@ -6,12 +6,12 @@ import Form from '../Form.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { bulkCreateFormProps, composeInputTemplateSheet } from '@southneuhof/is-vue-framework/utilities/crudCreate'
 import Dialog from '@southneuhof/is-vue-framework/components/base/Dialog.vue'
-import { defaultFormConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
 import { defineAsyncComponent } from 'vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
+import { useFrameworkDefaults } from '@southneuhof/is-vue-framework'
 
 const props = defineProps<{
   config: CRUDCompositeConfig
@@ -21,6 +21,7 @@ const props = defineProps<{
 
 const [route, router] = [useRoute(), useRouter()]
 const crudOperations = useCRUDOperations(props.config, props.operations)
+const defaultFormConfig = useFrameworkDefaults().form
 
 if (!props.config.title) props.config.title = String(route.meta.title)
 

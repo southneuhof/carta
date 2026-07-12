@@ -4,7 +4,7 @@ import { buildFormConfig } from '../../../model-config'
 import { useCRUDOperations, type CRUDCompositeConfig, type CRUDOperationOverrides } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 import Form from '../Form.vue'
 import { useRoute, useRouter } from 'vue-router'
-import { defaultFormConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
+import { useFrameworkDefaults } from '@southneuhof/is-vue-framework'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
@@ -18,6 +18,7 @@ const props = defineProps<{
 
 const [route, router] = [useRoute(), useRouter()]
 const crudOperations = useCRUDOperations(props.config, props.operations)
+const defaultFormConfig = useFrameworkDefaults().form
 
 if (!props.config.title) props.config.title = String(route.meta.title)
 

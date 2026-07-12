@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, type PropType } from 'vue'
 import TreeItem from './TreeItem.vue'
-import { defaultTableConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
 import { defaultTableGetData } from '@southneuhof/is-vue-framework/runtimeDefaults'
-import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
+import { useFrameworkDefaults, useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 import { parse } from '@southneuhof/utilities/parse'
 
 const props = defineProps({
@@ -25,6 +24,7 @@ const props = defineProps({
   searchParametersGenerator: { type: Function, default: () => ({}) },
 })
 const runtime = useFrameworkRuntime()
+const defaultTableConfig = useFrameworkDefaults().table
 const getData = props.getData ?? (async (getAPI: string, searchParameters?: Record<string, number | string | undefined>) => {
   const result = await defaultTableGetData(getAPI, searchParameters, runtime.table)
   return { data: result.data, totalPage: result.totalPage ?? 0, total: result.total ?? result.data.length }

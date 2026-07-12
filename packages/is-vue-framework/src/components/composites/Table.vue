@@ -4,14 +4,13 @@ import type { PropType } from 'vue'
 import { parse } from '@southneuhof/utilities/parse'
 import Pagination from '@southneuhof/is-vue-framework/components/utils/Pagination.vue'
 import { defaultTableGetData, getTableFieldTypes } from '@southneuhof/is-vue-framework/runtimeDefaults'
-import { defaultTableConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
 import { onMounted, onBeforeUnmount } from 'vue'
 import Draggable from 'vuedraggable'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import type { CRUDListOperation } from '@southneuhof/is-vue-framework/adapters/crud-operations'
-import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
+import { useFrameworkDefaults, useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   fields: { type: Array as PropType<string[]>, required: true },
@@ -45,6 +44,7 @@ const props = defineProps({
   tableId: { type: String, required: false, default: '' },
 })
 const runtime = useFrameworkRuntime()
+const defaultTableConfig = useFrameworkDefaults().table
 const getData = props.getData ?? ((getAPI: string, searchParameters?: Record<string, number | string | undefined>) => defaultTableGetData(getAPI, searchParameters, runtime.table))
 const onDataLoaded = props.onDataLoaded ?? ((data: any[]) => runtime.table?.onDataLoaded?.(data))
 const slots = useSlots()

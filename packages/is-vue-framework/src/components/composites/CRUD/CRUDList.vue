@@ -12,14 +12,13 @@ import { defaultCRUDListOnExport } from '@southneuhof/is-vue-framework/runtimeDe
 import { useCRUDOperations, type CRUDCompositeConfig, type CRUDOperationOverrides } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 import Form from '../Form.vue'
 import Dialog from '@southneuhof/is-vue-framework/components/base/Dialog.vue'
-import { defaultTableConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
 import Tooltip from '@southneuhof/is-vue-framework/components/base/Tooltip.vue'
 import { toast } from 'vue-sonner'
-import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
+import { useFrameworkDefaults, useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 
 const props = defineProps<{
   config: CRUDCompositeConfig
@@ -29,6 +28,7 @@ const props = defineProps<{
 
 const [route, router] = [useRoute(), useRouter()]
 const runtime = useFrameworkRuntime()
+const defaultTableConfig = useFrameworkDefaults().table
 const crudOperations = useCRUDOperations(props.config, props.operations)
 
 if (!props.config.title) props.config.title = String(route.meta.title)

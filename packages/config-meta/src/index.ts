@@ -9,13 +9,4 @@ export type {
   InputConfig,
 } from './types'
 
-export {
-  baseDefaultGlobalConfig,
-  baseDefaultTableConfig,
-  baseDefaultDetailConfig,
-  baseDefaultFormConfig,
-  baseDefaultsConfigBundle,
-} from './defaults'
-
 export { mergeDefaultsConfig } from './mergeDefaultsConfig'
-export { resolveDefaultsConfig } from './runtime'

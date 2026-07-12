@@ -2,8 +2,7 @@
 import { computed, ref } from 'vue'
 import type { PropType } from 'vue'
 import { defaultTableGetData, getTableFieldTypes } from '@southneuhof/is-vue-framework/runtimeDefaults'
-import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
-import { defaultTableConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
+import { useFrameworkDefaults, useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 import { parse } from '@southneuhof/utilities/parse'
 import Button from '../../base/Button.vue'
 import Icon from '../../base/Icon.vue'
@@ -29,6 +28,7 @@ const props = defineProps({
   searchParametersGenerator: { type: Function, default: () => ({}) },
 })
 const runtime = useFrameworkRuntime()
+const defaultTableConfig = useFrameworkDefaults().table
 const getData = props.getData ?? (async (getAPI: string, searchParameters?: Record<string, number | string | undefined>) => {
   const result = await defaultTableGetData(getAPI, searchParameters, runtime.table)
   return { data: result.data, totalPage: result.totalPage ?? 0, total: result.total ?? result.data.length }

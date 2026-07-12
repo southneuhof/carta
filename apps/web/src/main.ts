@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import { configureParser, parse } from '@southneuhof/utilities/parse'
 import { FrameworkPlugin } from '@southneuhof/is-vue-framework'
 import { frameworkRuntime } from './framework/runtime'
+import { appDefaults } from '@/configs/defaults'
 import { dictionary } from '@/configs/dictionary'
 import App from './App.vue'
 import router from './router'
@@ -52,7 +53,7 @@ declare module 'vue' {
 document.addEventListener('DOMContentLoaded', async () => {
   app.use(createPinia())
   app.use(router)
-  app.use(FrameworkPlugin, frameworkRuntime)
+  app.use(FrameworkPlugin, { runtime: frameworkRuntime, defaults: appDefaults })
   app.use(
     VueTippy,
     // optional

@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { baseDefaultsConfigBundle } from '../defaults'
 import { mergeDefaultsConfig } from '../mergeDefaultsConfig'
-import { resolveDefaultsConfig } from '../runtime'
-import type { DeepPartial, DefaultsConfigBundle } from '../types'
 
 describe('config-meta runtime helpers', () => {
   it('deep merges objects while replacing scalar and array values', () => {
@@ -42,33 +39,14 @@ describe('config-meta runtime helpers', () => {
     })
   })
 
-  it('resolves mobile overrides without mutating shared defaults', () => {
-    const override: DeepPartial<DefaultsConfigBundle> = {
-      table: {
-        fieldsAlias: {
-          name: 'Nama Override',
-        },
-      },
-      global: {
-        fieldsType: {
-          active: {
-            type: 'chip',
-            props: {
-              options: {
-                true: { color: 'success', label: 'Enabled' },
-              },
-            },
-          },
-        },
-      },
-    }
+  it('merges explicit app base without mutating source', () => {
+    const base: Record<string, any> = { global: { fieldsAlias: { name: 'Name' } }, values: ['base'] }
+    const result = mergeDefaultsConfig(base, { global: { fieldsAlias: { code: 'Code' } }, values: ['app'] })
 
-    const resolved = resolveDefaultsConfig(override)
-
-    expect(resolved.table.fieldsAlias.name).toBe('Nama Override')
-    expect(baseDefaultsConfigBundle.table.fieldsAlias.name).toBe('Nama')
-
-    expect(resolved.global.fieldsType.active.props?.options?.true?.label).toBe('Enabled')
-    expect(baseDefaultsConfigBundle.global.fieldsType.active.props?.options?.true?.label).toBe('Aktif')
+    expect(result).toEqual({
+      global: { fieldsAlias: { name: 'Name', code: 'Code' } },
+      values: ['app'],
+    })
+    expect(base).toEqual({ global: { fieldsAlias: { name: 'Name' } }, values: ['base'] })
   })
 })

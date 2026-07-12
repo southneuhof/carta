@@ -1,10 +1,38 @@
-import { resolveDefaultsConfig, type DeepPartial, type DefaultsConfigBundle } from '@repo/config-meta'
+import type { DefaultsConfigBundle } from '@repo/config-meta'
 
-export const baseMobileDefaultsOverride: DeepPartial<DefaultsConfigBundle> = {}
+export const baseMobileDefaults: DefaultsConfigBundle = {
+  global: {
+    fieldSlots: {},
+    fieldsProxy: {},
+    inputConfig: {},
+    fieldsParse: {},
+    fieldsAlias: {},
+    fieldsType: {},
+  },
+  table: {
+    fieldSlots: {},
+    fieldsProxy: {},
+    fieldsAlias: {},
+    fieldsClass: {},
+    fieldsHeaderClass: {},
+    fieldsParse: {},
+    fieldsType: {},
+    fieldsAlign: {},
+  },
+  detail: {
+    fieldSlots: {},
+    fieldsProxy: {},
+    fieldsAlias: {},
+    fieldsParse: {},
+    fieldsType: {},
+  },
+  form: {
+    inputConfig: {},
+    fieldsAlias: {},
+  },
+}
 
-const resolvedDefaults = resolveDefaultsConfig(baseMobileDefaultsOverride)
-
-export const defaultGlobalConfig = resolvedDefaults.global
-export const defaultTableConfig = resolvedDefaults.table
-export const defaultDetailConfig = resolvedDefaults.detail
-export const defaultFormConfig = resolvedDefaults.form
+export const defaultGlobalConfig = baseMobileDefaults.global
+export const defaultTableConfig = baseMobileDefaults.table
+export const defaultDetailConfig = baseMobileDefaults.detail
+export const defaultFormConfig = baseMobileDefaults.form

@@ -7,13 +7,12 @@ import { toast } from 'vue-sonner'
 import { useRoute } from 'vue-router'
 import { componentTypeMap as typeConfigMap } from './common/properties'
 import { keyManager } from '@southneuhof/is-vue-framework/adapters/state'
-import { defaultFormConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
 import { getInputComponentRegistry, resolveInputComponent } from './formInputRegistry'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
 import type { CRUDDetailOperation, CRUDMutationOperation, CRUDUpdateOperation } from '@southneuhof/is-vue-framework/adapters/crud-operations'
-import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
+import { useFrameworkDefaults, useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   inputConfig: { type: Object as PropType<InputConfig>, default: () => ({}) },
@@ -43,6 +42,7 @@ const props = defineProps({
   disabled: { type: Boolean },
 })
 const runtime = useFrameworkRuntime()
+const defaultFormConfig = useFrameworkDefaults().form
 const getDetailData = props.getDetailData ?? ((params: { getAPI: string; id?: string | number | string[]; searchParameters?: object }) => defaultFormGetData(params, runtime.form))
 const beforeSubmit = props.beforeSubmit ?? ((params: { formData: object }) => defaultBeforeSubmit(params, runtime.form))
 const onSubmit = props.onSubmit ?? ((params: { payload: object; method: 'put' | 'post'; targetAPI: string; type: 'create' | 'update' }) => defaultOnSubmit(params, runtime.form))

@@ -3,9 +3,8 @@ import { defaultDetailGetData, defaultDetailOnDataLoaded, getDetailFieldTypes } 
 import { parse } from '@southneuhof/utilities/parse'
 import { computed, onMounted, ref, type PropType } from 'vue'
 import { componentTypeMap, parsedTypes } from './common/properties'
-import { defaultDetailConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
 import type { CRUDDetailOperation } from '@southneuhof/is-vue-framework/adapters/crud-operations'
-import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
+import { useFrameworkDefaults, useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   fields: { type: Array as PropType<string[]>, required: true },
@@ -25,6 +24,7 @@ const props = defineProps({
   rowGap: { type: String, default: '4px' },
 })
 const runtime = useFrameworkRuntime()
+const defaultDetailConfig = useFrameworkDefaults().detail
 const resolvedGetData = props.getData ?? ((getAPI: string, searchParameters?: Record<string, any>, dataID?: string) => defaultDetailGetData(getAPI, searchParameters, dataID, runtime.detail))
 const onDataLoaded = props.onDataLoaded ?? ((data: any) => defaultDetailOnDataLoaded(data, runtime.detail))
 

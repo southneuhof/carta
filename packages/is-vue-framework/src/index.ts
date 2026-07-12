@@ -4,6 +4,19 @@ export * from './model-config'
 export * from './adapters/plugin'
 export * from './runtime'
 export * from './runtimeHooks'
+export * from './defaultsHooks'
+export {
+  frameworkDefaultsKey,
+  resolveFrameworkDefaults,
+} from './adapters/defaults'
+export type {
+  FrameworkDefaultsInput,
+  FrameworkGlobalDefaults,
+  FrameworkTableDefaults,
+  FrameworkDetailDefaults,
+  FrameworkFormDefaults,
+  ResolvedFrameworkDefaults,
+} from './adapters/defaults'
 export {
   parseFilenameFromContentDisposition,
   downloadBlob,
