@@ -12,7 +12,7 @@ import { permissions } from './permissions'
 describe('permissions store', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
-    storageGet.mockImplementation((key: string) => key === 'permissions' ? ['stale-permission'] : { role_id: 2 })
+    storageGet.mockImplementation((key: string) => (key === 'permissions' ? ['stale-permission'] : { role_id: 2 }))
   })
 
   it('clears stale permissions when rebuilt with an empty array', () => {
@@ -23,5 +23,11 @@ describe('permissions store', () => {
     store.build([])
 
     expect(store.has('stale-permission')).toBe(false)
+  })
+
+  it('allows every permission for administrator roles', () => {
+    storageGet.mockImplementation((key: string) => (key === 'permissions' ? [] : { role_id: 1 }))
+
+    expect(permissions().has('view-unlisted-route')).toBe(true)
   })
 })

@@ -1,14 +1,32 @@
 <script setup lang="ts">
 import RailItem from './layouts/RailItem.vue'
 import RailExpand from './layouts/RailExpand.vue'
-import { modules } from '@/stores/modules'
+import navigationManifest from '@/components/navigations/navigation-manifest'
 import Logo from '@/assets/corporate/common/Logo.vue'
 import { ref } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import { permissions } from '@/stores/permissions'
 
 const sidebarexpand = ref<HTMLElement>()
 const sidebarState = ref<{index?: number, open: boolean}>({index: undefined, open: false})
+const accessibleNavigation = navigationManifest.flatMap((item) => {
+  if (item.routes.length === 1) {
+    return permissions().has(`view-${item.permission || item.name}`) ? [item] : []
+  }
+
+  const routes: any[] = []
+  item.routes.forEach((route: any) => {
+    if (route.separator) {
+      if (routes.length && !routes[routes.length - 1].separator) routes.push(route)
+      return
+    }
+    if (route.name && permissions().has(`view-${route.permission || route.name}`)) routes.push(route)
+  })
+  if (routes[routes.length - 1]?.separator) routes.pop()
+
+  return routes.length ? [{ ...item, routes }] : []
+})
 
 onClickOutside(
   (sidebarexpand as any),
@@ -27,7 +45,7 @@ onClickOutside(
       <Logo class="w-12"></Logo>
       <div class="flex h-full w-full flex-col items-start gap-4 overflow-auto">
         <RailItem
-          v-for="(item, index) in modules().value"
+          v-for="(item, index) in accessibleNavigation"
           :key="item.name"
           :title="item.title"
           :state="item.name === String($route.meta.moduleName) ? 2 : sidebarState.index === index ? 1 : 0"
@@ -57,7 +75,7 @@ onClickOutside(
   </div>
   <div class="left-24 z-10 flex flex-row bg-surface sticky top-0 max-h-screen py-3">
     <Transition name="sidebar">
-      <RailExpand v-if="sidebarState.open && sidebarState.index !== undefined" ref="sidebarexpand" :menus="sidebarState.index === -1 ? undefined : modules().value[sidebarState.index]" />
+      <RailExpand v-if="sidebarState.open && sidebarState.index !== undefined" ref="sidebarexpand" :menus="sidebarState.index === -1 ? undefined : accessibleNavigation[sidebarState.index]" />
     </Transition>
   </div>
 </template>

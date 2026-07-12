@@ -1,5 +1,4 @@
 import router from '../router'
-import { modules } from '@/stores/modules'
 import { storage } from '@southneuhof/utilities/storage'
 import { useColorPreference } from '@/stores/colorpreference'
 import { permissions } from '@/stores/permissions'
@@ -235,7 +234,6 @@ class AppServices {
     storage.localStorage.clear()
     storage.cookie.clear()
     if (colorPreference) useColorPreference().set(colorPreference)
-    modules().clear()
     permissions().clear()
 
     if (redirectToSinta) {

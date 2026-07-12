@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { storage } from '@southneuhof/utilities/storage'
-import { modules } from '@/stores/modules'
-import { globalLoading } from '@/stores/loading'
 import { permissions } from '@/stores/permissions'
 import Logo from '@/assets/corporate/common/Logo.vue'
 import { resolvePostLoginRoute } from '@/router/navigation'
@@ -31,7 +29,6 @@ const NO_ACCESS_MESSAGE = 'Anda tidak memiliki akses ke aplikasi ini'
 const NO_DESTINATION_MESSAGE = 'Tidak ada halaman yang dapat diakses oleh akun ini'
 
 function clearStagedAccess() {
-  modules().clear()
   permissions().clear()
 }
 
@@ -89,7 +86,6 @@ async function login() {
     }
 
     permissions().build(tasks)
-    modules().build()
     const destination = resolvePostLoginRoute(router, consumePostLoginRedirect())
     if (!destination) {
       await rejectLogin(NO_DESTINATION_MESSAGE, sessionEstablished, true)
@@ -106,7 +102,6 @@ async function login() {
   }
 }
 
-onMounted(() => setTimeout(() => globalLoading().disable(), 1000))
 </script>
 
 <template>

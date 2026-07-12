@@ -10,11 +10,8 @@ const mocks = vi.hoisted(() => ({
   storageSet: vi.fn(),
   permissionsBuild: vi.fn(),
   permissionsClear: vi.fn(),
-  modulesBuild: vi.fn(),
-  modulesClear: vi.fn(),
   consumeRedirect: vi.fn(),
   resolvePostLoginRoute: vi.fn(),
-  globalLoadingDisable: vi.fn(),
 }))
 
 vi.mock('vue-router', () => ({
@@ -35,14 +32,6 @@ vi.mock('@southneuhof/is-vue-framework/components/inputs/PasswordInput.vue', () 
 
 vi.mock('@/stores/permissions', () => ({
   permissions: () => ({ build: mocks.permissionsBuild, clear: mocks.permissionsClear }),
-}))
-
-vi.mock('@/stores/modules', () => ({
-  modules: () => ({ build: mocks.modulesBuild, clear: mocks.modulesClear }),
-}))
-
-vi.mock('@/stores/loading', () => ({
-  globalLoading: () => ({ disable: mocks.globalLoadingDisable }),
 }))
 
 vi.mock('@/utils/post-login-redirect', () => ({
@@ -106,7 +95,7 @@ describe('login route', () => {
     mocks.resolvePostLoginRoute.mockReturnValue({ name: 'users' })
   })
 
-  it('sends credentials, persists assigned permissions, builds stores, and navigates once', async () => {
+  it('sends credentials, persists assigned permissions, and navigates once', async () => {
     mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', roleId: 'role-1', name: 'Alice', email: 'alice@example.com' } }))
     mocks.permissionsGet.mockResolvedValue(response(true, {
       data: [
@@ -135,7 +124,6 @@ describe('login route', () => {
     })
     expect(mocks.storageSet).toHaveBeenCalledWith('permissions', ['view-users'])
     expect(mocks.permissionsBuild).toHaveBeenCalledExactlyOnceWith(['view-users'])
-    expect(mocks.modulesBuild).toHaveBeenCalledOnce()
     expect(mocks.resolvePostLoginRoute).toHaveBeenCalledWith(mocks.router, '/settings/users')
     expect(mocks.router.push).toHaveBeenCalledExactlyOnceWith({ name: 'users' })
     expect(mocks.signOut).not.toHaveBeenCalled()
@@ -206,7 +194,6 @@ describe('login route', () => {
     expect(mocks.storageSet).not.toHaveBeenCalled()
     expect(mocks.permissionsBuild).not.toHaveBeenCalled()
     expect(mocks.permissionsClear).toHaveBeenCalledOnce()
-    expect(mocks.modulesClear).toHaveBeenCalledOnce()
     expect(mocks.router.push).not.toHaveBeenCalled()
     expect(mocks.signOut).toHaveBeenCalledOnce()
     expect(wrapper.text()).toContain('Anda tidak memiliki akses ke aplikasi ini')
@@ -227,7 +214,6 @@ describe('login route', () => {
     expect(mocks.permissionsBuild).toHaveBeenCalledExactlyOnceWith(['view-users'])
     expect(mocks.storageSet).not.toHaveBeenCalled()
     expect(mocks.permissionsClear).toHaveBeenCalledOnce()
-    expect(mocks.modulesClear).toHaveBeenCalledOnce()
     expect(mocks.router.push).not.toHaveBeenCalled()
     expect(mocks.signOut).toHaveBeenCalledOnce()
     expect(wrapper.text()).toContain('Tidak ada halaman yang dapat diakses oleh akun ini')

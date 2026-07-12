@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ProfileSegment from '../../layouts/ProfileSegment.vue'
-import { modules } from '@/stores/modules'
+import navigationManifest from '@/components/navigations/navigation-manifest'
 import NavItem from './layouts/NavItem.vue'
 import { ref } from 'vue'
 import { onClickOutside } from '@vueuse/core'
@@ -8,11 +8,30 @@ import Logo from '@/assets/corporate/common/Logo.vue'
 import { useRouter } from 'vue-router'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import { permissions } from '@/stores/permissions'
 
 const sidebarexpand = ref<HTMLElement>()
 const sidebarState = ref<{ index: number; open: boolean }>({ index: 0, open: false })
 const sidebarView = ref<'modules' | 'routes' | 'profile'>('modules')
 const router = useRouter()
+const access = permissions()
+const accessibleNavigation = navigationManifest.flatMap((item) => {
+  if (item.routes.length === 1) {
+    return access.has(`view-${item.permission || item.name}`) ? [item] : []
+  }
+
+  const routes: any[] = []
+  item.routes.forEach((route: any) => {
+    if (route.separator) {
+      if (routes.length && !routes[routes.length - 1].separator) routes.push(route)
+      return
+    }
+    if (route.name && access.has(`view-${route.permission || route.name}`)) routes.push(route)
+  })
+  if (routes[routes.length - 1]?.separator) routes.pop()
+
+  return routes.length ? [{ ...item, routes }] : []
+})
 
 const closeSidebar = () => {
   sidebarState.value.open = false
@@ -60,12 +79,12 @@ onClickOutside(sidebarexpand as any, closeSidebar, { ignore: ['#sidebar', '#dial
     <Button kind="icon" variant="standard" size="square" class="ml-2 w-fit" @click="closeSidebar"><Icon name="close" /></Button>
     <TransitionGroup mode="out-in" tag="div" name="viewmode" class="min-w-full overflow-scroll">
       <div v-if="sidebarView === 'modules'" class="flex flex-col gap-2">
-        <NavItem :key="item.name" v-for="(item, index) in modules().value" :route="item" :active="item.name === String($route.meta.moduleName)" @click="selectModule(item, index)" />
+        <NavItem :key="item.name" v-for="(item, index) in accessibleNavigation" :route="item" :active="item.name === String($route.meta.moduleName)" @click="selectModule(item, index)" />
         <NavItem :active="sidebarState.index === -1" :route="{ icon: 'user', title: 'Profil' }" @click="() => (sidebarView = 'profile')" />
       </div>
       <div v-else-if="sidebarView === 'routes'" class="flex flex-col gap-2">
         <NavItem :active="false" :route="{ icon: 'arrow-left', title: 'Kembali' }" @click="sidebarView = 'modules'"></NavItem>
-        <div v-for="route in modules().value[sidebarState.index]?.routes ?? []" :key="route.name">
+        <div v-for="route in accessibleNavigation[sidebarState.index]?.routes ?? []" :key="route.name">
           <div v-if="route.separator" class="px-4 py-2 text-sm text-muted">{{ route.name }}</div>
           <NavItem v-else :active="route.name === String($route.name)" :route="route" @click="() => selectRoute(route.name)" />
         </div>

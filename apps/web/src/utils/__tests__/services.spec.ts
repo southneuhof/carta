@@ -21,7 +21,6 @@ const mocks = vi.hoisted(() => {
     state,
     storage,
     router: { push: vi.fn() },
-    modules: { clear: vi.fn() },
     permissions: { clear: vi.fn() },
     colorPreference: { value: 'light', set: vi.fn() },
     signOut: vi.fn(),
@@ -31,7 +30,6 @@ const mocks = vi.hoisted(() => {
 
 vi.mock('@/router', () => ({ default: mocks.router }))
 vi.mock('@southneuhof/utilities/storage', () => ({ storage: mocks.storage }))
-vi.mock('@/stores/modules', () => ({ modules: () => mocks.modules }))
 vi.mock('@/stores/permissions', () => ({ permissions: () => mocks.permissions }))
 vi.mock('@/stores/colorpreference', () => ({ useColorPreference: () => mocks.colorPreference }))
 vi.mock('vue-sonner', () => ({ toast: { error: mocks.toastError } }))
@@ -157,7 +155,6 @@ describe('legacy app services', () => {
 
     expect(mocks.storage.localStorage.clear).toHaveBeenCalledOnce()
     expect(mocks.storage.cookie.clear).toHaveBeenCalledOnce()
-    expect(mocks.modules.clear).toHaveBeenCalledOnce()
     expect(mocks.permissions.clear).toHaveBeenCalledOnce()
     expect(mocks.router.push).toHaveBeenCalledExactlyOnceWith({ name: 'login', force: true })
   })

@@ -1,5 +1,6 @@
 import type { RouteLocationRaw, Router } from 'vue-router'
-import { modules } from '@/stores/modules'
+import navigationManifest from '@/components/navigations/navigation-manifest'
+import { permissions } from '@/stores/permissions'
 
 type AccessibleRoute = {
   separator?: boolean
@@ -7,10 +8,13 @@ type AccessibleRoute = {
 }
 
 export function getFirstAccessibleRouteName(): string | null {
-  for (const module of modules().value) {
-    const firstRoute = module.routes.find((route) => !(route as AccessibleRoute).separator) as AccessibleRoute | undefined
-    if (firstRoute?.name) {
-      return firstRoute.name
+  const access = permissions()
+
+  for (const module of navigationManifest) {
+    for (const route of module.routes as AccessibleRoute[]) {
+      if (!route.separator && route.name && access.has(`view-${(route as any).permission || route.name}`)) {
+        return route.name
+      }
     }
   }
 
