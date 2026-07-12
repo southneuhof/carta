@@ -63,7 +63,7 @@ onMounted(async () => {
             <slot v-if="$slots['list-content']" name="list-content"></slot>
             <CRUDList v-else :config="config" :operations="operations" :permissions="actionsPermission">
               <template v-for="slotname in Object.keys($slots)" v-slot:[String(slotname)]="data">
-                <slot v-if="slotname.slice(0, 5) === 'list-'" :name="slotname" v-bind="(data as any)"></slot>
+                <slot v-if="slotname.startsWith('list-') || slotname.startsWith('view-')" :name="slotname" v-bind="(data as any)"></slot>
               </template>
             </CRUDList>
           </template>
@@ -72,7 +72,7 @@ onMounted(async () => {
             <slot v-if="$slots['detail-content']" name="detail-content"></slot>
             <CRUDDetail v-else :config="config" :operations="operations" :permissions="actionsPermission">
               <template v-for="slotname in Object.keys($slots)" v-slot:[String(slotname)]="data">
-                <slot v-if="slotname.slice(0, 7) === 'detail-'" :name="slotname" v-bind="(data as any)"></slot>
+                <slot v-if="slotname.startsWith('detail-') || slotname.startsWith('view-')" :name="slotname" v-bind="(data as any)"></slot>
               </template>
             </CRUDDetail>
           </template>

@@ -279,7 +279,7 @@ const { handlePrint } = useVueToPrint({
             </Suspense>
             <Detail v-else v-bind="detailViewConfig" :load="() => crudOperations.detail(String(route.query[`${props.config.name}_id`]), detailConfig.searchParameters)" @loaded="(data: any) => activeData = data">
               <template v-for="slotname in Object.keys($slots)" v-slot:[String(slotname)]="data">
-                <slot v-if="slotname.slice(0, 7) === 'detail-'" :name="slotname" v-bind="(data as any)"></slot>
+                <slot v-if="slotname.startsWith('detail-') || slotname.startsWith('view-')" :name="slotname" v-bind="(data as any)"></slot>
               </template>
             </Detail>
             <slot v-if="$slots['detail-inner-under'] && activeData" name="detail-inner-under" v-bind="{ data: activeData }" />

@@ -367,6 +367,7 @@ onBeforeUnmount(() => {
                   <td v-for="field in fields" class="p-2" :class="fieldsAlignClassMap[fieldsAlign[field] ?? 'start'].text">
                     <component v-if="fieldSlots[field]" :is="fieldSlots[field]" :data="{ data: item }" />
                     <slot v-else-if="$slots[`list-${field}`]" :name="`list-${field}`" v-bind="{ data: item.rawData, index }" />
+                    <slot v-else-if="$slots[`view-${field}`]" :name="`view-${field}`" v-bind="{ data: item.rawData, index }" />
                     <p v-else-if="tableData?.rawData[index]?.[field] == null">-</p>
                     <component
                       v-else-if="fieldsType[field]?.type && tableFieldTypes[fieldsType[field]?.type]"

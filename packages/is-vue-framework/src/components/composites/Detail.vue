@@ -96,6 +96,7 @@ watch(
             <td :style="{ paddingTop: rowGap, paddingBottom: rowGap }" className="px-2 align-top">
               <component v-if="fieldSlots[field]" :is="fieldSlots[field]" :data="detailData.rawData" />
               <slot v-else-if="$slots[`detail-${field}`]" :name="`detail-${field}`" v-bind="{ data: detailData?.rawData, index }"></slot>
+              <slot v-else-if="$slots[`view-${field}`]" :name="`view-${field}`" v-bind="{ data: detailData?.rawData, index }"></slot>
               <template v-else-if="detailData?.rawData[field] == null">-</template>
               <component
                 v-else-if="fieldsType[field]?.type && detailFieldTypes[fieldsType[field]?.type]"

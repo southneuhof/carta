@@ -230,7 +230,7 @@ onMounted(() => {
                   class="max-h-[calc(100vh-230px)] overflow-auto"
                 >
                   <template v-for="slotname in Object.keys($slots)" v-slot:[String(slotname)]="data">
-                    <slot v-if="slotname.slice(0, 5) === 'list-'" :name="slotname" v-bind="(data as any)"></slot>
+                    <slot v-if="slotname.startsWith('list-') || slotname.startsWith('view-')" :name="slotname" v-bind="(data as any)"></slot>
                   </template>
                   <template #list-rowActions="{ data }">
                     <slot v-if="$slots['list-rowActions']" v-bind="{ data }"></slot>
