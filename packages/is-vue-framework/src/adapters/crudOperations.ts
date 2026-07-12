@@ -1,5 +1,6 @@
 import type { ModelConfig } from '../model-config'
-import { getFrameworkBehaviors, missingBehavior } from './behaviors'
+import { missingBehavior, type FrameworkCRUDBehaviors } from './behaviors'
+import { useFrameworkBehaviors } from '../runtimeHooks'
 
 export type CRUDIdentity = string | number
 export type CRUDQuery = Record<string, any>
@@ -40,11 +41,10 @@ export function defineCRUDCompositeConfig<const TResource, const TConfig extends
   return config
 }
 
-export function resolveCRUDOperations<TResource>(config: CRUDCompositeConfig<TResource>, direct: CRUDOperationOverrides = {}): CRUDOperations {
+export function resolveCRUDOperations<TResource>(config: CRUDCompositeConfig<TResource>, direct: CRUDOperationOverrides = {}, crud?: FrameworkCRUDBehaviors<TResource>): CRUDOperations {
   const overrides = { ...config.operations, ...direct }
   const complete = overrides.list && overrides.detail && overrides.create && overrides.update && overrides.delete
   if (complete) return overrides as CRUDOperations
-  const crud = getFrameworkBehaviors().crud
   return {
     list: overrides.list || (async (query) => (crud?.list || missingBehavior('crud.list'))({ resource: config.resource, query })),
     detail: overrides.detail || (async (id, query) => (crud?.detail || missingBehavior('crud.detail'))({ resource: config.resource, id, query })),
@@ -54,4 +54,8 @@ export function resolveCRUDOperations<TResource>(config: CRUDCompositeConfig<TRe
     export: overrides.export || (crud?.export ? (({ query, config: operationConfig }) => crud.export!({ resource: config.resource, query, config: operationConfig })) : undefined),
     reorder: overrides.reorder || (crud?.reorder ? ((event) => crud.reorder!({ resource: config.resource, event })) : undefined),
   }
+}
+
+export function useCRUDOperations<TResource>(config: CRUDCompositeConfig<TResource>, direct: CRUDOperationOverrides = {}): CRUDOperations {
+  return resolveCRUDOperations(config, direct, useFrameworkBehaviors().crud)
 }

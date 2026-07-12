@@ -3,6 +3,7 @@ import { ref, onMounted, type PropType } from 'vue'
 import TreeItem from './TreeItem.vue'
 import { defaultTableConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
 import { defaultTableGetData } from '@southneuhof/is-vue-framework/behaviors/table'
+import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
 import { parse } from '@southneuhof/utilities/parse'
 
 const props = defineProps({
@@ -19,10 +20,14 @@ const props = defineProps({
   getData: {
     type: Function as PropType<(getAPI: string, searchParameters?: Record<string, number | string | undefined>) => Promise<{ data: Record<string, any>[]; totalPage: number; total: number }>>,
     required: false,
-    default: defaultTableGetData,
   },
   levels: { type: Number },
   searchParametersGenerator: { type: Function, default: () => ({}) },
+})
+const behaviors = useFrameworkBehaviors()
+const getData = props.getData ?? (async (getAPI: string, searchParameters?: Record<string, number | string | undefined>) => {
+  const result = await defaultTableGetData(getAPI, searchParameters, behaviors.table)
+  return { data: result.data, totalPage: result.totalPage ?? 0, total: result.total ?? result.data.length }
 })
 
 const fieldsAlias = { ...defaultTableConfig.fieldsAlias, ...props.fieldsAlias }
@@ -47,7 +52,7 @@ const rootItems = ref<any[]>([])
 
 onMounted(async () => {
   if (props.getAPI) {
-    const { data } = await props.getData(props.getAPI, { level: 1, ...props.searchParameters, ...props.searchParametersGenerator(1, null) })
+    const { data } = await getData(props.getAPI, { level: 1, ...props.searchParameters, ...props.searchParametersGenerator(1, null) })
     rootItems.value = formatTableData(data)
     props.onDataLoaded(data)
   }
@@ -74,7 +79,7 @@ onMounted(async () => {
         :fieldsType="fieldsType"
         :getAPI="props.getAPI"
         :searchParameters="props.searchParameters"
-        :getData="props.getData"
+        :getData="getData"
         :searchParametersGenerator="searchParametersGenerator"
         :fieldsProxy="fieldsProxy"
       >

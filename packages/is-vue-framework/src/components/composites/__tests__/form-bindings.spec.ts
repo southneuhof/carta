@@ -4,6 +4,7 @@ import Form from '../Form.vue'
 import FormBindingTestInput from './FormBindingTestInput.vue'
 import { registerInputComponents, resetInputComponentRegistryForTests } from '../formInputRegistry'
 import { resetFrameworkDefaultsForTests } from '../../../adapters/defaults'
+import { FrameworkPlugin } from '../../../adapters/plugin'
 
 vi.mock('vue-router', () => ({
   useRoute: () => ({
@@ -69,6 +70,7 @@ async function mountForm({ formProps = {}, initialModel = {} }: MountOptions = {
   })
 
   const app = createApp(Host)
+  app.use(FrameworkPlugin, { behaviors: {} })
   app.mount(container)
   await flushForm()
 

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { parse } from '@southneuhof/utilities/parse'
 import { ref, watch } from 'vue'
-import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import { missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
 import { useDropZone } from '@vueuse/core'
 import { ContextMenuContent, ContextMenuItem, ContextMenuPortal, ContextMenuTrigger, ContextMenuRoot } from 'radix-vue'
 import { toast } from 'vue-sonner'
@@ -45,6 +46,7 @@ const props = defineProps({
     default: false,
   },
 })
+const behaviors = useFrameworkBehaviors()
 
 const data = ref()
 const modelValue = defineModel<any>()
@@ -63,7 +65,7 @@ const ROOT_VISIBLE_SEGMENTS = ['storage', 'public']
 const ROOT_STORAGE_PATH = '/storage/public'
 
 async function getData() {
-  const behavior = getFrameworkBehaviors().fileManager?.listFiles
+  const behavior = behaviors.fileManager?.listFiles
   if (!behavior) missingBehavior('fileManager.listFiles')
   const responseData = await behavior(searchParameters.value)
 
@@ -130,7 +132,7 @@ function handleRowClick(item: any) {
 
 async function onDrop(files: File[] | null) {
   if (files && files.length > 0) {
-    const uploadFile = getFrameworkBehaviors().fileManager?.uploadFile
+    const uploadFile = behaviors.fileManager?.uploadFile
     if (!uploadFile) missingBehavior('fileManager.uploadFile')
     const uploadPromises = files.map((file) => uploadFile(file, modelValue.value?.path))
 
@@ -152,13 +154,13 @@ await getData()
 const _window = window
 
 function deleteFile(path: string) {
-  const behavior = getFrameworkBehaviors().fileManager?.deleteFile
+  const behavior = behaviors.fileManager?.deleteFile
   if (!behavior) missingBehavior('fileManager.deleteFile')
   return behavior(path)
 }
 
 async function ensureFolderNameAvailable(dir: string, folderName: string) {
-  const behavior = getFrameworkBehaviors().fileManager?.listFiles
+  const behavior = behaviors.fileManager?.listFiles
   if (!behavior) missingBehavior('fileManager.listFiles')
 
   const existingItems = (await behavior({ dir, limit: 1000 })) || []
@@ -173,7 +175,7 @@ async function ensureFolderNameAvailable(dir: string, folderName: string) {
 
 async function createFolder(payload: Record<string, any>) {
   await ensureFolderNameAvailable(payload.dir, payload.folder_name)
-  const behavior = getFrameworkBehaviors().fileManager?.createFolder
+  const behavior = behaviors.fileManager?.createFolder
   if (!behavior) missingBehavior('fileManager.createFolder')
   return behavior(payload.dir, payload.folder_name)
 }

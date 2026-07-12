@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import type { PropType } from 'vue'
 import { defaultTableGetData, getTableFieldTypes } from '@southneuhof/is-vue-framework/behaviors/table'
+import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
 import { defaultTableConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
 import { parse } from '@southneuhof/utilities/parse'
 import Button from '../../base/Button.vue'
@@ -23,10 +24,14 @@ const props = defineProps({
   getData: {
     type: Function as PropType<(getAPI: string, searchParameters?: Record<string, number | string | undefined>) => Promise<{ data: Record<string, any>[]; totalPage: number; total: number }>>,
     required: false,
-    default: defaultTableGetData,
   },
   levels: { type: Number },
   searchParametersGenerator: { type: Function, default: () => ({}) },
+})
+const behaviors = useFrameworkBehaviors()
+const getData = props.getData ?? (async (getAPI: string, searchParameters?: Record<string, number | string | undefined>) => {
+  const result = await defaultTableGetData(getAPI, searchParameters, behaviors.table)
+  return { data: result.data, totalPage: result.totalPage ?? 0, total: result.total ?? result.data.length }
 })
 
 const fieldsAlias = { ...defaultTableConfig.fieldsAlias, ...props.fieldsAlias }
@@ -34,7 +39,7 @@ const fieldsProxy = { ...defaultTableConfig.fieldsProxy, ...props.fieldsProxy }
 
 const children = ref<any[]>([])
 const expanded = ref(false)
-const tableFieldTypes = computed(() => getTableFieldTypes())
+const tableFieldTypes = computed(() => getTableFieldTypes(behaviors.table))
 
 function formatTableData(data: Record<string, any>[]) {
   const res: any[] = []
@@ -53,7 +58,7 @@ function formatTableData(data: Record<string, any>[]) {
 
 const loadData = async () => {
   try {
-    const { data } = await props.getData(props.getAPI, {
+    const { data } = await getData(props.getAPI, {
       level: props.level + 1,
       parent_id: props.data.id,
       ...props.searchParameters,
@@ -108,7 +113,7 @@ const toggle = async () => {
         :searchParametersGenerator="searchParametersGenerator"
         :getAPI="props.getAPI"
         :searchParameters="props.searchParameters"
-        :getData="props.getData"
+        :getData="getData"
       >
         <template v-for="slotname in Object.keys($slots)" v-slot:[String(slotname)]="data: any">
           <slot v-if="slotname.slice(0, 5) === 'list-'" :name="slotname" v-bind="(data as any)"></slot>

@@ -4,6 +4,8 @@ export * from './router'
 export * from './model-config'
 export * from './adapters/behaviors'
 export * from './adapters/plugin'
+export * from './runtime'
+export * from './runtimeHooks'
 export {
   parseFilenameFromContentDisposition,
   downloadBlob,
@@ -11,6 +13,7 @@ export {
 export {
   defineCRUDCompositeConfig,
   resolveCRUDOperations,
+  useCRUDOperations,
 } from './adapters/crudOperations'
 export type {
   CRUDCompositeConfig,

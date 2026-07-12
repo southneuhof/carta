@@ -1,7 +1,7 @@
 import { Suspense, createApp, h } from 'vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import FileManager from '../FileManager.vue'
-import { configureFrameworkBehaviors, resetFrameworkBehaviorsForTests } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import { FrameworkPlugin } from '@southneuhof/is-vue-framework/adapters/plugin'
 
 vi.mock('../_layouts/PathTree.vue', () => ({
   default: {
@@ -32,6 +32,7 @@ vi.mock('@southneuhof/is-vue-framework/components/base/Spinner.vue', () => ({
 }))
 
 const mounted: Array<ReturnType<typeof createApp>> = []
+let runtime: any = { behaviors: {} }
 
 async function flush() {
   await Promise.resolve()
@@ -56,14 +57,13 @@ function mountFileManager(activePath = '/storage/public/folder-b') {
   })
 
   mounted.push(app)
+  app.use(FrameworkPlugin, runtime)
   app.mount(host)
 
   return { host }
 }
 
-beforeEach(() => {
-  resetFrameworkBehaviorsForTests()
-})
+beforeEach(() => { runtime = { behaviors: {} } })
 
 afterEach(() => {
   for (const app of mounted.splice(0)) app.unmount()
@@ -73,8 +73,7 @@ afterEach(() => {
 
 describe('FileManager delete navigation', () => {
   it('falls back to a sibling folder before navigating to the parent', async () => {
-    configureFrameworkBehaviors({
-      fileManager: {
+    runtime = { behaviors: { fileManager: {
         listFiles: vi.fn().mockImplementation(({ dir }: { dir: string }) => {
           if (dir === '/storage/public') {
             return Promise.resolve([
@@ -85,8 +84,7 @@ describe('FileManager delete navigation', () => {
 
           return Promise.resolve([])
         }),
-      },
-    })
+      } } }
 
     mountFileManager()
     await flush()
@@ -101,11 +99,9 @@ describe('FileManager delete navigation', () => {
   })
 
   it('falls back to the parent folder when no siblings remain', async () => {
-    configureFrameworkBehaviors({
-      fileManager: {
+    runtime = { behaviors: { fileManager: {
         listFiles: vi.fn().mockResolvedValue([]),
-      },
-    })
+      } } }
 
     mountFileManager()
     await flush()

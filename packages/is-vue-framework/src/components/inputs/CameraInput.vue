@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { toast } from 'vue-sonner'
-import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import { missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
 import Dialog from '../base/Dialog.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
@@ -13,6 +14,7 @@ const props = defineProps({
     required: false,
   },
 })
+const behaviors = useFrameworkBehaviors()
 const emit = defineEmits(['update:modelValue'])
 
 const isCameraOpen = ref(false)
@@ -92,7 +94,7 @@ const handleFileUpload = (file: File) => {
   const reader = new FileReader()
   reader.readAsDataURL(file)
   uploadPercentage.value = 0
-  const fileUpload = getFrameworkBehaviors().upload?.fileUpload
+  const fileUpload = behaviors.upload?.fileUpload
   if (!fileUpload) missingBehavior('upload.fileUpload')
   fileUpload(file, '', (event: any) => {
       uploadDetail.value = file

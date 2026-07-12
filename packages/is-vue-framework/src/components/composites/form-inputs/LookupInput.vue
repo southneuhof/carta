@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defaultGetData, defaultGetDetail, defaultFieldsAlias, defaultDataFormatter } from '@southneuhof/is-vue-framework/behaviors/lookup'
+import { defaultGetData, defaultGetDetail, getDefaultFieldsAlias, defaultDataFormatter } from '@southneuhof/is-vue-framework/behaviors/lookup'
 import { ref, type PropType, watch, computed, onMounted } from 'vue'
 import { commonProps } from '../../inputs/commonprops'
 import Radio from '../../inputs/Radio.vue'
@@ -17,16 +17,15 @@ import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Chip from '@southneuhof/is-vue-framework/components/base/Chip.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   ...commonProps,
   getData: {
     type: Function as PropType<(getAPI: string, searchParameters?: object) => Promise<any>>,
-    default: defaultGetData,
   },
   getDetail: {
     type: Function as PropType<(getAPI: string, id: string | number, searchParameters?: object) => Promise<any>>,
-    default: defaultGetDetail,
   },
   getAPI: {
     type: String,
@@ -62,7 +61,6 @@ const props = defineProps({
   },
   fieldsAlias: {
     type: Object,
-    default: defaultFieldsAlias,
   },
   preview: {
     type: String,
@@ -88,7 +86,6 @@ const props = defineProps({
   },
   dataFormatter: {
     type: Function,
-    default: defaultDataFormatter,
   },
   inlineAddFormConfig: {
     type: Object,
@@ -114,6 +111,11 @@ const props = defineProps({
   formData: { type: Object },
   onSelectData: { type: Function as PropType<(formData: any, selectedData: any, formDataSetter: (newData: any) => void) => void> },
 })
+const behaviors = useFrameworkBehaviors()
+const resolvedGetData = props.getData ?? ((getAPI: string, searchParameters?: object) => defaultGetData(getAPI, searchParameters ?? {}, behaviors.lookup))
+const resolvedGetDetail = props.getDetail ?? ((getAPI: string, id: string | number, searchParameters?: object) => defaultGetDetail(getAPI, id, searchParameters, behaviors.lookup))
+const resolvedFieldsAlias = props.fieldsAlias ?? getDefaultFieldsAlias(behaviors.lookup)
+const resolvedDataFormatter = props.dataFormatter ?? ((data: Array<Record<string, any>>, allowMulti: boolean, pick: string) => defaultDataFormatter(data, allowMulti, pick, behaviors.lookup))
 
 const modelValue = defineModel<any>()
 const emit = defineEmits<{
@@ -205,7 +207,7 @@ function formatSelectionForModel(selection: Array<Record<string, any>>) {
     data = transformedData
   }
   if (!data.length) return props.multi ? [] : null
-  return props.dataFormatter(data, props.multi, props.pick, props.fields)
+  return resolvedDataFormatter(data, props.multi, props.pick, props.fields)
 }
 
 function syncModelAndSelectHook(selection: Array<Record<string, any>>) {
@@ -225,7 +227,7 @@ async function hydrateSingleSelectedData() {
   if (selectedId == null || selectedId === '') return
 
   try {
-    const detailData = await props.getDetail(props.getAPI, selectedId, props.searchParameters)
+    const detailData = await resolvedGetDetail(props.getAPI, selectedId, props.searchParameters)
     if (!detailData) return
 
     syncSelection([deepClone(detailData)])
@@ -375,14 +377,14 @@ function handleClick(data: Record<string, any>) {
             </div>
             <Table
               :fields="fields"
-              :fieldsAlias="fieldsAlias"
+              :fieldsAlias="resolvedFieldsAlias"
               :fieldsType="fieldsType"
               :fieldsProxy="fieldsProxy"
               :fieldsDictionary="fieldsDictionary"
               :fieldsParse="fieldsParse"
               :limitSet="[5, 10]"
               :getAPI="getAPI"
-              :getData="getData"
+              :getData="resolvedGetData"
               :searchParameters="combinedSearchParameters"
               paginated
               :onRowClick="handleClick"
@@ -428,7 +430,7 @@ function handleClick(data: Record<string, any>) {
         </template>
       </DialogForm>
     </div>
-    <Table v-if="multi && modelValue?.length && !hidePreviewTable" :key="previewTableKey" :data="modelValue" :fields="fields" :fieldsAlias="fieldsAlias">
+    <Table v-if="multi && modelValue?.length && !hidePreviewTable" :key="previewTableKey" :data="modelValue" :fields="fields" :fieldsAlias="resolvedFieldsAlias">
       <template #list-rowActions="{ data }">
         <ConfirmationDialog
           :onConfirm="

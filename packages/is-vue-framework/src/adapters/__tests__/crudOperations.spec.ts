@@ -1,5 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import { configureFrameworkBehaviors, resetFrameworkBehaviorsForTests } from '../behaviors'
+import { describe, expect, it, vi } from 'vitest'
 import {
   defineCRUDCompositeConfig,
   resolveCRUDOperations,
@@ -16,8 +15,6 @@ function operations(label: string): CRUDOperations {
   }
 }
 
-afterEach(resetFrameworkBehaviorsForTests)
-
 describe('CRUD behaviors', () => {
   it('keeps resources opaque and binds every operation argument', async () => {
     const resource = { transportSpecific: Symbol('resource') }
@@ -28,10 +25,8 @@ describe('CRUD behaviors', () => {
       update: vi.fn(async () => ({ label: 'update' })),
       delete: vi.fn(async () => ({ label: 'delete' })),
     }
-    configureFrameworkBehaviors<typeof resource>({ crud })
-
     const config = defineCRUDCompositeConfig({ name: 'items', title: 'Items', resource })
-    const resolved = resolveCRUDOperations(config)
+    const resolved = resolveCRUDOperations(config, {}, crud)
     await resolved.list({ page: 2 })
     await resolved.detail('1', { active: true })
     await resolved.create({ name: 'new' })
@@ -46,18 +41,18 @@ describe('CRUD behaviors', () => {
   })
 
   it('applies direct overrides after config overrides', async () => {
-    configureFrameworkBehaviors({ crud: {
+    const crud = {
       list: async () => ({ data: [{ label: 'default' }] }),
       detail: async () => ({ label: 'default' }),
       create: async () => ({ label: 'default' }),
       update: async () => ({ label: 'default' }),
       delete: async () => ({ label: 'default' }),
-    } })
+    }
     const configList = vi.fn(async () => ({ data: [{ label: 'config' }] }))
     const directList = vi.fn(async () => ({ data: [{ label: 'direct' }] }))
     const config = defineCRUDCompositeConfig({ name: 'items', title: 'Items', resource: {}, operations: { list: configList } })
 
-    await expect(resolveCRUDOperations(config, { list: directList }).list()).resolves.toEqual({ data: [{ label: 'direct' }] })
+    await expect(resolveCRUDOperations(config, { list: directList }, crud).list()).resolves.toEqual({ data: [{ label: 'direct' }] })
     expect(configList).not.toHaveBeenCalled()
   })
 

@@ -1,9 +1,10 @@
 import { Suspense, createApp, h, nextTick, ref } from 'vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import PathDetail from '../_layouts/PathDetail.vue'
-import { configureFrameworkBehaviors, resetFrameworkBehaviorsForTests } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import { FrameworkPlugin } from '@southneuhof/is-vue-framework/adapters/plugin'
 
 const mounted: Array<ReturnType<typeof createApp>> = []
+let runtime: any
 
 const fixtureItems = [
   {
@@ -87,6 +88,7 @@ function mountPathDetail(
   })
 
   app.directive('columns-resizable', {})
+  app.use(FrameworkPlugin, runtime)
 
   mounted.push(app)
   app.mount(host)
@@ -103,15 +105,12 @@ beforeEach(() => {
     value: createLocalStorageMock(),
     configurable: true,
   })
-  resetFrameworkBehaviorsForTests()
-  configureFrameworkBehaviors({
-    fileManager: {
+  runtime = { behaviors: { fileManager: {
       listFiles: vi.fn().mockResolvedValue(fixtureItems),
       uploadFile: vi.fn(),
       createFolder: vi.fn(),
       deleteFile: vi.fn().mockResolvedValue(undefined),
-    },
-  })
+    } } }
 })
 
 afterEach(() => {

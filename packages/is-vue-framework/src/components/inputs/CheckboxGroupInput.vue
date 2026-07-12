@@ -4,6 +4,7 @@ import { onMounted, ref, type PropType } from 'vue'
 import { commonProps } from './commonprops'
 import BaseInput from './BaseInput.vue'
 import Checkbox from './CheckboxInput.vue'
+import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   pick: { type: String, default: 'id' },
@@ -21,7 +22,6 @@ const props = defineProps({
   getData: {
     type: Function as PropType<(getAPI: string, searchParameters: object) => Promise<Array<any>>>,
     required: false,
-    default: defaultGetData,
   },
   data: {
     type: Array as PropType<any[]>,
@@ -31,6 +31,8 @@ const props = defineProps({
   },
   ...commonProps,
 })
+const behaviors = useFrameworkBehaviors()
+const getData = props.getData ?? ((getAPI: string, searchParameters: object) => defaultGetData(getAPI, searchParameters, behaviors.checkboxGroup))
 
 const modelValue = defineModel<any[]>({ default: () => [] })
 
@@ -39,7 +41,7 @@ const data = ref<any[]>()
 const selected = ref<any>([])
 
 onMounted(async () => {
-  if (props.getAPI) data.value = await props.getData(props.getAPI, props.searchParameters)
+  if (props.getAPI) data.value = await getData(props.getAPI, props.searchParameters)
   else data.value = props.data
   if (props.uniqueIDAs) {
     const parsed = modelValue.value.map((item) => ({ ...item, [props.pick]: item[props.uniqueIDAs!], [props.uniqueIDAs!]: undefined }))

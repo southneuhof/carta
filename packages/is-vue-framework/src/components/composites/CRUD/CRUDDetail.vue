@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { provide, ref } from 'vue'
 import { buildDetailConfig } from '../../../model-config'
-import { resolveCRUDOperations, type CRUDCompositeConfig, type CRUDOperationOverrides } from '@southneuhof/is-vue-framework/adapters/crud-operations'
+import { useCRUDOperations, type CRUDCompositeConfig, type CRUDOperationOverrides } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 import Detail from '../Detail.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { defaultOnExport } from '@southneuhof/is-vue-framework/behaviors/crudDetail'
@@ -20,7 +20,7 @@ const props = defineProps<{
 }>()
 
 const [route, router] = [useRoute(), useRouter()]
-const crudOperations = resolveCRUDOperations(props.config, props.operations)
+const crudOperations = useCRUDOperations(props.config, props.operations)
 
 const detailConfig: DetailConfig = {
   ...buildDetailConfig(props.config, {

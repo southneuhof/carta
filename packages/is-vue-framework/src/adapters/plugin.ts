@@ -1,24 +1,13 @@
-import type { Plugin } from 'vue'
-import { configureFrameworkBehaviors, type FrameworkBehaviors } from './behaviors'
-import { applyFrameworkConfig, applyFrameworkDefaults, type FrameworkAppConfigDefaults, type FrameworkDefaultsInput } from './defaults'
-import { registerInputComponents, type FrameworkInputRegistry } from '../components/composites/formInputRegistry'
+import type { App, Plugin } from 'vue'
+import type { FrameworkRuntime } from '../runtime'
+import { frameworkRuntimeKey } from '../runtime'
 
-export interface FrameworkPluginOptions<TCRUDResource = unknown> {
-  extension?: {
-    inputs?: FrameworkInputRegistry
-  }
-  config?: FrameworkAppConfigDefaults
-  defaults?: FrameworkDefaultsInput
-  behaviors?: FrameworkBehaviors<TCRUDResource>
-}
+export const FrameworkPlugin: Plugin<[runtime: FrameworkRuntime]> = {
+  install(app: App, runtime: FrameworkRuntime) {
+    if (!runtime || !runtime.behaviors) {
+      throw new Error('[vue-framework] FrameworkPlugin requires a runtime with behaviors.')
+    }
 
-export function createFrameworkPlugin<TCRUDResource = unknown>(options: FrameworkPluginOptions<TCRUDResource> = {}): Plugin {
-  return {
-    install() {
-      if (options.extension?.inputs) registerInputComponents(options.extension.inputs)
-      if (options.config) applyFrameworkConfig(options.config)
-      if (options.defaults) applyFrameworkDefaults(options.defaults)
-      if (options.behaviors) configureFrameworkBehaviors(options.behaviors)
-    },
-  }
+    app.provide(frameworkRuntimeKey, runtime)
+  },
 }

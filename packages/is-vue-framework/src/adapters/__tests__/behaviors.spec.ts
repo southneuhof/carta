@@ -1,118 +1,58 @@
-import { beforeEach, describe, expect, it } from 'vitest'
-import { configureFrameworkBehaviors, getFrameworkBehaviors, missingBehavior, resetFrameworkBehaviorsForTests } from '../behaviors'
-import config, { applyFrameworkConfig, applyFrameworkDefaults, defaultDetailConfig, defaultFormConfig, defaultTableConfig, mode } from '../defaults'
+import { createApp, defineComponent, h } from 'vue'
+import { describe, expect, it } from 'vitest'
+import { FrameworkPlugin } from '../plugin'
+import { useFrameworkBehaviors, useFrameworkRuntime } from '../../runtimeHooks'
 
-describe('framework behavior registry', () => {
-  beforeEach(() => {
-    resetFrameworkBehaviorsForTests()
-  })
-
-  it('stores configured behavior groups', async () => {
-    const getData = async () => ({ data: [], total: 0, totalPage: 0 })
-
-    configureFrameworkBehaviors({
-      table: { getData },
-    })
-
-    expect(getFrameworkBehaviors().table?.getData).toBe(getData)
-  })
-
-  it('merges behavior groups without replacing existing members', () => {
-    const getData = async () => ({ data: [], total: 0, totalPage: 0 })
-    const onDataLoaded = () => {}
-
-    configureFrameworkBehaviors({ table: { getData } })
-    configureFrameworkBehaviors({ table: { onDataLoaded } })
-
-    expect(getFrameworkBehaviors().table?.getData).toBe(getData)
-    expect(getFrameworkBehaviors().table?.onDataLoaded).toBe(onDataLoaded)
-  })
-
-  it('throws a clear missing behavior error', () => {
-    expect(() => missingBehavior('table.getData')).toThrow('Missing behavior: table.getData')
-  })
-
-  it('applies defaults through defaults registry API', () => {
-    applyFrameworkDefaults({
-      table: {
-        fieldsAlias: { title: 'Judul' },
-        fieldsClass: { title: 'truncate' },
-        fieldsType: { active: { type: 'chip' } },
-        fieldsAlign: { active: 'center' },
-      },
-      detail: {
-        fieldsAlias: { description: 'Deskripsi' },
-        fieldsType: { status: { type: 'chip' } },
-      },
-      form: {
-        fieldsAlias: { code: 'Kode' },
-        inputConfig: { code: { type: 'text', props: { required: true } } },
-      },
-      mode: 'custom',
-    })
-    applyFrameworkConfig({
-      apiUrl: 'https://api.example.com/',
-    })
-
-    expect(defaultTableConfig.fieldsAlias.title).toBe('Judul')
-    expect(defaultTableConfig.fieldsClass.title).toBe('truncate')
-    expect(defaultTableConfig.fieldsType.active?.type).toBe('chip')
-    expect(defaultTableConfig.fieldsAlign.active).toBe('center')
-    expect(defaultDetailConfig.fieldsAlias.description).toBe('Deskripsi')
-    expect(defaultDetailConfig.fieldsType.status?.type).toBe('chip')
-    expect(defaultFormConfig.fieldsAlias.code).toBe('Kode')
-    expect(defaultFormConfig.inputConfig.code?.type).toBe('text')
-    expect(config.apiUrl).toBe('https://api.example.com/')
-    expect(mode).toBe('custom')
-  })
-
-  it('deep merges defaults across repeated calls', () => {
-    applyFrameworkDefaults({
-      table: {
-        fieldsAlias: { title: 'Judul' },
-        fieldsType: { status: { type: 'chip', props: { color: 'success' } } },
+describe('framework runtime', () => {
+  it('provides behaviors to descendants', () => {
+    const behavior = { table: { getData: async () => ({ data: [] }) } }
+    let received: unknown
+    const App = defineComponent({
+      setup() {
+        received = useFrameworkBehaviors()
+        return () => h('div')
       },
     })
-    applyFrameworkConfig({
-      server: { timeout: 1000 },
-    })
-
-    applyFrameworkDefaults({
-      table: {
-        fieldsAlias: { code: 'Kode' },
-        fieldsType: { status: { props: { rounded: true } } },
-      },
-    })
-    applyFrameworkConfig({
-      server: { retries: 2 },
-    })
-
-    expect(defaultTableConfig.fieldsAlias.title).toBe('Judul')
-    expect(defaultTableConfig.fieldsAlias.code).toBe('Kode')
-    expect(defaultTableConfig.fieldsType.status?.type).toBe('chip')
-    expect(defaultTableConfig.fieldsType.status?.props?.color).toBe('success')
-    expect(defaultTableConfig.fieldsType.status?.props?.rounded).toBe(true)
-    expect(config.server.timeout).toBe(1000)
-    expect(config.server.retries).toBe(2)
+    const app = createApp(App)
+    const host = document.createElement('div')
+    app.use(FrameworkPlugin, { behaviors: behavior })
+    app.mount(host)
+    app.unmount()
+    expect(received).toBe(behavior)
   })
 
-  it('resets defaults when behavior registry resets for tests', () => {
-    applyFrameworkDefaults({
-      table: { fieldsAlias: { title: 'Judul' } },
-      detail: { fieldsAlias: { title: 'Judul' } },
-      form: { fieldsAlias: { title: 'Judul' } },
-      mode: 'custom',
+  it('isolates runtimes between apps', () => {
+    const first = { table: { getData: async () => ({ data: [] }) } }
+    const second = { table: { getData: async () => ({ data: [] }) } }
+    const seen: unknown[] = []
+    const App = defineComponent({ setup: () => { seen.push(useFrameworkBehaviors()); return () => h('div') } })
+    const host1 = document.createElement('div')
+    const host2 = document.createElement('div')
+    const app1 = createApp(App).use(FrameworkPlugin, { behaviors: first })
+    const app2 = createApp(App).use(FrameworkPlugin, { behaviors: second })
+    app1.mount(host1)
+    app2.mount(host2)
+    app1.unmount()
+    app2.unmount()
+    expect(seen).toEqual([first, second])
+  })
+
+  it('reports missing installation clearly', () => {
+    let error: unknown
+    const App = defineComponent({
+      setup() {
+        try {
+          useFrameworkRuntime()
+        } catch (caught) {
+          error = caught
+        }
+        return () => h('div')
+      },
     })
-    applyFrameworkConfig({ apiUrl: 'https://api.example.com/' })
-
-    resetFrameworkBehaviorsForTests()
-
-    expect(defaultTableConfig.fieldsAlias).toEqual({})
-    expect(defaultDetailConfig.fieldsAlias).toEqual({})
-    expect(defaultFormConfig.fieldsAlias).toEqual({})
-    expect(defaultFormConfig.inputConfig).toEqual({})
-    expect(config.apiUrl).toBe('')
-    expect(config.server).toEqual({})
-    expect(mode).toBe('default')
+    const app = createApp(App)
+    const host = document.createElement('div')
+    app.mount(host)
+    app.unmount()
+    expect(error).toEqual(new Error('[is-vue-framework] FrameworkPlugin is not installed.'))
   })
 })

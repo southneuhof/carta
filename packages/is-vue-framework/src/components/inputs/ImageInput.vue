@@ -14,6 +14,7 @@ import Popover from '@southneuhof/is-vue-framework/components/base/Popover.vue'
 import FileManager from '@southneuhof/is-vue-framework/components/utils/FileManager/FileManager.vue'
 import { Dialog, DialogContent } from '@southneuhof/is-vue-framework/components/base/Dialog/index'
 import { isImageAssetValue, normalizeFileAssetValue, type FileAssetValue } from './assetValue'
+import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   modelValue: {
@@ -55,14 +56,15 @@ const props = defineProps({
   },
   fileUpload: {
     type: Function as PropType<ImageInputUploadBehavior>,
-    default: defaultImageInputUpload,
   },
   imageURLResolver: {
     type: Function as PropType<ImageInputURLResolverBehavior>,
-    default: defaultImageURLResolver,
   },
   ...commonProps,
 })
+const behaviors = useFrameworkBehaviors()
+const fileUpload = props.fileUpload ?? ((file: File, directory?: string, onUploadProgress?: (progress: { loaded: number; total: number }) => void) => defaultImageInputUpload(file, directory, onUploadProgress, behaviors))
+const imageURLResolver = props.imageURLResolver ?? ((payload: Record<string, any> | string) => defaultImageURLResolver(payload, behaviors))
 
 type ImageAssetValue = FileAssetValue & { order_number?: number }
 
@@ -104,7 +106,7 @@ const handleUpload = (file?: File, options: { replace?: boolean } = {}) => {
   }
   uploadPercentage.value = 0
   isUploading.value = true
-  props.fileUpload(file, props.uploadPath, (event: any) => {
+  fileUpload(file, props.uploadPath, (event: any) => {
       uploadDetail.value = file
       uploadPercentage.value = Math.round((100 * event.loaded) / event.total)
     })
@@ -203,7 +205,7 @@ function handleChange(event: any) {
 }
 
 function resolvePreviewURLs(payload: ImageAssetValue) {
-  return props.imageURLResolver(payload)
+  return imageURLResolver(payload)
 }
 
 function resolveDragKey(item: ImageAssetValue, index: number): string {

@@ -1,9 +1,10 @@
 import { Suspense, createApp, h, nextTick, ref } from 'vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import PathTree from '../_layouts/PathTree.vue'
-import { configureFrameworkBehaviors, resetFrameworkBehaviorsForTests } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import { FrameworkPlugin } from '@southneuhof/is-vue-framework/adapters/plugin'
 
 const mounted: Array<ReturnType<typeof createApp>> = []
+let runtime: any
 
 const treeFixtures: Record<string, Array<Record<string, any>>> = {
   '/storage/public': [
@@ -54,6 +55,7 @@ function mountPathTree() {
   })
 
   mounted.push(app)
+  app.use(FrameworkPlugin, runtime)
   app.mount(host)
 
   return {
@@ -63,9 +65,7 @@ function mountPathTree() {
 }
 
 beforeEach(() => {
-  resetFrameworkBehaviorsForTests()
-  configureFrameworkBehaviors({
-    fileManager: {
+  runtime = { behaviors: { fileManager: {
       listFiles: vi.fn().mockImplementation(({ dir, type }: { dir: string; type?: string }) => {
         if (type === 'folder') {
           return Promise.resolve(treeFixtures[dir] || [])
@@ -76,8 +76,7 @@ beforeEach(() => {
       uploadFile: vi.fn(),
       createFolder: vi.fn(),
       deleteFile: vi.fn().mockResolvedValue(undefined),
-    },
-  })
+    } } }
 })
 
 afterEach(() => {
@@ -172,6 +171,7 @@ describe('PathTree selection behavior', () => {
     })
 
     mounted.push(app)
+    app.use(FrameworkPlugin, runtime)
     app.mount(host)
     await flush()
 

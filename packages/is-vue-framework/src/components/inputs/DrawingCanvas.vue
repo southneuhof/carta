@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { dataURItoBlob } from '@southneuhof/utilities/object'
 import { ref, onMounted, type PropType } from 'vue'
-import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import { missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
 import BaseInput from './BaseInput.vue'
 import { commonProps } from './commonprops'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
@@ -13,12 +14,6 @@ import Tooltip from '@southneuhof/is-vue-framework/components/base/Tooltip.vue'
 const props = defineProps({
   onSave: {
     type: Function as PropType<(image: string) => Promise<any>>,
-    default: async (image: string) => {
-      const blob = dataURItoBlob(image)
-      const fileUploadNoAuth = getFrameworkBehaviors().upload?.fileUploadNoAuth
-      if (!fileUploadNoAuth) missingBehavior('upload.fileUploadNoAuth')
-      return await fileUploadNoAuth(blob, () => {})
-    },
   },
   height: {
     type: Number,
@@ -29,6 +24,13 @@ const props = defineProps({
     default: 500,
   },
   ...commonProps,
+})
+const behaviors = useFrameworkBehaviors()
+const onSave = props.onSave ?? (async (image: string) => {
+  const blob = dataURItoBlob(image)
+  const fileUploadNoAuth = behaviors.upload?.fileUploadNoAuth
+  if (!fileUploadNoAuth) missingBehavior('upload.fileUploadNoAuth')
+  return await fileUploadNoAuth(blob, () => {})
 })
 
 const modelValue = defineModel()
@@ -90,7 +92,7 @@ const setToErase = () => {
 const saveImage = async () => {
   if (canvas.value) {
     const image = canvas.value.toDataURL('image/png')
-    modelValue.value = await props.onSave(image)
+    modelValue.value = await onSave(image)
     isSaved.value = true
   }
 }

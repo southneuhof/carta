@@ -9,7 +9,8 @@ interface FolderItem {
 }
 
 import { toast } from 'vue-sonner'
-import { getFrameworkBehaviors, missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import { missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composites/ConfirmationDialog.vue'
 import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue'
@@ -36,6 +37,7 @@ const props = defineProps({
     default: () => {},
   },
 })
+const behaviors = useFrameworkBehaviors()
 
 const modelValue = defineModel<Record<string, any>>()
 
@@ -77,7 +79,7 @@ async function fetchChildren() {
 
   isLoading.value = true
   try {
-    const behavior = getFrameworkBehaviors().fileManager?.listFiles
+    const behavior = behaviors.fileManager?.listFiles
     if (!behavior) missingBehavior('fileManager.listFiles')
     children.value = (await behavior({ dir: props.item?.path || '', type: 'folder' })) || []
   } catch (error) {
@@ -89,13 +91,13 @@ async function fetchChildren() {
 }
 
 function deleteFile(path: string) {
-  const behavior = getFrameworkBehaviors().fileManager?.deleteFile
+  const behavior = behaviors.fileManager?.deleteFile
   if (!behavior) missingBehavior('fileManager.deleteFile')
   return behavior(path)
 }
 
 async function ensureFolderNameAvailable(dir: string, folderName: string) {
-  const behavior = getFrameworkBehaviors().fileManager?.listFiles
+  const behavior = behaviors.fileManager?.listFiles
   if (!behavior) missingBehavior('fileManager.listFiles')
 
   const existingItems = (await behavior({ dir, limit: 1000 })) || []
@@ -110,7 +112,7 @@ async function ensureFolderNameAvailable(dir: string, folderName: string) {
 
 async function createFolder(payload: Record<string, any>) {
   await ensureFolderNameAvailable(payload.dir, payload.folder_name)
-  const behavior = getFrameworkBehaviors().fileManager?.createFolder
+  const behavior = behaviors.fileManager?.createFolder
   if (!behavior) missingBehavior('fileManager.createFolder')
   return behavior(payload.dir, payload.folder_name)
 }

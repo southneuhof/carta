@@ -9,7 +9,7 @@ import ConfirmationDialog from '../ConfirmationDialog.vue'
 import Switch from '@southneuhof/is-vue-framework/components/inputs/Switch.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { defaultOnExport } from '@southneuhof/is-vue-framework/behaviors/crudList'
-import { resolveCRUDOperations, type CRUDCompositeConfig, type CRUDOperationOverrides } from '@southneuhof/is-vue-framework/adapters/crud-operations'
+import { useCRUDOperations, type CRUDCompositeConfig, type CRUDOperationOverrides } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 import Form from '../Form.vue'
 import Dialog from '@southneuhof/is-vue-framework/components/base/Dialog.vue'
 import { defaultTableConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
@@ -19,6 +19,7 @@ import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
 import Tooltip from '@southneuhof/is-vue-framework/components/base/Tooltip.vue'
 import { toast } from 'vue-sonner'
+import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
 
 const props = defineProps<{
   config: CRUDCompositeConfig
@@ -27,7 +28,8 @@ const props = defineProps<{
 }>()
 
 const [route, router] = [useRoute(), useRouter()]
-const crudOperations = resolveCRUDOperations(props.config, props.operations)
+const behaviors = useFrameworkBehaviors()
+const crudOperations = useCRUDOperations(props.config, props.operations)
 
 if (!props.config.title) props.config.title = String(route.meta.title)
 
@@ -48,7 +50,7 @@ const listConfig = ref<ListConfig>(
       allow: true,
       onExport: crudOperations.export
         ? ({ params, listConfig }: any) => crudOperations.export!({ query: params, config: listConfig })
-        : defaultOnExport,
+        : ({ exportAPI, params, listConfig }: any) => defaultOnExport({ exportAPI, params, listConfig }, behaviors.crudList),
     },
   })
 )

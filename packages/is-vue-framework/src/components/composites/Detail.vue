@@ -5,6 +5,7 @@ import { computed, onMounted, ref, type PropType } from 'vue'
 import { componentTypeMap, parsedTypes } from './common/properties'
 import { defaultDetailConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
 import type { CRUDDetailOperation } from '@southneuhof/is-vue-framework/adapters/crud-operations'
+import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   fields: { type: Array as PropType<string[]>, required: true },
@@ -19,17 +20,20 @@ const props = defineProps({
   operation: { type: Function as PropType<CRUDDetailOperation> },
   dataID: { type: String },
   searchParameters: { type: Object as PropType<Record<string, any>> },
-  getData: { type: Function as PropType<(getAPI: string, searchParameters?: Record<string, any>, dataID?: string) => Promise<Record<string, any>>>, default: defaultDetailGetData },
-  onDataLoaded: { type: Function as PropType<(data: any) => void>, default: defaultOnDataLoaded },
+  getData: { type: Function as PropType<(getAPI: string, searchParameters?: Record<string, any>, dataID?: string) => Promise<Record<string, any>>> },
+  onDataLoaded: { type: Function as PropType<(data: any) => void> },
   rowGap: { type: String, default: '4px' },
 })
+const behaviors = useFrameworkBehaviors()
+const resolvedGetData = props.getData ?? ((getAPI: string, searchParameters?: Record<string, any>, dataID?: string) => defaultDetailGetData(getAPI, searchParameters, dataID, behaviors.detail))
+const onDataLoaded = props.onDataLoaded ?? ((data: any) => defaultOnDataLoaded(data, behaviors.detail))
 
 const fieldSlots = defaultDetailConfig.fieldSlots
 const fieldsAlias = { ...defaultDetailConfig.fieldsAlias, ...props.fieldsAlias }
 const fieldsProxy = { ...defaultDetailConfig.fieldsProxy, ...props.fieldsProxy }
 const fieldsType = { ...defaultDetailConfig.fieldsType, ...props.fieldsType }
 const fieldsParse = { ...defaultDetailConfig.fieldsParse, ...props.fieldsParse }
-const detailFieldTypes = computed(() => getDetailFieldTypes())
+const detailFieldTypes = computed(() => getDetailFieldTypes(behaviors.detail))
 
 // const fields = computed(() => props.fields.filter(field => field.slice(0, 2) !== 'S|'))
 const detailData = ref<{ data: Record<string, any>; rawData: Record<string, any> }>({ data: {}, rawData: {} })
@@ -51,16 +55,16 @@ async function getData() {
   if (!props.data && (props.operation || props.getAPI)) {
     const request = props.operation
       ? props.operation(props.dataID || '', props.searchParameters)
-      : props.getData(props.getAPI!, props.searchParameters, props.dataID)
+      : resolvedGetData(props.getAPI!, props.searchParameters, props.dataID)
     await request.then((data) => {
       if (!data) return
       detailData.value = { data: formatDetailData(data), rawData: data }
-      props.onDataLoaded(data)
+      onDataLoaded(data)
       loading.value = false
     })
   } else if (props.data) {
     detailData.value = { data: formatDetailData(props.data), rawData: props.data }
-    props.onDataLoaded(props.data)
+      onDataLoaded(props.data)
     loading.value = false
   }
 }

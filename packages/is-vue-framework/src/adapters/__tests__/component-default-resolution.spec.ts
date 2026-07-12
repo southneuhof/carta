@@ -1,12 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { resetFrameworkBehaviorsForTests } from '../behaviors'
 import { applyFrameworkDefaults, defaultDetailConfig, defaultFormConfig, defaultTableConfig } from '../defaults'
 
 describe('component default resolution compatibility', () => {
-  beforeEach(() => {
-    resetFrameworkBehaviorsForTests()
-  })
-
   it('matches Table.vue default resolution shape', () => {
     applyFrameworkDefaults({
       table: {

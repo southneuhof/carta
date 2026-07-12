@@ -21,7 +21,8 @@
     "./behaviors/*": "./src/behaviors/*",
     "./styles/*": "./src/styles/*",
     "./router": "./src/router/index.ts",
-    "./router/*": "./src/router/*"
+    "./router/*": "./src/router/*",
+    "./runtime": "./src/runtime.ts"
   },
   "peerDependencies": {
     "vue": "^3.5.12",

@@ -15,6 +15,7 @@ import FileManager from '@southneuhof/is-vue-framework/components/utils/FileMana
 import { Dialog, DialogContent } from '@southneuhof/is-vue-framework/components/base/Dialog/index'
 import { normalizeFileAssetValue, type FileAssetValue } from './assetValue'
 import { useDropZone } from '@vueuse/core'
+import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   accept: {
@@ -38,10 +39,11 @@ const props = defineProps({
   },
   fileUpload: {
     type: Function as PropType<FileInputUploadBehavior>,
-    default: defaultFileInputUpload,
   },
   ...commonProps,
 })
+const behaviors = useFrameworkBehaviors()
+const fileUpload = props.fileUpload ?? ((file: File, directory?: string, onUploadProgress?: (progress: { loaded: number; total: number }) => void) => defaultFileInputUpload(file, directory, onUploadProgress, behaviors))
 const emit = defineEmits<{
   (event: 'validation:touch'): void
 }>()
@@ -82,7 +84,7 @@ const handleFileUpload = (files: File | File[]) => {
   fileArray.forEach((file) => {
     if (!validateFileLike(file.type, file.size)) return
     isUploading.value = true
-    props.fileUpload(file, props.uploadPath, (event: any) => {
+    fileUpload(file, props.uploadPath, (event: any) => {
         uploadDetail.value = file
         uploadPercentage.value = Math.round((100 * event.loaded) / event.total)
       })

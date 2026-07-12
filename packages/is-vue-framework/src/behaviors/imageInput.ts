@@ -1,13 +1,13 @@
-import { getFrameworkBehaviors, missingBehavior, type FrameworkFileUpload, type FrameworkImageURLResolver } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import { missingBehavior, type FrameworkBehaviors, type FrameworkFileUpload, type FrameworkImageURLResolver } from '@southneuhof/is-vue-framework/adapters/behaviors'
 
-export async function defaultImageInputUpload(file: File, directory?: string, onUploadProgress?: (progress: { loaded: number; total: number }) => void) {
-  const fileUpload = getFrameworkBehaviors().fileManager?.uploadFile ?? getFrameworkBehaviors().imageInput?.fileUpload
+export async function defaultImageInputUpload(file: File, directory?: string, onUploadProgress?: (progress: { loaded: number; total: number }) => void, behaviors?: FrameworkBehaviors) {
+  const fileUpload = behaviors?.fileManager?.uploadFile ?? behaviors?.imageInput?.fileUpload
   if (!fileUpload) missingBehavior('fileManager.uploadFile or imageInput.fileUpload')
   return fileUpload(file, directory, onUploadProgress)
 }
 
-export function defaultImageURLResolver(payload: Record<string, any> | string) {
-  const resolver = getFrameworkBehaviors().imageInput?.imageURLResolver
+export function defaultImageURLResolver(payload: Record<string, any> | string, behaviors?: FrameworkBehaviors) {
+  const resolver = behaviors?.imageInput?.imageURLResolver
   if (resolver) return resolver(payload)
 
   const data = typeof payload === 'string' ? { url: payload } : payload

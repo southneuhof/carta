@@ -3,7 +3,7 @@ import { computed, ref, useSlots, watch } from 'vue'
 import type { PropType } from 'vue'
 import { parse } from '@southneuhof/utilities/parse'
 import Pagination from '@southneuhof/is-vue-framework/components/utils/Pagination.vue'
-import { defaultTableGetData, tableFieldTypes } from '@southneuhof/is-vue-framework/behaviors/table'
+import { defaultTableGetData, getTableFieldTypes } from '@southneuhof/is-vue-framework/behaviors/table'
 import { defaultTableConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
 import { onMounted, onBeforeUnmount } from 'vue'
 import Draggable from 'vuedraggable'
@@ -11,6 +11,7 @@ import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import type { CRUDListOperation } from '@southneuhof/is-vue-framework/adapters/crud-operations'
+import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   fields: { type: Array as PropType<string[]>, required: true },
@@ -30,7 +31,6 @@ const props = defineProps({
   getData: {
     type: Function as PropType<(getAPI: string, searchParameters?: Record<string, number | string | undefined>) => Promise<{ data: Record<string, any>[]; totalPage: number; total: number }>>,
     required: false,
-    default: defaultTableGetData,
   },
   paginated: { type: Boolean, required: false, default: false },
   sortable: { type: Boolean, required: false, default: false },
@@ -44,6 +44,9 @@ const props = defineProps({
   rowClass: { type: Function as PropType<(data: Record<string, any>, index: number) => string>, default: () => '' },
   tableId: { type: String, required: false, default: '' },
 })
+const behaviors = useFrameworkBehaviors()
+const getData = props.getData ?? ((getAPI: string, searchParameters?: Record<string, number | string | undefined>) => defaultTableGetData(getAPI, searchParameters, behaviors.table))
+const onDataLoaded = props.onDataLoaded ?? ((data: any[]) => behaviors.table?.onDataLoaded?.(data))
 const slots = useSlots()
 
 const modelValue = defineModel<Record<string, any>[]>({ default: () => [] })
@@ -60,6 +63,7 @@ const fieldsClass = { ...defaultTableConfig.fieldsClass, ...props.fieldsClass }
 const fieldsHeaderClass = { ...defaultTableConfig.fieldsHeaderClass, ...props.fieldsHeaderClass }
 const fieldsParse = { ...defaultTableConfig.fieldsParse, ...props.fieldsParse }
 const fieldsAlign = { ...defaultTableConfig.fieldsAlign, ...props.fieldsAlign }
+const tableFieldTypes = getTableFieldTypes(behaviors.table)
 
 const localsearchParameters = ref<Record<string, any>>({ page: '1', limit: props.draggable ? 9999 : props.limitSet[0] })
 
@@ -105,13 +109,13 @@ async function loadData() {
   if (props.operation || props.getAPI) {
     const { data, total, totalPage } = props.operation
       ? await props.operation(localsearchParameters.value)
-      : await props.getData(props.getAPI!, localsearchParameters.value)
+      : await getData(props.getAPI!, localsearchParameters.value)
     tableData.value = { ...data, data: formatTableData(data), rawData: data }
     dataInfo.value = { total, totalPage, length: data?.length || data.length }
   } else if (props.data) tableData.value = { ...props.data, data: formatTableData(props.data), rawData: props.data }
   // keep modelValue synced with the latest rawData
   modelValue.value = tableData.value.rawData
-  props.onDataLoaded(tableData.value.rawData)
+  onDataLoaded(tableData.value.rawData)
   loading.value = false
 }
 

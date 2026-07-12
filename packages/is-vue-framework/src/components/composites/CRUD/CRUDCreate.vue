@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
 import { buildFormConfig } from '../../../model-config'
-import { resolveCRUDOperations, type CRUDCompositeConfig, type CRUDOperationOverrides } from '@southneuhof/is-vue-framework/adapters/crud-operations'
+import { useCRUDOperations, type CRUDCompositeConfig, type CRUDOperationOverrides } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 import Form from '../Form.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { bulkCreateFormProps, composeInputTemplateSheet } from '@southneuhof/is-vue-framework/behaviors/crudCreate'
@@ -20,7 +20,7 @@ const props = defineProps<{
 }>()
 
 const [route, router] = [useRoute(), useRouter()]
-const crudOperations = resolveCRUDOperations(props.config, props.operations)
+const crudOperations = useCRUDOperations(props.config, props.operations)
 
 if (!props.config.title) props.config.title = String(route.meta.title)
 

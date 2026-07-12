@@ -7,6 +7,7 @@ import Popover from '@southneuhof/is-vue-framework/components/base/Popover.vue'
 import TextInput from '@southneuhof/is-vue-framework/components/inputs/TextInput.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   placeholder: {
@@ -32,7 +33,6 @@ const props = defineProps({
   getData: {
     type: Function as PropType<(getAPI: string, searchParameters: object) => Promise<Array<any>>>,
     required: false,
-    default: defaultGetData,
   },
   defaultToFirst: {
     type: Boolean,
@@ -78,6 +78,8 @@ const props = defineProps({
   },
   ...commonProps,
 })
+const behaviors = useFrameworkBehaviors()
+const getData = props.getData ?? ((getAPI: string, searchParameters: object) => defaultGetData(getAPI, searchParameters, behaviors.select))
 
 const modelValue = defineModel<any[] | Record<string, string> | null | string>()
 const emit = defineEmits<{
@@ -164,7 +166,7 @@ displayValue = computed(() => {
 })
 
 async function preflight() {
-  if (props.getAPI) data.value = await props.getData(props.getAPI, props.searchParameters)
+  if (props.getAPI) data.value = await getData(props.getAPI, props.searchParameters)
   else data.value = props.data
   if (props.transform) {
     const transformedData = JSON.parse(JSON.stringify(data.value))

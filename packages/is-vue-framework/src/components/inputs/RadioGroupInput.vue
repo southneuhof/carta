@@ -5,6 +5,7 @@ import Radio from '@southneuhof/is-vue-framework/components/inputs/Radio.vue'
 import { commonProps } from './commonprops'
 import { defaultGetData } from '@southneuhof/is-vue-framework/behaviors/radioGroup'
 import BaseInput from './BaseInput.vue'
+import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   data: {
@@ -25,7 +26,6 @@ const props = defineProps({
   },
   getData: {
     type: Function as PropType<(getAPI: string, searchParameters?: object) => Promise<Array<any>>>,
-    default: defaultGetData,
   },
   variant: {
     type: String as PropType<'native' | 'card'>,
@@ -42,6 +42,8 @@ const props = defineProps({
   },
   ...commonProps,
 })
+const behaviors = useFrameworkBehaviors()
+const getData = props.getData ?? ((getAPI: string, searchParameters: object) => defaultGetData(getAPI, searchParameters, behaviors.radioGroup))
 
 const modelValue = defineModel()
 const emit = defineEmits<{
@@ -52,7 +54,7 @@ const data = ref()
 
 async function preflight() {
   loading.value = true
-  if (props.getAPI) data.value = await props.getData(props.getAPI, props.searchParameters)
+  if (props.getAPI) data.value = await getData(props.getAPI, props.searchParameters)
   else if (props.data) data.value = props.data
   if (props.defaultValue && modelValue.value == null) modelValue.value = props.defaultValue
   loading.value = false
