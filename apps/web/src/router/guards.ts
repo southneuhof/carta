@@ -10,22 +10,23 @@ export function isPublicRoute(routeName: unknown): boolean {
 
 export function createAuthGuard(): NavigationGuard {
   return (to) => {
-    const token = storage.cookie.get('token')
+    const authenticated = Boolean(storage.localStorage.get('profile')?.id)
 
     if (isPublicRoute(to.name)) {
-      if (token && String(to.name) === 'login') {
-        return getDefaultAuthenticatedRouteLocation() ?? { name: 'login' }
+      if (authenticated && (String(to.name) === 'login' || to.path === '/')) {
+        const destination = getDefaultAuthenticatedRouteLocation()
+        if (destination) return destination
       }
       return true
     }
 
-    if (!token) {
+    if (!authenticated) {
       savePostLoginRedirect(to.fullPath)
       return { name: 'login' }
     }
 
     if (to.path === '/') {
-      return getDefaultAuthenticatedRouteLocation() ?? { name: 'login' }
+      return getDefaultAuthenticatedRouteLocation() ?? true
     }
 
     if (!to.matched.length) {

@@ -1,5 +1,11 @@
 # API
 
+## Environment
+
+Copy `.env.example` to `.env` and configure the database and auth settings. `BETTER_AUTH_URL` is the public API origin, while `APP_ORIGIN` is the browser origin allowed to send credentialed requests.
+
+Auth is served at `/api/auth/*`. All routes except `/health` and `/api/auth/*` require a valid Better Auth session cookie.
+
 `src/routes/` is the public API surface. Group related route files in folders.
 
 Naming:

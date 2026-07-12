@@ -1,6 +1,9 @@
 import { and, eq, sql } from 'drizzle-orm'
 import { afterAll, beforeEach, describe, expect, it } from 'vitest'
-import { app } from '../app'
+import { hashPassword } from 'better-auth/crypto'
+import { app as rawApp } from '../app'
+import { getAuth } from '../routes/auth/auth'
+import { accounts } from '../routes/auth/auth.entity'
 import { closeDb, getDb } from '../db'
 import { productVariants } from '../routes/product-variants/product-variants.entity'
 import { productVariantAssignments, products } from '../routes/products/products.entity'
@@ -37,10 +40,22 @@ const productFixture = {
   createdAt: '2026-01-01T00:00:00.000Z',
 }
 
+let sessionCookie = ''
+const app = {
+  request(path: string, init: RequestInit = {}) {
+    const headers = new Headers(init.headers)
+    if (sessionCookie) headers.set('Cookie', sessionCookie)
+    return rawApp.request(path, { ...init, headers })
+  },
+}
+
 describe('products API', () => {
   beforeEach(async () => {
     const db = getDb()
     await db.execute(sql.raw(`
+      drop table if exists sessions;
+      drop table if exists accounts;
+      drop table if exists verifications;
       drop table if exists product_variant_assignments;
       drop table if exists product_variants;
       drop table if exists products;
@@ -71,9 +86,28 @@ describe('products API', () => {
         id text primary key,
         name text not null,
         email text not null unique,
+        email_verified boolean not null default false,
+        image text,
         role_id text not null references roles(id),
         created_at timestamp not null default now(),
         updated_at timestamp not null default now()
+      );
+
+      create table sessions (
+        id text primary key, expires_at timestamp not null, token text not null unique,
+        created_at timestamp not null default now(), updated_at timestamp not null default now(),
+        ip_address text, user_agent text, user_id text not null references users(id) on delete cascade
+      );
+      create table accounts (
+        id text primary key, account_id text not null, provider_id text not null,
+        user_id text not null references users(id) on delete cascade, access_token text,
+        refresh_token text, id_token text, access_token_expires_at timestamp,
+        refresh_token_expires_at timestamp, scope text, password text,
+        created_at timestamp not null default now(), updated_at timestamp not null default now()
+      );
+      create table verifications (
+        id text primary key, identifier text not null, value text not null, expires_at timestamp not null,
+        created_at timestamp not null default now(), updated_at timestamp not null default now()
       );
 
       create table if not exists products (
@@ -100,6 +134,10 @@ describe('products API', () => {
     await db.insert(permissions).values(permissionFixtures)
     await db.insert(rolePermissions).values(permissionFixtures.map(({ id }) => ({ roleId: roleFixture.id, permissionId: id })))
     await db.insert(users).values([userFixture, secondUserFixture])
+    await db.insert(accounts).values({
+      id: 'account-1', accountId: userFixture.id, providerId: 'credential', userId: userFixture.id,
+      password: await hashPassword('demo-password'),
+    })
     await db.insert(products).values(productFixture)
     await db.insert(productVariants).values([
       { id: 'body', name: 'Body', createdAt: '2026-01-01T00:00:00.000Z' },
@@ -113,6 +151,11 @@ describe('products API', () => {
       { productId: 'product-1', variantId: 'soap' },
       { productId: 'product-1', variantId: 'brand-a' },
     ])
+    const signedIn = await getAuth().api.signInEmail({
+      body: { email: userFixture.email, password: 'demo-password' },
+      returnHeaders: true,
+    })
+    sessionCookie = signedIn.headers.get('set-cookie')?.split(';')[0] ?? ''
   })
 
   afterAll(() => closeDb())
@@ -287,59 +330,42 @@ describe('products API', () => {
     expect(await update.json()).toEqual({ error: 'not_found' })
   })
 
-  it('supports mock login plus Users and Roles CRUD', async () => {
-    const rejectedLogin = await app.request('/login', {
+  it('uses Better Auth sessions and removes legacy identity routes', async () => {
+    const unauthorized = await rawApp.request('/products/list')
+    expect(unauthorized.status).toBe(401)
+    expect(await unauthorized.json()).toEqual({ error: 'unauthorized' })
+
+    const rejectedLogin = await rawApp.request('/api/auth/sign-in/email', {
       method: 'POST',
-      body: JSON.stringify({ username: 'admin@example.com', password: 'wrong' }),
-      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: userFixture.email, password: 'wrong-password' }),
+      headers: { 'Content-Type': 'application/json', Origin: process.env.APP_ORIGIN! },
     })
     expect(rejectedLogin.status).toBe(401)
 
-    const login = await app.request('/login', {
+    const login = await rawApp.request('/api/auth/sign-in/email', {
       method: 'POST',
-      body: JSON.stringify({ username: 'admin@example.com', password: 'demo-password' }),
-      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: userFixture.email, password: 'demo-password' }),
+      headers: { 'Content-Type': 'application/json', Origin: process.env.APP_ORIGIN! },
     })
     expect(login.status).toBe(200)
-    expect(await login.json()).toMatchObject({ token: 'demo-token', user: { email: 'admin@example.com', role_id: 1 }, tasks: expect.arrayContaining(['view-user', 'delete-role']) })
+    const cookie = login.headers.get('set-cookie')?.split(';')[0]
+    expect(cookie).toContain('better-auth.session_token=')
 
-    const createdRole = await app.request('/roles/create', {
+    const currentSession = await rawApp.request('/api/auth/get-session', { headers: { Cookie: cookie! } })
+    expect(currentSession.status).toBe(200)
+    expect(await currentSession.json()).toMatchObject({ user: { email: userFixture.email, roleId: roleFixture.id } })
+
+    const legacyLogin = await rawApp.request('/login', { method: 'POST' })
+    expect(legacyLogin.status).toBe(401)
+    expect((await app.request('/users/create', { method: 'POST' })).status).toBe(404)
+    expect((await app.request('/users/delete/user-2', { method: 'DELETE' })).status).toBe(404)
+
+    const signOut = await rawApp.request('/api/auth/sign-out', {
       method: 'POST',
-      body: JSON.stringify({ name: 'Editor' }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: { Cookie: cookie!, Origin: process.env.APP_ORIGIN! },
     })
-    expect(createdRole.status).toBe(201)
-    const roleData = (await createdRole.json()).data
-    expect(roleData).toMatchObject({ name: 'Editor' })
-
-    const createdUser = await app.request('/users/create', {
-      method: 'POST',
-      body: JSON.stringify({ name: 'Editor User', email: 'editor@example.com', roleId: roleData.id }),
-      headers: { 'Content-Type': 'application/json' },
-    })
-    expect(createdUser.status).toBe(201)
-    const userData = (await createdUser.json()).data
-    expect(userData).toMatchObject({ email: 'editor@example.com', role: { id: roleData.id, name: 'Editor' } })
-
-    const listedUsers = await app.request('/users/list')
-    expect((await listedUsers.json()).data).toEqual(expect.arrayContaining([expect.objectContaining({ id: userData.id, role: expect.objectContaining({ name: 'Editor' }) })]))
-
-    const updatedUser = await app.request(`/users/update/${userData.id}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ name: 'Updated Editor' }),
-      headers: { 'Content-Type': 'application/json' },
-    })
-    expect(updatedUser.status).toBe(200)
-    expect(await updatedUser.json()).toMatchObject({ data: { name: 'Updated Editor' } })
-
-    const blockedRoleDelete = await app.request(`/roles/delete/${roleData.id}`, { method: 'DELETE' })
-    expect(blockedRoleDelete.status).toBe(409)
-    expect(await blockedRoleDelete.json()).toEqual({ error: 'role_in_use', message: 'Role masih dipakai oleh pengguna.' })
-
-    const deletedUser = await app.request(`/users/delete/${userData.id}`, { method: 'DELETE' })
-    expect(deletedUser.status).toBe(200)
-    const deletedRole = await app.request(`/roles/delete/${roleData.id}`, { method: 'DELETE' })
-    expect(deletedRole.status).toBe(200)
+    expect(signOut.status).toBe(200)
+    expect((await rawApp.request('/products/list', { headers: { Cookie: cookie! } })).status).toBe(401)
   })
 
   it('lists and idempotently toggles persisted role permissions', async () => {

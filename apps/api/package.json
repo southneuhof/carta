@@ -18,9 +18,11 @@
     "./rpc": "./src/rpc.ts"
   },
   "dependencies": {
+    "@better-auth/drizzle-adapter": "^1.6.23",
     "@hono/node-server": "^2.0.6",
     "@hono/zod-validator": "^0.8.0",
     "@southneuhof/sprindle": "workspace:*",
+    "better-auth": "^1.6.23",
     "drizzle-orm": "1.0.0-rc.4",
     "drizzle-zod": "^0.8.3",
     "hono": "^4.12.27",

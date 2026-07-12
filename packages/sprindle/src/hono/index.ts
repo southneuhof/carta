@@ -23,8 +23,8 @@ type RequireTopLevelRoutePath<TInstallables extends readonly SprindleInstallable
 }
 
 type SprindleSchema<TInstallable> =
-  TInstallable extends { method: infer TMethod extends string; path: infer TPath extends string; kind: infer TKind extends string }
-    ? RouteSchema<unknown, TMethod, TKind, TPath>
+  TInstallable extends ModelRoute<any, infer TMethod, infer TPath, infer TInput, infer TOutput, infer TKind>
+    ? RouteSchema<unknown, TMethod, TKind, TPath, TOutput, TInput>
     : TInstallable extends DefinedModel
       ? ModelSchema<TInstallable>
       : {}
@@ -33,17 +33,17 @@ type ModelSchema<TModel extends DefinedModel> =
   TModel extends DefinedModel<infer TPath, infer TEntity, infer TRoutes> ? RouteTreeSchema<TEntity, TRoutes, TPath> : {}
 
 type RouteTreeSchema<TEntity, TTree, TPrefix extends string> = UnionToIntersection<{
-  [K in keyof TTree & string]: TTree[K] extends ModelRoute<any, infer TMethod, infer TPath, any, infer TOutput, infer TKind>
-    ? RouteSchema<TEntity, TMethod, TKind, JoinPath<JoinPath<TPrefix, K>, TPath>, TOutput>
+  [K in keyof TTree & string]: TTree[K] extends ModelRoute<any, infer TMethod, infer TPath, infer TInput, infer TOutput, infer TKind>
+    ? RouteSchema<TEntity, TMethod, TKind, JoinPath<JoinPath<TPrefix, K>, TPath>, TOutput, TInput>
     : TTree[K] extends Record<string, unknown>
       ? RouteTreeSchema<TEntity, TTree[K], JoinPath<TPrefix, K>>
       : {}
 }[keyof TTree & string]>
 
-type RouteSchema<TEntity, TMethod extends string, TKind extends string, TPath extends string, TOutput = unknown> = {
+type RouteSchema<TEntity, TMethod extends string, TKind extends string, TPath extends string, TOutput = unknown, TInput = {}> = {
   [P in NormalizePath<TPath>]: {
     [M in `$${TMethod}`]: TKind extends 'custom'
-      ? OutputEndpoint<RouteInput<TEntity, TKind, NormalizePath<TPath>>, TOutput>
+      ? OutputEndpoint<MergeInput<TInput & ParamInput<NormalizePath<TPath>>>, TOutput>
       : CanonicalEndpoint<TEntity, RouteInput<TEntity, TKind, NormalizePath<TPath>>, TKind>
   }
 }

@@ -5,6 +5,9 @@ async function main() {
   const db = getDb()
 
   await db.execute(sql.raw(`
+    drop table if exists sessions;
+    drop table if exists accounts;
+    drop table if exists verifications;
     drop table if exists product_variant_assignments;
     drop table if exists product_variants;
     drop table if exists products;

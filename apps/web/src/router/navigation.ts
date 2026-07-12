@@ -25,7 +25,7 @@ export function getDefaultAuthenticatedRouteLocation(): RouteLocationRaw | null 
 export function resolvePostLoginRoute(router: Router, redirect: string | null): RouteLocationRaw | null {
   if (redirect) {
     const resolved = router.resolve(redirect)
-    if (resolved.matched.length && resolved.name !== 'login') {
+    if (resolved.matched.length && resolved.name !== 'login' && resolved.path !== '/') {
       return redirect
     }
   }

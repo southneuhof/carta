@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const tokenState = { token: '' }
+const authState = { profile: null as null | { id: string } }
 const saveRedirectSpy = vi.fn()
 const getDefaultRouteSpy = vi.fn(() => ({ name: 'dashboard' }))
 
 vi.mock('@southneuhof/utilities/storage', () => ({
   storage: {
-    cookie: {
-      get: () => tokenState.token,
+    localStorage: {
+      get: () => authState.profile,
     },
   },
 }))
@@ -26,20 +26,29 @@ const next = (() => {}) as any
 
 describe('createAuthGuard', () => {
   beforeEach(() => {
-    tokenState.token = ''
+    authState.profile = null
     saveRedirectSpy.mockReset()
     getDefaultRouteSpy.mockClear()
     getDefaultRouteSpy.mockReturnValue({ name: 'dashboard' })
   })
 
-  it('allows public login route without token', () => {
+  it('allows public login route without a profile', () => {
     const guard = createAuthGuard()
     const result = guard({ name: 'login', fullPath: '/unauthenticated/auth/login', path: '/unauthenticated/auth/login', matched: [{}] } as any, {} as any, next)
 
     expect(result).toBe(true)
   })
 
-  it('redirects protected route without token and saves redirect', () => {
+  it('does not redirect authenticated login to itself without an accessible destination', () => {
+    authState.profile = { id: 'user-1' }
+    getDefaultRouteSpy.mockReturnValue(null as any)
+    const guard = createAuthGuard()
+    const result = guard({ name: 'login', fullPath: '/unauthenticated/auth/login', path: '/unauthenticated/auth/login', matched: [{}] } as any, {} as any, next)
+
+    expect(result).toBe(true)
+  })
+
+  it('redirects protected route without a profile and saves redirect', () => {
     const guard = createAuthGuard()
     const result = guard({ name: 'users', fullPath: '/authenticated/settings/users', path: '/authenticated/settings/users', matched: [{}] } as any, {} as any, next)
 
@@ -47,8 +56,8 @@ describe('createAuthGuard', () => {
     expect(result).toEqual({ name: 'login' })
   })
 
-  it('redirects root route with token to first accessible route', () => {
-    tokenState.token = 'abc'
+  it('redirects root route with a profile to first accessible route', () => {
+    authState.profile = { id: 'user-1' }
     const guard = createAuthGuard()
     const result = guard({ name: undefined, fullPath: '/', path: '/', matched: [] } as any, {} as any, next)
 
@@ -56,15 +65,15 @@ describe('createAuthGuard', () => {
     expect(result).toEqual({ name: 'dashboard' })
   })
 
-  it('redirects unknown route without token to login', () => {
+  it('redirects unknown route without a profile to login', () => {
     const guard = createAuthGuard()
     const result = guard({ name: 'not-found', fullPath: '/missing', path: '/missing', matched: [{}] } as any, {} as any, next)
 
     expect(result).toEqual({ name: 'login' })
   })
 
-  it('allows unknown route with token without signing out', () => {
-    tokenState.token = 'abc'
+  it('allows unknown route with a profile without signing out', () => {
+    authState.profile = { id: 'user-1' }
     const guard = createAuthGuard()
     const result = guard({ name: 'not-found', fullPath: '/missing', path: '/missing', matched: [{}] } as any, {} as any, next)
 

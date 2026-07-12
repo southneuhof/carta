@@ -5,6 +5,7 @@ import { useColorPreference } from '@/stores/colorpreference'
 import { permissions } from '@/stores/permissions'
 import { toast } from 'vue-sonner'
 import { getCurrentHashRouteForRedirect, savePostLoginRedirect } from './post-login-redirect'
+import { rpc } from '@/framework/rpc'
 
 type ServiceRequestOptions = {
   bypassErrorToast?: boolean
@@ -42,16 +43,9 @@ async function parseResponse(response: Response, responseType?: ServiceRequestOp
   return response[type === 'json' ? 'json' : type]()
 }
 
-async function notifyLogoutToServer(token: string) {
+async function notifyLogoutToServer() {
   try {
-    await fetch(`${apiUrl}logout`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json, text/plain, */*',
-        Authorization: `Bearer ${token}`,
-      },
-      keepalive: true,
-    })
+    await rpc.api.auth['sign-out'].$post()
   } catch (_) {}
 }
 
@@ -63,19 +57,18 @@ function shouldRedirectToSintaOn401(): boolean {
 class AppServices {
   // ponytail: local bridge for legacy endpoints; delete as routes move to Hono RPC.
   private async request(method: string, path: string, body?: unknown, query?: Record<string, any>, options?: ServiceRequestOptions) {
-    const token = storage.cookie.get('token')
     const headers = new Headers({
       Accept: 'application/json, text/plain, */*',
       ...(options?.init?.headers as Record<string, string> | undefined),
     })
     const isObjectBody = body && typeof body === 'object' && !(body instanceof FormData) && !(body instanceof Blob)
     if (isObjectBody) headers.set('Content-Type', 'application/json')
-    if (token) headers.set('Authorization', `Bearer ${token}`)
 
     const response = await fetch(buildURL(path, query), {
       ...options?.init,
       method,
       headers,
+      credentials: 'include',
       body: body == null ? undefined : isObjectBody ? JSON.stringify(body) : (body as BodyInit),
     })
 
@@ -175,10 +168,9 @@ class AppServices {
   }
 
   signOut(notifyServer: boolean = true, options?: { onUnauthorized?: boolean }) {
-    const token = storage.cookie.get('token')
     const isSsoUser = shouldRedirectToSintaOn401()
 
-    if (notifyServer && token) void notifyLogoutToServer(token)
+    if (notifyServer) void notifyLogoutToServer()
 
     const redirectToSinta = isSsoUser && (Boolean(options?.onUnauthorized) || notifyServer)
     if (redirectToSinta && options?.onUnauthorized) {

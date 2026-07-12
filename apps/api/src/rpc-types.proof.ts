@@ -11,11 +11,17 @@ type HasProductsList = '/products/list' extends keyof AppSchema ? true : false
 type HasProductsCreate = '/products/create' extends keyof AppSchema ? true : false
 type HasProductsNested = '/products/gamer/version1' extends keyof AppSchema ? true : false
 type HasHealth = '/health' extends keyof AppSchema ? true : false
+type HasAuthSignIn = '/api/auth/sign-in/email' extends keyof AppSchema ? true : false
+type HasAuthSession = '/api/auth/get-session' extends keyof AppSchema ? true : false
+type HasAuthSignOut = '/api/auth/sign-out' extends keyof AppSchema ? true : false
 
 const hasProductsList: HasProductsList = true
 const hasProductsCreate: HasProductsCreate = true
 const hasProductsNested: HasProductsNested = true
 const hasHealth: HasHealth = true
+const hasAuthSignIn: HasAuthSignIn = true
+const hasAuthSession: HasAuthSession = true
+const hasAuthSignOut: HasAuthSignOut = true
 
 const productCreateOk: ProductCreate = {
   id: 'product-1',
@@ -47,3 +53,6 @@ void hasProductsList
 void hasProductsCreate
 void hasProductsNested
 void hasHealth
+void hasAuthSignIn
+void hasAuthSession
+void hasAuthSignOut
