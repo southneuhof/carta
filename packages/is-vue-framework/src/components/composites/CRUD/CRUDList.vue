@@ -2,7 +2,7 @@
 import Popover from '@southneuhof/is-vue-framework/components/base/Popover.vue'
 import { buildListConfig } from '../../../model-config'
 import SearchBox from '../SearchBox.vue'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { keyManager } from '@southneuhof/is-vue-framework/adapters/state'
 import Table from '../Table.vue'
 import ConfirmationDialog from '../ConfirmationDialog.vue'
@@ -54,6 +54,10 @@ const listConfig = ref<ListConfig>(
     },
   })
 )
+const tableConfig = computed(() => {
+  const { getAPI: _getAPI, ...config } = listConfig.value as any
+  return config
+})
 
 const filterProps: Record<string, any> = {
   fields: props.config.view?.list?.filter?.fields,
@@ -124,7 +128,6 @@ onMounted(() => {
                           <Card class="w-[350px]" variant="outlined">
                             <Form
                               :key="keyManager().value[`sys_${config.name}_name`]"
-                              static
                               :modelValue="searchParameters"
                               @update:modelValue="(value) => (searchParameters = value as Record<string, any>)"
                               :fields="filterProps.fields || []"
@@ -213,15 +216,15 @@ onMounted(() => {
             <Card v-else class="flex h-full flex-col">
               <div class="min-h-0 flex-1 overflow-auto">
                 <Table
-                  :operation="crudOperations.list"
                   :key="keyManager().value[`${config.name}_table`]"
-                  v-bind="listConfig"
+                  v-bind="tableConfig"
+                  :load="crudOperations.list"
                   :fields="listConfig.fields!"
                   :searchParameters="{ ...listConfig.searchParameters, ...searchParameters }"
                   paginated
                   sortable
                   hoverEffect
-                  :onDataLoaded="(data: Array<any>) => {
+                  @loaded="(data: Array<any>) => {
                     visibleFields = listConfig.toggleableFields ? Object.fromEntries(listConfig.toggleableFields.map(field => [field, (listConfig.fields ?? []).includes(field)])) : data[0] ? Object.fromEntries(Object.keys(data[0]).filter(field => !!listConfig.fieldsAlias?.[field]).map((field) => [field, (listConfig.fields ?? []).includes(field)])) : {}
                   }"
                   class="max-h-[calc(100vh-230px)] overflow-auto"

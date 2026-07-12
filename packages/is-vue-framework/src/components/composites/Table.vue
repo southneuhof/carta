@@ -3,14 +3,14 @@ import { computed, ref, useSlots, watch } from 'vue'
 import type { PropType } from 'vue'
 import { parse } from '@southneuhof/utilities/parse'
 import Pagination from '@southneuhof/is-vue-framework/components/utils/Pagination.vue'
-import { defaultTableGetData, getTableFieldTypes } from '@southneuhof/is-vue-framework/runtimeDefaults'
+import { getTableFieldTypes } from '@southneuhof/is-vue-framework/runtimeDefaults'
 import { onMounted, onBeforeUnmount } from 'vue'
 import Draggable from 'vuedraggable'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
-import type { CRUDListOperation } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 import { useFrameworkDefaults, useFrameworkRuntime } from '@southneuhof/is-vue-framework'
+import type { TableLoad } from './types'
 
 const props = defineProps({
   fields: { type: Array as PropType<string[]>, required: true },
@@ -23,14 +23,8 @@ const props = defineProps({
   fieldsClass: { type: Object as PropType<Record<string, string>>, default: () => ({}) },
   fieldsHeaderClass: { type: Object as PropType<Record<string, string>>, default: () => ({}) },
   data: { type: Array as PropType<any[]>, required: false },
-  getAPI: { type: String, required: false },
-  operation: { type: Function as PropType<CRUDListOperation>, required: false },
+  load: { type: Function as PropType<TableLoad>, required: false },
   searchParameters: { type: Object as PropType<Record<string, any>>, required: false, default: () => ({}) },
-  onDataLoaded: { type: Function as PropType<(data: any[]) => void>, required: false, default: () => ({}) },
-  getData: {
-    type: Function as PropType<(getAPI: string, searchParameters?: Record<string, number | string | undefined>) => Promise<{ data: Record<string, any>[]; totalPage: number; total: number }>>,
-    required: false,
-  },
   paginated: { type: Boolean, required: false, default: false },
   sortable: { type: Boolean, required: false, default: false },
   limitSet: { type: Array as PropType<number[]>, default: [10, 20, 50, 100] },
@@ -45,9 +39,8 @@ const props = defineProps({
 })
 const runtime = useFrameworkRuntime()
 const defaultTableConfig = useFrameworkDefaults().table
-const getData = props.getData ?? ((getAPI: string, searchParameters?: Record<string, number | string | undefined>) => defaultTableGetData(getAPI, searchParameters, runtime.table))
-const onDataLoaded = props.onDataLoaded ?? ((data: any[]) => runtime.table?.onDataLoaded?.(data))
 const slots = useSlots()
+const emit = defineEmits<{ (event: 'loaded', data: any[]): void; (event: 'error', error: unknown): void }>()
 
 const modelValue = defineModel<Record<string, any>[]>({ default: () => [] })
 
@@ -106,18 +99,30 @@ function handleFieldFilter(field: string) {
 
 async function loadData() {
   loading.value = true
-  if (props.operation || props.getAPI) {
-    const { data, total, totalPage } = props.operation
-      ? await props.operation(localsearchParameters.value)
-      : await getData(props.getAPI!, localsearchParameters.value)
-    tableData.value = { ...data, data: formatTableData(data), rawData: data }
-    dataInfo.value = { total, totalPage, length: data?.length || data.length }
-  } else if (props.data) tableData.value = { ...props.data, data: formatTableData(props.data), rawData: props.data }
-  // keep modelValue synced with the latest rawData
-  modelValue.value = tableData.value.rawData
-  onDataLoaded(tableData.value.rawData)
-  loading.value = false
+  try {
+    if (props.load) {
+      const { data, total, totalPage } = await props.load(localsearchParameters.value)
+      tableData.value = { data: formatTableData(data), rawData: data }
+      dataInfo.value = { total, totalPage, length: data?.length || 0 }
+    } else if (props.data) {
+      tableData.value = { data: formatTableData(props.data), rawData: props.data }
+      dataInfo.value = { length: props.data.length }
+    } else {
+      tableData.value = { data: [], rawData: [] }
+      dataInfo.value = { length: 0 }
+    }
+    modelValue.value = tableData.value.rawData
+    emit('loaded', tableData.value.rawData)
+  } catch (error) {
+    tableData.value = { data: [], rawData: [] }
+    dataInfo.value = { length: 0 }
+    emit('error', error)
+  } finally {
+    loading.value = false
+  }
 }
+
+if (props.load && props.data && (import.meta as any).env?.DEV) console.warn('[vue-framework] Table received both load and data; load takes precedence.')
 
 await loadData()
 
@@ -138,6 +143,8 @@ watch(
   },
   { deep: true }
 )
+
+defineExpose({ reload: loadData })
 
 const rowExpandActiveIndex = ref()
 
@@ -192,7 +199,6 @@ const COLUMN_WIDTHS_STORAGE_KEY = 'tableColumnWidths'
 
 const tableStorageId = computed(() => {
   if (props.tableId) return props.tableId
-  if (props.getAPI) return props.getAPI
   return `fields:${props.fields.join('|')}`
 })
 

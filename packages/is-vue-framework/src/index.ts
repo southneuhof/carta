@@ -22,6 +22,7 @@ export {
   downloadBlob,
 } from './services'
 export { resolveCRUDOperations, useCRUDOperations } from './adapters/crudOperations'
+export type { TableResult, TableLoad, DetailLoad, FormLoad, FormSubmit } from './components/composites/types'
 export type {
   CRUDCompositeConfig,
   CRUDResource,

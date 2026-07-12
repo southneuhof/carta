@@ -174,8 +174,8 @@ if (isExpanded.value) {
               }"
               class="w-full"
               :extraData="{ dir: item.path }"
-              :onSubmit="({ payload }) => createFolder(payload)"
-              :onSuccess="handleCreateFolderSuccess"
+              :submit="(payload) => createFolder(payload)"
+              @success="handleCreateFolderSuccess"
             >
               <template #trigger>
                 <div class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-on-surface/10">

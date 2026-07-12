@@ -1,65 +1,42 @@
 <script setup lang="ts">
 import { ref, type PropType, watch, provide, onMounted, nextTick } from 'vue'
 import { evaluateFieldDependencies, type FieldDependency, type InputConfig } from '../../model-config'
-import { defaultBeforeSubmit, defaultFormGetData, defaultOnError, defaultOnSubmit, defaultOnSuccess } from '@southneuhof/is-vue-framework/runtimeDefaults'
 import { executeValidationRules } from '@southneuhof/is-vue-framework/utilities/validations'
 import { toast } from 'vue-sonner'
-import { useRoute } from 'vue-router'
 import { componentTypeMap as typeConfigMap } from './common/properties'
 import { keyManager } from '@southneuhof/is-vue-framework/adapters/state'
-import { getInputComponentRegistry, resolveInputComponent } from './formInputRegistry'
+import { resolveInputComponent } from './formInputRegistry'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
-import type { CRUDDetailOperation, CRUDMutationOperation, CRUDUpdateOperation } from '@southneuhof/is-vue-framework/adapters/crud-operations'
-import { useFrameworkDefaults, useFrameworkRuntime } from '@southneuhof/is-vue-framework'
+import { useFrameworkDefaults } from '@southneuhof/is-vue-framework'
+import type { FormLoad, FormSubmit } from './types'
 
 const props = defineProps({
   inputConfig: { type: Object as PropType<InputConfig>, default: () => ({}) },
   fields: { type: Array as PropType<string[]>, required: true },
   fieldsAlias: { type: Object, default: () => ({}) },
-  getDetailData: {
-    type: Function as PropType<({ getAPI, id, searchParameters }: { getAPI: string; id?: string | number | string[]; searchParameters?: object }) => Promise<object>>,
-  },
-  detailOperation: { type: Function as PropType<CRUDDetailOperation> },
-  createOperation: { type: Function as PropType<CRUDMutationOperation> },
-  updateOperation: { type: Function as PropType<CRUDUpdateOperation> },
+  load: { type: Function as PropType<FormLoad> },
+  submit: { type: Function as PropType<FormSubmit> },
   getInitialData: { type: Function as PropType<() => Promise<Record<string, any>>>, default: async () => ({}) },
   beforeSubmit: { type: Function as PropType<({ formData }: { formData: object }) => object> },
-  onSubmit: {
-    type: Function as PropType<({ payload, method, targetAPI, type }: { payload: object; method: 'put' | 'post'; targetAPI: string; type: 'create' | 'update' }) => Promise<object | void>>,
-  },
-  onSuccess: { type: Function as PropType<({ formData, res }: { formData: object; res: Record<string, any> }) => void> },
-  onError: { type: Function as PropType<({ formData, error }: { formData: object; error: Record<string, any> }) => void> },
-  targetAPI: { type: String, default: '' },
-  getAPI: { type: String },
-  dataID: { type: Object as PropType<string | string[]> },
-  formType: { type: String as PropType<'create' | 'update'>, default: 'create' },
-  method: { type: String as PropType<'put' | 'post'> },
-  searchParameters: { type: Object, default: () => ({}) },
   extraData: { type: Object, default: () => ({}) },
-  static: { type: Boolean },
   disabled: { type: Boolean },
 })
-const runtime = useFrameworkRuntime()
 const defaultFormConfig = useFrameworkDefaults().form
-const getDetailData = props.getDetailData ?? ((params: { getAPI: string; id?: string | number | string[]; searchParameters?: object }) => defaultFormGetData(params, runtime.form))
-const beforeSubmit = props.beforeSubmit ?? ((params: { formData: object }) => defaultBeforeSubmit(params, runtime.form))
-const onSubmit = props.onSubmit ?? ((params: { payload: object; method: 'put' | 'post'; targetAPI: string; type: 'create' | 'update' }) => defaultOnSubmit(params, runtime.form))
-const onSuccess = props.onSuccess ?? ((params: { formData: object; res: Record<string, any> }) => defaultOnSuccess({ payload: params.formData, response: params.res }, runtime.form))
-const onError = props.onError ?? ((params: { formData: object; error: Record<string, any> }) => defaultOnError({ payload: params.formData, error: params.error }, runtime.form))
-
-const route = useRoute()
+const beforeSubmit = props.beforeSubmit ?? ((params: { formData: object }) => params.formData)
+const emit = defineEmits<{
+  (event: 'success', result: unknown, submittedData: Record<string, any>): void
+  (event: 'error', error: unknown, submittedData: Record<string, any>): void
+}>()
 
 const inputConfig = ref({ ...defaultFormConfig.inputConfig, ...props.inputConfig })
 const fieldsAlias = { ...defaultFormConfig.fieldsAlias, ...props.fieldsAlias }
 const fieldDependencyTarget = ref<Record<string, string[]>>({})
-defineEmits<{ (event: string, ...args: any[]): void }>()
 const modelValue = defineModel<any>({ default: () => ({}) })
 
 const formData = ref<Record<string, any>>({
-  ...(localStorage.getItem('sys_form_initial_data') ? JSON.parse(localStorage.getItem('sys_form_initial_data')!) : {}),
-  ...(route.query['sys_form_initial_data'] ? JSON.parse(String(route.query['sys_form_initial_data'])) : {}),
+  ...(modelValue.value || {}),
 })
 
 const fieldErrors = ref<Record<string, string>>({})
@@ -255,37 +232,19 @@ function buildInputConfig() {
 
 async function preflight() {
   loading.value.get = true
-  formData.value = (await props.getInitialData()) || {}
-  if (props.formType === 'update') {
-    const detailData = props.detailOperation
-      ? await props.detailOperation(props.dataID || '', props.searchParameters)
-      : await getDetailData({ getAPI: props.getAPI || '', id: props.dataID, searchParameters: props.searchParameters })
-    formData.value = { ...formData.value, ...detailData }
+  try {
+    formData.value = { ...(await props.getInitialData()) || {}, ...(modelValue.value || {}) }
+    if (props.load) formData.value = { ...formData.value, ...((await props.load()) || {}) }
+    buildInputConfig()
+  } catch (error) {
+    emit('error', error, formData.value)
+  } finally {
+    loading.value.get = false
   }
-
-  if (props.static) {
-    watch(
-      () => formData.value,
-      () => {
-        modelValue.value = formData.value
-      },
-      { deep: true }
-    )
-    watch(
-      () => modelValue.value,
-      () => {
-        formData.value = modelValue.value
-      },
-      { deep: true }
-    )
-    formData.value = modelValue.value
-  }
-
-  buildInputConfig()
-  loading.value.get = false
 }
 
 async function submitForm() {
+  if (!props.submit || loading.value.post) return
   submitAttempted.value = true
   if (validateVisibleFields()) {
     void scrollToFirstVisibleErrorField()
@@ -297,17 +256,13 @@ async function submitForm() {
     if (fieldDependencyData.value[field]?.visibility?.value === false) formData.value[field] = null
   })
 
-  const payload = beforeSubmit({ formData: { ...formData.value, ...props.extraData } })
+  const payload = beforeSubmit({ formData: { ...formData.value, ...props.extraData } }) as Record<string, any>
   loading.value.post = true
   try {
-    const res = props.formType === 'update' && props.updateOperation
-      ? await props.updateOperation(props.dataID || '', payload as Record<string, any>)
-      : props.formType === 'create' && props.createOperation
-        ? await props.createOperation(payload as Record<string, any>)
-        : await onSubmit({ payload, method: props.method || (props.formType === 'update' ? 'put' : 'post'), targetAPI: props.targetAPI, type: props.formType })
-    onSuccess({ formData: payload, res: res || {} })
+    const res = await props.submit(payload)
+    emit('success', res, payload)
   } catch (error: any) {
-    onError({ formData: payload, error })
+    emit('error', error, payload)
   }
   loading.value.post = false
 }
@@ -381,6 +336,36 @@ provide('setFormData', setFormData)
 onMounted(() => {
   preflight()
 })
+
+watch(
+  () => formData.value,
+  () => {
+    modelValue.value = formData.value
+  },
+  { deep: true }
+)
+
+watch(
+  () => modelValue.value,
+  (value) => {
+    if (value && value !== formData.value) formData.value = value
+  },
+  { deep: true }
+)
+
+async function reload() {
+  if (!props.load) return
+  loading.value.get = true
+  try {
+    formData.value = { ...formData.value, ...((await props.load()) || {}) }
+  } catch (error) {
+    emit('error', error, formData.value)
+  } finally {
+    loading.value.get = false
+  }
+}
+
+defineExpose({ reload, submitForm })
 </script>
 
 <template>
@@ -417,7 +402,6 @@ onMounted(() => {
                     :key="keyManager().value[field]"
                     :is="inputConfig[field].component"
                     :formData="formData"
-                    :formType="formType"
                     @validation:touch="() => handleFieldTouch(field)"
                     v-bind="{
                       label: fieldsAlias[field] ?? field,
@@ -459,7 +443,7 @@ onMounted(() => {
           </template>
           <Card v-else color="errorContainer" class="col-span-12">WARN: inputConfig[{{ field }}] is undefined</Card>
         </template>
-        <div v-if="!props.static && !disabled" class="col-span-12 mt-6 flex">
+        <div v-if="props.submit && !disabled" class="col-span-12 mt-6 flex">
           <Button v-if="!$slots.submitButton" class="max-w-fit" :type="'submit'" :disabled="loading.get || loading.post">Submit</Button>
           <slot v-else name="submitButton" v-bind="{ loading: loading.get || loading.post, submitForm, formData }"></slot>
         </div>

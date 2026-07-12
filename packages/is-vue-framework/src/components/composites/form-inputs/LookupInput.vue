@@ -383,8 +383,7 @@ function handleClick(data: Record<string, any>) {
               :fieldsDictionary="fieldsDictionary"
               :fieldsParse="fieldsParse"
               :limitSet="[5, 10]"
-              :getAPI="getAPI"
-              :getData="resolvedGetData"
+              :load="(query) => resolvedGetData(getAPI, query)"
               :searchParameters="combinedSearchParameters"
               paginated
               :onRowClick="handleClick"

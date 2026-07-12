@@ -29,8 +29,11 @@ const detailConfig: DetailConfig = {
     fieldsProxy: defaultDetailConfig.fieldsProxy,
     fieldsType: defaultDetailConfig.fieldsType as Record<string, { type: string; props?: any }>,
   }),
-  dataID: String(route.query[`${props.config.name}_id`]),
 }
+const detailViewConfig = (() => {
+  const { getAPI: _getAPI, dataID: _dataID, searchParameters: _searchParameters, ...config } = detailConfig as any
+  return config
+})()
 
 // const exportConfig: CRUDDetailProps['export'] & Partial<CRUDDetailProps> = {
 //   routeName: props.config.detail?.export?.routeName || props.config.model || props.config.getAPI || props.config.name || String(route.name),
@@ -52,7 +55,6 @@ function loadActiveData(data: any) {
   activeData.value = data
 }
 
-provide('onDataLoaded', loadActiveData)
 provide('data', activeData)
 
 const { handlePrint } = useVueToPrint({
@@ -275,7 +277,7 @@ const { handlePrint } = useVueToPrint({
             <Suspense v-if="$slots['detail-main']">
               <slot name="detail-main"></slot>
             </Suspense>
-            <Detail v-else v-bind="(detailConfig as any)" :operation="crudOperations.detail" :onDataLoaded="(data: any) => activeData = data">
+            <Detail v-else v-bind="detailViewConfig" :load="() => crudOperations.detail(String(route.query[`${props.config.name}_id`]), detailConfig.searchParameters)" @loaded="(data: any) => activeData = data">
               <template v-for="slotname in Object.keys($slots)" v-slot:[String(slotname)]="data">
                 <slot v-if="slotname.slice(0, 7) === 'detail-'" :name="slotname" v-bind="(data as any)"></slot>
               </template>

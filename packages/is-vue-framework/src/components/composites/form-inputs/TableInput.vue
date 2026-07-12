@@ -26,6 +26,15 @@ const modelValue = defineModel<any[]>({ default: () => [] })
 const id = useId()
 
 const _console = console
+
+function cloneRow(data: Record<string, any>) {
+  return Promise.resolve(JSON.parse(JSON.stringify(data)))
+}
+
+function cleanFormConfig(config: Record<string, unknown>) {
+  const { targetAPI, getAPI, dataID, formType, method, onSubmit, onSuccess, onError, getDetailData, detailOperation, createOperation, updateOperation, ...rest } = config
+  return rest
+}
 </script>
 
 <template>
@@ -36,17 +45,15 @@ const _console = console
         <DialogForm
           v-if="!disabled"
           v-bind="{
-            ...(form as any),
-            fields: form?.fields || fields,
+            ...((cleanFormConfig(form as any) as any)),
+            fields: (form?.fields || fields) as string[],
             fieldsAlias: { ...(fieldsAlias as Record<string, unknown>), ...((form?.fieldsAlias as Record<string, unknown>) || {}) },
           }"
-          :onSubmit="
-            async ({ payload }) => {
+          :submit="async (payload) => {
               modelValue.push(payload)
               modelValue = [...modelValue]
               keyManager().triggerChange(`table-input-${id}`)
-            }
-          "
+            }"
         >
           <template #trigger>
             <Button v-if="!$slots['create-button']"><Icon name="add"></Icon>Tambah</Button>
@@ -70,18 +77,15 @@ const _console = console
           <div class="flex flex-row items-center gap-2">
             <DialogForm
               v-bind="{
-                ...(form as any),
-                fields: form?.fields || fields,
+                ...((cleanFormConfig(form as any) as any)),
+                fields: (form?.fields || fields) as string[],
                 fieldsAlias: { ...(fieldsAlias as Record<string, unknown>), ...((form?.fieldsAlias as Record<string, unknown>) || {}) },
               }"
-              :onSubmit="
-                async ({ payload }) => {
+              :submit="async (payload) => {
                   modelValue[index] = payload
                   keyManager().triggerChange(`table-input-${id}`)
-                }
-              "
-              :getDetailData="() => JSON.parse(JSON.stringify(data))"
-              formType="update"
+                }"
+              :load="() => cloneRow(data)"
             >
               <template #trigger>
                 <Button color="warning" variant="tonal"><Icon name="edit"></Icon></Button>

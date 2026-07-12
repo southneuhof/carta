@@ -11,15 +11,8 @@ export interface FrameworkCRUDRuntime {
   reorder?: (params: { resource: CRUDResource; event: any }) => Promise<unknown> | unknown
 }
 
-export type FrameworkFormGetData = (params: { getAPI: string; id?: string | number | string[]; searchParameters?: object }) => Promise<object | undefined>
-export type FrameworkFormBeforeSubmit = (params: { formData: object }) => object
-export type FrameworkFormSubmit = (params: { payload: object; method: 'put' | 'post'; targetAPI: string; type: 'create' | 'update' }) => Promise<object | void>
-export type FrameworkFormSuccess = (params: { formData?: object; payload?: object; res?: Record<string, any>; response?: object }) => void | object
-export type FrameworkFormError = (params: { formData?: object; payload?: object; error: any }) => void | object
-
-export interface FrameworkFormRuntime { getDetailData?: FrameworkFormGetData; beforeSubmit?: FrameworkFormBeforeSubmit; onSubmit?: FrameworkFormSubmit; onSuccess?: FrameworkFormSuccess; onError?: FrameworkFormError }
-export interface FrameworkTableRuntime { getData?: (getAPI: string, searchParameters?: Record<string, any>) => Promise<{ data: Record<string, any>[]; totalPage?: number; total?: number }>; onDataLoaded?: (data: any) => void; fieldTypes?: Record<string, any> }
-export interface FrameworkDetailRuntime { getData?: (getAPI: string, searchParameters?: Record<string, any>, dataID?: string | number) => Promise<Record<string, any>>; onDataLoaded?: (data: any) => void; fieldTypes?: Record<string, any> }
+export interface FrameworkTableRuntime { getData?: (getAPI: string, searchParameters?: Record<string, any>) => Promise<{ data: Record<string, any>[]; totalPage?: number; total?: number }>; fieldTypes?: Record<string, any> }
+export interface FrameworkDetailRuntime { getData?: (getAPI: string, searchParameters?: Record<string, any>, dataID?: string | number) => Promise<Record<string, any>>; fieldTypes?: Record<string, any> }
 export interface FrameworkSelectRuntime { getData?: (getAPI: string, searchParameters?: object) => Promise<Array<any>> }
 export interface FrameworkLookupRuntime { getData?: (getAPI: string, searchParameters?: object) => Promise<any>; getDetail?: (getAPI: string, id: string | number, searchParameters?: object) => Promise<any>; dataFormatter?: (data: Array<Record<string, any>>, allowMulti: boolean, pick: string) => any; fieldsAlias?: Record<string, string> }
 export type FrameworkFileUpload = (file: File, directory?: string, onUploadProgress?: (progress: { loaded: number; total: number }) => void) => Promise<any>
@@ -35,7 +28,6 @@ export interface FrameworkCRUDDetailRuntime { onExport?: (detailConfig: any, id:
 
 export interface FrameworkRuntime {
   crud?: FrameworkCRUDRuntime
-  form?: FrameworkFormRuntime
   table?: FrameworkTableRuntime
   detail?: FrameworkDetailRuntime
   select?: FrameworkSelectRuntime

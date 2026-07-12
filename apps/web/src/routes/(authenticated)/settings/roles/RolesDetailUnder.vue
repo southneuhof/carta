@@ -63,6 +63,18 @@ const rolePermissionsConfig = {
   fields: ['name'],
   fieldsAlias: { name: 'Permission' },
 } satisfies CRUDCompositeConfig<CRUDResource>
+
+async function copyRolePermissions(payload: Record<string, any>) {
+  const baseURL = String(import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
+  const response = await fetch(`${baseURL}/custom/mappingrolepermission/copy`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...payload, target_role_id: data.value?.id || data.id }),
+  })
+  if (!response.ok) throw await response.json().catch(() => new Error(response.statusText))
+  return response.json().catch(() => undefined)
+}
 </script>
 
 <template>
@@ -77,7 +89,6 @@ const rolePermissionsConfig = {
     <template #list-view-header-action>
       <DialogForm
         :fields="['source_role_id']"
-        targetAPI="custom/mappingrolepermission/copy?custom"
         :fieldsAlias="{ source_role_id: 'Role' }"
         :inputConfig="{
           source_role_id: {
@@ -91,8 +102,8 @@ const rolePermissionsConfig = {
           },
         }"
         :extraData="{ target_role_id: data.id }"
-        method="put"
-        :onSuccess="() => {
+        :submit="copyRolePermissions"
+        @success="() => {
           toast.success('Berhasil menyalin permission dari role!')
           keyManager().triggerChange('roles-detail-under')
         }"

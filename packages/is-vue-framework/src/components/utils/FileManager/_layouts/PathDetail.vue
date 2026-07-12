@@ -484,8 +484,8 @@ watch(
               }"
               class="w-full"
               :extraData="{ dir: item.path }"
-              :onSubmit="({ payload }) => createFolder(payload)"
-              :onSuccess="
+              :submit="(payload) => createFolder(payload)"
+              @success="
                 () => {
                   toast.success('Folder created successfully')
                   getData()

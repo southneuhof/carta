@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { defaultDetailGetData, defaultDetailOnDataLoaded, getDetailFieldTypes } from '@southneuhof/is-vue-framework/runtimeDefaults'
+import { getDetailFieldTypes } from '@southneuhof/is-vue-framework/runtimeDefaults'
 import { parse } from '@southneuhof/utilities/parse'
-import { computed, onMounted, ref, type PropType } from 'vue'
+import { computed, ref, watch, type PropType } from 'vue'
 import { componentTypeMap, parsedTypes } from './common/properties'
-import type { CRUDDetailOperation } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 import { useFrameworkDefaults, useFrameworkRuntime } from '@southneuhof/is-vue-framework'
+import type { DetailLoad } from './types'
 
 const props = defineProps({
   fields: { type: Array as PropType<string[]>, required: true },
@@ -15,18 +15,12 @@ const props = defineProps({
   fieldsUnit: { type: Object as PropType<Record<string, string>>, default: () => ({}) },
   fieldsParse: { type: Object as PropType<Record<string, string>>, default: () => ({}) },
   data: { type: Object as PropType<Record<string, any>> },
-  getAPI: { type: String },
-  operation: { type: Function as PropType<CRUDDetailOperation> },
-  dataID: { type: String },
-  searchParameters: { type: Object as PropType<Record<string, any>> },
-  getData: { type: Function as PropType<(getAPI: string, searchParameters?: Record<string, any>, dataID?: string) => Promise<Record<string, any>>> },
-  onDataLoaded: { type: Function as PropType<(data: any) => void> },
+  load: { type: Function as PropType<DetailLoad> },
   rowGap: { type: String, default: '4px' },
 })
 const runtime = useFrameworkRuntime()
 const defaultDetailConfig = useFrameworkDefaults().detail
-const resolvedGetData = props.getData ?? ((getAPI: string, searchParameters?: Record<string, any>, dataID?: string) => defaultDetailGetData(getAPI, searchParameters, dataID, runtime.detail))
-const onDataLoaded = props.onDataLoaded ?? ((data: any) => defaultDetailOnDataLoaded(data, runtime.detail))
+const emit = defineEmits<{ (event: 'loaded', data: any): void; (event: 'error', error: unknown): void }>()
 
 const fieldSlots = defaultDetailConfig.fieldSlots
 const fieldsAlias = { ...defaultDetailConfig.fieldsAlias, ...props.fieldsAlias }
@@ -51,25 +45,32 @@ function formatDetailData(data: Record<string, any>) {
   return res
 }
 
-async function getData() {
-  if (!props.data && (props.operation || props.getAPI)) {
-    const request = props.operation
-      ? props.operation(props.dataID || '', props.searchParameters)
-      : resolvedGetData(props.getAPI!, props.searchParameters, props.dataID)
-    await request.then((data) => {
-      if (!data) return
-      detailData.value = { data: formatDetailData(data), rawData: data }
-      onDataLoaded(data)
-      loading.value = false
-    })
-  } else if (props.data) {
-    detailData.value = { data: formatDetailData(props.data), rawData: props.data }
-      onDataLoaded(props.data)
+async function reload() {
+  loading.value = true
+  try {
+    const data = props.load ? await props.load() : props.data
+    detailData.value = { data: data ? formatDetailData(data) : {}, rawData: data || {} }
+    if (data) emit('loaded', data)
+  } catch (error) {
+    detailData.value = { data: {}, rawData: {} }
+    emit('error', error)
+  } finally {
     loading.value = false
   }
 }
 
-await getData()
+if (props.load && props.data && (import.meta as any).env?.DEV) console.warn('[vue-framework] Detail received both load and data; load takes precedence.')
+
+await reload()
+defineExpose({ reload })
+
+watch(
+  () => props.data,
+  () => {
+    if (!props.load) reload()
+  },
+  { deep: true },
+)
 
 // onMounted(() => {
 //   getData()

@@ -4,7 +4,6 @@ import {
   type FrameworkCRUDListRuntime,
   type FrameworkDetailRuntime,
   type FrameworkFileUpload,
-  type FrameworkFormRuntime,
   type FrameworkImageURLResolver,
   type FrameworkLookupRuntime,
   type FrameworkRuntime,
@@ -52,22 +51,8 @@ export async function defaultDetailGetData(getAPI: string, searchParameters?: Re
   return getData(getAPI, searchParameters, id)
 }
 
-export function defaultDetailOnDataLoaded(data?: any, runtime?: FrameworkDetailRuntime) { return runtime?.onDataLoaded?.(data) }
 export function getDetailFieldTypes(runtime?: FrameworkDetailRuntime): Record<string, any> { return runtime?.fieldTypes ?? {} }
 
-export function defaultBeforeSubmit({ formData }: { formData: object }, runtime?: FrameworkFormRuntime) { return runtime?.beforeSubmit?.({ formData }) ?? formData }
-export async function defaultOnSubmit(params: { payload: object; method: 'put' | 'post'; targetAPI: string; type: 'create' | 'update' }, runtime?: FrameworkFormRuntime) {
-  const submit = runtime?.onSubmit
-  if (!submit) missingRuntimeCapability('form.onSubmit')
-  return submit(params)
-}
-export function defaultOnSuccess({ payload, response }: { payload: object; response: object }, runtime?: FrameworkFormRuntime) { return runtime?.onSuccess?.({ payload, response }) ?? { payload, response } }
-export function defaultOnError({ payload, error }: { payload: object; error: any }, runtime?: FrameworkFormRuntime) { return runtime?.onError?.({ payload, error }) ?? { payload, error } }
-export async function defaultFormGetData(params: { getAPI: string; id?: string | number | string[]; searchParameters?: object }, runtime?: FrameworkFormRuntime) {
-  const getData = runtime?.getDetailData
-  if (!getData) missingRuntimeCapability('form.getDetailData')
-  return getData(params)
-}
 
 export async function defaultFileInputUpload(file: File, directory?: string, progress?: (value: { loaded: number; total: number }) => void, runtime?: FrameworkRuntime) {
   const upload = runtime?.fileManager?.uploadFile ?? runtime?.fileInput?.fileUpload

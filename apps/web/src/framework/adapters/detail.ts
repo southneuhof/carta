@@ -5,8 +5,4 @@ export async function getData(getAPI: string, searchParameters?: Record<string, 
   return data
 }
 
-export function onDataLoaded() {
-  return
-}
-
 export const fieldTypes: Record<string, any> = {}

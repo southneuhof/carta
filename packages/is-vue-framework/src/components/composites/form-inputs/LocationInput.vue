@@ -154,7 +154,7 @@ const { apiKey: GOOGLE_MAP_API_KEY } = await getMapConfig()
               </div>
               <p v-else class="text-muted">Klik pada peta atau tekan tombol untuk memilih lokasi</p>
             </Card>
-            <Form v-if="formConfig && modelValue" static v-model="formModel as any" v-bind="formConfig"></Form>
+            <Form v-if="formConfig && modelValue" v-model="formModel as any" v-bind="formConfig"></Form>
           </div>
           <div v-if="loading" class="flex flex-row items-center gap-4">
             <Spinner />

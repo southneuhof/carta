@@ -25,6 +25,10 @@ if (!props.config.title) props.config.title = String(route.meta.title)
 const updateFormConfig: UpdateConfig = buildFormConfig(props.config, 'update', {
   fieldsAlias: defaultFormConfig.fieldsAlias,
 }) as UpdateConfig
+const updateFormProps = (() => {
+  const { getAPI: _getAPI, targetAPI: _targetAPI, dataID: _dataID, searchParameters: _searchParameters, onSuccess: _onSuccess, ...config } = updateFormConfig as any
+  return config
+})()
 </script>
 
 <template>
@@ -56,17 +60,10 @@ const updateFormConfig: UpdateConfig = buildFormConfig(props.config, 'update', {
         <slot v-if="$slots['update-main']" name="update-main" />
         <Card v-else>
           <Form
-            v-bind="(updateFormConfig as any)"
-            :detailOperation="crudOperations.detail"
-            :updateOperation="crudOperations.update"
-            formType="update"
-            :dataID="String(route.query[`${props.config.name}_id`])"
-            :onSuccess="
-              () => {
-                toast.success('Berhasil mengubah data!')
-                $router.back()
-              }
-            "
+            v-bind="updateFormProps"
+            :load="() => crudOperations.detail(String(route.query[`${props.config.name}_id`]), updateFormConfig.searchParameters)"
+            :submit="(data) => crudOperations.update(String(route.query[`${props.config.name}_id`]), data)"
+            @success="() => { toast.success('Berhasil mengubah data!'); $router.back() }"
           />
         </Card>
       </Suspense>

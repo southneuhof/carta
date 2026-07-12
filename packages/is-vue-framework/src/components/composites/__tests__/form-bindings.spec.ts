@@ -109,7 +109,6 @@ describe('Form multi-binding compatibility', () => {
     const mounted = await mountForm({
       initialModel: { name: 'initial-name' },
       formProps: {
-        static: true,
       },
     })
 
@@ -132,7 +131,6 @@ describe('Form multi-binding compatibility', () => {
         namePreviewOpen: false,
       },
       formProps: {
-        static: true,
         inputConfig: {
           name: {
             type: 'custom',
@@ -168,7 +166,6 @@ describe('Form multi-binding compatibility', () => {
         alias: 'aliased-value',
       },
       formProps: {
-        static: true,
         inputConfig: {
           name: {
             type: 'custom',
@@ -202,7 +199,6 @@ describe('Form multi-binding compatibility', () => {
         nameUploadState: 'idle',
       },
       formProps: {
-        static: true,
         inputConfig: {
           name: {
             type: 'binding-test',
@@ -236,7 +232,6 @@ describe('Form multi-binding compatibility', () => {
         url_text: 'Initial button text',
       },
       formProps: {
-        static: true,
         fields: ['url'],
         inputConfig: {
           url: {
@@ -267,7 +262,6 @@ describe('Form multi-binding compatibility', () => {
   it('preserves unrelated props and validation touch handling', async () => {
     const mounted = await mountForm({
       formProps: {
-        static: true,
         fieldsAlias: {
           name: 'Display Name',
         },

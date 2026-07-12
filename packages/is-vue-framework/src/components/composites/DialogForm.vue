@@ -2,45 +2,26 @@
 import Form from '@southneuhof/is-vue-framework/components/composites/Form.vue'
 import type { InputConfig } from '../../model-config'
 import { computed, type PropType } from 'vue'
-import { defaultFormGetData, defaultBeforeSubmit, defaultOnSubmit, defaultOnSuccess, defaultOnError } from '@southneuhof/is-vue-framework/runtimeDefaults'
 import Dialog from '../base/Dialog.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
-import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
+import type { FormLoad, FormSubmit } from './types'
 // import DialogDeprecated from '../base/DialogDeprecated.vue';
 
 const props = defineProps({
   inputConfig: { type: Object as PropType<InputConfig>, default: () => ({}) },
   fields: { type: Array as PropType<string[]>, required: true },
   fieldsAlias: { type: Object, default: () => ({}) },
-  getDetailData: {
-    type: Function as PropType<({ getAPI, id, searchParameters }: { getAPI: string; id?: string | number | string[]; searchParameters?: object }) => Promise<object>>,
-  },
+  load: { type: Function as PropType<FormLoad> },
+  submit: { type: Function as PropType<FormSubmit> },
   getInitialData: { type: Function as PropType<() => Promise<Record<string, any>>>, default: async () => ({}) },
   beforeSubmit: { type: Function as PropType<({ formData }: { formData: object }) => object> },
-  onSubmit: {
-    type: Function as PropType<({ payload, method, targetAPI, type }: { payload: object; method: 'put' | 'post'; targetAPI: string; type: 'create' | 'update' }) => Promise<object | void>>,
-  },
-  onSuccess: { type: Function as PropType<({ formData, res }: { formData: object; res: Record<string, any> }) => void> },
-  onError: { type: Function as PropType<({ formData, error }: { formData: object; error: Record<string, any> }) => void> },
-  targetAPI: { type: String, default: '' },
-  getAPI: { type: String },
-  dataID: { type: [String, Array] as PropType<string | string[]> },
-  formType: { type: String as PropType<'create' | 'update'>, default: 'create' },
-  method: { type: String as PropType<'put' | 'post'> },
-  searchParameters: { type: Object, default: () => ({}) },
   extraData: { type: Object, default: () => ({}) },
-  static: { type: Boolean },
   disabled: { type: Boolean },
 })
-const runtime = useFrameworkRuntime()
-const getDetailData = props.getDetailData ?? ((params: { getAPI: string; id?: string | number | string[]; searchParameters?: object }) => defaultFormGetData(params, runtime.form))
-const beforeSubmit = props.beforeSubmit ?? ((params: { formData: object }) => defaultBeforeSubmit(params, runtime.form))
-const onSubmit = props.onSubmit ?? ((params: { payload: object; method: 'put' | 'post'; targetAPI: string; type: 'create' | 'update' }) => defaultOnSubmit(params, runtime.form))
-const onSuccess = props.onSuccess ?? ((params: { formData: object; res: Record<string, any> }) => defaultOnSuccess({ payload: params.formData, response: params.res }, runtime.form))
-const onError = props.onError ?? ((params: { formData: object; error: Record<string, any> }) => defaultOnError({ payload: params.formData, error: params.error }, runtime.form))
+const emit = defineEmits<{ (event: 'success', result: unknown, submittedData: Record<string, any>): void; (event: 'error', error: unknown, submittedData: Record<string, any>): void }>()
 
 const formProps = computed<Record<string, any>>(() => {
-  const { onSuccess: _onSuccess, getDetailData: _getDetailData, beforeSubmit: _beforeSubmit, onSubmit: _onSubmit, onError: _onError, ...rest } = props
+  const { ...rest } = props
   return rest
 })
 </script>
@@ -58,12 +39,13 @@ const formProps = computed<Record<string, any>>(() => {
         <slot v-if="$slots.header" name="header"></slot>
         <Form
           v-bind="(formProps as any)"
-          :onSuccess="
-            ({ formData, res }) => {
-              onSuccess({ formData, res })
+          @success="
+            (result, submittedData) => {
+              emit('success', result, submittedData)
               setOpen(false)
             }
           "
+          @error="(error, submittedData) => emit('error', error, submittedData)"
         >
           <template #submitButton="{ loading, submitForm, formData }" v-if="$slots.submitButton">
             <slot name="submitButton" v-bind="{ loading, submitForm, formData, setOpen }"></slot>

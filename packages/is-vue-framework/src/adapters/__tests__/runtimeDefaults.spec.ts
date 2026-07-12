@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { defaultFileInputUpload, defaultImageInputUpload, defaultImageURLResolver, defaultOnSubmit, defaultTableGetData, getTableFieldTypes } from '../../runtimeDefaults'
+import { defaultFileInputUpload, defaultImageInputUpload, defaultImageURLResolver, defaultTableGetData, getTableFieldTypes } from '../../runtimeDefaults'
 
 describe('runtime defaults', () => {
   it('uses supplied table runtime', async () => {
@@ -15,11 +15,6 @@ describe('runtime defaults', () => {
 
   it('throws when required runtime capability is missing', async () => {
     await expect(defaultTableGetData('users', undefined, {})).rejects.toThrow('Missing runtime capability: table.getData')
-  })
-
-  it('uses supplied form runtime', async () => {
-    const onSubmit = vi.fn(async () => ({ ok: true }))
-    await expect(defaultOnSubmit({ payload: {}, method: 'post', targetAPI: 'users', type: 'create' }, { onSubmit })).resolves.toEqual({ ok: true })
   })
 
   it('prefers file-manager upload runtime', async () => {

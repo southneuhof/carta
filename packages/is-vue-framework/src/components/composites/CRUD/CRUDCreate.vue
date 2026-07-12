@@ -3,10 +3,7 @@ import { toast } from 'vue-sonner'
 import { buildFormConfig } from '../../../model-config'
 import { useCRUDOperations, type CRUDCompositeConfig, type CRUDOperationOverrides } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 import Form from '../Form.vue'
-import { useRoute, useRouter } from 'vue-router'
-import { bulkCreateFormProps, composeInputTemplateSheet } from '@southneuhof/is-vue-framework/utilities/crudCreate'
-import Dialog from '@southneuhof/is-vue-framework/components/base/Dialog.vue'
-import { defineAsyncComponent } from 'vue'
+import { useRoute } from 'vue-router'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
@@ -19,7 +16,7 @@ const props = defineProps<{
   permissions: CRUDPermissions
 }>()
 
-const [route, router] = [useRoute(), useRouter()]
+const route = useRoute()
 const crudOperations = useCRUDOperations(props.config, props.operations)
 const defaultFormConfig = useFrameworkDefaults().form
 
@@ -28,6 +25,10 @@ if (!props.config.title) props.config.title = String(route.meta.title)
 const createFormConfig: CreateConfig = buildFormConfig(props.config, 'create', {
   fieldsAlias: defaultFormConfig.fieldsAlias,
 }) as CreateConfig
+const createFormProps = (() => {
+  const { targetAPI: _targetAPI, onSuccess: _onSuccess, ...config } = createFormConfig as any
+  return config
+})()
 </script>
 
 <template>
@@ -47,43 +48,6 @@ const createFormConfig: CreateConfig = buildFormConfig(props.config, 'create', {
         </Button>
         <div class="min-w-max text-xl">Tambah {{ config.title || $route.meta.title }}</div>
       </div>
-      <!-- <Dialog>
-        <template #trigger>
-          <Button kind="icon" variant="standard"><Icon name="function-add"></Icon>Bulk Create</Button>
-        </template>
-        <template #title>
-          Bulk Create
-        </template>
-        <template #content>
-          <div class="flex flex-col gap-4">
-            <ol class="list-decimal ml-4">
-              <li><span class="italic">Download</span> file template <button class="inline-flex text-info" @click="() => composeInputTemplateSheet(createFormConfig)">di sini <Icon class="ml-1" size="md" name="download"></Icon></button></li>
-              <li><span class="italic">Upload file template</span> yang sudah terisi di bawah ini</li>
-              <li>Tekan <span class="italic font-semibold">submit</span></li>
-            </ol>
-            <Form
-              :fields="['data']"
-              :fieldsAlias="{
-                data: 'Data'
-              }"
-              :inputConfig="{
-                data: {
-                  type: 'custom',
-                  component: defineAsyncComponent(() => import('@/components/composites/CRUD/_layouts/SpreadsheetReader.vue')) as any,
-                  props: {
-                    fields: createFormConfig.fields
-                  }
-                }
-              }"
-              :targetAPI="`${createFormConfig.targetAPI}/bulk-create?custom`"
-              :onSuccess="createFormConfig.onSuccess ? createFormConfig.onSuccess : () => {
-                toast.success('Berhasil menambahkan data!')
-                $router.back()
-              }"
-            />
-          </div>
-        </template>
-      </Dialog> -->
     </Card>
     <Transition name="vfade" mode="out-in">
       <Suspense>
@@ -94,19 +58,10 @@ const createFormConfig: CreateConfig = buildFormConfig(props.config, 'create', {
         </template>
         <slot v-if="$slots['create-main']" name="create-main" />
         <Card v-else>
-          <Form
-            v-bind="(createFormConfig as any)"
-            :createOperation="crudOperations.create"
-            formType="create"
-            :onSuccess="
-              createFormConfig.onSuccess
-                ? createFormConfig.onSuccess
-                : () => {
-                    toast.success('Berhasil menambahkan data!')
-                    $router.back()
-                  }
-            "
-          />
+          <Form v-bind="createFormProps" :submit="crudOperations.create" @success="(result, submittedData) => {
+            if (createFormConfig.onSuccess) createFormConfig.onSuccess({ formData: submittedData, res: (result as Record<string, any>) || {} })
+            else { toast.success('Berhasil menambahkan data!'); $router.back() }
+          }" />
         </Card>
       </Suspense>
     </Transition>

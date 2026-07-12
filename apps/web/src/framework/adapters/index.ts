@@ -1,5 +1,4 @@
 import type { FrameworkRuntime } from '@southneuhof/is-vue-framework'
-import * as form from './form'
 import * as table from './table'
 import * as detail from './detail'
 import * as select from './select'
@@ -16,7 +15,6 @@ import * as crud from './crud'
 
 export const frameworkRuntimeCapabilities = {
   crud,
-  form,
   table,
   detail,
   select,
