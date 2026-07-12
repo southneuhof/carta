@@ -1,10 +1,11 @@
-import { defineCRUDCompositeConfig } from '@southneuhof/is-vue-framework/adapters/crud-operations'
-import { rpc } from '@/framework/rpc'
+import type { CRUDCompositeConfig } from '@southneuhof/is-vue-framework/adapters/crud-operations'
+import { resources } from '@/framework/rpc'
 
-export default defineCRUDCompositeConfig({
+export default {
   name: 'users',
   title: 'Pengguna',
-  resource: rpc.users,
+  resource: resources.users,
+  actions: { create: false, delete: false },
   fields: ['name', 'email', 'roleId', 'createdAt', 'updatedAt'],
   fieldsAlias: { roleId: 'Role' },
   view: { list: { filter: { fields: ['roleId'] } } },
@@ -20,4 +21,4 @@ export default defineCRUDCompositeConfig({
       inputConfig: { password: { type: 'password' } },
     },
   },
-})
+} satisfies CRUDCompositeConfig<typeof resources.users>

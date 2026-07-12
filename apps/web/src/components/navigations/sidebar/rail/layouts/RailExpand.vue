@@ -20,7 +20,7 @@ const props = defineProps({
           <div class="text-2xl font-bold">{{ menus.title }}</div>
           <hr/>
           <div class="flex flex-col gap-2">
-            <div v-for="submenu in menus.routes">
+            <div v-for="submenu in menus.routes" :key="submenu.name">
               <div v-if="submenu.separator" class="text-muted px-4 py-2 text-sm">{{ submenu.name }}</div>
               <button v-else-if="String($route.name) === submenu.name" class="overlay flex w-full flex-row items-center gap-4 rounded-full bg-primary p-4 text-on-primary after:hover:bg-on-primary/[8%] after:active:bg-on-primary/[12%]    ">
                 <Icon :FILL="1" :name="submenu.icon"></Icon>

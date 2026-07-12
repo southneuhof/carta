@@ -8,13 +8,10 @@ export {
   parseFilenameFromContentDisposition,
   downloadBlob,
 } from './services'
-export {
-  defineCRUDCompositeConfig,
-  resolveCRUDOperations,
-  useCRUDOperations,
-} from './adapters/crudOperations'
+export { resolveCRUDOperations, useCRUDOperations } from './adapters/crudOperations'
 export type {
   CRUDCompositeConfig,
+  CRUDResource,
   CRUDOperations,
   CRUDOperationOverrides,
 } from './adapters/crudOperations'

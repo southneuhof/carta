@@ -101,10 +101,10 @@ const sections = [
 <template>
   <div class="flex w-full items-center justify-center bg-background text-on-surface">
     <div class="my-4 flex min-h-screen max-w-5xl flex-col gap-8 rounded-lg bg-surface-container px-4 py-8">
-      <div v-for="section in sections" class="flex flex-col gap-4">
+      <div v-for="section in sections" :key="section.title" class="flex flex-col gap-4">
         <div class="text-3xl font-bold">{{ section.title }}</div>
         <div class="flex flex-col gap-2">
-          <div v-for="paragraph in section.content">
+          <div v-for="paragraph in section.content" :key="paragraph">
             {{ paragraph }}
           </div>
         </div>

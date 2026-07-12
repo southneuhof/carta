@@ -94,14 +94,18 @@ export type ModelFormField = {
   propGenerator?: Record<string, (formData: Record<string, any>) => any>
 }
 
-export type InputConfig = Record<string, ModelFormField>
+type StringKey<T> = Extract<keyof T, string>
+type ConfigKey<T> = string extends StringKey<T> ? string : StringKey<T>
+type KeyMap<T, TValue> = string extends ConfigKey<T> ? Record<string, TValue> : Partial<Record<ConfigKey<T>, TValue>>
 
-export type CommonModelConfig = {
-  fields?: string[]
-  fieldsAlias?: Record<string, string>
+export type InputConfig<TInput extends Record<string, any> = Record<string, any>> = KeyMap<TInput, ModelFormField>
+
+export type CommonModelConfig<TRecord extends Record<string, any> = Record<string, any>> = {
+  fields?: ConfigKey<TRecord>[]
+  fieldsAlias?: KeyMap<TRecord, string>
 }
 
-export type CommonViewConfig = CommonModelConfig & {
+export type CommonViewConfig<TRecord extends Record<string, any> = Record<string, any>> = CommonModelConfig<TRecord> & {
   getAPI?: string
   fieldsDictionary?: Record<string, Record<string, string>>
   fieldsParse?: Record<string, string>
@@ -111,15 +115,15 @@ export type CommonViewConfig = CommonModelConfig & {
   searchParameters?: Record<string, any>
 }
 
-export type ListConfig = CommonViewConfig & {
+export type ListConfig<TRecord extends Record<string, any> = Record<string, any>> = CommonViewConfig<TRecord> & {
   uid?: string
   deleteAPI?: string
   fieldsClass?: Record<string, string>
   fieldsHeaderClass?: Record<string, string>
   fieldsAlign?: Record<string, 'start' | 'center' | 'end'>
   filter?: {
-    fields?: string[]
-    fieldsAlias?: Record<string, string>
+    fields?: ConfigKey<TRecord>[]
+    fieldsAlias?: KeyMap<TRecord, string>
     inputConfig?: InputConfig
   }
   toggleableFields?: string[]
@@ -132,7 +136,7 @@ export type ListConfig = CommonViewConfig & {
   }
 }
 
-export type DetailConfig = CommonViewConfig & {
+export type DetailConfig<TRecord extends Record<string, any> = Record<string, any>> = CommonViewConfig<TRecord> & {
   dataID?: string
   export?: Omit<CommonViewConfig, 'getAPI' | 'searchParameters'> & {
     title?: string
@@ -141,33 +145,33 @@ export type DetailConfig = CommonViewConfig & {
   }
 }
 
-export type CommonTransactionConfig = CommonModelConfig & {
+export type CommonTransactionConfig<TInput extends Record<string, any> = Record<string, any>> = CommonModelConfig<TInput> & {
   targetAPI?: string
-  inputConfig?: InputConfig
+  inputConfig?: InputConfig<TInput>
   extraData?: Record<string, any>
   getInitialData?: () => Promise<Record<string, any>>
   onSuccess?: (params: { formData: Record<string, any>; res: Record<string, any> }) => void
 }
 
-export type CreateConfig = CommonTransactionConfig
+export type CreateConfig<TInput extends Record<string, any> = Record<string, any>> = CommonTransactionConfig<TInput>
 
-export type UpdateConfig = CommonTransactionConfig & {
+export type UpdateConfig<TInput extends Record<string, any> = Record<string, any>> = CommonTransactionConfig<TInput> & {
   getAPI?: string
   dataID?: string
   searchParameters?: Record<string, any>
 }
 
-export type ViewConfig = CommonViewConfig & {
-  list?: ListConfig
-  detail?: DetailConfig
+export type ViewConfig<TRecord extends Record<string, any> = Record<string, any>> = CommonViewConfig<TRecord> & {
+  list?: ListConfig<TRecord>
+  detail?: DetailConfig<TRecord>
 }
 
-export type TransactionConfig = CommonTransactionConfig & {
-  create?: CreateConfig
-  update?: UpdateConfig
+export type TransactionConfig<TCreateInput extends Record<string, any> = Record<string, any>, TUpdateInput extends Record<string, any> = TCreateInput> = CommonTransactionConfig<TCreateInput & TUpdateInput> & {
+  create?: CreateConfig<TCreateInput>
+  update?: UpdateConfig<TUpdateInput>
 }
 
-export type ModelConfig = CommonModelConfig & {
+export type ModelConfig<TRecord extends Record<string, any> = Record<string, any>, TCreateInput extends Record<string, any> = Record<string, any>, TUpdateInput extends Record<string, any> = TCreateInput> = CommonModelConfig<TRecord> & {
   name: string
   title: string
   modelAPI?: string
@@ -178,8 +182,8 @@ export type ModelConfig = CommonModelConfig & {
     delete?: boolean
     detail?: boolean
   }
-  view?: ViewConfig
-  transaction?: TransactionConfig
+  view?: ViewConfig<TRecord>
+  transaction?: TransactionConfig<TCreateInput, TUpdateInput>
 }
 
 export type ModelConfigOverride = DeepPartial<ModelConfig>

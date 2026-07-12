@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject } from 'vue'
+import { inject, ref } from 'vue'
 import Switch from '@southneuhof/is-vue-framework/components/inputs/Switch.vue'
 import CRUDComposite from '@southneuhof/is-vue-framework/components/composites/CRUDComposite.vue'
 import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue'
@@ -7,10 +7,41 @@ import { toast } from 'vue-sonner'
 import { keyManager } from '@/stores/keyManager'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
-import { defineCRUDCompositeConfig, type CRUDListResult, type CRUDOperations } from '@southneuhof/is-vue-framework/adapters/crud-operations'
+import type { CRUDCompositeConfig, CRUDListResult, CRUDOperations, CRUDResource } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 import { rpc } from '@/framework/rpc'
 
 const data = inject<any>('data', {})
+const pendingPermissionIds = ref(new Set<string>())
+
+function setPermissionPending(permissionId: string, pending: boolean) {
+  const nextPendingIds = new Set(pendingPermissionIds.value)
+  if (pending) nextPendingIds.add(permissionId)
+  else nextPendingIds.delete(permissionId)
+  pendingPermissionIds.value = nextPendingIds
+}
+
+function isPermissionPending(permissionId: unknown) {
+  return pendingPermissionIds.value.has(String(permissionId))
+}
+
+async function toggleRolePermission(row: { id: string; active: boolean }, nextValue: boolean) {
+  const permissionId = String(row.id)
+  if (pendingPermissionIds.value.has(permissionId)) return
+
+  setPermissionPending(permissionId, true)
+  try {
+    const route = rpc.roles[':roleId'].permissions[':permissionId']
+    const request = { param: { roleId: String(data.value?.id || data.id), permissionId } }
+    const response = nextValue ? await route.$put(request) : await route.$delete(request)
+    if (!response.ok) throw new Error('Permission toggle request failed')
+  } catch {
+    row.active = !nextValue
+    toast.error('Gagal memperbarui permission. Silakan coba lagi.')
+  } finally {
+    setPermissionPending(permissionId, false)
+  }
+}
+
 const unavailable = async () => { throw new Error('This operation is not available for role permissions.') }
 const rolePermissionOperations: CRUDOperations = {
   async list() {
@@ -23,16 +54,15 @@ const rolePermissionOperations: CRUDOperations = {
   update: unavailable,
   delete: unavailable,
 }
-const rolePermissionsConfig = defineCRUDCompositeConfig({
+const rolePermissionsConfig = {
   name: 'mapping-role-permission',
   title: 'Permissions',
   permission: 'mapping-role-permission',
-  resource: rpc.roles[':roleId'].permissions,
   operations: rolePermissionOperations,
   actions: { create: false, update: false, delete: false, detail: false },
   fields: ['name'],
   fieldsAlias: { name: 'Permission' },
-})
+} satisfies CRUDCompositeConfig<CRUDResource>
 </script>
 
 <template>
@@ -40,12 +70,8 @@ const rolePermissionsConfig = defineCRUDCompositeConfig({
     <template #list-rowActions="{ data: rowData }">
       <Switch
         v-model="rowData.active"
-        :onToggle="(nextValue: boolean) => {
-          const route = rpc.roles[':roleId'].permissions[':permissionId']
-          const request = { param: { roleId: String(data.value?.id || data.id), permissionId: String(rowData.id) } }
-          if (nextValue) route.$put(request)
-          else route.$delete(request)
-        }"
+        :onToggle="(nextValue: boolean) => toggleRolePermission(rowData, nextValue)"
+        :disabled="isPermissionPending(rowData.id)"
       />
     </template>
     <template #list-view-header-action>

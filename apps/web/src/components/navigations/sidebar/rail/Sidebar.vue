@@ -28,6 +28,7 @@ onClickOutside(
       <div class="flex h-full w-full flex-col items-start gap-4 overflow-auto">
         <RailItem
           v-for="(item, index) in modules().value"
+          :key="item.name"
           :title="item.title"
           :state="item.name === String($route.meta.moduleName) ? 2 : sidebarState.index === index ? 1 : 0"
           @click="() => {

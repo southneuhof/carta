@@ -51,6 +51,7 @@ function applyPlatformToInputConfig(inputConfig: InputConfig | undefined, platfo
 
   const result: InputConfig = {}
   for (const [field, config] of Object.entries(inputConfig)) {
+    if (!config) continue
     const platformOverride = config.platform?.[platform]
     const mergedField = mergeValue(config, platformOverride) as ModelFormField
     if (mergedField?.platform) delete mergedField.platform
@@ -196,6 +197,7 @@ export function evaluateFieldDependencies(formData: Record<string, any>, inputCo
   const result: FieldDependencyEvaluation = {}
 
   for (const [field, config] of Object.entries(inputConfig || {})) {
+    if (!config) continue
     const dependency = config.dependency
     if (!dependency) continue
 

@@ -46,6 +46,7 @@ vi.mock('@/framework/rpc', () => ({
 import services from '../services'
 
 const originalFetch = globalThis.fetch
+const originalXMLHttpRequest = globalThis.XMLHttpRequest
 const fetchMock = vi.fn()
 
 function jsonResponse(payload: unknown, status = 200) {
@@ -62,6 +63,7 @@ function jsonResponse(payload: unknown, status = 200) {
 describe('legacy app services', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    fetchMock.mockReset()
     mocks.state.clear()
     mocks.colorPreference.value = 'light'
     window.location.hash = ''
@@ -70,8 +72,49 @@ describe('legacy app services', () => {
 
   afterEach(() => {
     globalThis.fetch = originalFetch
+    globalThis.XMLHttpRequest = originalXMLHttpRequest
     vi.restoreAllMocks()
   })
+
+  function createFile() {
+    return new File(['file contents'], 'report.txt', { type: 'text/plain' })
+  }
+
+  class FakeXMLHttpRequest {
+    upload = {
+      addEventListener: vi.fn((type: string, listener: (event: ProgressEvent) => void) => {
+        this.uploadListeners.set(type, listener)
+      }),
+    }
+    status = 0
+    statusText = ''
+    method = ''
+    url = ''
+    body: BodyInit | null = null
+    private listeners = new Map<string, (event: Event) => void>()
+    private uploadListeners = new Map<string, (event: ProgressEvent) => void>()
+
+    open = vi.fn((method: string, url: string) => {
+      this.method = method
+      this.url = url
+    })
+
+    addEventListener(type: string, listener: (event: Event) => void) {
+      this.listeners.set(type, listener)
+    }
+
+    send(body: BodyInit | null) {
+      this.body = body
+    }
+
+    trigger(type: string) {
+      this.listeners.get(type)?.(new Event(type))
+    }
+
+    triggerProgress(loaded: number, total: number) {
+      this.uploadListeners.get('progress')?.({ loaded, total, lengthComputable: true } as ProgressEvent)
+    }
+  }
 
   it('encodes GET queries, repeats array keys, and omits nullish values', async () => {
     fetchMock.mockResolvedValue(jsonResponse({ data: [] }))
@@ -146,5 +189,107 @@ describe('legacy app services', () => {
     expect(createObjectURL).toHaveBeenCalledOnce()
     expect(click).toHaveBeenCalledOnce()
     expect(revokeObjectURL).toHaveBeenCalledExactlyOnceWith(objectUrl)
+  })
+
+  it('uploads, confirms the PUT, and then registers the file', async () => {
+    const file = createFile()
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ upload_url: 'https://storage.test/upload', file_path: 'files/report.txt' }))
+      .mockResolvedValueOnce(jsonResponse({}, 204))
+      .mockResolvedValueOnce(jsonResponse({ url: 'https://api.test/files/report.txt' }))
+
+    await expect(services.fileUpload(file, 'docs')).resolves.toEqual({
+      success: true,
+      path: 'files/report.txt',
+      data: 'files/report.txt',
+      url: 'https://api.test/files/report.txt',
+    })
+
+    expect(fetchMock).toHaveBeenCalledTimes(3)
+    expect(fetchMock.mock.calls[1]).toEqual(['https://storage.test/upload', { method: 'PUT', body: file }])
+    expect(JSON.parse(String((fetchMock.mock.calls[2]![1] as RequestInit).body))).toEqual({ path: 'files/report.txt', size: file.size })
+  })
+
+  it('rejects a non-2xx presigned PUT and does not register the file', async () => {
+    const file = createFile()
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ upload_url: 'https://storage.test/upload', file_path: 'files/report.txt' }))
+      .mockResolvedValueOnce(jsonResponse({ message: 'storage rejected' }, 403))
+
+    await expect(services.fileUpload(file)).rejects.toThrow('Presigned upload failed')
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('rejects a network-level presigned PUT and does not register the file', async () => {
+    const file = createFile()
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ upload_url: 'https://storage.test/upload', file_path: 'files/report.txt' }))
+      .mockRejectedValueOnce(new Error('network failure'))
+
+    await expect(services.fileUpload(file)).rejects.toThrow('Presigned upload failed due to a network error')
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('propagates registration failure after a successful presigned PUT', async () => {
+    const file = createFile()
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ upload_url: 'https://storage.test/upload', file_path: 'files/report.txt' }))
+      .mockResolvedValueOnce(jsonResponse({}, 200))
+      .mockResolvedValueOnce(jsonResponse({ message: 'registration failed' }, 422))
+
+    await expect(services.fileUpload(file)).rejects.toEqual({ message: 'registration failed' })
+    expect(fetchMock).toHaveBeenCalledTimes(3)
+  })
+
+  it('reports XHR upload progress and completes at the file size', async () => {
+    const file = createFile()
+    let xhr!: FakeXMLHttpRequest
+    class TestXMLHttpRequest extends FakeXMLHttpRequest {
+      constructor() {
+        super()
+        xhr = this
+      }
+    }
+    globalThis.XMLHttpRequest = TestXMLHttpRequest as unknown as typeof XMLHttpRequest
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ upload_url: 'https://storage.test/upload', file_path: 'files/report.txt' }))
+      .mockResolvedValueOnce(jsonResponse({ url: 'https://api.test/files/report.txt' }))
+    const progress = vi.fn()
+
+    const pending = services.fileUpload(file, '', progress)
+    await vi.waitFor(() => expect(xhr).toBeDefined())
+    xhr.triggerProgress(Math.floor(file.size / 2), file.size)
+    xhr.status = 200
+    xhr.trigger('load')
+    await pending
+
+    expect(xhr.open).toHaveBeenCalledExactlyOnceWith('PUT', 'https://storage.test/upload')
+    expect(xhr.body).toBe(file)
+    expect(progress).toHaveBeenLastCalledWith({ loaded: file.size, total: file.size })
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('keeps the fetch-compatible path when no progress callback is supplied', async () => {
+    const file = createFile()
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ upload_url: 'https://storage.test/upload', file_path: 'files/report.txt' }))
+      .mockResolvedValueOnce(jsonResponse({}, 200))
+      .mockResolvedValueOnce(jsonResponse({ url: 'https://api.test/files/report.txt' }))
+
+    await services.fileUpload(file)
+
+    expect(fetchMock.mock.calls[1]![1]).toMatchObject({ method: 'PUT', body: file })
+  })
+
+  it('keeps fileUploadNoAuth as a multipart request', async () => {
+    const file = createFile()
+    fetchMock.mockResolvedValueOnce(jsonResponse({ path: 'uploads/report.txt' }))
+
+    await services.fileUploadNoAuth(file)
+
+    const [, init] = fetchMock.mock.calls[0]!
+    expect((init as RequestInit).method).toBe('POST')
+    expect((init as RequestInit).body).toBeInstanceOf(FormData)
+    expect(((init as RequestInit).body as FormData).get('file')).toBe(file)
   })
 })

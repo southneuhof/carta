@@ -24,39 +24,84 @@ const router = useRouter()
 const loading = ref(false)
 const formData = ref({ email: '', password: '' })
 
+const INVALID_CREDENTIALS_MESSAGE = 'Email atau password tidak valid'
+const CONNECTION_ERROR_MESSAGE = 'Tidak dapat terhubung ke server. Silakan coba lagi'
+const PERMISSION_ERROR_MESSAGE = 'Gagal memuat akses aplikasi. Silakan coba lagi'
+const NO_ACCESS_MESSAGE = 'Anda tidak memiliki akses ke aplikasi ini'
+const NO_DESTINATION_MESSAGE = 'Tidak ada halaman yang dapat diakses oleh akun ini'
+
+function clearStagedAccess() {
+  modules().clear()
+  permissions().clear()
+}
+
+async function rejectLogin(message: string, sessionEstablished: boolean, clearAccess = false) {
+  if (clearAccess) clearStagedAccess()
+  if (sessionEstablished) {
+    try {
+      await rpc.api.auth['sign-out'].$post()
+    } catch (_) {}
+  }
+  loginMessage.value = { message, type: 'error' }
+}
+
 async function login() {
   loading.value = true
   loginMessage.value = { message: '', type: undefined }
+  let sessionEstablished = false
+  let failureStage: 'sign-in' | 'permissions' = 'sign-in'
   try {
     const loginResponse = await rpc.api.auth['sign-in'].email.$post({ json: formData.value })
-    if (!loginResponse.ok) throw await loginResponse.json()
-    const { user } = await loginResponse.json()
+    if (!loginResponse.ok) {
+      await rejectLogin(INVALID_CREDENTIALS_MESSAGE, false)
+      return
+    }
+
+    const loginData = await loginResponse.json()
+    if (!loginData?.user) {
+      await rejectLogin(INVALID_CREDENTIALS_MESSAGE, false)
+      return
+    }
+
+    sessionEstablished = true
+    failureStage = 'permissions'
+    const { user } = loginData
     const profile = { ...user, role_id: user.roleId, fullname: user.name, username: user.email }
     const permissionResponse = await rpc.roles[':roleId'].permissions.$get({ param: { roleId: user.roleId } })
-    if (!permissionResponse.ok) throw await permissionResponse.json()
+    if (!permissionResponse.ok) {
+      await rejectLogin(PERMISSION_ERROR_MESSAGE, sessionEstablished)
+      return
+    }
+
     const permissionData = await permissionResponse.json()
+    if (!Array.isArray(permissionData?.data)) {
+      await rejectLogin(PERMISSION_ERROR_MESSAGE, sessionEstablished)
+      return
+    }
+
     const tasks = permissionData.data
       .filter((permission: { assigned: boolean }) => permission.assigned)
       .map((permission: { id: string }) => permission.id)
 
-    storage.localStorage.set('profile', profile)
-    storage.localStorage.set('permissions', tasks)
-    if (tasks?.length === 0 && !BYPASS_ALL_PERMISSIONS) {
-      loginMessage.value = { message: 'Anda tidak memiliki akses ke aplikasi ini', type: 'error' }
-      loading.value = false
+    if (tasks.length === 0 && !BYPASS_ALL_PERMISSIONS) {
+      await rejectLogin(NO_ACCESS_MESSAGE, sessionEstablished, true)
       return
     }
 
-    permissions().build()
+    permissions().build(tasks)
     modules().build()
     const destination = resolvePostLoginRoute(router, consumePostLoginRedirect())
     if (!destination) {
-      loginMessage.value = { message: 'Tidak ada halaman yang dapat diakses oleh akun ini', type: 'error' }
-      loading.value = false
+      await rejectLogin(NO_DESTINATION_MESSAGE, sessionEstablished, true)
       return
     }
-    router.push(destination)
+
+    storage.localStorage.set('profile', profile)
+    storage.localStorage.set('permissions', tasks)
+    await router.push(destination)
   } catch (_) {
+    await rejectLogin(failureStage === 'permissions' ? PERMISSION_ERROR_MESSAGE : CONNECTION_ERROR_MESSAGE, sessionEstablished, failureStage === 'permissions')
+  } finally {
     loading.value = false
   }
 }

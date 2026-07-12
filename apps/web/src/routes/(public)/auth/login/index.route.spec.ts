@@ -6,9 +6,12 @@ const mocks = vi.hoisted(() => ({
   router: { push: vi.fn(), resolve: vi.fn() },
   signIn: vi.fn(),
   permissionsGet: vi.fn(),
+  signOut: vi.fn(),
   storageSet: vi.fn(),
   permissionsBuild: vi.fn(),
+  permissionsClear: vi.fn(),
   modulesBuild: vi.fn(),
+  modulesClear: vi.fn(),
   consumeRedirect: vi.fn(),
   resolvePostLoginRoute: vi.fn(),
   globalLoadingDisable: vi.fn(),
@@ -31,11 +34,11 @@ vi.mock('@southneuhof/is-vue-framework/components/inputs/TextInput.vue', () => (
 vi.mock('@southneuhof/is-vue-framework/components/inputs/PasswordInput.vue', () => ({ default: { name: 'PasswordInput' } }))
 
 vi.mock('@/stores/permissions', () => ({
-  permissions: () => ({ build: mocks.permissionsBuild }),
+  permissions: () => ({ build: mocks.permissionsBuild, clear: mocks.permissionsClear }),
 }))
 
 vi.mock('@/stores/modules', () => ({
-  modules: () => ({ build: mocks.modulesBuild }),
+  modules: () => ({ build: mocks.modulesBuild, clear: mocks.modulesClear }),
 }))
 
 vi.mock('@/stores/loading', () => ({
@@ -52,8 +55,8 @@ vi.mock('@/router/navigation', () => ({
 
 vi.mock('@/framework/rpc', () => ({
   rpc: {
-    api: { auth: { 'sign-in': { email: { $post: mocks.signIn } } } },
     roles: { ':roleId': { permissions: { $get: mocks.permissionsGet } } },
+    api: { auth: { 'sign-in': { email: { $post: mocks.signIn } }, 'sign-out': { $post: mocks.signOut } } },
   },
 }))
 
@@ -63,6 +66,11 @@ const inputStub = (name: string) => defineComponent({
   props: { modelValue: { type: String, default: '' } },
   emits: ['update:modelValue'],
   template: '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
+})
+const buttonStub = defineComponent({
+  name: 'Button',
+  props: { disabled: { type: Boolean, default: false } },
+  template: '<button :disabled="disabled"><slot /></button>',
 })
 
 import Login from './index.route.vue'
@@ -81,7 +89,7 @@ function mountLogin() {
         Logo: visualStub('Logo'),
         Card: visualStub('Card'),
         Toast: visualStub('Toast'),
-        Button: visualStub('Button'),
+        Button: buttonStub,
         Spinner: visualStub('Spinner'),
         TextInput: inputStub('TextInput'),
         PasswordInput: inputStub('PasswordInput'),
@@ -93,6 +101,7 @@ function mountLogin() {
 describe('login route', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mocks.signOut.mockResolvedValue(undefined)
     mocks.consumeRedirect.mockReturnValue('/settings/users')
     mocks.resolvePostLoginRoute.mockReturnValue({ name: 'users' })
   })
@@ -125,15 +134,17 @@ describe('login route', () => {
       username: 'alice@example.com',
     })
     expect(mocks.storageSet).toHaveBeenCalledWith('permissions', ['view-users'])
-    expect(mocks.permissionsBuild).toHaveBeenCalledOnce()
+    expect(mocks.permissionsBuild).toHaveBeenCalledExactlyOnceWith(['view-users'])
     expect(mocks.modulesBuild).toHaveBeenCalledOnce()
     expect(mocks.resolvePostLoginRoute).toHaveBeenCalledWith(mocks.router, '/settings/users')
     expect(mocks.router.push).toHaveBeenCalledExactlyOnceWith({ name: 'users' })
+    expect(mocks.signOut).not.toHaveBeenCalled()
+    expect(wrapper.find('button').attributes('disabled')).toBeUndefined()
 
     wrapper.unmount()
   })
 
-  it('does not fetch permissions or navigate after a failed sign-in response', async () => {
+  it('shows a controlled credential error and leaves state untouched after a failed sign-in response', async () => {
     mocks.signIn.mockResolvedValue(response(false, { message: 'Invalid credentials' }))
 
     const wrapper = mountLogin()
@@ -143,11 +154,14 @@ describe('login route', () => {
     expect(mocks.permissionsGet).not.toHaveBeenCalled()
     expect(mocks.storageSet).not.toHaveBeenCalled()
     expect(mocks.router.push).not.toHaveBeenCalled()
+    expect(mocks.signOut).not.toHaveBeenCalled()
+    expect(wrapper.text()).toContain('Email atau password tidak valid')
+    expect(wrapper.find('button').attributes('disabled')).toBeUndefined()
 
     wrapper.unmount()
   })
 
-  it('does not navigate after a failed permission response', async () => {
+  it('shows a controlled permission error and cleans up after a failed permission response', async () => {
     mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', roleId: 'role-1', name: 'Alice', email: 'alice@example.com' } }))
     mocks.permissionsGet.mockResolvedValue(response(false, { message: 'Permission lookup failed' }))
 
@@ -158,6 +172,83 @@ describe('login route', () => {
     expect(mocks.permissionsGet).toHaveBeenCalledWith({ param: { roleId: 'role-1' } })
     expect(mocks.storageSet).not.toHaveBeenCalled()
     expect(mocks.router.push).not.toHaveBeenCalled()
+    expect(mocks.signOut).toHaveBeenCalledOnce()
+    expect(wrapper.text()).toContain('Gagal memuat akses aplikasi. Silakan coba lagi')
+    expect(wrapper.find('button').attributes('disabled')).toBeUndefined()
+
+    wrapper.unmount()
+  })
+
+  it('shows a controlled connection error when sign-in cannot reach the server', async () => {
+    mocks.signIn.mockRejectedValue(new Error('network details must stay hidden'))
+
+    const wrapper = mountLogin()
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(mocks.storageSet).not.toHaveBeenCalled()
+    expect(mocks.router.push).not.toHaveBeenCalled()
+    expect(wrapper.text()).toContain('Tidak dapat terhubung ke server. Silakan coba lagi')
+    expect(wrapper.text()).not.toContain('network details must stay hidden')
+    expect(wrapper.find('button').attributes('disabled')).toBeUndefined()
+
+    wrapper.unmount()
+  })
+
+  it('rejects accounts with no assigned permissions without persisting or navigating', async () => {
+    mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', roleId: 'role-1', name: 'Alice', email: 'alice@example.com' } }))
+    mocks.permissionsGet.mockResolvedValue(response(true, { data: [] }))
+
+    const wrapper = mountLogin()
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(mocks.storageSet).not.toHaveBeenCalled()
+    expect(mocks.permissionsBuild).not.toHaveBeenCalled()
+    expect(mocks.permissionsClear).toHaveBeenCalledOnce()
+    expect(mocks.modulesClear).toHaveBeenCalledOnce()
+    expect(mocks.router.push).not.toHaveBeenCalled()
+    expect(mocks.signOut).toHaveBeenCalledOnce()
+    expect(wrapper.text()).toContain('Anda tidak memiliki akses ke aplikasi ini')
+    expect(wrapper.find('button').attributes('disabled')).toBeUndefined()
+
+    wrapper.unmount()
+  })
+
+  it('rejects a missing destination without persisting or navigating', async () => {
+    mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', roleId: 'role-1', name: 'Alice', email: 'alice@example.com' } }))
+    mocks.permissionsGet.mockResolvedValue(response(true, { data: [{ id: 'view-users', assigned: true }] }))
+    mocks.resolvePostLoginRoute.mockReturnValue(null)
+
+    const wrapper = mountLogin()
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(mocks.permissionsBuild).toHaveBeenCalledExactlyOnceWith(['view-users'])
+    expect(mocks.storageSet).not.toHaveBeenCalled()
+    expect(mocks.permissionsClear).toHaveBeenCalledOnce()
+    expect(mocks.modulesClear).toHaveBeenCalledOnce()
+    expect(mocks.router.push).not.toHaveBeenCalled()
+    expect(mocks.signOut).toHaveBeenCalledOnce()
+    expect(wrapper.text()).toContain('Tidak ada halaman yang dapat diakses oleh akun ini')
+    expect(wrapper.find('button').attributes('disabled')).toBeUndefined()
+
+    wrapper.unmount()
+  })
+
+  it('keeps the primary error when session cleanup fails', async () => {
+    mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', roleId: 'role-1', name: 'Alice', email: 'alice@example.com' } }))
+    mocks.permissionsGet.mockResolvedValue(response(true, { data: [] }))
+    mocks.signOut.mockRejectedValue(new Error('cleanup details must stay hidden'))
+
+    const wrapper = mountLogin()
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(mocks.signOut).toHaveBeenCalledOnce()
+    expect(wrapper.text()).toContain('Anda tidak memiliki akses ke aplikasi ini')
+    expect(wrapper.text()).not.toContain('cleanup details must stay hidden')
+    expect(wrapper.find('button').attributes('disabled')).toBeUndefined()
 
     wrapper.unmount()
   })
