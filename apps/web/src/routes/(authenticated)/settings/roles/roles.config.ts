@@ -6,8 +6,5 @@ export default defineCRUDCompositeConfig({
   title: 'Role',
   resource: rpc.roles,
   fields: ['name'],
-  transaction: {
-    fields: ['name'],
-    inputConfig: { name: { type: 'text', props: { required: true } } },
-  },
+  transaction: { fields: ['name'], inputConfig: { name: { type: 'text', props: { required: true } } } },
 })

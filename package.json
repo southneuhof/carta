@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "packageManager": "pnpm@10.8.0",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
   "scripts": {
     "dev": "turbo run dev --filter=@southneuhof/api --filter=@southneuhof/framework-web",
     "dev:web": "pnpm --filter @southneuhof/framework-web dev",

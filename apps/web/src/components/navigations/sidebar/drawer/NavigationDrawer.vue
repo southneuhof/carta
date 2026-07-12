@@ -39,7 +39,7 @@ const selectModule = (module: any, index: number) => {
 }
 
 const selectRoute = (routeName: string) => {
-  router.push({ name: routeName })
+  router.push({ name: routeName } as any)
   closeSidebar()
 }
 

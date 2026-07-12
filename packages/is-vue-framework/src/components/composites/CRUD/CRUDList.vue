@@ -188,7 +188,7 @@ onMounted(() => {
             </div>
             <div v-if="(config.actions?.create ?? true) && permissions.create" class="flex items-center pl-4">
               <slot v-if="$slots['list-createButton']" name="list-createButton" v-bind="{ listConfig }"> </slot>
-              <Button v-else @click="() => router.push({ name: String(route.name), query: { ...route.query, [`${config.name}_view`]: 'create' } })">
+              <Button v-else @click="() => router.push({ name: route.name!, query: { ...route.query, [`${config.name}_view`]: 'create' } })">
                 <template #icon>
                   <Icon name="add"></Icon>
                 </template>
@@ -237,7 +237,7 @@ onMounted(() => {
                         v-else-if="(config.actions?.detail ?? true) && permissions.detail"
                         color="info"
                         kind="icon"
-                        @click="() => router.push({ name: String(route.name), query: { ...route.query, [`${config.name}_view`]: 'detail', [`${config.name}_id`]: data[listConfig.uid!] } })"
+                        @click="() => router.push({ name: route.name!, query: { ...route.query, [`${config.name}_view`]: 'detail', [`${config.name}_id`]: data[listConfig.uid!] } })"
                       >
                         <template #icon>
                           <Icon name="information"></Icon>
@@ -248,7 +248,7 @@ onMounted(() => {
                         v-else-if="(config.actions?.update ?? true) && data.can_update != false && permissions.update"
                         color="warning"
                         kind="icon"
-                        @click="() => router.push({ name: String(route.name), query: { ...route.query, [`${config.name}_view`]: 'update', [`${config.name}_id`]: data[listConfig.uid!] } })"
+                        @click="() => router.push({ name: route.name!, query: { ...route.query, [`${config.name}_view`]: 'update', [`${config.name}_id`]: data[listConfig.uid!] } })"
                       >
                         <template #icon>
                           <Icon name="edit"></Icon>

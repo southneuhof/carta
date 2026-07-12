@@ -16,8 +16,9 @@ import TextInput from '@southneuhof/is-vue-framework/components/inputs/TextInput
 import PasswordInput from '@southneuhof/is-vue-framework/components/inputs/PasswordInput.vue'
 import { rpc } from '@/framework/rpc'
 
-const BYPASS_ALL_PERMISSIONS = import.meta.env.VITE_APP_BYPASS_ALL_PERMISSIONS === 'true'
+definePage({ name: 'login', meta: { title: 'Login' } })
 
+const BYPASS_ALL_PERMISSIONS = import.meta.env.VITE_APP_BYPASS_ALL_PERMISSIONS === 'true'
 const loginMessage = ref<{ message: string; type: 'error' | 'warning' | 'info' | 'success' | undefined }>({ message: '', type: undefined })
 const router = useRouter()
 const loading = ref(false)
@@ -26,17 +27,11 @@ const formData = ref({ email: '', password: '' })
 async function login() {
   loading.value = true
   loginMessage.value = { message: '', type: undefined }
-
   try {
     const loginResponse = await rpc.api.auth['sign-in'].email.$post({ json: formData.value })
     if (!loginResponse.ok) throw await loginResponse.json()
     const { user } = await loginResponse.json()
-    const profile = {
-      ...user,
-      role_id: user.roleId,
-      fullname: user.name,
-      username: user.email,
-    }
+    const profile = { ...user, role_id: user.roleId, fullname: user.name, username: user.email }
     const permissionResponse = await rpc.roles[':roleId'].permissions.$get({ param: { roleId: user.roleId } })
     if (!permissionResponse.ok) throw await permissionResponse.json()
     const permissionData = await permissionResponse.json()
@@ -46,7 +41,7 @@ async function login() {
 
     storage.localStorage.set('profile', profile)
     storage.localStorage.set('permissions', tasks)
-    if (tasks?.length == 0 && !BYPASS_ALL_PERMISSIONS) {
+    if (tasks?.length === 0 && !BYPASS_ALL_PERMISSIONS) {
       loginMessage.value = { message: 'Anda tidak memiliki akses ke aplikasi ini', type: 'error' }
       loading.value = false
       return
@@ -66,47 +61,22 @@ async function login() {
   }
 }
 
-onMounted(() => {
-  setTimeout(() => {
-    globalLoading().disable()
-  }, 1000)
-})
+onMounted(() => setTimeout(() => globalLoading().disable(), 1000))
 </script>
 
 <template>
   <Card class="flex flex-col gap-16 p-8">
-    <div class="flex flex-row items-center gap-8">
-      <Logo class="w-16"/>
-    </div>
-    <div class="flex flex-col gap-4">
-      <div class="text-lg">Welcome to</div>
-      <div class="text-4xl font-bold">Demo App</div>
-    </div>
-    <form class="flex flex-col items-center gap-4" @submit.prevent="() => login()">
-      <TextInput
-        class="w-full"
-        :model-value="formData.email"
-        @update:model-value="(value) => (formData.email = String(value))"
-        label="Email"
-        enableHelperMessage
-        required
-      />
-      <PasswordInput
-        class="w-full"
-        :model-value="formData.password"
-        @update:model-value="(value) => (formData.password = String(value))"
-        label="Password"
-        enableHelperMessage
-        required
-      />
-      <div v-if="!loading" class="flex flex-row items-center gap-2 w-full">
-        <Button :disabled="loading" @click="() => login()" type="submit" class="mt-6 w-full">Login</Button>
+    <div class="flex flex-row items-center gap-8"><Logo class="w-16" /></div>
+    <div class="flex flex-col gap-4"><div class="text-lg">Welcome to</div><div class="text-4xl font-bold">Demo App</div></div>
+    <form class="flex flex-col items-center gap-4" @submit.prevent="login">
+      <TextInput class="w-full" :model-value="formData.email" @update:model-value="(value) => (formData.email = String(value))" label="Email" enableHelperMessage required />
+      <PasswordInput class="w-full" :model-value="formData.password" @update:model-value="(value) => (formData.password = String(value))" label="Password" enableHelperMessage required />
+      <div v-if="!loading" class="flex w-full flex-row items-center gap-2">
+        <Button :disabled="loading" type="submit" class="mt-6 w-full">Login</Button>
       </div>
-      <Button v-else disabled variant="tonal" class="mt-6 w-full"><Spinner/></Button>
+      <Button v-else disabled variant="tonal" class="mt-6 w-full"><Spinner /></Button>
     </form>
-    <div class="flex w-full items-center justify-center">
-      <Toast v-if="loginMessage.message" :type="loginMessage.type">{{ loginMessage.message }}</Toast>
-    </div>
-    <div class="text-muted text-center">Company Ltd.</div>
+    <div class="flex w-full items-center justify-center"><Toast v-if="loginMessage.message" :type="loginMessage.type">{{ loginMessage.message }}</Toast></div>
+    <div class="text-center text-muted">Company Ltd.</div>
   </Card>
 </template>

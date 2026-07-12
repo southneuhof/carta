@@ -23,22 +23,9 @@ const usersMappingRoleConfig = defineCRUDCompositeConfig({
   resource: null,
   operations: unavailableOperations,
   fields: ['role_name', 'role_code', 'description'],
-  fieldsAlias: {
-    role_name: 'Nama Role',
-    role_code: 'Kode Role',
-    description: 'Deskripsi',
-  },
-  actions: {
-    create: false,
-    delete: false,
-    update: false,
-    detail: false,
-  },
-  view: {
-    list: {
-      searchParameters: { user_id: resolveUserId() },
-    },
-  },
+  fieldsAlias: { role_name: 'Nama Role', role_code: 'Kode Role', description: 'Deskripsi' },
+  actions: { create: false, delete: false, update: false, detail: false },
+  view: { list: { searchParameters: { user_id: resolveUserId() } } },
 })
 </script>
 
@@ -47,15 +34,7 @@ const usersMappingRoleConfig = defineCRUDCompositeConfig({
     <template #list-rowActions="{ data }">
       <Switch
         v-model="data.active"
-        :onToggle="
-          (nextValue) => {
-            services.post('mapping-user-roles/toggle', {
-              user_id: resolveUserId(),
-              role_id: data.id,
-              active: nextValue,
-            })
-          }
-        "
+        :onToggle="(nextValue) => services.post('mapping-user-roles/toggle', { user_id: resolveUserId(), role_id: data.id, active: nextValue })"
       />
     </template>
   </CRUDComposite>

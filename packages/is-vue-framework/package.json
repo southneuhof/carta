@@ -25,16 +25,16 @@
     "./runtimeDefaults": "./src/runtimeDefaults.ts"
   },
   "peerDependencies": {
-    "vue": "^3.5.12",
-    "vue-router": "^4.2.2"
+    "vue": "^3.5.39",
+    "vue-router": "^5.1.0"
   },
   "dependencies": {
     "@southneuhof/utilities": "workspace:^",
     "clsx": "^2.1.1",
     "tailwind-merge": "^1.13.1",
     "xlsx": "^0.18.5",
-    "vue": "^3.5.12",
-    "vue-router": "^4.2.2",
+    "vue": "^3.5.39",
+    "vue-router": "^5.1.0",
     "vue-sonner": "^2.0.1",
     "@vuepic/vue-datepicker": "^11.0.3",
     "@vueuse/core": "^12.5.0",
@@ -51,12 +51,12 @@
     "vue-tippy": "^6.7.1"
   },
   "devDependencies": {
-    "@types/node": "^18.16.16",
-    "@vitejs/plugin-vue": "^5.2.4",
+    "@types/node": "^24.0.0",
+    "@vitejs/plugin-vue": "^6.0.7",
     "jsdom": "^20.0.3",
     "typescript": "^5.9.3",
-    "vue-tsc": "^3.2.4",
-    "vitest": "^2.1.9"
+    "vue-tsc": "^3.3.7",
+    "vitest": "^4.1.10"
   },
   "scripts": {
     "build": "pnpm run type-check",

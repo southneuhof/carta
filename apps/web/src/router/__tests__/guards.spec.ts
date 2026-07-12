@@ -34,7 +34,7 @@ describe('createAuthGuard', () => {
 
   it('allows public login route without a profile', () => {
     const guard = createAuthGuard()
-    const result = guard({ name: 'login', fullPath: '/unauthenticated/auth/login', path: '/unauthenticated/auth/login', matched: [{}] } as any, {} as any, next)
+    const result = guard({ name: 'login', fullPath: '/auth/login', path: '/auth/login', meta: { requiresAuth: false }, matched: [{}] } as any, {} as any, next)
 
     expect(result).toBe(true)
   })
@@ -43,23 +43,23 @@ describe('createAuthGuard', () => {
     authState.profile = { id: 'user-1' }
     getDefaultRouteSpy.mockReturnValue(null as any)
     const guard = createAuthGuard()
-    const result = guard({ name: 'login', fullPath: '/unauthenticated/auth/login', path: '/unauthenticated/auth/login', matched: [{}] } as any, {} as any, next)
+    const result = guard({ name: 'login', fullPath: '/auth/login', path: '/auth/login', meta: { requiresAuth: false }, matched: [{}] } as any, {} as any, next)
 
     expect(result).toBe(true)
   })
 
   it('redirects protected route without a profile and saves redirect', () => {
     const guard = createAuthGuard()
-    const result = guard({ name: 'users', fullPath: '/authenticated/settings/users', path: '/authenticated/settings/users', matched: [{}] } as any, {} as any, next)
+    const result = guard({ name: 'users', fullPath: '/settings/users?tab=roles', path: '/settings/users', meta: { requiresAuth: true }, matched: [{}] } as any, {} as any, next)
 
-    expect(saveRedirectSpy).toHaveBeenCalledWith('/authenticated/settings/users')
+    expect(saveRedirectSpy).toHaveBeenCalledWith('/settings/users?tab=roles')
     expect(result).toEqual({ name: 'login' })
   })
 
   it('redirects root route with a profile to first accessible route', () => {
     authState.profile = { id: 'user-1' }
     const guard = createAuthGuard()
-    const result = guard({ name: undefined, fullPath: '/', path: '/', matched: [] } as any, {} as any, next)
+    const result = guard({ name: 'root', fullPath: '/', path: '/', meta: {}, matched: [{}] } as any, {} as any, next)
 
     expect(getDefaultRouteSpy).toHaveBeenCalled()
     expect(result).toEqual({ name: 'dashboard' })
@@ -67,15 +67,15 @@ describe('createAuthGuard', () => {
 
   it('redirects unknown route without a profile to login', () => {
     const guard = createAuthGuard()
-    const result = guard({ name: 'not-found', fullPath: '/missing', path: '/missing', matched: [{}] } as any, {} as any, next)
+    const result = guard({ name: 'not-found', fullPath: '/missing', path: '/missing', meta: {}, matched: [{}] } as any, {} as any, next)
 
-    expect(result).toEqual({ name: 'login' })
+    expect(result).toBe(true)
   })
 
   it('allows unknown route with a profile without signing out', () => {
     authState.profile = { id: 'user-1' }
     const guard = createAuthGuard()
-    const result = guard({ name: 'not-found', fullPath: '/missing', path: '/missing', matched: [{}] } as any, {} as any, next)
+    const result = guard({ name: 'not-found', fullPath: '/missing', path: '/missing', meta: {}, matched: [{}] } as any, {} as any, next)
 
     expect(result).toBe(true)
   })

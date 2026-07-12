@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import menu from '@/menu'
+import navigationManifest from '@/components/navigations/navigation-manifest'
 import { permissions } from './permissions'
 
 const value: Array<Module> = []
@@ -24,7 +24,7 @@ function compactSeparators(routes: any[]): any[] {
 export const modules = defineStore('modules', () => {
   function build() {
     clear()
-    menu.forEach((item) => {
+    navigationManifest.forEach((item) => {
       if (item.routes.length === 1) {
         if (permissions().has(`view-${item.permission || item.name}`)) {
           value.push(item)

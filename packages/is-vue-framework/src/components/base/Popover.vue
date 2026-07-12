@@ -25,7 +25,7 @@ const props = defineProps({
   },
 })
 
-const open = defineModel({ default: false })
+const open = defineModel<boolean>({ default: false })
 
 function setOpen(value: boolean) {
   open.value = value

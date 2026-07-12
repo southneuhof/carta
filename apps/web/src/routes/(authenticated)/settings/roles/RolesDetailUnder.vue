@@ -36,39 +36,29 @@ const rolePermissionsConfig = defineCRUDCompositeConfig({
 </script>
 
 <template>
-  <CRUDComposite
-    :config="rolePermissionsConfig"
-  >
+  <CRUDComposite :config="rolePermissionsConfig">
     <template #list-rowActions="{ data: rowData }">
       <Switch
         v-model="rowData.active"
-        :onToggle="
-          (nextValue: boolean) => {
-            const route = rpc.roles[':roleId'].permissions[':permissionId']
-            const request = { param: { roleId: String(data.value?.id || data.id), permissionId: String(rowData.id) } }
-            if (nextValue) route.$put(request)
-            else route.$delete(request)
-          }
-        "
+        :onToggle="(nextValue: boolean) => {
+          const route = rpc.roles[':roleId'].permissions[':permissionId']
+          const request = { param: { roleId: String(data.value?.id || data.id), permissionId: String(rowData.id) } }
+          if (nextValue) route.$put(request)
+          else route.$delete(request)
+        }"
       />
     </template>
     <template #list-view-header-action>
       <DialogForm
         :fields="['source_role_id']"
         targetAPI="custom/mappingrolepermission/copy?custom"
-        :fieldsAlias="{
-          source_role_id: 'Role',
-        }"
+        :fieldsAlias="{ source_role_id: 'Role' }"
         :inputConfig="{
           source_role_id: {
             type: 'lookup',
             props: {
               fields: ['role_name', 'role_code', 'description'],
-              fieldsAlias: {
-                role_name: 'Nama Role',
-                role_code: 'Kode Role',
-                description: 'Deskripsi',
-              },
+              fieldsAlias: { role_name: 'Nama Role', role_code: 'Kode Role', description: 'Deskripsi' },
               required: true,
               getAPI: 'roles',
             },
@@ -76,18 +66,14 @@ const rolePermissionsConfig = defineCRUDCompositeConfig({
         }"
         :extraData="{ target_role_id: data.id }"
         method="put"
-        :onSuccess="
-          () => {
-            toast.success('Berhasil menyalin permission dari role!')
-            keyManager().triggerChange(`roles-detail-under`)
-          }
-        "
+        :onSuccess="() => {
+          toast.success('Berhasil menyalin permission dari role!')
+          keyManager().triggerChange('roles-detail-under')
+        }"
       >
-        <template #title>
-          <p>Pilih Role Sumber</p>
-        </template>
+        <template #title><p>Pilih Role Sumber</p></template>
         <template #trigger>
-          <Button kind="icon" variant="standard">Salin dari Role Lain<Icon name="file-copy"></Icon></Button>
+          <Button kind="icon" variant="standard">Salin dari Role Lain<Icon name="file-copy" /></Button>
         </template>
       </DialogForm>
     </template>

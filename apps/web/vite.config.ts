@@ -2,11 +2,19 @@ import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import VueRouter from 'vue-router/vite'
+import { applyRouteGroupLayouts } from './src/router/file-routing/layout-groups'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   envPrefix: ['VITE_'],
   plugins: [
+    VueRouter({
+      routesFolder: 'src/routes',
+      extensions: ['.route.vue', '.layout.vue'],
+      dts: 'src/route-map.d.ts',
+      beforeWriteFiles: applyRouteGroupLayouts,
+    }),
     vue({
       script: {
         defineModel: true,
