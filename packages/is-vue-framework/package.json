@@ -13,16 +13,16 @@
     "./services": "./src/services/index.ts",
     "./adapters/defaults": "./src/adapters/defaults.ts",
     "./adapters/state": "./src/adapters/state.ts",
-    "./adapters/behaviors": "./src/adapters/behaviors.ts",
     "./adapters/crud-operations": "./src/adapters/crudOperations.ts",
     "./adapters/*": "./src/adapters/*",
     "./components/*": "./src/components/*",
     "./renderers/*": "./src/renderers/*",
-    "./behaviors/*": "./src/behaviors/*",
+    "./utilities/*": "./src/utilities/*",
     "./styles/*": "./src/styles/*",
     "./router": "./src/router/index.ts",
     "./router/*": "./src/router/*",
-    "./runtime": "./src/runtime.ts"
+    "./runtime": "./src/runtime.ts",
+    "./runtimeDefaults": "./src/runtimeDefaults.ts"
   },
   "peerDependencies": {
     "vue": "^3.5.12",

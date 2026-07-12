@@ -32,7 +32,7 @@ vi.mock('@southneuhof/is-vue-framework/components/base/Spinner.vue', () => ({
 }))
 
 const mounted: Array<ReturnType<typeof createApp>> = []
-let runtime: any = { behaviors: {} }
+let runtime: any = {}
 
 async function flush() {
   await Promise.resolve()
@@ -63,7 +63,7 @@ function mountFileManager(activePath = '/storage/public/folder-b') {
   return { host }
 }
 
-beforeEach(() => { runtime = { behaviors: {} } })
+beforeEach(() => { runtime = {} })
 
 afterEach(() => {
   for (const app of mounted.splice(0)) app.unmount()
@@ -73,7 +73,7 @@ afterEach(() => {
 
 describe('FileManager delete navigation', () => {
   it('falls back to a sibling folder before navigating to the parent', async () => {
-    runtime = { behaviors: { fileManager: {
+    runtime = { fileManager: {
         listFiles: vi.fn().mockImplementation(({ dir }: { dir: string }) => {
           if (dir === '/storage/public') {
             return Promise.resolve([
@@ -84,7 +84,7 @@ describe('FileManager delete navigation', () => {
 
           return Promise.resolve([])
         }),
-      } } }
+      } }
 
     mountFileManager()
     await flush()
@@ -99,9 +99,9 @@ describe('FileManager delete navigation', () => {
   })
 
   it('falls back to the parent folder when no siblings remain', async () => {
-    runtime = { behaviors: { fileManager: {
+    runtime = { fileManager: {
         listFiles: vi.fn().mockResolvedValue([]),
-      } } }
+      } }
 
     mountFileManager()
     await flush()

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { defaultGetData } from '@southneuhof/is-vue-framework/behaviors/checkboxGroup'
+import { defaultSelectGetData } from '@southneuhof/is-vue-framework/runtimeDefaults'
 import { onMounted, ref, type PropType } from 'vue'
 import { commonProps } from './commonprops'
 import BaseInput from './BaseInput.vue'
 import Checkbox from './CheckboxInput.vue'
-import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
+import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   pick: { type: String, default: 'id' },
@@ -31,8 +31,8 @@ const props = defineProps({
   },
   ...commonProps,
 })
-const behaviors = useFrameworkBehaviors()
-const getData = props.getData ?? ((getAPI: string, searchParameters: object) => defaultGetData(getAPI, searchParameters, behaviors.checkboxGroup))
+const runtime = useFrameworkRuntime()
+const getData = props.getData ?? ((getAPI: string, searchParameters: object) => defaultSelectGetData(getAPI, searchParameters, runtime.checkboxGroup, 'checkboxGroup'))
 
 const modelValue = defineModel<any[]>({ default: () => [] })
 

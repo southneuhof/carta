@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import type { FrameworkBehaviors } from '../behaviors'
 import type { FrameworkRuntime } from '../../runtime'
 
 describe('type surface', () => {
@@ -8,20 +7,12 @@ describe('type surface', () => {
   })
 })
 
-const behaviorsValid: FrameworkBehaviors = {
+const runtimeValid: FrameworkRuntime = {
   form: {},
   table: {},
 }
-
-void behaviorsValid
-
-const runtimeValid: FrameworkRuntime = { behaviors: behaviorsValid }
 void runtimeValid
 
-// @ts-expect-error FrameworkBehaviors no longer accepts defaults
-const behaviorsInvalid: FrameworkBehaviors = { defaults: {} }
-void behaviorsInvalid
-
-// @ts-expect-error runtime requires behaviors
-const runtimeInvalid: FrameworkRuntime = {}
+// @ts-expect-error runtime rejects unknown capability groups
+const runtimeInvalid: FrameworkRuntime = { unknown: {} }
 void runtimeInvalid

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, computed, type PropType } from 'vue'
-import { defaultFileInputUpload, type FileInputUploadBehavior } from '@southneuhof/is-vue-framework/behaviors/fileInput'
+import { defaultFileInputUpload, type FileInputUploadRuntime } from '@southneuhof/is-vue-framework/runtimeDefaults'
 import FileComponent from '@southneuhof/is-vue-framework/components/utils/FileComponent.vue'
 import { toast } from 'vue-sonner'
 import BaseInput from './BaseInput.vue'
@@ -15,7 +15,7 @@ import FileManager from '@southneuhof/is-vue-framework/components/utils/FileMana
 import { Dialog, DialogContent } from '@southneuhof/is-vue-framework/components/base/Dialog/index'
 import { normalizeFileAssetValue, type FileAssetValue } from './assetValue'
 import { useDropZone } from '@vueuse/core'
-import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
+import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   accept: {
@@ -38,12 +38,12 @@ const props = defineProps({
     default: '',
   },
   fileUpload: {
-    type: Function as PropType<FileInputUploadBehavior>,
+    type: Function as PropType<FileInputUploadRuntime>,
   },
   ...commonProps,
 })
-const behaviors = useFrameworkBehaviors()
-const fileUpload = props.fileUpload ?? ((file: File, directory?: string, onUploadProgress?: (progress: { loaded: number; total: number }) => void) => defaultFileInputUpload(file, directory, onUploadProgress, behaviors))
+const runtime = useFrameworkRuntime()
+const fileUpload = props.fileUpload ?? ((file: File, directory?: string, onUploadProgress?: (progress: { loaded: number; total: number }) => void) => defaultFileInputUpload(file, directory, onUploadProgress, runtime))
 const emit = defineEmits<{
   (event: 'validation:touch'): void
 }>()

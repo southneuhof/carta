@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, type PropType } from 'vue'
-import { defaultImageInputUpload, defaultImageURLResolver, type ImageInputUploadBehavior, type ImageInputURLResolverBehavior } from '@southneuhof/is-vue-framework/behaviors/imageInput'
+import { defaultImageInputUpload, defaultImageURLResolver, type ImageInputUploadRuntime, type ImageInputURLResolverRuntime } from '@southneuhof/is-vue-framework/runtimeDefaults'
 import { toast } from 'vue-sonner'
 import ImagePreview from '@southneuhof/is-vue-framework/components/base/ImagePreview.vue'
 import Draggable from 'vuedraggable'
@@ -14,7 +14,7 @@ import Popover from '@southneuhof/is-vue-framework/components/base/Popover.vue'
 import FileManager from '@southneuhof/is-vue-framework/components/utils/FileManager/FileManager.vue'
 import { Dialog, DialogContent } from '@southneuhof/is-vue-framework/components/base/Dialog/index'
 import { isImageAssetValue, normalizeFileAssetValue, type FileAssetValue } from './assetValue'
-import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
+import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   modelValue: {
@@ -55,16 +55,16 @@ const props = defineProps({
     default: '',
   },
   fileUpload: {
-    type: Function as PropType<ImageInputUploadBehavior>,
+    type: Function as PropType<ImageInputUploadRuntime>,
   },
   imageURLResolver: {
-    type: Function as PropType<ImageInputURLResolverBehavior>,
+    type: Function as PropType<ImageInputURLResolverRuntime>,
   },
   ...commonProps,
 })
-const behaviors = useFrameworkBehaviors()
-const fileUpload = props.fileUpload ?? ((file: File, directory?: string, onUploadProgress?: (progress: { loaded: number; total: number }) => void) => defaultImageInputUpload(file, directory, onUploadProgress, behaviors))
-const imageURLResolver = props.imageURLResolver ?? ((payload: Record<string, any> | string) => defaultImageURLResolver(payload, behaviors))
+const runtime = useFrameworkRuntime()
+const fileUpload = props.fileUpload ?? ((file: File, directory?: string, onUploadProgress?: (progress: { loaded: number; total: number }) => void) => defaultImageInputUpload(file, directory, onUploadProgress, runtime))
+const imageURLResolver = props.imageURLResolver ?? ((payload: Record<string, any> | string) => defaultImageURLResolver(payload, runtime))
 
 type ImageAssetValue = FileAssetValue & { order_number?: number }
 

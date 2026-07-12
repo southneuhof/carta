@@ -3,9 +3,10 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 
 const sourceRoot = join(__dirname, '..')
-const forbiddenRoots = ['behaviors', 'components'].map((segment) => join(sourceRoot, segment))
+const checkedTargets = ['runtimeDefaults.ts', 'utilities', 'components'].map((segment) => join(sourceRoot, segment))
 
 function collectFiles(directory: string): string[] {
+  if (!statSync(directory).isDirectory()) return [directory]
   return readdirSync(directory).flatMap((entry) => {
     const path = join(directory, entry)
     if (statSync(path).isDirectory()) return collectFiles(path)
@@ -14,8 +15,8 @@ function collectFiles(directory: string): string[] {
 }
 
 describe('service decoupling', () => {
-  it('keeps framework behaviors and components decoupled from configured services', () => {
-    const offenders = forbiddenRoots
+  it('keeps runtime defaults, utilities, and components decoupled from configured services', () => {
+    const offenders = checkedTargets
       .flatMap(collectFiles)
       .filter((file) => readFileSync(file, 'utf8').includes('@southneuhof/is-vue-framework/services'))
       .map((file) => relative(sourceRoot, file))

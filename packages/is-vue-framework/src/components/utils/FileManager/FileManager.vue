@@ -3,8 +3,7 @@ import { ref, watch, type PropType } from 'vue'
 import PathTree from './_layouts/PathTree.vue'
 import PathDetail from './_layouts/PathDetail.vue'
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
-import { missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
-import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
+import { missingRuntimeCapability, useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   multi: {
@@ -28,7 +27,7 @@ const props = defineProps({
     default: () => null,
   },
 })
-const behaviors = useFrameworkBehaviors()
+const runtime = useFrameworkRuntime()
 
 const DEFAULT_ACCESSIBLE_PATH = '/storage/public'
 
@@ -49,10 +48,10 @@ function getParentPath(path?: string) {
 
 async function getSiblingDirectoryPath(path?: string) {
   const parentPath = getParentPath(path)
-  const behavior = behaviors.fileManager?.listFiles
-  if (!behavior) missingBehavior('fileManager.listFiles')
+  const listFiles = runtime.fileManager?.listFiles
+  if (!listFiles) missingRuntimeCapability('fileManager.listFiles')
 
-  const responseData = (await behavior({ dir: parentPath, type: 'folder' })) || []
+  const responseData = (await listFiles({ dir: parentPath, type: 'folder' })) || []
   const siblingDirectories = responseData.filter((item: Record<string, any>) => item?.path && item.path !== path)
 
   return siblingDirectories[0]?.path || null

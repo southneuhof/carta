@@ -70,7 +70,7 @@ async function mountForm({ formProps = {}, initialModel = {} }: MountOptions = {
   })
 
   const app = createApp(Host)
-  app.use(FrameworkPlugin, { behaviors: {} })
+  app.use(FrameworkPlugin, {})
   app.mount(container)
   await flushForm()
 

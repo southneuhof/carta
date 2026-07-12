@@ -105,12 +105,12 @@ beforeEach(() => {
     value: createLocalStorageMock(),
     configurable: true,
   })
-  runtime = { behaviors: { fileManager: {
+  runtime = { fileManager: {
       listFiles: vi.fn().mockResolvedValue(fixtureItems),
       uploadFile: vi.fn(),
       createFolder: vi.fn(),
       deleteFile: vi.fn().mockResolvedValue(undefined),
-    } } }
+    } }
 })
 
 afterEach(() => {

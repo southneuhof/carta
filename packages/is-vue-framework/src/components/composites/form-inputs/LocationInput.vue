@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { GoogleMap, Marker } from 'vue3-google-map'
 import { computed, ref, watch, type PropType } from 'vue'
-import { missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
-import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
+import { missingRuntimeCapability, useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 import { commonProps } from '../../inputs/commonprops'
 import Popover from '../../base/Popover.vue'
 import SearchBox from '../SearchBox.vue'
@@ -33,7 +32,7 @@ const props = defineProps({
     type: Object as PropType<any>,
   },
 })
-const behaviors = useFrameworkBehaviors()
+const runtime = useFrameworkRuntime()
 
 const modelValue = defineModel<Coordinate>()
 const emit = defineEmits<{
@@ -66,8 +65,8 @@ watch(modelValue, () => {
 async function getLocationDetail(place_id: any) {
   zoom.value = 5
   loading.value = true
-  const getPlaceDetail = behaviors.location?.getPlaceDetail
-  if (!getPlaceDetail) missingBehavior('location.getPlaceDetail')
+  const getPlaceDetail = runtime.location?.getPlaceDetail
+  if (!getPlaceDetail) missingRuntimeCapability('location.getPlaceDetail')
   const result = await getPlaceDetail(place_id)
   loading.value = false
   modelValue.value = {
@@ -79,8 +78,8 @@ async function getLocationDetail(place_id: any) {
 }
 
 async function getPlacesAutocomplete() {
-  const getPlaceAutocomplete = behaviors.location?.getPlaceAutocomplete
-  if (!getPlaceAutocomplete) missingBehavior('location.getPlaceAutocomplete')
+  const getPlaceAutocomplete = runtime.location?.getPlaceAutocomplete
+  if (!getPlaceAutocomplete) missingRuntimeCapability('location.getPlaceAutocomplete')
   autocompletePredictions.value = await getPlaceAutocomplete(query.value)
 }
 
@@ -106,8 +105,8 @@ function handlePinDragEnd(event: any) {
   emit('validation:touch')
 }
 
-const getMapConfig = behaviors.location?.getMapConfig
-if (!getMapConfig) missingBehavior('location.getMapConfig')
+const getMapConfig = runtime.location?.getMapConfig
+if (!getMapConfig) missingRuntimeCapability('location.getMapConfig')
 const { apiKey: GOOGLE_MAP_API_KEY } = await getMapConfig()
 </script>
 

@@ -2,10 +2,10 @@
 import Form from '@southneuhof/is-vue-framework/components/composites/Form.vue'
 import type { InputConfig } from '../../model-config'
 import { computed, type PropType } from 'vue'
-import { defaultFormGetData, defaultBeforeSubmit, defaultOnSubmit, defaultOnSuccess, defaultOnError } from '@southneuhof/is-vue-framework/behaviors/form'
+import { defaultFormGetData, defaultBeforeSubmit, defaultOnSubmit, defaultOnSuccess, defaultOnError } from '@southneuhof/is-vue-framework/runtimeDefaults'
 import Dialog from '../base/Dialog.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
-import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
+import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 // import DialogDeprecated from '../base/DialogDeprecated.vue';
 
 const props = defineProps({
@@ -32,12 +32,12 @@ const props = defineProps({
   static: { type: Boolean },
   disabled: { type: Boolean },
 })
-const behaviors = useFrameworkBehaviors()
-const getDetailData = props.getDetailData ?? ((params: { getAPI: string; id?: string | number | string[]; searchParameters?: object }) => defaultFormGetData(params, behaviors.form))
-const beforeSubmit = props.beforeSubmit ?? ((params: { formData: object }) => defaultBeforeSubmit(params, behaviors.form))
-const onSubmit = props.onSubmit ?? ((params: { payload: object; method: 'put' | 'post'; targetAPI: string; type: 'create' | 'update' }) => defaultOnSubmit(params, behaviors.form))
-const onSuccess = props.onSuccess ?? ((params: { formData: object; res: Record<string, any> }) => defaultOnSuccess({ payload: params.formData, response: params.res }, behaviors.form))
-const onError = props.onError ?? ((params: { formData: object; error: Record<string, any> }) => defaultOnError({ payload: params.formData, error: params.error }, behaviors.form))
+const runtime = useFrameworkRuntime()
+const getDetailData = props.getDetailData ?? ((params: { getAPI: string; id?: string | number | string[]; searchParameters?: object }) => defaultFormGetData(params, runtime.form))
+const beforeSubmit = props.beforeSubmit ?? ((params: { formData: object }) => defaultBeforeSubmit(params, runtime.form))
+const onSubmit = props.onSubmit ?? ((params: { payload: object; method: 'put' | 'post'; targetAPI: string; type: 'create' | 'update' }) => defaultOnSubmit(params, runtime.form))
+const onSuccess = props.onSuccess ?? ((params: { formData: object; res: Record<string, any> }) => defaultOnSuccess({ payload: params.formData, response: params.res }, runtime.form))
+const onError = props.onError ?? ((params: { formData: object; error: Record<string, any> }) => defaultOnError({ payload: params.formData, error: params.error }, runtime.form))
 
 const formProps = computed<Record<string, any>>(() => {
   const { onSuccess: _onSuccess, getDetailData: _getDetailData, beforeSubmit: _beforeSubmit, onSubmit: _onSubmit, onError: _onError, ...rest } = props

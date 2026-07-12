@@ -6,7 +6,3 @@ export function useFrameworkRuntime(): FrameworkRuntime {
   if (!runtime) throw new Error('[is-vue-framework] FrameworkPlugin is not installed.')
   return runtime
 }
-
-export function useFrameworkBehaviors() {
-  return useFrameworkRuntime().behaviors
-}

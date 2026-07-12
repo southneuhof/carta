@@ -65,7 +65,7 @@ function mountPathTree() {
 }
 
 beforeEach(() => {
-  runtime = { behaviors: { fileManager: {
+  runtime = { fileManager: {
       listFiles: vi.fn().mockImplementation(({ dir, type }: { dir: string; type?: string }) => {
         if (type === 'folder') {
           return Promise.resolve(treeFixtures[dir] || [])
@@ -76,7 +76,7 @@ beforeEach(() => {
       uploadFile: vi.fn(),
       createFolder: vi.fn(),
       deleteFile: vi.fn().mockResolvedValue(undefined),
-    } } }
+    } }
 })
 
 afterEach(() => {

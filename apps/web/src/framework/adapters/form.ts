@@ -1,5 +1,5 @@
 import services from '@/utils/services'
-import { parseURL } from '@southneuhof/is-vue-framework/behaviors/common'
+import { parseURL } from '@southneuhof/is-vue-framework/utilities/common'
 
 export function beforeSubmit({ formData }: { formData: object }) {
   return formData

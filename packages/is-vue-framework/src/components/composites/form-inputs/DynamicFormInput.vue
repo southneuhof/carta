@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, type PropType } from 'vue'
-import { missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
-import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
+import { missingRuntimeCapability, useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   templateAPI: { type: String, required: true },
@@ -10,13 +9,13 @@ const props = defineProps({
   view: { type: String, default: 'name' },
   model: { type: String, default: 'value' },
 })
-const behaviors = useFrameworkBehaviors()
+const runtime = useFrameworkRuntime()
 
 const modelValue = defineModel<any>()
 onMounted(() => {
   if (!modelValue.value) {
-    const getTemplate = behaviors.dynamicForm?.getTemplate
-    if (!getTemplate) missingBehavior('dynamicForm.getTemplate')
+    const getTemplate = runtime.dynamicForm?.getTemplate
+    if (!getTemplate) missingRuntimeCapability('dynamicForm.getTemplate')
     getTemplate(props.templateAPI).then((data) => {
       modelValue.value = data
     })

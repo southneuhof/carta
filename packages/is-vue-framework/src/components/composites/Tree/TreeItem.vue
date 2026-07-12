@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import type { PropType } from 'vue'
-import { defaultTableGetData, getTableFieldTypes } from '@southneuhof/is-vue-framework/behaviors/table'
-import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
+import { defaultTableGetData, getTableFieldTypes } from '@southneuhof/is-vue-framework/runtimeDefaults'
+import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 import { defaultTableConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
 import { parse } from '@southneuhof/utilities/parse'
 import Button from '../../base/Button.vue'
@@ -28,9 +28,9 @@ const props = defineProps({
   levels: { type: Number },
   searchParametersGenerator: { type: Function, default: () => ({}) },
 })
-const behaviors = useFrameworkBehaviors()
+const runtime = useFrameworkRuntime()
 const getData = props.getData ?? (async (getAPI: string, searchParameters?: Record<string, number | string | undefined>) => {
-  const result = await defaultTableGetData(getAPI, searchParameters, behaviors.table)
+  const result = await defaultTableGetData(getAPI, searchParameters, runtime.table)
   return { data: result.data, totalPage: result.totalPage ?? 0, total: result.total ?? result.data.length }
 })
 
@@ -39,7 +39,7 @@ const fieldsProxy = { ...defaultTableConfig.fieldsProxy, ...props.fieldsProxy }
 
 const children = ref<any[]>([])
 const expanded = ref(false)
-const tableFieldTypes = computed(() => getTableFieldTypes(behaviors.table))
+const tableFieldTypes = computed(() => getTableFieldTypes(runtime.table))
 
 function formatTableData(data: Record<string, any>[]) {
   const res: any[] = []

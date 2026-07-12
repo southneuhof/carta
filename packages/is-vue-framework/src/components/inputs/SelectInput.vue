@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defaultGetData } from '@southneuhof/is-vue-framework/behaviors/select'
+import { defaultSelectGetData } from '@southneuhof/is-vue-framework/runtimeDefaults'
 import { ref, type PropType, watch, computed, type ComputedRef, onMounted } from 'vue'
 import { commonProps } from './commonprops'
 import BaseInput from './BaseInput.vue'
@@ -7,7 +7,7 @@ import Popover from '@southneuhof/is-vue-framework/components/base/Popover.vue'
 import TextInput from '@southneuhof/is-vue-framework/components/inputs/TextInput.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
-import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
+import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   placeholder: {
@@ -78,8 +78,8 @@ const props = defineProps({
   },
   ...commonProps,
 })
-const behaviors = useFrameworkBehaviors()
-const getData = props.getData ?? ((getAPI: string, searchParameters: object) => defaultGetData(getAPI, searchParameters, behaviors.select))
+const runtime = useFrameworkRuntime()
+const getData = props.getData ?? ((getAPI: string, searchParameters: object) => defaultSelectGetData(getAPI, searchParameters, runtime.select))
 
 const modelValue = defineModel<any[] | Record<string, string> | null | string>()
 const emit = defineEmits<{

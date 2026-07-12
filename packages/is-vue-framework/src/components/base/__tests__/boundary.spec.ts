@@ -6,7 +6,7 @@ const baseRoot = join(__dirname, '..')
 const sourceRoot = join(baseRoot, '..', '..')
 const forbiddenImports = [
   ['@southneuhof/is-vue-framework', 'adapters'].join('/'),
-  ['@southneuhof/is-vue-framework', 'behaviors'].join('/'),
+  ['@southneuhof/is-vue-framework', 'runtime'].join('/'),
   ['@southneuhof/is-vue-framework', 'services'].join('/'),
   ['@southneuhof/is-vue-framework', 'router'].join('/'),
   ['@southneuhof/is-vue-framework', 'components', 'composites'].join('/'),

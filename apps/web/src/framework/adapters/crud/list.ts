@@ -1,8 +1,8 @@
-import type { FrameworkCRUDBehaviors } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import type { FrameworkCRUDRuntime } from '@southneuhof/is-vue-framework'
 import type { CRUDRecord } from '@southneuhof/is-vue-framework/adapters/crud-operations'
 import { parseRpcResponse, type RpcCRUDResource } from './common'
 
-export const list: NonNullable<FrameworkCRUDBehaviors<RpcCRUDResource>['list']> = async ({ resource, query = {} }) => {
+export const list: NonNullable<FrameworkCRUDRuntime<RpcCRUDResource>['list']> = async ({ resource, query = {} }) => {
   const normalizedQuery = Object.fromEntries(
     Object.entries(query)
       .filter(([, value]) => value !== undefined && value !== null)

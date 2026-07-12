@@ -1,4 +1,4 @@
-import type { componentTypeMap } from '@southneuhof/is-vue-framework/behaviors/form'
+import type { componentTypeMap } from '@southneuhof/is-vue-framework/components/composites/common/properties'
 import type { ZodTypeAny } from 'zod'
 import type { FieldDependency, ModelFormField } from '@southneuhof/is-vue-framework'
 import type { AsyncComponentLoader, Component } from 'vue'

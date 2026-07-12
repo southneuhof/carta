@@ -1,6 +1,6 @@
 import type { FrameworkRuntime } from '@southneuhof/is-vue-framework'
-import { frameworkBehaviors } from './adapters'
+import { frameworkRuntimeCapabilities } from './adapters'
 
 export const frameworkRuntime = {
-  behaviors: frameworkBehaviors,
+  ...frameworkRuntimeCapabilities,
 } satisfies FrameworkRuntime

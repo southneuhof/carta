@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defaultGetData, defaultGetDetail, getDefaultFieldsAlias, defaultDataFormatter } from '@southneuhof/is-vue-framework/behaviors/lookup'
+import { defaultLookupGetData, defaultLookupGetDetail, getDefaultLookupFieldsAlias, defaultLookupDataFormatter } from '@southneuhof/is-vue-framework/runtimeDefaults'
 import { ref, type PropType, watch, computed, onMounted } from 'vue'
 import { commonProps } from '../../inputs/commonprops'
 import Radio from '../../inputs/Radio.vue'
@@ -17,7 +17,7 @@ import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Chip from '@southneuhof/is-vue-framework/components/base/Chip.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
-import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
+import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   ...commonProps,
@@ -111,11 +111,11 @@ const props = defineProps({
   formData: { type: Object },
   onSelectData: { type: Function as PropType<(formData: any, selectedData: any, formDataSetter: (newData: any) => void) => void> },
 })
-const behaviors = useFrameworkBehaviors()
-const resolvedGetData = props.getData ?? ((getAPI: string, searchParameters?: object) => defaultGetData(getAPI, searchParameters ?? {}, behaviors.lookup))
-const resolvedGetDetail = props.getDetail ?? ((getAPI: string, id: string | number, searchParameters?: object) => defaultGetDetail(getAPI, id, searchParameters, behaviors.lookup))
-const resolvedFieldsAlias = props.fieldsAlias ?? getDefaultFieldsAlias(behaviors.lookup)
-const resolvedDataFormatter = props.dataFormatter ?? ((data: Array<Record<string, any>>, allowMulti: boolean, pick: string) => defaultDataFormatter(data, allowMulti, pick, behaviors.lookup))
+const runtime = useFrameworkRuntime()
+const resolvedGetData = props.getData ?? ((getAPI: string, searchParameters?: object) => defaultLookupGetData(getAPI, searchParameters ?? {}, runtime.lookup))
+const resolvedGetDetail = props.getDetail ?? ((getAPI: string, id: string | number, searchParameters?: object) => defaultLookupGetDetail(getAPI, id, searchParameters, runtime.lookup))
+const resolvedFieldsAlias = props.fieldsAlias ?? getDefaultLookupFieldsAlias(runtime.lookup)
+const resolvedDataFormatter = props.dataFormatter ?? ((data: Array<Record<string, any>>, allowMulti: boolean, pick: string) => defaultLookupDataFormatter(data, allowMulti, pick, runtime.lookup))
 
 const modelValue = defineModel<any>()
 const emit = defineEmits<{

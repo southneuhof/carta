@@ -3,7 +3,7 @@ import { computed, ref, useSlots, watch } from 'vue'
 import type { PropType } from 'vue'
 import { parse } from '@southneuhof/utilities/parse'
 import Pagination from '@southneuhof/is-vue-framework/components/utils/Pagination.vue'
-import { defaultTableGetData, getTableFieldTypes } from '@southneuhof/is-vue-framework/behaviors/table'
+import { defaultTableGetData, getTableFieldTypes } from '@southneuhof/is-vue-framework/runtimeDefaults'
 import { defaultTableConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
 import { onMounted, onBeforeUnmount } from 'vue'
 import Draggable from 'vuedraggable'
@@ -11,7 +11,7 @@ import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import type { CRUDListOperation } from '@southneuhof/is-vue-framework/adapters/crud-operations'
-import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
+import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   fields: { type: Array as PropType<string[]>, required: true },
@@ -44,9 +44,9 @@ const props = defineProps({
   rowClass: { type: Function as PropType<(data: Record<string, any>, index: number) => string>, default: () => '' },
   tableId: { type: String, required: false, default: '' },
 })
-const behaviors = useFrameworkBehaviors()
-const getData = props.getData ?? ((getAPI: string, searchParameters?: Record<string, number | string | undefined>) => defaultTableGetData(getAPI, searchParameters, behaviors.table))
-const onDataLoaded = props.onDataLoaded ?? ((data: any[]) => behaviors.table?.onDataLoaded?.(data))
+const runtime = useFrameworkRuntime()
+const getData = props.getData ?? ((getAPI: string, searchParameters?: Record<string, number | string | undefined>) => defaultTableGetData(getAPI, searchParameters, runtime.table))
+const onDataLoaded = props.onDataLoaded ?? ((data: any[]) => runtime.table?.onDataLoaded?.(data))
 const slots = useSlots()
 
 const modelValue = defineModel<Record<string, any>[]>({ default: () => [] })
@@ -63,7 +63,7 @@ const fieldsClass = { ...defaultTableConfig.fieldsClass, ...props.fieldsClass }
 const fieldsHeaderClass = { ...defaultTableConfig.fieldsHeaderClass, ...props.fieldsHeaderClass }
 const fieldsParse = { ...defaultTableConfig.fieldsParse, ...props.fieldsParse }
 const fieldsAlign = { ...defaultTableConfig.fieldsAlign, ...props.fieldsAlign }
-const tableFieldTypes = getTableFieldTypes(behaviors.table)
+const tableFieldTypes = getTableFieldTypes(runtime.table)
 
 const localsearchParameters = ref<Record<string, any>>({ page: '1', limit: props.draggable ? 9999 : props.limitSet[0] })
 

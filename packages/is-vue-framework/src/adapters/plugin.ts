@@ -4,8 +4,8 @@ import { frameworkRuntimeKey } from '../runtime'
 
 export const FrameworkPlugin: Plugin<[runtime: FrameworkRuntime]> = {
   install(app: App, runtime: FrameworkRuntime) {
-    if (!runtime || !runtime.behaviors) {
-      throw new Error('[vue-framework] FrameworkPlugin requires a runtime with behaviors.')
+    if (!runtime || typeof runtime !== 'object') {
+      throw new Error('[vue-framework] FrameworkPlugin requires a runtime object.')
     }
 
     app.provide(frameworkRuntimeKey, runtime)

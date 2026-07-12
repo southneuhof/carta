@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, type PropType, watch, provide, onMounted, nextTick } from 'vue'
 import { evaluateFieldDependencies, type FieldDependency, type InputConfig } from '../../model-config'
-import { defaultBeforeSubmit, defaultFormGetData, defaultOnError, defaultOnSubmit, defaultOnSuccess } from '@southneuhof/is-vue-framework/behaviors/form'
-import { executeValidationRules } from '@southneuhof/is-vue-framework/behaviors/validations'
+import { defaultBeforeSubmit, defaultFormGetData, defaultOnError, defaultOnSubmit, defaultOnSuccess } from '@southneuhof/is-vue-framework/runtimeDefaults'
+import { executeValidationRules } from '@southneuhof/is-vue-framework/utilities/validations'
 import { toast } from 'vue-sonner'
 import { useRoute } from 'vue-router'
 import { componentTypeMap as typeConfigMap } from './common/properties'
@@ -13,7 +13,7 @@ import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
 import type { CRUDDetailOperation, CRUDMutationOperation, CRUDUpdateOperation } from '@southneuhof/is-vue-framework/adapters/crud-operations'
-import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
+import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   inputConfig: { type: Object as PropType<InputConfig>, default: () => ({}) },
@@ -42,12 +42,12 @@ const props = defineProps({
   static: { type: Boolean },
   disabled: { type: Boolean },
 })
-const behaviors = useFrameworkBehaviors()
-const getDetailData = props.getDetailData ?? ((params: { getAPI: string; id?: string | number | string[]; searchParameters?: object }) => defaultFormGetData(params, behaviors.form))
-const beforeSubmit = props.beforeSubmit ?? ((params: { formData: object }) => defaultBeforeSubmit(params, behaviors.form))
-const onSubmit = props.onSubmit ?? ((params: { payload: object; method: 'put' | 'post'; targetAPI: string; type: 'create' | 'update' }) => defaultOnSubmit(params, behaviors.form))
-const onSuccess = props.onSuccess ?? ((params: { formData: object; res: Record<string, any> }) => defaultOnSuccess({ payload: params.formData, response: params.res }, behaviors.form))
-const onError = props.onError ?? ((params: { formData: object; error: Record<string, any> }) => defaultOnError({ payload: params.formData, error: params.error }, behaviors.form))
+const runtime = useFrameworkRuntime()
+const getDetailData = props.getDetailData ?? ((params: { getAPI: string; id?: string | number | string[]; searchParameters?: object }) => defaultFormGetData(params, runtime.form))
+const beforeSubmit = props.beforeSubmit ?? ((params: { formData: object }) => defaultBeforeSubmit(params, runtime.form))
+const onSubmit = props.onSubmit ?? ((params: { payload: object; method: 'put' | 'post'; targetAPI: string; type: 'create' | 'update' }) => defaultOnSubmit(params, runtime.form))
+const onSuccess = props.onSuccess ?? ((params: { formData: object; res: Record<string, any> }) => defaultOnSuccess({ payload: params.formData, response: params.res }, runtime.form))
+const onError = props.onError ?? ((params: { formData: object; error: Record<string, any> }) => defaultOnError({ payload: params.formData, error: params.error }, runtime.form))
 
 const route = useRoute()
 

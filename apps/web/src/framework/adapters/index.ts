@@ -1,4 +1,4 @@
-import type { FrameworkBehaviors } from '@southneuhof/is-vue-framework/adapters/behaviors'
+import type { FrameworkRuntime } from '@southneuhof/is-vue-framework'
 import * as form from './form'
 import * as table from './table'
 import * as detail from './detail'
@@ -15,7 +15,7 @@ import * as crudDetail from './crudDetail'
 import * as crud from './crud'
 import type { RpcCRUDResource } from './crud'
 
-export const frameworkBehaviors: FrameworkBehaviors<RpcCRUDResource> = {
+export const frameworkRuntimeCapabilities = {
   crud,
   form,
   table,
@@ -30,4 +30,4 @@ export const frameworkBehaviors: FrameworkBehaviors<RpcCRUDResource> = {
   dynamicForm,
   crudList,
   crudDetail,
-}
+} satisfies FrameworkRuntime<RpcCRUDResource>

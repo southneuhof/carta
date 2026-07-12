@@ -3,9 +3,9 @@ import { ref, watch, onBeforeMount } from 'vue'
 import type { PropType } from 'vue'
 import Radio from '@southneuhof/is-vue-framework/components/inputs/Radio.vue'
 import { commonProps } from './commonprops'
-import { defaultGetData } from '@southneuhof/is-vue-framework/behaviors/radioGroup'
+import { defaultSelectGetData } from '@southneuhof/is-vue-framework/runtimeDefaults'
 import BaseInput from './BaseInput.vue'
-import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
+import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   data: {
@@ -42,8 +42,8 @@ const props = defineProps({
   },
   ...commonProps,
 })
-const behaviors = useFrameworkBehaviors()
-const getData = props.getData ?? ((getAPI: string, searchParameters: object) => defaultGetData(getAPI, searchParameters, behaviors.radioGroup))
+const runtime = useFrameworkRuntime()
+const getData = props.getData ?? ((getAPI: string, searchParameters: object) => defaultSelectGetData(getAPI, searchParameters, runtime.radioGroup, 'radioGroup'))
 
 const modelValue = defineModel()
 const emit = defineEmits<{

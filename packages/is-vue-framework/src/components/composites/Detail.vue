@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { defaultDetailGetData, defaultOnDataLoaded, getDetailFieldTypes } from '@southneuhof/is-vue-framework/behaviors/detail'
+import { defaultDetailGetData, defaultDetailOnDataLoaded, getDetailFieldTypes } from '@southneuhof/is-vue-framework/runtimeDefaults'
 import { parse } from '@southneuhof/utilities/parse'
 import { computed, onMounted, ref, type PropType } from 'vue'
 import { componentTypeMap, parsedTypes } from './common/properties'
 import { defaultDetailConfig } from '@southneuhof/is-vue-framework/adapters/defaults'
 import type { CRUDDetailOperation } from '@southneuhof/is-vue-framework/adapters/crud-operations'
-import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
+import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   fields: { type: Array as PropType<string[]>, required: true },
@@ -24,16 +24,16 @@ const props = defineProps({
   onDataLoaded: { type: Function as PropType<(data: any) => void> },
   rowGap: { type: String, default: '4px' },
 })
-const behaviors = useFrameworkBehaviors()
-const resolvedGetData = props.getData ?? ((getAPI: string, searchParameters?: Record<string, any>, dataID?: string) => defaultDetailGetData(getAPI, searchParameters, dataID, behaviors.detail))
-const onDataLoaded = props.onDataLoaded ?? ((data: any) => defaultOnDataLoaded(data, behaviors.detail))
+const runtime = useFrameworkRuntime()
+const resolvedGetData = props.getData ?? ((getAPI: string, searchParameters?: Record<string, any>, dataID?: string) => defaultDetailGetData(getAPI, searchParameters, dataID, runtime.detail))
+const onDataLoaded = props.onDataLoaded ?? ((data: any) => defaultDetailOnDataLoaded(data, runtime.detail))
 
 const fieldSlots = defaultDetailConfig.fieldSlots
 const fieldsAlias = { ...defaultDetailConfig.fieldsAlias, ...props.fieldsAlias }
 const fieldsProxy = { ...defaultDetailConfig.fieldsProxy, ...props.fieldsProxy }
 const fieldsType = { ...defaultDetailConfig.fieldsType, ...props.fieldsType }
 const fieldsParse = { ...defaultDetailConfig.fieldsParse, ...props.fieldsParse }
-const detailFieldTypes = computed(() => getDetailFieldTypes(behaviors.detail))
+const detailFieldTypes = computed(() => getDetailFieldTypes(runtime.detail))
 
 // const fields = computed(() => props.fields.filter(field => field.slice(0, 2) !== 'S|'))
 const detailData = ref<{ data: Record<string, any>; rawData: Record<string, any> }>({ data: {}, rawData: {} })

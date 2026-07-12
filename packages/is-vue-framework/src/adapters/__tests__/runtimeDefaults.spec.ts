@@ -1,11 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
-import { defaultTableGetData, getTableFieldTypes } from '../table'
-import { defaultOnSubmit } from '../form'
-import { defaultFileInputUpload } from '../fileInput'
-import { defaultImageInputUpload, defaultImageURLResolver } from '../imageInput'
+import { defaultFileInputUpload, defaultImageInputUpload, defaultImageURLResolver, defaultOnSubmit, defaultTableGetData, getTableFieldTypes } from '../../runtimeDefaults'
 
-describe('explicit behavior helpers', () => {
-  it('uses supplied table behavior', async () => {
+describe('runtime defaults', () => {
+  it('uses supplied table runtime', async () => {
     const getData = vi.fn(async () => ({ data: [{ id: 1 }], total: 1, totalPage: 1 }))
     await expect(defaultTableGetData('users', { page: 1 }, { getData })).resolves.toEqual({ data: [{ id: 1 }], total: 1, totalPage: 1 })
     expect(getData).toHaveBeenCalledWith('users', { page: 1 })
@@ -16,16 +13,16 @@ describe('explicit behavior helpers', () => {
     expect(getTableFieldTypes({ fieldTypes: { image } }).image).toBe(image)
   })
 
-  it('throws when required behavior missing', async () => {
-    await expect(defaultTableGetData('users', undefined, {})).rejects.toThrow('Missing behavior: table.getData')
+  it('throws when required runtime capability is missing', async () => {
+    await expect(defaultTableGetData('users', undefined, {})).rejects.toThrow('Missing runtime capability: table.getData')
   })
 
-  it('uses supplied form submit behavior', async () => {
+  it('uses supplied form runtime', async () => {
     const onSubmit = vi.fn(async () => ({ ok: true }))
     await expect(defaultOnSubmit({ payload: {}, method: 'post', targetAPI: 'users', type: 'create' }, { onSubmit })).resolves.toEqual({ ok: true })
   })
 
-  it('prefers file-manager upload behavior', async () => {
+  it('prefers file-manager upload runtime', async () => {
     const uploadFile = vi.fn(async () => ({ url: '/file' }))
     const legacy = vi.fn()
     const file = new File(['file'], 'file.txt')
@@ -37,7 +34,7 @@ describe('explicit behavior helpers', () => {
     expect(defaultImageURLResolver({ url: 'https://example.test/a.jpg' })).toEqual({ imageURL: 'https://example.test/a.jpg', thumbnailURL: 'https://example.test/a.jpg' })
   })
 
-  it('uses supplied image upload behavior', async () => {
+  it('uses supplied image runtime', async () => {
     const fileUpload = vi.fn(async () => ({ url: '/image' }))
     const file = new File(['image'], 'image.png')
     await expect(defaultImageInputUpload(file, undefined, undefined, { imageInput: { fileUpload } })).resolves.toEqual({ url: '/image' })

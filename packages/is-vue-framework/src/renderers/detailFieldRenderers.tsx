@@ -1,1 +1,1 @@
-export { getDetailFieldTypes as detailFieldRenderers } from '@southneuhof/is-vue-framework/behaviors/detail'
+export { getDetailFieldTypes as detailFieldRenderers } from '@southneuhof/is-vue-framework/runtimeDefaults'

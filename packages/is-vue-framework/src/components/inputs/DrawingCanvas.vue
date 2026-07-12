@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { dataURItoBlob } from '@southneuhof/utilities/object'
 import { ref, onMounted, type PropType } from 'vue'
-import { missingBehavior } from '@southneuhof/is-vue-framework/adapters/behaviors'
-import { useFrameworkBehaviors } from '@southneuhof/is-vue-framework'
+import { missingRuntimeCapability, useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 import BaseInput from './BaseInput.vue'
 import { commonProps } from './commonprops'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
@@ -25,11 +24,11 @@ const props = defineProps({
   },
   ...commonProps,
 })
-const behaviors = useFrameworkBehaviors()
+const runtime = useFrameworkRuntime()
 const onSave = props.onSave ?? (async (image: string) => {
   const blob = dataURItoBlob(image)
-  const fileUploadNoAuth = behaviors.upload?.fileUploadNoAuth
-  if (!fileUploadNoAuth) missingBehavior('upload.fileUploadNoAuth')
+  const fileUploadNoAuth = runtime.upload?.fileUploadNoAuth
+  if (!fileUploadNoAuth) missingRuntimeCapability('upload.fileUploadNoAuth')
   return await fileUploadNoAuth(blob, () => {})
 })
 

@@ -15,7 +15,7 @@ function operations(label: string): CRUDOperations {
   }
 }
 
-describe('CRUD behaviors', () => {
+describe('CRUD runtime', () => {
   it('keeps resources opaque and binds every operation argument', async () => {
     const resource = { transportSpecific: Symbol('resource') }
     const crud = {
@@ -56,13 +56,13 @@ describe('CRUD behaviors', () => {
     expect(configList).not.toHaveBeenCalled()
   })
 
-  it('supports a complete per-config operation bundle without registered behaviors', async () => {
+  it('supports a complete per-config operation bundle without runtime CRUD capabilities', async () => {
     const config = defineCRUDCompositeConfig({ name: 'items', title: 'Items', resource: null, operations: operations('local') })
     await expect(resolveCRUDOperations(config).detail('1')).resolves.toEqual({ label: 'local' })
   })
 
-  it('reports missing operations through behavior diagnostics', async () => {
+  it('reports missing operations through runtime diagnostics', async () => {
     const config = defineCRUDCompositeConfig({ name: 'items', title: 'Items', resource: {} })
-    await expect(resolveCRUDOperations(config).list()).rejects.toThrow('Missing behavior: crud.list')
+    await expect(resolveCRUDOperations(config).list()).rejects.toThrow('Missing runtime capability: crud.list')
   })
 })
