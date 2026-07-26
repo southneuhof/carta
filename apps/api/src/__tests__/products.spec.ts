@@ -361,6 +361,7 @@ describe('products API', () => {
     const health = await rawApp.request('/health')
     expect(health.status).toBe(200)
     expect(await health.json()).toEqual({ ok: true })
+    expect(health.headers.get('x-request-id')).toBeTruthy()
 
     const rolePermissions = await rawApp.request('/roles/role-admin/permissions')
     expect(rolePermissions.status).toBe(401)

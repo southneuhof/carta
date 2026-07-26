@@ -117,9 +117,34 @@ type NormalizePath<TPath extends string> = TPath extends `${infer Head}//${infer
 type MergeInput<T> = { [K in keyof T]: T[K] }
 type UnionToIntersection<T> = (T extends unknown ? (value: T) => void : never) extends (value: infer U) => void ? U : never
 
+/** Minimal, pino-compatible logging surface. Apps bring their own implementation. */
+export type Logger = {
+  info: (object: object, message?: string) => void
+  warn: (object: object, message?: string) => void
+  error: (object: object, message?: string) => void
+}
+
+export const consoleLogger: Logger = {
+  info: (object, message) => console.info(message ?? '', object),
+  warn: (object, message) => console.warn(message ?? '', object),
+  error: (object, message) => console.error(message ?? '', object),
+}
+
 export type SprindleInstallOptions = {
   /** Resolves the caller's identity for every route; `authenticated()` guards read it. */
   identity?: IdentityResolver
+  /** Receives framework-level error logs; defaults to a console adapter. */
+  logger?: Logger
+}
+
+/** Middleware: assigns a request id (honoring an inbound `x-request-id`) and echoes it on the response. */
+export function requestContext() {
+  return async (c: Context, next: () => Promise<void>) => {
+    const requestId = c.req.header('x-request-id') || crypto.randomUUID()
+    c.set('requestId', requestId)
+    c.header('x-request-id', requestId)
+    await next()
+  }
 }
 
 export function installSprindle<const TApp extends Hono<any, any>, const TInstallables extends readonly SprindleInstallable[]>(
@@ -127,6 +152,12 @@ export function installSprindle<const TApp extends Hono<any, any>, const TInstal
   installables: TInstallables & RequireTopLevelRoutePath<TInstallables>,
   options: SprindleInstallOptions = {},
 ): TApp extends Hono<infer TEnv, infer TSchema> ? Hono<TEnv, TSchema & SprindleInstallSchema<TInstallables>> : never {
+  const logger = options.logger ?? consoleLogger
+  app.use('*', async (c: Context, next: () => Promise<void>) => {
+    c.set('logger', logger)
+    await next()
+  })
+
   for (const installable of installables) {
     if ('route' in installable) {
       // Models compile their context before install, so the resolver is attached to the live object.
@@ -148,8 +179,9 @@ export function installSprindle<const TApp extends Hono<any, any>, const TInstal
 export function sprindleOnError(error: Error, c: Context) {
   const httpError = toHttpError(error)
   if (httpError) return c.json({ error: httpError.code, message: httpError.message || undefined, issues: httpError.issues }, httpError.status as 400)
-  // plan 015 replaces this with the injected logger
-  console.error(error)
+
+  const logger = (c.get('logger') as Logger | undefined) ?? consoleLogger
+  logger.error({ requestId: c.get('requestId'), method: c.req.method, path: c.req.path, err: String(error) }, 'sprindle request failed')
   return c.json({ error: 'internal_error' }, 500)
 }
 

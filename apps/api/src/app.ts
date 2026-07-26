@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { installSprindle, sprindleNotFound, sprindleOnError } from '@southneuhof/sprindle/hono'
+import { consoleLogger, installSprindle, requestContext, sprindleNotFound, sprindleOnError } from '@southneuhof/sprindle/hono'
 import { getDb } from './db'
 import { routes } from './routes'
 import { getAuth } from './routes/auth/auth'
@@ -12,6 +12,7 @@ export const app = installSprindle(
   new Hono()
     .onError(sprindleOnError)
     .notFound(sprindleNotFound)
+    .use('*', requestContext())
     .use(
       '*',
       cors({
@@ -27,7 +28,10 @@ export const app = installSprindle(
       await next()
     }),
   routes,
-  { identity: (c) => getAuth().api.getSession({ headers: c.req.raw.headers }) },
+  {
+    identity: (c) => getAuth().api.getSession({ headers: c.req.raw.headers }),
+    logger: consoleLogger,
+  },
 )
 
 export type AppType = typeof app
