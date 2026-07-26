@@ -1,0 +1,157 @@
+import { describe, expect, it } from 'vitest'
+import { defineFields } from '../defineFields'
+import { resolveFields, toCatalog } from '../resolve'
+import { readField, readFields, writeField } from '../access'
+
+interface Role extends Record<string, unknown> {
+  id: string
+  name: string
+  rel_section_id: string
+  status_code: string
+  latitude: number
+  longitude: number
+}
+
+const roleFields = defineFields<Role>()({
+  name: {
+    label: 'Nama',
+    table: { sortable: true },
+    form: { renderer: 'text' },
+  },
+  section_id: {
+    label: 'Ruas',
+    read: (record) => record.rel_section_id,
+  },
+  status_code: {
+    label: 'Status',
+    display: { renderer: 'chip', props: { options: ['open'] } },
+    form: { renderer: 'radio', props: { options: ['open', 'closed'] } },
+  },
+  secret: {
+    label: 'Secret',
+    table: false,
+    detail: false,
+  },
+  location: {
+    label: 'Lokasi',
+    read: (record) => ({ latitude: record.latitude, longitude: record.longitude }),
+    write: (draft, value) => {
+      const location = value as { latitude: number; longitude: number }
+      draft.latitude = location.latitude
+      draft.longitude = location.longitude
+    },
+  },
+})
+
+describe('field resolution', () => {
+  it('keeps the caller order and falls back to the key as a label', () => {
+    const resolved = resolveFields({ fields: roleFields, surface: 'table', keys: ['status_code', 'name'] })
+
+    expect(resolved.map((field) => field.key)).toEqual(['status_code', 'name'])
+    expect(resolveFields({ fields: { untitled: {} }, surface: 'table' })[0].label).toBe('untitled')
+  })
+
+  it('excludes fields whose surface projection is false', () => {
+    expect(resolveFields({ fields: roleFields, surface: 'table' }).map((field) => field.key)).not.toContain('secret')
+    expect(resolveFields({ fields: roleFields, surface: 'form' }).map((field) => field.key)).toContain('secret')
+  })
+
+  it('projects shared display config into table and detail but lets the surface win', () => {
+    const [status] = resolveFields({ fields: roleFields, surface: 'table', keys: ['status_code'] })
+    const [formStatus] = resolveFields({ fields: roleFields, surface: 'form', keys: ['status_code'] })
+
+    expect(status.renderer).toBe('chip')
+    expect(status.props).toEqual({ options: ['open'] })
+    expect(formStatus.renderer).toBe('radio')
+    expect(formStatus.props).toEqual({ options: ['open', 'closed'] })
+  })
+
+  it('applies every precedence layer in order', () => {
+    const [field] = resolveFields({
+      fields: { name: { label: 'Entry', table: { renderer: 'entry', props: { size: 'md' } } } },
+      surface: 'table',
+      defaults: { renderer: 'default', props: { size: 'sm', dense: true } },
+      schema: { name: { renderer: 'schema' } },
+      overrides: { name: { renderer: 'instance', props: { dense: false } } },
+    })
+
+    expect(field.renderer).toBe('instance')
+    expect(field.props).toEqual({ size: 'md', dense: false })
+    expect(field.label).toBe('Entry')
+  })
+
+  it('treats null as an explicit clear and undefined as inherit', () => {
+    const [cleared] = resolveFields({
+      fields: { name: { table: { renderer: 'entry' } } },
+      surface: 'table',
+      overrides: { name: { renderer: null, props: null } },
+      defaults: { props: { dense: true } },
+    })
+
+    expect(cleared.renderer).toBeUndefined()
+    expect(cleared.props).toEqual({})
+  })
+
+  it('carries behavior only on the form surface', () => {
+    const fields = { name: { form: { behavior: { visible: () => true } } } }
+
+    expect(resolveFields({ fields, surface: 'form' })[0].behavior).toBeDefined()
+    expect(resolveFields({ fields, surface: 'table' })[0].behavior).toBeUndefined()
+  })
+
+  it('rejects unknown field keys', () => {
+    expect(() => resolveFields({ fields: roleFields, surface: 'table', keys: ['missing'] })).toThrow('Unknown field "missing"')
+  })
+
+  it('accepts a resolved field list as well as a catalog', () => {
+    const { catalog, order } = toCatalog([{ key: 'name', label: 'Nama' }])
+
+    expect(order).toEqual(['name'])
+    expect(catalog.name.label).toBe('Nama')
+  })
+})
+
+describe('field access', () => {
+  const record: Role = {
+    id: '1',
+    name: 'Admin',
+    rel_section_id: 'section-9',
+    status_code: 'open',
+    latitude: 1,
+    longitude: 2,
+  }
+
+  it('reads ordinary fields by key and computed fields through read', () => {
+    expect(readField(record, 'name', roleFields.name)).toBe('Admin')
+    expect(readField(record, 'section_id', roleFields.section_id)).toBe('section-9')
+    expect(readField(record, 'location', roleFields.location)).toEqual({ latitude: 1, longitude: 2 })
+  })
+
+  it('returns undefined for null records', () => {
+    expect(readField(null, 'name', roleFields.name)).toBeUndefined()
+    expect(readField(undefined, 'section_id', roleFields.section_id)).toBeUndefined()
+  })
+
+  it('writes ordinary values by key without mutating the input draft', () => {
+    const draft = { name: 'Admin' } as unknown as Role
+    const next = writeField(draft, 'name', 'Editor', roleFields.name)
+
+    expect(next.name).toBe('Editor')
+    expect(draft.name).toBe('Admin')
+  })
+
+  it('writes transformed values through write', () => {
+    const draft = { latitude: 0, longitude: 0 } as unknown as Role
+    const next = writeField(draft, 'location', { latitude: 5, longitude: 6 }, roleFields.location)
+
+    expect(next.latitude).toBe(5)
+    expect(next.longitude).toBe(6)
+    expect(draft.latitude).toBe(0)
+  })
+
+  it('reads a whole record against a resolved field list', () => {
+    const fields = resolveFields({ fields: roleFields, surface: 'detail', keys: ['name', 'section_id'] })
+
+    expect(readFields(record, fields)).toEqual({ name: 'Admin', section_id: 'section-9' })
+  })
+})

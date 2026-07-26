@@ -12,7 +12,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-export function normalizeCollection<TRecord extends Record<string, unknown>>(payload: unknown): CollectionResult<TRecord> {
+export function normalizeCollection<TRecord extends object>(payload: unknown): CollectionResult<TRecord> {
   if (Array.isArray(payload)) return { data: payload as TRecord[] }
   if (!isRecord(payload) || !Array.isArray(payload.data)) return { data: [] }
 
@@ -31,7 +31,7 @@ export function normalizeCollection<TRecord extends Record<string, unknown>>(pay
   }
 }
 
-export function normalizeRecord<TRecord extends Record<string, unknown>>(payload: unknown): RecordResult<TRecord> {
+export function normalizeRecord<TRecord extends object>(payload: unknown): RecordResult<TRecord> {
   if (!isRecord(payload)) return undefined
   if (isRecord(payload.data)) return payload.data as TRecord
   return payload as TRecord

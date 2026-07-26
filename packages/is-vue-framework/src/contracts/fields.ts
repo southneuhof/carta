@@ -13,9 +13,12 @@
 
 export type FieldKey<TRecord> = Extract<keyof TRecord, string> | (string & {})
 
+/** Caller-supplied information a field may read besides the record or draft. */
+export type FieldContext = Record<string, unknown>
+
 /** Ordinary fields need no accessor; `read`/`write` are escape hatches. */
-export type FieldRead<TRecord, TValue = unknown> = (record: TRecord) => TValue
-export type FieldWrite<TDraft, TValue = unknown> = (draft: TDraft, value: TValue) => void
+export type FieldRead<TRecord, TValue = unknown> = (record: TRecord, context: FieldContext) => TValue
+export type FieldWrite<TDraft, TValue = unknown> = (draft: TDraft, value: TValue, context: FieldContext) => void
 
 /** Identity of the field a renderer is rendering. */
 export interface FieldRendererInfo {
@@ -50,6 +53,7 @@ export interface FormRendererContext<TDraft = Record<string, unknown>, TValue = 
 export interface FieldBehaviorContext<TDraft = Record<string, unknown>, TValue = unknown> {
   draft: TDraft
   value: TValue
+  context: FieldContext
 }
 
 /**
@@ -103,9 +107,10 @@ export interface FieldDefinition<
   read?: FieldRead<TRecord, TValue>
   write?: FieldWrite<TDraft, TValue>
   display?: FieldDisplayProjection
-  table?: FieldTableProjection
-  detail?: FieldDetailProjection
-  form?: FieldFormProjection<TDraft, TValue>
+  /** `false` excludes the field from that surface entirely. */
+  table?: FieldTableProjection | false
+  detail?: FieldDetailProjection | false
+  form?: FieldFormProjection<TDraft, TValue> | false
 }
 
 export type FieldCatalog<TRecord = Record<string, unknown>, TDraft = TRecord> = Record<

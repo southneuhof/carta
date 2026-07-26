@@ -1,5 +1,14 @@
 export type * from './contracts'
 export * from './query'
+export * from './fields'
+export {
+  createRendererRegistry,
+  createRendererRegistries,
+  rendererRegistriesKey,
+  useRendererRegistries,
+  useRendererRegistry,
+} from './renderers/registry'
+export type { RendererSurface, RendererRegistry, RendererRegistries, RendererRegistriesInput } from './renderers/registry'
 export {
   frameworkAdaptersKey,
   resolveFrameworkAdapters,

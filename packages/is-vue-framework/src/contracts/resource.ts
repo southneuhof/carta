@@ -19,10 +19,10 @@ import type { ValidationSchema } from './validation'
 export type ResourceKey = string
 
 export interface ResourceSchemas<
-  TRecord extends Record<string, unknown> = Record<string, unknown>,
-  TQuery extends Record<string, unknown> = Record<string, unknown>,
-  TCreate extends Record<string, unknown> = Record<string, unknown>,
-  TUpdate extends Record<string, unknown> = TCreate,
+  TRecord extends object = Record<string, unknown>,
+  TQuery extends object = Record<string, unknown>,
+  TCreate extends object = Record<string, unknown>,
+  TUpdate extends object = TCreate,
 > {
   record?: ValidationSchema<TRecord>
   query?: ValidationSchema<TQuery>
@@ -31,8 +31,8 @@ export interface ResourceSchemas<
 }
 
 export interface ResourceDefinitionBase<
-  TRecord extends Record<string, unknown> = Record<string, unknown>,
-  TDraft extends Record<string, unknown> = TRecord,
+  TRecord extends object = Record<string, unknown>,
+  TDraft extends object = TRecord,
 > {
   key: ResourceKey
   identity?: (record: TRecord) => RecordIdentity
@@ -42,7 +42,7 @@ export interface ResourceDefinitionBase<
   policy?: AccessPolicy<TRecord>
 }
 
-export interface TableFactoryArguments<TQuery extends Record<string, unknown> = Record<string, unknown>> {
+export interface TableFactoryArguments<TQuery extends object = Record<string, unknown>> {
   searchParameters?: Record<string, unknown>
   namespace?: QueryNamespace
   query?: TQuery
@@ -53,12 +53,12 @@ export interface DetailFactoryArguments {
   searchParameters?: Record<string, unknown>
 }
 
-export interface CreateFormFactoryArguments<TCreate extends Record<string, unknown> = Record<string, unknown>> {
+export interface CreateFormFactoryArguments<TCreate extends object = Record<string, unknown>> {
   initialData?: Partial<TCreate>
   searchParameters?: Record<string, unknown>
 }
 
-export interface UpdateFormFactoryArguments<TUpdate extends Record<string, unknown> = Record<string, unknown>> {
+export interface UpdateFormFactoryArguments<TUpdate extends object = Record<string, unknown>> {
   id: RecordIdentity
   initialData?: Partial<TUpdate>
   searchParameters?: Record<string, unknown>
@@ -71,10 +71,10 @@ export interface UpdateFormFactoryArguments<TUpdate extends Record<string, unkno
  * create form.
  */
 export interface ResourcePropFactories<
-  TRecord extends Record<string, unknown> = Record<string, unknown>,
-  TQuery extends Record<string, unknown> = Record<string, unknown>,
-  TCreate extends Record<string, unknown> = Record<string, unknown>,
-  TUpdate extends Record<string, unknown> = TCreate,
+  TRecord extends object = Record<string, unknown>,
+  TQuery extends object = Record<string, unknown>,
+  TCreate extends object = Record<string, unknown>,
+  TUpdate extends object = TCreate,
 > {
   table: (args?: TableFactoryArguments<TQuery>) => TableProps<TRecord, TQuery>
   detail: (args: DetailFactoryArguments) => DetailProps<TRecord>
@@ -91,10 +91,10 @@ export interface ResourceInvalidationArguments {
 }
 
 export interface Resource<
-  TRecord extends Record<string, unknown> = Record<string, unknown>,
-  TQuery extends Record<string, unknown> = Record<string, unknown>,
-  TCreate extends Record<string, unknown> = Record<string, unknown>,
-  TUpdate extends Record<string, unknown> = TCreate,
+  TRecord extends object = Record<string, unknown>,
+  TQuery extends object = Record<string, unknown>,
+  TCreate extends object = Record<string, unknown>,
+  TUpdate extends object = TCreate,
 > extends ResourceDefinitionBase<TRecord, TCreate>,
     ResourcePropFactories<TRecord, TQuery, TCreate, TUpdate> {
   schemas?: ResourceSchemas<TRecord, TQuery, TCreate, TUpdate>

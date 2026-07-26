@@ -65,7 +65,7 @@ describe('adapter resolution', () => {
   })
 
   it('merges partial data adapters over the defaults', () => {
-    const normalizeCollection: DataAdapter['normalizeCollection'] = <TRecord extends Record<string, unknown>>(payload: unknown) => ({
+    const normalizeCollection: DataAdapter['normalizeCollection'] = <TRecord extends object>(payload: unknown) => ({
       data: ((payload as { items?: unknown[] }).items ?? []) as TRecord[],
     })
     const resolved = resolveFrameworkAdapters({ data: { normalizeCollection } })

@@ -6,6 +6,7 @@ import { frameworkRuntimeKey } from '../runtime'
 import { frameworkDefaultsKey, resolveFrameworkDefaults, type FrameworkDefaultsInput } from './defaults'
 import { frameworkAdaptersKey, resolveFrameworkAdapters, type FrameworkAdaptersInput } from './projectAdapters'
 import { createFrameworkQueryClient, frameworkQueryClientKey } from '../query/client'
+import { createRendererRegistries, rendererRegistriesKey, type RendererRegistriesInput } from '../renderers/registry'
 
 export interface FrameworkPluginOptions {
   runtime: FrameworkRuntime
@@ -14,6 +15,8 @@ export interface FrameworkPluginOptions {
   adapters?: FrameworkAdaptersInput
   /** Injected cache client for tests and advanced projects. */
   queryClient?: QueryClient
+  /** Project renderer implementations, registered per surface. */
+  renderers?: RendererRegistriesInput
 }
 
 function isPluginOptions(value: FrameworkRuntime | FrameworkPluginOptions): value is FrameworkPluginOptions {
@@ -36,6 +39,8 @@ export const FrameworkPlugin: Plugin<[runtimeOrOptions: FrameworkRuntime | Frame
 
     const adapters = resolveFrameworkAdapters(options?.adapters)
     app.provide(frameworkAdaptersKey, adapters)
+
+    app.provide(rendererRegistriesKey, createRendererRegistries(options?.renderers))
 
     const queryClient = options?.queryClient ?? createFrameworkQueryClient(adapters.queryDefaults)
     app.provide(frameworkQueryClientKey, queryClient)

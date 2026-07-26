@@ -11,9 +11,9 @@ export interface CollectionMeta {
   pageSize?: number
 }
 
-export interface CollectionResult<TRecord extends Record<string, unknown> = Record<string, unknown>> {
+export interface CollectionResult<TRecord extends object = Record<string, unknown>> {
   data: TRecord[]
   meta?: CollectionMeta
 }
 
-export type RecordResult<TRecord extends Record<string, unknown> = Record<string, unknown>> = TRecord | undefined
+export type RecordResult<TRecord extends object = Record<string, unknown>> = TRecord | undefined

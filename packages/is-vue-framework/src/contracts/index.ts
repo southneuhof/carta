@@ -17,6 +17,7 @@ export type { CollectionMeta, CollectionResult, RecordResult } from './results'
 
 export type {
   FieldKey,
+  FieldContext,
   FieldRead,
   FieldWrite,
   FieldRendererInfo,

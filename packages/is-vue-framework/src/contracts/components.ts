@@ -20,8 +20,8 @@ import type { QueryNamespace } from './query'
 import type { SubmitError, ValidationSchema } from './validation'
 
 export interface TableProps<
-  TRecord extends Record<string, unknown> = Record<string, unknown>,
-  TQuery extends Record<string, unknown> = Record<string, unknown>,
+  TRecord extends object = Record<string, unknown>,
+  TQuery extends object = Record<string, unknown>,
 > {
   fields: FieldsInput<TRecord>
   data?: TRecord[]
@@ -35,7 +35,7 @@ export interface TableProps<
   schema?: ValidationSchema<TQuery>
 }
 
-export interface DetailProps<TRecord extends Record<string, unknown> = Record<string, unknown>> {
+export interface DetailProps<TRecord extends object = Record<string, unknown>> {
   fields: FieldsInput<TRecord>
   id?: RecordIdentity
   data?: TRecord
@@ -43,11 +43,11 @@ export interface DetailProps<TRecord extends Record<string, unknown> = Record<st
   searchParameters?: Record<string, unknown>
 }
 
-export type FormSubmitHandler<TInput extends Record<string, unknown> = Record<string, unknown>, TResult = unknown> = (
+export type FormSubmitHandler<TInput extends object = Record<string, unknown>, TResult = unknown> = (
   draft: TInput,
 ) => MaybePromise<TResult>
 
-export interface FormProps<TInput extends Record<string, unknown> = Record<string, unknown>, TResult = unknown> {
+export interface FormProps<TInput extends object = Record<string, unknown>, TResult = unknown> {
   fields: FieldsInput<TInput, TInput>
   /** Prefilled values; loaded values override these, and user edits override both. */
   initialData?: Partial<TInput>

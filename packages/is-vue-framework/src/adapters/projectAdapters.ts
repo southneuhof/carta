@@ -20,9 +20,9 @@ import type {
 
 export interface DataAdapter {
   /** Normalizes any backend collection envelope into rows plus metadata. */
-  normalizeCollection: <TRecord extends Record<string, unknown>>(payload: unknown) => CollectionResult<TRecord>
+  normalizeCollection: <TRecord extends object>(payload: unknown) => CollectionResult<TRecord>
   /** Normalizes any backend record envelope into one record. */
-  normalizeRecord: <TRecord extends Record<string, unknown>>(payload: unknown) => RecordResult<TRecord>
+  normalizeRecord: <TRecord extends object>(payload: unknown) => RecordResult<TRecord>
   /** Normalizes a rejected request into a message plus field issues. */
   normalizeError: (error: unknown) => SubmitError
 }
@@ -77,7 +77,7 @@ function collectMeta(source: Record<string, unknown>): CollectionMeta | undefine
  * collection rather than guessing at a project envelope.
  */
 export const defaultDataAdapter: DataAdapter = {
-  normalizeCollection: <TRecord extends Record<string, unknown>>(payload: unknown): CollectionResult<TRecord> => {
+  normalizeCollection: <TRecord extends object>(payload: unknown): CollectionResult<TRecord> => {
     if (Array.isArray(payload)) return { data: payload as TRecord[] }
     if (isRecord(payload) && Array.isArray(payload.data)) {
       const meta = collectMeta(payload)
@@ -85,7 +85,7 @@ export const defaultDataAdapter: DataAdapter = {
     }
     return { data: [] }
   },
-  normalizeRecord: <TRecord extends Record<string, unknown>>(payload: unknown): RecordResult<TRecord> => {
+  normalizeRecord: <TRecord extends object>(payload: unknown): RecordResult<TRecord> => {
     if (!isRecord(payload)) return undefined
     if (isRecord(payload.data)) return payload.data as TRecord
     return payload as TRecord
