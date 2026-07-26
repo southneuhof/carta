@@ -84,3 +84,28 @@ describe('legacy users query-state URLs', () => {
     warn.mockRestore()
   })
 })
+
+describe('legacy overtimes query-state URLs', () => {
+  it('redirects every view the overtime screen supports', () => {
+    expect(legacyRolesRedirect(location({ overtimes_view: 'list' }))).toEqual({ path: '/hr/overtimes', query: {} })
+    expect(legacyRolesRedirect(location({ overtimes_view: 'create' }))).toEqual({ path: '/hr/overtimes/new', query: {} })
+    expect(legacyRolesRedirect(location({ overtimes_view: 'detail', overtimes_id: '7' }))).toEqual({ path: '/hr/overtimes/7', query: {} })
+    expect(legacyRolesRedirect(location({ overtimes_view: 'update', overtimes_id: '7' }))).toEqual({ path: '/hr/overtimes/7/edit', query: {} })
+  })
+
+  it('preserves unrelated query values', () => {
+    expect(legacyRolesRedirect(location({ overtimes_view: 'detail', overtimes_id: '7', tab: 'chain' }))).toEqual({
+      path: '/hr/overtimes/7',
+      query: { tab: 'chain' },
+    })
+  })
+
+  it('falls back to the list when a detail link carries no id', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    expect(legacyRolesRedirect(location({ overtimes_view: 'detail' }))).toEqual({ path: '/hr/overtimes', query: {} })
+    expect(warn).toHaveBeenCalledOnce()
+
+    warn.mockRestore()
+  })
+})

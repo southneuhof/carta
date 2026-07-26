@@ -1,12 +1,14 @@
 import { forbidden, HttpError, notFound } from '@southneuhof/sprindle'
 import { defineRoute } from '@southneuhof/sprindle/routes'
-import { eq } from 'drizzle-orm'
+import type { ModelRuntimeContext } from '@southneuhof/sprindle/model'
+import { and, asc, eq } from 'drizzle-orm'
 import { z } from 'zod/v4'
 import { getDb } from '../../db'
 import { orgIdentity, type OrgIdentity } from '../../identity'
 import { notifyAfterCommit, type DeliveredNotification } from '../../notifications/transport'
 import { resolveRecipients } from '../notifications/recipients'
 import { advanceChain, currentStep, seedChain, type ActivatedNotification } from '../verification/chain'
+import { logVerifications } from '../verification/verification.entity'
 import { overtimes, type OvertimeStatus } from './overtimes.entity'
 
 const MODULE = 'overtimes'
@@ -88,6 +90,35 @@ export const submitOvertime = defineRoute({
 })
 
 /**
+ * The verification timeline for one request.
+ *
+ * Added while building the screens (plan 025): the chain tables landed in plan 023
+ * with no read endpoint and plan 024 did not add one, so the detail screen had no
+ * way to render the timeline. It lives on the overtime model rather than as a
+ * generic verification resource so that visibility follows the record — a caller
+ * who can read the request can read its chain, and nobody else can.
+ */
+export const overtimeSteps = defineRoute({
+  path: '/:id',
+  method: 'get',
+  action: async (args) => {
+    const identity = await orgIdentity(args)
+    const record = await loadOvertime(args.c.req.param('id'))
+    if (identity?.scope !== 'all' && identity?.sectionId !== record.sectionId) {
+      return args.c.json({ error: 'not_found' }, 404)
+    }
+
+    const steps = await getDb()
+      .select()
+      .from(logVerifications)
+      .where(and(eq(logVerifications.moduleName, MODULE), eq(logVerifications.moduleId, record.id)))
+      .orderBy(asc(logVerifications.orderNumber))
+
+    return args.c.json({ data: steps, total: steps.length })
+  },
+})
+
+/**
  * The reference rule, reproduced: the caller's job position matches the step **and**
  * their section matches the record's, or they are the step's named recipient, or
  * their scope is `all`.
@@ -103,7 +134,12 @@ function mayVerify(identity: OrgIdentity | null, step: { jobPositionId: string |
   return false
 }
 
-export const verifyOvertime = defineRoute({
+type VerifyInput = { json: { decision: 'approved' | 'rejected'; description?: string } }
+
+// The input type is declared rather than inferred: `defineRoute` cannot see the
+// body shape a custom action reads by hand, so without this the derived RPC
+// contract has no `json` and the browser call site does not type-check.
+export const verifyOvertime = defineRoute<Response, ModelRuntimeContext, 'post', '/:id', VerifyInput>({
   path: '/:id',
   method: 'post',
   action: async (args) => {

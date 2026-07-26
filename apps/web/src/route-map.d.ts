@@ -39,11 +39,16 @@ declare module 'vue-router/auto-routes' {
       | '/(authenticated)/settings/roles/[roleId]'
       | '/(authenticated)/settings/users/[userId]'
       | 'dashboard'
+      | 'overtime-create'
+      | 'overtime-detail'
+      | 'overtime-edit'
+      | 'overtimes'
       | 'roles'
       | 'roles-create'
       | 'roles-detail'
       | 'roles-permissions'
       | 'roles-update'
+      | 'to-do'
       | 'users'
       | 'users-detail'
       | 'users-roles'
@@ -52,6 +57,34 @@ declare module 'vue-router/auto-routes' {
     'dashboard': RouteRecordInfo<
       'dashboard',
       '/dashboard',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'overtimes': RouteRecordInfo<
+      'overtimes',
+      '/hr/overtimes',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'overtime-detail': RouteRecordInfo<
+      'overtime-detail',
+      '/hr/overtimes/:overtimeId',
+      { overtimeId: ParamValue<true> },
+      { overtimeId: ParamValue<false> },
+      | never
+    >,
+    'overtime-edit': RouteRecordInfo<
+      'overtime-edit',
+      '/hr/overtimes/:overtimeId/edit',
+      { overtimeId: ParamValue<true> },
+      { overtimeId: ParamValue<false> },
+      | never
+    >,
+    'overtime-create': RouteRecordInfo<
+      'overtime-create',
+      '/hr/overtimes/new',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -137,6 +170,13 @@ declare module 'vue-router/auto-routes' {
       { userId: ParamValue<false> },
       | never
     >,
+    'to-do': RouteRecordInfo<
+      'to-do',
+      '/to-do',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/(public)/public': RouteRecordInfo<
       '/(public)/public',
       '/',
@@ -185,11 +225,16 @@ declare module 'vue-router/auto-routes' {
         | '/(authenticated)/settings/roles/[roleId]'
         | '/(authenticated)/settings/users/[userId]'
         | 'dashboard'
+        | 'overtime-create'
+        | 'overtime-detail'
+        | 'overtime-edit'
+        | 'overtimes'
         | 'roles'
         | 'roles-create'
         | 'roles-detail'
         | 'roles-permissions'
         | 'roles-update'
+        | 'to-do'
         | 'users'
         | 'users-detail'
         | 'users-roles'
@@ -202,6 +247,38 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/dashboard/index.route.vue': {
       routes:
         | 'dashboard'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/hr/overtimes/index.route.vue': {
+      routes:
+        | 'overtimes'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/hr/overtimes/[overtimeId]/index.route.vue': {
+      routes:
+        | 'overtime-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/hr/overtimes/[overtimeId]/edit.route.vue': {
+      routes:
+        | 'overtime-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/hr/overtimes/new.route.vue': {
+      routes:
+        | 'overtime-create'
       views:
         | never
       pathParamNames:
@@ -296,6 +373,14 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/settings/users/[userId]/roles/index.route.vue': {
       routes:
         | 'users-roles'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/to-do/index.route.vue': {
+      routes:
+        | 'to-do'
       views:
         | never
       pathParamNames:

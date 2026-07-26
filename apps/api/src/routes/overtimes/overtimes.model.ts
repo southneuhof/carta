@@ -6,7 +6,7 @@ import { eq } from 'drizzle-orm'
 import { getDb } from '../../db'
 import { orgIdentity } from '../../identity'
 import { overtime, overtimes } from './overtimes.entity'
-import { submitOvertime, verifyOvertime } from './overtimes.routes'
+import { overtimeSteps, submitOvertime, verifyOvertime } from './overtimes.routes'
 import { createScopedOvertimeSource, SCOPE_KEY } from './overtimes.source'
 
 const scopedSource = createScopedOvertimeSource(() => getDb())
@@ -72,6 +72,7 @@ export const overtimeModel = defineModel({
     // `source.materialize()` so their responses match the detail wire contract.
     submit: submitOvertime,
     verify: verifyOvertime,
+    steps: overtimeSteps,
     // No delete: a submitted request is a record.
   },
 })

@@ -106,23 +106,61 @@ Resolved during investigation, no longer open questions:
   `record` (`packages/is-vue-framework/src/resources/controls.ts:41`); Verify/Reject is a custom
   `ViewControl` with `onSelect`.
 
-Still open, and the actual reason to build this:
+## Verdict — what the slice actually found (2026-07-27)
 
-1. **The inbox list cannot be expressed as list query parameters.** `buildListPlan` in
-   `packages/sprindle/src/source/drizzle-source.ts` turns every filter key into `eq` and rejects
-   unknown keys with 400. The inbox needs `(roleId IN my_roles OR jobPositionId = mine OR
-   userReceiverId = me) AND section scope AND createdAt >= now() - 30 days`. Agreed direction: a
-   custom `ModelSource` wrapping `createDrizzleSource` with a scope predicate — it keeps the
-   `list()` wire contract and pagination, and it exercises the "implement `ModelSource`" escape
-   hatch that `packages/sprindle/docs/reference.md` advertises and nothing currently uses.
-2. **Per-request organizational context.** `identity()` returns only the better-auth session. The
-   legacy equivalents are `getUserSectionId()`, `getUserJobPositionId()`, `getUserRoles()`. A
-   model-level `before` hook can resolve this into `state`, but there is no way to share one hook
-   across models except exporting a function. Whether that deserves a framework primitive is a
-   question to answer by building it.
-3. **Notification write versus transport ordering.** With no queue, the rule must be explicit:
-   notification rows are written *inside* the verification transaction; transport dispatch happens
-   *after commit*, fire-and-forget. Otherwise a failed push rolls back an approved overtime.
+Plans 022–025 are implemented. **No change to `packages/sprindle` or
+`packages/is-vue-framework` was necessary.** That is the headline: a config-driven approval workflow,
+a polymorphically-targeted notification subsystem, and caller-scoped lists were all expressible in
+the frameworks as they stand.
+
+The three questions the slice was built to answer:
+
+1. **Can a custom `ModelSource` express a caller-scoped list?** **Yes**, and it did not need the
+   fallback plan 023 held in reserve. `ModelSource.list` receives only `{ query, context }`, and
+   `context` is the *model* runtime context built once by `defineModel` and shared across requests —
+   so the source genuinely cannot see the caller *through the context*. But `list()` is a route
+   *factory*, and a model-level `before` hook may patch `state`; `state.query` is what reaches the
+   source. Identity travels that channel. See `apps/api/src/routes/notifications/notifications.source.ts`.
+   *Caveat found in the same place:* `ModelSource.detail` receives only an id, so the same trick does
+   not work for it. The framework `detail()` route would have read any row by id, so it is not
+   registered — a scoped custom route replaces it.
+2. **Can one transaction span a workflow's multi-table writes, with dispatch after commit?**
+   **Yes, comfortably.** `seedChain`/`advanceChain` take a transaction handle rather than reaching for
+   the database, so the route owns the boundary. Two things fell out of drawing it explicitly: the
+   current-step lookup and the authorization check belong *inside* the transaction with the write
+   they guard (otherwise two verifiers can both advance the chain), and recipient resolution belongs
+   *outside* it with delivery. A test injects a failure after every write and before commit and
+   asserts nothing survives.
+3. **Can a record-state-dependent control be expressed without a framework change?** **Yes**, but not
+   the way the earlier note assumed. A custom `ViewControl` is indeed enough — however `DetailProps`
+   does not hand its loaded record back to the parent, so the *route* has to load the record and pass
+   it to `DetailView` through `data`. That is one extra line, not a framework gap, but it is the
+   part that was mispredicted.
+
+Two further findings worth carrying to the next module:
+
+- **Relation hydration is one level deep.** `materialize` builds its `with` clause from the entity's
+  own relation fields, so a *nested* entity is loaded without its relations and then fails its own
+  select schema. Anything nested inside another entity's `schemas.select` must itself be a leaf.
+  `employee` had to become one so `overtimes` could nest it.
+- **A route registered outside a model has no `context.entity`.** Anything returning through
+  `source.materialize()` must live in a model's route tree.
+
+### What was *not* proven
+
+- The chain engine has exactly one consumer. It is written to be reusable and has not been reused;
+  do not generalize it further until a second module needs it.
+- Delivery is an in-memory transport. Nothing here proves a real push integration works.
+- Realized-hours calculation was cut (it needs an attendance subsystem) and real-time delivery was
+  cut (the badge polls). Neither absence was a framework limitation.
+
+### The ordering rule, now enforced in one place
+
+Notification rows are written *inside* the verification transaction; transport dispatch happens
+*after commit*, fire-and-forget, in `notifyAfterCommit`. Both halves live there rather than at call
+sites because getting either wrong is invisible until it matters: delivering inside the transaction
+announces work that then rolls back, and letting `deliver` reject would roll back a verification
+because a push service was down.
 
 ## Identity model — decided 2026-07-27
 
@@ -182,9 +220,21 @@ non-functional against the new backend. It is fixed as part of the identity rewo
    table shape, so its absence no longer blocks planning. Default: reconstruct from service usage and
    state that explicitly in each plan. A dump would still be worth having to confirm the semantics of
    `config_verificators` and the notification status values.
-2. **Chain seeding.** `DoVerifOvertime.php` seeds the verificator chain lazily on first approval
-   (`$dataVerif->order_number == 0` branch). Do we reproduce that, or seed the chain at submit
-   time — cleaner, but a behavior change?
+2. **Chain seeding** — *settled.* The chain is seeded **eagerly at submit**. `orderNumber` starts at
+   1 and there is no `order_number == 0` sentinel, so no branch has to decide whether the chain is
+   real yet. Recorded again in `apps/api/src/routes/verification/chain.ts`.
+
+### Deliberate divergences from the reference, now implemented
+
+- **Eager chain seeding**, as above.
+- **One notification per step inserted up front** (step 1 `unseen`, later steps `unset`) rather than
+  one row rewritten back to `unseen` as each step activates. Same observable behavior, and the
+  timeline survives.
+- **Recipient resolution unions its three rules.** `sendPushNotif.php` assigns rather than appends in
+  each branch, so a row naming both a job position and a role only ever reaches the role. That is a
+  bug there, not a specification. Consequence: imported rows with two targets fan out more widely here.
+- **`roles.scope` replaces `min(role_group_id)`** and its hardcoded id sets. If real data is ever
+  imported, that mapping belongs in the import script, not the schema.
 
 ## Dependency
 

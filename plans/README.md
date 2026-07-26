@@ -87,10 +87,15 @@ Plan 022 is a prerequisite for the slice and carries all destructive work; 023�
 
 | Plan | Title | Priority | Effort | Depends on | Status |
 |---|---|---|---|---|---|
-| [022](022-rebuild-identity-and-org-structure.md) | Rebuild identity and org structure, retire the mirror, reset to one baseline | P1 | L | 021 | TODO |
-| [023](023-notification-subsystem.md) | Build the notification subsystem and the scoped list seam | P1 | L | 022 | TODO |
-| [024](024-overtime-workflow.md) | Build the overtime workflow and its verificator chain | P1 | L | 023 | TODO |
-| [025](025-overtime-and-inbox-screens.md) | Build the overtime screens, inbox, and typed deep-link registry | P1 | L | 024 | TODO |
+| [022](022-rebuild-identity-and-org-structure.md) | Rebuild identity and org structure, retire the mirror, reset to one baseline | P1 | L | 021 | DONE |
+| [023](023-notification-subsystem.md) | Build the notification subsystem and the scoped list seam | P1 | L | 022 | DONE |
+| [024](024-overtime-workflow.md) | Build the overtime workflow and its verificator chain | P1 | L | 023 | DONE |
+| [025](025-overtime-and-inbox-screens.md) | Build the overtime screens, inbox, and typed deep-link registry | P1 | L | 024 | DONE |
+
+**Verdict: the slice needed no framework change.** Neither `packages/sprindle` nor
+`packages/is-vue-framework` was modified. The findings — including the two things the planning
+mispredicted — are recorded in [NOTES-trom-proof-slice.md](NOTES-trom-proof-slice.md), which is now
+the slice's result rather than its proposal. Read that before starting a second module.
 
 ### Slice dependency notes
 
@@ -188,7 +193,7 @@ The 2026-07-22 planning baseline had green framework tests/types, green web test
 
 ## Deferred work
 
-- The accepted HKA TROM proof slice — overtime requests plus a slice of the notification subsystem — is recorded in [NOTES-trom-proof-slice.md](NOTES-trom-proof-slice.md). Accepted 2026-07-27, not yet scheduled and no plan files written. It depends on plan 021 and has two open questions (schema source of truth, verificator-chain seeding) noted there.
+- The HKA TROM proof slice — overtime requests plus a slice of the notification subsystem — is **implemented** (plans 022–025, 2026-07-27). Its findings are in [NOTES-trom-proof-slice.md](NOTES-trom-proof-slice.md). Remaining gaps recorded there: the chain engine has one consumer and must not be generalized until a second module needs it; delivery is an in-memory transport; realized-hours calculation and real-time delivery were cut deliberately.
 - The external `/Users/gamer/Documents/projects/hka-trom/frontend` repository is a design reference only and is not modified by these plans. Its migration starts after plan 009's downstream checklist and separate authorization.
 - Shared mobile schemas remain deliberately out of scope.
 - Backend authorization remains authoritative; UI access policy only controls presentation.

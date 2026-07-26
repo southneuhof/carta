@@ -8,6 +8,20 @@ const navigationManifest: Modules = [
     routes: [{ name: 'dashboard', title: 'Dashboard', icon: 'home' }],
   },
   {
+    name: 'to-do',
+    title: 'To Do',
+    icon: 'inbox',
+    description: 'Tugas verifikasi',
+    routes: [{ name: 'to-do', title: 'To Do', icon: 'inbox' }],
+  },
+  {
+    name: 'hr',
+    title: 'Kepegawaian',
+    icon: 'folder',
+    description: 'Kepegawaian',
+    routes: [{ name: 'overtimes', title: 'Lembur', icon: 'folder' }],
+  },
+  {
     name: 'settings',
     title: 'Pengaturan',
     icon: 'settings',
