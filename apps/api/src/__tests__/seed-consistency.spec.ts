@@ -1,7 +1,5 @@
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
-import { dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { and, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { closeDb, getDb } from '../db'
@@ -11,7 +9,10 @@ import { notifications } from '../routes/notifications/notifications.entity'
 import { resolveRecipients } from '../routes/notifications/recipients'
 
 const run = promisify(execFile)
-const apiRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
+// Vitest runs with the app directory as cwd. Deliberately not `import.meta.url`:
+// `packages/sdk` type-checks these sources under a module setting that rejects it,
+// so it fails the workspace-wide `pnpm type-check` while `apps/api`'s own passes.
+const apiRoot = process.cwd()
 
 /**
  * The development seed has to produce data its own configuration can actually

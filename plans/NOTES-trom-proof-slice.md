@@ -209,9 +209,13 @@ schema should name this column for what it holds.
 `apps/web/src/framework/adapters/resources/users.ts:103` posts to `mapping-user-roles/toggle`, a route
 that does not exist in `apps/api`. The screen at `routes/(authenticated)/settings/users/[userId]/roles/`
 calls it and `users.spec.ts:76` mocks `post`, so no test catches it. The role-assignment UI is
-non-functional against the new backend. It is fixed as part of the identity rework, not separately.
+non-functional against the new backend.
 
-## Open questions to settle before planning
+**Fixed in plan 022.** Real RPC routes (`GET/PUT/DELETE /users/:userId/roles[/:roleId]`) replaced the
+dead endpoint, and the spec now asserts against those routes rather than a mocked HTTP helper —
+mocking the helper is precisely what let the broken call survive.
+
+## Open questions — all settled
 
 1. **Schema source of truth** — *narrowed, no longer blocking.* The legacy model files have drifted
    from the real database: `app/Models/LogVerifications.php`'s `FIELD_TYPE` declares neither

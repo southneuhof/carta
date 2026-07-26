@@ -69,15 +69,23 @@ so the decision to retire `packages/contracts/src/schemas/index.ts` rests on a n
 | Plan | Title | Priority | Effort | Depends on | Status |
 |---|---|---|---|---|---|
 | [021](021-browser-safe-entity-schemas.md) | Make entity Zod schemas importable in the browser | P1 | M | — | DONE |
+| [022](022-rebuild-identity-and-org-structure.md) | Retire the mirror (folded into the identity rebuild) | P1 | L | 021 | DONE |
 
 Outcome: entity modules are browser-importable, the Zod bridge accepts both the classic and `zod/v4`
 dialects, and `roles` validates against `role.schemas` directly. The measured cost is a **one-time**
 +55 kB gzipped for the `drizzle-orm` + `drizzle-zod` construction machinery and +529 B per additional
 resource — see the plan's Measurement section. **GO, accepted 2026-07-27**: an internal system
-application where load time is not a primary constraint. The follow-up therefore migrates the
-remaining resources and deletes both `packages/contracts/src/schemas/index.ts` and
-`apps/api/src/__tests__/schema-parity.spec.ts`; it must also choose an entity home, since
-`packages/domain` is taken by theme tokens that `apps/base-mobile` consumes.
+application where load time is not a primary constraint.
+
+**The mirror is gone.** Plan 022 carried out the follow-up, since it was rewriting the same entity
+files: `packages/contracts/src/schemas/index.ts`, `apps/api/src/__tests__/schema-parity.spec.ts`, the
+web `schemaAdapter`, and the dead stub `AppType` were all deleted. Every resource now declares
+`schemas` from its entity module, and `apps/web/src/framework/__tests__/entity-schema-import.spec.ts`
+covers all of them plus two static scans (no node builtins, no `@southneuhof/sprindle/model`).
+`packages/contracts` remains as an empty directory with a README saying so; no app depends on it.
+Entity modules stayed at `apps/api/src/routes/<name>/<name>.entity.ts` — `packages/domain` was
+unavailable because `apps/base-mobile` consumes its theme tokens, and moving them would have pulled
+`drizzle-orm` into the mobile app.
 
 ## HKA TROM proof slice (added 2026-07-27)
 

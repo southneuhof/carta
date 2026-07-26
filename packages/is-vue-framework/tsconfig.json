@@ -20,12 +20,6 @@
       "@southneuhof/api/*": [
         "../../apps/api/src/*"
       ],
-      "@southneuhof/contracts": [
-        "../contracts/src/index.ts"
-      ],
-      "@southneuhof/contracts/*": [
-        "../contracts/src/*"
-      ],
       "@southneuhof/domain": [
         "../domain/src/index.ts"
       ],

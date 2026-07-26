@@ -7,8 +7,6 @@
     "paths": {
       "@southneuhof/api": ["./src/index.ts"],
       "@southneuhof/api/*": ["./src/*"],
-      "@southneuhof/contracts": ["../../packages/contracts/src/index.ts"],
-      "@southneuhof/contracts/*": ["../../packages/contracts/src/*"],
       "@southneuhof/sdk": ["../../packages/sdk/src/index.ts"],
       "@southneuhof/sdk/*": ["../../packages/sdk/src/*"],
 

@@ -36,12 +36,6 @@
       "@southneuhof/api/*": [
         "../api/src/*"
       ],
-      "@southneuhof/contracts": [
-        "../../packages/contracts/src/index.ts"
-      ],
-      "@southneuhof/contracts/*": [
-        "../../packages/contracts/src/*"
-      ],
       "@southneuhof/domain": [
         "../../packages/domain/src/index.ts"
       ],

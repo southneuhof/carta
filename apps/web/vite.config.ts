@@ -46,14 +46,6 @@ export default defineConfig({
         replacement: fileURLToPath(new URL('../api/src/', import.meta.url)),
       },
       {
-        find: /^@southneuhof\/contracts$/,
-        replacement: fileURLToPath(new URL('../../packages/contracts/src/index.ts', import.meta.url)),
-      },
-      {
-        find: '@southneuhof/contracts/',
-        replacement: fileURLToPath(new URL('../../packages/contracts/src/', import.meta.url)),
-      },
-      {
         find: /^@southneuhof\/domain$/,
         replacement: fileURLToPath(new URL('../../packages/domain/src/index.ts', import.meta.url)),
       },
