@@ -1,10 +1,17 @@
-import { and, eq, getTableColumns, getTableName, inArray, notInArray, Table } from 'drizzle-orm'
+import { and, asc, count, desc, eq, getTableColumns, getTableName, ilike, inArray, notInArray, or, Table } from 'drizzle-orm'
 import type { AnyColumn } from 'drizzle-orm'
 import { PrimaryKeyBuilder } from 'drizzle-orm/pg-core'
 import type { DomainEntity, DomainRelationField, DomainSchema } from '../model/domain-schema'
 import type { ModelRuntimeEntity, ModelSource } from './model-source'
 
 const tableSymbols = (Table as unknown as { Symbol: Record<'ExtraConfigBuilder' | 'ExtraConfigColumns', symbol> }).Symbol
+
+type SelectBuilder = {
+  where: (condition: unknown) => SelectBuilder
+  orderBy: (...columns: unknown[]) => SelectBuilder
+  limit: (limit: number) => SelectBuilder
+  offset: (offset: number) => SelectBuilder
+} & PromiseLike<unknown[]>
 
 type DrizzleDb = {
   query?: Record<
@@ -14,12 +21,8 @@ type DrizzleDb = {
       findFirst: (config?: unknown) => Promise<unknown | undefined>
     }
   >
-  select: () => {
-    from: (table: unknown) => {
-      where: (condition: unknown) => {
-        limit: (limit: number) => Promise<unknown[]>
-      } & PromiseLike<unknown[]>
-    } & PromiseLike<unknown[]>
+  select: (fields?: unknown) => {
+    from: (table: unknown) => SelectBuilder
   }
   insert: (table: unknown) => {
     values: (input: unknown) => {
@@ -85,9 +88,69 @@ export function createDrizzleSource<TRecord, TCreate, TUpdate>({
     return parseCompositeId(id)
   }
 
+  const stringColumns = Object.entries(tableColumns).filter(([, column]) => column.dataType === 'string')
+
+  const buildListPlan = (query: Record<string, unknown>) => {
+    const page = toPositiveInteger(query.page, 1)
+    const limit = toPositiveInteger(query.limit, DEFAULT_LIST_LIMIT)
+    const search = typeof query.search === 'string' && query.search.length ? query.search : undefined
+    const order = query.order === 'desc' ? 'desc' : 'asc'
+    const sort = query.sort == null || query.sort === '' ? undefined : String(query.sort)
+    if (sort && !(sort in tableColumns)) throw validationError(`Unknown sort column "${sort}".`)
+
+    const filters: { key: string; value: unknown }[] = []
+    for (const [key, value] of Object.entries(query)) {
+      if (RESERVED_LIST_QUERY_KEYS.has(key) || value === undefined) continue
+      if (!(key in tableColumns)) throw validationError(`Unknown query parameter "${key}".`)
+      filters.push({ key, value })
+    }
+
+    const conditions = [
+      ...filters.map(({ key, value }) => eq(tableColumns[key], value)),
+      ...(search && stringColumns.length ? [or(...stringColumns.map(([, column]) => ilike(column, `%${search}%`)))] : []),
+    ]
+    const objectConditions: Record<string, unknown>[] = [
+      ...filters.map(({ key, value }) => ({ [key]: value })),
+      ...(search && stringColumns.length ? [{ OR: stringColumns.map(([key]) => ({ [key]: { ilike: `%${search}%` } })) }] : []),
+    ]
+
+    return {
+      page,
+      limit,
+      offset: (page - 1) * limit,
+      where: conditions.length ? and(...conditions) : undefined,
+      objectWhere: objectConditions.length === 0 ? undefined : objectConditions.length === 1 ? objectConditions[0] : { AND: objectConditions },
+      orderBy: sort ? { [sort]: order } : undefined,
+      orderByColumns: sort ? [order === 'desc' ? desc(tableColumns[sort]) : asc(tableColumns[sort])] : undefined,
+    }
+  }
+
+  const selectRows = () => database.select().from(table)
+
+  const countRows = async (where: unknown) => {
+    const builder = database.select({ value: count() }).from(table)
+    const rows = await (where ? builder.where(where) : builder)
+    const value = (rows[0] as { value?: unknown } | undefined)?.value
+    return Number(value ?? 0)
+  }
+
+  const relationalReader = (reader: DrizzleDb) => (tableKey && withRelations ? reader.query?.[tableKey] : undefined)
+
   const materialize = async (input: unknown | unknown[], reader: DrizzleDb = database): Promise<TRecord | TRecord[]> => {
-    if (Array.isArray(input)) return Promise.all(input.map((row) => materializeOne(row, reader)))
-    return materializeOne(input, reader)
+    if (!Array.isArray(input)) return materializeOne(input, reader)
+    const relational = relationalReader(reader)
+    // Composite primary keys cannot be batched with a single `in` predicate; they stay per-row (rare).
+    if (!relational || primaryKey.length !== 1) return Promise.all(input.map((row) => materializeOne(row, reader)))
+
+    const primaryKeyKey = primaryKey[0].key
+    const ids = input.map((row) => getRowId(row, primaryKey))
+    const hydrated = await relational.findMany({ where: { [primaryKeyKey]: { in: ids } }, with: withRelations })
+    const byId = new Map(hydrated.map((row) => [(row as Record<string, unknown>)[primaryKeyKey], row]))
+    return ids.map((id) => {
+      const row = byId.get(id)
+      if (!row) throw new Error(`Record not found while materializing table "${tableKey}".`)
+      return schemas.select.parse(row)
+    })
   }
   const materializeOne = async (row: unknown, reader: DrizzleDb = database): Promise<TRecord> => {
     if (!tableKey || !withRelations) return schemas.select.parse(row)
@@ -98,14 +161,30 @@ export function createDrizzleSource<TRecord, TCreate, TUpdate>({
   }
 
   return {
-    async list() {
-      const rows = await database.select().from(table)
-      if (!rows) throw new Error(`Drizzle relational query not found for table "${tableKey}".`)
-      return { data: (await materialize(rows)) as TRecord[] }
+    async list({ query }) {
+      const plan = buildListPlan(query ?? {})
+      const total = await countRows(plan.where)
+      const relational = relationalReader(database)
+
+      if (relational) {
+        const rows = await relational.findMany({ where: plan.objectWhere, orderBy: plan.orderBy, limit: plan.limit, offset: plan.offset, with: withRelations })
+        return { data: rows.map((row) => schemas.select.parse(row)), total }
+      }
+
+      let builder = selectRows()
+      if (plan.where) builder = builder.where(plan.where)
+      if (plan.orderByColumns) builder = builder.orderBy(...plan.orderByColumns)
+      const rows = await builder.limit(plan.limit).offset(plan.offset)
+      return { data: rows.map((row) => schemas.select.parse(row)), total }
     },
     async detail({ id }) {
-      const rows = await database.select().from(table).where(wherePrimaryKey(id)).limit(1)
-      return rows[0] ? ((await materialize(rows[0])) as TRecord) : null
+      const relational = relationalReader(database)
+      if (relational) {
+        const hydrated = await relational.findFirst({ where: wherePrimaryKeyObject(id), with: withRelations })
+        return hydrated ? schemas.select.parse(hydrated) : null
+      }
+      const rows = await selectRows().where(wherePrimaryKey(id)).limit(1)
+      return rows[0] ? schemas.select.parse(rows[0]) : null
     },
     async create({ input }) {
       const { row, relations } = splitRelationInput(schemas.create.parse(input), relationByField)
@@ -142,6 +221,14 @@ export function createDrizzleSource<TRecord, TCreate, TUpdate>({
       return materialize(input)
     },
   }
+}
+
+const RESERVED_LIST_QUERY_KEYS = new Set(['page', 'limit', 'search', 'sort', 'order'])
+const DEFAULT_LIST_LIMIT = 20
+
+function toPositiveInteger(value: unknown, fallback: number) {
+  const parsed = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : Number.NaN
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback
 }
 
 function hasKeys(value: unknown) {

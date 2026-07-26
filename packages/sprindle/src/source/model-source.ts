@@ -11,7 +11,7 @@ export type ModelRuntimeContext<TTable = unknown> = {
 
 export type SourceListResult<TRecord> = {
   data: TRecord[]
-  total?: number
+  total: number
 }
 
 export type ModelSource<TRecord = unknown> = {

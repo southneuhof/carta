@@ -316,6 +316,40 @@ describe('products API', () => {
     })
   })
 
+  it('paginates, sorts, filters and searches list queries', async () => {
+    const db = getDb()
+    await db.insert(products).values([
+      { id: 'product-2', name: 'Alpha Product', sku: 'ALPHA-2', ownerId: 'user-2', createdAt: '2026-01-02T00:00:00.000Z' },
+      { id: 'product-3', name: 'Beta Product', sku: 'BETA-3', ownerId: 'user-2', createdAt: '2026-01-03T00:00:00.000Z' },
+    ])
+
+    const paged = await app.request('/products/list?limit=2&page=2&sort=name&order=asc')
+    expect(paged.status).toBe(200)
+    const pagedBody = await paged.json()
+    expect(pagedBody).toMatchObject({ page: 2, limit: 2, total: 3 })
+    expect(pagedBody.data.map((row: { id: string }) => row.id)).toEqual(['product-1'])
+
+    const sorted = await app.request('/products/list?sort=name&order=desc')
+    expect(sorted.status).toBe(200)
+    expect((await sorted.json()).data.map((row: { name: string }) => row.name)).toEqual(['Example Product', 'Beta Product', 'Alpha Product'])
+
+    const filtered = await app.request('/products/list?sku=ALPHA-2')
+    expect(filtered.status).toBe(200)
+    expect(await filtered.json()).toMatchObject({ total: 1, data: [{ id: 'product-2' }] })
+
+    const searched = await app.request('/products/list?search=alpha')
+    expect(searched.status).toBe(200)
+    expect(await searched.json()).toMatchObject({ total: 1, data: [{ id: 'product-2' }] })
+
+    const unknownFilter = await app.request('/products/list?category=tools')
+    expect(unknownFilter.status).toBe(400)
+    expect(await unknownFilter.json()).toMatchObject({ error: 'validation_error', message: 'Unknown query parameter "category".' })
+
+    const unknownSort = await app.request('/products/list?sort=category')
+    expect(unknownSort.status).toBe(400)
+    expect(await unknownSort.json()).toMatchObject({ error: 'validation_error', message: 'Unknown sort column "category".' })
+  })
+
   it('returns not_found for missing detail and update records', async () => {
     const detail = await app.request('/products/detail/missing-product')
     expect(detail.status).toBe(404)

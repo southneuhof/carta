@@ -68,7 +68,8 @@ describe('installSprindle', () => {
 
     expectTypeOf<typeof routes[1]['path']>().toEqualTypeOf<'/health'>()
     expectTypeOf<typeof routes[0]['path']>().toEqualTypeOf<'/items'>()
-    expectTypeOf<Schema['/items/list']['$get']['input']>().toEqualTypeOf<{ query: { page?: string; limit?: string; search?: string } }>()
+    expectTypeOf<Schema['/items/list']['$get']['input']['query']>().toMatchTypeOf<{ page?: string; limit?: string; search?: string; sort?: string; order?: string }>()
+    expectTypeOf<Schema['/items/list']['$get']['input']['query']['status']>().toEqualTypeOf<string | undefined>()
     expectTypeOf<Schema['/items/detail/:id']['$get']['input']>().toEqualTypeOf<{ param: { id: string } }>()
     expectTypeOf<Schema['/items/create']['$post']['input']>().toEqualTypeOf<{ json: z.input<typeof item.schemas.create> }>()
     expectTypeOf<Schema['/items/update/:id']['$patch']['input']>().toEqualTypeOf<{ json: z.input<typeof item.schemas.update>; param: { id: string } }>()
@@ -76,7 +77,7 @@ describe('installSprindle', () => {
     expectTypeOf<Schema['/items/create']['$post']['status']>().toEqualTypeOf<201 | 400 | 401 | 403 | 409 | 422 | 500>()
     type ListSuccess = Extract<Schema['/items/list']['$get'], { status: 200 }>['output']
     type DetailSuccess = Extract<Schema['/items/detail/:id']['$get'], { status: 200 }>['output']
-    expectTypeOf<ListSuccess>().toEqualTypeOf<{ data: z.output<typeof item.schemas.select>[]; page: number; limit: number; total?: number }>()
+    expectTypeOf<ListSuccess>().toEqualTypeOf<{ data: z.output<typeof item.schemas.select>[]; page: number; limit: number; total: number }>()
     expectTypeOf<DetailSuccess>().toEqualTypeOf<{ data: z.output<typeof item.schemas.select> }>()
     expectTypeOf<Schema['/health']['$get']['status']>().toEqualTypeOf<200>()
   })

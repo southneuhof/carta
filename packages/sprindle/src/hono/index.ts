@@ -6,7 +6,9 @@ type ListQuery = {
   page?: string
   limit?: string
   search?: string
-}
+  sort?: string
+  order?: string
+} & Record<string, string | undefined>
 
 type JsonEndpoint<TInput, TOutput, TStatus extends number = 200> = {
   input: TInput
@@ -76,7 +78,7 @@ type CreateInput<TEntity> = TEntity extends { schemas: { create: infer TSchema e
 type UpdateInput<TEntity> = TEntity extends { schemas: { update: infer TSchema extends z.ZodType } } ? { json: z.input<TSchema> } : { json: unknown }
 type SelectOutput<TEntity> = TEntity extends { schemas: { select: infer TSchema extends z.ZodType } } ? z.output<TSchema> : unknown
 type KindOutput<TEntity, TKind extends string> = TKind extends 'list'
-  ? { data: SelectOutput<TEntity>[]; page: number; limit: number; total?: number }
+  ? { data: SelectOutput<TEntity>[]; page: number; limit: number; total: number }
   : TKind extends 'detail' | 'create' | 'update'
     ? { data: SelectOutput<TEntity> }
     : TKind extends 'delete'

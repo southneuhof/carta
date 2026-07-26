@@ -255,3 +255,148 @@ describe('createDrizzleSource transactions', () => {
     expect(statements.every((statement) => statement.on === 'base')).toBe(true)
   })
 })
+
+const memberships = pgTable(
+  'memberships',
+  {
+    ownerId: text('owner_id').notNull(),
+    childId: text('child_id').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.ownerId, t.childId] })],
+)
+
+const membership = createEntity({
+  table: memberships,
+  schemas: {
+    create: z.object({ ownerId: z.string(), childId: z.string() }),
+    update: z.object({ childId: z.string() }),
+    select: z.object({ ownerId: z.string(), childId: z.string(), owner: owner.schemas.select.nullable() }),
+  },
+})
+
+const membershipRelations = defineRelationsPart({ memberships, owners, children }, (r) => ({
+  owners: {
+    children: r.many.children({ from: r.owners.id, to: r.children.ownerId }),
+  },
+  memberships: {
+    owner: r.one.owners({ from: r.memberships.ownerId, to: r.owners.id }),
+  },
+}))
+
+const membershipDomainSchema = defineDomainSchema([
+  defineDomainPart({ tables: { memberships, owners, children }, entities: [membership, owner, child], relations: [membershipRelations] }),
+])
+
+const ownerRow = (id: string, name = 'Owner') => ({ id, name, children: [] })
+
+/** Mock db that records the relational-query configs and the count query it was asked to run. */
+function createQueryDb(rows: Record<string, unknown>[]) {
+  const calls: { findMany: unknown[]; findFirst: unknown[]; countWhere: unknown[] } = { findMany: [], findFirst: [], countWhere: [] }
+
+  const builder = (fields: unknown) => {
+    const chain: Record<string, unknown> = {
+      where: (condition: unknown) => {
+        if (fields) calls.countWhere.push(condition)
+        return chain
+      },
+      orderBy: () => chain,
+      limit: () => chain,
+      offset: () => chain,
+      then: (resolve: (value: unknown[]) => void) => resolve(fields ? [{ value: rows.length }] : rows),
+    }
+    return chain
+  }
+
+  const db = {
+    query: {
+      owners: {
+        findMany: async (config?: unknown) => {
+          calls.findMany.push(config)
+          return rows
+        },
+        findFirst: async (config?: unknown) => {
+          calls.findFirst.push(config)
+          return rows[0]
+        },
+      },
+      memberships: {
+        findMany: async (config?: unknown) => {
+          calls.findMany.push(config)
+          return rows
+        },
+        findFirst: async (config?: unknown) => {
+          calls.findFirst.push(config)
+          return rows[0]
+        },
+      },
+    },
+    select: (fields?: unknown) => ({ from: () => builder(fields) }),
+    insert: () => ({ values: () => ({ returning: async () => rows }) }),
+    update: () => ({ set: () => ({ where: () => ({ returning: async () => rows }) }) }),
+    delete: () => ({ where: () => ({ returning: async () => [] }) }),
+  }
+
+  return { db, calls }
+}
+
+describe('createDrizzleSource list queries', () => {
+  it('applies pagination, sorting, filters and search, and counts with the same predicate', async () => {
+    const { db, calls } = createQueryDb([ownerRow('owner-1')])
+    const source = createDrizzleSource({ db, table: owners, domainSchema: ownerDomainSchema, entity: owner, schemas: owner.schemas })
+
+    const result = await source.list({
+      query: { page: '2', limit: '5', sort: 'name', order: 'desc', search: 'own', id: 'owner-1' },
+      context: undefined as never,
+    })
+
+    expect(result).toEqual({ data: [{ id: 'owner-1', name: 'Owner', children: [] }], total: 1 })
+    expect(calls.findMany).toHaveLength(1)
+    expect(calls.findMany[0]).toMatchObject({
+      limit: 5,
+      offset: 5,
+      orderBy: { name: 'desc' },
+      where: { AND: [{ id: 'owner-1' }, { OR: [{ id: { ilike: '%own%' } }, { name: { ilike: '%own%' } }] }] },
+      with: { children: true },
+    })
+    expect(calls.countWhere).toHaveLength(1)
+  })
+
+  it('rejects unknown filter keys and unknown sort columns', async () => {
+    const { db } = createQueryDb([ownerRow('owner-1')])
+    const source = createDrizzleSource({ db, table: owners, domainSchema: ownerDomainSchema, entity: owner, schemas: owner.schemas })
+
+    await expect(source.list({ query: { category: 'tools' }, context: undefined as never })).rejects.toThrow('Unknown query parameter "category".')
+    await expect(source.list({ query: { sort: 'category' }, context: undefined as never })).rejects.toThrow('Unknown sort column "category".')
+  })
+
+  it('reads detail with one relational query', async () => {
+    const { db, calls } = createQueryDb([ownerRow('owner-1')])
+    const source = createDrizzleSource({ db, table: owners, domainSchema: ownerDomainSchema, entity: owner, schemas: owner.schemas })
+
+    expect(await source.detail({ id: 'owner-1', context: undefined as never })).toEqual({ id: 'owner-1', name: 'Owner', children: [] })
+    expect(calls.findFirst).toEqual([{ where: { id: 'owner-1' }, with: { children: true } }])
+  })
+
+  it('materializes arrays with one batched query in input order', async () => {
+    const { db, calls } = createQueryDb([ownerRow('owner-2', 'Second'), ownerRow('owner-1')])
+    const source = createDrizzleSource({ db, table: owners, domainSchema: ownerDomainSchema, entity: owner, schemas: owner.schemas })
+
+    const materialized = await source.materialize([{ id: 'owner-1' }, { id: 'owner-2' }], { context: undefined as never })
+
+    expect(materialized).toEqual([ownerRow('owner-1'), ownerRow('owner-2', 'Second')])
+    expect(calls.findMany).toEqual([{ where: { id: { in: ['owner-1', 'owner-2'] } }, with: { children: true } }])
+    expect(calls.findFirst).toHaveLength(0)
+  })
+
+  it('falls back to per-row materialization for composite primary keys', async () => {
+    const membershipRow = { ownerId: 'owner-1', childId: 'child-1', owner: ownerRow('owner-1') }
+    const { db, calls } = createQueryDb([membershipRow])
+    const source = createDrizzleSource({ db, table: memberships, domainSchema: membershipDomainSchema, entity: membership, schemas: membership.schemas })
+
+    const materialized = await source.materialize([membershipRow, membershipRow], { context: undefined as never })
+
+    expect(materialized).toEqual([membershipRow, membershipRow])
+    expect(calls.findFirst).toHaveLength(2)
+    expect(calls.findMany).toHaveLength(0)
+  })
+})
