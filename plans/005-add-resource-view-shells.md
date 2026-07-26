@@ -1,15 +1,15 @@
-# Plan 012: Add declarative ListView, DetailView, and FormView shells
+# Plan 005: Add declarative ListView, DetailView, and FormView shells
 
 > **Implementation instructions**: Add visual shells around the core primitives. Shells own CRUD-looking chrome and declarative controls, but they must not become a new orchestrator or own resource data plumbing. Preserve old CRUD components for compatibility.
 >
-> **Drift check (run first)**: `git diff --stat edeff25..HEAD -- packages/is-vue-framework/src/components/CRUD packages/is-vue-framework/src/components/composites packages/is-vue-framework/src/components/layout packages/is-vue-framework/src/index.ts docs/architecture/web-application-architecture.md`; verify architecture hash `ea637318ae94c0bc677012f7fcca332c0df7bf67`.
+> **Drift check (run first)**: `git diff --stat edeff25..HEAD -- packages/is-vue-framework/src/components/CRUD packages/is-vue-framework/src/components/composites packages/is-vue-framework/src/components/layout packages/is-vue-framework/src/index.ts docs/architecture/web-application-architecture.md`; verify architecture hash `6fbc44a012d92c4462e08914ca75b5b4226845c8`.
 
 ## Status
 
 - **Priority**: P1
 - **Effort**: L
 - **Risk**: MED
-- **Depends on**: `plans/011-rebuild-core-components.md`
+- **Depends on**: `plans/004-rebuild-core-components.md`
 - **Category**: migration
 - **Planned at**: commit `edeff25`, 2026-07-22
 
@@ -49,7 +49,7 @@ Removing CRUD wrappers entirely would force Cards, headers, actions, and feedbac
 
 ## Git workflow
 
-- Suggested branch: `codex/plan-012-view-shells`
+- Suggested branch: `codex/plan-005-view-shells`
 - Suggested commit: `feat(framework): add resource view shells`
 - Do not push or open a PR unless instructed.
 

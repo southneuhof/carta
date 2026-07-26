@@ -1,15 +1,15 @@
-# Plan 016: Retire the legacy CRUD architecture and publish migration guidance
+# Plan 009: Retire the legacy CRUD architecture and publish migration guidance
 
-> **Implementation instructions**: Begin only after every in-repo route has zero legacy usage and plans 014-015 are stable. Separate application cleanup from public-package API removal. Removing exported APIs requires an explicit major-version decision; otherwise retain deprecated compatibility wrappers for one release.
+> **Implementation instructions**: Begin only after every in-repo route has zero legacy usage and plans 007-008 are stable. Separate application cleanup from public-package API removal. Removing exported APIs requires an explicit major-version decision; otherwise retain deprecated compatibility wrappers for one release.
 >
-> **Drift check (run first)**: `git diff --stat edeff25..HEAD -- packages/is-vue-framework/src apps/web/src apps/web/README.md docs package.json pnpm-lock.yaml .github/workflows plans`; verify architecture hash `ea637318ae94c0bc677012f7fcca332c0df7bf67` or review intentional documentation changes made by prior plans.
+> **Drift check (run first)**: `git diff --stat edeff25..HEAD -- packages/is-vue-framework/src apps/web/src apps/web/README.md docs package.json pnpm-lock.yaml .github/workflows plans`; verify architecture hash `6fbc44a012d92c4462e08914ca75b5b4226845c8` or review intentional documentation changes made by prior plans.
 
 ## Status
 
 - **Priority**: P2
 - **Effort**: L
 - **Risk**: HIGH
-- **Depends on**: `plans/014-migrate-roles-as-nested-slice.md`, `plans/015-migrate-users-and-prove-complexity.md`
+- **Depends on**: `plans/007-migrate-roles-as-nested-slice.md`, `plans/008-migrate-users-and-prove-complexity.md`
 - **Category**: migration
 - **Planned at**: commit `edeff25`, 2026-07-22
 
@@ -58,7 +58,7 @@ The migration is incomplete while the app can still fall back to query-driven `C
 
 ## Git workflow
 
-- Suggested branch: `codex/plan-016-retire-legacy-crud`
+- Suggested branch: `codex/plan-009-retire-legacy-crud`
 - Suggested commits: `refactor(web): remove legacy CRUD usage`, then `docs(framework): publish resource migration guide`; use a separate breaking-change commit only if explicitly approved.
 - Do not push, publish, or open a PR unless instructed.
 

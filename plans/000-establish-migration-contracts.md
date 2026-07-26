@@ -1,17 +1,17 @@
-# Plan 007: Establish the migration contracts and a green baseline
+# Plan 000: Establish the migration contracts and a green baseline
 
 > **Implementation instructions**: Execute this plan before changing component behavior. Preserve every legacy export and runtime path. Run each verification before continuing and update this plan's row in `plans/README.md` only after implementation and review.
 >
 > **Drift check (run first)**: `git diff --stat edeff25..HEAD -- package.json pnpm-lock.yaml apps/web/package.json apps/web/tsconfig*.json apps/api/package.json packages/is-vue-framework/src packages/is-vue-framework/package.json docs/architecture/web-application-architecture.md`
 >
-> The architecture document was uncommitted when this plan was written. Also run: `test "$(git hash-object docs/architecture/web-application-architecture.md)" = "ea637318ae94c0bc677012f7fcca332c0df7bf67"`. A mismatch is a STOP condition until the design change is reviewed.
+> The architecture document was uncommitted when this plan was written. Also run: `test "$(git hash-object docs/architecture/web-application-architecture.md)" = "6fbc44a012d92c4462e08914ca75b5b4226845c8"`. A mismatch is a STOP condition until the design change is reviewed.
 
 ## Status
 
 - **Priority**: P1
 - **Effort**: M
 - **Risk**: MED
-- **Depends on**: none (plans 001-006 are already complete)
+- **Depends on**: none (the earlier pre-migration audit plans are complete and removed from the index; their work is in git history)
 - **Category**: migration
 - **Planned at**: commit `edeff25`, 2026-07-22
 
@@ -58,7 +58,7 @@ The current public surface couples the plugin, CRUD runtime, model config, and r
 
 ## Git workflow
 
-- Suggested branch: `codex/plan-007-migration-contracts`
+- Suggested branch: `codex/plan-000-migration-contracts`
 - Suggested commit: `feat(framework): define migration contracts`
 - Do not push or open a PR unless instructed.
 
@@ -94,7 +94,7 @@ Add type tests proving that resource prop factory outputs bind directly to `Tabl
 
 ### Step 4: Characterize legacy compatibility
 
-Extend existing plugin/runtime and composite tests to prove current exports still resolve, plugin installation still provides the legacy runtime/defaults, and existing CRUD components still mount with their present props. These tests keep non-migrated screens honest until their slice migrates; they are deleted with the legacy code in plan 016 (clean break — no wrappers will exist).
+Extend existing plugin/runtime and composite tests to prove current exports still resolve, plugin installation still provides the legacy runtime/defaults, and existing CRUD components still mount with their present props. These tests keep non-migrated screens honest until their slice migrates; they are deleted with the legacy code in plan 009 (clean break — no wrappers will exist).
 
 **Verify**: all framework and web test/type-check commands pass; `git diff --name-only` contains only in-scope files.
 

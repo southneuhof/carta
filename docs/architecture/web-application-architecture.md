@@ -775,8 +775,8 @@ reintroducing a configuration-driven state machine.
 ## Addendum — decisions of 2026-07-26
 
 The following decisions were made after the body above was written. Where they
-conflict with body text, this addendum and `plans/007`-`plans/016` govern. Plan
-016 Step 4 reconciles the full document to the shipped API.
+conflict with body text, this addendum and `plans/000`-`plans/009` govern. Plan
+009 Step 4 reconciles the full document to the shipped API.
 
 ### Resource prop factories, not static prop bags
 
@@ -838,10 +838,10 @@ subtree; leaving the subtree drops them.
 ### Clean break and sequencing
 
 `@southneuhof/is-vue-framework` has no consumers outside this monorepo (verified
-before deletion in plan 016). There are no compatibility wrappers, prop
+before deletion in plan 009). There are no compatibility wrappers, prop
 normalization, or deprecation cycles: new cores are separate components, legacy
-components stay untouched until plan 016 deletes them wholesale under a major
-version bump. Plans 008-013 execute at full scope, sequentially, each with
+components stay untouched until plan 009 deletes them wholesale under a major
+version bump. Plans 001-006 execute at full scope, sequentially, each with
 complete verification gates; a walking-skeleton re-scoping was considered and
 rejected because it broke plan self-containment, and the framework is not
 co-developed with an app.

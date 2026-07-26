@@ -1,15 +1,15 @@
-# Plan 009: Build the shared field catalog and renderer registry
+# Plan 002: Build the shared field catalog and renderer registry
 
-> **Implementation instructions**: Add the schema-driven field projection system without changing feature screens. Leave legacy components/config untouched — there are no external consumers and no compatibility wrappers; legacy code is deleted wholesale in plan 016. Update the index only after review.
+> **Implementation instructions**: Add the schema-driven field projection system without changing feature screens. Leave legacy components/config untouched — there are no external consumers and no compatibility wrappers; legacy code is deleted wholesale in plan 009. Update the index only after review.
 >
-> **Drift check (run first)**: `git diff --stat edeff25..HEAD -- packages/is-vue-framework/src/components packages/is-vue-framework/src/model-config packages/is-vue-framework/src/index.ts docs/architecture/web-application-architecture.md`; verify the architecture document hash is `ea637318ae94c0bc677012f7fcca332c0df7bf67`.
+> **Drift check (run first)**: `git diff --stat edeff25..HEAD -- packages/is-vue-framework/src/components packages/is-vue-framework/src/model-config packages/is-vue-framework/src/index.ts docs/architecture/web-application-architecture.md`; verify the architecture document hash is `6fbc44a012d92c4462e08914ca75b5b4226845c8`.
 
 ## Status
 
 - **Priority**: P1
 - **Effort**: L
 - **Risk**: MED
-- **Depends on**: `plans/007-establish-migration-contracts.md`
+- **Depends on**: `plans/000-establish-migration-contracts.md`
 - **Category**: migration
 - **Planned at**: commit `edeff25`, 2026-07-22
 
@@ -24,7 +24,7 @@ Form, table, and detail currently accept parallel field maps, aliases, proxies, 
 - `Form.vue` resolves inputs through `formInputRegistry`; table/detail have their own renderer behavior.
 - `model-config/types.ts:49-73` defines `FieldDependency`: per-field `dependency` config with a `fields` depends-on list and pure `visibility`/`disabled`/`props`/`inputConfig`/`value` generators. `model-config/runtime.ts:209-230` evaluates it and `Form.vue:65-289` applies it, including nulling hidden fields' values before submit (`Form.vue:256`). This is a core Form capability and must survive the migration as a first-class catalog concept, not a legacy conversion. The manual `fields` depends-on list is a known stale-list footgun; its successor uses automatic reactive tracking (see Step 3).
 - Target rules: one catalog entry can supply label, value schema, renderer selection, table/detail/form projections, access metadata, optional `read(record, context)` / `write(value, draft, context)`, and an optional `behavior` block (see Step 3). Ordinary fields use property access and assignment; `fieldsProxy` is represented by `read` only where it is genuinely needed. Presentation behavior remains in Vue implementations/registries, not serialized config.
-- Vocabulary: `renderer` is the config key selecting a registry implementation on every surface (`table.renderer`, `detail.renderer`, `form.renderer`) — do not name it `type` (collides with value types, which schemas own) or `control`. The word "control(s)" is reserved exclusively for action controls in plans 012-013.
+- Vocabulary: `renderer` is the config key selecting a registry implementation on every surface (`table.renderer`, `detail.renderer`, `form.renderer`) — do not name it `type` (collides with value types, which schemas own) or `control`. The word "control(s)" is reserved exclusively for action controls in plans 005-006.
 
 ## Commands you will need
 
@@ -47,13 +47,13 @@ Form, table, and detail currently accept parallel field maps, aliases, proxies, 
 **Out of scope**:
 
 - Rewriting existing components, resources, or routes
-- Backend/RPC validation derivation (plan 010)
+- Backend/RPC validation derivation (plan 003)
 - Adding arbitrary component instances or presentation callbacks to serializable field config
 - Making `read`/`write` mandatory
 
 ## Git workflow
 
-- Suggested branch: `codex/plan-009-field-catalog`
+- Suggested branch: `codex/plan-002-field-catalog`
 - Suggested commit: `feat(framework): add shared field catalog`
 - Do not push or open a PR unless instructed.
 
@@ -86,7 +86,7 @@ The `behavior` block may declare:
 
 Structural rules: `behavior` accepts only function values — constants belong in the static projection level; static `form: false` still excludes the field entirely, while `behavior.visible` is the runtime question; `derived` and `resetWhen` on the same field is a contradictory-definition diagnostic. Functions must be pure and synchronous: no navigation, network I/O, or reads outside the provided context (enforce with a dev-mode recording proxy, which also yields the observed dependency graph for cycle detection and devtools diagnostics).
 
-Contract types remain plain `(ctx) => T` functions with no Vue imports; only the evaluation strategy (computed-per-option) lives in the runtime, and a mount-free evaluation helper (reactive draft + computeds in plain vitest) keeps determinism testable. Define the submission rule here as data, applied later by Form in plan 011: a field whose `visible` evaluates false contributes no value to the submitted draft (preserving the `Form.vue:256` behavior), and how that interacts with schema validation is settled in plan 010.
+Contract types remain plain `(ctx) => T` functions with no Vue imports; only the evaluation strategy (computed-per-option) lives in the runtime, and a mount-free evaluation helper (reactive draft + computeds in plain vitest) keeps determinism testable. Define the submission rule here as data, applied later by Form in plan 004: a field whose `visible` evaluates false contributes no value to the submitted draft (preserving the `Form.vue:256` behavior), and how that interacts with schema validation is settled in plan 003.
 
 Table/detail projections carry no `behavior` block for now; dynamic behavior is a draft/form concept. If table/detail ever need it, they grow their own `behavior` blocks with the same shape rather than sharing form semantics.
 
@@ -102,7 +102,7 @@ Renderer contexts must include value, record/draft, field definition, disabled/r
 
 ### Step 5: Document the legacy-to-catalog mapping without building converters
 
-There are no compatibility converters (clean break, no external consumers). Instead, record the manual translation table used when migrating each screen's config in plans 014-015: `fieldsAlias -> label`, `fieldsProxy -> read`, `type -> renderer`, `dependency -> behavior` (`visibility.validator -> visible`, `disabled.validator -> disabled`, `props`/`inputConfig` generators -> `props`, `value.generator -> derived` or `resetWhen` case by case). This table seeds plan 016's migration guide.
+There are no compatibility converters (clean break, no external consumers). Instead, record the manual translation table used when migrating each screen's config in plans 007-008: `fieldsAlias -> label`, `fieldsProxy -> read`, `type -> renderer`, `dependency -> behavior` (`visibility.validator -> visible`, `disabled.validator -> disabled`, `props`/`inputConfig` generators -> `props`, `value.generator -> derived` or `resetWhen` case by case). This table seeds plan 009's migration guide.
 
 **Verify**: a hand-translated fixture equivalent to the current roles config preserves labels, computed values, and field order; type-check passes without `any`.
 

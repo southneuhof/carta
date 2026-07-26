@@ -1,15 +1,15 @@
-# Plan 013: Build native resource definitions and first-class controls
+# Plan 006: Build native resource definitions and first-class controls
 
 > **Implementation instructions**: Implement resource composition over existing contracts, cores, and shells. A resource describes standard data and native prop bags; routes still own placement and navigation. Do not introduce a composite renderer.
 >
-> **Drift check (run first)**: `git diff --stat edeff25..HEAD -- packages/is-vue-framework/src apps/web/src/framework apps/web/src/main.ts docs/architecture/web-application-architecture.md`; verify architecture hash `ea637318ae94c0bc677012f7fcca332c0df7bf67`.
+> **Drift check (run first)**: `git diff --stat edeff25..HEAD -- packages/is-vue-framework/src apps/web/src/framework apps/web/src/main.ts docs/architecture/web-application-architecture.md`; verify architecture hash `6fbc44a012d92c4462e08914ca75b5b4226845c8`.
 
 ## Status
 
 - **Priority**: P1
 - **Effort**: L
 - **Risk**: HIGH
-- **Depends on**: `plans/008-add-project-adapters-and-query-runtime.md`, `plans/009-build-field-catalog-and-renderers.md`, `plans/010-derive-validation-from-schemas.md`, `plans/011-rebuild-core-components.md`, `plans/012-add-resource-view-shells.md`
+- **Depends on**: `plans/001-add-project-adapters-and-query-runtime.md`, `plans/002-build-field-catalog-and-renderers.md`, `plans/003-derive-validation-from-schemas.md`, `plans/004-rebuild-core-components.md`, `plans/005-add-resource-view-shells.md`
 - **Category**: migration
 - **Planned at**: commit `edeff25`, 2026-07-22
 
@@ -52,7 +52,7 @@ Developers should declare a resource once and receive automatic ordinary loading
 
 ## Git workflow
 
-- Suggested branch: `codex/plan-013-native-resources`
+- Suggested branch: `codex/plan-006-native-resources`
 - Suggested commit: `feat(framework): add native resource definitions`
 - Do not push or open a PR unless instructed.
 
@@ -66,7 +66,7 @@ Create a generic builder whose output includes stable identity plus callable `ta
 - `detail({ id, ... })` — record identity required.
 - `form()` returns a create-wired `FormProps` (create submit + create schema); `form({ id })` returns an update-wired one (record load + update submit + update schema); `form({ initialData })` supports prefilled create (clone/draft), where `initialData` follows the universal value-or-`load` rule. Overload signatures make `id` non-nullable so a possibly-undefined route param is a compile error, never a silent create form.
 
-Form itself remains mode-free: the factory wires load/submit/schema before Form sees props, which is also the mechanism plan 010's operation-schema selection relies on. Memoize factory results per normalized arguments so equal calls return structurally equal props; load re-execution is keyed by plan 008 query identity, not closure identity. Call-site overrides need no API: a returned props object is plain, so `v-bind="{ ...roles.form({ id }), submit: custom }"` is the escape hatch. Generate everything directly from field catalog, loaders/submitters, schema lookup, query defaults, identity, and explicit overrides. Do not return adapter-only shapes requiring `ResourceForm`/`ResourceTable` components.
+Form itself remains mode-free: the factory wires load/submit/schema before Form sees props, which is also the mechanism plan 003's operation-schema selection relies on. Memoize factory results per normalized arguments so equal calls return structurally equal props; load re-execution is keyed by plan 001 query identity, not closure identity. Call-site overrides need no API: a returned props object is plain, so `v-bind="{ ...roles.form({ id }), submit: custom }"` is the escape hatch. Generate everything directly from field catalog, loaders/submitters, schema lookup, query defaults, identity, and explicit overrides. Do not return adapter-only shapes requiring `ResourceForm`/`ResourceTable` components.
 
 **Verify**: compile-time equality/satisfies tests bind all three factory outputs directly to core components, reject extraneous props, and reject a nullable `id` argument; runtime tests prove memoized structural equality and that `form()` vs `form({ id })` wire create vs update submit/schema.
 
@@ -90,7 +90,7 @@ Allow projects/resources to declare optional standard route targets or route-nam
 
 ### Step 5: Add exceptional escape hatches and diagnostics
 
-Support explicit prop overrides, load/submit overrides, `namespace`/local query state, read/write hooks, schema override, custom controls, and capability override. Merge with the precedence fixed in plan 009 and warn for contradictory definitions (for example a visible update control without submit/route behavior).
+Support explicit prop overrides, load/submit overrides, `namespace`/local query state, read/write hooks, schema override, custom controls, and capability override. Merge with the precedence fixed in plan 002 and warn for contradictory definitions (for example a visible update control without submit/route behavior).
 
 **Verify**: precedence/diagnostic tests cover every escape hatch and ordinary resource fixtures use none of them.
 

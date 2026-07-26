@@ -1,15 +1,15 @@
-# Plan 014: Migrate roles and permissions as the nested vertical slice
+# Plan 007: Migrate roles and permissions as the nested vertical slice
 
 > **Implementation instructions**: Migrate only roles/permissions end to end. Use real filesystem routes, resource-native prop bags, and shells. Preserve user-visible capabilities and add redirects for old query-state URLs. Do not migrate users in this phase.
 >
-> **Drift check (run first)**: `git diff --stat edeff25..HEAD -- apps/web/src/routes/'(authenticated)'/settings/roles apps/web/src/framework apps/web/src/router apps/web/src/components/navigations apps/api/src/routes/roles packages/is-vue-framework/src docs/architecture/web-application-architecture.md`; verify architecture hash `ea637318ae94c0bc677012f7fcca332c0df7bf67`.
+> **Drift check (run first)**: `git diff --stat edeff25..HEAD -- apps/web/src/routes/'(authenticated)'/settings/roles apps/web/src/framework apps/web/src/router apps/web/src/components/navigations apps/api/src/routes/roles packages/is-vue-framework/src docs/architecture/web-application-architecture.md`; verify architecture hash `6fbc44a012d92c4462e08914ca75b5b4226845c8`.
 
 ## Status
 
 - **Priority**: P1
 - **Effort**: L
 - **Risk**: HIGH
-- **Depends on**: `plans/013-build-native-resource-definitions.md`
+- **Depends on**: `plans/006-build-native-resource-definitions.md`
 - **Category**: migration
 - **Planned at**: commit `edeff25`, 2026-07-22
 
@@ -50,13 +50,13 @@ Roles is the smallest real feature that still exercises list/detail/create/updat
 
 - Users migration
 - API response-shape changes or authorization changes
-- General framework features missing from plans 007-013
+- General framework features missing from plans 000-006
 - Editing the external HKA-TROM repository
 - Replacing the custom permission mutation with a fake generic CRUD operation
 
 ## Git workflow
 
-- Suggested branch: `codex/plan-014-roles-vertical-slice`
+- Suggested branch: `codex/plan-007-roles-vertical-slice`
 - Suggested commit: `refactor(web): migrate roles to resource routes`
 - Do not push or open a PR unless instructed.
 
@@ -64,7 +64,7 @@ Roles is the smallest real feature that still exercises list/detail/create/updat
 
 ### Step 1: Add a minimal roles resource
 
-Define the role field catalog and RPC resource under the app adapter/resource folder. Ordinary list/detail/create/update/delete loaders and submitters must derive from RPC. Bind schemas from plan 010. Provide route targets/access policy so standard controls infer automatically; add explicit behavior only for the permissions workflow.
+Define the role field catalog and RPC resource under the app adapter/resource folder. Ordinary list/detail/create/update/delete loaders and submitters must derive from RPC. Bind schemas from plan 003. Provide route targets/access policy so standard controls infer automatically; add explicit behavior only for the permissions workflow.
 
 **Verify**: resource type tests show direct Table/Detail/Form binding and no repeated ordinary RPC implementations.
 

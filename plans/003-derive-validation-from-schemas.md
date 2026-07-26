@@ -1,15 +1,15 @@
-# Plan 010: Derive form validation from client-safe schemas
+# Plan 003: Derive form validation from client-safe schemas
 
 > **Implementation instructions**: Build schema selection and validation adapters; do not import server-only API modules into browser runtime code. Manual Zod schemas remain the required fallback when RPC metadata is unavailable. Update the plan index after review.
 >
-> **Drift check (run first)**: `git diff --stat edeff25..HEAD -- packages/is-vue-framework/src packages/contracts packages/sdk packages/sprindle apps/api/src apps/web/src/framework docs/architecture/web-application-architecture.md`; verify architecture hash `ea637318ae94c0bc677012f7fcca332c0df7bf67`.
+> **Drift check (run first)**: `git diff --stat edeff25..HEAD -- packages/is-vue-framework/src packages/contracts packages/sdk packages/sprindle apps/api/src apps/web/src/framework docs/architecture/web-application-architecture.md`; verify architecture hash `6fbc44a012d92c4462e08914ca75b5b4226845c8`.
 
 ## Status
 
 - **Priority**: P1
 - **Effort**: L
 - **Risk**: HIGH
-- **Depends on**: `plans/007-establish-migration-contracts.md`, `plans/009-build-field-catalog-and-renderers.md`
+- **Depends on**: `plans/000-establish-migration-contracts.md`, `plans/002-build-field-catalog-and-renderers.md`
 - **Category**: migration
 - **Planned at**: commit `edeff25`, 2026-07-22
 
@@ -56,7 +56,7 @@ Validation should be schema-oriented and should not be repeated when an RPC cont
 
 ## Git workflow
 
-- Suggested branch: `codex/plan-010-schema-validation`
+- Suggested branch: `codex/plan-003-schema-validation`
 - Suggested commit: `feat(framework): derive validation from schemas`
 - Do not push or open a PR unless instructed.
 
@@ -76,7 +76,7 @@ Make resource/route metadata addressable by resource identity and operation (`cr
 
 ### Step 3: Implement validation selection and issue normalization
 
-Add framework helpers that select a Zod schema by the precedence above, parse safely, and normalize Zod issues into stable field/form issues. Preserve nested paths and multiple issues. Operation-schema selection has a concrete owner: the resource prop factory (plan 013) that wired a create or update submit attaches the matching operation schema to the returned `FormProps`. Form itself never selects between create/update schemas and has no mode.
+Add framework helpers that select a Zod schema by the precedence above, parse safely, and normalize Zod issues into stable field/form issues. Preserve nested paths and multiple issues. Operation-schema selection has a concrete owner: the resource prop factory (plan 006) that wired a create or update submit attaches the matching operation schema to the returned `FormProps`. Form itself never selects between create/update schemas and has no mode.
 
 **Verify**: tests cover explicit override, RPC-derived schema, manual fallback, nested paths, cross-field/refine errors, and no-schema behavior.
 
@@ -84,7 +84,7 @@ Add framework helpers that select a Zod schema by the precedence above, parse sa
 
 Allow field catalog entries to refer to their schema-derived constraints for renderer inference and error mapping. Do not copy min/max/required rules into presentation config when Zod already owns them. Manual catalog schemas remain supported for offline/non-RPC resources.
 
-Define the interaction with field behavior (plan 009): a field whose `behavior.visible` evaluates false is excluded from the submitted draft, so validation must run against the visibility-filtered draft, and a schema-required field that is behaviorally hidden must surface a clear diagnostic (contradictory definition) rather than an unresolvable user-facing error. Conditional requiredness that depends on other field values belongs in the Zod schema (`refine`/discriminated unions), not duplicated in behavior options; behavior decides presence, schemas decide validity. Where a discriminated union already encodes branch shape, a field absent from the active branch may derive default invisibility as a consistency bonus, never as the only mechanism.
+Define the interaction with field behavior (plan 002): a field whose `behavior.visible` evaluates false is excluded from the submitted draft, so validation must run against the visibility-filtered draft, and a schema-required field that is behaviorally hidden must surface a clear diagnostic (contradictory definition) rather than an unresolvable user-facing error. Conditional requiredness that depends on other field values belongs in the Zod schema (`refine`/discriminated unions), not duplicated in behavior options; behavior decides presence, schemas decide validity. Where a discriminated union already encodes branch shape, a field absent from the active branch may derive default invisibility as a consistency bonus, never as the only mechanism.
 
 **Verify**: type/runtime tests show a schema change changes validation without editing a field renderer configuration; tests cover validation of a visibility-filtered draft and the hidden-but-required diagnostic.
 

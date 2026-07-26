@@ -1,15 +1,15 @@
-# Plan 015: Migrate users and prove multi-table/custom-load complexity
+# Plan 008: Migrate users and prove multi-table/custom-load complexity
 
 > **Implementation instructions**: Migrate users only after the roles slice is stable. Use this phase to exercise multiple independently querying tables, local/offline `load`, explicit query escape hatches, and a custom mapping workflow. Do not weaken the architecture merely to preserve legacy component structure.
 >
-> **Drift check (run first)**: `git diff --stat edeff25..HEAD -- apps/web/src/routes/'(authenticated)'/settings/users apps/web/src/framework apps/web/src/router apps/web/src/components/navigations apps/api/src/routes/users packages/is-vue-framework/src docs/architecture/web-application-architecture.md`; verify architecture hash `ea637318ae94c0bc677012f7fcca332c0df7bf67`.
+> **Drift check (run first)**: `git diff --stat edeff25..HEAD -- apps/web/src/routes/'(authenticated)'/settings/users apps/web/src/framework apps/web/src/router apps/web/src/components/navigations apps/api/src/routes/users packages/is-vue-framework/src docs/architecture/web-application-architecture.md`; verify architecture hash `6fbc44a012d92c4462e08914ca75b5b4226845c8`.
 
 ## Status
 
 - **Priority**: P1
 - **Effort**: L
 - **Risk**: HIGH
-- **Depends on**: `plans/014-migrate-roles-as-nested-slice.md`
+- **Depends on**: `plans/007-migrate-roles-as-nested-slice.md`
 - **Category**: migration
 - **Planned at**: commit `edeff25`, 2026-07-22
 
@@ -49,11 +49,11 @@ Users adds a custom role-mapping workflow and supplies the second real proof tha
 - General dashboard/product work
 - Editing HKA-TROM
 - Inventing generic mapping commands/actions
-- Removing shared legacy framework code (plan 016)
+- Removing shared legacy framework code (plan 009)
 
 ## Git workflow
 
-- Suggested branch: `codex/plan-015-users-complexity-slice`
+- Suggested branch: `codex/plan-008-users-complexity-slice`
 - Suggested commit: `refactor(web): migrate users and complex loads`
 - Do not push or open a PR unless instructed.
 

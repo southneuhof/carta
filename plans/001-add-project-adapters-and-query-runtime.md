@@ -1,15 +1,15 @@
-# Plan 008: Add project adapters and the namespaced query runtime
+# Plan 001: Add project adapters and the namespaced query runtime
 
 > **Implementation instructions**: Implement infrastructure without migrating feature routes. Keep TanStack Query internal; public component/resource APIs remain `load` and `submit`. Run every verification and update `plans/README.md` when reviewed.
 >
-> **Drift check (run first)**: `git diff --stat edeff25..HEAD -- packages/is-vue-framework/package.json packages/is-vue-framework/src apps/web/src/framework apps/web/src/main.ts pnpm-lock.yaml docs/architecture/web-application-architecture.md`; then verify architecture hash `ea637318ae94c0bc677012f7fcca332c0df7bf67` with `git hash-object`.
+> **Drift check (run first)**: `git diff --stat edeff25..HEAD -- packages/is-vue-framework/package.json packages/is-vue-framework/src apps/web/src/framework apps/web/src/main.ts pnpm-lock.yaml docs/architecture/web-application-architecture.md`; then verify architecture hash `6fbc44a012d92c4462e08914ca75b5b4226845c8` with `git hash-object`.
 
 ## Status
 
 - **Priority**: P1
 - **Effort**: L
 - **Risk**: HIGH
-- **Depends on**: `plans/007-establish-migration-contracts.md`
+- **Depends on**: `plans/000-establish-migration-contracts.md`
 - **Category**: migration
 - **Planned at**: commit `edeff25`, 2026-07-22
 
@@ -56,7 +56,7 @@ Components need automatic caching, request cancellation, invalidation, and URL-o
 
 ## Git workflow
 
-- Suggested branch: `codex/plan-008-query-adapters`
+- Suggested branch: `codex/plan-001-query-adapters`
 - Suggested commit: `feat(framework): add query and project adapters`
 - Do not push or open a PR unless instructed.
 
@@ -94,7 +94,7 @@ Sibling-tab preservation (decided 2026-07-26): links between sibling routes unde
 
 Add an internal loader composable that accepts the public `load` function and context, forwards `AbortSignal`, normalizes project results, and uses the key factory. Support sync/offline return values without special vocabulary. Define retry defaults and stale-time in adapters/defaults, not resources. Mutations must invalidate the appropriate list/detail identities through semantic helpers.
 
-Load re-execution is governed by the deterministic query key, never by `load` function/closure identity. This is load-bearing for plan 013: resource prop factories return fresh closures per call, and equal logical inputs must dedupe to the same cached execution.
+Load re-execution is governed by the deterministic query key, never by `load` function/closure identity. This is load-bearing for plan 006: resource prop factories return fresh closures per call, and equal logical inputs must dedupe to the same cached execution.
 
 **Verify**: fake-timer tests prove deduplication, cancellation on key change/unmount, cache separation, sync values, normalized failures, and targeted invalidation.
 
