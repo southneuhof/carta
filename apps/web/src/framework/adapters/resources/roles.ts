@@ -1,5 +1,5 @@
 import { defineFields, defineResource, fromZod } from '@southneuhof/is-vue-framework'
-import { roleSchemas } from '@southneuhof/contracts'
+import { role } from '@southneuhof/api/routes/roles/roles.entity'
 import { rpc } from '@/framework/rpc'
 import { createRpcOperations } from './rpcResource'
 import type { RpcCRUDRoute } from './rpcRoute'
@@ -45,9 +45,11 @@ export const roles = defineResource<Role, RoleQuery, RoleDraft, RoleDraft>({
   table: { fields: ['name', 'createdAt'] },
   detail: { fields: ['name', 'createdAt'] },
   form: { fields: ['name'] },
+  // The authoritative server schemas, imported from the entity module itself —
+  // not a browser-side re-declaration that has to be kept in step with it.
   schemas: {
-    create: fromZod<RoleDraft>(roleSchemas.create),
-    update: fromZod<RoleDraft>(roleSchemas.update),
+    create: fromZod<RoleDraft>(role.schemas.create),
+    update: fromZod<RoleDraft>(role.schemas.update),
   },
   routes: {
     list: '/settings/roles',

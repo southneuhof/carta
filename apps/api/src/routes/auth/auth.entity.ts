@@ -1,9 +1,8 @@
-import { randomUUID } from 'node:crypto'
 import { pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { users } from '../users/users.entity'
 
 export const sessions = pgTable('sessions', {
-  id: text('id').primaryKey().$defaultFn(randomUUID),
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   expiresAt: timestamp('expires_at').notNull(),
   token: text('token').notNull().unique(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -14,7 +13,7 @@ export const sessions = pgTable('sessions', {
 })
 
 export const accounts = pgTable('accounts', {
-  id: text('id').primaryKey().$defaultFn(randomUUID),
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   accountId: text('account_id').notNull(),
   providerId: text('provider_id').notNull(),
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
@@ -30,7 +29,7 @@ export const accounts = pgTable('accounts', {
 })
 
 export const verifications = pgTable('verifications', {
-  id: text('id').primaryKey().$defaultFn(randomUUID),
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   identifier: text('identifier').notNull(),
   value: text('value').notNull(),
   expiresAt: timestamp('expires_at').notNull(),

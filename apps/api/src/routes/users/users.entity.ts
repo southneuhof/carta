@@ -1,11 +1,10 @@
-import { randomUUID } from 'node:crypto'
-import { createEntity } from '@southneuhof/sprindle/model'
+import { createEntity } from '@southneuhof/sprindle/entity'
 import { boolean, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
 import { role, roles } from '../roles/roles.entity'
 
 export const users = pgTable('users', {
-  id: text('id').primaryKey().$defaultFn(randomUUID),
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text('name').notNull(),
   email: text('email').notNull().unique(),
   emailVerified: boolean('email_verified').notNull().default(false),

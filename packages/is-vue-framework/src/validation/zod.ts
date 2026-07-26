@@ -5,65 +5,120 @@
  * only on the structural `ValidationSchema` contract, so a schema may arrive
  * from an RPC manifest, a resource definition, or a hand-written module without
  * changing a component.
+ *
+ * Two Zod dialects reach this bridge. Classic `zod` backs the browser-safe
+ * schema manifest; the `zod/v4` subpath backs the API entity modules, whose
+ * `drizzle-zod` schemas the browser imports directly. They emit unrelated
+ * types, so every signature here is structural rather than nominal, and the
+ * metadata readers normalize the internal shape each dialect records.
  */
-import type { ZodIssue, ZodTypeAny } from 'zod'
 import type { ValidationIssue, ValidationResult, ValidationSchema } from '../contracts'
 import type { FieldLayer } from '../fields'
 
-export function normalizeZodIssues(issues: readonly ZodIssue[]): ValidationIssue[] {
-  return issues.map((issue) => ({ path: [...issue.path], message: issue.message }))
+/**
+ * The part of a Zod issue this bridge reads. Classic Zod types the path as
+ * `(string | number)[]` and the v4 dialect widens it to `PropertyKey[]`, so the
+ * wider one is the common shape.
+ */
+export type ZodIssueLike = { path: readonly PropertyKey[]; message: string }
+
+/**
+ * Structural stand-in for a Zod schema of either dialect. The bridge only ever
+ * reads `safeParse`, `shape`, `isOptional` and `_def`, so this is the honest
+ * contract — a nominal `ZodTypeAny` would name one dialect and reject the other.
+ * `_def` stays `unknown` because each dialect's own definition type is a closed
+ * interface with no index signature; every read below narrows it explicitly.
+ */
+export type ZodSchemaLike = {
+  safeParse: (input: unknown) => { success: boolean; data?: unknown; error?: { issues: readonly ZodIssueLike[] } }
+  isOptional?: () => boolean
+  shape?: Record<string, unknown>
+  _def?: unknown
+}
+
+export function normalizeZodIssues(issues: readonly ZodIssueLike[]): ValidationIssue[] {
+  // Object and array paths are always string or number segments in practice;
+  // only the v4 path type admits symbols, and no schema kind produces one.
+  return issues.map((issue) => ({ path: [...issue.path] as (string | number)[], message: issue.message }))
 }
 
 export interface ZodValidationSchema<TOutput> extends ValidationSchema<TOutput> {
   /** Keys the schema requires; used for the hidden-but-required diagnostic. */
   requiredKeys: string[]
-  source: ZodTypeAny
+  source: ZodSchemaLike
 }
 
-function objectShape(schema: ZodTypeAny): Record<string, ZodTypeAny> | undefined {
-  const shape = (schema as unknown as { shape?: Record<string, ZodTypeAny> }).shape
+function objectShape(schema: ZodSchemaLike): Record<string, ZodSchemaLike> | undefined {
+  const shape = schema.shape
   if (!shape || typeof shape !== 'object') return undefined
-  return shape
+  return shape as Record<string, ZodSchemaLike>
 }
 
-export function requiredSchemaKeys(schema: ZodTypeAny): string[] {
+export function requiredSchemaKeys(schema: ZodSchemaLike): string[] {
   const shape = objectShape(schema)
   if (!shape) return []
   return Object.entries(shape)
-    .filter(([, value]) => !(value as unknown as { isOptional: () => boolean }).isOptional())
+    .filter(([, value]) => !value.isOptional?.())
     .map(([key]) => key)
 }
 
-export function fromZod<TOutput>(schema: ZodTypeAny): ZodValidationSchema<TOutput> {
+export function fromZod<TOutput>(schema: ZodSchemaLike): ZodValidationSchema<TOutput> {
   return {
     source: schema,
     requiredKeys: requiredSchemaKeys(schema),
     validate: (input: unknown): ValidationResult<TOutput> => {
       const result = schema.safeParse(input)
       if (result.success) return { success: true, data: result.data as TOutput }
-      return { success: false, issues: normalizeZodIssues(result.error.issues) }
+      return { success: false, issues: normalizeZodIssues(result.error?.issues ?? []) }
     },
   }
 }
 
-const rendererByTypeName: Record<string, string> = {
-  ZodString: 'text',
-  ZodNumber: 'number',
-  ZodBoolean: 'switch',
-  ZodDate: 'date',
-  ZodEnum: 'select',
-  ZodNativeEnum: 'select',
-  ZodArray: 'tag',
+/**
+ * One tag per schema kind, whichever dialect produced it. Classic Zod records
+ * `_def.typeName` (`'ZodString'`); the v4 dialect records `_def.type`
+ * (`'string'`) and drops `typeName` entirely.
+ */
+function typeTag(schema: ZodSchemaLike): string {
+  const definition = schema._def as { type?: string; typeName?: string } | undefined
+  if (!definition) return ''
+  if (definition.type) return definition.type
+  const legacy = definition.typeName
+  return legacy ? legacy.replace(/^Zod/, '').toLowerCase() : ''
 }
 
-function unwrap(schema: ZodTypeAny): ZodTypeAny {
-  const definition = (schema as unknown as { _def?: { typeName?: string; innerType?: ZodTypeAny; schema?: ZodTypeAny } })._def
-  const typeName = definition?.typeName
-  if (typeName === 'ZodOptional' || typeName === 'ZodNullable' || typeName === 'ZodDefault') {
-    return unwrap(definition!.innerType as ZodTypeAny)
+const rendererByTypeTag: Record<string, string> = {
+  string: 'text',
+  number: 'number',
+  boolean: 'switch',
+  date: 'date',
+  enum: 'select',
+  nativeenum: 'select',
+  array: 'tag',
+}
+
+type WrapperDefinition = { innerType?: ZodSchemaLike; schema?: ZodSchemaLike; in?: ZodSchemaLike }
+
+function unwrap(schema: ZodSchemaLike): ZodSchemaLike {
+  const definition = schema._def as WrapperDefinition | undefined
+  if (!definition) return schema
+
+  const tag = typeTag(schema)
+  if (tag === 'optional' || tag === 'nullable' || tag === 'default') {
+    return definition.innerType ? unwrap(definition.innerType) : schema
   }
-  if (typeName === 'ZodEffects' && definition?.schema) return unwrap(definition.schema)
+  // Classic wraps transforms and refinements in `ZodEffects`; v4 pipes them.
+  if (tag === 'effects' && definition.schema) return unwrap(definition.schema)
+  if (tag === 'pipe' && definition.in) return unwrap(definition.in)
   return schema
+}
+
+/** Enum members are an array in classic Zod and an object map in the v4 dialect. */
+function enumOptions(schema: ZodSchemaLike): string[] | undefined {
+  const definition = schema._def as { values?: string[]; entries?: Record<string, string> } | undefined
+  if (definition?.values) return definition.values
+  if (definition?.entries) return Object.values(definition.entries)
+  return undefined
 }
 
 /**
@@ -71,21 +126,21 @@ function unwrap(schema: ZodTypeAny): ZodTypeAny {
  * minimum length, or patterns stay in the schema and are never copied into
  * presentation config.
  */
-export function inferFieldLayers(schema: ZodTypeAny): Record<string, FieldLayer> {
+export function inferFieldLayers(schema: ZodSchemaLike): Record<string, FieldLayer> {
   const shape = objectShape(schema)
   if (!shape) return {}
 
   const layers: Record<string, FieldLayer> = {}
   for (const [key, value] of Object.entries(shape)) {
     const inner = unwrap(value)
-    const typeName = (inner as unknown as { _def?: { typeName?: string } })._def?.typeName ?? ''
-    const renderer = rendererByTypeName[typeName]
+    const tag = typeTag(inner)
+    const renderer = rendererByTypeTag[tag]
     if (!renderer) continue
 
     const layer: FieldLayer = { renderer }
-    if (typeName === 'ZodEnum') {
-      const options = (inner as unknown as { _def: { values: string[] } })._def.values
-      layer.props = { options }
+    if (tag === 'enum' || tag === 'nativeenum') {
+      const options = enumOptions(inner)
+      if (options) layer.props = { options }
     }
     layers[key] = layer
   }

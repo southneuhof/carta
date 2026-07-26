@@ -60,6 +60,60 @@ Framework-inclusion test applied: core only if (a) every app rebuilds it identic
 - **Userland transaction boundary** (route action + hooks in one tx): deferred, not rejected — revisit on demonstrated need (noted in plan 011).
 - **Operator filters / searchable-sortable allowlists / cursor pagination**: deferred — wait for a real consumer (noted in plan 012).
 
+## Contract track (added 2026-07-27)
+
+Planned against commit `4ab2c8f`. Removes the hand-written schema mirror's *cause* — entity modules
+that could not be imported into a browser bundle — and measures what importing them actually costs,
+so the decision to retire `packages/contracts/src/schemas/index.ts` rests on a number.
+
+| Plan | Title | Priority | Effort | Depends on | Status |
+|---|---|---|---|---|---|
+| [021](021-browser-safe-entity-schemas.md) | Make entity Zod schemas importable in the browser | P1 | M | — | DONE |
+
+Outcome: entity modules are browser-importable, the Zod bridge accepts both the classic and `zod/v4`
+dialects, and `roles` validates against `role.schemas` directly. The measured cost is a **one-time**
++55 kB gzipped for the `drizzle-orm` + `drizzle-zod` construction machinery and +529 B per additional
+resource — see the plan's Measurement section. **GO, accepted 2026-07-27**: an internal system
+application where load time is not a primary constraint. The follow-up therefore migrates the
+remaining resources and deletes both `packages/contracts/src/schemas/index.ts` and
+`apps/api/src/__tests__/schema-parity.spec.ts`; it must also choose an entity home, since
+`packages/domain` is taken by theme tokens that `apps/base-mobile` consumes.
+
+## HKA TROM proof slice (added 2026-07-27)
+
+Planned against commit `4ab2c8f`. The accepted slice and its decision record live in
+[NOTES-trom-proof-slice.md](NOTES-trom-proof-slice.md) — read it before executing any of these.
+Plan 022 is a prerequisite for the slice and carries all destructive work; 023–025 are the slice.
+
+| Plan | Title | Priority | Effort | Depends on | Status |
+|---|---|---|---|---|---|
+| [022](022-rebuild-identity-and-org-structure.md) | Rebuild identity and org structure, retire the mirror, reset to one baseline | P1 | L | 021 | TODO |
+| [023](023-notification-subsystem.md) | Build the notification subsystem and the scoped list seam | P1 | L | 022 | TODO |
+| [024](024-overtime-workflow.md) | Build the overtime workflow and its verificator chain | P1 | L | 023 | TODO |
+| [025](025-overtime-and-inbox-screens.md) | Build the overtime screens, inbox, and typed deep-link registry | P1 | L | 024 | TODO |
+
+### Slice dependency notes
+
+- **022 is destructive and must run first.** It drops every table in `public`, deletes the existing
+  migration, and regenerates a single baseline. Authorized by the maintainer 2026-07-27; the plan
+  requires one more confirmation immediately before the drop. Migrations are additive from 023 onward.
+- 022 absorbed the organizational tables (`tollSections`, `sectionTypes`, `jobPositions`,
+  `sectionGroups`, `sectionRantings`) because `employees` carries foreign keys into them, and
+  `employees` is part of the identity model. 023 is therefore notifications and chain configuration only.
+- 022 also folds in plan 021's deferred follow-up: deleting `packages/contracts/src/schemas/index.ts`
+  and `apps/api/src/__tests__/schema-parity.spec.ts`, since the same entity files are being rewritten.
+- Each plan names `packages/sprindle` / `packages/is-vue-framework` changes as a STOP condition. The
+  slice exists to find out whether the frameworks are sufficient; a framework edit made mid-slice
+  destroys the answer. Report the gap instead.
+
+### Questions the slice is built to answer
+
+1. Can a custom `ModelSource` express a caller-scoped list, or is `ModelSource` an extension point that
+   cannot see the caller? (023, Step 4)
+2. Can one transaction span a workflow's multi-table writes through `getDb().transaction()` in a custom
+   route, with notification dispatch after commit? (024, Step 5)
+3. Can a record-state-dependent control be expressed without a framework change? (025, Step 3)
+
 ## Dependency and delivery notes
 
 - **Full-scope sequential phases (decided 2026-07-26)**: plans 001-006 are executed at full scope in order, each with its own complete verification gates. A walking-skeleton re-scoping was considered and reverted: it violated the plan-writing rules (self-containment, machine-checkable boundaries), and the framework is not co-developed with an app, so longer wall-clock time before the first slice is acceptable. Early-validation duty falls on plan 000's compile-time contract tests and plan 006's ordinary-resource fixture.
@@ -134,6 +188,7 @@ The 2026-07-22 planning baseline had green framework tests/types, green web test
 
 ## Deferred work
 
+- The accepted HKA TROM proof slice — overtime requests plus a slice of the notification subsystem — is recorded in [NOTES-trom-proof-slice.md](NOTES-trom-proof-slice.md). Accepted 2026-07-27, not yet scheduled and no plan files written. It depends on plan 021 and has two open questions (schema source of truth, verificator-chain seeding) noted there.
 - The external `/Users/gamer/Documents/projects/hka-trom/frontend` repository is a design reference only and is not modified by these plans. Its migration starts after plan 009's downstream checklist and separate authorization.
 - Shared mobile schemas remain deliberately out of scope.
 - Backend authorization remains authoritative; UI access policy only controls presentation.
@@ -145,4 +200,4 @@ The 2026-07-22 planning baseline had green framework tests/types, green web test
 - Require explicit repeated API calls for every resource: rejected for ordinary RPC resources; plan 006 derives them while keeping explicit overrides.
 - Expose TanStack Query in resource definitions: rejected to avoid infrastructure lock-in and a second public vocabulary.
 - Preserve query-string screen orchestration as the routing model: rejected; only temporary redirects remain.
-- Import API entity modules directly for validation: rejected if they carry server/database runtime dependencies; plan 003 requires a client-safe boundary.
+- Import API entity modules directly for validation: rejected if they carry server/database runtime dependencies; plan 003 requires a client-safe boundary. **Amended 2026-07-27**: plan 021 removed those runtime dependencies (`node:crypto`, and the Hono-carrying `@southneuhof/sprindle/model` subpath), so the condition attached to this rejection no longer holds — an entity module now *is* a client-safe boundary in plan 003's sense, and `roles` imports its schemas directly. What remains is a bundle-size question, not a correctness one; see plan 021's Measurement section.

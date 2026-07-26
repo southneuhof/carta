@@ -1,10 +1,9 @@
-import { randomUUID } from 'node:crypto'
-import { createEntity } from '@southneuhof/sprindle/model'
+import { createEntity } from '@southneuhof/sprindle/entity'
 import { pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
 
 export const roles = pgTable('roles', {
-  id: text('id').primaryKey().$defaultFn(randomUUID),
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text('name').notNull(),
   createdAt: timestamp('created_at', { mode: 'string' }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { mode: 'string' }).notNull().defaultNow(),

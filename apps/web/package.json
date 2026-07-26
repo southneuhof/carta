@@ -68,6 +68,7 @@
     "@southneuhof/utilities": "workspace:*",
     "@southneuhof/sdk": "workspace:*",
     "@southneuhof/contracts": "workspace:*",
+    "@southneuhof/api": "workspace:*",
     "@repo/config-meta": "workspace:*"
   },
   "devDependencies": {

@@ -12,6 +12,7 @@
     ".": "./src/index.ts",
     "./hono": "./src/hono/index.ts",
     "./model": "./src/model/index.ts",
+    "./entity": "./src/entity/index.ts",
     "./routes": "./src/routes/index.ts",
     "./openapi": "./src/openapi/index.ts",
     "./source": "./src/source/index.ts",

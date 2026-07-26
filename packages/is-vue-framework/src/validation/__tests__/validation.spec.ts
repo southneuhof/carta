@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
+import { z as z4 } from 'zod/v4'
 import { fromZod, inferFieldLayers, requiredSchemaKeys } from '../zod'
 import { assertNoHiddenRequiredFields, selectSchema, validateDraft } from '../select'
 import { resolveFields } from '../../fields'
@@ -89,6 +90,85 @@ describe('zod bridge', () => {
     expect(strict.validate({ name: 'abc' }).success).toBe(false)
     expect(loose.validate({ name: 'abc' }).success).toBe(true)
     expect(resolveFields({ fields, surface: 'form' })[0].renderer).toBe('text')
+  })
+})
+
+/**
+ * The API entity modules build their schemas with the `zod/v4` subpath, and the
+ * browser imports those schemas directly. The dialect records different
+ * internal metadata than classic Zod — `_def.type` instead of `_def.typeName`,
+ * enum members as an object map instead of an array — so the bridge is exercised
+ * against both. The classic-dialect blocks above are the other half of this gate.
+ */
+describe('zod v4 dialect', () => {
+  const createSchema4 = z4.object({
+    name: z4.string().min(3, 'Nama minimal 3 karakter'),
+    address: z4.object({ city: z4.string() }),
+    tags: z4.array(z4.string().min(1)),
+    note: z4.string().optional(),
+  })
+
+  it('returns parsed data on success', () => {
+    expect(fromZod<{ name: string }>(z4.object({ name: z4.string() })).validate({ name: 'Admin' })).toEqual({
+      success: true,
+      data: { name: 'Admin' },
+    })
+  })
+
+  it('normalizes nested and array issue paths', () => {
+    const result = fromZod(createSchema4).validate({ name: 'ab', address: {}, tags: [''] })
+
+    expect(result.success).toBe(false)
+    if (result.success) return
+
+    const paths = result.issues.map((issue) => issue.path.join('.'))
+    expect(paths).toEqual(expect.arrayContaining(['name', 'address.city', 'tags.0']))
+    expect(result.issues.find((issue) => issue.path.join('.') === 'name')?.message).toBe('Nama minimal 3 karakter')
+  })
+
+  it('reports required keys for the hidden-but-required diagnostic', () => {
+    expect(requiredSchemaKeys(createSchema4).sort()).toEqual(['address', 'name', 'tags'])
+    expect(requiredSchemaKeys(z4.string())).toEqual([])
+  })
+
+  it('infers renderers, reading enum members from the v4 entry map', () => {
+    const layers = inferFieldLayers(
+      z4.object({
+        name: z4.string().min(3),
+        age: z4.number().optional(),
+        active: z4.boolean(),
+        status: z4.enum(['open', 'closed']),
+      }),
+    )
+
+    expect(layers.name).toEqual({ renderer: 'text' })
+    expect(layers.age).toEqual({ renderer: 'number' })
+    expect(layers.active).toEqual({ renderer: 'switch' })
+    expect(layers.status).toEqual({ renderer: 'select', props: { options: ['open', 'closed'] } })
+  })
+
+  it('unwraps optional, nullable, and default wrappers to the inner renderer', () => {
+    const layers = inferFieldLayers(
+      z4.object({
+        note: z4.string().optional(),
+        retired: z4.boolean().default(false),
+        closedAt: z4.date().nullable(),
+      }),
+    )
+
+    expect(layers.note).toEqual({ renderer: 'text' })
+    expect(layers.retired).toEqual({ renderer: 'switch' })
+    expect(layers.closedAt).toEqual({ renderer: 'date' })
+  })
+
+  it('keeps cross-field refine errors on their declared path', () => {
+    const schema = z4
+      .object({ password: z4.string(), confirmation: z4.string() })
+      .refine((value) => value.password === value.confirmation, { message: 'Konfirmasi tidak cocok', path: ['confirmation'] })
+    const result = fromZod(schema).validate({ password: 'a', confirmation: 'b' })
+
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.issues).toEqual([{ path: ['confirmation'], message: 'Konfirmasi tidak cocok' }])
   })
 })
 
