@@ -1,6 +1,7 @@
 export type * from './contracts'
 export * from './query'
 export * from './fields'
+export * from './validation'
 export {
   createRendererRegistry,
   createRendererRegistries,

@@ -67,6 +67,7 @@
     "@southneuhof/is-vue-framework": "workspace:*",
     "@southneuhof/utilities": "workspace:*",
     "@southneuhof/sdk": "workspace:*",
+    "@southneuhof/contracts": "workspace:*",
     "@repo/config-meta": "workspace:*"
   },
   "devDependencies": {

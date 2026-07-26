@@ -1,3 +1,5 @@
+export * from './schemas'
+
 import { Hono } from 'hono'
 
 type ProductListInput = {
