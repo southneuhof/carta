@@ -1,5 +1,5 @@
 import type { ResourceOperations } from '@southneuhof/is-vue-framework'
-import { parseRpcResponse, resolveRoute, serializeIdentity, type RpcCRUDRoute } from '../crud/common'
+import { parseRpcResponse, resolveRoute, serializeIdentity, type RpcCRUDRoute } from './rpcRoute'
 import { normalizeCollection, normalizeRecord } from '../data/normalize'
 
 /**
@@ -67,5 +67,5 @@ export function rpcOperations<
   TCreate extends object = Record<string, unknown>,
   TUpdate extends object = TCreate
 >(resource: string): ResourceOperations<TRecord, TQuery, TCreate, TUpdate> {
-  return createRpcOperations<TRecord, TQuery, TCreate, TUpdate>(resolveRoute(resource as never))
+  return createRpcOperations<TRecord, TQuery, TCreate, TUpdate>(resolveRoute(resource))
 }

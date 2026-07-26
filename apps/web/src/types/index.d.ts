@@ -77,10 +77,6 @@ declare global {
     update?: UpdateConfig
   }
 
-  type CRUDCompositeConfig = ModelConfig & {
-    view?: ViewConfig
-    transaction?: TransationConfig
-  }
 }
 
 declare global {

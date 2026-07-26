@@ -4,7 +4,7 @@ import { rpc } from '@/framework/rpc'
 import services from '@/utils/services'
 import { createRpcOperations } from './rpcResource'
 import { roles, type Role } from './roles'
-import type { RpcCRUDRoute } from '../crud/common'
+import type { RpcCRUDRoute } from './rpcRoute'
 
 export interface User extends Record<string, unknown> {
   id: string

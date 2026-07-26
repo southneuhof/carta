@@ -1,8 +1,8 @@
 # Web Application Architecture
 
-- **Status:** Accepted direction; implementation pending
+- **Status:** Shipped; this document describes the implemented API
 - **Scope:** `apps/web` and reusable web framework APIs in `packages/is-vue-framework`
-- **Last updated:** 2026-07-26 (see the Addendum for decisions that supersede conflicting body text)
+- **Last updated:** 2026-07-26 (reconciled to the shipped API; the former Addendum is folded into the body)
 
 ## Context
 
@@ -156,17 +156,28 @@ export const incidents = defineResource({
 });
 ```
 
-The resource exposes native component prop bags:
+The resource exposes callable prop factories returning exact native props:
 
 ```ts
-incidents.list;
-incidents.detail(incidentId);
-incidents.create;
-incidents.update(incidentId);
+incidents.table();
+incidents.table({ searchParameters: { section_id } });
+incidents.detail({ id: incidentId });
+incidents.form();
+incidents.form({ id: incidentId });
+incidents.form({ initialData });
 ```
 
-These values satisfy the props of the corresponding visual surface shells. They
-are not resource objects interpreted by those components.
+`table(args?)` takes optional `{ searchParameters, namespace, query }`;
+`detail({ id })` requires the record identity; `form()` wires the create submit
+and create schema while `form({ id })` wires the record load, update submit, and
+update schema. Overloads make `id` non-nullable, so a possibly-undefined route
+param is a compile error rather than a silent create form. Results are memoized
+per normalized arguments, and load re-execution is governed by the deterministic
+query key, never by closure identity. Call-site overrides are plain object
+spread: `v-bind="{ ...roles.form({ id }), submit }"`.
+
+These values satisfy the props of the corresponding core components and surface
+shells. They are not resource objects interpreted by those components.
 
 ### Core components
 
@@ -226,10 +237,10 @@ components with CRUD assumptions.
 Normal route usage stays concise:
 
 ```vue
-<ListView v-bind="incidents.list" />
-<DetailView v-bind="incidents.detail(incidentId)" />
-<FormView v-bind="incidents.create" />
-<FormView v-bind="incidents.update(incidentId)" />
+<ListView :table="incidents.table()" />
+<DetailView :detail="incidents.detail({ id: incidentId })" />
+<FormView :form="incidents.form()" />
+<FormView :form="incidents.form({ id: incidentId })" />
 ```
 
 The primitives remain available for custom composition:
@@ -274,7 +285,7 @@ type FormSurface<TInput> = {
 Use exact surfaces:
 
 ```vue
-<ListView v-bind="incidents.list" />
+<ListView :table="incidents.table()" />
 ```
 
 Do not bind a whole resource:
@@ -415,8 +426,8 @@ Each table owns an independent query, derived from its resource surface by defau
 Normal usage requires no explicit `v-model:query`:
 
 ```vue
-<ListView v-bind="incidentActions.list" />
-<ListView v-bind="incidentVictims.list" />
+<ListView :table="incidentActions.table()" />
+<ListView :table="incidentVictims.table()" />
 ```
 
 The default URL namespace derives from the resource key:
@@ -431,10 +442,13 @@ uses that binding to parse, serialize, and update query state.
 Escape hatches remain available:
 
 ```vue
-<ListView v-bind="users.list" query-namespace="assignees" />
+<ListView :table="users.table({ namespace: 'assignees' })" />
 
-<ListView v-bind="users.list" :query="externallyControlledQuery" />
+<ListView :table="{ ...users.table(), query: externallyControlledQuery }" />
 ```
+
+`namespace` is the prop distinguishing duplicate table instances
+(`<Table namespace="archived">` -> `archived.page`).
 
 An explicit namespace is required when the same resource appears multiple times in
 one view. Framework code cannot infer the semantic difference between those table
@@ -563,12 +577,15 @@ resource-level policies. Vue surface shells own control layout and rendering.
 One-off presentation belongs in route/component slots.
 
 ```vue
-<ListView v-bind="incidents.list">
-  <template #row-controls="{ record }">
-    <IncidentControls :incident="record" />
+<ListView :table="incidents.table()" :controls="standardControls({ resource: incidents, surface: 'list' })">
+  <template #cell:status_code="{ record }">
+    <IncidentStatus :incident="record" />
   </template>
 </ListView>
 ```
+
+Standard controls are list, detail, create, update, and delete. Excel export and
+print are app-level custom controls, not framework standard controls.
 
 Resource-level control configuration is an override, not the primary way standard
 controls are declared.
@@ -605,6 +622,56 @@ Form renderer:
 Registry keys cover normal cases. Direct components, slots, and headless rendering
 provide escape hatches.
 
+## Dynamic field behavior
+
+A field's form projection may carry a `behavior` block of pure, synchronous
+function options over the reactive draft:
+
+```ts
+status_code: {
+  label: 'Status',
+  form: {
+    renderer: 'radio',
+    behavior: {
+      visible: ({ draft }) => draft.is_accident === true,
+      disabled: ({ draft }) => draft.locked === true,
+      props: ({ draft }) => ({ options: optionsFor(draft.section_id) }),
+    },
+  },
+}
+```
+
+Each option is evaluated in one Vue `computed` over the draft, so it subscribes
+to exactly the properties it reads and is re-tracked on every run — there is no
+depends-on list. `derived` computes a value the user cannot override;
+`resetWhen` clears the field when its result changes identity. `behavior`
+accepts functions only: constants belong in the static projection, and
+`derived` together with `resetWhen` on one field is a contradictory definition.
+
+A field whose `visible` evaluates false contributes no value to the submitted
+draft, and validation runs on the visibility-filtered draft. Behavior decides
+presence; schemas decide validity. Conditional requiredness belongs in the Zod
+schema (`refine` or a discriminated union), never duplicated in behavior.
+
+## Routing and URL state
+
+The app uses HTML5 history (`createWebHistory`). It stays fully static; the only
+hosting requirement is a fallback rule serving `index.html` for unknown paths.
+Legacy hash URLs are normalized client-side on boot, and legacy query-state URLs
+(`?roles_view=detail&roles_id=1`) redirect to their route. Links between sibling
+routes under a shared parent layout preserve the siblings' namespaced query
+params within that subtree; leaving the subtree drops them.
+
+## Vocabulary rules
+
+Public API names come from, in order of preference: the legacy framework where
+semantics genuinely match (`searchParameters`, `initialData`, `fields`, `load`,
+`submit`); Vue/HTML/TypeScript standard vocabulary (`props`, `namespace`,
+`visible`, `disabled`, `renderer`, `id`); plain English (`behavior`, `derived`).
+`renderer` is the field-config key for widget selection on every surface — never
+`type` or `control`; "control(s)" refers exclusively to action controls. Domain
+words never appear in framework APIs.
+
 ## Configuration composition
 
 Configuration merging uses explicit boundaries rather than a universal recursive
@@ -620,7 +687,7 @@ deep merge.
 Plain object and prop composition remains the local override mechanism:
 
 ```vue
-<ListView v-bind="incidents.list" query-namespace="dashboard-incidents" />
+<ListView :table="incidents.table({ namespace: 'dashboard-incidents' })" />
 ```
 
 When behavior requires substantial control flow, use ordinary TypeScript or Vue
@@ -648,14 +715,9 @@ The resource defines the project API mapping once:
 ```ts
 export const incidentActions = defineResource({
   key: "incident-actions",
-  rpc: rpc.incidentActions,
-  scope: {
-    incidentId: {
-      query: "incident_id",
-    },
-  },
   fields: incidentActionFields,
-  list: {
+  operations: createRpcOperations(rpc.incidentActions),
+  table: {
     fields: ["service_type_id", "vehicle_id", "officer_id", "stage"],
   },
 });
@@ -687,14 +749,16 @@ resource, routing, and state-machine responsibilities move elsewhere:
 
 | Current component | Target responsibility                                         |
 | ----------------- | ------------------------------------------------------------- |
-| `CRUDList`        | `ListView` visual shell plus `resource.list` prop bag         |
-| `CRUDDetail`      | `DetailView` visual shell plus `resource.detail(id)` prop bag |
-| `CRUDCreate`      | `FormView` visual shell plus `resource.create` prop bag       |
-| `CRUDUpdate`      | `FormView` visual shell plus `resource.update(id)` prop bag   |
+| `CRUDList`        | `ListView` shell plus `resource.table()`                      |
+| `CRUDDetail`      | `DetailView` shell plus `resource.detail({ id })`             |
+| `CRUDCreate`      | `FormView` shell plus `resource.form()`                       |
+| `CRUDUpdate`      | `FormView` shell plus `resource.form({ id })`                 |
 | `CRUDComposite`   | Removed; filesystem routes select surfaces                    |
 
-Compatibility wrappers may temporarily translate legacy model configs during
-migration. They are deprecated migration tools and are not part of the final API.
+There are no compatibility wrappers. The package had no consumers outside this
+monorepo, so the legacy components and their CRUD runtime were deleted outright
+under a major version bump; `docs/architecture/resource-migration-guide.md`
+records the manual translation.
 
 ## Suggested project structure
 
@@ -732,7 +796,9 @@ packages/is-vue-framework/src/
   runtime/
 ```
 
-## Migration strategy
+## Migration history
+
+The migration shipped in this order (see `plans/000`-`plans/009`):
 
 1. Establish a green, independent web verification baseline.
 2. Define typed adapter, load, field, resource, and surface contracts.
@@ -748,14 +814,12 @@ packages/is-vue-framework/src/
 10. Freeze legacy CRUD APIs, migrate remaining routes, then remove compatibility
     wrappers and `CRUDComposite`.
 
-## Prototype gates
+## Acceptance gates
 
-The architecture is accepted as direction but must pass a vertical prototype before
-its public API is frozen.
+These cases are covered by tests in the framework package and by
+`apps/web/src/framework/acceptance/QueryOwnershipFixture.vue`:
 
-The prototype must demonstrate:
-
-- `<ListView v-bind="resource.list" />` with automatic namespaced query state;
+- `<ListView :table="resource.table()" />` with automatic namespaced query state;
 - two tables in one route with independent URL query state;
 - an explicit query namespace override for duplicate resource tables;
 - API-backed and local/offline loaders using the same component contracts;
@@ -768,80 +832,8 @@ The prototype must demonstrate:
 - inferred standard controls with denied controls hidden;
 - `ListView`, `DetailView`, and `FormView` preserving the normal application look.
 
-The initial vertical slices are `roles`, `incidents`, and one non-resource custom
-page. Public APIs should not be declared stable until these cases work without
-reintroducing a configuration-driven state machine.
+The shipped vertical slices are `roles` (list, create, detail, edit, and nested
+permissions) and `users` (list, detail, edit, and role mapping). `incidents`
+lives in a downstream repository and is covered by the downstream checklist in
+the migration guide.
 
-## Addendum — decisions of 2026-07-26
-
-The following decisions were made after the body above was written. Where they
-conflict with body text, this addendum and `plans/000`-`plans/009` govern. Plan
-009 Step 4 reconciles the full document to the shipped API.
-
-### Resource prop factories, not static prop bags
-
-Resources expose callable factories returning exact native props
-(`TableProps`/`DetailProps`/`FormProps`), because detail and form props depend
-on information only the route holds:
-
-- `table(args?)` — optional `{ searchParameters, namespace }`. Parent scoping is
-  an ordinary `searchParameters` entry supplied by the route; the framework has
-  no `parent` vocabulary.
-- `detail({ id })` — record identity required.
-- `form()` wires create submit + create schema; `form({ id })` wires record load
-  + update submit + update schema; `form({ initialData })` supports prefilled
-  create (clone/draft) with `initialData` following the universal value-or-`load`
-  rule. Overloads make `id` non-nullable so a possibly-undefined route param is
-  a compile error, never a silent create form.
-
-Form itself remains mode-free: the factory wires load/submit/schema before Form
-sees props, and the factory that wired a submit attaches the matching operation
-schema. Factory results are memoized per normalized arguments; load re-execution
-is governed by the deterministic query key, never closure identity. Call-site
-overrides are plain object spread: `v-bind="{ ...roles.form({ id }), submit }"`.
-Body examples such as `resource.list`/`resource.table` read as factory calls.
-
-### Field `behavior` block (successor to `FieldDependency`)
-
-A field's form projection may carry a `behavior` block of pure, synchronous
-function options — `visible`, `disabled`, `props`, `derived`, `resetWhen` — over
-a draft context. There is no manual depends-on list: each function is evaluated
-in one Vue `computed` over the reactive draft, subscribing to exactly the
-properties it reads, re-tracked per run. Constants belong in the static
-projection; `behavior` accepts only functions. Behavior-driven `props`
-shallow-merge over static `props`. A field whose `visible` evaluates false
-contributes no value to the submitted draft, and validation runs on the
-visibility-filtered draft. Behavior decides presence; schemas decide validity.
-
-### Vocabulary rules
-
-Public API names come from, in order of preference: the legacy framework where
-semantics genuinely match (`searchParameters`, `initialData`, `fields`, `load`,
-`submit`); Vue/HTML/TypeScript standard vocabulary (`props`, `namespace`,
-`visible`, `disabled`, `renderer`, `id`); plain English (`behavior`, `derived`).
-Specifically: `renderer` is the field-config key for widget selection on every
-surface (never `type` or `control`); "control(s)" refers exclusively to action
-controls; `namespace` is the prop distinguishing duplicate table instances
-(`<Table namespace="archived">` → `archived.page`). Domain words never appear in
-framework APIs. Excel export and print are app-level custom controls, not
-framework standard controls.
-
-### Routing and URL state
-
-The web app moves from hash history to HTML5 history (`createWebHistory`). The
-app stays fully static; the only hosting requirement is a fallback rule serving
-`index.html` for unknown paths. Legacy hash URLs are normalized client-side on
-boot. Links between sibling routes under a shared parent layout (tab-style
-detail pages) preserve the siblings' namespaced query params within that
-subtree; leaving the subtree drops them.
-
-### Clean break and sequencing
-
-`@southneuhof/is-vue-framework` has no consumers outside this monorepo (verified
-before deletion in plan 009). There are no compatibility wrappers, prop
-normalization, or deprecation cycles: new cores are separate components, legacy
-components stay untouched until plan 009 deletes them wholesale under a major
-version bump. Plans 001-006 execute at full scope, sequentially, each with
-complete verification gates; a walking-skeleton re-scoping was considered and
-rejected because it broke plan self-containment, and the framework is not
-co-developed with an app.

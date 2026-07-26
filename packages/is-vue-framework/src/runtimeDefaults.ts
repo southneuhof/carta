@@ -1,7 +1,5 @@
 import {
   missingRuntimeCapability,
-  type FrameworkCRUDDetailRuntime,
-  type FrameworkCRUDListRuntime,
   type FrameworkDetailRuntime,
   type FrameworkFileUpload,
   type FrameworkImageURLResolver,
@@ -72,17 +70,7 @@ export function defaultImageURLResolver(payload: Record<string, any> | string, r
   return { imageURL: String(data?.url ?? data?.imageURL ?? data?.image_url ?? ''), thumbnailURL: String(data?.url ?? data?.thumbnailURL ?? data?.thumbnail_url ?? data?.thumbnail ?? '') }
 }
 
-export async function defaultCRUDListOnExport(params: { exportAPI: string; params: Record<string, any>; listConfig: any }, runtime?: FrameworkCRUDListRuntime) {
-  const callback = runtime?.onExport
-  if (!callback) missingRuntimeCapability('crudList.onExport')
-  return callback(params)
-}
 
-export async function defaultCRUDDetailOnExport(config: any, id: number, runtime?: FrameworkCRUDDetailRuntime) {
-  const callback = runtime?.onExport
-  if (!callback) missingRuntimeCapability('crudDetail.onExport')
-  return callback(config, id)
-}
 
 export type FileInputUploadRuntime = FrameworkFileUpload
 export type ImageInputUploadRuntime = FrameworkFileUpload

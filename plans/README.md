@@ -17,7 +17,7 @@ Drift-check semantics: every plan diffs `edeff25..HEAD` over its watched paths. 
 | [006](006-build-native-resource-definitions.md) | Build native resource definitions and controls | P1 | L | 001-005 | DONE |
 | [007](007-migrate-roles-as-nested-slice.md) | Migrate roles and permissions as nested slice | P1 | L | 006 | DONE |
 | [008](008-migrate-users-and-prove-complexity.md) | Migrate users and prove complex cases | P1 | L | 007 | DONE |
-| [009](009-retire-legacy-crud-architecture.md) | Retire legacy CRUD architecture and publish guidance | P2 | L | 007, 008 | TODO |
+| [009](009-retire-legacy-crud-architecture.md) | Retire legacy CRUD architecture and publish guidance | P2 | L | 007, 008 | DONE |
 
 Status values: `TODO`, `IN PROGRESS`, `DONE`, `BLOCKED (reason)`, or `REJECTED (rationale)`.
 

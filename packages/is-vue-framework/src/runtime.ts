@@ -1,15 +1,4 @@
 import type { InjectionKey } from 'vue'
-import type { CRUDIdentity, CRUDListResult, CRUDQuery, CRUDRecord, CRUDResource } from './adapters/crudOperations'
-
-export interface FrameworkCRUDRuntime {
-  list?: (params: { resource: CRUDResource; query?: CRUDQuery }) => Promise<CRUDListResult>
-  detail?: (params: { resource: CRUDResource; id: CRUDIdentity | CRUDIdentity[]; query?: CRUDQuery }) => Promise<CRUDRecord | undefined>
-  create?: (params: { resource: CRUDResource; input: CRUDRecord }) => Promise<CRUDRecord | void>
-  update?: (params: { resource: CRUDResource; id: CRUDIdentity | CRUDIdentity[]; input: CRUDRecord }) => Promise<CRUDRecord | void>
-  delete?: (params: { resource: CRUDResource; id: CRUDIdentity }) => Promise<unknown>
-  export?: (params: { resource: CRUDResource; query: CRUDQuery; config: Record<string, any> }) => Promise<unknown>
-  reorder?: (params: { resource: CRUDResource; event: any }) => Promise<unknown> | unknown
-}
 
 export interface FrameworkTableRuntime { getData?: (getAPI: string, searchParameters?: Record<string, any>) => Promise<{ data: Record<string, any>[]; totalPage?: number; total?: number }>; fieldTypes?: Record<string, any> }
 export interface FrameworkDetailRuntime { getData?: (getAPI: string, searchParameters?: Record<string, any>, dataID?: string | number) => Promise<Record<string, any>>; fieldTypes?: Record<string, any> }
@@ -23,11 +12,8 @@ export interface FrameworkUploadRuntime { fileUpload?: FrameworkFileUpload; file
 export interface FrameworkLocationRuntime { getPlaceDetail?: (placeId: string | number) => Promise<{ lat: number; lng: number; formatted_address?: string }>; getPlaceAutocomplete?: (input: string) => Promise<Record<string, any>[]>; getMapConfig?: () => Promise<{ apiKey: string }> }
 export interface FrameworkFileManagerRuntime { listFiles?: (params: Record<string, any>) => Promise<any[]>; uploadFile?: FrameworkFileUpload; createFolder?: (dir: string, folderName: string) => Promise<any>; deleteFile?: (path: string) => Promise<any> }
 export interface FrameworkDynamicFormRuntime { getTemplate?: (templateAPI: string) => Promise<any[]> }
-export interface FrameworkCRUDListRuntime { onDelete?: (endpoint: string, id: string | number) => Promise<any>; onExport?: (params: { exportAPI: string; params: Record<string, any>; listConfig: any }) => Promise<any>; onDragChange?: (reorderAPI: string, event: any) => Promise<any> | void }
-export interface FrameworkCRUDDetailRuntime { onExport?: (detailConfig: any, id: number) => Promise<any> }
 
 export interface FrameworkRuntime {
-  crud?: FrameworkCRUDRuntime
   table?: FrameworkTableRuntime
   detail?: FrameworkDetailRuntime
   select?: FrameworkSelectRuntime
@@ -40,8 +26,6 @@ export interface FrameworkRuntime {
   location?: FrameworkLocationRuntime
   fileManager?: FrameworkFileManagerRuntime
   dynamicForm?: FrameworkDynamicFormRuntime
-  crudList?: FrameworkCRUDListRuntime
-  crudDetail?: FrameworkCRUDDetailRuntime
 }
 
 export function missingRuntimeCapability(name: string): never {

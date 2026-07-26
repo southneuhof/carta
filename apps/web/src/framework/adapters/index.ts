@@ -9,12 +9,8 @@ import * as upload from './upload'
 import * as location from './location'
 import * as fileManager from './fileManager'
 import * as dynamicForm from './dynamicForm'
-import * as crudList from './crudList'
-import * as crudDetail from './crudDetail'
-import * as crud from './crud'
 
 export const frameworkRuntimeCapabilities = {
-  crud,
   table,
   detail,
   select,
@@ -25,6 +21,4 @@ export const frameworkRuntimeCapabilities = {
   location,
   fileManager,
   dynamicForm,
-  crudList,
-  crudDetail,
 } satisfies FrameworkRuntime

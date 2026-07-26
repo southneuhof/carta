@@ -52,17 +52,5 @@ export {
   parseFilenameFromContentDisposition,
   downloadBlob,
 } from './services'
-export { resolveCRUDOperations, useCRUDOperations } from './adapters/crudOperations'
 export type { TableResult, TableLoad, DetailLoad, FormLoad, FormSubmit } from './components/composites/types'
-export type {
-  CRUDCompositeConfig,
-  CRUDResource,
-  CRUDOperations,
-  CRUDOperationOverrides,
-  ResourceRecord,
-  ResourceCreateInput,
-  ResourceUpdateInput,
-  ResourceQuery,
-  ResourceIdentity,
-} from './adapters/crudOperations'
 export { parseURL as parseServiceURL } from './services'

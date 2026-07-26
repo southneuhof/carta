@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { defineResource } from '@southneuhof/is-vue-framework'
 import { createRpcOperations } from './rpcResource'
-import type { RpcCRUDRoute } from '../crud/common'
+import type { RpcCRUDRoute } from './rpcRoute'
 
 const ok = (payload: unknown) => ({ ok: true, json: async () => payload } as unknown as Response)
 

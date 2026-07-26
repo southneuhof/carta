@@ -2,7 +2,7 @@ import { defineFields, defineResource, fromZod } from '@southneuhof/is-vue-frame
 import { roleSchemas } from '@southneuhof/contracts'
 import { rpc } from '@/framework/rpc'
 import { createRpcOperations } from './rpcResource'
-import type { RpcCRUDRoute } from '../crud/common'
+import type { RpcCRUDRoute } from './rpcRoute'
 
 export interface Role extends Record<string, unknown> {
   id: string
