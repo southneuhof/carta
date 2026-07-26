@@ -2,6 +2,7 @@ export type * from './contracts'
 export * from './query'
 export * from './fields'
 export * from './validation'
+export { Table, Detail, Form } from './components/core'
 export {
   createRendererRegistry,
   createRendererRegistries,

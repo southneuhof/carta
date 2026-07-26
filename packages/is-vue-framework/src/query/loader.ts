@@ -32,6 +32,9 @@ export interface LoaderState<TResult> {
   refresh: () => Promise<void>
 }
 
+/** Sentinel standing in for a loader that legitimately resolved nothing. */
+const missingResult = Symbol('is-vue-framework-missing-result')
+
 export function useLoader<TContext extends LoadSignalContext, TResult>(
   options: LoaderOptions<TContext, TResult>,
 ): LoaderState<TResult> {
@@ -57,13 +60,17 @@ export function useLoader<TContext extends LoadSignalContext, TResult>(
       if (!load) throw new Error('[is-vue-framework] No loader supplied.')
       const context = { ...toValue(options.context), signal } as TContext
       const result = await load(context)
-      return options.normalize ? options.normalize(result) : result
+      const normalized = options.normalize ? options.normalize(result) : (result as TResult)
+      // The cache rejects `undefined`, but "no record" is a legitimate result.
+      return (normalized ?? missingResult) as TResult
     },
   })
 
-  const data = computed(() => (externalData.value !== undefined ? externalData.value : query.data.value)) as Ref<
-    TResult | undefined
-  >
+  const data = computed(() => {
+    if (externalData.value !== undefined) return externalData.value
+    const value = query.data.value as TResult | typeof missingResult | undefined
+    return value === missingResult ? undefined : value
+  }) as Ref<TResult | undefined>
   const error = computed(() =>
     query.error.value ? adapters.data.normalizeError(query.error.value) : undefined,
   ) as Ref<SubmitError | undefined>

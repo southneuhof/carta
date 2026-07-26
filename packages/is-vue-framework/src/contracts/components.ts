@@ -41,6 +41,8 @@ export interface DetailProps<TRecord extends object = Record<string, unknown>> {
   data?: TRecord
   load?: Load<RecordLoadContext, RecordResult<TRecord>>
   searchParameters?: Record<string, unknown>
+  /** Cache identity shared with other views of the same record. */
+  namespace?: QueryNamespace
 }
 
 export type FormSubmitHandler<TInput extends object = Record<string, unknown>, TResult = unknown> = (
@@ -58,4 +60,8 @@ export interface FormProps<TInput extends object = Record<string, unknown>, TRes
   schema?: ValidationSchema<TInput>
   /** Normalizes a rejected submission into field-level issues. */
   normalizeError?: (error: unknown) => SubmitError
+  /** Cache identity for the optional initial-data load. */
+  namespace?: QueryNamespace
+  /** Renders every input read-only. */
+  disabled?: boolean
 }
