@@ -132,3 +132,126 @@ describe('createDrizzleSource', () => {
     expect(assignmentRows).toEqual([{ productId: 'product-1', variantId: 'brand-a' }])
   })
 })
+
+const owners = pgTable('owners', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+})
+
+const children = pgTable('children', {
+  id: text('id').primaryKey(),
+  ownerId: text('owner_id'),
+})
+
+const child = createEntity({
+  table: children,
+  schemas: {
+    create: z.object({ id: z.string() }),
+    update: z.object({ id: z.string() }),
+    select: z.object({ id: z.string(), ownerId: z.string().nullable() }),
+  },
+})
+
+const owner = createEntity({
+  table: owners,
+  schemas: {
+    create: z.object({ id: z.string(), name: z.string(), children: z.array(z.object({ id: z.string() })).optional() }),
+    update: z.object({ name: z.string().optional(), children: z.array(z.object({ id: z.string() })).optional() }),
+    select: z.object({ id: z.string(), name: z.string(), children: z.array(child.schemas.select) }),
+  },
+})
+
+const ownerRelations = defineRelationsPart({ owners, children }, (r) => ({
+  owners: {
+    children: r.many.children({ from: r.owners.id, to: r.children.ownerId }),
+  },
+}))
+
+const ownerDomainSchema = defineDomainSchema([
+  defineDomainPart({ tables: { owners, children }, entities: [owner, child], relations: [ownerRelations] }),
+])
+
+type Statement = { on: string; kind: string }
+
+/**
+ * Mock db that records which db object (`base` or `tx`) each statement ran on,
+ * and can be told to throw on the first statement of a given kind.
+ */
+function createRecordingDb({ supportsTransaction = true, throwOn }: { supportsTransaction?: boolean; throwOn?: string } = {}) {
+  const statements: Statement[] = []
+
+  const build = (on: string) => {
+    const record = async <T>(kind: string, value: T): Promise<T> => {
+      statements.push({ on, kind })
+      if (throwOn === kind) throw new Error(`statement "${kind}" failed`)
+      return value
+    }
+
+    const db: Record<string, unknown> = {
+      query: {
+        owners: { findFirst: async () => (await record('materialize', { id: 'owner-1', name: 'Owner', children: [{ id: 'child-1', ownerId: 'owner-1' }] })) },
+        products: { findFirst: async () => (await record('materialize', { id: 'product-1', name: 'Body Soap', variants: [] })) },
+      },
+      select: () => ({
+        from: () => ({
+          where: () => ({
+            limit: async () => record('select', [{ id: 'owner-1', name: 'Owner' }]),
+            then: (resolve: (value: unknown[]) => void) => record('select', [{ id: 'owner-1', name: 'Owner' }]).then(resolve),
+          }),
+          then: (resolve: (value: unknown[]) => void) => record('select', [{ id: 'owner-1', name: 'Owner' }]).then(resolve),
+        }),
+      }),
+      insert: () => ({ values: (input: unknown) => ({ returning: async () => record('insert', Array.isArray(input) ? input : [input]) }) }),
+      update: () => ({ set: () => ({ where: () => ({ returning: async () => record('update', [{ id: 'owner-1', name: 'Owner' }]) }) }) }),
+      delete: () => ({ where: () => ({ returning: async () => record('delete', []) }) }),
+    }
+
+    return db
+  }
+
+  const base = build('base')
+  if (supportsTransaction) {
+    base.transaction = async <T>(fn: (tx: unknown) => Promise<T>) => {
+      statements.push({ on: 'base', kind: 'transaction' })
+      return fn(build('tx'))
+    }
+  }
+
+  return { db: base, statements }
+}
+
+describe('createDrizzleSource transactions', () => {
+  it('runs a failing through-relation create inside a transaction and propagates the error', async () => {
+    const { db, statements } = createRecordingDb({ throwOn: 'insert' })
+    const source = createDrizzleSource({ db, table: products, domainSchema, entity: product, schemas: product.schemas })
+
+    await expect(
+      source.create({ input: { id: 'product-1', name: 'Body Soap', variants: [{ id: 'body' }] }, context: undefined as never }),
+    ).rejects.toThrow('statement "insert" failed')
+
+    expect(statements[0]).toEqual({ on: 'base', kind: 'transaction' })
+    expect(statements.slice(1).every((statement) => statement.on === 'tx')).toBe(true)
+  })
+
+  it('runs every update statement for an array relation on the transaction', async () => {
+    const { db, statements } = createRecordingDb()
+    const source = createDrizzleSource({ db, table: owners, domainSchema: ownerDomainSchema, entity: owner, schemas: owner.schemas })
+
+    const updated = await source.update({ id: 'owner-1', input: { name: 'Owner', children: [{ id: 'child-1' }] }, context: undefined as never })
+
+    expect(updated).toEqual({ id: 'owner-1', name: 'Owner', children: [{ id: 'child-1', ownerId: 'owner-1' }] })
+    expect(statements[0]).toEqual({ on: 'base', kind: 'transaction' })
+    expect(statements.slice(1).map((statement) => statement.kind)).toEqual(['update', 'update', 'update', 'materialize'])
+    expect(statements.slice(1).every((statement) => statement.on === 'tx')).toBe(true)
+  })
+
+  it('falls back to direct statements when the db has no transaction support', async () => {
+    const { db, statements } = createRecordingDb({ supportsTransaction: false })
+    const source = createDrizzleSource({ db, table: owners, domainSchema: ownerDomainSchema, entity: owner, schemas: owner.schemas })
+
+    const created = await source.create({ input: { id: 'owner-1', name: 'Owner', children: [{ id: 'child-1' }] }, context: undefined as never })
+
+    expect(created).toEqual({ id: 'owner-1', name: 'Owner', children: [{ id: 'child-1', ownerId: 'owner-1' }] })
+    expect(statements.every((statement) => statement.on === 'base')).toBe(true)
+  })
+})

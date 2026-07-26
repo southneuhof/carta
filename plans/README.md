@@ -28,7 +28,7 @@ Planned against commit `694c905` by a comparative audit of `packages/sprindle` a
 | Plan | Title | Priority | Effort | Depends on | Status |
 |---|---|---|---|---|---|
 | [010](010-backend-verification-baseline.md) | Establish a backend verification baseline (CI + lint) | P1 | S | — | DONE |
-| [011](011-atomic-source-writes.md) | Make Drizzle source writes atomic | P1 | M | 010 | TODO |
+| [011](011-atomic-source-writes.md) | Make Drizzle source writes atomic | P1 | M | 010 | DONE |
 | [012](012-working-list-queries.md) | Implement list queries (pagination/filter/sort/search, single-query reads) | P1 | L | 010, 011 | TODO |
 | [013](013-error-contract.md) | Establish a single error contract | P1 | M | 010 | TODO |
 | [014](014-authz-seam.md) | Add the authorization seam (identity, 401/403) | P1 | M | 013 | TODO |

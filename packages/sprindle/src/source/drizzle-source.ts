@@ -38,6 +38,11 @@ type DrizzleDb = {
       returning: () => Promise<unknown[]>
     }
   }
+  transaction?: <T>(fn: (tx: DrizzleDb) => Promise<T>) => Promise<T>
+}
+
+async function withTransaction<T>(database: DrizzleDb, fn: (tx: DrizzleDb) => Promise<T>): Promise<T> {
+  return database.transaction ? database.transaction(fn) : fn(database)
 }
 
 type ValidationError = Error & { status: 400; code: 'validation_error' }
@@ -80,14 +85,14 @@ export function createDrizzleSource<TRecord, TCreate, TUpdate>({
     return parseCompositeId(id)
   }
 
-  const materialize = async (input: unknown | unknown[]): Promise<TRecord | TRecord[]> => {
-    if (Array.isArray(input)) return Promise.all(input.map((row) => materializeOne(row)))
-    return materializeOne(input)
+  const materialize = async (input: unknown | unknown[], reader: DrizzleDb = database): Promise<TRecord | TRecord[]> => {
+    if (Array.isArray(input)) return Promise.all(input.map((row) => materializeOne(row, reader)))
+    return materializeOne(input, reader)
   }
-  const materializeOne = async (row: unknown): Promise<TRecord> => {
+  const materializeOne = async (row: unknown, reader: DrizzleDb = database): Promise<TRecord> => {
     if (!tableKey || !withRelations) return schemas.select.parse(row)
     const id = getRowId(row, primaryKey)
-    const hydrated = await database.query?.[tableKey]?.findFirst({ where: wherePrimaryKeyObject(id), with: withRelations })
+    const hydrated = await reader.query?.[tableKey]?.findFirst({ where: wherePrimaryKeyObject(id), with: withRelations })
     if (!hydrated) throw new Error(`Record not found while materializing table "${tableKey}".`)
     return schemas.select.parse(hydrated)
   }
@@ -105,25 +110,29 @@ export function createDrizzleSource<TRecord, TCreate, TUpdate>({
     async create({ input }) {
       const { row, relations } = splitRelationInput(schemas.create.parse(input), relationByField)
       applyOneRelationValues(row, relations, tableColumns)
-      const rows = await database.insert(table).values(row).returning()
-      if (rows[0]) {
-        const id = getReturnedId(rows[0], primaryKey)
-        await applyManyRelationValues(database, id, relations, primaryKey, tableColumns)
-        return (await materialize(rows[0])) as TRecord
-      }
-      return schemas.select.parse(rows[0])
+      return withTransaction(database, async (tx) => {
+        const rows = await tx.insert(table).values(row).returning()
+        if (rows[0]) {
+          const id = getReturnedId(rows[0], primaryKey)
+          await applyManyRelationValues(tx, id, relations, primaryKey, tableColumns)
+          return (await materialize(rows[0], tx)) as TRecord
+        }
+        return schemas.select.parse(rows[0])
+      })
     },
     async update({ id, input }) {
       const { row, relations } = splitRelationInput(schemas.update.parse(input), relationByField)
       applyOneRelationValues(row, relations, tableColumns)
-      const rows = hasKeys(row)
-        ? await database.update(table).set(row).where(wherePrimaryKey(id)).returning()
-        : await database.select().from(table).where(wherePrimaryKey(id)).limit(1)
-      if (rows[0]) {
-        await applyManyRelationValues(database, id, relations, primaryKey, tableColumns)
-        return (await materialize(rows[0])) as TRecord
-      }
-      return rows[0] ? schemas.select.parse(rows[0]) : null
+      return withTransaction(database, async (tx) => {
+        const rows = hasKeys(row)
+          ? await tx.update(table).set(row).where(wherePrimaryKey(id)).returning()
+          : await tx.select().from(table).where(wherePrimaryKey(id)).limit(1)
+        if (rows[0]) {
+          await applyManyRelationValues(tx, id, relations, primaryKey, tableColumns)
+          return (await materialize(rows[0], tx)) as TRecord
+        }
+        return rows[0] ? schemas.select.parse(rows[0]) : null
+      })
     },
     async delete({ id }) {
       const rows = await database.delete(table).where(wherePrimaryKey(id)).returning()
