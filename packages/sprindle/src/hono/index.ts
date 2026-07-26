@@ -1,5 +1,6 @@
-import type { Hono, TypedResponse } from 'hono'
+import type { Context, Hono, TypedResponse } from 'hono'
 import type { z } from 'zod/v4'
+import { toHttpError } from '../errors'
 import type { DefinedModel, ModelRoute, ModelRuntimeContext } from '../model'
 
 type ListQuery = {
@@ -132,4 +133,18 @@ export function installSprindle<const TApp extends Hono<any, any>, const TInstal
   }
 
   return app as never
+}
+
+/** Hono `app.onError` handler: renders HttpErrors through the envelope and hides everything else behind `internal_error`. */
+export function sprindleOnError(error: Error, c: Context) {
+  const httpError = toHttpError(error)
+  if (httpError) return c.json({ error: httpError.code, message: httpError.message || undefined, issues: httpError.issues }, httpError.status as 400)
+  // plan 015 replaces this with the injected logger
+  console.error(error)
+  return c.json({ error: 'internal_error' }, 500)
+}
+
+/** Hono `app.notFound` handler: one envelope for unmatched routes. */
+export function sprindleNotFound(c: Context) {
+  return c.json({ error: 'not_found' }, 404)
 }

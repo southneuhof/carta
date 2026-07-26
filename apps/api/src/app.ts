@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { installSprindle } from '@southneuhof/sprindle/hono'
+import { installSprindle, sprindleNotFound, sprindleOnError } from '@southneuhof/sprindle/hono'
 import { getDb } from './db'
 import { routes } from './routes'
 import { getAuth } from './routes/auth/auth'
@@ -10,6 +10,8 @@ if (!appOrigin) throw new Error('APP_ORIGIN is required.')
 
 export const app = installSprindle(
   new Hono()
+    .onError(sprindleOnError)
+    .notFound(sprindleNotFound)
     .use(
       '*',
       cors({

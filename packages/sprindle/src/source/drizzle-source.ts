@@ -2,6 +2,7 @@ import { and, asc, count, desc, eq, getTableColumns, getTableName, ilike, inArra
 import type { AnyColumn } from 'drizzle-orm'
 import { PrimaryKeyBuilder } from 'drizzle-orm/pg-core'
 import type { DomainEntity, DomainRelationField, DomainSchema } from '../model/domain-schema'
+import { validationError } from '../errors'
 import type { ModelRuntimeEntity, ModelSource } from './model-source'
 
 const tableSymbols = (Table as unknown as { Symbol: Record<'ExtraConfigBuilder' | 'ExtraConfigColumns', symbol> }).Symbol
@@ -48,7 +49,6 @@ async function withTransaction<T>(database: DrizzleDb, fn: (tx: DrizzleDb) => Pr
   return database.transaction ? database.transaction(fn) : fn(database)
 }
 
-type ValidationError = Error & { status: 400; code: 'validation_error' }
 type RelationWrite = { relation: DomainRelationField; value: unknown }
 
 export type CreateDrizzleSourceConfig<TRecord, TCreate, TUpdate> = {
@@ -368,10 +368,6 @@ function getOwnerColumnValue(ownerId: unknown, primaryKey: { key: string; column
 
 function unique(values: unknown[]) {
   return [...new Set(values)]
-}
-
-function validationError(message: string): ValidationError {
-  return Object.assign(new Error(message), { status: 400 as const, code: 'validation_error' as const })
 }
 
 export function getPrimaryKeyColumns(table: unknown): AnyColumn[] {

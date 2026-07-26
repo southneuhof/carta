@@ -350,6 +350,20 @@ describe('products API', () => {
     expect(await unknownSort.json()).toMatchObject({ error: 'validation_error', message: 'Unknown sort column "category".' })
   })
 
+  it('answers unknown paths and invalid relation writes through the error contract', async () => {
+    const unknownPath = await app.request('/products/does-not-exist')
+    expect(unknownPath.status).toBe(404)
+    expect(await unknownPath.json()).toEqual({ error: 'not_found' })
+
+    const invalidRelation = await app.request('/products/create', {
+      method: 'POST',
+      body: JSON.stringify({ id: 'product-9', name: 'Ninth', sku: 'NINTH-9', variants: [{}] }),
+      headers: { 'Content-Type': 'application/json' },
+    })
+    expect(invalidRelation.status).toBe(400)
+    expect(await invalidRelation.json()).toMatchObject({ error: 'validation_error', issues: [{ field: 'variants.0.id' }] })
+  })
+
   it('returns not_found for missing detail and update records', async () => {
     const detail = await app.request('/products/detail/missing-product')
     expect(detail.status).toBe(404)

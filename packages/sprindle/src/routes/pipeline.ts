@@ -1,3 +1,4 @@
+import { toHttpError } from '../errors'
 import type { RouteHandlerArgs, RoutePipeline, ValidationIssue } from '../model/route-types'
 import type { RouteActionResult } from './define-route'
 
@@ -28,6 +29,8 @@ export async function runRoutePipeline<TArgs extends RouteHandlerArgs>(
   } catch (error) {
     const response = (await runError(args, error, routePipeline)) ?? (await runError(args, error, modelPipeline))
     if (response) return response
+    const httpError = toHttpError(error)
+    if (httpError) return args.c.json({ error: httpError.code, message: httpError.message || undefined, issues: httpError.issues }, httpError.status as 400)
     throw error
   }
 }
