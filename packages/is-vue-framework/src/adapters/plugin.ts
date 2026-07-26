@@ -7,6 +7,7 @@ import { frameworkDefaultsKey, resolveFrameworkDefaults, type FrameworkDefaultsI
 import { frameworkAdaptersKey, resolveFrameworkAdapters, type FrameworkAdaptersInput } from './projectAdapters'
 import { createFrameworkQueryClient, frameworkQueryClientKey } from '../query/client'
 import { createRendererRegistries, rendererRegistriesKey, type RendererRegistriesInput } from '../renderers/registry'
+import { registerResourceRuntime } from '../resources/runtime'
 
 export interface FrameworkPluginOptions {
   runtime: FrameworkRuntime
@@ -45,5 +46,6 @@ export const FrameworkPlugin: Plugin<[runtimeOrOptions: FrameworkRuntime | Frame
     const queryClient = options?.queryClient ?? createFrameworkQueryClient(adapters.queryDefaults)
     app.provide(frameworkQueryClientKey, queryClient)
     app.use(VueQueryPlugin, { queryClient })
+    registerResourceRuntime({ adapters, queryClient })
   },
 }

@@ -4,6 +4,7 @@ export * from './fields'
 export * from './validation'
 export { Table, Detail, Form } from './components/core'
 export * from './components/views'
+export * from './resources'
 export {
   createRendererRegistry,
   createRendererRegistries,
@@ -17,6 +18,7 @@ export {
   resolveFrameworkAdapters,
   useFrameworkAdapters,
   defaultDataAdapter,
+  defaultAccessAdapter,
   defaultQueryRuntimeDefaults,
   createMemoryQueryLocationAdapter,
 } from './adapters/projectAdapters'

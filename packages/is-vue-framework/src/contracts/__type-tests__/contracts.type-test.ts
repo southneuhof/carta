@@ -5,13 +5,13 @@
  * They deliberately live outside `__tests__/`, which `tsconfig.json` excludes.
  */
 
+import type { Resource } from '../../resources'
 import type {
   CollectionResult,
   DetailProps,
   FormProps,
   Load,
   RecordLoadContext,
-  Resource,
   TableProps,
   CollectionLoadContext,
 } from '../index'

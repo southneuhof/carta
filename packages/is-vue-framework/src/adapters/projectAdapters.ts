@@ -8,6 +8,7 @@
  */
 import { inject, type InjectionKey } from 'vue'
 import type {
+  AccessAdapter,
   CollectionMeta,
   CollectionResult,
   QueryLocationAdapter,
@@ -42,6 +43,8 @@ export interface FrameworkAdaptersInput {
   data?: Partial<DataAdapter>
   query?: QueryLocationAdapter
   schemas?: SchemaAdapter
+  /** UI access policy. Backend authorization stays authoritative. */
+  access?: AccessAdapter
   queryDefaults?: QueryRuntimeDefaults
 }
 
@@ -49,6 +52,7 @@ export interface ResolvedFrameworkAdapters {
   data: DataAdapter
   query: QueryLocationAdapter
   schemas?: SchemaAdapter
+  access: AccessAdapter
   queryDefaults: Required<QueryRuntimeDefaults>
 }
 
@@ -126,11 +130,15 @@ export const defaultQueryRuntimeDefaults: Required<QueryRuntimeDefaults> = {
   refetchOnWindowFocus: false,
 }
 
+/** Permissive by default: the backend, not the UI, is the security boundary. */
+export const defaultAccessAdapter: AccessAdapter = { allows: () => true }
+
 export function resolveFrameworkAdapters(input: FrameworkAdaptersInput = {}): ResolvedFrameworkAdapters {
   return {
     data: { ...defaultDataAdapter, ...input.data },
     query: input.query ?? createMemoryQueryLocationAdapter(),
     schemas: input.schemas,
+    access: input.access ?? defaultAccessAdapter,
     queryDefaults: { ...defaultQueryRuntimeDefaults, ...input.queryDefaults },
   }
 }

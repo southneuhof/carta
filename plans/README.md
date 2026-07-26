@@ -14,7 +14,7 @@ Drift-check semantics: every plan diffs `edeff25..HEAD` over its watched paths. 
 | [003](003-derive-validation-from-schemas.md) | Derive validation from client-safe schemas | P1 | L | 000, 002 | DONE |
 | [004](004-rebuild-core-components.md) | Rebuild Form, Table, and Detail cores | P1 | L | 001, 002, 003 | DONE |
 | [005](005-add-resource-view-shells.md) | Add declarative resource view shells | P1 | L | 004 | DONE |
-| [006](006-build-native-resource-definitions.md) | Build native resource definitions and controls | P1 | L | 001-005 | TODO |
+| [006](006-build-native-resource-definitions.md) | Build native resource definitions and controls | P1 | L | 001-005 | DONE |
 | [007](007-migrate-roles-as-nested-slice.md) | Migrate roles and permissions as nested slice | P1 | L | 006 | TODO |
 | [008](008-migrate-users-and-prove-complexity.md) | Migrate users and prove complex cases | P1 | L | 007 | TODO |
 | [009](009-retire-legacy-crud-architecture.md) | Retire legacy CRUD architecture and publish guidance | P2 | L | 007, 008 | TODO |

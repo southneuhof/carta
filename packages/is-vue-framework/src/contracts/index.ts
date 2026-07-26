@@ -65,5 +65,4 @@ export type {
   UpdateFormFactoryArguments,
   ResourcePropFactories,
   ResourceInvalidationArguments,
-  Resource,
 } from './resource'
