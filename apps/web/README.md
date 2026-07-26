@@ -28,6 +28,15 @@ Legacy `/#/path` URLs are normalized to their history-mode equivalent on boot,
 and legacy roles query-state URLs (`?roles_view=...`) redirect to the matching
 route.
 
+## Acceptance fixture
+
+`src/framework/acceptance/QueryOwnershipFixture.vue` is a permanent contract
+test, not demo code, and it is deliberately unreachable from navigation. It
+proves independent per-table query namespaces, an explicit namespace for a
+duplicated resource, synchronous and asynchronous loaders behind one contract,
+local query state that never touches the URL, and exceptional `read` and
+`behavior` fields next to ordinary ones.
+
 ## Requirements
 
 - Node.js 18+ (recommended)

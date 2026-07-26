@@ -37,6 +37,7 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       Record<never, never>,
       | '/(authenticated)/settings/roles/[roleId]'
+      | '/(authenticated)/settings/users/[userId]'
       | 'dashboard'
       | 'roles'
       | 'roles-create'
@@ -44,6 +45,9 @@ declare module 'vue-router/auto-routes' {
       | 'roles-permissions'
       | 'roles-update'
       | 'users'
+      | 'users-detail'
+      | 'users-roles'
+      | 'users-update'
     >,
     'dashboard': RouteRecordInfo<
       'dashboard',
@@ -103,6 +107,36 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/(authenticated)/settings/users/[userId]': RouteRecordInfo<
+      '/(authenticated)/settings/users/[userId]',
+      '/settings/users/:userId',
+      { userId: ParamValue<true> },
+      { userId: ParamValue<false> },
+      | 'users-detail'
+      | 'users-roles'
+      | 'users-update'
+    >,
+    'users-detail': RouteRecordInfo<
+      'users-detail',
+      '/settings/users/:userId',
+      { userId: ParamValue<true> },
+      { userId: ParamValue<false> },
+      | never
+    >,
+    'users-update': RouteRecordInfo<
+      'users-update',
+      '/settings/users/:userId/edit',
+      { userId: ParamValue<true> },
+      { userId: ParamValue<false> },
+      | never
+    >,
+    'users-roles': RouteRecordInfo<
+      'users-roles',
+      '/settings/users/:userId/roles',
+      { userId: ParamValue<true> },
+      { userId: ParamValue<false> },
+      | never
+    >,
     '/(public)/public': RouteRecordInfo<
       '/(public)/public',
       '/',
@@ -149,6 +183,7 @@ declare module 'vue-router/auto-routes' {
       routes:
         | '/(authenticated)/authenticated'
         | '/(authenticated)/settings/roles/[roleId]'
+        | '/(authenticated)/settings/users/[userId]'
         | 'dashboard'
         | 'roles'
         | 'roles-create'
@@ -156,6 +191,9 @@ declare module 'vue-router/auto-routes' {
         | 'roles-permissions'
         | 'roles-update'
         | 'users'
+        | 'users-detail'
+        | 'users-roles'
+        | 'users-update'
       views:
         | 'default'
       pathParamNames:
@@ -223,6 +261,41 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/settings/users/index.route.vue': {
       routes:
         | 'users'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/settings/users/[userId].route.vue': {
+      routes:
+        | '/(authenticated)/settings/users/[userId]'
+        | 'users-detail'
+        | 'users-roles'
+        | 'users-update'
+      views:
+        | 'default'
+      pathParamNames:
+        | 'userId'
+    }
+    'src/routes/(authenticated)/settings/users/[userId]/index.route.vue': {
+      routes:
+        | 'users-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/settings/users/[userId]/edit.route.vue': {
+      routes:
+        | 'users-update'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/settings/users/[userId]/roles/index.route.vue': {
+      routes:
+        | 'users-roles'
       views:
         | never
       pathParamNames:

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import type { RouteLocationNormalized } from 'vue-router'
 import { legacyRolesRedirect, normalizeHashUrl, normalizeLegacyHashLocation } from '../legacy-urls'
 
-const location = (query: Record<string, string | string[]>) => ({ query }) as unknown as RouteLocationNormalized
+const location = (query: Record<string, string | string[]>) => ({ query } as unknown as RouteLocationNormalized)
 
 describe('legacy hash URLs', () => {
   it('rewrites a hash route to its history-mode path', () => {
@@ -65,5 +65,22 @@ describe('legacy roles query-state URLs', () => {
       path: '/settings/roles/7',
       query: {},
     })
+  })
+})
+
+describe('legacy users query-state URLs', () => {
+  it('redirects the views the users screen supported', () => {
+    expect(legacyRolesRedirect(location({ users_view: 'list' }))).toEqual({ path: '/settings/users', query: {} })
+    expect(legacyRolesRedirect(location({ users_view: 'detail', users_id: '7' }))).toEqual({ path: '/settings/users/7', query: {} })
+    expect(legacyRolesRedirect(location({ users_view: 'update', users_id: '7' }))).toEqual({ path: '/settings/users/7/edit', query: {} })
+  })
+
+  it('falls back to the users list for views the backend never supported', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    expect(legacyRolesRedirect(location({ users_view: 'create' }))).toEqual({ path: '/settings/users', query: {} })
+    expect(warn).toHaveBeenCalledOnce()
+
+    warn.mockRestore()
   })
 })

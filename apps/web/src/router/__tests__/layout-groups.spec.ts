@@ -13,11 +13,16 @@ class Node {
     this.children = children
     if (component) {
       this.components.set('default', component)
-      this.path = component.split('/').at(-1)!.replace(/\.(?:route|layout)\.vue$/, '')
+      this.path = component
+        .split('/')
+        .at(-1)!
+        .replace(/\.(?:route|layout)\.vue$/, '')
     }
   }
 
-  delete() { this.deleted = true }
+  delete() {
+    this.deleted = true
+  }
 }
 
 describe('route-group layouts', () => {
@@ -44,10 +49,7 @@ describe('route-group layouts', () => {
   })
 
   it('rejects multiple direct layouts in one group', () => {
-    const root = new Node(undefined, [
-      new Node('/project/src/routes/(admin)/one.layout.vue'),
-      new Node('/project/src/routes/(admin)/two.layout.vue'),
-    ])
+    const root = new Node(undefined, [new Node('/project/src/routes/(admin)/one.layout.vue'), new Node('/project/src/routes/(admin)/two.layout.vue')])
     expect(() => applyRouteGroupLayouts(root as any)).toThrow(/multiple direct/)
   })
 
@@ -67,12 +69,8 @@ describe('route-group layouts', () => {
   })
 
   it('does not reclassify promoted groups when the hook runs again', () => {
-    const authenticated = new Node(undefined, [
-      new Node('/project/src/routes/(authenticated)/authenticated.layout.vue'),
-    ])
-    const publicGroup = new Node(undefined, [
-      new Node('/project/src/routes/(public)/public.layout.vue'),
-    ])
+    const authenticated = new Node(undefined, [new Node('/project/src/routes/(authenticated)/authenticated.layout.vue')])
+    const publicGroup = new Node(undefined, [new Node('/project/src/routes/(public)/public.layout.vue')])
     const root = new Node(undefined, [authenticated, publicGroup])
 
     applyRouteGroupLayouts(root as any)

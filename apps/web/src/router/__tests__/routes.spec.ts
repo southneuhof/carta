@@ -59,3 +59,24 @@ describe('roles route tree', () => {
     }
   })
 })
+
+describe('users route tree', () => {
+  it('produces one route per users screen', () => {
+    expect(router.resolve('/settings/users').name).toBe('users')
+    expect(router.resolve('/settings/users/7').name).toBe('users-detail')
+    expect(router.resolve('/settings/users/7/edit').name).toBe('users-update')
+    expect(router.resolve('/settings/users/7/roles').name).toBe('users-roles')
+  })
+
+  it('passes the user identity as a route param under a shared layout', () => {
+    const detail = router.resolve('/settings/users/7')
+    const mapping = router.resolve('/settings/users/7/roles')
+
+    expect(mapping.params).toEqual({ userId: '7' })
+    expect(detail.matched.filter((route) => mapping.matched.includes(route)).some((route) => route.path.includes(':userId'))).toBe(true)
+  })
+
+  it('offers no create route, matching the backend capability', () => {
+    expect(router.resolve('/settings/users/new').name).toBe('users-detail')
+  })
+})

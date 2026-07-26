@@ -26,32 +26,62 @@ export function normalizeLegacyHashLocation(windowRef: Window = window): void {
   windowRef.history.replaceState(windowRef.history.state, '', normalized)
 }
 
-const rolesViewPaths: Record<string, (id: string) => string> = {
-  list: () => '/settings/roles',
-  create: () => '/settings/roles/new',
-  detail: (id) => `/settings/roles/${id}`,
-  update: (id) => `/settings/roles/${id}/edit`,
+type ViewPaths = Record<string, ((id: string) => string) | undefined>
+
+/** One entry per migrated feature that used the query-state dispatcher. */
+const legacyFeatures: { name: string; base: string; views: ViewPaths }[] = [
+  {
+    name: 'roles',
+    base: '/settings/roles',
+    views: {
+      list: () => '/settings/roles',
+      create: () => '/settings/roles/new',
+      detail: (id) => `/settings/roles/${id}`,
+      update: (id) => `/settings/roles/${id}/edit`,
+    },
+  },
+  {
+    name: 'users',
+    base: '/settings/users',
+    views: {
+      list: () => '/settings/users',
+      detail: (id) => `/settings/users/${id}`,
+      update: (id) => `/settings/users/${id}/edit`,
+    },
+  },
+]
+
+function single(value: unknown): string | undefined {
+  const resolved = Array.isArray(value) ? value[0] : value
+  return resolved == null ? undefined : String(resolved)
 }
 
-export function legacyRolesRedirect(to: RouteLocationNormalized): RouteLocationRaw | undefined {
-  const view = to.query.roles_view
-  if (view === undefined) return undefined
+export function legacyViewRedirect(to: RouteLocationNormalized): RouteLocationRaw | undefined {
+  for (const feature of legacyFeatures) {
+    const requested = single(to.query[`${feature.name}_view`])
+    if (requested === undefined) continue
 
-  const { roles_view: legacyView, roles_id: identity, ...query } = to.query
-  void legacyView
-  const requested = Array.isArray(view) ? view[0] : view
-  const id = Array.isArray(identity) ? identity[0] : identity
-  const build = requested ? rolesViewPaths[String(requested)] : undefined
+    const query = { ...to.query }
+    delete query[`${feature.name}_view`]
+    delete query[`${feature.name}_id`]
 
-  if (!build) {
-    console.warn(`[web] Unknown legacy roles view "${String(requested)}"; showing the roles list.`)
-    return { path: '/settings/roles', query }
+    const id = single(to.query[`${feature.name}_id`])
+    const build = feature.views[requested]
+
+    if (!build) {
+      console.warn(`[web] Unknown legacy ${feature.name} view "${requested}"; showing the ${feature.name} list.`)
+      return { path: feature.base, query }
+    }
+    if ((requested === 'detail' || requested === 'update') && !id) {
+      console.warn(`[web] Legacy ${feature.name} view "${requested}" had no ${feature.name}_id; showing the ${feature.name} list.`)
+      return { path: feature.base, query }
+    }
+
+    return { path: build(id ?? ''), query }
   }
 
-  if ((requested === 'detail' || requested === 'update') && !id) {
-    console.warn(`[web] Legacy roles view "${String(requested)}" had no roles_id; showing the roles list.`)
-    return { path: '/settings/roles', query }
-  }
-
-  return { path: build(String(id ?? '')), query }
+  return undefined
 }
+
+/** @deprecated Use `legacyViewRedirect`; kept as the roles-only entry point. */
+export const legacyRolesRedirect = legacyViewRedirect
