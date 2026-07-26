@@ -9,6 +9,11 @@ import { users } from '../src/routes/users/users.entity'
 async function main() {
   const db = getDb()
 
+  // Seeding expects a schema this script owns. The suites in src/__tests__ rebuild
+  // the same tables with their own fixture ids under the same unique codes, so a
+  // seed straight after `pnpm test` collides on the code rather than upserting by
+  // id. Use `db:refresh` in that case — unpicking the fixture graph row by row
+  // would just be a reset written less clearly.
   await db.execute(sql.raw(`
     insert into section_types (id, code, name)
     values ('section-type-toll', 'TOLL', 'Ruas Tol')
@@ -71,16 +76,35 @@ async function main() {
   await db.insert(userRoles).values({ userId: adminId, roleId: 'admin-role' })
     .onConflictDoUpdate({ target: [userRoles.userId, userRoles.roleId], set: { active: true } })
 
+  // Seeded before the employee so the employee can point at it. The coordinator is
+  // filled in afterwards, because the two tables reference each other.
+  await db.execute(sql.raw(`
+    insert into section_groups (id, name, section_id) values ('group-north', 'Regu Utara', 'section-north')
+    on conflict (id) do update set name = excluded.name, section_id = excluded.section_id;
+  `))
+
   await db.insert(employees).values({
     id: 'employee-admin',
     fullName: 'Demo Administrator',
     userId: adminId,
     sectionId: 'section-north',
-    jobPositionId: 'position-manager',
+    // Supervisor, not manager: the chain's first step targets `position-supervisor`,
+    // and with nobody holding it in this section that notification would fan out to
+    // nobody. One seeded login has to satisfy every step for the flow to be
+    // walkable in development.
+    jobPositionId: 'position-supervisor',
+    sectionGroupId: 'group-north',
   }).onConflictDoUpdate({
     target: employees.id,
-    set: { userId: adminId, sectionId: 'section-north', jobPositionId: 'position-manager' },
+    set: { userId: adminId, sectionId: 'section-north', jobPositionId: 'position-supervisor', sectionGroupId: 'group-north' },
   })
+
+  // The chain's second step is `sectionGroupHead`, so without a coordinator the
+  // seeded admin cannot submit anything and the development data is unusable —
+  // `seedChain` refuses at submit rather than stranding the record. The admin is
+  // its own coordinator here because it is the only seeded login; that is
+  // development convenience, not a model of the real org chart.
+  await db.execute(sql.raw(`update section_groups set koreg_employee_id = 'employee-admin' where id = 'group-north'`))
 
   // A person without a login: the org chart holds people who never sign in, and
   // recipient resolution has to keep working for them.
@@ -107,7 +131,7 @@ async function main() {
 
     insert into notifications (id, recipient_employee_id, job_position_id, role_id, section_id, title, content, status_code, notification_type, module_name) values
       ('notif-direct', 'employee-admin', null, null, 'section-north', 'Lembur menunggu verifikasi', 'Satu pengajuan lembur menunggu tindakan Anda.', 'unseen', 'verification', 'overtimes'),
-      ('notif-position', null, 'position-manager', null, 'section-north', 'Rekap mingguan tersedia', 'Rekap lembur minggu ini sudah dapat dilihat.', 'unseen', 'info', 'overtimes'),
+      ('notif-position', null, 'position-supervisor', null, 'section-north', 'Rekap mingguan tersedia', 'Rekap lembur minggu ini sudah dapat dilihat.', 'unseen', 'info', 'overtimes'),
       ('notif-role', null, null, 'admin-role', 'section-north', 'Konfigurasi diperbarui', 'Rantai verifikasi lembur telah diperbarui.', 'seen', 'info', 'settings')
     on conflict (id) do update set
       title = excluded.title, content = excluded.content, status_code = excluded.status_code;

@@ -74,11 +74,17 @@ around it by loosening the schema.
 | `db:push` | dev-only direct schema sync, no history |
 | `db:reset` | drop every table in `public` + migration history, then migrate |
 | `db:seed` | idempotent development seed |
+| `db:refresh` | `db:reset` then `db:seed` — **use this after `pnpm test`** |
 | `db:smoke` | signs in as the seeded admin and exercises product create/update/delete |
 
 ## Notes
 
-- Tests hit a real Postgres via `DATABASE_URL` and rebuild their own tables in `beforeEach`.
+- Tests hit a real Postgres via `DATABASE_URL` and rebuild their own tables in `beforeEach`. They own
+  the database while they run: they leave their own fixture rows behind, so `db:seed` on its own will
+  fail afterwards on a unique-code collision. Run `db:refresh` to get back to a usable dev database.
+- Spec files run serially (`vitest.config.ts` sets `fileParallelism: false`) for the same reason —
+  in parallel, one file drops the tables another is using. Nothing else may touch that database
+  while the suite runs.
 - `GET /openapi.json` is generated from the installed models — no hand-maintained spec.
 - CI: `.github/workflows/backend-validation.yml` runs lint, type-check, migrate and tests for this app
   and for `packages/sprindle`.
