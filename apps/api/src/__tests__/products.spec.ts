@@ -367,6 +367,18 @@ describe('products API', () => {
     expect(rolePermissions.status).toBe(401)
   })
 
+  it('serves an OpenAPI document describing the installed models', async () => {
+    const response = await rawApp.request('/openapi.json')
+    expect(response.status).toBe(200)
+
+    const document = await response.json()
+    expect(document.openapi).toMatch(/^3\.1/)
+    expect(Object.keys(document.paths)).toEqual(expect.arrayContaining(['/products/list', '/products/detail/{id}', '/users/list']))
+
+    const served = new Set(rawApp.routes.map((route: { path: string }) => route.path.replace(/:([A-Za-z0-9_]+)/g, '{$1}')))
+    for (const path of Object.keys(document.paths)) expect(served.has(path)).toBe(true)
+  })
+
   it('answers unknown paths and invalid relation writes through the error contract', async () => {
     const unknownPath = await app.request('/products/does-not-exist')
     expect(unknownPath.status).toBe(404)
