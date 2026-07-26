@@ -90,8 +90,8 @@ jobs:
       - name: Type-check api
         run: pnpm --filter @southneuhof/api type-check
 
-      - name: Push api database schema
-        run: pnpm --filter @southneuhof/api db:push
+      - name: Apply api database migrations
+        run: pnpm --filter @southneuhof/api db:migrate
 
       - name: Test api
         run: pnpm --filter @southneuhof/api test

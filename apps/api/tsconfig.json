@@ -11,8 +11,7 @@
       "@southneuhof/contracts/*": ["../../packages/contracts/src/*"],
       "@southneuhof/sdk": ["../../packages/sdk/src/index.ts"],
       "@southneuhof/sdk/*": ["../../packages/sdk/src/*"],
-      "@southneuhof/sprindle": ["../../packages/sprindle/src/index.ts"],
-      "@southneuhof/sprindle/*": ["../../packages/sprindle/src/*"]
+
     }
   },
   "include": [

@@ -1,7 +1,24 @@
-import { app } from '../src/app'
+import { app as rawApp } from '../src/app'
 import { closeDb } from '../src/db'
+import { getAuth } from '../src/routes/auth/auth'
 
 async function main() {
+  // Product routes require a session (see the authenticated() guards); sign in as the seeded admin.
+  const signedIn = await getAuth().api.signInEmail({
+    body: { email: 'admin@example.com', password: 'demo-password' },
+    returnHeaders: true,
+  })
+  const cookie = signedIn.headers.get('set-cookie')?.split(';')[0]
+  if (!cookie) throw new Error('Smoke sign-in failed: run `pnpm run db:seed` first.')
+
+  const app = {
+    request(path: string, init: RequestInit = {}) {
+      const headers = new Headers(init.headers)
+      headers.set('Cookie', cookie)
+      return rawApp.request(path, { ...init, headers })
+    },
+  }
+
   const id = 'product-smoke'
   await app.request(`/products/delete/${id}`, { method: 'DELETE' })
 

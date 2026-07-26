@@ -9,9 +9,12 @@
     "type-check": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
     "test": "node --env-file-if-exists=.env ./node_modules/vitest/vitest.mjs run",
-    "db:push": "tsx --env-file-if-exists=.env scripts/push-products.ts",
-    "db:reset": "tsx --env-file-if-exists=.env scripts/drop-products.ts && pnpm run db:push",
-    "db:smoke": "tsx --env-file-if-exists=.env scripts/smoke-db.ts"
+    "db:push": "drizzle-kit push",
+    "db:reset": "tsx --env-file-if-exists=.env scripts/reset-db.ts && pnpm run db:migrate",
+    "db:smoke": "tsx --env-file-if-exists=.env scripts/smoke-db.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "tsx --env-file-if-exists=.env scripts/seed.ts"
   },
   "exports": {
     ".": "./src/index.ts",
