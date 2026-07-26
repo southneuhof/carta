@@ -66,7 +66,11 @@ export function generateOpenApi(installables: readonly SprindleInstallable[], in
 }
 
 /** A `GET` route serving the generated document; mount it like any other top-level route. */
-export function openapiRoute(installables: readonly SprindleInstallable[], info: OpenApiInfo, path = '/openapi.json') {
+export function openapiRoute<const TPath extends string = '/openapi.json'>(
+  installables: readonly SprindleInstallable[],
+  info: OpenApiInfo,
+  path: TPath = '/openapi.json' as TPath,
+) {
   return defineRoute({
     path,
     method: 'get',
