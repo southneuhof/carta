@@ -15,6 +15,9 @@ import { user } from '../routes/users/users.entity'
  * Compared structurally: `drizzle-zod` emits Zod 4 objects on the server while
  * the manifest declares Zod 3 classic objects. The two are never mixed at
  * runtime, so parity is asserted on shape and parse results, not on types.
+ *
+ * Plan 020 unified sprindle and api on the `zod/v4` import dialect and left
+ * `@southneuhof/contracts` on Zod 3 classic, so this workaround stays.
  */
 type SchemaLike = {
   shape: Record<string, { isOptional: () => boolean }>

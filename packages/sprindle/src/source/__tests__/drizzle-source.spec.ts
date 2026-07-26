@@ -1,7 +1,7 @@
 import { defineRelationsPart } from 'drizzle-orm'
 import { pgTable, primaryKey, text } from 'drizzle-orm/pg-core'
 import { describe, expect, it } from 'vitest'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 import { createEntity, defineDomainPart, defineDomainSchema } from '../../model'
 import { createDrizzleSource } from '../drizzle-source'
 

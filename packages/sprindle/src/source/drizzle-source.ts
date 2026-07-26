@@ -1,11 +1,9 @@
-import { and, asc, count, desc, eq, getTableColumns, getTableName, ilike, inArray, notInArray, or, Table } from 'drizzle-orm'
+import { and, asc, count, desc, eq, getTableColumns, getTableName, ilike, inArray, notInArray, or } from 'drizzle-orm'
 import type { AnyColumn } from 'drizzle-orm'
-import { PrimaryKeyBuilder } from 'drizzle-orm/pg-core'
 import type { DomainEntity, DomainRelationField, DomainSchema } from '../model/domain-schema'
 import { validationError } from '../errors'
+import { getPrimaryKeyEntries } from './drizzle-internals'
 import type { ModelRuntimeEntity, ModelSource } from './model-source'
-
-const tableSymbols = (Table as unknown as { Symbol: Record<'ExtraConfigBuilder' | 'ExtraConfigColumns', symbol> }).Symbol
 
 type SelectBuilder = {
   where: (condition: unknown) => SelectBuilder
@@ -372,31 +370,6 @@ function unique(values: unknown[]) {
 
 export function getPrimaryKeyColumns(table: unknown): AnyColumn[] {
   return getPrimaryKeyEntries(table).map((entry) => entry.column)
-}
-
-function getPrimaryKeyEntries(table: unknown): { key: string; column: AnyColumn }[] {
-  const columns = getTableColumns(table as never) as Record<string, AnyColumn>
-  const inline = Object.entries(columns)
-    .filter(([, column]) => column.primary)
-    .map(([key, column]) => ({ key, column }))
-  if (inline.length) return inline
-
-  const extraConfigBuilder = (table as { [tableSymbols.ExtraConfigBuilder]?: (columns: unknown) => unknown })[tableSymbols.ExtraConfigBuilder]
-  const extraConfigColumns = (table as { [tableSymbols.ExtraConfigColumns]?: unknown })[tableSymbols.ExtraConfigColumns]
-  const extraConfig = extraConfigBuilder?.(extraConfigColumns) ?? []
-  const primaryKey = (Array.isArray(extraConfig) ? extraConfig : Object.values(extraConfig)).find((item) => item instanceof PrimaryKeyBuilder) as
-    | { columns: { name: string }[] }
-    | undefined
-  const names = primaryKey?.columns.map((column) => column.name) ?? []
-  if (names.length) {
-    return names.map((name) => {
-      const entry = Object.entries(columns).find(([, column]) => column.name === name)
-      if (!entry) throw new Error(`Primary key column "${name}" not found for table "${getTableName(table as never)}"`)
-      return { key: entry[0], column: entry[1] }
-    })
-  }
-
-  throw new Error(`Primary key not found for table "${getTableName(table as never)}"`)
 }
 
 function parseCompositeId(id: unknown): Record<string, unknown> {

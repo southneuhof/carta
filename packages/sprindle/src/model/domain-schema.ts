@@ -1,6 +1,7 @@
 import { getTableColumns, getTableName, is, Many, One } from 'drizzle-orm'
 import type { AnyColumn } from 'drizzle-orm'
 import { createDrizzleSource } from '../source/drizzle-source'
+import { resolveThroughColumn } from '../source/drizzle-internals'
 import type { ModelRuntimeEntity, ModelSource } from '../source/model-source'
 
 const ENTITY_MARK = Symbol.for('@southneuhof/sprindle/entity')
@@ -280,7 +281,7 @@ function getRelationColumns(relation: unknown, key: 'sourceColumns' | 'targetCol
 
 function getThroughColumns(columns: unknown[] | undefined, field: string, entityName: string): AnyColumn[] {
   if (!columns?.length) throw new Error(`Missing through columns for relation "${field}" on entity "${entityName}".`)
-  const resolved = columns.map((column) => (column as { _?: { column?: AnyColumn } })._?.column)
+  const resolved = columns.map((column) => resolveThroughColumn(column))
   if (resolved.some((column) => !column)) throw new Error(`Invalid through columns for relation "${field}" on entity "${entityName}".`)
   return resolved as AnyColumn[]
 }
