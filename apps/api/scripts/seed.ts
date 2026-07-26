@@ -94,6 +94,25 @@ async function main() {
     set: { sectionId: 'section-south', jobPositionId: 'position-officer' },
   })
 
+  // The overtime verification chain: supervisor first, then the shift coordinator.
+  // `orderNumber` starts at 1 — there is no "not yet seeded" sentinel step.
+  await db.execute(sql.raw(`
+    insert into config_verificators (id, module_name, section_type_id, order_number, verificator_type, job_position_id) values
+      ('chain-overtime-1', 'overtimes', 'section-type-toll', 1, 'jobPosition', 'position-supervisor'),
+      ('chain-overtime-2', 'overtimes', 'section-type-toll', 2, 'sectionGroupHead', null)
+    on conflict (id) do update set
+      module_name = excluded.module_name, section_type_id = excluded.section_type_id,
+      order_number = excluded.order_number, verificator_type = excluded.verificator_type,
+      job_position_id = excluded.job_position_id;
+
+    insert into notifications (id, recipient_employee_id, job_position_id, role_id, section_id, title, content, status_code, notification_type, module_name) values
+      ('notif-direct', 'employee-admin', null, null, 'section-north', 'Lembur menunggu verifikasi', 'Satu pengajuan lembur menunggu tindakan Anda.', 'unseen', 'verification', 'overtimes'),
+      ('notif-position', null, 'position-manager', null, 'section-north', 'Rekap mingguan tersedia', 'Rekap lembur minggu ini sudah dapat dilihat.', 'unseen', 'info', 'overtimes'),
+      ('notif-role', null, null, 'admin-role', 'section-north', 'Konfigurasi diperbarui', 'Rantai verifikasi lembur telah diperbarui.', 'seen', 'info', 'settings')
+    on conflict (id) do update set
+      title = excluded.title, content = excluded.content, status_code = excluded.status_code;
+  `))
+
   await closeDb()
 }
 
