@@ -29,3 +29,33 @@ describe('file-based routes', () => {
     expect(router.resolve('/unauthenticated/auth/login').name).toBe('not-found')
   })
 })
+
+describe('roles route tree', () => {
+  it('produces one route per roles screen', () => {
+    expect(router.resolve('/settings/roles').name).toBe('roles')
+    expect(router.resolve('/settings/roles/new').name).toBe('roles-create')
+    expect(router.resolve('/settings/roles/7').name).toBe('roles-detail')
+    expect(router.resolve('/settings/roles/7/edit').name).toBe('roles-update')
+    expect(router.resolve('/settings/roles/7/permissions').name).toBe('roles-permissions')
+  })
+
+  it('passes the role identity as a route param', () => {
+    expect(router.resolve('/settings/roles/7/permissions').params).toEqual({ roleId: '7' })
+  })
+
+  it('nests the record screens under a shared role layout', () => {
+    const detail = router.resolve('/settings/roles/7')
+    const permissions = router.resolve('/settings/roles/7/permissions')
+    const shared = detail.matched.filter((route) => permissions.matched.includes(route))
+
+    expect(shared.some((route) => route.path.includes(':roleId'))).toBe(true)
+    expect(router.resolve('/settings/roles').matched.some((route) => route.path.includes(':roleId'))).toBe(false)
+  })
+
+  it('lazily loads every roles screen component', () => {
+    for (const path of ['/settings/roles', '/settings/roles/new', '/settings/roles/7', '/settings/roles/7/edit', '/settings/roles/7/permissions']) {
+      const record = router.resolve(path).matched.at(-1)!
+      expect(typeof record.components?.default).toBe('function')
+    }
+  })
+})

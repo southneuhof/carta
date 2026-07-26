@@ -11,11 +11,22 @@ The accepted direction for the next web architecture is documented in
 - Vue 3 (`script setup`, async components)
 - Vite 4
 - TypeScript
-- Vue Router (hash history)
+- Vue Router (HTML5 history)
 - Pinia
 - Tailwind CSS + PostCSS
 - Vitest + Vue Test Utils
 - ESLint + Prettier
+
+## Static hosting
+
+The app is fully static and client-side, but it uses HTML5 history, so the host
+must serve `index.html` for any unknown path (SPA fallback). Vite's dev server
+and `vite preview` do this by default; on other hosts configure the equivalent
+rewrite (for example `try_files $uri /index.html;` on nginx).
+
+Legacy `/#/path` URLs are normalized to their history-mode equivalent on boot,
+and legacy roles query-state URLs (`?roles_view=...`) redirect to the matching
+route.
 
 ## Requirements
 

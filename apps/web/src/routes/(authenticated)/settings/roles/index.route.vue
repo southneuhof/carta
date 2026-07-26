@@ -1,18 +1,20 @@
 <script setup lang="ts">
-import roles from './roles.config'
-import RolesDetailUnder from './RolesDetailUnder.vue'
-import { keyManager } from '@/stores/keyManager'
-import CRUDComposite from '@southneuhof/is-vue-framework/components/composites/CRUDComposite.vue'
+import { useRouter } from 'vue-router'
+import { ListView, standardControls } from '@southneuhof/is-vue-framework'
+import { roles } from '@/framework/adapters/resources/roles'
 
 definePage({ name: 'roles', meta: { title: 'Roles', moduleName: 'settings' } })
+
+const router = useRouter()
+const controls = standardControls({ resource: roles, surface: 'list' })
 </script>
 
 <template>
-  <CRUDComposite :config="roles">
-    <template #detail-under>
-      <div class="flex flex-col gap-2">
-        <RolesDetailUnder :key="keyManager().value['roles-detail-under']" />
-      </div>
+  <ListView title="Roles" :table="roles.table()" :controls="controls">
+    <template #cell:name="{ value, record }">
+      <a :href="roles.routes.detail?.(String(record.id))" @click.prevent="router.push(roles.routes.detail!(String(record.id)))">
+        {{ value }}
+      </a>
     </template>
-  </CRUDComposite>
+  </ListView>
 </template>
