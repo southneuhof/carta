@@ -63,22 +63,23 @@ async function login() {
     sessionEstablished = true
     failureStage = 'permissions'
     const { user } = loginData
-    const profile = { ...user, role_id: user.roleId, fullname: user.name, username: user.email }
-    const permissionResponse = await rpc.roles[':roleId'].permissions.$get({ param: { roleId: user.roleId } })
-    if (!permissionResponse.ok) {
+    // Permissions union across every active role, so they come from the server's
+    // resolved identity rather than from one role's permission list.
+    const identityResponse = await rpc.me.$get()
+    if (!identityResponse.ok) {
       await rejectLogin(PERMISSION_ERROR_MESSAGE, sessionEstablished)
       return
     }
 
-    const permissionData = await permissionResponse.json()
-    if (!Array.isArray(permissionData?.data)) {
+    const identityData = await identityResponse.json()
+    const identity = identityData?.data
+    if (!identity || !Array.isArray(identity.permissions)) {
       await rejectLogin(PERMISSION_ERROR_MESSAGE, sessionEstablished)
       return
     }
 
-    const tasks = permissionData.data
-      .filter((permission: { assigned: boolean }) => permission.assigned)
-      .map((permission: { id: string }) => permission.id)
+    const profile = { ...user, role_id: identity.roleIds[0] ?? '', fullname: user.name, username: user.email }
+    const tasks = identity.permissions
 
     if (tasks.length === 0 && !BYPASS_ALL_PERMISSIONS) {
       await rejectLogin(NO_ACCESS_MESSAGE, sessionEstablished, true)

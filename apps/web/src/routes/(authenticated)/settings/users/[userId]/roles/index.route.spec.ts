@@ -6,20 +6,24 @@ import { FrameworkPlugin, createFrameworkQueryClient, resetResourceRuntimeForTes
 const ok = (payload: unknown) => ({ ok: true, json: async () => payload })
 const toggleCalls: { user_id: string; role_id: string; active: boolean }[] = []
 let toggleFails = false
-let assignedRoleId = 'r1'
+
+// Assignment is many-to-many, so server state is a set of role ids rather than one
+// `roleId` on the user record. Assigning a second role must not clear the first.
+const catalogue = [
+  { id: 'r1', name: 'Admin' },
+  { id: 'r2', name: 'Editor' },
+]
+let assignedRoleIds = new Set<string>(['r1'])
 
 vi.mock('vue-sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 
-vi.mock('@/utils/services', () => ({
-  default: {
-    post: vi.fn(async (_path: string, payload: { user_id: string; role_id: string; active: boolean }) => {
-      toggleCalls.push(payload)
-      if (toggleFails) throw new Error('Ditolak')
-      assignedRoleId = payload.active ? payload.role_id : ''
-      return {}
-    }),
-  },
-}))
+async function writeAssignment(userId: string, roleId: string, active: boolean) {
+  toggleCalls.push({ user_id: userId, role_id: roleId, active })
+  if (toggleFails) return { ok: false, json: async () => ({ error: 'forbidden' }) }
+  if (active) assignedRoleIds.add(roleId)
+  else assignedRoleIds.delete(roleId)
+  return ok({ data: { id: roleId, assigned: active } })
+}
 
 vi.mock('@/framework/rpc', () => ({
   rpc: {
@@ -27,10 +31,21 @@ vi.mock('@/framework/rpc', () => ({
       list: { $get: vi.fn(async () => ok({ data: [], total: 0 })) },
       detail: {
         ':id': {
-          $get: vi.fn(async ({ param }: { param: { id: string } }) => ok({ data: { id: param.id, name: `Pengguna ${param.id}`, roleId: assignedRoleId } })),
+          $get: vi.fn(async ({ param }: { param: { id: string } }) => ok({ data: { id: param.id, name: `Pengguna ${param.id}` } })),
         },
       },
       update: { ':id': { $patch: vi.fn(async () => ok({ data: {} })) } },
+      ':userId': {
+        roles: Object.assign(
+          { $get: vi.fn(async () => ok({ data: catalogue.map((role) => ({ ...role, assigned: assignedRoleIds.has(role.id) })), total: catalogue.length })) },
+          {
+            ':roleId': {
+              $put: vi.fn(async ({ param }: { param: { userId: string; roleId: string } }) => writeAssignment(param.userId, param.roleId, true)),
+              $delete: vi.fn(async ({ param }: { param: { userId: string; roleId: string } }) => writeAssignment(param.userId, param.roleId, false)),
+            },
+          }
+        ),
+      },
     },
     roles: {
       list: {
@@ -92,7 +107,7 @@ async function mountRoute(userId = 'u1') {
 beforeEach(() => {
   toggleCalls.length = 0
   toggleFails = false
-  assignedRoleId = 'r1'
+  assignedRoleIds = new Set(['r1'])
 })
 
 afterEach(() => resetResourceRuntimeForTests())
@@ -150,14 +165,15 @@ describe('user role mapping screen', () => {
     view.unmount()
   })
 
-  it('refreshes the mapping from the server after a successful toggle', async () => {
+  it('refreshes the mapping from the server after a successful toggle, keeping other roles', async () => {
     const view = await mountRoute()
 
     view.row('r2').click()
     await flush(16)
 
+    // Both stay checked: assigning a role adds to the set, it does not replace it.
     expect(view.row('r2').checked).toBe(true)
-    expect(view.row('r1').checked).toBe(false)
+    expect(view.row('r1').checked).toBe(true)
     view.unmount()
   })
 })

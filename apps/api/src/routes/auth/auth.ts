@@ -21,11 +21,6 @@ export function createAuth({ allowSignUp = false }: { allowSignUp?: boolean } = 
     trustedOrigins: [requiredEnv('APP_ORIGIN')],
     database: drizzleAdapter(getDb(), { provider: 'pg', schema, usePlural: true }),
     emailAndPassword: { enabled: true, disableSignUp: !allowSignUp },
-    user: {
-      additionalFields: {
-        roleId: { type: 'string', required: true, input: true },
-      },
-    },
   })
 }
 

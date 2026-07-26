@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const mocks = vi.hoisted(() => ({
   router: { push: vi.fn(), resolve: vi.fn() },
   signIn: vi.fn(),
-  permissionsGet: vi.fn(),
+  meGet: vi.fn(),
   signOut: vi.fn(),
   storageSet: vi.fn(),
   permissionsBuild: vi.fn(),
@@ -44,7 +44,7 @@ vi.mock('@/router/navigation', () => ({
 
 vi.mock('@/framework/rpc', () => ({
   rpc: {
-    roles: { ':roleId': { permissions: { $get: mocks.permissionsGet } } },
+    me: { $get: mocks.meGet },
     api: { auth: { 'sign-in': { email: { $post: mocks.signIn } }, 'sign-out': { $post: mocks.signOut } } },
   },
 }))
@@ -96,13 +96,8 @@ describe('login route', () => {
   })
 
   it('sends credentials, persists assigned permissions, and navigates once', async () => {
-    mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', roleId: 'role-1', name: 'Alice', email: 'alice@example.com' } }))
-    mocks.permissionsGet.mockResolvedValue(response(true, {
-      data: [
-        { id: 'view-users', assigned: true },
-        { id: 'view-admin', assigned: false },
-      ],
-    }))
+    mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', name: 'Alice', email: 'alice@example.com' } }))
+    mocks.meGet.mockResolvedValue(response(true, { data: { userId: 'user-1', roleIds: ['role-1'], scope: 'all', permissions: ['view-users'] } }))
 
     const wrapper = mountLogin()
     const inputs = wrapper.findAll('input')
@@ -112,10 +107,9 @@ describe('login route', () => {
     await flushPromises()
 
     expect(mocks.signIn).toHaveBeenCalledWith({ json: { email: 'alice@example.com', password: 'secret' } })
-    expect(mocks.permissionsGet).toHaveBeenCalledWith({ param: { roleId: 'role-1' } })
+    expect(mocks.meGet).toHaveBeenCalledOnce()
     expect(mocks.storageSet).toHaveBeenCalledWith('profile', {
       id: 'user-1',
-      roleId: 'role-1',
       name: 'Alice',
       email: 'alice@example.com',
       role_id: 'role-1',
@@ -139,7 +133,7 @@ describe('login route', () => {
     await wrapper.find('form').trigger('submit')
     await flushPromises()
 
-    expect(mocks.permissionsGet).not.toHaveBeenCalled()
+    expect(mocks.meGet).not.toHaveBeenCalled()
     expect(mocks.storageSet).not.toHaveBeenCalled()
     expect(mocks.router.push).not.toHaveBeenCalled()
     expect(mocks.signOut).not.toHaveBeenCalled()
@@ -150,14 +144,14 @@ describe('login route', () => {
   })
 
   it('shows a controlled permission error and cleans up after a failed permission response', async () => {
-    mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', roleId: 'role-1', name: 'Alice', email: 'alice@example.com' } }))
-    mocks.permissionsGet.mockResolvedValue(response(false, { message: 'Permission lookup failed' }))
+    mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', name: 'Alice', email: 'alice@example.com' } }))
+    mocks.meGet.mockResolvedValue(response(false, { message: 'Identity lookup failed' }))
 
     const wrapper = mountLogin()
     await wrapper.find('form').trigger('submit')
     await flushPromises()
 
-    expect(mocks.permissionsGet).toHaveBeenCalledWith({ param: { roleId: 'role-1' } })
+    expect(mocks.meGet).toHaveBeenCalledOnce()
     expect(mocks.storageSet).not.toHaveBeenCalled()
     expect(mocks.router.push).not.toHaveBeenCalled()
     expect(mocks.signOut).toHaveBeenCalledOnce()
@@ -184,8 +178,8 @@ describe('login route', () => {
   })
 
   it('rejects accounts with no assigned permissions without persisting or navigating', async () => {
-    mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', roleId: 'role-1', name: 'Alice', email: 'alice@example.com' } }))
-    mocks.permissionsGet.mockResolvedValue(response(true, { data: [] }))
+    mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', name: 'Alice', email: 'alice@example.com' } }))
+    mocks.meGet.mockResolvedValue(response(true, { data: { userId: 'user-1', roleIds: [], scope: 'owner', permissions: [] } }))
 
     const wrapper = mountLogin()
     await wrapper.find('form').trigger('submit')
@@ -203,8 +197,8 @@ describe('login route', () => {
   })
 
   it('rejects a missing destination without persisting or navigating', async () => {
-    mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', roleId: 'role-1', name: 'Alice', email: 'alice@example.com' } }))
-    mocks.permissionsGet.mockResolvedValue(response(true, { data: [{ id: 'view-users', assigned: true }] }))
+    mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', name: 'Alice', email: 'alice@example.com' } }))
+    mocks.meGet.mockResolvedValue(response(true, { data: { userId: 'user-1', roleIds: ['role-1'], scope: 'all', permissions: ['view-users'] } }))
     mocks.resolvePostLoginRoute.mockReturnValue(null)
 
     const wrapper = mountLogin()
@@ -223,8 +217,8 @@ describe('login route', () => {
   })
 
   it('keeps the primary error when session cleanup fails', async () => {
-    mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', roleId: 'role-1', name: 'Alice', email: 'alice@example.com' } }))
-    mocks.permissionsGet.mockResolvedValue(response(true, { data: [] }))
+    mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', name: 'Alice', email: 'alice@example.com' } }))
+    mocks.meGet.mockResolvedValue(response(true, { data: { userId: 'user-1', roleIds: [], scope: 'owner', permissions: [] } }))
     mocks.signOut.mockRejectedValue(new Error('cleanup details must stay hidden'))
 
     const wrapper = mountLogin()

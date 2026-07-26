@@ -5,7 +5,7 @@ type AuthHandler = { handler(request: Request): Promise<Response> }
 type SignInOutput = {
   redirect: boolean
   token: string
-  user: { id: string; name: string; email: string; emailVerified: boolean; image?: string | null; roleId: string; createdAt: Date; updatedAt: Date }
+  user: { id: string; name: string; email: string; emailVerified: boolean; image?: string | null; createdAt: Date; updatedAt: Date }
 }
 
 function handler(getAuth: () => AuthHandler) {

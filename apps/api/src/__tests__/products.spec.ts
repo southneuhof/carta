@@ -7,20 +7,19 @@ import { accounts } from '../routes/auth/auth.entity'
 import { closeDb, getDb } from '../db'
 import { productVariants } from '../routes/product-variants/product-variants.entity'
 import { productVariantAssignments, products } from '../routes/products/products.entity'
-import { permissions, rolePermissions, roles } from '../routes/roles/roles.entity'
+import { permissions, rolePermissions, roles, userRoles } from '../routes/roles/roles.entity'
 import { users } from '../routes/users/users.entity'
 
-const roleFixture = { id: 'role-admin', name: 'Administrator', createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' }
+const roleFixture = { id: 'role-admin', name: 'Administrator', scope: 'all' as const, createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' }
 const permissionFixtures = [
   ['view-user', 'View users'], ['show-user', 'Show user'], ['create-user', 'Create user'], ['update-user', 'Update user'], ['delete-user', 'Delete user'],
   ['view-role', 'View roles'], ['show-role', 'Show role'], ['create-role', 'Create role'], ['update-role', 'Update role'], ['delete-role', 'Delete role'],
-].map(([id, name]) => ({ id: id!, name: name! }))
+].map(([id, name]) => ({ id: id!, code: id!, name: name! }))
 
 const userFixture = {
   id: 'user-1',
   name: 'Product Owner',
   email: 'admin@example.com',
-  roleId: 'role-admin',
   createdAt: '2026-01-01T00:00:00.000Z',
 }
 
@@ -28,7 +27,6 @@ const secondUserFixture = {
   id: 'user-2',
   name: 'Second Owner',
   email: 'second@example.com',
-  roleId: 'role-admin',
   createdAt: '2026-01-01T00:00:00.000Z',
 }
 
@@ -53,32 +51,44 @@ describe('products API', () => {
   beforeEach(async () => {
     const db = getDb()
     await db.execute(sql.raw(`
-      drop table if exists sessions;
-      drop table if exists accounts;
-      drop table if exists verifications;
-      drop table if exists product_variant_assignments;
-      drop table if exists product_variants;
-      drop table if exists products;
-      drop table if exists users;
-      drop table if exists role_permissions;
-      drop table if exists permissions;
-      drop table if exists roles;
+      drop table if exists sessions cascade;
+      drop table if exists accounts cascade;
+      drop table if exists verifications cascade;
+      drop table if exists product_variant_assignments cascade;
+      drop table if exists product_variants cascade;
+      drop table if exists products cascade;
+      drop table if exists employees cascade;
+      drop table if exists section_groups cascade;
+      drop table if exists section_rantings cascade;
+      drop table if exists toll_sections cascade;
+      drop table if exists section_types cascade;
+      drop table if exists job_positions cascade;
+      drop table if exists user_roles cascade;
+      drop table if exists users cascade;
+      drop table if exists role_permissions cascade;
+      drop table if exists permissions cascade;
+      drop table if exists roles cascade;
 
       create table if not exists roles (
         id text primary key,
         name text not null,
+        scope text not null default 'section',
+        active boolean not null default true,
         created_at timestamp not null default now(),
         updated_at timestamp not null default now()
       );
 
       create table if not exists permissions (
         id text primary key,
-        name text not null
+        code text not null unique,
+        name text not null,
+        active boolean not null default true
       );
 
       create table if not exists role_permissions (
         role_id text not null references roles(id) on delete cascade,
         permission_id text not null references permissions(id) on delete cascade,
+        active boolean not null default true,
         primary key (role_id, permission_id)
       );
 
@@ -88,7 +98,44 @@ describe('products API', () => {
         email text not null unique,
         email_verified boolean not null default false,
         image text,
-        role_id text not null references roles(id),
+        created_at timestamp not null default now(),
+        updated_at timestamp not null default now()
+      );
+
+      create table if not exists user_roles (
+        user_id text not null references users(id) on delete cascade,
+        role_id text not null references roles(id) on delete cascade,
+        active boolean not null default true,
+        primary key (user_id, role_id)
+      );
+
+      create table if not exists section_types (
+        id text primary key, code text not null unique, name text not null
+      );
+      create table if not exists toll_sections (
+        id text primary key, code text not null unique, name text not null,
+        section_type_id text references section_types(id)
+      );
+      create table if not exists job_positions (
+        id text primary key, code text not null unique, name text not null
+      );
+      create table if not exists section_groups (
+        id text primary key, name text not null, section_id text references toll_sections(id),
+        koreg_employee_id text
+      );
+      create table if not exists section_rantings (
+        id text primary key, name text not null, section_id text references toll_sections(id),
+        head_employee_id text
+      );
+      create table if not exists employees (
+        id text primary key,
+        full_name text not null,
+        user_id text unique references users(id),
+        section_id text references toll_sections(id),
+        job_position_id text references job_positions(id),
+        section_group_id text references section_groups(id),
+        section_ranting_id text references section_rantings(id),
+        active boolean not null default true,
         created_at timestamp not null default now(),
         updated_at timestamp not null default now()
       );
@@ -134,6 +181,10 @@ describe('products API', () => {
     await db.insert(permissions).values(permissionFixtures)
     await db.insert(rolePermissions).values(permissionFixtures.map(({ id }) => ({ roleId: roleFixture.id, permissionId: id })))
     await db.insert(users).values([userFixture, secondUserFixture])
+    await db.insert(userRoles).values([
+      { userId: userFixture.id, roleId: roleFixture.id },
+      { userId: secondUserFixture.id, roleId: roleFixture.id },
+    ])
     await db.insert(accounts).values({
       id: 'account-1', accountId: userFixture.id, providerId: 'credential', userId: userFixture.id,
       password: await hashPassword('demo-password'),
@@ -430,7 +481,7 @@ describe('products API', () => {
 
     const currentSession = await rawApp.request('/api/auth/get-session', { headers: { Cookie: cookie! } })
     expect(currentSession.status).toBe(200)
-    expect(await currentSession.json()).toMatchObject({ user: { email: userFixture.email, roleId: roleFixture.id } })
+    expect(await currentSession.json()).toMatchObject({ user: { email: userFixture.email } })
 
     const legacyLogin = await rawApp.request('/login', { method: 'POST' })
     expect(legacyLogin.status).toBe(404)
@@ -458,7 +509,7 @@ describe('products API', () => {
     for (let attempt = 0; attempt < 2; attempt++) {
       const assigned = await app.request('/roles/role-editor/permissions/view-user', { method: 'PUT' })
       expect(assigned.status).toBe(200)
-      expect(await assigned.json()).toEqual({ data: { id: 'view-user', name: 'View users', assigned: true } })
+      expect(await assigned.json()).toEqual({ data: { id: 'view-user', code: 'view-user', name: 'View users', assigned: true } })
     }
     const assignments = await getDb().select().from(rolePermissions).where(and(eq(rolePermissions.roleId, 'role-editor'), eq(rolePermissions.permissionId, 'view-user')))
     expect(assignments).toHaveLength(1)
@@ -466,7 +517,7 @@ describe('products API', () => {
     for (let attempt = 0; attempt < 2; attempt++) {
       const revoked = await app.request('/roles/role-editor/permissions/view-user', { method: 'DELETE' })
       expect(revoked.status).toBe(200)
-      expect(await revoked.json()).toEqual({ data: { id: 'view-user', name: 'View users', assigned: false } })
+      expect(await revoked.json()).toEqual({ data: { id: 'view-user', code: 'view-user', name: 'View users', assigned: false } })
     }
 
     expect((await app.request('/roles/missing/permissions')).status).toBe(404)

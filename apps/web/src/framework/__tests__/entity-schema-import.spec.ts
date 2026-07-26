@@ -3,7 +3,12 @@ import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { fromZod, requiredSchemaKeys } from '@southneuhof/is-vue-framework'
+import { employee } from '@southneuhof/api/routes/employees/employees.entity'
+import { jobPosition, sectionType, tollSection } from '@southneuhof/api/routes/organization/organization.entity'
+import { productVariant } from '@southneuhof/api/routes/product-variants/product-variants.entity'
+import { product } from '@southneuhof/api/routes/products/products.entity'
 import { role } from '@southneuhof/api/routes/roles/roles.entity'
+import { user } from '@southneuhof/api/routes/users/users.entity'
 
 /**
  * Guards the browser-safe entity boundary.
@@ -20,8 +25,13 @@ import { role } from '@southneuhof/api/routes/roles/roles.entity'
  * covers entity modules this suite does not itself import. The assertions above
  * prove the complementary half: that the schemas are usable client-side through
  * the ordinary validation bridge, not merely importable.
+ *
+ * Since plan 022 there is no schema mirror left to fall back on, so every entity
+ * module is covered rather than `roles` alone.
  */
 const entityDirectory = join(dirname(fileURLToPath(import.meta.url)), '../../../../api/src/routes')
+
+const allEntities = { employee, jobPosition, product, productVariant, role, sectionType, tollSection, user }
 
 function collectEntityModules(directory: string): string[] {
   return readdirSync(directory).flatMap((entry) => {
@@ -53,6 +63,21 @@ describe('entity schemas are importable in the browser', () => {
   it('treats every update field as optional, matching the server schema', () => {
     expect(requiredSchemaKeys(role.schemas.update)).toEqual([])
     expect(fromZod(role.schemas.update).validate({}).success).toBe(true)
+  })
+
+  it('exposes create, update and select schemas on every entity', () => {
+    for (const [name, entity] of Object.entries(allEntities)) {
+      expect(entity.schemas.create, `${name}.schemas.create`).toBeDefined()
+      expect(entity.schemas.update, `${name}.schemas.update`).toBeDefined()
+      expect(entity.schemas.select, `${name}.schemas.select`).toBeDefined()
+      expect(typeof entity.schemas.create.safeParse, `${name}.schemas.create.safeParse`).toBe('function')
+    }
+  })
+
+  it('validates through the framework bridge for every entity, not just roles', () => {
+    for (const [name, entity] of Object.entries(allEntities)) {
+      expect(fromZod(entity.schemas.update).validate({}).success, `${name}.schemas.update`).toBe(true)
+    }
   })
 
   it('keeps every entity module free of node builtins', () => {

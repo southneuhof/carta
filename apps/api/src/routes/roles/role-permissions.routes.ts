@@ -10,7 +10,17 @@ async function exists(table: typeof roles | typeof permissions, id: string) {
 
 async function mappedPermission(permissionId: string, assigned: boolean) {
   const permission = await getDb().select().from(permissions).where(eq(permissions.id, permissionId)).limit(1)
-  return { ...permission[0]!, assigned }
+  const { active: _active, ...rest } = permission[0]!
+  return { ...rest, assigned }
+}
+
+/** Assignment is the `active` flag, not the row's existence — revoking keeps the history. */
+async function setAssignment(roleId: string, permissionId: string, active: boolean) {
+  await getDb()
+    .insert(rolePermissions)
+    .values({ roleId, permissionId, active })
+    .onConflictDoUpdate({ target: [rolePermissions.roleId, rolePermissions.permissionId], set: { active } })
+  return mappedPermission(permissionId, active)
 }
 
 export const listRolePermissions = defineRoute({
@@ -22,11 +32,11 @@ export const listRolePermissions = defineRoute({
     if (!roleId) return c.json({ error: 'not_found' }, 404)
     if (!await exists(roles, roleId)) return c.json({ error: 'not_found' }, 404)
     const data = await getDb()
-      .select({ id: permissions.id, name: permissions.name, assignedRoleId: rolePermissions.roleId })
+      .select({ id: permissions.id, code: permissions.code, name: permissions.name, assignedActive: rolePermissions.active })
       .from(permissions)
       .leftJoin(rolePermissions, and(eq(rolePermissions.permissionId, permissions.id), eq(rolePermissions.roleId, roleId)))
       .orderBy(permissions.id)
-    return c.json({ data: data.map(({ assignedRoleId, ...permission }) => ({ ...permission, assigned: assignedRoleId != null })), total: data.length })
+    return c.json({ data: data.map(({ assignedActive, ...permission }) => ({ ...permission, assigned: assignedActive === true })), total: data.length })
   },
 })
 
@@ -37,8 +47,7 @@ export const assignRolePermission = defineRoute({
   action: async ({ c }) => {
     const { roleId, permissionId } = c.req.param()
     if (!await exists(roles, roleId) || !await exists(permissions, permissionId)) return c.json({ error: 'not_found' }, 404)
-    await getDb().insert(rolePermissions).values({ roleId, permissionId }).onConflictDoNothing()
-    return c.json({ data: await mappedPermission(permissionId, true) })
+    return c.json({ data: await setAssignment(roleId, permissionId, true) })
   },
 })
 
@@ -49,7 +58,6 @@ export const revokeRolePermission = defineRoute({
   action: async ({ c }) => {
     const { roleId, permissionId } = c.req.param()
     if (!await exists(roles, roleId) || !await exists(permissions, permissionId)) return c.json({ error: 'not_found' }, 404)
-    await getDb().delete(rolePermissions).where(and(eq(rolePermissions.roleId, roleId), eq(rolePermissions.permissionId, permissionId)))
-    return c.json({ data: await mappedPermission(permissionId, false) })
+    return c.json({ data: await setAssignment(roleId, permissionId, false) })
   },
 })
