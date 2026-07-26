@@ -1,4 +1,20 @@
 export type * from './contracts'
+export * from './query'
+export {
+  frameworkAdaptersKey,
+  resolveFrameworkAdapters,
+  useFrameworkAdapters,
+  defaultDataAdapter,
+  defaultQueryRuntimeDefaults,
+  createMemoryQueryLocationAdapter,
+} from './adapters/projectAdapters'
+export type {
+  DataAdapter,
+  SchemaAdapter,
+  QueryRuntimeDefaults,
+  FrameworkAdaptersInput,
+  ResolvedFrameworkAdapters,
+} from './adapters/projectAdapters'
 export * from './renderers'
 export * from './router'
 export * from './model-config'

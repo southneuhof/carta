@@ -9,7 +9,7 @@ Drift-check semantics: every plan diffs `edeff25..HEAD` over its watched paths. 
 | Plan | Title | Priority | Effort | Depends on | Status |
 |---|---|---|---|---|---|
 | [000](000-establish-migration-contracts.md) | Establish migration contracts and a green baseline | P1 | M | — | DONE |
-| [001](001-add-project-adapters-and-query-runtime.md) | Add project adapters and namespaced query runtime | P1 | L | 000 | TODO |
+| [001](001-add-project-adapters-and-query-runtime.md) | Add project adapters and namespaced query runtime | P1 | L | 000 | DONE |
 | [002](002-build-field-catalog-and-renderers.md) | Build shared field catalog and renderer registry | P1 | L | 000 | TODO |
 | [003](003-derive-validation-from-schemas.md) | Derive validation from client-safe schemas | P1 | L | 000, 002 | TODO |
 | [004](004-rebuild-core-components.md) | Rebuild Form, Table, and Detail cores | P1 | L | 001, 002, 003 | TODO |
