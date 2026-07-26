@@ -18,6 +18,8 @@ coverage
 *.tsbuildinfo
 *.local
 .env
+graphify-out/cost.json
+graphify-out/cache/
 .expo/
 /cypress/videos/
 /cypress/screenshots/

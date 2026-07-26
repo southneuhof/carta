@@ -3,6 +3,9 @@
 Admin frontend built with Vue 3 + Vite + TypeScript.
 This app now lives inside the monorepo at `apps/web`.
 
+The accepted direction for the next web architecture is documented in
+[`docs/architecture/web-application-architecture.md`](../../docs/architecture/web-application-architecture.md).
+
 ## Tech Stack
 
 - Vue 3 (`script setup`, async components)
