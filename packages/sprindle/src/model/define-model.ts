@@ -16,7 +16,7 @@ export type DefineModelConfig<
 
 export type DefinedModel<
   TPath extends string = string,
-  TEntity extends ModelRuntimeEntity = ModelRuntimeEntity,
+  _TEntity extends ModelRuntimeEntity = ModelRuntimeEntity,
   TRoutes extends RouteTree = RouteTree,
 > = {
   name: string

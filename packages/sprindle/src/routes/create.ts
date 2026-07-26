@@ -1,7 +1,5 @@
 import { defineRouteFactory } from './define-route'
 
-type CreateState = { input: unknown }
-
 export const create = defineRouteFactory({
   method: 'post',
   kind: 'create',

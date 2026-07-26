@@ -52,8 +52,8 @@ export type ModelRoute<
   TContext extends ModelRuntimeContext = ModelRuntimeContext,
   TMethod extends HttpMethod = HttpMethod,
   TPath extends string = string,
-  TInput extends AnyInput = AnyInput,
-  TOutput = unknown,
+  _TInput extends AnyInput = AnyInput,
+  _TOutput = unknown,
   TKind extends ModelRouteKind = ModelRouteKind,
 > = {
   readonly [MODEL_ROUTE]: true

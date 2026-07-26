@@ -2,8 +2,6 @@ import { zValidator } from '@hono/zod-validator'
 import { defineRouteFactory } from './define-route'
 import { idParamSchema } from '../validation'
 
-type DetailState = { id: string }
-
 export const detail = defineRouteFactory({
   method: 'get',
   path: '/:id',

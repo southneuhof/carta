@@ -2,8 +2,6 @@ import { zValidator } from '@hono/zod-validator'
 import { defineRouteFactory } from './define-route'
 import { idParamSchema } from '../validation'
 
-type UpdateState = { id: string; input: unknown }
-
 export const update = defineRouteFactory({
   method: 'patch',
   path: '/:id',
