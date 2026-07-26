@@ -4,20 +4,11 @@ import { z } from 'zod/v4'
 import { create, defineRoute, detail, list, update } from '../../routes'
 import { defineModel } from '../../model'
 import { installSprindle, type SprindleInstallSchema } from '..'
-import type { ModelRuntimeEntity, ModelSource } from '../../source'
-
-const source = {
-  list: async () => [],
-  detail: async () => null,
-  create: async ({ input }) => input,
-  update: async () => null,
-  delete: async () => false,
-  materialize: async (input) => input,
-} satisfies ModelSource
+import { createTestEntity } from '../../testing'
+import type { ModelRuntimeEntity } from '../../source'
 
 const item = {
-  name: 'items',
-  source,
+  ...createTestEntity(),
   schemas: {
     create: z.object({ id: z.string(), name: z.string() }),
     update: z.object({ name: z.string().optional() }),

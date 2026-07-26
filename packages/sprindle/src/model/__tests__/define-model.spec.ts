@@ -6,29 +6,11 @@ import { defineModel } from '../define-model'
 import { createDrizzleModel } from '../../source'
 import { getPrimaryKeyColumns } from '../../source/drizzle-source'
 import type { RouteTree } from '../route-tree'
-import type { ModelRuntimeEntity, ModelSource } from '../../source'
+import type { ModelRuntimeEntity } from '../../source'
+import { createTestEntity } from '../../testing'
 
-const source: ModelSource<{ id: string }> = {
-  async list() {
-    return [{ id: 'item-1' }]
-  },
-  async detail() {
-    return null
-  },
-  async create() {
-    return { id: 'item-1' }
-  },
-  async update() {
-    return null
-  },
-  async delete() {
-    return false
-  },
-  async materialize(input) {
-    return input as { id: string }
-  },
-}
-const itemEntity = { name: 'items', source } as ModelRuntimeEntity
+const itemEntity = createTestEntity({ rows: [{ id: 'item-1' }] }) as unknown as ModelRuntimeEntity
+
 
 describe('defineModel route compiler', () => {
   if (false) {
@@ -215,9 +197,11 @@ describe('defineModel route compiler', () => {
   })
 
   it('accepts declarative hooks on first-class route factories', async () => {
+    // Keeps a fixed-return source: this test asserts the route echoes whatever the source produced.
+    const fixedEntity = { name: 'items', source: { ...itemEntity.source, create: async () => ({ id: 'item-1' }) } } as ModelRuntimeEntity
     const model = defineModel({
       path: '/items',
-      entity: itemEntity,
+      entity: fixedEntity,
       routes: {
         create: create({
           validate: [({ state }) => (state.input && typeof state.input === 'object' && 'id' in state.input ? undefined : 'id required')],

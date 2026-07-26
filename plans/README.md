@@ -33,7 +33,7 @@ Planned against commit `694c905` by a comparative audit of `packages/sprindle` a
 | [013](013-error-contract.md) | Establish a single error contract | P1 | M | 010 | DONE |
 | [014](014-authz-seam.md) | Add the authorization seam (identity, 401/403) | P1 | M | 013 | DONE |
 | [015](015-request-id-and-logger-seam.md) | Add request ids and a logger seam | P2 | S | 013 | DONE |
-| [016](016-test-utilities.md) | Ship test utilities (memory source, test app) | P2 | M | 012, 013 | TODO |
+| [016](016-test-utilities.md) | Ship test utilities (memory source, test app) | P2 | M | 012, 013 | DONE |
 | [017](017-openapi-emission.md) | Emit OpenAPI from installed models | P2 | M | 012, 013 | TODO |
 | [018](018-migrations-convention.md) | Adopt versioned migrations and a seed convention | P2 | S | 010 | TODO |
 | [019](019-framework-docs.md) | Write the Sprindle reference docs and agent guide | P2 | M | 011–018 (documents what landed; run last) | TODO |
