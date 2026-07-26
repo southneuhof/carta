@@ -1,3 +1,4 @@
+export type * from './contracts'
 export * from './renderers'
 export * from './router'
 export * from './model-config'
