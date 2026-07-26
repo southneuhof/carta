@@ -1,5 +1,6 @@
 export { defineRoute } from './define-route'
 export type { DefineRouteConfig, ModelRouteFactory, RouteConfigFor, RouteFactoryConfigFor } from './define-route'
+export { authenticated } from './authenticated'
 export { create } from './create'
 export { deleteRoute } from './delete'
 export { detail } from './detail'

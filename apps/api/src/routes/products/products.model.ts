@@ -1,4 +1,4 @@
-import { create, deleteRoute, detail, list, update } from '@southneuhof/sprindle/routes'
+import { authenticated, create, deleteRoute, detail, list, update } from '@southneuhof/sprindle/routes'
 import { defineModel } from '@southneuhof/sprindle/model'
 import { customProductMaterialize, customProductRoute, version1, versionTest } from './products.routes'
 import { product } from './products.entity'
@@ -6,7 +6,7 @@ import { product } from './products.entity'
 export const productModel = defineModel({
   path: '/products',
   entity: product,
-  authorize: [({ c }) => (c.req.header('x-product-access') === 'denied' ? 'Product access denied.' : undefined)],
+  authorize: [authenticated(), ({ c }) => (c.req.header('x-product-access') === 'denied' ? 'Product access denied.' : undefined)],
   routes: {
     list: list(),
     detail: detail(),

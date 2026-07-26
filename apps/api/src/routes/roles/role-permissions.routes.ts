@@ -1,4 +1,4 @@
-import { defineRoute } from '@southneuhof/sprindle/routes'
+import { authenticated, defineRoute } from '@southneuhof/sprindle/routes'
 import { and, eq } from 'drizzle-orm'
 import { getDb } from '../../db'
 import { permissions, rolePermissions, roles } from './roles.entity'
@@ -16,6 +16,7 @@ async function mappedPermission(permissionId: string, assigned: boolean) {
 export const listRolePermissions = defineRoute({
   path: '/roles/:roleId/permissions',
   method: 'get',
+  authorize: [authenticated()],
   action: async ({ c }) => {
     const roleId = c.req.param('roleId')
     if (!roleId) return c.json({ error: 'not_found' }, 404)
@@ -32,6 +33,7 @@ export const listRolePermissions = defineRoute({
 export const assignRolePermission = defineRoute({
   path: '/roles/:roleId/permissions/:permissionId',
   method: 'put',
+  authorize: [authenticated()],
   action: async ({ c }) => {
     const { roleId, permissionId } = c.req.param()
     if (!await exists(roles, roleId) || !await exists(permissions, permissionId)) return c.json({ error: 'not_found' }, 404)
@@ -43,6 +45,7 @@ export const assignRolePermission = defineRoute({
 export const revokeRolePermission = defineRoute({
   path: '/roles/:roleId/permissions/:permissionId',
   method: 'delete',
+  authorize: [authenticated()],
   action: async ({ c }) => {
     const { roleId, permissionId } = c.req.param()
     if (!await exists(roles, roleId) || !await exists(permissions, permissionId)) return c.json({ error: 'not_found' }, 404)

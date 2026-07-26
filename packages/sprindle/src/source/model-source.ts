@@ -1,12 +1,18 @@
+import type { Context } from 'hono'
+
 export type ModelRuntimeEntity<TTable = unknown> = {
   name: string
   table?: TTable
   source: ModelSource
 }
 
+/** The app's single answer to "who is calling"; installed through `installSprindle` options. */
+export type IdentityResolver = (c: Context) => unknown | Promise<unknown>
+
 export type ModelRuntimeContext<TTable = unknown> = {
   name: string
   entity: ModelRuntimeEntity<TTable>
+  identity?: IdentityResolver
 }
 
 export type SourceListResult<TRecord> = {

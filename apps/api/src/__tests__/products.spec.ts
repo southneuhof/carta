@@ -350,6 +350,22 @@ describe('products API', () => {
     expect(await unknownSort.json()).toMatchObject({ error: 'validation_error', message: 'Unknown sort column "category".' })
   })
 
+  it('separates unauthenticated from forbidden and keeps health public', async () => {
+    const unauthenticated = await rawApp.request('/products/list')
+    expect(unauthenticated.status).toBe(401)
+    expect(await unauthenticated.json()).toEqual({ error: 'unauthorized' })
+
+    const forbidden = await app.request('/products/list', { headers: { 'x-product-access': 'denied' } })
+    expect(forbidden.status).toBe(403)
+
+    const health = await rawApp.request('/health')
+    expect(health.status).toBe(200)
+    expect(await health.json()).toEqual({ ok: true })
+
+    const rolePermissions = await rawApp.request('/roles/role-admin/permissions')
+    expect(rolePermissions.status).toBe(401)
+  })
+
   it('answers unknown paths and invalid relation writes through the error contract', async () => {
     const unknownPath = await app.request('/products/does-not-exist')
     expect(unknownPath.status).toBe(404)
@@ -404,7 +420,8 @@ describe('products API', () => {
     expect(await currentSession.json()).toMatchObject({ user: { email: userFixture.email, roleId: roleFixture.id } })
 
     const legacyLogin = await rawApp.request('/login', { method: 'POST' })
-    expect(legacyLogin.status).toBe(401)
+    expect(legacyLogin.status).toBe(404)
+    expect(await legacyLogin.json()).toEqual({ error: 'not_found' })
     expect((await app.request('/users/create', { method: 'POST' })).status).toBe(404)
     expect((await app.request('/users/delete/user-2', { method: 'DELETE' })).status).toBe(404)
 

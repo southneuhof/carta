@@ -2,6 +2,7 @@ import type { Context, Hono, TypedResponse } from 'hono'
 import type { z } from 'zod/v4'
 import { toHttpError } from '../errors'
 import type { DefinedModel, ModelRoute, ModelRuntimeContext } from '../model'
+import type { IdentityResolver } from '../source'
 
 type ListQuery = {
   page?: string
@@ -116,18 +117,26 @@ type NormalizePath<TPath extends string> = TPath extends `${infer Head}//${infer
 type MergeInput<T> = { [K in keyof T]: T[K] }
 type UnionToIntersection<T> = (T extends unknown ? (value: T) => void : never) extends (value: infer U) => void ? U : never
 
+export type SprindleInstallOptions = {
+  /** Resolves the caller's identity for every route; `authenticated()` guards read it. */
+  identity?: IdentityResolver
+}
+
 export function installSprindle<const TApp extends Hono<any, any>, const TInstallables extends readonly SprindleInstallable[]>(
   app: TApp,
   installables: TInstallables & RequireTopLevelRoutePath<TInstallables>,
+  options: SprindleInstallOptions = {},
 ): TApp extends Hono<infer TEnv, infer TSchema> ? Hono<TEnv, TSchema & SprindleInstallSchema<TInstallables>> : never {
   for (const installable of installables) {
     if ('route' in installable) {
+      // Models compile their context before install, so the resolver is attached to the live object.
+      if (options.identity) installable.context.identity = options.identity
       app.route(installable.path, installable.route)
       continue
     }
 
     if (!installable.path) throw new Error('Top-level Sprindle routes need a path.')
-    const boundRoute = installable.bind({ name: installable.path } as ModelRuntimeContext)
+    const boundRoute = installable.bind({ name: installable.path, identity: options.identity } as ModelRuntimeContext)
     const install = app[boundRoute.method] as (path: string, ...handlers: unknown[]) => Hono
     install.call(app, boundRoute.path, ...boundRoute.middleware, boundRoute.handler)
   }

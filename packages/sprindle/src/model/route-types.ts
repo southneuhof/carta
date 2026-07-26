@@ -24,6 +24,8 @@ export type RouteHandlerArgs<
   context: TContext
   route: RouteInfo<TMethod, TPath, TKind>
   state: TState
+  /** Lazy, memoized per request: resolves the caller's identity, or null when none is installed. */
+  identity: () => Promise<unknown>
 }
 
 export type ValidationIssue = string | { field?: string; message: string }

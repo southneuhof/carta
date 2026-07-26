@@ -95,10 +95,13 @@ export function defineRoute<
       middleware,
       handler: async (c) => {
         const typedContext = context as TContext
+        let identityResult: Promise<unknown> | undefined
+        const identity = () => (identityResult ??= Promise.resolve(typedContext.identity ? typedContext.identity(c) : null))
         const args = {
           c,
           context: typedContext,
           route,
+          identity,
           state: state ? await state({ c, context: typedContext }) : ({} as TState),
         } as RouteHandlerArgs<TContext, TState, TMethod, TPath, TKind>
 

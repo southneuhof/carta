@@ -25,14 +25,9 @@ export const app = installSprindle(
     .use('*', async (_c, next) => {
       getDb()
       await next()
-    })
-    .use('*', async (c, next) => {
-      if (c.req.path === '/health' || c.req.path.startsWith('/api/auth/')) return next()
-      const session = await getAuth().api.getSession({ headers: c.req.raw.headers })
-      if (!session) return c.json({ error: 'unauthorized' }, 401)
-      await next()
     }),
   routes,
+  { identity: (c) => getAuth().api.getSession({ headers: c.req.raw.headers }) },
 )
 
 export type AppType = typeof app

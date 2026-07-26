@@ -1,4 +1,4 @@
-import { create, detail, list, update } from '@southneuhof/sprindle/routes'
+import { authenticated, create, detail, list, update } from '@southneuhof/sprindle/routes'
 import { defineModel } from '@southneuhof/sprindle/model'
 import { defineRoute } from '@southneuhof/sprindle/routes'
 import { eq } from 'drizzle-orm'
@@ -9,6 +9,7 @@ import { role, roles } from './roles.entity'
 export const roleModel = defineModel({
   path: '/roles',
   entity: role,
+  authorize: [authenticated()],
   routes: {
     list: list(),
     detail: detail(),
