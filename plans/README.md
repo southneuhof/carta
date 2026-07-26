@@ -21,6 +21,45 @@ Drift-check semantics: every plan diffs `edeff25..HEAD` over its watched paths. 
 
 Status values: `TODO`, `IN PROGRESS`, `DONE`, `BLOCKED (reason)`, or `REJECTED (rationale)`.
 
+## Backend track: Sprindle production readiness (added 2026-07-26)
+
+Planned against commit `694c905` by a comparative audit of `packages/sprindle` against the mature production backend at `/Users/gamer/Documents/projects/hka-trom/backend` (external reference only — never modified). Scope rule decided with the maintainer: the framework ships request-lifecycle and source-contract correctness plus seams; policies and formats stay app-level. Backend plans drift-check `694c905..HEAD`; changes attributable to DONE backend plans are expected.
+
+| Plan | Title | Priority | Effort | Depends on | Status |
+|---|---|---|---|---|---|
+| [010](010-backend-verification-baseline.md) | Establish a backend verification baseline (CI + lint) | P1 | S | — | TODO |
+| [011](011-atomic-source-writes.md) | Make Drizzle source writes atomic | P1 | M | 010 | TODO |
+| [012](012-working-list-queries.md) | Implement list queries (pagination/filter/sort/search, single-query reads) | P1 | L | 010, 011 | TODO |
+| [013](013-error-contract.md) | Establish a single error contract | P1 | M | 010 | TODO |
+| [014](014-authz-seam.md) | Add the authorization seam (identity, 401/403) | P1 | M | 013 | TODO |
+| [015](015-request-id-and-logger-seam.md) | Add request ids and a logger seam | P2 | S | 013 | TODO |
+| [016](016-test-utilities.md) | Ship test utilities (memory source, test app) | P2 | M | 012, 013 | TODO |
+| [017](017-openapi-emission.md) | Emit OpenAPI from installed models | P2 | M | 012, 013 | TODO |
+| [018](018-migrations-convention.md) | Adopt versioned migrations and a seed convention | P2 | S | 010 | TODO |
+| [019](019-framework-docs.md) | Write the Sprindle reference docs and agent guide | P2 | M | 011–018 (documents what landed; run last) | TODO |
+| [020](020-dependency-hygiene.md) | Unify Zod imports, isolate Drizzle internals | P2 | M | 010 (run after 011–017) | TODO |
+
+### Backend dependency notes
+
+- 010 first — it makes every later plan's verification gate enforced (no CI or lint exists for `packages/sprindle`/`apps/api` today).
+- 011 → 012 are sequential rewrites of the same file (`source/drizzle-source.ts`); 012 must preserve 011's materialize-on-tx property. Pagination and the N+1 fix were deliberately merged into 012 — separate plans would conflict in that file.
+- 013 is independent after 010; 014 and 015 consume its `HttpError` constructors and `sprindleOnError`. 014 and 015 both extend `installSprindle` options — whichever runs second merges into one options object.
+- 016 mirrors 012's query semantics in a memory source (conformance witness); 017 serializes 012/013's wire shapes. Neither can precede them.
+- 019 documents landed behavior only; 020 is deliberately last among code plans to avoid rebasing 011–017.
+
+### Backend findings considered and rejected (so nobody re-audits)
+
+Framework-inclusion test applied: core only if (a) every app rebuilds it identically, (b) it must be correct below the app, or (c) it fits existing vocabulary with zero new nouns.
+
+- **RBAC/permissions in core**: rejected — the framework ships the seam (plan 014); role/permission storage and codes are app policy. The reference app's four inconsistent enforcement points came from a missing seam, not missing framework RBAC.
+- **Audit-log hook in core**: rejected — the pipeline's `after`/model hooks are the extension point; audit shape is compliance policy. Recipe in plan 019's `docs/recipes.md`.
+- **Excel/PDF export in core**: rejected — formats and layouts are domain; the reference app's per-module export dispatch ladders prove every export is special. List-query reuse (plan 012) is the only framework contribution.
+- **File upload/storage, background jobs, caching, rate limiting, health checks, CORS/security headers, config loading, i18n in core**: rejected — Hono middleware territory, policy, or format; recipes only (plan 019).
+- **Scaffolding/introspection CLI** (reference app's `generate:model`): rejected — Sprindle is schema-first with types-over-codegen; conventions documentation (plan 019) replaces generators.
+- **Soft-delete vocabulary**: rejected — the reference implementation is inconsistent and inverted; apps model an `active` flag themselves if needed.
+- **Userland transaction boundary** (route action + hooks in one tx): deferred, not rejected — revisit on demonstrated need (noted in plan 011).
+- **Operator filters / searchable-sortable allowlists / cursor pagination**: deferred — wait for a real consumer (noted in plan 012).
+
 ## Dependency and delivery notes
 
 - **Full-scope sequential phases (decided 2026-07-26)**: plans 001-006 are executed at full scope in order, each with its own complete verification gates. A walking-skeleton re-scoping was considered and reverted: it violated the plan-writing rules (self-containment, machine-checkable boundaries), and the framework is not co-developed with an app, so longer wall-clock time before the first slice is acceptable. Early-validation duty falls on plan 000's compile-time contract tests and plan 006's ordinary-resource fixture.
