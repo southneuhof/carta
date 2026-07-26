@@ -111,6 +111,17 @@ async function main() {
       ('notif-role', null, null, 'admin-role', 'section-north', 'Konfigurasi diperbarui', 'Rantai verifikasi lembur telah diperbarui.', 'seen', 'info', 'settings')
     on conflict (id) do update set
       title = excluded.title, content = excluded.content, status_code = excluded.status_code;
+
+    insert into overtimes (id, section_id, applicant_employee_id, date, start_time, estimated_minutes, description, status_code, created_by_user_id) values
+      ('overtime-draft', 'section-north', 'employee-admin', '2026-07-20', '18:00', 120, 'Perbaikan gardu tol', 'draft', '${adminId}'),
+      ('overtime-waiting', 'section-north', 'employee-admin', '2026-07-21', '19:00', 180, 'Penanganan insiden lalu lintas', 'waiting', '${adminId}')
+    on conflict (id) do update set
+      description = excluded.description, status_code = excluded.status_code;
+
+    insert into log_verifications (id, module_name, module_id, order_number, verificator_type, job_position_id, recipient_employee_id, status_code) values
+      ('log-overtime-waiting-1', 'overtimes', 'overtime-waiting', 1, 'jobPosition', 'position-supervisor', null, 'waiting'),
+      ('log-overtime-waiting-2', 'overtimes', 'overtime-waiting', 2, 'sectionGroupHead', null, 'employee-admin', 'pending')
+    on conflict (id) do update set status_code = excluded.status_code;
   `))
 
   await closeDb()

@@ -1,14 +1,8 @@
 import { createEntity } from '@southneuhof/sprindle/entity'
 import { defineRelationsPart } from 'drizzle-orm'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
-import {
-  employees,
-  jobPosition,
-  jobPositions,
-  tollSection,
-  tollSections,
-} from '../organization/organization.entity'
-import { user, users } from '../users/users.entity'
+import { employees, jobPositions, tollSections } from '../organization/organization.entity'
+import { users } from '../users/users.entity'
 
 // The `employees` table is declared in `organization.entity.ts` with the rest of the
 // mutually-referential org graph; the entity, relations and model stay here. It is
@@ -23,15 +17,22 @@ export const employeeRelations = defineRelationsPart({ employees, users, tollSec
   },
 }))
 
+/**
+ * `select` carries no relations, and that is a constraint rather than an omission.
+ *
+ * Relation hydration is one level deep: `materialize` builds its `with` clause from
+ * the entity's own relation fields, so a *nested* entity is loaded without its own
+ * relations and then fails its select schema. Since `overtimes.select` nests
+ * `employee` (for the applicant), `employee` has to be a leaf.
+ *
+ * The relations below stay declared so a future reader can see what exists and so
+ * a screen that needs them can join explicitly; they are simply not read here.
+ */
 export const employee = createEntity({
   table: employees,
   schemas: {
     create: createInsertSchema(employees).omit({ id: true, createdAt: true, updatedAt: true }),
     update: createUpdateSchema(employees).omit({ id: true, createdAt: true, updatedAt: true }),
-    select: createSelectSchema(employees).extend({
-      account: user.schemas.select.nullable(),
-      section: tollSection.schemas.select.nullable(),
-      jobPosition: jobPosition.schemas.select.nullable(),
-    }),
+    select: createSelectSchema(employees),
   },
 })

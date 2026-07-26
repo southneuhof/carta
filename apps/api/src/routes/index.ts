@@ -4,6 +4,7 @@ import { healthRoute } from './health/health'
 import { authRoutes, domain as authDomain } from './auth/auth'
 import { domain as employeesDomain, employeeModel } from './employees/employees'
 import { domain as notificationsDomain, markSeen, notificationDetail, notificationModel, unreadCount } from './notifications/notifications'
+import { domain as overtimesDomain, overtimeModel } from './overtimes/overtimes'
 import { domain as verificationDomain } from './verification/verification'
 import {
   domain as organizationDomain,
@@ -35,6 +36,7 @@ export const domainParts = [
   usersDomain,
   verificationDomain,
   notificationsDomain,
+  overtimesDomain,
 ] as const
 
 const installedRoutes = [
@@ -57,6 +59,7 @@ const installedRoutes = [
   markSeen,
   notificationDetail,
   notificationModel,
+  overtimeModel,
   sectionTypeModel,
   tollSectionModel,
   jobPositionModel,
