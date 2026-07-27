@@ -11,19 +11,15 @@ import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { ListView } from '@southneuhof/is-vue-framework'
-import { loadAssignableRoles, setUserRole, users, type AssignableRole } from '@/framework/adapters/resources/users'
+import { users } from '../../../users.resource'
+import { userRoles } from './user-roles.resource'
+import { setUserRole, type UserRole } from './user-roles.operations'
 
 
 const route = useRoute('settings-users-detail-roles')
 const userId = computed(() => route.params.userId)
 const reloadToken = ref(0)
-
-const table = computed(() => ({
-  fields: { name: { label: 'Nama Role' } },
-  namespace: 'user-roles',
-  searchParameters: { user_id: userId.value, reload: reloadToken.value },
-  load: () => loadAssignableRoles(userId.value),
-}))
+const table = computed(() => userRoles.table({ namespace: 'user-roles', searchParameters: { user_id: userId.value, reload: reloadToken.value } }).table)
 
 const pending = ref(new Set<string>())
 const optimistic = ref<Record<string, boolean>>({})
@@ -32,15 +28,15 @@ function isPending(id: string) {
   return pending.value.has(id)
 }
 
-function activeOf(record: AssignableRole) {
-  return optimistic.value[String(record.id)] ?? Boolean(record.active)
+function assignedOf(record: UserRole) {
+  return optimistic.value[String(record.id)] ?? record.assigned
 }
 
-async function toggle(record: AssignableRole, next: boolean) {
+async function toggle(record: UserRole, next: boolean) {
   const roleId = String(record.id)
   if (pending.value.has(roleId)) return
 
-  const previous = activeOf(record)
+  const previous = assignedOf(record)
   optimistic.value = { ...optimistic.value, [roleId]: next }
   pending.value = new Set(pending.value).add(roleId)
 
@@ -67,10 +63,10 @@ async function toggle(record: AssignableRole, next: boolean) {
       <input
         type="checkbox"
         :data-role="record.id"
-        :checked="activeOf(record as AssignableRole)"
+        :checked="assignedOf(record as UserRole)"
         :disabled="isPending(String(record.id))"
         :aria-label="`Role ${value}`"
-        @change="toggle(record as AssignableRole, ($event.target as HTMLInputElement).checked)"
+        @change="toggle(record as UserRole, ($event.target as HTMLInputElement).checked)"
       />
     </template>
   </ListView>

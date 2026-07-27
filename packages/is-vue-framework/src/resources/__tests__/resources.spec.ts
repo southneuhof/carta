@@ -103,6 +103,13 @@ describe('defineResource factories', () => {
     expect(roles.table({ namespace: 'archived' }).table.namespace).toBe('archived')
   })
 
+  it('forwards pagination visibility through resource table props', () => {
+    const roles = ordinaryResource()
+
+    expect(roles.table({ pagination: 'always' }).table.pagination).toBe('always')
+    expect(roles.table({ pagination: false }).table.pagination).toBe(false)
+  })
+
   it('treats parent scoping as an ordinary searchParameters entry', () => {
     const roles = ordinaryResource()
 
@@ -144,7 +151,7 @@ describe('defineResource factories', () => {
 
   it('wires create for form() and update for form({ id })', async () => {
     const create = vi.fn(async () => ({ id: '2' }))
-    const update = vi.fn(async () => undefined)
+    const update = vi.fn(async (id: string, input: { name: string }) => ({ id, ...input }))
     const detail = vi.fn(async () => records[0])
     const roles = ordinaryResource({ create, update, detail })
 
@@ -173,7 +180,7 @@ describe('defineResource factories', () => {
         create: fromZod(z.object({ name: z.string().min(3) })),
         update: fromZod(z.object({ name: z.string().optional() })),
       },
-      operations: { create: async () => undefined, update: async () => undefined },
+      operations: { create: async () => ({ id: '2', name: 'Admin' }), update: async () => ({ id: '2', name: 'Admin' }) },
     })
 
     expect(roles.form().schema?.validate({ name: 'ab' }).success).toBe(false)
@@ -327,7 +334,7 @@ describe('standard controls, projected by the surface factories', () => {
     const routeless = defineResource<Role>({
       key: 'roles',
       fields,
-      operations: { list: async () => ({ data: records }), create: async () => undefined },
+      operations: { list: async () => ({ data: records }), create: async () => ({ id: '2', name: 'Admin' }) },
     })
 
     expect(routeless.table().controls).toEqual([])
@@ -387,6 +394,20 @@ describe('standard controls, projected by the surface factories', () => {
     }
   })
 
+  it('projects only permitted record actions on the table surface', () => {
+    const roles = ordinaryResource()
+    const remove = vi.fn()
+
+    expect(roles.table().rowControls?.(records[0]).map((control) => control.key)).toEqual(['detail', 'update'])
+    const withDelete = roles.table({ onDelete: remove }).rowControls?.(records[0]) ?? []
+    expect(withDelete.map((control) => control.key)).toEqual(['detail', 'update', 'delete'])
+    withDelete.find((control) => control.key === 'delete')?.onSelect?.()
+    expect(remove).toHaveBeenCalledWith(records[0])
+
+    withAccess(denyAll)
+    expect(roles.table({ onDelete: remove }).rowControls?.(records[0])).toEqual([])
+  })
+
   it('generates links from actions', () => {
     const controls = ordinaryResource().detail({ id: '7', onDelete: () => undefined }).controls
 
@@ -432,17 +453,37 @@ describe('resource props inside shells', () => {
     view.unmount()
   })
 
-  it('binds create and update forms to FormView with no mode', async () => {
-    const create = vi.fn(async () => undefined)
-    const update = vi.fn(async () => undefined)
+  it('renders only permitted resource row actions in ListView', async () => {
+    const resource = {
+      table: () => ({
+        table: { fields, data: records },
+        controls: [],
+        rowControls: () => [
+          { key: 'detail', label: 'Detail', to: '/roles/1' },
+          { key: 'update', label: 'Ubah', to: '/roles/1/edit' },
+        ],
+      }),
+    }
+    const view = mountCore(ListView, { resource })
+    await flush()
+
+    expect(view.find('[aria-label="Detail"]')).not.toBeNull()
+    expect(view.find('[aria-label="Ubah"]')).not.toBeNull()
+    expect(view.find('[aria-label="Hapus"]')).toBeNull()
+    view.unmount()
+  })
+
+  it('binds create and update resources to FormView with no mode', async () => {
+    const create = vi.fn(async () => ({ id: '2', name: 'Admin' }))
+    const update = vi.fn(async (id: string, input: { name: string }) => ({ id, ...input }))
     const roles = ordinaryResource({ create, update })
 
-    const createView = mountCore(FormView, { form: roles.form() })
+    const createView = mountCore(FormView, { resource: roles })
     await flush()
     createView.find('form')!.dispatchEvent(new Event('submit'))
     await flush()
 
-    const updateView = mountCore(FormView, { form: roles.form({ id: '1' }) })
+    const updateView = mountCore(FormView, { resource: roles, id: '1' })
     await flush()
     updateView.find('form')!.dispatchEvent(new Event('submit'))
     await flush()
@@ -453,15 +494,31 @@ describe('resource props inside shells', () => {
     updateView.unmount()
   })
 
-  it('supports call-site overrides by plain object spread', async () => {
-    const roles = ordinaryResource()
-    const submit = vi.fn(async () => undefined)
-    const view = mountCore(FormView, { form: { ...roles.form({ id: '1' }), submit } })
+  it('passes formOptions to the resource factory', async () => {
+    const create = vi.fn(async () => ({ id: '2', name: 'Admin' }))
+    const roles = ordinaryResource({ create })
+    const form = vi.spyOn(roles, 'form')
+    const formOptions = { initialData: { name: 'Salinan' }, searchParameters: { source: 'clone' } }
+    const view = mountCore(FormView, { resource: roles, formOptions })
     await flush()
     view.find('form')!.dispatchEvent(new Event('submit'))
     await flush()
 
-    expect(submit).toHaveBeenCalled()
+    expect(form).toHaveBeenCalledWith(formOptions)
+    expect(create).toHaveBeenCalledWith({ name: 'Salinan' })
+    view.unmount()
+  })
+
+  it('supports raw custom form props', async () => {
+    const submit = vi.fn(async () => undefined)
+    const load = vi.fn(async () => ({ name: 'Loaded' }))
+    const view = mountCore(FormView, { formProps: { fields, load, submit } })
+    await flush()
+    view.find('form')!.dispatchEvent(new Event('submit'))
+    await flush()
+
+    expect(load).toHaveBeenCalledOnce()
+    expect(submit).toHaveBeenCalledWith({ name: 'Loaded' })
     view.unmount()
   })
 })

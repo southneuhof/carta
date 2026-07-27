@@ -50,7 +50,7 @@ vi.mock('@/framework/rpc', () => {
 })
 
 const PermissionsRoute = (await import('./index.route.vue')).default
-const { rolePermissions } = await import('@/framework/adapters/resources/roles')
+const { rolePermissions } = await import('./role-permissions.resource')
 
 async function flush(times = 8) {
   for (let attempt = 0; attempt < times; attempt += 1) {

@@ -1,16 +1,16 @@
-# Graph Report - is-framework  (2026-07-27)
+# Graph Report - is-framework  (2026-07-28)
 
 ## Corpus Check
-- 786 files · ~778,856 words
+- 807 files · ~788,893 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 7190 nodes · 10795 edges · 629 communities (446 shown, 183 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 121 edges (avg confidence: 0.65)
+- 7397 nodes · 11142 edges · 641 communities (457 shown, 184 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 119 edges (avg confidence: 0.65)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `17e7ed92`
+- Built from commit: `2826b0ab`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -489,7 +489,6 @@
 - domain/README.md
 - vue3-google-map
 - vue-sonner
-- vue-tippy
 - @vuepic/vue-datepicker
 - @vueuse/core
 - is-vue-framework/README.md
@@ -531,10 +530,22 @@
 - 5.8.2 - 2021-06-23
 - 6.0.2 - 2022-04-27
 - 6.7.2 - 2023-10-25
+- 5.8.1 - 2021-05-20
 - roles.layout.vue
-- 5.3.1 - 2020-05-27
-- 5.8.2 - 2021-06-23
+- 6.7.2 - 2023-10-25
+- 7.0.1 - 2024-04-10
+- 7.2.1 - 2024-07-03
+- 5.1.5 - 2019-12-19
+- 5.3.2 - 2020-06-10
+- 6.6.2 - 2023-08-09
+- 6.0.2 - 2022-04-27
+- 6.0.3 - 2022-05-25
 - 7.1.1 - 2024-05-22
+- 6.4.1 - 2023-03-29
+- 6.7.2 - 2023-10-25
+- @tinymce/tinymce-vue
+- vue-sonner
+- @vueuse/core
 
 ## God Nodes (most connected - your core abstractions)
 1. `Changelog` - 174 edges
@@ -563,19 +574,19 @@
 ## Import Cycles
 - 3-file cycle: `apps/api/src/db.ts -> apps/api/src/routes/index.ts -> apps/api/src/identity.ts -> apps/api/src/db.ts`
 - 3-file cycle: `apps/api/src/db.ts -> apps/api/src/routes/index.ts -> apps/api/src/routes/auth/auth.ts -> apps/api/src/db.ts`
-- 4-file cycle: `apps/api/src/db.ts -> apps/api/src/routes/index.ts -> apps/api/src/routes/notifications/notifications.ts -> apps/api/src/routes/notifications/notifications.routes.ts -> apps/api/src/db.ts`
-- 4-file cycle: `apps/api/src/db.ts -> apps/api/src/routes/index.ts -> apps/api/src/routes/notifications/notifications.ts -> apps/api/src/routes/notifications/notifications.model.ts -> apps/api/src/db.ts`
 - 4-file cycle: `apps/api/src/db.ts -> apps/api/src/routes/index.ts -> apps/api/src/routes/overtimes/overtimes.ts -> apps/api/src/routes/overtimes/overtimes.model.ts -> apps/api/src/db.ts`
+- 4-file cycle: `apps/api/src/db.ts -> apps/api/src/routes/index.ts -> apps/api/src/routes/roles/roles.ts -> apps/api/src/routes/roles/user-roles.routes.ts -> apps/api/src/db.ts`
+- 4-file cycle: `apps/api/src/db.ts -> apps/api/src/routes/index.ts -> apps/api/src/routes/notifications/notifications.ts -> apps/api/src/routes/notifications/notifications.model.ts -> apps/api/src/db.ts`
+- 4-file cycle: `apps/api/src/db.ts -> apps/api/src/routes/index.ts -> apps/api/src/routes/notifications/notifications.ts -> apps/api/src/routes/notifications/notifications.routes.ts -> apps/api/src/db.ts`
 - 4-file cycle: `apps/api/src/db.ts -> apps/api/src/routes/index.ts -> apps/api/src/routes/roles/roles.ts -> apps/api/src/routes/roles/role-permissions.routes.ts -> apps/api/src/db.ts`
 - 4-file cycle: `apps/api/src/db.ts -> apps/api/src/routes/index.ts -> apps/api/src/routes/roles/roles.ts -> apps/api/src/routes/roles/roles.model.ts -> apps/api/src/db.ts`
-- 4-file cycle: `apps/api/src/db.ts -> apps/api/src/routes/index.ts -> apps/api/src/routes/roles/roles.ts -> apps/api/src/routes/roles/user-roles.routes.ts -> apps/api/src/db.ts`
-- 5-file cycle: `apps/api/src/db.ts -> apps/api/src/routes/index.ts -> apps/api/src/routes/overtimes/overtimes.ts -> apps/api/src/routes/overtimes/overtimes.model.ts -> apps/api/src/routes/overtimes/overtimes.routes.ts -> apps/api/src/db.ts`
-- 5-file cycle: `apps/api/src/db.ts -> apps/api/src/routes/index.ts -> apps/api/src/routes/notifications/notifications.ts -> apps/api/src/routes/notifications/notifications.routes.ts -> apps/api/src/identity.ts -> apps/api/src/db.ts`
-- 5-file cycle: `apps/api/src/db.ts -> apps/api/src/routes/index.ts -> apps/api/src/routes/notifications/notifications.ts -> apps/api/src/routes/notifications/notifications.model.ts -> apps/api/src/identity.ts -> apps/api/src/db.ts`
 - 5-file cycle: `apps/api/src/db.ts -> apps/api/src/routes/index.ts -> apps/api/src/routes/overtimes/overtimes.ts -> apps/api/src/routes/overtimes/overtimes.model.ts -> apps/api/src/identity.ts -> apps/api/src/db.ts`
+- 5-file cycle: `apps/api/src/db.ts -> apps/api/src/routes/index.ts -> apps/api/src/routes/overtimes/overtimes.ts -> apps/api/src/routes/overtimes/overtimes.model.ts -> apps/api/src/routes/overtimes/overtimes.routes.ts -> apps/api/src/db.ts`
+- 5-file cycle: `apps/api/src/db.ts -> apps/api/src/routes/index.ts -> apps/api/src/routes/notifications/notifications.ts -> apps/api/src/routes/notifications/notifications.model.ts -> apps/api/src/identity.ts -> apps/api/src/db.ts`
+- 5-file cycle: `apps/api/src/db.ts -> apps/api/src/routes/index.ts -> apps/api/src/routes/notifications/notifications.ts -> apps/api/src/routes/notifications/notifications.routes.ts -> apps/api/src/identity.ts -> apps/api/src/db.ts`
 - 5-file cycle: `apps/api/src/db.ts -> apps/api/src/routes/index.ts -> apps/api/src/routes/products/products.ts -> apps/api/src/routes/products/products.model.ts -> apps/api/src/routes/products/products.routes.ts -> apps/api/src/db.ts`
 
-## Communities (629 total, 183 thin omitted)
+## Communities (641 total, 184 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.00
@@ -586,16 +597,16 @@ Cohesion: 0.07
 Nodes (19): consumePostLoginRedirect(), getCurrentHashRouteForRedirect(), normalizeInternalRoute(), safeGetSessionStorage(), savePostLoginRedirect(), apiUrl, AppServices, buildURL() (+11 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.06
-Nodes (61): main(), main(), main(), app, closeDb(), getDb(), getDomainSchema(), narrowestScope (+53 more)
+Cohesion: 0.05
+Nodes (79): main(), main(), main(), app, closeDb(), getDb(), createMemoryTransport(), setTransport() (+71 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.07
 Nodes (45): toAdminAssetObject(), isAbsoluteStorageAsset(), isLikelyUploadObject(), isStorageAsset(), normalizeBasePath(), normalizeFileUploadValue(), toPublicAssetUrl(), toStoredAssetPath() (+37 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.07
-Nodes (32): createMemoryTransport(), DeliveredNotification, getTransport(), MemoryTransport, NotificationTransport, notifyAfterCommit(), setTransport(), domain (+24 more)
+Cohesion: 0.12
+Nodes (26): domain, jobPosition, sectionGroups, sectionRantings, sectionType, tollSection, tollSections, jobPositionModel (+18 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.10
@@ -638,48 +649,48 @@ Cohesion: 0.11
 Nodes (31): createSectionSchemaManager(), EagerSchemaGlobModule, isSectionSchema(), readSectionSchemas(), buildNestedSlugWhere(), createLandingPageLoad(), createRootLayoutLoad(), LandingPageLoadConfig (+23 more)
 
 ### Community 15 - "Community 15"
-Cohesion: 0.12
-Nodes (33): advanceChain(), currentStep(), resolveRecipientEmployee(), seedChain(), Tx, ErrorIssue, isHttpError(), isSchemaError() (+25 more)
+Cohesion: 0.17
+Nodes (25): validationError(), itemEntity, getPrimaryKeyEntries(), applyManyRelationValues(), applyOneRelationValues(), applyThroughManyRelationValue(), createDrizzleModel(), createDrizzleModelFactory() (+17 more)
 
 ### Community 16 - "Community 16"
-Cohesion: 0.06
-Nodes (3): fieldTypes, fieldsAlias, fieldTypes
+Cohesion: 0.05
+Nodes (7): fieldTypes, fieldsAlias, fieldTypes, runtimeInvalid, runtimeValid, FrameworkRuntime, defaultLookupDataFormatter()
 
 ### Community 17 - "Community 17"
-Cohesion: 0.04
-Nodes (84): port, CanonicalEndpoint, CleanParam, consoleLogger, CreateInput, ErrorStatus, ExtractParams, installSprindle() (+76 more)
+Cohesion: 0.05
+Nodes (68): CanonicalEndpoint, CleanParam, consoleLogger, CreateInput, ErrorStatus, ExtractParams, installSprindle(), JoinPath (+60 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.10
-Nodes (29): buildInputConfig(), clearFieldValidation(), emit, FieldBindMap, fieldContainerRefs, fieldDependencyData, fieldDependencyTarget, fieldErrors (+21 more)
+Cohesion: 0.09
+Nodes (33): buildInputConfig(), clearFieldValidation(), emit, FieldBindMap, fieldContainerRefs, fieldDependencyData, fieldDependencyTarget, fieldErrors (+25 more)
 
 ### Community 19 - "Community 19"
-Cohesion: 0.11
-Nodes (34): defaultDataAdapter, useFrameworkAdapters(), mountWith(), RecordIdentity, QueryKey, QueryValues, frameworkQueryClientKey, invalidateResourceData() (+26 more)
+Cohesion: 0.04
+Nodes (66): getDomainSchema(), AnySchema, createEntity(), CreateEntityConfig, createRelationField(), DefineDomainPartConfig, defineDomainSchema(), defineEntitySchemas() (+58 more)
 
 ### Community 20 - "Community 20"
 Cohesion: 0.06
 Nodes (31): attrs, ButtonColor, ButtonKind, ButtonType, ButtonVariant, currentAriaLabel, dispatchToggleEvents(), emit (+23 more)
 
 ### Community 21 - "Community 21"
-Cohesion: 0.07
-Nodes (31): columnRefs, columnWidths, dataInfo, emit, fieldsAlias, fieldsAlign, fieldsAlignClassMap, fieldsClass (+23 more)
+Cohesion: 0.06
+Nodes (35): columnRefs, columnWidths, dataInfo, emit, fieldsAlias, fieldsAlign, fieldsAlignClassMap, fieldsClass (+27 more)
 
 ### Community 22 - "Community 22"
-Cohesion: 0.06
-Nodes (36): commitSelectedAsset(), modelValue, open, props, selectedItems, FileAssetValue, inferContentType(), inferFilename() (+28 more)
+Cohesion: 0.07
+Nodes (31): FileAssetValue, inferContentType(), inferFilename(), isImageAssetValue(), normalizeFileAssetValue(), normalizeFileAssetValues(), toStoredAssetPath(), emit (+23 more)
 
 ### Community 23 - "Community 23"
-Cohesion: 0.04
-Nodes (64): AnySchema, CreateEntityConfig, createRelationField(), defineDomainPart(), DefineDomainPartConfig, defineDomainSchema(), defineEntitySchemas(), DomainEntity (+56 more)
+Cohesion: 0.05
+Nodes (61): adapters, entries, fields, loaded, owner, props, record, renderers (+53 more)
 
 ### Community 24 - "Community 24"
 Cohesion: 0.10
 Nodes (5): hasEventListeners(), KO, off(), UO, Vo
 
 ### Community 25 - "Community 25"
-Cohesion: 0.07
-Nodes (39): getPlacesAutocomplete(), children, createFolder(), deleteFile(), ensureFolderNameAvailable(), fetchChildren(), FolderItem, handleCreateFolderSuccess() (+31 more)
+Cohesion: 0.16
+Nodes (5): on(), OR, setup(), T(), uC
 
 ### Community 26 - "Community 26"
 Cohesion: 0.07
@@ -691,15 +702,15 @@ Nodes (42): dependencies, drizzle-orm, hono, @hono/zod-validator, typescript, zo
 
 ### Community 29 - "Community 29"
 Cohesion: 0.09
-Nodes (29): combinedSearchParameters, commitFromSelection(), committedInputValue, deepClone(), displayValue, emit, filterParameters, filterProps (+21 more)
+Nodes (28): combinedSearchParameters, commitFromSelection(), committedInputValue, deepClone(), displayValue, emit, filterParameters, filterProps (+20 more)
 
 ### Community 30 - "Community 30"
 Cohesion: 0.09
 Nodes (25): acceptTypes, acceptTypesPretty, dropZoneRef, emit, emitChanges(), fileInput, fileManagerOpen, handleFileDelete() (+17 more)
 
 ### Community 31 - "Community 31"
-Cohesion: 0.05
-Nodes (28): error, handleResize, NavItemRoute, props, config, debouncedSetValue, modelValue, props (+20 more)
+Cohesion: 0.14
+Nodes (11): debouncedSetValue, modelValue, props, value, extension, isPreviewable, props, debounce() (+3 more)
 
 ### Community 32 - "Community 32"
 Cohesion: 0.07
@@ -710,12 +721,12 @@ Cohesion: 0.14
 Nodes (21): buildLayoutRoutes(), findMenuRoute(), InferredRoute, inferRoute(), isSeparatorRoute(), normalizePath(), toPathSegment(), toTitle() (+13 more)
 
 ### Community 34 - "Community 34"
-Cohesion: 0.07
-Nodes (48): AuthHandler, createAuthRoutes(), handler(), SignInOutput, DefinedModel, DefineModelConfig, compileRouteTree(), CompileRouteTreeConfig (+40 more)
+Cohesion: 0.21
+Nodes (14): ErrorIssue, isHttpError(), isSchemaError(), SchemaError, toHttpError(), unauthorized(), normalizeIssues(), runAfter() (+6 more)
 
 ### Community 35 - "Community 35"
-Cohesion: 0.15
-Nodes (26): buildDetailConfig(), buildFormConfig(), buildListConfig(), evaluateFieldDependencies(), pickFirst(), CommonModelConfig, CommonTransactionConfig, CommonViewConfig (+18 more)
+Cohesion: 0.12
+Nodes (36): cloneValue(), isPlainObject(), mergeModelConfig(), mergeValue(), applyPlatformToInputConfig(), buildDetailConfig(), buildFormConfig(), buildListConfig() (+28 more)
 
 ### Community 36 - "Community 36"
 Cohesion: 0.05
@@ -726,8 +737,8 @@ Cohesion: 0.07
 Nodes (27): packages/contracts/src/*, packages/contracts/src/index.ts, packages/sprindle/src/*, packages/sprindle/src/index.ts, compilerOptions, baseUrl, jsx, lib (+19 more)
 
 ### Community 38 - "Community 38"
-Cohesion: 0.09
-Nodes (33): applyFrameworkConfig(), applyFrameworkDefaults(), applyGlobalDefaults(), BASELINE_APP_CONFIG, BASELINE_DETAIL_CONFIG, BASELINE_FORM_CONFIG, BASELINE_TABLE_CONFIG, cloneValue() (+25 more)
+Cohesion: 0.13
+Nodes (26): applyFrameworkConfig(), applyFrameworkDefaults(), applyGlobalDefaults(), BASELINE_APP_CONFIG, BASELINE_DETAIL_CONFIG, BASELINE_FORM_CONFIG, BASELINE_TABLE_CONFIG, cloneValue() (+18 more)
 
 ### Community 39 - "Community 39"
 Cohesion: 0.07
@@ -738,8 +749,8 @@ Cohesion: 0.10
 Nodes (17): b(), c(), g(), i(), l(), n(), o(), r() (+9 more)
 
 ### Community 41 - "Community 41"
-Cohesion: 0.06
-Nodes (33): children, expanded, fieldsAlias, fieldsProxy, formatTableData(), loadData(), props, runtime (+25 more)
+Cohesion: 0.20
+Nodes (14): formatCurrency(), formatDate(), formatDateTime(), formatDelta(), formatHour(), formatLargeNumber(), formatMonth(), formatNumber() (+6 more)
 
 ### Community 42 - "Community 42"
 Cohesion: 0.22
@@ -747,15 +758,15 @@ Nodes (12): Apostle, sanitizeQuery(), toQueryString(), ianaMediaTypeMethodMap, i
 
 ### Community 44 - "Community 44"
 Cohesion: 0.07
-Nodes (29): dependencies, clsx, date-fns, radix-vue, tailwind-merge, @tanstack/vue-query, tinymce, uuid (+21 more)
+Nodes (29): dependencies, clsx, date-fns, radix-vue, tailwind-merge, @tanstack/vue-query, @tanstack/vue-table, tinymce (+21 more)
 
 ### Community 45 - "Community 45"
-Cohesion: 0.03
-Nodes (60): keyManager(), keyStore, useColorPreference(), modelValue, props, id, modelValue, props (+52 more)
+Cohesion: 0.05
+Nodes (31): keyManager(), keyStore, useColorPreference(), id, modelValue, props, activeError, containerRef (+23 more)
 
 ### Community 46 - "Community 46"
-Cohesion: 0.05
-Nodes (30): emit, isOpen, props, colorMap, props, attrs, backgroundClassMap, CardColorRole (+22 more)
+Cohesion: 0.04
+Nodes (25): emit, isOpen, props, colorMap, props, panelState, props, emit (+17 more)
 
 ### Community 47 - "Community 47"
 Cohesion: 0.07
@@ -771,19 +782,19 @@ Nodes (7): add(), By(), createEditor(), items(), Ly(), overrideDefaults(), _setB
 
 ### Community 63 - "Community 63"
 Cohesion: 0.02
-Nodes (112): 4.1.1 - 2014-07-08, 4.1.5 - 2014-09-09, 4.1.9 - 2015-03-10, 4.2.1 - 2015-06-29, 4.2.2 - 2015-07-22, 4.2.3 - 2015-07-30, 4.2.8 - 2015-11-13, 4.3.11 - 2016-04-25 (+104 more)
+Nodes (112): 4.1.1 - 2014-07-08, 4.1.5 - 2014-09-09, 4.1.9 - 2015-03-10, 4.2.1 - 2015-06-29, 4.2.2 - 2015-07-22, 4.2.3 - 2015-07-30, 4.2.5 - 2015-08-31, 4.2.6 - 2015-09-28 (+104 more)
 
 ### Community 64 - "Community 64"
-Cohesion: 0.10
-Nodes (52): DataAdapter, AccessPolicy, AccessRequest, DetailProps, FormProps, FormSubmitHandler, TableProps, DisplayRendererContext (+44 more)
+Cohesion: 0.09
+Nodes (58): AccessPolicy, AccessRequest, DetailProps, FormProps, FormSubmitHandler, TableProps, DisplayRendererContext, FieldBehavior (+50 more)
 
 ### Community 65 - "Community 65"
-Cohesion: 0.07
-Nodes (37): meRoute, domain, employee, employeeRelations, employeeModel, healthRoute, domainParts, installedRoutes (+29 more)
+Cohesion: 0.11
+Nodes (26): domain, notification, notificationRelations, notifications, NotificationStatus, notificationStatuses, notificationModel, scopedSource (+18 more)
 
 ### Community 66 - "Community 66"
-Cohesion: 0.05
-Nodes (49): adapters, entries, fields, loaded, owner, props, record, renderers (+41 more)
+Cohesion: 0.10
+Nodes (19): adapters, behavior, dirty, draft, edited, emit, fields, hiddenKeys (+11 more)
 
 ### Community 67 - "Community 67"
 Cohesion: 0.11
@@ -797,9 +808,13 @@ Nodes (20): collectIconClassesFromRule(), extractRemixiconClassNamesFromStyleShe
 Cohesion: 0.08
 Nodes (23): dependencies, @southneuhof/landing-sveltekit-framework, description, devDependencies, @types/node, vitest, exports, ./common-section-meta (+15 more)
 
+### Community 71 - "Community 71"
+Cohesion: 0.12
+Nodes (16): Commands you will need, Current state, Done criteria, Git workflow, Maintenance notes, Plan 040: Derive FormView success navigation from resources, Scope, Status (+8 more)
+
 ### Community 73 - "Community 73"
-Cohesion: 0.06
-Nodes (22): colorMap, props, panelState, props, boxSizeClassMap, props, mounted, modelValue (+14 more)
+Cohesion: 0.10
+Nodes (29): AnyInput, health, info, installables, item, model, ping, authenticated() (+21 more)
 
 ### Community 74 - "Community 74"
 Cohesion: 0.25
@@ -815,11 +830,11 @@ Nodes (29): Action, BaseCRUDConfig, BaseCRUDConfigLegacy, CommonModelConfig, Com
 
 ### Community 78 - "Community 78"
 Cohesion: 0.03
-Nodes (91): RouteTab, remove(), AccessAdapter, createProof, Customer, CustomerCreate, CustomerCreateFromOperations, customerCreateProof (+83 more)
+Nodes (88): RouteTab, AccessAdapter, createProof, Customer, CustomerCreate, CustomerCreateFromOperations, customerCreateProof, CustomerFromOperations (+80 more)
 
 ### Community 79 - "Community 79"
-Cohesion: 0.05
-Nodes (38): router, router, route, roleId, route, router, route, route (+30 more)
+Cohesion: 0.17
+Nodes (13): route, userId, emailUpdate, HasOperation, operations, update, UserUpdate, User (+5 more)
 
 ### Community 80 - "Community 80"
 Cohesion: 0.10
@@ -846,44 +861,44 @@ Cohesion: 0.10
 Nodes (20): dependencies, clsx, tailwind-merge, description, devDependencies, vitest, exports, clsx (+12 more)
 
 ### Community 86 - "Community 86"
-Cohesion: 0.16
-Nodes (12): AppType, apiUrl, rpc, api, ProductCreate, productCreateBad, productCreateOk, createRpcClient() (+4 more)
+Cohesion: 0.07
+Nodes (26): AppType, AppSchema, HasAuthSession, HasAuthSignIn, HasAuthSignOut, HasHealth, HasProductsCreate, HasProductsList (+18 more)
 
 ### Community 87 - "Community 87"
-Cohesion: 0.09
-Nodes (27): domain, productVariant, productVariants, domain, product, productRelations, products, productVariantAssignments (+19 more)
+Cohesion: 0.18
+Nodes (14): domain, productVariant, productVariants, domain, product, productRelations, products, productVariantAssignments (+6 more)
 
 ### Community 88 - "Community 88"
 Cohesion: 0.11
 Nodes (19): Commands you will need, Current state, Done criteria, Git workflow, Locked behavior, Maintenance notes, Plan 033: Make Tabs select the first valid child at bare parent URLs, Scope (+11 more)
 
 ### Community 89 - "Community 89"
-Cohesion: 0.09
-Nodes (38): FieldBehavior, FieldContext, FieldDefinition, Incident, IncidentDraft, IncidentFieldKey, incidentFields, tableFields (+30 more)
+Cohesion: 0.10
+Nodes (33): Incident, IncidentDraft, IncidentFieldKey, incidentFields, tableFields, readField(), readFields(), writeField() (+25 more)
 
 ### Community 90 - "Community 90"
-Cohesion: 0.07
-Nodes (33): alpha, beta, Draft, draftFields, fields, localQuery, offline, Row (+25 more)
+Cohesion: 0.29
+Nodes (7): legacyFeatures, legacyRolesRedirect, legacyViewRedirect(), normalizeHashUrl(), normalizeLegacyHashLocation(), single(), ViewPaths
 
 ### Community 91 - "Community 91"
-Cohesion: 0.10
-Nodes (40): notifications, NotificationStatus, notificationStatuses, domain, employees, jobPosition, jobPositions, sectionGroups (+32 more)
+Cohesion: 0.06
+Nodes (42): meRoute, narrowestScope, orgIdentity, requirePermission(), resolve(), SessionLike, sessionUserId(), DeliveredNotification (+34 more)
 
 ### Community 92 - "Community 92"
-Cohesion: 0.09
-Nodes (19): profileData, clearStagedAccess(), formData, loading, login(), loginMessage, rejectLogin(), router (+11 more)
+Cohesion: 0.22
+Nodes (6): currentOwner, owner, props, route, router, tabs
 
 ### Community 93 - "Community 93"
-Cohesion: 0.10
-Nodes (22): open, props, setOpen(), currentPicked, data, emit, filteredData, handleItemClick() (+14 more)
+Cohesion: 0.04
+Nodes (48): open, props, setOpen(), modelValue, props, data, loading, modelValue (+40 more)
 
 ### Community 94 - "Community 94"
 Cohesion: 0.11
 Nodes (18): CheckboxSpec, CollectionSpec, ColorInputSpec, ColorPickerSpec, CustomEditorNewSpec, CustomEditorOldSpec, DropZoneSpec, FormComponentSpec (+10 more)
 
 ### Community 95 - "Community 95"
-Cohesion: 0.15
-Nodes (16): accessAdapter, allowsPermission(), createFrameworkAdapters(), legacyPermissionPrefix, dataAdapter, createRouteQueryAdapter(), mergeNamespace(), prefixOf() (+8 more)
+Cohesion: 0.10
+Nodes (19): clearStagedAccess(), formData, loading, login(), loginMessage, rejectLogin(), router, buttonStub (+11 more)
 
 ### Community 96 - "Community 96"
 Cohesion: 0.07
@@ -898,8 +913,8 @@ Cohesion: 0.07
 Nodes (29): Commands you will need, Conventions to match, Current state, Destructive operations, Done criteria, Entity home — decided, no move, Git workflow, Identity today (+21 more)
 
 ### Community 99 - "Community 99"
-Cohesion: 0.14
-Nodes (14): modelValue, props, activePath, expandedPaths, getParentPath(), getSiblingDirectoryPath(), handleDirectoryDeleted(), isNavigatingHistory (+6 more)
+Cohesion: 0.12
+Nodes (16): colorMap, props, modelValue, props, activePath, expandedPaths, getParentPath(), getSiblingDirectoryPath() (+8 more)
 
 ### Community 100 - "Community 100"
 Cohesion: 0.12
@@ -910,8 +925,8 @@ Cohesion: 0.15
 Nodes (5): background(), buildBackgroundStyle(), ImageManifest, ImageVariant, ./IntersectionObserver.svelte
 
 ### Community 102 - "Community 102"
-Cohesion: 0.11
-Nodes (19): autocompletePredictions, center, Coordinate, emit, formModel, getCurrentLocation(), getLocationDetail(), handlePinDragEnd() (+11 more)
+Cohesion: 0.12
+Nodes (9): detailError, detailSrc, imageCandidates, isOpen, props, slots, thumbnailError, thumbnailSrc (+1 more)
 
 ### Community 104 - "Community 104"
 Cohesion: 0.17
@@ -927,19 +942,19 @@ Nodes (15): config, appInputComponents, builtInInputComponents, FrameworkInputCo
 
 ### Community 108 - "Community 108"
 Cohesion: 0.10
-Nodes (22): currentStep, identity, isDraft, isWaiting, maySubmit, mayVerify, onApprove(), onReject() (+14 more)
+Nodes (25): currentStep, identity, isDraft, isWaiting, maySubmit, mayVerify, onApprove(), onReject() (+17 more)
 
 ### Community 109 - "Community 109"
-Cohesion: 0.12
-Nodes (14): busy, copy(), emit, open, options, props, sourceRoleId, assignedOf() (+6 more)
+Cohesion: 0.14
+Nodes (15): assignedOf(), optimistic, pending, roleId, route, table, toggle(), ListEndpoint (+7 more)
 
 ### Community 110 - "Community 110"
 Cohesion: 0.12
 Nodes (15): compilerOptions, module, moduleResolution, strict, types, exclude, extends, include (+7 more)
 
 ### Community 111 - "Community 111"
-Cohesion: 0.16
-Nodes (20): SprindleInstallable, addOperation(), componentName(), EntitySchemas, ERROR_SCHEMA, ERROR_STATUSES, generateOpenApi(), isPlainObject() (+12 more)
+Cohesion: 0.08
+Nodes (46): AuthHandler, createAuthRoutes(), handler(), SignInOutput, SprindleInstallable, DefinedModel, DefineModelConfig, compileRouteTree() (+38 more)
 
 ### Community 112 - "Community 112"
 Cohesion: 0.06
@@ -970,12 +985,12 @@ Cohesion: 0.14
 Nodes (14): import, svelte, exports, ./api, ./auth, ./client, ./components/carousel, ./components/*.svelte (+6 more)
 
 ### Community 119 - "Community 119"
-Cohesion: 0.18
-Nodes (10): createFormSubmissionHandler(), createFormTemplateHandler(), FormSubmissionField, FrameworkErrorLike, FrameworkErrorResponse, FrameworkSuccessResponse, LandingFrameworkConfig, exceptionData() (+2 more)
+Cohesion: 0.09
+Nodes (24): setup(), modelValue, props, runtime, children, expanded, fieldsAlias, fieldsProxy (+16 more)
 
 ### Community 120 - "Community 120"
 Cohesion: 0.15
-Nodes (13): apexcharts, dependencies, apexcharts, chartjs-plugin-datalabels, dotenv, @fullcalendar/core, lodash, vue3-google-map (+5 more)
+Nodes (13): dependencies, chartjs-plugin-annotation, chartjs-plugin-datalabels, dotenv, @fullcalendar/core, lodash, vue3-google-map, vue3-google-map (+5 more)
 
 ### Community 121 - "Community 121"
 Cohesion: 0.15
@@ -986,8 +1001,8 @@ Cohesion: 0.12
 Nodes (15): description, optional, name, peerDependenciesMeta, hono, private, repository, type (+7 more)
 
 ### Community 123 - "Community 123"
-Cohesion: 0.14
-Nodes (14): devDependencies, hono, jsdom, @types/node, typescript, @vitejs/plugin-vue, vitest, vue-tsc (+6 more)
+Cohesion: 0.15
+Nodes (13): devDependencies, jsdom, @types/node, typescript, @vitejs/plugin-vue, vitest, vue-tsc, jsdom (+5 more)
 
 ### Community 124 - "Community 124"
 Cohesion: 0.15
@@ -1034,8 +1049,8 @@ Cohesion: 0.17
 Nodes (11): compilerOptions, composite, rootDir, strict, extends, include, ../../apps/api/src/**/*, ../contracts/src/**/* (+3 more)
 
 ### Community 137 - "Community 137"
-Cohesion: 0.16
-Nodes (5): on(), OR, setup(), T(), uC
+Cohesion: 0.09
+Nodes (19): router, table, MarkSeenEndpoint, MarkSeenResult, notificationOperations, NotificationRecord, NotificationStatus, HasOperation (+11 more)
 
 ### Community 138 - "Community 138"
 Cohesion: 0.18
@@ -1043,7 +1058,7 @@ Nodes (13): defineNavigation(), NavigationAction, NavigationDirect, NavigationEn
 
 ### Community 139 - "Community 139"
 Cohesion: 0.15
-Nodes (16): collectMeta(), createMemoryQueryLocationAdapter(), defaultQueryRuntimeDefaults, frameworkAdaptersKey, readNumber(), ResolvedFrameworkAdapters, resolveFrameworkAdapters(), QueryLocationAdapter (+8 more)
+Nodes (15): busy, copy(), emit, open, options, props, sourceRoleId, roleId (+7 more)
 
 ### Community 140 - "Community 140"
 Cohesion: 0.22
@@ -1066,12 +1081,12 @@ Cohesion: 0.06
 Nodes (28): asyncTable, behaviorForm, compositeIdentity, compositeRowLink, controlledTable, createProps, derivedIdentity, derivedIdentityValue (+20 more)
 
 ### Community 147 - "Community 147"
-Cohesion: 0.10
-Nodes (25): ControlPlacement, controlsAt(), ViewControl, deletePending, DetailViewProps, props, router, surface (+17 more)
+Cohesion: 0.05
+Nodes (45): ControlPlacement, controlsAt(), ViewControl, deletePending, DetailViewProps, props, remove(), router (+37 more)
 
 ### Community 148 - "Community 148"
-Cohesion: 0.43
-Nodes (6): cloneValue(), isPlainObject(), mergeModelConfig(), mergeValue(), DeepPartial, ModelConfig
+Cohesion: 0.13
+Nodes (17): loadVerificationSteps(), StepsEndpoint, StepsResponse, IsAny, IsUnknown, missingId, request, response (+9 more)
 
 ### Community 149 - "Community 149"
 Cohesion: 0.22
@@ -1094,8 +1109,8 @@ Cohesion: 0.25
 Nodes (7): compilerOptions, composite, rootDir, extends, include, src/**/*, ../../tsconfig.base.json
 
 ### Community 154 - "Community 154"
-Cohesion: 0.22
-Nodes (5): notificationFields, NotificationQuery, NotificationRecord, notifications, NotificationStatus
+Cohesion: 0.15
+Nodes (6): fixtureItems, flush(), mounted, flush(), mounted, treeFixtures
 
 ### Community 155 - "Community 155"
 Cohesion: 0.29
@@ -1118,16 +1133,16 @@ Cohesion: 0.29
 Nodes (7): BaseToolbarButtonInstanceApi, BaseToolbarToggleButtonInstanceApi, ContextFormButtonInstanceApi, ContextFormToggleButtonInstanceApi, GroupToolbarButtonInstanceApi, ToolbarButtonInstanceApi, ToolbarToggleButtonInstanceApi
 
 ### Community 160 - "Community 160"
-Cohesion: 0.22
-Nodes (8): activeOf(), optimistic, pending, reloadToken, route, table, toggle(), userId
+Cohesion: 0.13
+Nodes (16): assignedOf(), optimistic, pending, reloadToken, route, table, toggle(), userId (+8 more)
 
 ### Community 161 - "Community 161"
 Cohesion: 0.29
 Nodes (6): _RouteFileInfoMap, RouteNamedMap, _RouteNamesForFilePath, TypesConfig, vue-router, vue-router/auto-routes
 
 ### Community 162 - "Community 162"
-Cohesion: 0.22
-Nodes (9): vue, vue-router, hono, vue, vue-router, peerDependencies, hono, vue (+1 more)
+Cohesion: 0.20
+Nodes (10): vue, vue-router, hono, hono, vue, vue-router, peerDependencies, hono (+2 more)
 
 ### Community 163 - "Community 163"
 Cohesion: 0.08
@@ -1139,7 +1154,7 @@ Nodes (24): 0.0.1, 1.0.0, 1.0.1, 1.0.10, 1.0.3, 1.0.4, 1.0.5, 1.0.6 (+16 more)
 
 ### Community 165 - "Community 165"
 Cohesion: 0.14
-Nodes (26): allEntities, entityDirectory, SchemaAdapter, ResourceOperation, ValidationResult, ValidationSchema, assertNoHiddenRequiredFields(), DraftValidationOptions (+18 more)
+Nodes (24): allEntities, entityDirectory, SchemaAdapter, ResourceOperation, assertNoHiddenRequiredFields(), DraftValidationOptions, SchemaSelection, selectSchema() (+16 more)
 
 ### Community 166 - "Community 166"
 Cohesion: 0.09
@@ -1170,8 +1185,8 @@ Cohesion: 0.33
 Nodes (3): forbiddenImports, inputsRoot, sourceRoot
 
 ### Community 173 - "Community 173"
-Cohesion: 0.11
-Nodes (15): Role, RoleDraft, roleFields, RolePermission, rolePermissionFields, rolePermissions, RoleQuery, roles (+7 more)
+Cohesion: 0.12
+Nodes (8): canvas, context, currentDrawingMode, isDrawing, isSaved, modelValue, props, runtime
 
 ### Community 174 - "Community 174"
 Cohesion: 0.39
@@ -1182,8 +1197,8 @@ Cohesion: 0.33
 Nodes (6): svelte, svelte, peerDependencies, svelte, @sveltejs/kit, @sveltejs/kit
 
 ### Community 176 - "Community 176"
-Cohesion: 0.38
-Nodes (6): buttonStub, inputStub(), mocks, mountLogin(), response(), visualStub()
+Cohesion: 0.06
+Nodes (36): attrs, backgroundClassMap, CardColorRole, CardVariant, foregroundClassMap, forwardedAttrs, handleRootClick(), handleRootKeydown() (+28 more)
 
 ### Community 177 - "Community 177"
 Cohesion: 0.40
@@ -1201,9 +1216,13 @@ Nodes (4): GOOGLE_MAP_API_KEY, location, mapCenter, props
 Cohesion: 0.11
 Nodes (18): Commands you will need, Current state, Done criteria, Git workflow, Maintenance notes, Plan 008: Migrate users and prove multi-table/custom-load complexity, Scope, Status (+10 more)
 
+### Community 182 - "Community 182"
+Cohesion: 0.07
+Nodes (29): Architectural constraints, Commands you will need, Compatibility guarantee, Current orchestration excerpts, Current state, Done criteria, Events, slots, and exposed members, Explicit non-goals (+21 more)
+
 ### Community 183 - "Community 183"
-Cohesion: 0.36
-Nodes (10): collectIssues(), isRecord(), normalizeCollection(), normalizeError(), normalizeRecord(), createRpcOperations(), queryValues(), rpcOperations() (+2 more)
+Cohesion: 0.14
+Nodes (15): children, createFolder(), deleteFile(), ensureFolderNameAvailable(), fetchChildren(), FolderItem, handleCreateFolderSuccess(), handleDeleteDirectory() (+7 more)
 
 ### Community 184 - "Community 184"
 Cohesion: 0.50
@@ -1282,16 +1301,20 @@ Cohesion: 0.11
 Nodes (18): Commands you will need, Current state, Done criteria, Git workflow, Maintenance notes, Plan 009: Retire the legacy CRUD architecture and publish migration guidance, Scope, Status (+10 more)
 
 ### Community 214 - "Community 214"
-Cohesion: 0.67
-Nodes (3): ./types, import, types
+Cohesion: 0.11
+Nodes (24): getPlacesAutocomplete(), FrameworkDetailRuntime, FrameworkDynamicFormRuntime, FrameworkFileInputRuntime, FrameworkFileManagerRuntime, FrameworkFileUpload, FrameworkImageInputRuntime, FrameworkImageURLResolver (+16 more)
 
 ### Community 219 - "Community 219"
-Cohesion: 0.12
-Nodes (17): Commands you will need, Current state, Done criteria, Git workflow, Locked ownership, Maintenance notes, Operation files own, Plan 038: Colocate route resources, split operations, and derive application types (+9 more)
+Cohesion: 0.07
+Nodes (28): Commands you will need, Current state, Done criteria, Git workflow, Locked ownership, Maintenance notes, Operation files own, Plan 038: Colocate route resources, split operations, and derive application types (+20 more)
 
 ### Community 220 - "Community 220"
 Cohesion: 0.11
 Nodes (17): Commands you will need, Current state, Done criteria, Git workflow, Maintenance notes, Plan 002: Build the shared field catalog and renderer registry, Scope, Status (+9 more)
+
+### Community 221 - "Community 221"
+Cohesion: 0.15
+Nodes (12): create, HasList, HasOperation, hasOperations, invalidScope, list, ListResponse, missingName (+4 more)
 
 ### Community 224 - "Community 224"
 Cohesion: 0.11
@@ -1314,8 +1337,8 @@ Cohesion: 0.09
 Nodes (21): API surface from plans 022–024, Commands you will need, Current state, Done criteria, Maintenance notes, Plan 025: Build the overtime screens, the notification inbox, and a typed deep-link registry, Routing, Scope (+13 more)
 
 ### Community 272 - "Community 272"
-Cohesion: 0.06
-Nodes (35): resolve(), appDefaults, settle(), FrameworkDefaultsInput, FrameworkPlugin, FrameworkPluginOptions, FrameworkAdaptersInput, runtimeInvalid (+27 more)
+Cohesion: 0.60
+Nodes (3): downloadBlob(), parseFilenameFromContentDisposition(), parseURL()
 
 ### Community 279 - "Community 279"
 Cohesion: 0.12
@@ -1330,8 +1353,8 @@ Cohesion: 0.10
 Nodes (19): Commands, Current state, Done criteria, Executable proof, Locked decisions, Maintenance notes, Plan 032: Replace route metadata with a typed manifest and native detail parents, Scope (+11 more)
 
 ### Community 300 - "Community 300"
-Cohesion: 0.33
-Nodes (15): actions, bootstrap(), detectRemoteDefaultBranch(), ensureCleanWorkingTree(), ensureRemote(), packageExists(), packages, pull() (+7 more)
+Cohesion: 0.18
+Nodes (10): createFormSubmissionHandler(), createFormTemplateHandler(), FormSubmissionField, FrameworkErrorLike, FrameworkErrorResponse, FrameworkSuccessResponse, LandingFrameworkConfig, exceptionData() (+2 more)
 
 ### Community 301 - "Community 301"
 Cohesion: 0.12
@@ -1342,16 +1365,12 @@ Cohesion: 0.12
 Nodes (16): Commands you will need, Current state, Done criteria, Git workflow, Maintenance notes, Plan 003: Derive form validation from client-safe schemas, Scope, Status (+8 more)
 
 ### Community 303 - "Community 303"
-Cohesion: 0.08
-Nodes (26): Backend dependency notes, Backend findings considered and rejected (so nobody re-audits), Backend track: Sprindle production readiness (added 2026-07-26), Clean-break dependency notes, Contract track (added 2026-07-27), Deferred work, Dependency and delivery notes, Derived resource types and scalable operations (added 2026-07-27) (+18 more)
+Cohesion: 0.06
+Nodes (32): Backend dependency notes, Backend findings considered and rejected (so nobody re-audits), Backend track: Sprindle production readiness (added 2026-07-26), Canonical-create dependency notes, Canonical create routes and FormView inputs (added 2026-07-27), Clean-break dependency notes, Contract track (added 2026-07-27), Deferred work (+24 more)
 
 ### Community 304 - "Community 304"
-Cohesion: 0.47
-Nodes (4): fullRoute(), ok(), AsyncFunction, RpcCRUDRoute
-
-### Community 305 - "Community 305"
-Cohesion: 0.18
-Nodes (11): Step 10: Run final gates and refresh graph, Step 1: Make the web build fail on type errors, Step 2: Add compile-time proofs against every live Hono resource, Step 3: Replace the broad RPC adapter and casts, Step 4: Colocate roles with their owning route subtrees, Step 5: Colocate users and use the typed user-role endpoint directly, Step 6: Colocate overtimes by CRUD root and identity subtree, Step 7: Colocate notifications with the canonical To Do route (+3 more)
+Cohesion: 0.17
+Nodes (8): colorMap, props, modelValue, props, inputValue, modelValue, props, tags
 
 ### Community 403 - "@southneuhof/landing-sveltekit-framework"
 Cohesion: 0.17
@@ -1370,12 +1389,12 @@ Cohesion: 0.20
 Nodes (10): Acceptance fixture, Available Scripts, Base Frontend Web App, Current Baseline, Environment Variables, Getting Started, Requirements, Runtime Configuration Notes (+2 more)
 
 ### Community 407 - "[userId]/roles/index.route.vue"
-Cohesion: 0.40
-Nodes (3): overtimeId, route, router
+Cohesion: 0.11
+Nodes (20): overtimeId, route, Overtime, OvertimeCreate, OvertimeDraft, overtimeOperations, OvertimeStatus, OvertimeUpdate (+12 more)
 
 ### Community 408 - "Resource migration guide"
-Cohesion: 0.17
-Nodes (11): 1. Define the resource, 2. Give every screen a route file, 3. Express nesting with the filesystem, not with vocabulary, 4. Keep custom workflows as code, 5. Escape hatches, in order of preference, 6. URL compatibility, Downstream checklist (HKA-TROM), Resource migration guide (+3 more)
+Cohesion: 0.15
+Nodes (12): 1. Define the resource, 2. Give every screen a route file, 3. Express nesting with the filesystem, not with vocabulary, 4. Keep custom workflows as code, 5. Escape hatches, in order of preference, 6. URL compatibility, Downstream checklist (HKA-TROM), Resource migration guide (+4 more)
 
 ### Community 409 - "Carta"
 Cohesion: 0.22
@@ -1402,8 +1421,8 @@ Cohesion: 0.29
 Nodes (7): 6.0.0 - 2022-03-03, Added, Changed, Deprecated, Fixed, Improved, Removed
 
 ### Community 415 - "login/index.route.spec.ts"
-Cohesion: 0.08
-Nodes (12): detailError, detailSrc, imageCandidates, isOpen, props, slots, thumbnailError, thumbnailSrc (+4 more)
+Cohesion: 0.25
+Nodes (6): appRoot, operationFiles, resourceFiles, retiredResourcesRoot, routeFiles, routesRoot
 
 ### Community 416 - "Drawer.vue"
 Cohesion: 0.11
@@ -1446,7 +1465,7 @@ Cohesion: 0.11
 Nodes (17): 1. Nested detail routes, 2. `controls`, Addendum (2026-07-27): decided design, Consequences accepted, Controls, Current state, Current state, Detail routing, shells, and tabs (+9 more)
 
 ### Community 426 - "[userId].route.vue"
-Cohesion: 0.12
+Cohesion: 0.11
 Nodes (17): Commands you will need, Current state, Design (decided — implement as specified), Done criteria, Git workflow, Maintenance notes, Plan 012: Implement list queries — pagination, filtering, sorting, search, and single-query reads, Scope (+9 more)
 
 ### Community 427 - "graphify reference: query, path, explain"
@@ -1682,8 +1701,8 @@ Cohesion: 0.67
 Nodes (3): 4.2.4 - 2015-08-17, Added, Fixed
 
 ### Community 486 - "4.2.5 - 2015-08-31"
-Cohesion: 0.50
-Nodes (4): executeValidationRules(), hasRequiredValidation(), isEmptyValue(), ValidationContext
+Cohesion: 0.25
+Nodes (5): profileData, permissions, storageGet, value, storage
 
 ### Community 487 - "4.2.6 - 2015-09-28"
 Cohesion: 0.11
@@ -1704,10 +1723,6 @@ Nodes (3): 4.4.0 - 2016-06-30, Added, Fixed
 ### Community 491 - "4.4.1 - 2016-07-26"
 Cohesion: 0.67
 Nodes (3): 4.4.1 - 2016-07-26, Added, Fixed
-
-### Community 492 - "4.4.2 - 2016-08-25"
-Cohesion: 0.67
-Nodes (3): 4.1.2 - 2014-07-15, Added, Fixed
 
 ### Community 493 - "4.5.3 - 2017-02-01"
 Cohesion: 0.67
@@ -1774,12 +1789,12 @@ Cohesion: 0.67
 Nodes (3): 5.0.13 - 2019-08-06, Changed, Fixed
 
 ### Community 509 - "5.0.16 - 2019-09-24"
-Cohesion: 0.67
-Nodes (3): 4.3.6 - 2016-03-01, Added, Fixed
+Cohesion: 0.33
+Nodes (4): detailGet, stepsGet, submitPost, verifyPost
 
 ### Community 510 - "5.0.3 - 2019-03-19"
-Cohesion: 0.67
-Nodes (3): 5.0.3 - 2019-03-19, Changed, Fixed
+Cohesion: 0.33
+Nodes (4): listGet, markSeenPost, rows, unreadGet
 
 ### Community 511 - "5.0.8 - 2019-06-18"
 Cohesion: 0.67
@@ -1798,8 +1813,8 @@ Cohesion: 0.67
 Nodes (3): 6.8.3 - 2024-02-08, Changed, Fixed
 
 ### Community 517 - "./server"
-Cohesion: 0.70
-Nodes (5): applyPlatformToInputConfig(), cloneValue(), isPlainObject(), mergeValue(), resolveModelConfig()
+Cohesion: 0.11
+Nodes (17): Commands you will need, Current state, Done criteria, Git workflow, Maintenance notes, Plan 039: Make create routes and FormView contracts canonical, Scope, Status (+9 more)
 
 ### Community 519 - "drizzle-zod"
 Cohesion: 0.12
@@ -1830,8 +1845,8 @@ Cohesion: 0.67
 Nodes (3): ./server, import, types
 
 ### Community 530 - "4.2.8 - 2015-11-13"
-Cohesion: 0.67
-Nodes (3): 4.2.5 - 2015-08-31, Added, Fixed
+Cohesion: 0.23
+Nodes (6): NavItemRoute, props, dataURItoBlob(), indexCompare(), parseCode(), titleCase()
 
 ### Community 532 - "4.3.2 - 2015-12-14"
 Cohesion: 0.12
@@ -1849,16 +1864,20 @@ Nodes (3): 4.7.11 - 2018-04-11, Added, Fixed
 Cohesion: 0.67
 Nodes (3): 4.7.7 - 2018-02-19, Added, Fixed
 
+### Community 537 - "4.9.11 - 2020-07-13"
+Cohesion: 0.12
+Nodes (15): both, create, createOnly, createOrUpdate, createWithIdentity, fields, missingIdentity, oldProp (+7 more)
+
 ### Community 538 - "4.9.2 - 2018-12-17"
-Cohesion: 0.14
-Nodes (14): Overtime, OvertimeDraft, overtimeFields, OvertimeQuery, overtimes, OvertimeStatus, overtimeStatusLabels, submitOvertime() (+6 more)
+Cohesion: 0.40
+Nodes (3): assignRole, listUserRoles, revokeRole
 
 ### Community 539 - "4.9.4 - 2019-03-20"
 Cohesion: 0.29
 Nodes (4): allowed, defaultItems, MountOptions, Page
 
 ### Community 541 - "5.1.1 - 2019-10-28"
-Cohesion: 0.10
+Cohesion: 0.12
 Nodes (15): Commands you will need, Current state, Done criteria, Git workflow, Maintenance notes, Plan 010: Establish a backend verification baseline (CI + lint for Sprindle and the API app), Scope, Status (+7 more)
 
 ### Community 542 - "5.1.2 - 2019-11-19"
@@ -1873,9 +1892,13 @@ Nodes (15): Commands you will need, Current state, Done criteria, Git workflow, 
 Cohesion: 0.12
 Nodes (15): Commands you will need, Current state, Done criteria, Maintenance notes, Outcome (2026-07-27), Plan 027: Fold standard controls into the resource surface factories, Scope, Status (+7 more)
 
-### Community 550 - "5.9.2 - 2021-09-08"
-Cohesion: 0.67
-Nodes (3): 5.0.0-preview-3 - 2018-10-18, Changed, Fixed
+### Community 554 - "6.3.1 - 2022-12-06"
+Cohesion: 0.28
+Nodes (6): error, handleResize, config, ColorMode, useColorPreference, value
+
+### Community 555 - "6.5.1 - 2023-06-19"
+Cohesion: 0.33
+Nodes (15): actions, bootstrap(), detectRemoteDefaultBranch(), ensureCleanWorkingTree(), ensureRemote(), packageExists(), packages, pull() (+7 more)
 
 ### Community 556 - "6.6.2 - 2023-08-09"
 Cohesion: 0.21
@@ -1889,61 +1912,89 @@ Nodes (6): context, generatedRoutes, generatedTypes, options, root, routeManifes
 Cohesion: 0.29
 Nodes (6): _RouteFileInfoMap, RouteNamedMap, _RouteNamesForFilePath, TypesConfig, vue-router, vue-router/auto-routes
 
+### Community 567 - "vue-sonner"
+Cohesion: 0.22
+Nodes (5): commitSelectedAsset(), modelValue, open, props, selectedItems
+
+### Community 569 - "@vuepic/vue-datepicker"
+Cohesion: 0.03
+Nodes (92): appDefaults, flush(), mountRoute(), record, Step, steps, submitPost, verifyPost (+84 more)
+
+### Community 570 - "@vueuse/core"
+Cohesion: 0.12
+Nodes (20): alpha, beta, Draft, draftFields, fields, localQuery, offline, Row (+12 more)
+
 ### Community 575 - "sprindle/README.md"
 Cohesion: 0.05
 Nodes (35): Add a resource, apps/api — agent runbook, Database commands, Notes, Schema errors at boot, Setup, Audit logging, Background jobs (+27 more)
 
 ### Community 578 - "legacy-urls.ts"
-Cohesion: 0.08
-Nodes (27): currentOwner, owner, props, route, router, tabs, allowsExtraordinaryRoute(), createAuthGuard() (+19 more)
+Cohesion: 0.09
+Nodes (28): accessAdapter, allowsPermission(), createFrameworkAdapters(), legacyPermissionPrefix, collectIssues(), dataAdapter, isRecord(), normalizeCollection() (+20 more)
+
+### Community 580 - "controls.type-test.ts"
+Cohesion: 0.67
+Nodes (3): 5.0.3 - 2019-03-19, Changed, Fixed
 
 ### Community 581 - "fields.type-test.ts"
-Cohesion: 0.25
-Nodes (8): buttonText, buttonUrl, emit, modelValue, previewOpen, props, triggerTouch(), uploadState
+Cohesion: 0.67
+Nodes (3): ./server/schema, import, types
+
+### Community 583 - "routing/Tabs.vue"
+Cohesion: 0.67
+Nodes (3): 5.0.0-preview-3 - 2018-10-18, Changed, Fixed
 
 ### Community 584 - "resources/notifications.spec.ts"
-Cohesion: 0.33
-Nodes (4): listGet, markSeenPost, rows, unreadGet
+Cohesion: 0.67
+Nodes (3): 4.1.2 - 2014-07-15, Added, Fixed
 
 ### Community 585 - "resources/overtimes.spec.ts"
-Cohesion: 0.33
-Nodes (4): detailGet, stepsGet, submitPost, verifyPost
+Cohesion: 0.67
+Nodes (3): 4.3.6 - 2016-03-01, Added, Fixed
 
-### Community 586 - "users.spec.ts"
-Cohesion: 0.40
-Nodes (3): assignRole, listUserRoles, revokeRole
+### Community 588 - "[overtimeId]/edit.route.vue"
+Cohesion: 0.67
+Nodes (3): 4.4.2 - 2016-08-25, Added, Fixed
+
+### Community 589 - "[roleId]/edit.route.vue"
+Cohesion: 0.67
+Nodes (3): ./types, import, types
 
 ### Community 590 - "[userId]/edit.route.vue"
 Cohesion: 0.67
 Nodes (3): 4.1.6 - 2014-10-08, Changed, Fixed
 
-### Community 593 - "4.3.6 - 2016-03-01"
-Cohesion: 0.67
-Nodes (3): 4.2.6 - 2015-09-28, Added, Fixed
+### Community 591 - "framework/identity.ts"
+Cohesion: 0.07
+Nodes (29): fetchIdentity(), orgIdentity, invalidDecision, missingId, SubmitEndpoint, SubmitResponse, verify, VerifyEndpoint (+21 more)
+
+### Community 598 - "4.3.1 - 2015-11-30"
+Cohesion: 0.25
+Nodes (8): buttonText, buttonUrl, emit, modelValue, previewOpen, props, triggerTouch(), uploadState
 
 ### Community 599 - "4.3.7 - 2016-03-02"
 Cohesion: 0.67
-Nodes (3): ./server/schema, import, types
+Nodes (3): 5.0.16 - 2019-09-24, Added, Fixed
 
 ## Knowledge Gaps
-- **3410 isolated node(s):** `name`, `private`, `version`, `type`, `dev` (+3405 more)
+- **3561 isolated node(s):** `name`, `private`, `version`, `type`, `dev` (+3556 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **183 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **184 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `identity()` connect `Community 47` to `Community 17`, `Community 5`?**
-  _High betweenness centrality (0.042) - this node is a cross-community bridge._
-- **Why does `resolve()` connect `Community 272` to `Community 2`, `Community 90`?**
-  _High betweenness centrality (0.028) - this node is a cross-community bridge._
+  _High betweenness centrality (0.059) - this node is a cross-community bridge._
+- **Why does `defineRoute()` connect `Community 17` to `Community 65`, `Community 2`, `Community 34`, `Community 73`, `Community 111`, `Community 15`, `Community 47`, `Community 87`, `Community 91`?**
+  _High betweenness centrality (0.037) - this node is a cross-community bridge._
 - **Why does `createModelDetailHandler()` connect `Community 5` to `Community 47`?**
-  _High betweenness centrality (0.026) - this node is a cross-community bridge._
+  _High betweenness centrality (0.032) - this node is a cross-community bridge._
 - **What connects `name`, `private`, `version` to the rest of the system?**
-  _3410 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _3561 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.004405286343612335 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.07197763801537387 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.06419753086419754 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.053009883198562445 - nodes in this community are weakly interconnected._

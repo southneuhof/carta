@@ -154,7 +154,7 @@ describe('FormView', () => {
 
   it('runs the same chrome for create-like and update-like props, with no mode anywhere', async () => {
     const createSubmit = vi.fn(async () => undefined)
-    const create = mountCore(FormView, { title: 'Tambah Role', form: formProps(createSubmit) })
+    const create = mountCore(FormView, { title: 'Tambah Role', formProps: formProps(createSubmit) })
     await flush()
     create.find('form')!.dispatchEvent(new Event('submit'))
     await flush()
@@ -162,7 +162,7 @@ describe('FormView', () => {
     const updateSubmit = vi.fn(async () => undefined)
     const update = mountCore(FormView, {
       title: 'Ubah Role',
-      form: { ...formProps(updateSubmit), load: async () => ({ name: 'Editor' }) },
+      formProps: { ...formProps(updateSubmit), load: async () => ({ name: 'Editor' }) },
     })
     await flush()
     update.find('form')!.dispatchEvent(new Event('submit'))
@@ -179,7 +179,7 @@ describe('FormView', () => {
   it('renders submit and cancel chrome and re-emits form events', async () => {
     const onSubmitted = vi.fn()
     const view = mountCore(FormView, {
-      form: formProps(async () => ({ id: 1 })),
+      formProps: formProps(async () => ({ id: 1 })),
       submitLabel: 'Kirim',
       onSubmitted,
     })
@@ -194,7 +194,7 @@ describe('FormView', () => {
   })
 
   it('resets the draft through the cancel control', async () => {
-    const view = mountCore(FormView, { form: formProps(async () => undefined) })
+    const view = mountCore(FormView, { formProps: formProps(async () => undefined) })
     await flush()
 
     const input = view.find<HTMLInputElement>('input')!
@@ -206,6 +206,105 @@ describe('FormView', () => {
     await flush()
 
     expect(view.find<HTMLInputElement>('input')!.value).toBe('Admin')
+    view.unmount()
+  })
+
+  function resourceForm(options: {
+    detail?: (id: string) => string
+    list?: string
+    afterSubmit?: (context: { navigate: (to: string) => Promise<void>; preventDefaultNavigation: () => void }) => Promise<void | string> | void | string
+    submit?: () => Promise<{ id: string; name: string }>
+  } = {}) {
+    return {
+      __formCapabilities: 'create' as const,
+      actions: {
+        create: {},
+        ...(options.detail ? { detail: { to: options.detail } } : {}),
+        ...(options.list ? { list: { to: options.list } } : {}),
+      },
+      identity: (record: { id: string }) => record.id,
+      form: () => ({ fields: { name: { label: 'Nama' } }, initialData: { name: 'Admin' }, submit: options.submit ?? (async () => ({ id: '1', name: 'Admin' })) }),
+      afterSubmit: options.afterSubmit,
+    }
+  }
+
+  it('derives detail navigation, then list fallback, and stays without either target', async () => {
+    const detail = mountCore(FormView, { resource: resourceForm({ detail: (id) => `/records/${id}`, list: '/records' }) })
+    const detailReplace = vi.spyOn(detail.router, 'replace')
+    detail.find('form')!.dispatchEvent(new Event('submit'))
+    await flush()
+    expect(detailReplace).toHaveBeenCalledWith('/records/1')
+    detail.unmount()
+
+    const list = mountCore(FormView, { resource: resourceForm({ list: '/records' }) })
+    const listReplace = vi.spyOn(list.router, 'replace')
+    list.find('form')!.dispatchEvent(new Event('submit'))
+    await flush()
+    expect(listReplace).toHaveBeenCalledWith('/records')
+    list.unmount()
+
+    const stay = mountCore(FormView, { resource: resourceForm() })
+    const stayReplace = vi.spyOn(stay.router, 'replace')
+    stay.find('form')!.dispatchEvent(new Event('submit'))
+    await flush()
+    expect(stayReplace).not.toHaveBeenCalled()
+    stay.unmount()
+  })
+
+  it('runs effects before default navigation and only controller calls suppress it', async () => {
+    const order: string[] = []
+    const effect = mountCore(FormView, {
+      resource: resourceForm({
+        detail: () => '/default',
+        afterSubmit: async () => { order.push('effect') },
+      }),
+    })
+    const effectReplace = vi.spyOn(effect.router, 'replace')
+    effect.find('form')!.dispatchEvent(new Event('submit'))
+    await flush()
+    expect(order).toEqual(['effect'])
+    expect(effectReplace).toHaveBeenCalledWith('/default')
+    effect.unmount()
+
+    const ignoredReturn = mountCore(FormView, {
+      resource: resourceForm({ detail: () => '/default', afterSubmit: () => '/ignored' }),
+    })
+    const ignoredReplace = vi.spyOn(ignoredReturn.router, 'replace')
+    ignoredReturn.find('form')!.dispatchEvent(new Event('submit'))
+    await flush()
+    expect(ignoredReplace).toHaveBeenCalledWith('/default')
+    ignoredReturn.unmount()
+
+    const controlled = mountCore(FormView, {
+      resource: resourceForm({ detail: () => '/default', afterSubmit: async ({ navigate }) => navigate('/custom') }),
+    })
+    const controlledReplace = vi.spyOn(controlled.router, 'replace')
+    controlled.find('form')!.dispatchEvent(new Event('submit'))
+    await flush()
+    expect(controlledReplace).toHaveBeenCalledTimes(1)
+    expect(controlledReplace).toHaveBeenCalledWith('/custom')
+    controlled.unmount()
+
+    const prevented = mountCore(FormView, {
+      resource: resourceForm({ detail: () => '/default', afterSubmit: ({ preventDefaultNavigation }) => preventDefaultNavigation() }),
+    })
+    const preventedReplace = vi.spyOn(prevented.router, 'replace')
+    prevented.find('form')!.dispatchEvent(new Event('submit'))
+    await flush()
+    expect(preventedReplace).not.toHaveBeenCalled()
+    prevented.unmount()
+  })
+
+  it('keeps persisted form mounted when follow-up effect fails', async () => {
+    const view = mountCore(FormView, {
+      resource: resourceForm({ detail: () => '/default', afterSubmit: async () => { throw new Error('follow-up') } }),
+    })
+    const replace = vi.spyOn(view.router, 'replace')
+    view.find('form')!.dispatchEvent(new Event('submit'))
+    await flush()
+
+    expect(view.find('form')).not.toBeNull()
+    expect(replace).not.toHaveBeenCalled()
     view.unmount()
   })
 })
@@ -227,7 +326,7 @@ describe('shell boundaries', () => {
     for (const [file, binding] of [
       ['ListView.vue', 'v-bind="surface.table"'],
       ['DetailView.vue', 'v-bind="surface.detail"'],
-      ['FormView.vue', 'v-bind="props.form"'],
+      ['FormView.vue', 'v-bind="surface"'],
     ]) {
       expect(readFileSync(join(viewsRoot, file), 'utf8')).toContain(binding)
     }

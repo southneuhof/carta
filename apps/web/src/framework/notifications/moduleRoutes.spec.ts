@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { notificationRoute, notificationRoutes } from './moduleRoutes'
-import type { NotificationRecord } from '@/framework/adapters/resources/notifications'
+import type { NotificationRecord } from '@/routes/(authenticated)/to-do/notifications.operations'
 
 function notification(overrides: Partial<NotificationRecord> = {}): NotificationRecord {
   return {
     id: 'n1',
+    recipientEmployeeId: null,
+    jobPositionId: null,
+    roleId: null,
+    sectionId: null,
     title: 'Judul',
     content: 'Isi',
     statusCode: 'unseen',
@@ -12,7 +16,12 @@ function notification(overrides: Partial<NotificationRecord> = {}): Notification
     moduleName: 'overtimes',
     moduleId: 'o1',
     payload: null,
+    createdByUserId: null,
     createdAt: '2026-07-20T00:00:00.000Z',
+    updatedAt: '2026-07-20T00:00:00.000Z',
+    jobPosition: null,
+    role: null,
+    section: null,
     ...overrides,
   }
 }

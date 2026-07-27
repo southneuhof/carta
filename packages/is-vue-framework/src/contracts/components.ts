@@ -32,6 +32,8 @@ export interface TableProps<
   namespace?: QueryNamespace
   /** Externally controlled query state; replaces the component's own namespaced state. */
   query?: TQuery
+  /** `always` keeps disabled controls visible for a single known page. */
+  pagination?: 'auto' | 'always' | false
   schema?: ValidationSchema<TQuery>
 }
 

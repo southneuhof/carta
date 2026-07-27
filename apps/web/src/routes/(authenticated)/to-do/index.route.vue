@@ -10,7 +10,8 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ListView } from '@southneuhof/is-vue-framework'
-import { notifications, type NotificationRecord } from '@/framework/adapters/resources/notifications'
+import { notifications } from './notifications.resource'
+import type { NotificationRecord } from './notifications.operations'
 import { notificationRoute } from '@/framework/notifications/moduleRoutes'
 
 

@@ -1,2 +1,2 @@
-export { createHonoResourceOperations } from './resource'
+export { createHonoResourceOperations, parseHonoResponse } from './resource'
 export type { HonoRequestOf, HonoResponseOf, HonoResourceOperations } from './resource'

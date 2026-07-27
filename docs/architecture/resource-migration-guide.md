@@ -2,8 +2,7 @@
 
 How to move a screen from the retired CRUD architecture to resources, cores, and
 view shells. Every example below is copied from migrated code in this repository
-(`apps/web/src/framework/adapters/resources/` and
-`apps/web/src/routes/(authenticated)/settings/`), not invented.
+(`apps/web/src/routes/(authenticated)/settings/`), not invented.
 
 There are no compatibility wrappers: `@southneuhof/is-vue-framework` 2.0 removed
 the legacy CRUD surface outright. Translate each screen by hand using the tables
@@ -64,8 +63,10 @@ const customers = defineResourceOperations<Customer, {}, CustomerCreate>()({
 ```
 
 `HonoRequestOf` retains the exact wire request; the adapter-facing query accepts
-serializable UI scalars and converts them to strings. Plan 038 moves the web app
-to this API and makes its build type-checking.
+serializable UI scalars and converts them to strings. Standard Hono create and
+update responses must be `{ data: Record }`: operations unwrap and return that
+record, including its declared identity fields. Plan 038 moves the web app to
+this API and makes its build type-checking.
 
 ## What replaced what
 
@@ -85,9 +86,9 @@ whole params bag.
 `DetailView` resource mode owns standard deletion: `remove`, normalized feedback, then
 `router.replace(resource.actions.list?.to)` where available. Use raw detail mode for workflows that need
 preloaded data or custom delete behavior. `id` is always explicit; views never inspect current route.
-| `CRUDCreate` | `FormView` + `resource.form()` |
-| `CRUDUpdate` | `FormView` + `resource.form({ id })` |
-| `useCRUDOperations` / `FrameworkCRUDRuntime` | `defineResource({ operations })`, derived from RPC by `createRpcOperations` |
+| `CRUDCreate` | `FormView :resource="resource"` |
+| `CRUDUpdate` | `FormView :resource="resource" :id="id"` |
+| `useCRUDOperations` / `FrameworkCRUDRuntime` | `defineResource({ operations })`, derived from a typed Hono parent by `createHonoResourceOperations` |
 | nested `CRUDComposite` with fabricated operations | a child route plus an ordinary `searchParameters` entry |
 | `inject<any>('data')` | route params, or a parent route component that passes them down |
 | `actions: { create: false }` | nothing: absent behavior removes the control automatically |
@@ -99,29 +100,56 @@ Field configuration mapping lives next to the catalog, in
 ## 1. Define the resource
 
 ```ts
-// apps/web/src/framework/adapters/resources/roles.ts
-export const roleFields = defineFields<Role, RoleDraft>()({
+// apps/web/src/routes/(authenticated)/settings/roles/roles.resource.ts
+import { roleOperations, type Role, type RoleCreate } from './roles.operations'
+
+export const roleFields = defineFields<Role, RoleCreate>()({
   name: { label: 'Nama Role', table: { sortable: true }, form: { renderer: 'text' } },
   createdAt: { label: 'Dibuat', display: { format: 'datetime' }, form: false },
 })
 
-export const roles = defineResource<Role, RoleQuery, RoleDraft, RoleDraft>({
+export const roles = defineResource({
   key: 'roles',
   fields: roleFields,
-  operations: createRpcOperations(rpc.roles),
+  operations: roleOperations,
   table: { fields: ['name', 'createdAt'] },
   detail: { fields: ['name', 'createdAt'] },
   form: { fields: ['name'] },
   schemas: { create: fromZod(roleSchemas.create), update: fromZod(roleSchemas.update) },
   actions: {
     list: { permission: 'roles.list', to: { name: 'settings-roles' } },
-    create: { permission: 'roles.create', to: { name: 'settings-roles-new' } },
+    create: { permission: 'roles.create', to: { name: 'settings-roles-create' } },
     detail: { permission: 'roles.detail', to: { name: 'settings-roles-detail', params: (id) => ({ roleId: id }) } },
     update: { permission: 'roles.update', to: { name: 'settings-roles-edit', params: (id) => ({ roleId: id }) } },
     delete: { permission: 'roles.delete' },
   },
 })
 ```
+
+## Route-owned operations
+
+The route subtree is both the navigation unit and the owner of its resource. A
+shared CRUD resource lives at that subtree root; identity-only workflows and
+child collections live beside their nearest dynamic or child route. Keep the
+two files direct and visible—do not add a route `index.ts` barrel or a central
+application resource registry:
+
+```text
+settings/roles/
+  roles.operations.ts     # Hono calls, parsed responses, derived transport types
+  roles.resource.ts       # fields, schemas, surfaces, actions
+  [roleId]/detail/permissions/
+    role-permissions.operations.ts
+    role-permissions.resource.ts
+```
+
+`*.operations.ts` must not import Vue, the router, components, or toasts.
+`*.resource.ts` must not call RPC. A Vue route imports these canonical files
+directly and retains temporary state, optimistic updates, dialogs, and toasts.
+Split a complex operation set by cohesive use case rather than growing a
+generic controller. Existing API shapes use `HonoResponseOf` and
+`ResourceRecordOf`/`ResourceCreateOf` derivations; a client-created projection
+may use `Pick` or `Omit` over those types.
 
 Only typed operations can be declared as actions. A missing `users.create`
 operation cannot produce a create action or create form; controls are instead
@@ -132,7 +160,7 @@ derived from the declared action, target, permission, visibility, and access.
 ```text
 settings/roles/
   index.route.vue          -> /settings/roles
-  new.route.vue            -> /settings/roles/new
+  create.route.vue         -> /settings/roles/create
   [roleId]/
     detail.route.vue       -> /settings/roles/:roleId/detail
     edit.route.vue         -> /settings/roles/:roleId/edit
@@ -144,7 +172,7 @@ settings/roles/
 <!-- index.route.vue -->
 <script setup lang="ts">
 import { ListView } from '@southneuhof/is-vue-framework'
-import { roles } from '@/framework/adapters/resources/roles'
+import { roles } from './roles.resource'
 </script>
 
 <template>
@@ -153,7 +181,7 @@ import { roles } from '@/framework/adapters/resources/roles'
 ```
 
 Filesystem owns URL structure and names: static segments joined by `-`, with
-route groups, `index`, and dynamic params omitted. `new` stays `new`; `edit`
+route groups, `index`, and dynamic params omitted. `create` stays `create`; `edit`
 stays `edit`; no semantic aliases exist. Resources own standard action targets
 and permissions; navigation manifest owns only ordered entrypoints. Record
 parents render `DetailView`, ordered action tabs, then `AppRouterView`; every
@@ -169,11 +197,24 @@ children leave parent detail visible.
 Tabs selects content only; it neither owns nor suppresses transitions.
 
 ```vue
-<!-- [roleId]/edit.route.vue — the same Form the create route uses, with no mode -->
+<!-- [roleId]/edit.route.vue — same Form, no lifecycle handler -->
 <template>
-  <FormView title="Ubah Role" :form="roles.form({ id: roleId })" @submitted="onSubmitted" />
+  <FormView title="Ubah Role" :resource="roles" :id="roleId" />
 </template>
 ```
+
+Resource FormView success behavior is declarative. Standard create/update
+operations return records; FormView shows `Data berhasil disimpan.`, then
+replaces to `actions.detail.to(identity(record))`, falls back to static
+`actions.list.to`, or stays on form. Set `success-message="..."` for route
+wording or `:success-message="false"` to suppress feedback.
+
+Exceptional post-submit work belongs in `after-submit`. It is awaited and gets
+`record`, `id`, `operation`, `defaultTo`, `navigate(to)`, and
+`preventDefaultNavigation()`. Return values never navigate. `navigate` and
+`preventDefaultNavigation` suppress default navigation; thrown effects leave
+form mounted and report follow-up failure. Raw `form-props` is event-only: it
+cannot use this hook or automatic navigation.
 
 ## 3. Express nesting with the filesystem, not with vocabulary
 

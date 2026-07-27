@@ -63,8 +63,8 @@ behavior explicit.
 ## CRUD route truth
 
 Files own URLs and generated names. A name joins static file segments with `-`;
-route groups, `index`, and dynamic params are omitted. Thus `new` remains
-`new`, `edit` remains `edit`, and parameter renames never rename a screen.
+route groups, `index`, and dynamic params are omitted. Thus `create` remains
+`create`, `edit` remains `edit`, and parameter renames never rename a screen.
 
 Resources own standard actions: each action gives explicit permission and an
 optional named target. Navigation manifest owns only entrypoint order and
@@ -76,7 +76,7 @@ declare explicit route metadata.
 ```text
 settings/roles/
   index.route.vue                         settings-roles
-  new.route.vue                           settings-roles-new
+  create.route.vue                        settings-roles-create
   [roleId]/edit.route.vue                 settings-roles-edit
   [roleId]/detail.route.vue               settings-roles-detail
   [roleId]/detail/permissions/index.route.vue
@@ -116,20 +116,20 @@ between list, detail, create, and update based on a query-string state machine.
 ```text
 src/routes/(authenticated)/emergency/incidents/
   index.route.vue
-  new.route.vue
+  create.route.vue
   [incidentId].layout.vue
   [incidentId]/
     index.route.vue
     edit.route.vue
     actions/
       index.route.vue
-      new.route.vue
+      create.route.vue
       [actionId].route.vue
     victims/
       index.route.vue
     asset-damages/
       index.route.vue
-      new.route.vue
+      create.route.vue
       [damageId].route.vue
 ```
 
@@ -248,6 +248,11 @@ The three core components are deliberately resource-agnostic.
 state, pagination, sorting, selection, loading, refreshing, empty, and error
 states. It does not own page headers, Cards, route navigation, or CRUD controls.
 
+TanStack Table is private `Table` runtime machinery. Framework fields, queries,
+and slots remain authoritative; server loading stays in `useLoader` and TanStack
+Query. Future table features require framework-owned contracts before internal
+TanStack state is introduced; selection remains deferred until that work exists.
+
 #### `Detail`
 
 `Detail` represents one record. It owns record loading, field rendering, loading,
@@ -298,13 +303,14 @@ Normal resource route usage stays concise:
 ```vue
 <ListView :resource="incidents" />
 <DetailView :resource="incidents" :id="incidentId" />
-<FormView :form="incidents.form()" />
-<FormView :form="incidents.form({ id: incidentId })" />
+<FormView :resource="incidents" />
+<FormView :resource="incidents" :id="incidentId" />
 ```
 
-`ListView` and `DetailView` call the resource surface factories internally.
-Raw `:table` and `:detail` modes remain for composed screens; resource-first
-detail owns standard delete feedback and list replacement.
+`ListView`, `DetailView`, and `FormView` call resource surface factories
+internally. Raw `:table`, `:detail`, and `:form-props` modes remain for
+composed screens; resource-first detail owns standard delete feedback and list
+replacement.
 
 The primitives remain available for custom composition:
 
@@ -790,7 +796,7 @@ The resource defines the project API mapping once:
 export const incidentActions = defineResource({
   key: "incident-actions",
   fields: incidentActionFields,
-  operations: createRpcOperations(rpc.incidentActions),
+  operations: createHonoResourceOperations(rpc.incidentActions),
   table: {
     fields: ["service_type_id", "vehicle_id", "officer_id", "stage"],
   },
@@ -825,8 +831,8 @@ resource, routing, and state-machine responsibilities move elsewhere:
 | ----------------- | ------------------------------------------------------------- |
 | `CRUDList`        | `ListView :resource="resource"` (or raw `resource.table()` composition) |
 | `CRUDDetail`      | `DetailView :resource="resource" :id="id"` (or raw `resource.detail({ id })` composition) |
-| `CRUDCreate`      | `FormView` shell plus `resource.form()`                       |
-| `CRUDUpdate`      | `FormView` shell plus `resource.form({ id })`                 |
+| `CRUDCreate`      | `FormView :resource="resource"`                              |
+| `CRUDUpdate`      | `FormView :resource="resource" :id="id"`                    |
 | `CRUDComposite`   | Removed; filesystem routes select surfaces                    |
 
 There are no compatibility wrappers. The package had no consumers outside this

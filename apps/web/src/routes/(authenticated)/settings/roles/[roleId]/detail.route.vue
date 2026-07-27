@@ -3,9 +3,9 @@ import { useRoute } from 'vue-router'
 import { DetailView } from '@southneuhof/is-vue-framework'
 import AppRouterView from '@/components/routing/AppRouterView.vue'
 import Tabs from '@/components/routing/Tabs.vue'
-import { roles } from '@/framework/adapters/resources/roles'
+import { roles } from '../roles.resource'
 import type { RouteTab } from '@/router/tabs'
-import { rolePermissions } from '@/framework/adapters/resources/roles'
+import { rolePermissions } from './detail/permissions/role-permissions.resource'
 
 const route = useRoute('settings-roles-detail')
 const roleId = route.params.roleId

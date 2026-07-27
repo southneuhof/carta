@@ -16,7 +16,8 @@ import { computed, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDocumentVisibility } from '@vueuse/core'
 import { ListView } from '@southneuhof/is-vue-framework'
-import { markNotificationsSeen, notifications, unreadIds, unreadNotificationCount, type NotificationRecord } from '@/framework/adapters/resources/notifications'
+import { notifications } from '@/routes/(authenticated)/to-do/notifications.resource'
+import { markNotificationsSeen, unreadIds, unreadNotificationCount, type NotificationRecord } from '@/routes/(authenticated)/to-do/notifications.operations'
 import { notificationRoute } from '@/framework/notifications/moduleRoutes'
 
 const POLL_INTERVAL_MS = 30_000

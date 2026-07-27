@@ -39,6 +39,7 @@ export function mountCore(component: Component, props: Record<string, unknown>, 
 
   return {
     app,
+    router,
     host,
     exposed: () => exposed!,
     text: () => host.textContent ?? '',

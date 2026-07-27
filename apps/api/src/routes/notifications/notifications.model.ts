@@ -19,11 +19,12 @@ const scopedSource = createScopedNotificationSource(() => getDb())
  * The real entity stays in the domain part and keeps being bound normally; only
  * this model reads through the scoped wrapper.
  */
-const scopedEntity: ModelRuntimeEntity = {
+const scopedEntity = {
   name: notification.name,
   table: notification.table,
+  schemas: notification.schemas,
   source: scopedSource,
-}
+} satisfies ModelRuntimeEntity & Pick<typeof notification, 'schemas'>
 
 /**
  * Notifications are written by workflows, never by clients, so there is no create,

@@ -67,8 +67,8 @@ export interface ResourceOperations<
 > {
   list?: (context: CollectionLoadContext<TQuery>) => MaybePromise<unknown>
   detail?: (context: RecordLoadContext<TIdentity>) => MaybePromise<unknown>
-  create?: (input: TCreate) => MaybePromise<unknown>
-  update?: (id: TIdentity, input: TUpdate) => MaybePromise<unknown>
+  create?: (input: TCreate) => MaybePromise<TRecord>
+  update?: (id: TIdentity, input: TUpdate) => MaybePromise<TRecord>
   delete?: (id: TIdentity) => MaybePromise<unknown>
   /** Type-only metadata; no runtime key is created. */
   readonly __record?: TRecord
@@ -237,6 +237,9 @@ export interface ResourceDefinition<
 export interface TableSurfaceArguments<TQuery extends object = Record<string, unknown>>
   extends TableFactoryArguments<TQuery> {
   controls?: ControlsArguments
+  rowControls?: ControlsArguments
+  /** Delete remains route-owned because confirmation and feedback are screen policy. */
+  onDelete?: (record: object) => void
 }
 
 /** Arguments for the record surface. Delete appears only with a handler. */
@@ -252,6 +255,8 @@ export interface DetailSurfaceArguments<TIdentity extends RecordIdentity = Recor
 export interface TableSurface<TRecord extends object, TQuery extends object> {
   table: TableProps<TRecord, TQuery>
   controls: ViewControl[]
+  /** Available per-record actions, already filtered through resource access policy. */
+  rowControls?: (record: TRecord) => ViewControl[]
 }
 
 /** Shell-ready record bundle: `v-bind` it onto `DetailView`. */
@@ -288,21 +293,26 @@ export type ListCapableResource<TRecord extends object = Record<string, unknown>
 export type DetailCapableResource<TRecord extends object = Record<string, unknown>, TIdentity extends RecordIdentity = RecordIdentityValue> = {
   detail: (args: DetailSurfaceArguments<TIdentity>) => DetailSurface<TRecord>
 }
-type CreateForm<TCreate extends object> = {
-  (): FormProps<TCreate>
-  (args: { initialData?: Partial<TCreate>; searchParameters?: Record<string, unknown> }): FormProps<TCreate>
+type CreateForm<TCreate extends object, TRecord extends object> = {
+  (): FormProps<TCreate, TRecord>
+  (args: { initialData?: Partial<TCreate>; searchParameters?: Record<string, unknown> }): FormProps<TCreate, TRecord>
 }
-type UpdateForm<TUpdate extends object, TIdentity extends RecordIdentity> = {
-  (args: { id: TIdentity; initialData?: Partial<TUpdate>; searchParameters?: Record<string, unknown> }): FormProps<TUpdate>
+type UpdateForm<TUpdate extends object, TRecord extends object, TIdentity extends RecordIdentity> = {
+  (args: { id: TIdentity; initialData?: Partial<TUpdate>; searchParameters?: Record<string, unknown> }): FormProps<TUpdate, TRecord>
 }
-type FormCapability<TOperations, TCreate extends object, TUpdate extends object, TIdentity extends RecordIdentity> =
+type FormCapability<TOperations, TRecord extends object, TCreate extends object, TUpdate extends object, TIdentity extends RecordIdentity> =
   'create' extends ResourceOperationKeys<TOperations>
     ? 'update' extends ResourceOperationKeys<TOperations>
-      ? { form: CreateForm<TCreate> & UpdateForm<TUpdate, TIdentity> }
-      : { form: CreateForm<TCreate> }
+      ? { form: CreateForm<TCreate, TRecord> & UpdateForm<TUpdate, TRecord, TIdentity> }
+      : { form: CreateForm<TCreate, TRecord> }
     : 'update' extends ResourceOperationKeys<TOperations>
-      ? { form: UpdateForm<TUpdate, TIdentity> }
+      ? { form: UpdateForm<TUpdate, TRecord, TIdentity> }
       : {}
+
+type FormCapabilities<TOperations> =
+  'create' extends ResourceOperationKeys<TOperations>
+    ? 'update' extends ResourceOperationKeys<TOperations> ? 'create-update' : 'create'
+    : 'update' extends ResourceOperationKeys<TOperations> ? 'update' : never
 
 /** Public resource surface follows literal operation keys, not runtime enumeration. */
 export type Resource<
@@ -315,7 +325,9 @@ export type Resource<
 > = ResourceBase<TRecord, TQuery, TCreate, TUpdate, TIdentity, ResourceOperationKeys<TOperations>>
   & ('list' extends ResourceOperationKeys<TOperations> ? ListCapableResource<TRecord, TQuery> : {})
   & ('detail' extends ResourceOperationKeys<TOperations> ? DetailCapableResource<TRecord, TIdentity> : {})
-  & FormCapability<TOperations, TCreate, TUpdate, TIdentity>
+  & FormCapability<TOperations, TRecord, TCreate, TUpdate, TIdentity>
+  /** Compile-time capability tag; no runtime property is emitted. */
+  & { readonly __formCapabilities: FormCapabilities<TOperations> }
   & ('delete' extends ResourceOperationKeys<TOperations> ? { remove: (id: TIdentity) => Promise<unknown> } : {})
 
 const operationNames = ['list', 'detail', 'create', 'update', 'delete'] as const
@@ -415,6 +427,7 @@ export function defineResource<
       schema: schemaFor('query') as ValidationSchema<TQuery> | undefined,
     }
     if (args?.query) props.query = args.query
+    if (args?.pagination !== undefined) props.pagination = args.pagination
     if (operations.list) {
       props.load = (context) => operations.list!(context) as MaybePromise<CollectionResult<TRecord>>
     }
@@ -447,10 +460,24 @@ export function defineResource<
   }
 
   function tableSurface(args?: TableSurfaceArguments<TQuery>): TableSurface<TRecord, TQuery> {
-    const { controls, ...data } = args ?? {}
+    const { controls, rowControls, onDelete, ...data } = args ?? {}
+    const hasRowControls = Boolean(actions.detail?.to || actions.update?.to || (actions.delete && onDelete))
     return {
       table: tableProps(data as TableFactoryArguments<TQuery>),
       controls: standardControls({ ...controlContext(), surface: 'list', controls }),
+      ...(hasRowControls
+        ? {
+            rowControls: (record: TRecord) =>
+              standardControls({
+                ...controlContext(),
+                surface: 'row',
+                id: identity(record),
+                record: record as Record<string, unknown>,
+                onDelete: onDelete ? () => onDelete(record) : undefined,
+                controls: rowControls,
+              }),
+          }
+        : {}),
     }
   }
 
@@ -475,7 +502,7 @@ export function defineResource<
     const initialData = (args?.initialData ?? definition.form?.initialData) as Partial<TCreate> | undefined
 
     if (args?.id === undefined) {
-      const props: FormProps<TCreate> = {
+      const props: FormProps<TCreate, TRecord> = {
         fields,
         searchParameters,
         namespace: `${definition.key}.create`,
@@ -492,7 +519,7 @@ export function defineResource<
     }
 
     const id = args.id
-    const props: FormProps<TUpdate> = {
+    const props: FormProps<TUpdate, TRecord> = {
       fields,
       searchParameters,
       namespace: `${definition.key}.update.${identityToken(id)}`,
@@ -528,7 +555,7 @@ export function defineResource<
   const resource: ResourceBase<TRecord, TQuery, TCreate, TUpdate, TIdentity, ResourceOperationKeys<TOperations>>
     & ListCapableResource<TRecord, TQuery>
     & DetailCapableResource<TRecord, TIdentity>
-    & { form: CreateForm<TCreate> & UpdateForm<TUpdate, TIdentity>; remove: (id: TIdentity) => Promise<unknown> } = {
+    & { form: CreateForm<TCreate, TRecord> & UpdateForm<TUpdate, TRecord, TIdentity>; remove: (id: TIdentity) => Promise<unknown> } = {
     key: definition.key,
     fields: definition.fields,
     actions,
@@ -539,11 +566,11 @@ export function defineResource<
     } } : {}),
     table: tableSurface,
     detail: detailSurface,
-    form: form as CreateForm<TCreate> & UpdateForm<TUpdate, TIdentity>,
+    form: form as CreateForm<TCreate, TRecord> & UpdateForm<TUpdate, TRecord, TIdentity>,
     remove,
     invalidate,
   }
-  return resource as Resource<TRecord, TQuery, TCreate, TUpdate, TIdentity, TOperations>
+  return resource as typeof resource & Pick<Resource<TRecord, TQuery, TCreate, TUpdate, TIdentity, TOperations>, '__formCapabilities'>
 }
 
 /**

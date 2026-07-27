@@ -1,5 +1,5 @@
 import type { RouteLocationRaw } from 'vue-router'
-import type { NotificationRecord } from '@/framework/adapters/resources/notifications'
+import type { NotificationRecord } from '@/routes/(authenticated)/to-do/notifications.operations'
 
 /**
  * Where a notification points.

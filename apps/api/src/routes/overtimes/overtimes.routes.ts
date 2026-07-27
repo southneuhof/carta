@@ -2,6 +2,7 @@ import { forbidden, HttpError, notFound } from '@southneuhof/sprindle'
 import { defineRoute } from '@southneuhof/sprindle/routes'
 import type { ModelRuntimeContext } from '@southneuhof/sprindle/model'
 import { and, asc, eq } from 'drizzle-orm'
+import type { TypedResponse } from 'hono'
 import { z } from 'zod/v4'
 import { getDb } from '../../db'
 import { orgIdentity, type OrgIdentity } from '../../identity'
@@ -9,9 +10,10 @@ import { notifyAfterCommit, type DeliveredNotification } from '../../notificatio
 import { resolveRecipients } from '../notifications/recipients'
 import { advanceChain, currentStep, seedChain, type ActivatedNotification } from '../verification/chain'
 import { logVerifications } from '../verification/verification.entity'
-import { overtimes, type OvertimeStatus } from './overtimes.entity'
+import { overtime, overtimes, type OvertimeStatus } from './overtimes.entity'
 
 const MODULE = 'overtimes'
+type OvertimeOutput = TypedResponse<{ data: z.output<typeof overtime.schemas.select> }, 200, 'json'>
 
 const verifySchema = z.object({
   decision: z.enum(['approved', 'rejected']),
@@ -53,7 +55,7 @@ async function dispatch(activated: ActivatedNotification[]): Promise<void> {
   await notifyAfterCommit(messages)
 }
 
-export const submitOvertime = defineRoute({
+export const submitOvertime = defineRoute<OvertimeOutput, ModelRuntimeContext, 'post', '/:id'>({
   path: '/:id',
   method: 'post',
   action: async (args) => {
@@ -85,7 +87,7 @@ export const submitOvertime = defineRoute({
     // back is worse than announcing it late.
     await dispatch(activated)
 
-    return args.c.json({ data: await args.context.entity.source.materialize({ id: record.id }, { context: args.context }) })
+    return args.c.json({ data: overtime.schemas.select.parse(await args.context.entity.source.materialize({ id: record.id }, { context: args.context })) })
   },
 })
 
@@ -139,7 +141,7 @@ type VerifyInput = { json: { decision: 'approved' | 'rejected'; description?: st
 // The input type is declared rather than inferred: `defineRoute` cannot see the
 // body shape a custom action reads by hand, so without this the derived RPC
 // contract has no `json` and the browser call site does not type-check.
-export const verifyOvertime = defineRoute<Response, ModelRuntimeContext, 'post', '/:id', VerifyInput>({
+export const verifyOvertime = defineRoute<OvertimeOutput, ModelRuntimeContext, 'post', '/:id', VerifyInput>({
   path: '/:id',
   method: 'post',
   action: async (args) => {
@@ -173,6 +175,6 @@ export const verifyOvertime = defineRoute<Response, ModelRuntimeContext, 'post',
 
     await dispatch(activated)
 
-    return args.c.json({ data: await args.context.entity.source.materialize({ id: record.id }, { context: args.context }) })
+    return args.c.json({ data: overtime.schemas.select.parse(await args.context.entity.source.materialize({ id: record.id }, { context: args.context })) })
   },
 })

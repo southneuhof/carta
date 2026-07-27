@@ -38,7 +38,7 @@ export interface ControlsArguments {
 export interface StandardControlOptions<TIdentity extends RecordIdentity = RecordIdentity> {
   key: string
   actions: Partial<Record<StandardControlName, ResourceAction<TIdentity>>>
-  surface: 'list' | 'detail'
+  surface: 'list' | 'detail' | 'row'
   /** Present on the detail surface, where controls are record-scoped. */
   id?: TIdentity
   record?: Record<string, unknown>
@@ -99,6 +99,20 @@ export function standardControls<TIdentity extends RecordIdentity>(
     }
     if (actions.delete && options.onDelete && allowed(options, 'delete')) {
       add('delete', { onSelect: options.onDelete, placement: 'primary' })
+    }
+  }
+
+  if (options.surface === 'row') {
+    const detail = actions.detail
+    const update = actions.update
+    if (detail?.to && options.id !== undefined && allowed(options, 'detail')) {
+      add('detail', { to: typeof detail.to === 'function' ? detail.to(options.id) : detail.to, placement: 'row' })
+    }
+    if (update?.to && options.id !== undefined && allowed(options, 'update')) {
+      add('update', { to: typeof update.to === 'function' ? update.to(options.id) : update.to, placement: 'row' })
+    }
+    if (actions.delete && options.onDelete && allowed(options, 'delete')) {
+      add('delete', { onSelect: options.onDelete, placement: 'row' })
     }
   }
 

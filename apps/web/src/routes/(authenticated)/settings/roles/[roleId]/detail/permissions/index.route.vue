@@ -11,7 +11,8 @@ import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { ListView } from '@southneuhof/is-vue-framework'
-import { rolePermissions, setRolePermission, type RolePermission } from '@/framework/adapters/resources/roles'
+import { rolePermissions } from './role-permissions.resource'
+import { setRolePermission, type RolePermission } from './role-permissions.operations'
 import CopyPermissionsDialog from './CopyPermissionsDialog.vue'
 
 

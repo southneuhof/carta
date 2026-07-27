@@ -17,15 +17,11 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { DetailView, ListView, type ActionableControl } from '@southneuhof/is-vue-framework'
-import {
-  loadOvertime,
-  overtimes,
-  submitOvertime,
-  verificationSteps,
-  verifyOvertime,
-  type Overtime,
-  type VerificationStep,
-} from '@/framework/adapters/resources/overtimes'
+import { overtimes } from '../overtimes.resource'
+import { type Overtime } from '../overtimes.operations'
+import { verificationSteps } from './verification-steps.resource'
+import { type VerificationStep } from './verification-steps.operations'
+import { loadOvertime, submitOvertime, verifyOvertime } from './overtime-workflow.operations'
 import { orgIdentity, type OrgIdentity } from '@/framework/identity'
 
 

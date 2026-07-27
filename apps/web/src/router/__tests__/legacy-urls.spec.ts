@@ -38,7 +38,6 @@ describe('legacy roles query-state URLs', () => {
 
   it('redirects every known view to its route', () => {
     expect(legacyRolesRedirect(location({ roles_view: 'list' }))).toEqual({ path: '/settings/roles', query: {} })
-    expect(legacyRolesRedirect(location({ roles_view: 'create' }))).toEqual({ path: '/settings/roles/new', query: {} })
     expect(legacyRolesRedirect(location({ roles_view: 'detail', roles_id: '7' }))).toEqual({ path: '/settings/roles/7', query: {} })
     expect(legacyRolesRedirect(location({ roles_view: 'update', roles_id: '7' }))).toEqual({ path: '/settings/roles/7/edit', query: {} })
   })
@@ -54,8 +53,9 @@ describe('legacy roles query-state URLs', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
 
     expect(legacyRolesRedirect(location({ roles_view: 'archive' }))).toEqual({ path: '/settings/roles', query: {} })
+    expect(legacyRolesRedirect(location({ roles_view: 'create' }))).toEqual({ path: '/settings/roles', query: {} })
     expect(legacyRolesRedirect(location({ roles_view: 'detail' }))).toEqual({ path: '/settings/roles', query: {} })
-    expect(warn).toHaveBeenCalledTimes(2)
+    expect(warn).toHaveBeenCalledTimes(3)
 
     warn.mockRestore()
   })
@@ -88,7 +88,6 @@ describe('legacy users query-state URLs', () => {
 describe('legacy overtimes query-state URLs', () => {
   it('redirects every view the overtime screen supports', () => {
     expect(legacyRolesRedirect(location({ overtimes_view: 'list' }))).toEqual({ path: '/hr/overtimes', query: {} })
-    expect(legacyRolesRedirect(location({ overtimes_view: 'create' }))).toEqual({ path: '/hr/overtimes/new', query: {} })
     expect(legacyRolesRedirect(location({ overtimes_view: 'detail', overtimes_id: '7' }))).toEqual({ path: '/hr/overtimes/7', query: {} })
     expect(legacyRolesRedirect(location({ overtimes_view: 'update', overtimes_id: '7' }))).toEqual({ path: '/hr/overtimes/7/edit', query: {} })
   })
@@ -104,6 +103,15 @@ describe('legacy overtimes query-state URLs', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
 
     expect(legacyRolesRedirect(location({ overtimes_view: 'detail' }))).toEqual({ path: '/hr/overtimes', query: {} })
+    expect(warn).toHaveBeenCalledOnce()
+
+    warn.mockRestore()
+  })
+
+  it('falls back with a diagnostic for retired create links', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    expect(legacyRolesRedirect(location({ overtimes_view: 'create' }))).toEqual({ path: '/hr/overtimes', query: {} })
     expect(warn).toHaveBeenCalledOnce()
 
     warn.mockRestore()

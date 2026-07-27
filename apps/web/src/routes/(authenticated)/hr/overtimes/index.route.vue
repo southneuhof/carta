@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ListView } from '@southneuhof/is-vue-framework'
-import { overtimes, type Overtime } from '@/framework/adapters/resources/overtimes'
+import { overtimes } from './overtimes.resource'
+import type { Overtime } from './overtimes.operations'
 
 
 </script>

@@ -5,7 +5,8 @@
  */
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
-import { roles, type Role } from '@/framework/adapters/resources/roles'
+import { roles } from '../../../roles.resource'
+import type { Role } from '../../../roles.operations'
 
 const props = defineProps<{ targetRoleId: string }>()
 const emit = defineEmits<{ (event: 'copied'): void }>()
@@ -17,7 +18,7 @@ const busy = ref(false)
 
 async function show() {
   open.value = true
-  const result = await roles.table().table.load!({ query: { limit: 100 }, searchParameters: {} })
+  const result = await roles.table().table.load!({ query: { limit: '100' }, searchParameters: {} })
   options.value = (result as { data: Role[] }).data.filter((role) => role.id !== props.targetRoleId)
 }
 

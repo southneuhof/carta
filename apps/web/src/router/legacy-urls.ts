@@ -35,7 +35,6 @@ const legacyFeatures: { name: string; base: string; views: ViewPaths }[] = [
     base: '/settings/roles',
     views: {
       list: () => '/settings/roles',
-      create: () => '/settings/roles/new',
       detail: (id) => `/settings/roles/${id}`,
       update: (id) => `/settings/roles/${id}/edit`,
     },
@@ -54,7 +53,6 @@ const legacyFeatures: { name: string; base: string; views: ViewPaths }[] = [
     base: '/hr/overtimes',
     views: {
       list: () => '/hr/overtimes',
-      create: () => '/hr/overtimes/new',
       detail: (id) => `/hr/overtimes/${id}`,
       update: (id) => `/hr/overtimes/${id}/edit`,
     },

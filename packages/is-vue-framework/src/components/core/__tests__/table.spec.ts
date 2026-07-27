@@ -131,13 +131,129 @@ describe('Table core', () => {
     view.unmount()
   })
 
+  it('keeps the two-state sort cycle and does not reorder controlled data', async () => {
+    const orderedRows = [
+      { name: 'Zulu', status: 'open' },
+      { name: 'Alpha', status: 'closed' },
+    ]
+    const queries: Record<string, unknown>[] = []
+    const view = mountCore(Table, {
+      fields,
+      data: orderedRows,
+      'onUpdate:query': (query: Record<string, unknown>) => queries.push(query),
+    })
+    await flush()
+
+    const sort = view.all('th button')[0]
+    sort.click()
+    await flush()
+    sort.click()
+    await flush()
+    sort.click()
+    await flush()
+
+    expect(queries.map(({ sort }) => sort)).toEqual(['asc', 'desc', 'asc'])
+    expect(view.all('tbody tr').map((row) => row.textContent)).toEqual(['Zuluopen', 'Alphaclosed'])
+    view.unmount()
+  })
+
+  it('emits original row records with visible zero-based indexes', async () => {
+    const onRowClick = vi.fn()
+    const view = mountCore(Table, { fields, data: rows, 'onRow-click': onRowClick })
+    await flush()
+
+    view.all('tbody tr')[1].click()
+
+    expect(onRowClick).toHaveBeenCalledWith(rows[1], 1)
+    expect(onRowClick.mock.calls[0][0]).toBe(rows[1])
+    view.unmount()
+  })
+
+  it('uses field reads and excludes fields outside the table surface', async () => {
+    const view = mountCore(Table, {
+      fields: {
+        name: { label: 'Nama lengkap', read: (record: { name: string }) => record.name.toUpperCase() },
+        status: { label: 'Status', table: false },
+      },
+      data: rows,
+    })
+    await flush()
+
+    expect(view.all('th').map((cell) => cell.textContent)).toEqual(['Nama lengkap'])
+    expect(view.text()).toContain('ADMIN')
+    expect(view.text()).not.toContain('open')
+    view.unmount()
+  })
+
+  it('keeps resolved alignment on table headers and cells', async () => {
+    const view = mountCore(Table, {
+      fields: {
+        name: { label: 'Nama', table: { align: 'start' } },
+        status: { label: 'Status', table: { align: 'end' } },
+      },
+      data: rows,
+    })
+    await flush()
+
+    expect(view.all('th').map((cell) => (cell as HTMLElement).style.textAlign)).toEqual(['start', 'end'])
+    expect(view.all('td').map((cell) => (cell as HTMLElement).style.textAlign)).toEqual(['start', 'end', 'start', 'end'])
+    view.unmount()
+  })
+
+  it('keeps pagination one-based and within normalized server bounds', async () => {
+    const view = mountCore(Table, {
+      fields,
+      load: () => ({ data: rows, total: 20, limit: 10 }),
+    })
+    await flush()
+
+    const [previous, next] = view.all('nav button') as HTMLButtonElement[]
+    expect(previous.disabled).toBe(true)
+    next.click()
+    await flush()
+    expect((view.exposed().query as Record<string, unknown>).page).toBe(2)
+    expect((view.all('nav button')[1] as HTMLButtonElement).disabled).toBe(true)
+    view.all('nav button')[1].click()
+    await flush()
+    expect((view.exposed().query as Record<string, unknown>).page).toBe(2)
+    view.unmount()
+  })
+
+  it('can keep disabled pagination visible for a single known page', async () => {
+    const view = mountCore(Table, {
+      fields,
+      pagination: 'always',
+      load: () => ({ data: rows, total: 1, limit: 10 }),
+    })
+    await flush()
+
+    expect(view.text()).toContain('1 / 1')
+    expect(view.all('nav button').every((button) => (button as HTMLButtonElement).disabled)).toBe(true)
+    view.unmount()
+  })
+
+  it('renders row actions in a separate column without emitting row clicks', async () => {
+    const onRowClick = vi.fn()
+    const view = mountCore(
+      Table,
+      { fields, data: rows, 'onRow-click': onRowClick },
+      { slots: { 'row-actions': ({ record }) => h('button', { class: 'row-action' }, String((record as typeof rows[number]).name)) } },
+    )
+    await flush()
+
+    expect(view.all('th').map((cell) => cell.textContent?.trim())).toEqual(['Nama', 'Status', 'Aksi'])
+    view.find<HTMLButtonElement>('.row-action')!.click()
+    expect(onRowClick).not.toHaveBeenCalled()
+    view.unmount()
+  })
+
   it('renders loading, empty, and error states', async () => {
     const pending = deferred<{ data: typeof rows }>()
     const loading = mountCore(Table, { fields, load: () => pending.promise })
     expect(loading.text()).toContain('Memuat')
     pending.resolve({ data: [] })
     await flush()
-    expect(loading.text()).toContain('Tidak ada data')
+    expect(loading.text()).toContain('No data')
     loading.unmount()
 
     const failing = mountCore(Table, {
@@ -184,6 +300,115 @@ describe('Table core', () => {
     await flush()
 
     expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ sort_by: 'name' }))
+    view.unmount()
+  })
+
+  it('passes complete cell scope and lets a named slot override its renderer', async () => {
+    const Chip = defineComponent({ props: { value: null }, setup: () => () => h('em', 'renderer') })
+    const scopes: Record<string, unknown>[] = []
+    const view = mountCore(
+      Table,
+      {
+        fields: {
+          name: { label: 'Nama', table: { renderer: 'chip' } },
+        },
+        data: rows,
+      },
+      {
+        renderers: { table: { chip: Chip } },
+        slots: {
+          'cell:name': (cell) => {
+            scopes.push(cell)
+            return h('strong', `slot:${String(cell.value)}`)
+          },
+        },
+      },
+    )
+    await flush()
+
+    expect(view.find('strong')?.textContent).toBe('slot:Admin')
+    expect(view.find('em')).toBeNull()
+    expect(scopes[0]).toMatchObject({ value: 'Admin', record: rows[0], field: { key: 'name', label: 'Nama' }, index: 0 })
+    expect(scopes[0].record).toBe(rows[0])
+    view.unmount()
+  })
+
+  it('keeps loading, error, and empty slot precedence', async () => {
+    const pending = deferred<{ data: typeof rows }>()
+    const loading = mountCore(
+      Table,
+      { fields, load: () => pending.promise },
+      { slots: { loading: () => h('p', 'Memuat khusus'), empty: () => h('p', 'Kosong khusus') } },
+    )
+    expect(loading.text()).toContain('Memuat khusus')
+    pending.resolve({ data: [] })
+    await flush()
+    expect(loading.text()).toContain('Kosong khusus')
+    loading.unmount()
+
+    const failing = mountCore(
+      Table,
+      { fields, load: async () => Promise.reject(new Error('Gagal khusus')) },
+      { slots: { error: ({ error }) => h('p', `Error khusus: ${(error as Error).message}`) } },
+    )
+    await flush(12)
+    expect(failing.text()).toContain('Error khusus: Gagal khusus')
+    failing.unmount()
+  })
+
+  it('refreshes through the exposed API and keeps framework query state exposed', async () => {
+    const load = vi.fn(() => ({ data: rows }))
+    const view = mountCore(Table, { fields, data: undefined, load })
+    await flush()
+
+    expect(view.exposed().query as Record<string, unknown>).toMatchObject({ page: 1, limit: 10 })
+    await (view.exposed().refresh as () => Promise<unknown>)()
+    await flush()
+    expect(load).toHaveBeenCalledTimes(2)
+    expect(view.exposed()).not.toHaveProperty('table')
+    view.unmount()
+  })
+
+  it('reacts to data and field changes without remounting', async () => {
+    const data = ref(rows)
+    const reactiveFields = ref(fields)
+    const Host = defineComponent(() => () => h(Table, { fields: reactiveFields.value, data: data.value }))
+    const view = mountCore(Host, {})
+    await flush()
+
+    data.value = [{ name: 'Owner', status: 'active' }]
+    reactiveFields.value = { status: { label: 'Keadaan' } }
+    await flush()
+
+    expect(view.all('th').map((cell) => cell.textContent)).toEqual(['Keadaan'])
+    expect(view.all('tbody tr')).toHaveLength(1)
+    expect(view.text()).toContain('active')
+    view.unmount()
+  })
+
+  it('reacts to query-adapter updates and replaces loader results without remounting', async () => {
+    const location = createMemoryQueryLocationAdapter()
+    const view = mountCore(
+      Table,
+      {
+        fields,
+        namespace: 'roles',
+        load: ({ query }: { query: Record<string, unknown> }) => ({
+          data: query.page === 2 ? [{ name: 'Owner', status: 'active' }] : rows,
+          total: 20,
+          limit: 10,
+        }),
+      },
+      { adapters: { query: location } },
+    )
+    await flush()
+
+    location.write('roles', { page: 2, limit: 10 })
+    await flush()
+
+    expect((view.exposed().query as Record<string, unknown>).page).toBe(2)
+    expect(view.all('tbody tr')).toHaveLength(1)
+    expect(view.text()).toContain('Owner')
     view.unmount()
   })
 })

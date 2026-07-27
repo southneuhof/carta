@@ -54,6 +54,7 @@ export interface TableFactoryArguments<TQuery extends object = Record<string, un
   searchParameters?: Record<string, unknown>
   namespace?: QueryNamespace
   query?: TQuery
+  pagination?: 'auto' | 'always' | false
 }
 
 export interface DetailFactoryArguments<TIdentity extends RecordIdentity = RecordIdentityValue> {

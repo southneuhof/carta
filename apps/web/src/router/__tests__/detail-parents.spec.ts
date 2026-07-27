@@ -10,12 +10,16 @@ vi.mock('@southneuhof/is-vue-framework', () => ({
   }),
 }))
 vi.mock('@/components/routing/Tabs.vue', () => ({ default: defineComponent({ setup: () => () => h('nav', { 'data-tabs': true }, 'Tabs') }) }))
-vi.mock('@/framework/adapters/resources/roles', () => ({
+vi.mock('@/routes/(authenticated)/settings/roles/roles.resource', () => ({
   roles: {},
+}))
+vi.mock('@/routes/(authenticated)/settings/roles/[roleId]/detail/permissions/role-permissions.resource', () => ({
   rolePermissions: { actions: { list: { key: 'list', permission: 'roles.update', routeName: 'settings-roles-detail-permissions', to: { name: 'settings-roles-detail-permissions' } } } },
 }))
-vi.mock('@/framework/adapters/resources/users', () => ({
+vi.mock('@/routes/(authenticated)/settings/users/users.resource', () => ({
   users: {},
+}))
+vi.mock('@/routes/(authenticated)/settings/users/[userId]/detail/roles/user-roles.resource', () => ({
   userRoles: { actions: { list: { key: 'list', permission: 'users.update', routeName: 'settings-users-detail-roles', to: { name: 'settings-users-detail-roles' } } } },
 }))
 

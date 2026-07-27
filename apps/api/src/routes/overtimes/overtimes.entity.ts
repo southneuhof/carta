@@ -2,6 +2,7 @@ import { createEntity } from '@southneuhof/sprindle/entity'
 import { defineRelationsPart } from 'drizzle-orm'
 import { date, integer, pgTable, text, time, timestamp } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
+import { z } from 'zod/v4'
 import { employees, tollSection, tollSections } from '../organization/organization.entity'
 import { employee } from '../employees/employees.entity'
 import { users } from '../users/users.entity'
@@ -61,6 +62,7 @@ export const overtime = createEntity({
     create: createInsertSchema(overtimes).omit({ id: true, createdAt: true, updatedAt: true }),
     update: createUpdateSchema(overtimes).omit({ id: true, createdAt: true, updatedAt: true, ...derivedFromCaller }),
     select: createSelectSchema(overtimes).extend({
+      statusCode: z.enum(overtimeStatuses),
       applicant: employee.schemas.select.nullable(),
       section: tollSection.schemas.select.nullable(),
     }),

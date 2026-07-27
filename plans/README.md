@@ -291,7 +291,7 @@ semantically owning route subtree for direct human navigation.
 | Plan | Title | Priority | Effort | Depends on | Status |
 |---|---|---|---|---|---|
 | [037](037-add-optional-hono-resource-tools.md) | Make resource behavior type-exact without runtime route reflection | P1 | L | 036 | DONE |
-| [038](038-split-resource-definitions-and-derive-types.md) | Colocate route resources, split operations, and derive types | P1 | L | 037 | TODO |
+| [038](038-split-resource-definitions-and-derive-types.md) | Colocate route resources, split operations, and derive types | P1 | L | 037 | DONE |
 
 ### Resource-type dependency notes
 
@@ -315,6 +315,79 @@ semantically owning route subtree for direct human navigation.
   derived, not retyped.
 - [Hono RPC runtime dead ends](NOTES-hono-rpc-runtime-dead-ends.md) records rejected approaches and
   the accepted type-exact/action-exact resolution.
+
+## Canonical create routes and FormView inputs (added 2026-07-27)
+
+Planned against commit `2826b0a`. This is a clean break: creation screens use
+the literal filesystem segment `create` and FormView becomes resource-first.
+No `/new` URL alias, `FormView :form` compatibility branch, redirect,
+deprecation warning, or prop normalization is permitted. Raw composed forms
+remain supported only through the explicit new `formProps` escape hatch, in
+parallel with DetailView's deliberate raw `detail` branch.
+
+| Plan | Title | Priority | Effort | Depends on | Status |
+|---|---|---|---|---|---|
+| [039](039-canonical-create-routes-and-formview.md) | Make create routes and FormView contracts canonical | P1 | M | 038 | DONE |
+
+### Canonical-create dependency notes
+
+- 039 is atomic: filesystem filenames, generated route names, action targets,
+  FormView calls, documentation, and removal of the legacy create-view mapping
+  must agree in one change.
+- DetailView remains untouched. It establishes the resource-first plus raw
+  composition pattern; 039 applies that pattern to FormView with a new raw
+  prop name so the old `form` spelling is invalid.
+
+## Derived FormView success lifecycle (added 2026-07-27)
+
+Planned against commit `2826b0a`. Standard resource forms return their record,
+then FormView derives detail navigation (list fallback) from resource actions.
+`afterSubmit` is an awaited free-form effect hook with a navigation controller;
+it never returns a route. Raw `formProps` stays event-only because it has no
+resource identity or action target.
+
+| Plan | Title | Priority | Effort | Depends on | Status |
+|---|---|---|---|---|---|
+| [040](040-derive-form-success-lifecycle.md) | Derive FormView success navigation from resources | P1 | M | 039 | DONE |
+
+### Form-success dependency notes
+
+- 040 follows 039 because it extends FormView’s resource-first branch while
+  preserving 039’s deliberately separate raw `formProps` branch.
+- It is atomic across mutation return types, Hono unwrapping, view lifecycle,
+  and app route cleanup: an envelope cast or route-side handler would recreate
+  a second source of success policy.
+
+## Internal TanStack Table engine (added 2026-07-27)
+
+Planned against commit `2826b0a`. This is an internal engine migration: canonical
+Table props, events, slots, exposed members, field vocabulary, one-based query
+shape, loading behavior, and server-owned sorting/pagination remain unchanged.
+TanStack Table types and instances never cross the framework boundary. Legacy
+`components/composites/Table.vue` remains untouched.
+
+| Plan | Title | Priority | Effort | Depends on | Status |
+|---|---|---|---|---|---|
+| [041](041-adopt-tanstack-table-engine.md) | Adopt TanStack Table internally without changing the Table contract | P1 | M | 004–006 | DONE |
+
+### Table-engine dependency notes
+
+- 041 starts with characterization tests against current core before adding the
+  dependency or replacing internals.
+- `useNamespacedQuery`, `useLoader`, TanStack Query, field resolution, renderer
+  registry, and ListView/resource contracts remain authoritative.
+- Selection and richer column features are deliberately deferred until each has
+  a framework-owned contract; raw TanStack options are never public API.
+
+## Collection pagination normalization (added 2026-07-28)
+
+| Plan | Title | Priority | Effort | Depends on | Status |
+|---|---|---|---|---|---|
+| [042](042-preserve-normalized-collection-pagination.md) | Preserve pagination metadata across collection normalization | P1 | S | 041 | IN PROGRESS |
+
+- 042 follows 041 because canonical Table now consumes normalized metadata for
+  its server pagination engine. It makes framework and web normalizers
+  idempotent, then proves the Hono resource → Table path retains `totalPage`.
 
 ## Dependency and delivery notes
 

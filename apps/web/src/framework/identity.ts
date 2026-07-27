@@ -1,5 +1,5 @@
 import { rpc } from '@/framework/rpc'
-import { parseRpcResponse } from '@/framework/adapters/resources/rpcRoute'
+import { parseHonoResponse, type HonoResponseOf } from '@southneuhof/is-vue-framework/hono'
 
 /**
  * The caller's organizational context, as the server resolved it.
@@ -12,15 +12,7 @@ import { parseRpcResponse } from '@/framework/adapters/resources/rpcRoute'
  * exists so screens can decide what to *draw*, and a refused request must still be
  * handled.
  */
-export interface OrgIdentity {
-  userId: string
-  employeeId: string | null
-  sectionId: string | null
-  jobPositionId: string | null
-  roleIds: string[]
-  scope: 'all' | 'central' | 'section' | 'owner'
-  permissions: string[]
-}
+export type OrgIdentity = HonoResponseOf<typeof rpc.me.$get, 200>['data']
 
 let cached: Promise<OrgIdentity | null> | undefined
 
@@ -35,7 +27,7 @@ export function refreshOrgIdentity(): void {
 
 async function fetchIdentity(): Promise<OrgIdentity | null> {
   try {
-    const payload = await parseRpcResponse<{ data: OrgIdentity }>(await rpc.me.$get())
+    const payload = await parseHonoResponse<typeof rpc.me.$get>(await rpc.me.$get())
     return payload.data
   } catch {
     return null

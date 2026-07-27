@@ -1,6 +1,6 @@
-import { roles } from '@/framework/adapters/resources/roles'
-import { users } from '@/framework/adapters/resources/users'
-import { overtimes } from '@/framework/adapters/resources/overtimes'
+import { roles } from '@/routes/(authenticated)/settings/roles/roles.resource'
+import { users } from '@/routes/(authenticated)/settings/users/users.resource'
+import { overtimes } from '@/routes/(authenticated)/hr/overtimes/overtimes.resource'
 import { defineNavigation, type NavigationIcon, type NavigationModule } from './contract'
 
 export const navigation = defineNavigation([

@@ -2,6 +2,7 @@ import { createEntity } from '@southneuhof/sprindle/entity'
 import { defineRelationsPart } from 'drizzle-orm'
 import { jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
+import { z } from 'zod/v4'
 import { employees, jobPositions, tollSections, tollSection, jobPosition } from '../organization/organization.entity'
 import { role, roles } from '../roles/roles.entity'
 import { users } from '../users/users.entity'
@@ -60,6 +61,7 @@ export const notification = createEntity({
     create: createInsertSchema(notifications).omit({ id: true, createdAt: true, updatedAt: true }),
     update: createUpdateSchema(notifications).omit({ id: true, createdAt: true, updatedAt: true }),
     select: createSelectSchema(notifications).extend({
+      statusCode: z.enum(notificationStatuses),
       jobPosition: jobPosition.schemas.select.nullable(),
       role: role.schemas.select.nullable(),
       section: tollSection.schemas.select.nullable(),

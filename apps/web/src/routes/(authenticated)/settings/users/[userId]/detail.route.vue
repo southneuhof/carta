@@ -3,9 +3,9 @@ import { useRoute } from 'vue-router'
 import { DetailView } from '@southneuhof/is-vue-framework'
 import AppRouterView from '@/components/routing/AppRouterView.vue'
 import Tabs from '@/components/routing/Tabs.vue'
-import { users } from '@/framework/adapters/resources/users'
+import { users } from '../users.resource'
 import type { RouteTab } from '@/router/tabs'
-import { userRoles } from '@/framework/adapters/resources/users'
+import { userRoles } from './detail/roles/user-roles.resource'
 
 const route = useRoute('settings-users-detail')
 const userId = route.params.userId

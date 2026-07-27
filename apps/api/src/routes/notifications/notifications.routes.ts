@@ -1,4 +1,6 @@
 import { authenticated, defineRoute } from '@southneuhof/sprindle/routes'
+import type { ModelRuntimeContext } from '@southneuhof/sprindle/model'
+import type { TypedResponse } from 'hono'
 import { inArray } from 'drizzle-orm'
 import { z } from 'zod/v4'
 import { getDb } from '../../db'
@@ -10,6 +12,8 @@ type RelationalReader = { findMany: (config?: unknown) => Promise<unknown[]> }
 type ScopedDb = { query: Record<string, RelationalReader> }
 
 const markSeenSchema = z.object({ ids: z.array(z.string()).max(200) })
+type MarkSeenInput = { json: z.input<typeof markSeenSchema> }
+type MarkSeenOutput = TypedResponse<{ data: { updated: number } }, 200, 'json'>
 
 /** Rows the caller may legitimately see, optionally narrowed further. */
 async function visibleRows(identity: Awaited<ReturnType<typeof orgIdentity>>, extra: Record<string, unknown>[] = [], columns?: Record<string, true>) {
@@ -47,7 +51,7 @@ export const unreadCount = defineRoute({
   },
 })
 
-export const markSeen = defineRoute({
+export const markSeen = defineRoute<MarkSeenOutput, ModelRuntimeContext, 'post', '/notifications/mark-seen', MarkSeenInput>({
   path: '/notifications/mark-seen',
   method: 'post',
   authorize: [authenticated()],

@@ -9,7 +9,7 @@ import type { RecordIdentity } from '../../contracts'
 const full = new Hono()
   .get('/full/list', validator('query', (value) => value as { page?: string; status?: 'active' | 'draft' }), (context) => context.json({ data: [{ id: 'r1', name: 'Admin', status: 'active' as const }], total: 1 }))
   .get('/full/detail/:id', (context) => context.json({ data: { id: context.req.param('id'), name: 'Admin', status: 'active' as const } }))
-  .post('/full/create', validator('json', (value) => value as { name: string; status: 'active' | 'draft' }), (context) => context.json({ data: context.req.valid('json') }, 201))
+  .post('/full/create', validator('json', (value) => value as { name: string; status: 'active' | 'draft' }), (context) => context.json({ data: { id: 'r2', ...context.req.valid('json') } }, 201))
   .patch('/full/update/:id', validator('json', (value) => value as { name: string }), (context) => context.json({ data: { id: context.req.param('id'), ...context.req.valid('json') } }))
   .delete('/full/delete/:id', (context) => context.json({ deleted: context.req.param('id') }))
   .post('/full/custom', (context) => context.json({ ok: true as const }, 200))
@@ -18,10 +18,12 @@ const partial = new Hono()
   .get('/partial/detail/:id', (context) => context.json({ data: { id: context.req.param('id'), name: 'User' } }))
   .patch('/partial/update/:id', validator('json', (value) => value as { name: string }), (context) => context.json({ data: { id: context.req.param('id'), ...context.req.valid('json') } }))
 const readOnly = new Hono().get('/read/list', (context) => context.json({ data: [{ id: 'n1', title: 'Notice' }] }))
+const invalidMutation = new Hono().post('/invalid/create', (context) => context.json({ data: 'not-a-record' }, 201))
 
 const fullClient = hc<typeof full>('http://example.test')
 const partialClient = hc<typeof partial>('http://example.test')
 const readClient = hc<typeof readOnly>('http://example.test')
+const invalidClient = hc<typeof invalidMutation>('http://example.test')
 
 fullClient.full.list.$get({ query: { page: '1', status: 'active' } })
 fullClient.full.detail[':id'].$get({ param: { id: 'r1' } })
@@ -34,13 +36,26 @@ readClient.read.list.$get()
 const fullOperations = createHonoResourceOperations(fullClient.full)
 const partialOperations = createHonoResourceOperations(partialClient.partial)
 const readOperations = createHonoResourceOperations(readClient.read)
+const invalidOperations = createHonoResourceOperations(invalidClient.invalid)
 
 fullOperations.create({ name: 'Editor', status: 'active' })
 partialOperations.update('u1', { name: 'Member' })
+async function recordMutationProof() {
+  const created = await fullOperations.create({ name: 'Editor', status: 'active' })
+  const updated = await fullOperations.update('r1', { name: 'Editor' })
+  const createdId: string = created.id
+  const updatedId: string = updated.id
+  // @ts-expect-error mutations return unwrapped records, not Hono envelopes.
+  created.data
+  void [createdId, updatedId]
+}
+void recordMutationProof
 // @ts-expect-error partial adapter exposes no create operation
 partialOperations.create
 // @ts-expect-error read-only adapter exposes no update operation
 readOperations.update
+// @ts-expect-error mutation success data must be an object record.
+invalidOperations.create
 
 const invalidPartialActions: ResourceActionsDefinition<RecordIdentity, Extract<keyof typeof partialOperations, 'list' | 'detail' | 'create' | 'update' | 'delete'>> = {
   // @ts-expect-error no typed create operation means no create action

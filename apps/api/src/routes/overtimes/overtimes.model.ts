@@ -14,11 +14,12 @@ const scopedSource = createScopedOvertimeSource(() => getDb())
 // Same façade shape as notifications: `bindDomainDatabase` reassigns the real
 // entity's source on every `getDb()`, so the model reads through this wrapper
 // while the real entity stays in the domain part and keeps being bound normally.
-const scopedEntity: ModelRuntimeEntity = {
+const scopedEntity = {
   name: overtime.name,
   table: overtime.table,
+  schemas: overtime.schemas,
   source: scopedSource,
-}
+} satisfies ModelRuntimeEntity & Pick<typeof overtime, 'schemas'>
 
 export const overtimeModel = defineModel({
   path: '/overtimes',

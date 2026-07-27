@@ -8,6 +8,13 @@ export type HonoRequestOf<TEndpoint> = InferRequestType<TEndpoint>
 /** Exact Hono response payload for one status. This stays type-only. */
 export type HonoResponseOf<TEndpoint, TStatus extends StatusCode> = InferResponseType<TEndpoint, TStatus>
 
+/** Parse one typed Hono response once; non-success payloads stay thrown. */
+export async function parseHonoResponse<TEndpoint, TStatus extends StatusCode = 200>(response: Response): Promise<HonoResponseOf<TEndpoint, TStatus>> {
+  const value: unknown = await response.json()
+  if (!response.ok) throw value
+  return value as HonoResponseOf<TEndpoint, TStatus>
+}
+
 type EndpointAt<TRoute, TKey extends string, TMethod extends string> = TKey extends keyof TRoute
   ? TRoute[TKey] extends infer TNode
     ? TMethod extends keyof TNode ? TNode[TMethod] : never
@@ -67,10 +74,17 @@ type ListOperation<TRoute, TRecord extends object, TQuery extends object> = [Lis
   ? {} : { list: (context: Parameters<NonNullable<ResourceOperations<TRecord, TQuery>['list']>>[0]) => Promise<CollectionResult<TRecord>> }
 type DetailOperation<TRoute, TRecord extends object> = [DetailGetEndpoint<TRoute>] extends [never]
   ? {} : { detail: (context: Parameters<NonNullable<ResourceOperations<TRecord, Record<string, never>, Record<string, never>, Record<string, never>, RecordIdentity>['detail']>>[0]) => Promise<TRecord | undefined> }
+type MutationRecordOf<TEndpoint, TStatus extends StatusCode> = DataOf<HonoResponseOf<TEndpoint, TStatus>> extends object
+  ? DataOf<HonoResponseOf<TEndpoint, TStatus>>
+  : never
 type CreateOperation<TRoute, TCreate extends object> = [CreateEndpoint<TRoute>] extends [never]
-  ? {} : { create: (input: TCreate) => Promise<HonoResponseOf<CreateEndpoint<TRoute>, 201>> }
+  ? {} : [MutationRecordOf<CreateEndpoint<TRoute>, 201>] extends [never]
+    ? never
+    : { create: (input: TCreate) => Promise<MutationRecordOf<CreateEndpoint<TRoute>, 201>> }
 type UpdateOperation<TRoute, TUpdate extends object> = [UpdateEndpoint<TRoute>] extends [never]
-  ? {} : { update: (id: RecordIdentity, input: TUpdate) => Promise<HonoResponseOf<UpdateEndpoint<TRoute>, 200>> }
+  ? {} : [MutationRecordOf<UpdateEndpoint<TRoute>, 200>] extends [never]
+    ? never
+    : { update: (id: RecordIdentity, input: TUpdate) => Promise<MutationRecordOf<UpdateEndpoint<TRoute>, 200>> }
 type DeleteOperation<TRoute> = [DeleteEndpoint<TRoute>] extends [never]
   ? {} : { delete: (id: RecordIdentity) => Promise<HonoResponseOf<DeleteEndpoint<TRoute>, 200>> }
 
@@ -114,6 +128,15 @@ function normalizeCollection(value: unknown): CollectionResult<object> {
   const response = value as { data: object[]; page?: number; limit?: number; total?: number }
   return { data: response.data, meta: { page: response.page, pageSize: response.limit, total: response.total } }
 }
+function unwrapRecord(value: unknown): object {
+  if (!value || typeof value !== 'object' || !('data' in value) || !value.data || typeof value.data !== 'object') {
+    throw new Error('[is-vue-framework] Hono mutation response must contain an object data record.')
+  }
+  return value.data
+}
+function typedOperations<T>(operations: object): T {
+  return operations as T
+}
 
 export function createHonoResourceOperations<const TRoute>(route: TRoute): HonoResourceOperations<TRoute> {
   const source = route as RuntimeRoute
@@ -125,9 +148,9 @@ export function createHonoResourceOperations<const TRoute>(route: TRoute): HonoR
       const value = await payload(await source.detail[':id'].$get({ param: { id: identity(id) }, query: wireQuery(searchParameters) }))
       return (value as { data: object }).data
     },
-    create: async (input: object) => payload(await source.create.$post({ json: input })),
-    update: async (id: RecordIdentity, input: object) => payload(await source.update[':id'].$patch({ param: { id: identity(id) }, json: input })),
+    create: async (input: object) => unwrapRecord(await payload(await source.create.$post({ json: input }))),
+    update: async (id: RecordIdentity, input: object) => unwrapRecord(await payload(await source.update[':id'].$patch({ param: { id: identity(id) }, json: input }))),
     delete: async (id: RecordIdentity) => payload(await source.delete[':id'].$delete({ param: { id: identity(id) } })),
   }
-  return operations as unknown as HonoResourceOperations<TRoute>
+  return typedOperations<HonoResourceOperations<TRoute>>(operations)
 }

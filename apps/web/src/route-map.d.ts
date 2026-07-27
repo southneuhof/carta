@@ -59,9 +59,9 @@ declare module 'vue-router/auto-routes' {
       { overtimeId: ParamValue<false> },
       | never
     >,
-    'hr-overtimes-new': RouteRecordInfo<
-      'hr-overtimes-new',
-      '/hr/overtimes/new',
+    'hr-overtimes-create': RouteRecordInfo<
+      'hr-overtimes-create',
+      '/hr/overtimes/create',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -94,9 +94,9 @@ declare module 'vue-router/auto-routes' {
       { roleId: ParamValue<false> },
       | never
     >,
-    'settings-roles-new': RouteRecordInfo<
-      'settings-roles-new',
-      '/settings/roles/new',
+    'settings-roles-create': RouteRecordInfo<
+      'settings-roles-create',
+      '/settings/roles/create',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -174,14 +174,14 @@ declare module 'vue-router/auto-routes' {
       routes:
         | 'dashboard'
         | 'hr-overtimes'
+        | 'hr-overtimes-create'
         | 'hr-overtimes-detail'
         | 'hr-overtimes-edit'
-        | 'hr-overtimes-new'
         | 'settings-roles'
+        | 'settings-roles-create'
         | 'settings-roles-detail'
         | 'settings-roles-detail-permissions'
         | 'settings-roles-edit'
-        | 'settings-roles-new'
         | 'settings-users'
         | 'settings-users-detail'
         | 'settings-users-detail-roles'
@@ -224,9 +224,9 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/routes/(authenticated)/hr/overtimes/new.route.vue': {
+    'src/routes/(authenticated)/hr/overtimes/create.route.vue': {
       routes:
-        | 'hr-overtimes-new'
+        | 'hr-overtimes-create'
       views:
         | never
       pathParamNames:
@@ -265,9 +265,9 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/routes/(authenticated)/settings/roles/new.route.vue': {
+    'src/routes/(authenticated)/settings/roles/create.route.vue': {
       routes:
-        | 'settings-roles-new'
+        | 'settings-roles-create'
       views:
         | never
       pathParamNames:

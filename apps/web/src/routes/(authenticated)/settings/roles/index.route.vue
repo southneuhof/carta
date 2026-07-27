@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ListView } from '@southneuhof/is-vue-framework'
-import { roles, type Role } from '@/framework/adapters/resources/roles'
+import { roles } from './roles.resource'
+import type { Role } from './roles.operations'
 
 </script>
 
