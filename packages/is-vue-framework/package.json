@@ -21,11 +21,18 @@
     "./router": "./src/router/index.ts",
     "./router/*": "./src/router/*",
     "./runtime": "./src/runtime.ts",
-    "./runtimeDefaults": "./src/runtimeDefaults.ts"
+    "./runtimeDefaults": "./src/runtimeDefaults.ts",
+    "./hono": "./src/hono/index.ts"
   },
   "peerDependencies": {
+    "hono": "^4.12.27",
     "vue": "^3.5.39",
     "vue-router": "^5.1.0"
+  },
+  "peerDependenciesMeta": {
+    "hono": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@southneuhof/utilities": "workspace:^",
@@ -53,6 +60,7 @@
   "devDependencies": {
     "@types/node": "^24.0.0",
     "@vitejs/plugin-vue": "^6.0.7",
+    "hono": "^4.12.27",
     "jsdom": "^20.0.3",
     "typescript": "^5.9.3",
     "vitest": "^4.1.10",

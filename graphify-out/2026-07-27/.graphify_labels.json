@@ -628,5 +628,11 @@
   "626": "routes/settings/roles/[roleId]/_parent.route.vue",
   "627": "routes/settings/roles/[roleId]/permissions/index.route.vue",
   "628": "6.8.2 - 2023-12-11",
-  "629": "vue3-google-map"
+  "629": "vue3-google-map",
+  "630": "035-mechanical-routes/src/routes/(authenticated)/settings/roles/index.route.vue",
+  "631": "035-mechanical-routes/src/routes/(authenticated)/settings/roles/new.route.vue",
+  "632": "035-mechanical-routes/src/routes/(authenticated)/settings/roles/[roleId]/detail/permissions/index.route.vue",
+  "633": "035-mechanical-routes/src/routes/(authenticated)/settings/roles/[roleId]/detail.route.vue",
+  "634": "035-mechanical-routes/src/routes/(authenticated)/settings/roles/[roleId]/edit.route.vue",
+  "635": "035-mechanical-routes/src/routes/not-found.route.vue"
 }

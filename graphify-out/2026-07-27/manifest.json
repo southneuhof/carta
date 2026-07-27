@@ -710,8 +710,8 @@
     "semantic_hash": "b2a8bd0bab9b3f066c891ecfc34bb1c4"
   },
   "apps/web/src/components/navigations/sidebar/drawer/NavigationDrawer.vue": {
-    "mtime": 1785141326.447814,
-    "ast_hash": "7282e4c6cc236d3d540b7125c120a49b",
+    "mtime": 1785149767.7132993,
+    "ast_hash": "9def205db18ec9154497199c7a8c454f",
     "semantic_hash": ""
   },
   "apps/web/src/components/navigations/sidebar/drawer/layouts/NavItem.vue": {
@@ -720,13 +720,13 @@
     "semantic_hash": ""
   },
   "apps/web/src/components/navigations/sidebar/rail/Sidebar.vue": {
-    "mtime": 1785141326.4468482,
-    "ast_hash": "cb5d9ba8232ce0d0613117631626e94f",
+    "mtime": 1785149767.7126756,
+    "ast_hash": "5c203427c5489332587a48e89c3a0fa1",
     "semantic_hash": ""
   },
   "apps/web/src/components/navigations/sidebar/rail/layouts/RailExpand.vue": {
-    "mtime": 1785141012.5632455,
-    "ast_hash": "97dac9a787ceb37d8f73b0d98abc02d4",
+    "mtime": 1785149251.1997497,
+    "ast_hash": "1489f21e7325b48fcc4baabeab4adeee",
     "semantic_hash": ""
   },
   "apps/web/src/components/navigations/sidebar/rail/layouts/RailItem.vue": {
@@ -840,43 +840,43 @@
     "semantic_hash": "c4a6ac05baddc3ef58be75f492f8a72f"
   },
   "apps/web/src/route-map.d.ts": {
-    "mtime": 1785143630.1088855,
-    "ast_hash": "2da16df945f670ec398679edb4ef14b0",
+    "mtime": 1785150000.9366376,
+    "ast_hash": "a3352e6c11c4a38ad83f6da730bdce96",
     "semantic_hash": ""
   },
   "apps/web/src/router/__tests__/guards.spec.ts": {
-    "mtime": 1785138146.172918,
-    "ast_hash": "177e38856c97e7fa7496dc2b051f10ae",
+    "mtime": 1785149945.7249544,
+    "ast_hash": "9eac2c573ba51bdd38a2a25b3abb2c63",
     "semantic_hash": ""
   },
   "apps/web/src/router/__tests__/layout-groups.spec.ts": {
-    "mtime": 1785141062.6430888,
-    "ast_hash": "757e13ff16622740d3510306b4b54221",
+    "mtime": 1785149270.6423497,
+    "ast_hash": "84a76225bcb20a827e7ff0777323efbe",
     "semantic_hash": ""
   },
   "apps/web/src/router/__tests__/navigation.spec.ts": {
-    "mtime": 1785141223.7879071,
-    "ast_hash": "ba7d16fad609299a135ef97a4e592e27",
+    "mtime": 1785149779.8809977,
+    "ast_hash": "ea4e52d6ff5e7c0f6b59a18ecd64d4ad",
     "semantic_hash": ""
   },
   "apps/web/src/router/__tests__/routes.spec.ts": {
-    "mtime": 1785138202.4707773,
-    "ast_hash": "85adb9fea195e19ac8537dcfea1d3a11",
+    "mtime": 1785149297.5458035,
+    "ast_hash": "987d97eeae456f4f41fae30d2e71de49",
     "semantic_hash": ""
   },
   "apps/web/src/router/file-routing/layout-groups.ts": {
-    "mtime": 1785140906.9190145,
-    "ast_hash": "e501ca3c0c285598103f3714a59827e1",
+    "mtime": 1785147852.0475798,
+    "ast_hash": "eb90fee841316572439aa5b185a45f28",
     "semantic_hash": ""
   },
   "apps/web/src/router/guards.ts": {
-    "mtime": 1785138507.4581933,
-    "ast_hash": "9222d083b91449b0b60aaf03be9eadea",
+    "mtime": 1785149525.5347645,
+    "ast_hash": "1c0c2d8b2e3354c7c0e80cb55b23a651",
     "semantic_hash": ""
   },
   "apps/web/src/router/index.ts": {
-    "mtime": 1785133925.4713302,
-    "ast_hash": "7a4ed5383177008c6120a8730e276500",
+    "mtime": 1785148049.1093466,
+    "ast_hash": "ee22d800f66568257e046b5cb7af0be6",
     "semantic_hash": ""
   },
   "apps/web/src/router/meta.d.ts": {
@@ -885,8 +885,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/router/navigation.ts": {
-    "mtime": 1785141012.5619779,
-    "ast_hash": "dddc6ce068db8f30ef8d1c1dd3171895",
+    "mtime": 1785149728.353718,
+    "ast_hash": "61e0856936fba3f709bce12fb631d445",
     "semantic_hash": ""
   },
   "apps/web/src/routes/(authenticated)/authenticated.layout.vue": {
@@ -919,19 +919,9 @@
     "ast_hash": "4bbf8ccb6f03dcea8043a272069785a4",
     "semantic_hash": ""
   },
-  "apps/web/src/routes/(public)/privacy-policy/privacy-policy.route.vue": {
-    "mtime": 1783870317.3595204,
-    "ast_hash": "6eea3f18683ee000e2c0a0d19629b4fb",
-    "semantic_hash": "6eea3f18683ee000e2c0a0d19629b4fb"
-  },
   "apps/web/src/routes/(public)/public.layout.vue": {
     "mtime": 1785140935.3834972,
     "ast_hash": "c21d27b8bb42bd873d95bd3d24a90d95",
-    "semantic_hash": ""
-  },
-  "apps/web/src/routes/[...path].route.vue": {
-    "mtime": 1785140935.385064,
-    "ast_hash": "35ef09450e3e0104b68bc8a03c8f30c7",
     "semantic_hash": ""
   },
   "apps/web/src/rpc-types.proof.ts": {
@@ -985,9 +975,9 @@
     "semantic_hash": "58a21833fde458f7430ba83fa2182de0"
   },
   "apps/web/src/utils/__tests__/services.spec.ts": {
-    "mtime": 1783870690.2020385,
-    "ast_hash": "f21af6a987906be08d914aa6da339604",
-    "semantic_hash": "f21af6a987906be08d914aa6da339604"
+    "mtime": 1785149844.1405108,
+    "ast_hash": "d5fd56aa9e4885c4a6f982502199992b",
+    "semantic_hash": ""
   },
   "apps/web/src/utils/auth.ts": {
     "mtime": 1781760700.830522,
@@ -1005,9 +995,9 @@
     "semantic_hash": "e53f824312b9e4c9bfe2e953a49cc609"
   },
   "apps/web/src/utils/services.ts": {
-    "mtime": 1783870690.2011034,
-    "ast_hash": "6891b0f8e714556e65266d8a1fd4272e",
-    "semantic_hash": "6891b0f8e714556e65266d8a1fd4272e"
+    "mtime": 1785149251.2001784,
+    "ast_hash": "fd63374bff401222676b3e3d1132c25a",
+    "semantic_hash": ""
   },
   "apps/web/tailwind.config.js": {
     "mtime": 1783777690.684136,
@@ -1035,8 +1025,8 @@
     "semantic_hash": "0715dc07fa3d1bd8a8f5b6093e960c3e"
   },
   "apps/web/vite.config.ts": {
-    "mtime": 1785140906.91932,
-    "ast_hash": "e0ee9cd1823e1d3842762450ad584817",
+    "mtime": 1785147852.0481908,
+    "ast_hash": "daceb073b05a870d621125b3afb63311",
     "semantic_hash": ""
   },
   "package.json": {
@@ -2620,8 +2610,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/framework/adapters/bundle.ts": {
-    "mtime": 1785138125.5613263,
-    "ast_hash": "e6940b3d9fbabcf961fe11b5da0d8932",
+    "mtime": 1785149724.6019244,
+    "ast_hash": "3dd6e74b2020ea2c4d0eee4fe03a4dd7",
     "semantic_hash": ""
   },
   "apps/web/src/framework/adapters/data/normalize.ts": {
@@ -2640,13 +2630,13 @@
     "semantic_hash": ""
   },
   "apps/web/src/framework/adapters/resources/roles.spec.ts": {
-    "mtime": 1785104202.7849002,
-    "ast_hash": "63255475ebbb44e0a8f104d76a8694ac",
+    "mtime": 1785149686.3538036,
+    "ast_hash": "92567000797b715c7817608f2297037e",
     "semantic_hash": ""
   },
   "apps/web/src/framework/adapters/resources/roles.ts": {
-    "mtime": 1785133563.533188,
-    "ast_hash": "6d41e5a72df7e923518eb3cb3c486b5f",
+    "mtime": 1785147033.3843515,
+    "ast_hash": "eccf1155ee5febf768d93b80002fff99",
     "semantic_hash": ""
   },
   "apps/web/src/framework/adapters/resources/rpcResource.spec.ts": {
@@ -2665,13 +2655,13 @@
     "semantic_hash": ""
   },
   "apps/web/src/framework/adapters/resources/users.spec.ts": {
-    "mtime": 1785134087.535068,
-    "ast_hash": "2ef24295450f135c7326169f15a670f7",
+    "mtime": 1785149645.745492,
+    "ast_hash": "1fa00d064a6d60ecf1cce0141fd63a1c",
     "semantic_hash": ""
   },
   "apps/web/src/framework/adapters/resources/users.ts": {
-    "mtime": 1785133563.533678,
-    "ast_hash": "345e0bcddeb3f3a9fd9a1d3ccb441e6a",
+    "mtime": 1785147033.384601,
+    "ast_hash": "a54db7fdafd803697ad0aacc23aa3325",
     "semantic_hash": ""
   },
   "apps/web/src/router/__tests__/legacy-urls.spec.ts": {
@@ -2685,43 +2675,18 @@
     "semantic_hash": ""
   },
   "apps/web/src/routes/(authenticated)/settings/roles/[roleId]/edit.route.vue": {
-    "mtime": 1785140935.3885539,
-    "ast_hash": "875814e595bfd4714d08cfb1231b7c8f",
-    "semantic_hash": ""
-  },
-  "apps/web/src/routes/(authenticated)/settings/roles/[roleId]/permissions/CopyPermissionsDialog.vue": {
-    "mtime": 1785104137.19095,
-    "ast_hash": "77b226332af60939d3a64bbbcf87210e",
-    "semantic_hash": ""
-  },
-  "apps/web/src/routes/(authenticated)/settings/roles/[roleId]/permissions/index.route.spec.ts": {
-    "mtime": 1785083207.3383195,
-    "ast_hash": "7c5318f52af5593091c0d57061c216ef",
-    "semantic_hash": ""
-  },
-  "apps/web/src/routes/(authenticated)/settings/roles/[roleId]/permissions/index.route.vue": {
-    "mtime": 1785141555.1407638,
-    "ast_hash": "f47b1f521422bf6188c28d4290c7625d",
+    "mtime": 1785148032.980018,
+    "ast_hash": "ae44c5211d1929e1ca4cd913503ea172",
     "semantic_hash": ""
   },
   "apps/web/src/routes/(authenticated)/settings/roles/new.route.vue": {
-    "mtime": 1785140935.3881109,
-    "ast_hash": "e8cf2c1a00f6f023630b68f361008ce9",
+    "mtime": 1785147965.440092,
+    "ast_hash": "16d82fdad5b3b028b57d6ad118aaf673",
     "semantic_hash": ""
   },
   "apps/web/src/routes/(authenticated)/settings/users/[userId]/edit.route.vue": {
-    "mtime": 1785140935.3895047,
-    "ast_hash": "acbc4b69c8ac1a6934d7dbb3793650d4",
-    "semantic_hash": ""
-  },
-  "apps/web/src/routes/(authenticated)/settings/users/[userId]/roles/index.route.spec.ts": {
-    "mtime": 1785093070.9632967,
-    "ast_hash": "a02bd35b1a6c174ad400ccbf0ff8ae33",
-    "semantic_hash": ""
-  },
-  "apps/web/src/routes/(authenticated)/settings/users/[userId]/roles/index.route.vue": {
-    "mtime": 1785140935.3897445,
-    "ast_hash": "df8722205659658facd90a260c7d998f",
+    "mtime": 1785148032.9802797,
+    "ast_hash": "408e9e8b03e06cf3d8ee4f2a0c02ca97",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/__tests__/public-api.spec.ts": {
@@ -2785,8 +2750,8 @@
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/views/DetailView.vue": {
-    "mtime": 1785133652.2571652,
-    "ast_hash": "cf67a1bbbae1650947a3474ce3481bf9",
+    "mtime": 1785147066.4540722,
+    "ast_hash": "a83fa8e8ef44086c940b0da27888963f",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/views/FormView.vue": {
@@ -2825,8 +2790,8 @@
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/contracts/__type-tests__/contracts.type-test.ts": {
-    "mtime": 1785138125.5606372,
-    "ast_hash": "613feae4ae8e67661f16c2fb0f8debf5",
+    "mtime": 1785147090.9570997,
+    "ast_hash": "8ea5c7220cedf3685d53b650dfab3a5c",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/contracts/__type-tests__/fields.type-test.ts": {
@@ -2865,8 +2830,8 @@
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/contracts/resource.ts": {
-    "mtime": 1785103415.0508711,
-    "ast_hash": "7f120ebe7bf85fecaea08ee3984c281c",
+    "mtime": 1785147097.7507718,
+    "ast_hash": "d528164347c5e043e8159d97254e22d3",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/contracts/results.ts": {
@@ -2975,23 +2940,23 @@
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/resources/__tests__/resources.spec.ts": {
-    "mtime": 1785134227.8553355,
-    "ast_hash": "21d678771c148070de29d2f6d56988db",
+    "mtime": 1785149911.5068672,
+    "ast_hash": "56345bed15cebcc3cf9b8f13ac9b6fc4",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/resources/controls.ts": {
-    "mtime": 1785133533.166664,
-    "ast_hash": "b2060f4617d265c5b8163b6ccc4baad3",
+    "mtime": 1785147066.4534843,
+    "ast_hash": "04a55f528e257ddd95187c3dcd92dbd9",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/resources/defineResource.ts": {
-    "mtime": 1785133533.1640863,
-    "ast_hash": "85fbd0721b3bd8853c6cc395f5a3b31f",
+    "mtime": 1785147953.6370418,
+    "ast_hash": "d47b91cac90f8fbd76fcc43bb6e2329b",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/resources/index.ts": {
-    "mtime": 1785104001.494653,
-    "ast_hash": "575f6be456f75cf021b3cad4e68ee663",
+    "mtime": 1785147066.455054,
+    "ast_hash": "c4ed31a35b1eeece73f944f7644f462f",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/resources/runtime.ts": {
@@ -3115,13 +3080,13 @@
     "semantic_hash": ""
   },
   "docs/architecture/resource-migration-guide.md": {
-    "mtime": 1785143506.9783318,
-    "ast_hash": "1e2439ca7152cf79edccfb17e95a7b22",
+    "mtime": 1785149889.1682243,
+    "ast_hash": "fb5d2a2a6322a4082de213172efcbdc8",
     "semantic_hash": ""
   },
   "docs/architecture/web-application-architecture.md": {
-    "mtime": 1785143506.98077,
-    "ast_hash": "0784b340f972c22240a6ab4a8034edd7",
+    "mtime": 1785150049.441142,
+    "ast_hash": "56f2168048e1f5644bf02346de8a604f",
     "semantic_hash": ""
   },
   "packages/apostle/CHANGELOG.md": {
@@ -3250,8 +3215,8 @@
     "semantic_hash": ""
   },
   "plans/README.md": {
-    "mtime": 1785143506.981731,
-    "ast_hash": "906915e16c2379aa3f6b3d104d5c1763",
+    "mtime": 1785150049.4429207,
+    "ast_hash": "85aa61b385599944370a5f3ffb39096a",
     "semantic_hash": ""
   },
   "pnpm-workspace.yaml": {
@@ -3525,8 +3490,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/components/routing/Tabs.vue": {
-    "mtime": 1785142454.3438795,
-    "ast_hash": "54ed1cd1c46d78c407ca0fc3bff7e8b3",
+    "mtime": 1785148038.116024,
+    "ast_hash": "8f5ab81e780bb8e78b07c9a532304354",
     "semantic_hash": ""
   },
   "apps/web/src/framework/__tests__/entity-schema-import.spec.ts": {
@@ -3545,13 +3510,13 @@
     "semantic_hash": ""
   },
   "apps/web/src/framework/adapters/resources/overtimes.spec.ts": {
-    "mtime": 1785104214.8184583,
-    "ast_hash": "39e0efd0e20d67dafbaa096a60eb377c",
+    "mtime": 1785149686.3541937,
+    "ast_hash": "af59439896832ddaaee763f1fcdba6c7",
     "semantic_hash": ""
   },
   "apps/web/src/framework/adapters/resources/overtimes.ts": {
-    "mtime": 1785133740.7987673,
-    "ast_hash": "b13871022b35a24f294f9f02adadded9",
+    "mtime": 1785147033.3849907,
+    "ast_hash": "463795024e82710fcdfc8c2bca814b9b",
     "semantic_hash": ""
   },
   "apps/web/src/framework/identity.ts": {
@@ -3560,33 +3525,23 @@
     "semantic_hash": ""
   },
   "apps/web/src/framework/notifications/moduleRoutes.spec.ts": {
-    "mtime": 1785095698.8604398,
-    "ast_hash": "855bb9acf7136a5529c81ae047e71230",
+    "mtime": 1785149303.8920293,
+    "ast_hash": "dba795073bb7ed4a9d2feda2bab67a63",
     "semantic_hash": ""
   },
   "apps/web/src/framework/notifications/moduleRoutes.ts": {
-    "mtime": 1785095453.7494,
-    "ast_hash": "f948ebb929bd07201c0c70cf126c21e1",
+    "mtime": 1785148032.9826872,
+    "ast_hash": "30c89f82c0cecfb0410d018a24d5735c",
     "semantic_hash": ""
   },
   "apps/web/src/router/tabs.ts": {
-    "mtime": 1785133925.4700348,
-    "ast_hash": "09823922502743bd11f8d94a7af1f9fc",
+    "mtime": 1785147980.8234477,
+    "ast_hash": "e52ff2785d7f3216444b10c002f62552",
     "semantic_hash": ""
   },
   "apps/web/src/routes/(authenticated)/hr/overtimes/[overtimeId]/edit.route.vue": {
-    "mtime": 1785140935.3861568,
-    "ast_hash": "3cdd167aed4d8d2171eed9b1590d2642",
-    "semantic_hash": ""
-  },
-  "apps/web/src/routes/(authenticated)/hr/overtimes/[overtimeId]/index.route.spec.ts": {
-    "mtime": 1785134045.446444,
-    "ast_hash": "6192da6bab7f8824140ee89f47bd75ad",
-    "semantic_hash": ""
-  },
-  "apps/web/src/routes/(authenticated)/hr/overtimes/[overtimeId]/index.route.vue": {
-    "mtime": 1785140935.3857558,
-    "ast_hash": "cc5d3e2e3b9721d40569cd9532db80b5",
+    "mtime": 1785148032.9821696,
+    "ast_hash": "c6a39556ba39c9baa588f2033c842f1c",
     "semantic_hash": ""
   },
   "apps/web/src/routes/(authenticated)/hr/overtimes/index.route.vue": {
@@ -3595,8 +3550,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/routes/(authenticated)/hr/overtimes/new.route.vue": {
-    "mtime": 1785140935.3870094,
-    "ast_hash": "776860a743d24f549f7d4c1a6a654d7b",
+    "mtime": 1785147965.4411237,
+    "ast_hash": "d65e6bcc6442ecfaf5c258bb85be3565",
     "semantic_hash": ""
   },
   "apps/web/src/routes/(authenticated)/to-do/index.route.vue": {
@@ -3695,8 +3650,8 @@
     "semantic_hash": ""
   },
   "docs/architecture/routing-and-controls-review.md": {
-    "mtime": 1785143506.9792125,
-    "ast_hash": "f9004611768202b5966d5947a6a2d4f5",
+    "mtime": 1785149889.1711345,
+    "ast_hash": "ccab27b5a542067fe8957b1c4d1ee159",
     "semantic_hash": ""
   },
   "packages/sprindle/docs/recipes.md": {
@@ -3825,48 +3780,33 @@
     "semantic_hash": ""
   },
   "apps/web/src/router/__tests__/detail-parents.spec.ts": {
-    "mtime": 1785143456.526941,
-    "ast_hash": "51b8063bc38cbc7f5f29e612b51ce831",
+    "mtime": 1785149557.9533713,
+    "ast_hash": "e0dc424246d2193d4b21927d07e72b2e",
     "semantic_hash": ""
   },
   "apps/web/src/router/__tests__/tabs.spec.ts": {
-    "mtime": 1785142531.6906264,
-    "ast_hash": "e2dfd99f431aab330b6b0ed62d63359f",
+    "mtime": 1785149525.5359654,
+    "ast_hash": "f4b21cd45f6729369e52f818745a67a2",
     "semantic_hash": ""
   },
   "apps/web/src/manifest/__tests__/manifest.spec.ts": {
-    "mtime": 1785141176.1052766,
-    "ast_hash": "a0bef5baff8980633395b5fe22a84ad6",
+    "mtime": 1785149793.2681909,
+    "ast_hash": "351a3f5f0fd20ca5f6e88ba5a4855d88",
     "semantic_hash": ""
   },
   "apps/web/src/manifest/contract.ts": {
-    "mtime": 1785141137.881983,
-    "ast_hash": "a9ff4f66da8eeef9db76ca987db8222a",
+    "mtime": 1785147953.6375258,
+    "ast_hash": "7d0bd862c3ec8266d3920beefbde8795",
     "semantic_hash": ""
   },
   "apps/web/src/manifest/index.ts": {
-    "mtime": 1785140888.4404616,
-    "ast_hash": "319ca6261c2d53185cf66ba15126fa98",
+    "mtime": 1785147913.2591681,
+    "ast_hash": "f1b8e0dd888ce08e567d9581e2d2c908",
     "semantic_hash": ""
   },
   "apps/web/src/manifest/navigation.ts": {
-    "mtime": 1785141144.6991763,
-    "ast_hash": "d43cd509f28c5a602d2995e2837f3808",
-    "semantic_hash": ""
-  },
-  "apps/web/src/manifest/routes.ts": {
-    "mtime": 1785140888.4400468,
-    "ast_hash": "11947a8dcce70901a33a87b2e8f6ecbf",
-    "semantic_hash": ""
-  },
-  "apps/web/src/routes/(authenticated)/settings/roles/[roleId]/_parent.route.vue": {
-    "mtime": 1785143456.5253272,
-    "ast_hash": "b9d8d6f147d92b656be1a26458841342",
-    "semantic_hash": ""
-  },
-  "apps/web/src/routes/(authenticated)/settings/users/[userId]/_parent.route.vue": {
-    "mtime": 1785143456.525948,
-    "ast_hash": "b81624ebdb0646278378c841eec38c78",
+    "mtime": 1785149767.7119753,
+    "ast_hash": "e0778a34d4d743ac2ae4b2e586805cd9",
     "semantic_hash": ""
   },
   "plans/proofs/031-native-parent-typed/prove.mjs": {
@@ -3917,6 +3857,136 @@
   "plans/034-scope-route-transitions-to-outlet-depth.md": {
     "mtime": 1785143184.928057,
     "ast_hash": "25fd2d0f6f8366baa179b4af8347dc5e",
+    "semantic_hash": ""
+  },
+  "apps/web/src/router/file-routing/names.ts": {
+    "mtime": 1785147852.0483513,
+    "ast_hash": "f6c5d1eed0d9d0d53e63301506ecf32c",
+    "semantic_hash": ""
+  },
+  "apps/web/src/routes/(authenticated)/hr/overtimes/[overtimeId]/detail.route.spec.ts": {
+    "mtime": 1785149844.138525,
+    "ast_hash": "482d93d8a71f82ec9f5ad73031ee9998",
+    "semantic_hash": ""
+  },
+  "apps/web/src/routes/(authenticated)/hr/overtimes/[overtimeId]/detail.route.vue": {
+    "mtime": 1785148032.9819689,
+    "ast_hash": "1db3bfaf3a1ad5c0de3628fb67444c37",
+    "semantic_hash": ""
+  },
+  "apps/web/src/routes/(authenticated)/settings/roles/[roleId]/detail.route.vue": {
+    "mtime": 1785148032.979024,
+    "ast_hash": "4d709046f841f58e6f0e66600d3505a8",
+    "semantic_hash": ""
+  },
+  "apps/web/src/routes/(authenticated)/settings/roles/[roleId]/detail/permissions/CopyPermissionsDialog.vue": {
+    "mtime": 1785104137.19095,
+    "ast_hash": "77b226332af60939d3a64bbbcf87210e",
+    "semantic_hash": ""
+  },
+  "apps/web/src/routes/(authenticated)/settings/roles/[roleId]/detail/permissions/index.route.spec.ts": {
+    "mtime": 1785083207.3383195,
+    "ast_hash": "7c5318f52af5593091c0d57061c216ef",
+    "semantic_hash": ""
+  },
+  "apps/web/src/routes/(authenticated)/settings/roles/[roleId]/detail/permissions/index.route.vue": {
+    "mtime": 1785148032.9811246,
+    "ast_hash": "52b52456cab3031ae5e787561dccd070",
+    "semantic_hash": ""
+  },
+  "apps/web/src/routes/(authenticated)/settings/users/[userId]/detail.route.vue": {
+    "mtime": 1785148032.9795413,
+    "ast_hash": "c1ea6843c285f0d4d659dabc4095e509",
+    "semantic_hash": ""
+  },
+  "apps/web/src/routes/(authenticated)/settings/users/[userId]/detail/roles/index.route.spec.ts": {
+    "mtime": 1785093070.9632967,
+    "ast_hash": "a02bd35b1a6c174ad400ccbf0ff8ae33",
+    "semantic_hash": ""
+  },
+  "apps/web/src/routes/(authenticated)/settings/users/[userId]/detail/roles/index.route.vue": {
+    "mtime": 1785148032.9814885,
+    "ast_hash": "e2e50ef100595d1c43a00e125b078ac2",
+    "semantic_hash": ""
+  },
+  "apps/web/src/routes/(public)/privacy-policy/index.route.vue": {
+    "mtime": 1783870317.3595204,
+    "ast_hash": "6eea3f18683ee000e2c0a0d19629b4fb",
+    "semantic_hash": ""
+  },
+  "apps/web/src/routes/not-found.route.vue": {
+    "mtime": 1785148071.9433532,
+    "ast_hash": "315212e3fe77ebd70ffdcd4dbfec7495",
+    "semantic_hash": ""
+  },
+  "plans/proofs/035-mechanical-routes/action-registry.mjs": {
+    "mtime": 1785146741.6862454,
+    "ast_hash": "619171112023a94c9d7a7e977974250e",
+    "semantic_hash": ""
+  },
+  "plans/proofs/035-mechanical-routes/lazy-detail.mjs": {
+    "mtime": 1785146741.6870131,
+    "ast_hash": "9e8d45c3499aadea6f025bde187e86b0",
+    "semantic_hash": ""
+  },
+  "plans/proofs/035-mechanical-routes/prove.mjs": {
+    "mtime": 1785146930.7848575,
+    "ast_hash": "842a4e32f375c63a896b92fe9e997d6b",
+    "semantic_hash": ""
+  },
+  "plans/proofs/035-mechanical-routes/route-map.d.ts": {
+    "mtime": 1785150029.2101898,
+    "ast_hash": "82db2bb95588c81f69b3804f689b9b12",
+    "semantic_hash": ""
+  },
+  "plans/proofs/035-mechanical-routes/src/routes/(authenticated)/authenticated.layout.vue": {
+    "mtime": 1785146741.687493,
+    "ast_hash": "c21c69bde476e3e18bdf219e6c06803a",
+    "semantic_hash": ""
+  },
+  "plans/proofs/035-mechanical-routes/src/routes/(authenticated)/organizations/[organizationId]/users/[userId]/detail.route.vue": {
+    "mtime": 1785146741.6893382,
+    "ast_hash": "92bbb327b366c7abe4db86bc163f7993",
+    "semantic_hash": ""
+  },
+  "plans/proofs/035-mechanical-routes/src/routes/(authenticated)/settings/roles/[roleId]/detail.route.vue": {
+    "mtime": 1785146741.6885986,
+    "ast_hash": "c21c69bde476e3e18bdf219e6c06803a",
+    "semantic_hash": ""
+  },
+  "plans/proofs/035-mechanical-routes/src/routes/(authenticated)/settings/roles/[roleId]/detail/permissions/index.route.vue": {
+    "mtime": 1785146741.6889095,
+    "ast_hash": "d1349f408e993302bce8e8c9cc0efc11",
+    "semantic_hash": ""
+  },
+  "plans/proofs/035-mechanical-routes/src/routes/(authenticated)/settings/roles/[roleId]/edit.route.vue": {
+    "mtime": 1785146741.6883283,
+    "ast_hash": "72dfa6b549d094bc31bfcf6a7c3165be",
+    "semantic_hash": ""
+  },
+  "plans/proofs/035-mechanical-routes/src/routes/(authenticated)/settings/roles/index.route.vue": {
+    "mtime": 1785146741.6878886,
+    "ast_hash": "7b71e3f04f51e7433ef19a454f388b02",
+    "semantic_hash": ""
+  },
+  "plans/proofs/035-mechanical-routes/src/routes/(authenticated)/settings/roles/new.route.vue": {
+    "mtime": 1785146741.6880345,
+    "ast_hash": "d08ddd4f8a33f9bcdec0f691dc740c3a",
+    "semantic_hash": ""
+  },
+  "plans/proofs/035-mechanical-routes/src/routes/not-found.route.vue": {
+    "mtime": 1785146741.689665,
+    "ast_hash": "f131f2396ba3b5c0e6b62187ab44f71e",
+    "semantic_hash": ""
+  },
+  "plans/035-prove-mechanical-file-routes.md": {
+    "mtime": 1785146510.0593948,
+    "ast_hash": "4ac4fcd4703a53e7e84f9570206182ba",
+    "semantic_hash": ""
+  },
+  "plans/036-make-files-and-resource-actions-route-truth.md": {
+    "mtime": 1785146510.0598562,
+    "ast_hash": "e4ea41a630c95b432355109d6899f468",
     "semantic_hash": ""
   }
 }

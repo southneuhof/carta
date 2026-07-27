@@ -10,7 +10,7 @@ import { computed, onBeforeUnmount, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import type { DetailProps, RecordIdentity } from '../../contracts'
-import type { DetailSurfaceArguments, Resource } from '../../resources/defineResource'
+import type { DetailCapableResource, DetailSurfaceArguments, ResourceAction } from '../../resources/defineResource'
 import { useResourceRuntime } from '../../resources/runtime'
 import Detail from '../core/Detail.vue'
 import ViewControls from './ViewControls.vue'
@@ -21,13 +21,10 @@ type DetailViewProps = {
   description?: string
 } & (
   | {
-      resource: Resource<
-        Record<string, unknown>,
-        Record<string, unknown>,
-        Record<string, unknown>,
-        Record<string, unknown>,
-        RecordIdentity
-      >
+      resource: DetailCapableResource<Record<string, unknown>, RecordIdentity> & {
+        actions: Partial<Record<'list' | 'delete', ResourceAction<RecordIdentity>>>
+        remove?: (id: RecordIdentity) => Promise<unknown>
+      }
       id: RecordIdentity
       detail?: never
       controls?: never
@@ -48,6 +45,7 @@ async function remove() {
   if (!props.resource || props.id === undefined || deletePending.value) return
   deletePending.value = true
   try {
+    if (!props.resource.remove) return
     await props.resource.remove(props.id)
     toast.success('Data berhasil dihapus.')
     const list = props.resource.actions.list?.to

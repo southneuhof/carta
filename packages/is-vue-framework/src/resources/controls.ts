@@ -14,7 +14,7 @@
  */
 import type { AccessAdapter, RecordIdentity, ResourceOperation } from '../contracts'
 import type { ViewControl } from '../components/views/controls'
-import type { ResourceAction, ResourceActionKey, ResourceCapabilities } from './defineResource'
+import type { ResourceAction, ResourceActionKey } from './defineResource'
 import type { RouteLocationRaw } from 'vue-router'
 
 export type StandardControlName = Extract<ResourceOperation, ResourceActionKey>
@@ -37,7 +37,6 @@ export interface ControlsArguments {
 
 export interface StandardControlOptions<TIdentity extends RecordIdentity = RecordIdentity> {
   key: string
-  capabilities: ResourceCapabilities
   actions: Partial<Record<StandardControlName, ResourceAction<TIdentity>>>
   surface: 'list' | 'detail'
   /** Present on the detail surface, where controls are record-scoped. */
@@ -67,7 +66,7 @@ function allowed<TIdentity extends RecordIdentity>(options: AccessInput<TIdentit
 export function standardControls<TIdentity extends RecordIdentity>(
   options: StandardControlOptions<TIdentity>,
 ): ViewControl[] {
-  const { capabilities, actions } = options
+  const { actions } = options
   const overrides = options.controls?.overrides ?? {}
   const controls: ViewControl[] = []
 
@@ -84,7 +83,7 @@ export function standardControls<TIdentity extends RecordIdentity>(
 
   if (options.surface === 'list') {
     const create = actions.create
-    if (capabilities.create && create?.to && typeof create.to !== 'function' && allowed(options, 'create')) {
+    if (create?.to && typeof create.to !== 'function' && allowed(options, 'create')) {
       add('create', { to: create.to, placement: 'primary' })
     }
   }
@@ -95,10 +94,10 @@ export function standardControls<TIdentity extends RecordIdentity>(
     if (list?.to && typeof list.to !== 'function' && allowed(options, 'list')) {
       add('list', { to: list.to, placement: 'secondary' })
     }
-    if (capabilities.update && update?.to && options.id !== undefined && allowed(options, 'update')) {
+    if (update?.to && options.id !== undefined && allowed(options, 'update')) {
       add('update', { to: typeof update.to === 'function' ? update.to(options.id) : update.to, placement: 'primary' })
     }
-    if (capabilities.delete && actions.delete && options.onDelete && allowed(options, 'delete')) {
+    if (actions.delete && options.onDelete && allowed(options, 'delete')) {
       add('delete', { onSelect: options.onDelete, placement: 'primary' })
     }
   }

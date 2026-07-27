@@ -279,6 +279,43 @@ target plus permission; navigation keeps entrypoints only. Dynamic params, route
   permission explicitly; named targets expose their name structurally for direct-entry guard lookup.
   Child collections own their actions; parent details own only tab label/order/placement.
 
+## Derived resource types and scalable operations (added 2026-07-27)
+
+Planned against commit `17e7ed9` after Plans 035–036 completed. Maintainer chose a backend-neutral
+core with optional Hono SDK tooling: Hono-backed applications infer resource record/request types
+from exact RPC endpoints; bring-your-own backends may define types and `ResourceOperations`
+manually. Complex operations remain separate from Vue and split by cohesive use case; resource
+definition files stay declarative. Application resource and operation files live inside their
+semantically owning route subtree for direct human navigation.
+
+| Plan | Title | Priority | Effort | Depends on | Status |
+|---|---|---|---|---|---|
+| [037](037-add-optional-hono-resource-tools.md) | Make resource behavior type-exact without runtime route reflection | P1 | L | 036 | DONE |
+| [038](038-split-resource-definitions-and-derive-types.md) | Colocate route resources, split operations, and derive types | P1 | L | 037 | TODO |
+
+### Resource-type dependency notes
+
+- 037 adds backend-neutral exact-key operation/resource types plus an explicit
+  `@southneuhof/is-vue-framework/hono` subpath. Hono remains an optional peer and is not exported
+  from the package root. Callers pass the typed `rpc.<resource>` parent directly. Its mapped public
+  type exposes only real operations for autocomplete and build errors; its ordinary JavaScript
+  object contains universal wrappers and is never enumerated as capability truth.
+- 037 removes `ResourceCapabilities`. Existing `actions` remain runtime UI target, permission, and
+  visibility truth; they never select transport operations. The API remains runtime enforcement.
+  This deliberately trades runtime-exact enumerable operation keys for zero codegen, zero runtime
+  discovery, no maintained capability metadata, and the concise parent-route call.
+- 038 consumes the proven adapter, deletes broad RPC casts and handwritten transport mirrors, and
+  colocates declarative resource files plus cohesive operation files at their nearest owning route
+  subtree. It also makes the web package build run `vue-tsc` before Vite so invalid agent-authored
+  transport/resource wiring cannot produce a successful build. No central application resource
+  folder or route-folder barrel remains.
+- UI-local optimistic/dialog/toast state remains in Vue. RPC calls, multi-request orchestration, and
+  reusable workflows remain in operation files.
+- Client-created projection types remain allowed when genuinely new. Existing API shapes must be
+  derived, not retyped.
+- [Hono RPC runtime dead ends](NOTES-hono-rpc-runtime-dead-ends.md) records rejected approaches and
+  the accepted type-exact/action-exact resolution.
+
 ## Dependency and delivery notes
 
 - **Full-scope sequential phases (decided 2026-07-26)**: plans 001-006 are executed at full scope in order, each with its own complete verification gates. A walking-skeleton re-scoping was considered and reverted: it violated the plan-writing rules (self-containment, machine-checkable boundaries), and the framework is not co-developed with an app, so longer wall-clock time before the first slice is acceptable. Early-validation duty falls on plan 000's compile-time contract tests and plan 006's ordinary-resource fixture.
@@ -320,7 +357,8 @@ flowchart LR
 - `load` is universal: it may return local, synchronous, cached, or remote asynchronous data. `data` and `load` are mutually exclusive.
 - TanStack Query is internal. Public APIs expose `load`, `submit`, query namespace/local-state escape hatches, and semantic invalidation—not raw query keys/options.
 - Ordinary RPC resources derive calls and Zod validation. Explicit operations, read/write hooks, schemas, query ownership, and controls are escape hatches.
-- Standard controls are inferred from behavior + route target + UI access; unavailable or denied controls disappear.
+- For Hono resources, TypeScript route keys are the operation contract; the runtime proxy-derived object is deliberately universal and must never be enumerated as capability metadata.
+- Resource actions own standard-control visibility and navigation, UI access may further deny them, and the API remains authoritative at execution time. Runtime `ResourceCapabilities` are not a second source of truth.
 - Dynamic field behavior is first-class: a field's form projection may carry a `behavior` block of pure function options (`visible`/`disabled`/`props`/`derived`/`resetWhen`) evaluated as computeds over the reactive draft with automatic dependency tracking — no manual depends-on lists (plan 002). Form owns the reactive wiring (plan 004); hidden fields are excluded from submission and validation runs on the filtered draft (plan 003). Behavior decides presence, schemas decide validity.
 - Naming: `renderer` is the field-config key for widget selection on every surface (`table.renderer`/`detail.renderer`/`form.renderer`) — never `type` (value types belong to schemas) or `control`. The word "control(s)" refers exclusively to action controls (plans 005-006).
 - Vocabulary rule: public API names must come from, in order of preference, (a) the legacy framework where semantics genuinely match (`searchParameters`, `initialData`, `fields`, `load`, `submit`), (b) Vue/HTML/TypeScript standard vocabulary (`props`, `namespace`, `visible`, `disabled`, `renderer`, `id`), or (c) plain English (`behavior`, `derived`). Coined compounds and framework-specific nouns are rejected in review unless no existing word is accurate; domain words (`parent`, `role`, `mapping`) never appear in framework APIs. Reusing a legacy name with changed semantics requires a loud migration-guide callout.
@@ -363,6 +401,7 @@ The 2026-07-22 planning baseline had green framework tests/types, green web test
 
 - Put CRUD chrome in Table/Detail/Form: rejected because it destroys primitive reusability; plan 005 owns chrome.
 - Require explicit repeated API calls for every resource: rejected for ordinary RPC resources; plan 006 derives them while keeping explicit overrides.
+- Reflect a Hono parent proxy into runtime-exact enumerable operation keys: rejected because route keys are erased at runtime. Plan 037 accepts a universal runtime wrapper with an exact mapped TypeScript surface; actions own UI visibility and the API enforces attempted calls.
 - Expose TanStack Query in resource definitions: rejected to avoid infrastructure lock-in and a second public vocabulary.
 - Preserve query-string screen orchestration as the routing model: rejected; only temporary redirects remain.
 - Import API entity modules directly for validation: rejected if they carry server/database runtime dependencies; plan 003 requires a client-safe boundary. **Amended 2026-07-27**: plan 021 removed those runtime dependencies (`node:crypto`, and the Hono-carrying `@southneuhof/sprindle/model` subpath), so the condition attached to this rejection no longer holds — an entity module now *is* a client-safe boundary in plan 003's sense, and `roles` imports its schemas directly. What remains is a bundle-size question, not a correctness one; see plan 021's Measurement section.

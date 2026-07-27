@@ -227,17 +227,8 @@ const compositeRowLink = userRoles.rowLink?.({
 void compositeRowLink
 
 /* Custom controls must be actionable, and the standard set is patchable. */
-void userRoles.table({
-  controls: {
-    labels: { create: 'Tugaskan' },
-    overrides: { create: false },
-    extra: [{ key: 'export', label: 'Excel', onSelect: () => undefined }],
-  },
-})
-userRoles.table({
-  // @ts-expect-error a control with neither a target nor a handler is unrepresentable
-  controls: { extra: [{ key: 'export', label: 'Excel' }] },
-})
+// @ts-expect-error resource without typed list operation exposes no table surface
+userRoles.table()
 void userRoles.detail({ id: { userId: 'u-1', roleId: 'r-1' }, onDelete: () => undefined })
 
 /* A composite resource never accepts a scalar identity. */
@@ -254,6 +245,7 @@ const derivedIdentity = defineResource({
   key: 'derivedUserRoles',
   fields: userRoleFields,
   identity: (record: UserRole) => `${record.userId}:${record.roleId}`,
+  operations: { detail: () => ({ userId: 'u-1', roleId: 'r-1', assignedAt: 'now' }) },
   actions: { detail: { permission: 'user-roles.detail', to: { name: 'user-roles-detail', params: (id) => ({ id }) } } },
 })
 const derivedIdentityValue: string = derivedIdentity.identity({ userId: 'u-1', roleId: 'r-1', assignedAt: 'now' })

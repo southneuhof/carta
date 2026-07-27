@@ -1,10 +1,17 @@
-export { defineResource } from './defineResource'
+export { defineResource, defineResourceOperations } from './defineResource'
 export type {
   Resource,
   ResourceDefinition,
   ResourceOperations,
-  ResourceCapabilities,
+  ResourceOperationKey,
+  ResourceOperationKeys,
+  ResourceRecordOf,
+  ResourceQueryOf,
+  ResourceCreateOf,
+  ResourceUpdateOf,
+  ResourceIdentityOf,
   ResourceAction,
+  ResourceActionsDefinition,
   ResourceActionDefinition,
   ResourceActionKey,
   ResourceActionTarget,
@@ -16,6 +23,9 @@ export type {
   TableSurfaceArguments,
   DetailSurface,
   DetailSurfaceArguments,
+  ResourceBase,
+  ListCapableResource,
+  DetailCapableResource,
 } from './defineResource'
 export { resourceActionForRoute, resetResourceActionRegistry } from './defineResource'
 

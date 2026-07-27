@@ -9,7 +9,7 @@
  */
 import { computed } from 'vue'
 import type { RecordIdentity, TableProps } from '../../contracts'
-import type { Resource, TableSurfaceArguments } from '../../resources/defineResource'
+import type { ListCapableResource, TableSurfaceArguments } from '../../resources/defineResource'
 import Table from '../core/Table.vue'
 import ViewControls from './ViewControls.vue'
 import { controlsAt, type ViewControl } from './controls'
@@ -19,7 +19,7 @@ type ListViewProps = {
   description?: string
 } & (
   | {
-      resource: Resource<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, RecordIdentity>
+      resource: ListCapableResource<Record<string, unknown>, Record<string, unknown>>
       table?: never
       controls?: never
       tableOptions?: TableSurfaceArguments

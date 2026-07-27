@@ -212,9 +212,10 @@ describe('defineResource factories', () => {
   it('rejects operations the resource does not define', async () => {
     const readOnly = defineResource<Role>({ key: 'roles', fields, operations: { list: async () => ({ data: records }) } })
 
-    expect(readOnly.capabilities).toEqual({ list: true, detail: false, create: false, update: false, delete: false })
-    await expect(readOnly.form().submit({})).rejects.toThrow('has no create behavior')
-    await expect(readOnly.remove('1')).rejects.toThrow('has no delete behavior')
+    expect(readOnly).not.toHaveProperty('capabilities')
+    const physical = readOnly as unknown as { form: () => { submit: (input: object) => Promise<unknown> }; remove: (id: string) => Promise<unknown> }
+    await expect(physical.form().submit({})).rejects.toThrow('has no create behavior')
+    await expect(physical.remove('1')).rejects.toThrow('has no delete behavior')
   })
 })
 
@@ -315,8 +316,6 @@ describe('standard controls, projected by the surface factories', () => {
       operations: { list: async () => ({ data: records }) },
       actions: {
         list: { permission: 'roles.list', to: { name: 'roles-list' } },
-        create: { permission: 'roles.create', to: { name: 'test-route' } },
-        update: { permission: 'roles.update', to: { name: 'roles-edit', params: (id) => ({ id }) } },
       },
     })
 

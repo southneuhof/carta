@@ -150,6 +150,31 @@ A resource combines:
 Standard operations are inferred from the configured RPC integration when
 available. Resources without RPC provide their loaders and submitters manually.
 
+#### Exact transport operations
+
+For Hono applications, transport availability is determined at **build-time**
+from the typed `hc()` route, through the optional
+`@southneuhof/is-vue-framework/hono` entry point:
+
+```ts
+const operations = createHonoResourceOperations(rpc.incidents)
+const incidents = defineResource({ key: 'incidents', fields: incidentFields, operations })
+```
+
+The public operation keys and resource surfaces are exact: a route without
+`create` has no create action or create-form overload. This is deliberately not
+runtime reflection. Hono client proxies and the adapter expose conventional
+physical wrappers, so `Object.keys(operations)`, broad annotations, `any`, and
+casts must never be used to infer capabilities. Plain object spread and explicit
+operation overrides are supported.
+
+Actions are the runtime UI/navigation/permission truth; they control what a
+surface offers but do not create transport operations. API routes and API
+authorization are runtime enforcement. A manual or external backend supplies a
+narrow `ResourceOperations` object (or `defineResourceOperations<...>()(...)`
+when it needs compile-only record metadata). Plan 038 applies this Hono API to
+the web app and makes the web build type-checking.
+
 ```ts
 export const incidents = defineResource({
   key: "incidents",

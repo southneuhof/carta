@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import * as framework from '../index'
 
 /**
@@ -17,6 +19,8 @@ const removedExports = [
   'useCRUDOperations',
   'defaultCRUDListOnExport',
   'defaultCRUDDetailOnExport',
+  'ResourceCapabilities',
+  'createHonoResourceOperations',
 ]
 
 const currentExports = [
@@ -55,5 +59,12 @@ describe('public API surface', () => {
     const runtime = await import('../runtime')
 
     expect(Object.keys(runtime)).not.toContain('FrameworkCRUDRuntime')
+  })
+
+  it('keeps Hono integration explicit and out of the root entry point', async () => {
+    const hono = await import('../hono')
+
+    expect(hono).toHaveProperty('createHonoResourceOperations')
+    expect(readFileSync(resolve(process.cwd(), 'src/index.ts'), 'utf8')).not.toMatch(/from ['"]hono|export .*hono/i)
   })
 })

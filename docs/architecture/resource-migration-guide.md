@@ -9,6 +9,64 @@ There are no compatibility wrappers: `@southneuhof/is-vue-framework` 2.0 removed
 the legacy CRUD surface outright. Translate each screen by hand using the tables
 below.
 
+## Transport, UI, and runtime truth
+
+Hono route availability is a **build-time** TypeScript property. Use the explicit
+optional integration, never the root package, and let the typed route decide the
+operations a resource may expose:
+
+```ts
+import { defineResource } from '@southneuhof/is-vue-framework'
+import { createHonoResourceOperations, type HonoRequestOf } from '@southneuhof/is-vue-framework/hono'
+
+const roleOperations = createHonoResourceOperations(rpc.roles)
+const roles = defineResource({ key: 'roles', fields: roleFields, operations: roleOperations })
+roles.table()
+roles.form()
+roles.form({ id: 'role-1' })
+```
+
+For a partial route, TypeScript rejects absent behavior; it is not a runtime
+capability check:
+
+```ts
+const userOperations = createHonoResourceOperations(rpc.users)
+// @ts-expect-error the typed users route has no create endpoint
+userOperations.create
+```
+
+`actions` are separate runtime UI truth: targets, permissions, and `visible`
+decide controls, but actions never materialize an operation. Hidden or
+programmatic operations need no action. The API and its authorization remain
+runtime enforcement. Do not use `Object.keys`, truthiness, casts to `any`, or a
+broad `ResourceOperations` annotation as capability detection; Hono clients are
+universal proxies and the adapter's physical wrappers are intentionally not
+transport metadata.
+
+Plain spread and explicit overrides are supported:
+
+```ts
+const roles = defineResource({
+  key: 'roles', fields: roleFields,
+  operations: { ...createHonoResourceOperations(rpc.roles), list: loadCachedRoles },
+})
+```
+
+A bring-your-own backend stays narrow and backend-neutral. If its record/input
+types cannot be inferred structurally, use the compile-only helper (it adds no
+runtime keys):
+
+```ts
+const customers = defineResourceOperations<Customer, {}, CustomerCreate>()({
+  list: async () => ({ data: await externalClient.customers() }),
+  create: (input) => externalClient.createCustomer(input),
+})
+```
+
+`HonoRequestOf` retains the exact wire request; the adapter-facing query accepts
+serializable UI scalars and converts them to strings. Plan 038 moves the web app
+to this API and makes its build type-checking.
+
 ## What replaced what
 
 | Retired | Replacement |
@@ -65,9 +123,9 @@ export const roles = defineResource<Role, RoleQuery, RoleDraft, RoleDraft>({
 })
 ```
 
-Only the operations the RPC route exposes are derived. `users` has no create or
-delete route, so `users.capabilities.create` is false and the create control
-never renders — no `actions: { create: false }` needed.
+Only typed operations can be declared as actions. A missing `users.create`
+operation cannot produce a create action or create form; controls are instead
+derived from the declared action, target, permission, visibility, and access.
 
 ## 2. Give every screen a route file
 

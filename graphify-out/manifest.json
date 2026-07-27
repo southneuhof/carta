@@ -840,7 +840,7 @@
     "semantic_hash": "c4a6ac05baddc3ef58be75f492f8a72f"
   },
   "apps/web/src/route-map.d.ts": {
-    "mtime": 1785150000.9366376,
+    "mtime": 1785150126.9437354,
     "ast_hash": "a3352e6c11c4a38ad83f6da730bdce96",
     "semantic_hash": ""
   },
@@ -905,8 +905,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/routes/(authenticated)/settings/users/index.route.vue": {
-    "mtime": 1785140935.389222,
-    "ast_hash": "e55014b64a1bfebe22827276bc2553b6",
+    "mtime": 1785150510.1652,
+    "ast_hash": "937bf02039cfb8a44eb02b1a067f1e49",
     "semantic_hash": ""
   },
   "apps/web/src/routes/(public)/auth/login/index.route.spec.ts": {
@@ -1145,8 +1145,8 @@
     "semantic_hash": "7a226a522c70af6a829dcebaad119dc2"
   },
   "packages/is-vue-framework/package.json": {
-    "mtime": 1785083207.3885913,
-    "ast_hash": "4b444a6c44fa5c5079e73241e4f4b1b6",
+    "mtime": 1785159083.9950287,
+    "ast_hash": "95f3de431168e306acdca1272169b998",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/__tests__/service-decoupling.spec.ts": {
@@ -2690,8 +2690,8 @@
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/__tests__/public-api.spec.ts": {
-    "mtime": 1785104009.3760045,
-    "ast_hash": "ecad7e8dbf8007f6e072dea26eafca65",
+    "mtime": 1785159963.495661,
+    "ast_hash": "a86e5505ba8fb140e9b9e943081466d8",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/adapters/__tests__/projectAdapters.spec.ts": {
@@ -2750,8 +2750,8 @@
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/views/DetailView.vue": {
-    "mtime": 1785147066.4540722,
-    "ast_hash": "a83fa8e8ef44086c940b0da27888963f",
+    "mtime": 1785158928.3997493,
+    "ast_hash": "7ee669a4756d3c3bff449e3af8c23cb8",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/views/FormView.vue": {
@@ -2760,8 +2760,8 @@
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/views/ListView.vue": {
-    "mtime": 1785133652.256367,
-    "ast_hash": "416efd19a8eae3cd03e24771f52d4dd2",
+    "mtime": 1785158928.3993025,
+    "ast_hash": "7031e0fc36e1a6fa912484dcab8ae776",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/views/ViewControls.vue": {
@@ -2790,8 +2790,8 @@
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/contracts/__type-tests__/contracts.type-test.ts": {
-    "mtime": 1785147090.9570997,
-    "ast_hash": "8ea5c7220cedf3685d53b650dfab3a5c",
+    "mtime": 1785159872.2543466,
+    "ast_hash": "c4ef9bd00a237c22e6787754aa2861be",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/contracts/__type-tests__/fields.type-test.ts": {
@@ -2940,23 +2940,23 @@
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/resources/__tests__/resources.spec.ts": {
-    "mtime": 1785149911.5068672,
-    "ast_hash": "56345bed15cebcc3cf9b8f13ac9b6fc4",
+    "mtime": 1785159028.2466648,
+    "ast_hash": "5f28314672d7d3f60a9ec55918c74886",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/resources/controls.ts": {
-    "mtime": 1785147066.4534843,
-    "ast_hash": "04a55f528e257ddd95187c3dcd92dbd9",
+    "mtime": 1785158910.1409895,
+    "ast_hash": "5ddea1cdd18ecb0b2adad96af3b227d9",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/resources/defineResource.ts": {
-    "mtime": 1785147953.6370418,
-    "ast_hash": "d47b91cac90f8fbd76fcc43bb6e2329b",
+    "mtime": 1785159861.9018784,
+    "ast_hash": "0932eaf60f6de17e29f9be8bd56f732b",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/resources/index.ts": {
-    "mtime": 1785147066.455054,
-    "ast_hash": "c4ed31a35b1eeece73f944f7644f462f",
+    "mtime": 1785159769.5866494,
+    "ast_hash": "8cb213d62dfa69a97b2d04788b3b07d1",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/resources/runtime.ts": {
@@ -3080,13 +3080,13 @@
     "semantic_hash": ""
   },
   "docs/architecture/resource-migration-guide.md": {
-    "mtime": 1785149889.1682243,
-    "ast_hash": "fb5d2a2a6322a4082de213172efcbdc8",
+    "mtime": 1785160046.6777527,
+    "ast_hash": "678c6e50e0476df6be440faab20bf7c8",
     "semantic_hash": ""
   },
   "docs/architecture/web-application-architecture.md": {
-    "mtime": 1785150049.441142,
-    "ast_hash": "56f2168048e1f5644bf02346de8a604f",
+    "mtime": 1785159997.4596624,
+    "ast_hash": "09236ea1aa708daae60b7fae153c4f90",
     "semantic_hash": ""
   },
   "packages/apostle/CHANGELOG.md": {
@@ -3215,8 +3215,8 @@
     "semantic_hash": ""
   },
   "plans/README.md": {
-    "mtime": 1785150049.4429207,
-    "ast_hash": "85aa61b385599944370a5f3ffb39096a",
+    "mtime": 1785158532.7712116,
+    "ast_hash": "6d6f8ec49e5b7bf326fe3509f15df57a",
     "semantic_hash": ""
   },
   "pnpm-workspace.yaml": {
@@ -3875,8 +3875,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/routes/(authenticated)/settings/roles/[roleId]/detail.route.vue": {
-    "mtime": 1785148032.979024,
-    "ast_hash": "4d709046f841f58e6f0e66600d3505a8",
+    "mtime": 1785150253.5501494,
+    "ast_hash": "b7a034037d5ae518cca4bf3d2cad2fe2",
     "semantic_hash": ""
   },
   "apps/web/src/routes/(authenticated)/settings/roles/[roleId]/detail/permissions/CopyPermissionsDialog.vue": {
@@ -3895,8 +3895,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/routes/(authenticated)/settings/users/[userId]/detail.route.vue": {
-    "mtime": 1785148032.9795413,
-    "ast_hash": "c1ea6843c285f0d4d659dabc4095e509",
+    "mtime": 1785150493.324979,
+    "ast_hash": "e9d33110ab974f9ad464e740c60d1a7c",
     "semantic_hash": ""
   },
   "apps/web/src/routes/(authenticated)/settings/users/[userId]/detail/roles/index.route.spec.ts": {
@@ -3987,6 +3987,41 @@
   "plans/036-make-files-and-resource-actions-route-truth.md": {
     "mtime": 1785146510.0598562,
     "ast_hash": "e4ea41a630c95b432355109d6899f468",
+    "semantic_hash": ""
+  },
+  "packages/is-vue-framework/src/hono/__tests__/resource.spec.ts": {
+    "mtime": 1785159304.4158056,
+    "ast_hash": "66c8aa02d8b93f13330fe02d79a68b7a",
+    "semantic_hash": ""
+  },
+  "packages/is-vue-framework/src/hono/__type-tests__/resource.type-test.ts": {
+    "mtime": 1785159866.296749,
+    "ast_hash": "a2d93b157f291f67b4a42efa83e1c75e",
+    "semantic_hash": ""
+  },
+  "packages/is-vue-framework/src/hono/index.ts": {
+    "mtime": 1785159083.9959247,
+    "ast_hash": "bb1cc4780c59582ea8bbf642bd13861c",
+    "semantic_hash": ""
+  },
+  "packages/is-vue-framework/src/hono/resource.ts": {
+    "mtime": 1785160039.429525,
+    "ast_hash": "e1a863d228cde19674963e30976761c6",
+    "semantic_hash": ""
+  },
+  "plans/037-add-optional-hono-resource-tools.md": {
+    "mtime": 1785158403.0092146,
+    "ast_hash": "350a11b27f709e9ac909723100defc08",
+    "semantic_hash": ""
+  },
+  "plans/038-split-resource-definitions-and-derive-types.md": {
+    "mtime": 1785158532.7719474,
+    "ast_hash": "1bf055318d638baf4cc6fdae9cc51310",
+    "semantic_hash": ""
+  },
+  "plans/NOTES-hono-rpc-runtime-dead-ends.md": {
+    "mtime": 1785158288.658621,
+    "ast_hash": "d54eab40e2bef52d02f3a75b40695b7f",
     "semantic_hash": ""
   }
 }

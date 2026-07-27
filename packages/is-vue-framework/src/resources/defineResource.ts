@@ -70,8 +70,79 @@ export interface ResourceOperations<
   create?: (input: TCreate) => MaybePromise<unknown>
   update?: (id: TIdentity, input: TUpdate) => MaybePromise<unknown>
   delete?: (id: TIdentity) => MaybePromise<unknown>
-  /** Declared so `TRecord` stays meaningful for consumers of this interface. */
+  /** Type-only metadata; no runtime key is created. */
   readonly __record?: TRecord
+  readonly __query?: TQuery
+  readonly __create?: TCreate
+  readonly __update?: TUpdate
+  readonly __identity?: TIdentity
+}
+
+export type ResourceOperationKey = 'list' | 'detail' | 'create' | 'update' | 'delete'
+export type ResourceOperationKeys<TOperations> = Extract<keyof TOperations, ResourceOperationKey>
+type ResourceOperationContract<
+  TRecord extends object = Record<string, unknown>,
+  TQuery extends object = Record<string, unknown>,
+  TCreate extends object = Record<string, unknown>,
+  TUpdate extends object = TCreate,
+  TIdentity extends RecordIdentity = RecordIdentityValue,
+> = Pick<ResourceOperations<TRecord, TQuery, TCreate, TUpdate, TIdentity>, ResourceOperationKey>
+type ResourceOperationMetadata<
+  TRecord extends object,
+  TQuery extends object,
+  TCreate extends object,
+  TUpdate extends object,
+  TIdentity extends RecordIdentity,
+> = {
+  /** Compile-time only; this identity helper adds no JavaScript properties. */
+  readonly __record: TRecord
+  readonly __query: TQuery
+  readonly __create: TCreate
+  readonly __update: TUpdate
+  readonly __identity: TIdentity
+}
+type ResourceMetadata<T> = T extends { readonly __record?: infer TValue } ? TValue : never
+type ResourceQueryMetadata<T> = T extends { readonly __query?: infer TValue } ? TValue : never
+type ResourceCreateMetadata<T> = T extends { readonly __create?: infer TValue } ? TValue : never
+type ResourceUpdateMetadata<T> = T extends { readonly __update?: infer TValue } ? TValue : never
+type ResourceIdentityMetadata<T> = T extends { readonly __identity?: infer TValue } ? TValue : never
+type OperationReturn<T, TKey extends ResourceOperationKey> = T extends Record<TKey, infer TOperation>
+  ? TOperation extends (...args: infer _TArgs) => infer TResult ? Awaited<TResult> : never
+  : never
+type OperationArgument<T, TKey extends ResourceOperationKey, TIndex extends number> = T extends Record<TKey, infer TOperation>
+  ? TOperation extends (...args: infer TArgs) => unknown ? TArgs[TIndex] : never
+  : never
+type RecordFromList<T> = OperationReturn<T, 'list'> extends CollectionResult<infer TValue> ? TValue : never
+type RecordFromDetail<T> = Exclude<OperationReturn<T, 'detail'>, undefined>
+
+/** Backend-neutral operation-contract extractors. */
+export type ResourceRecordOf<TOperations> = ResourceMetadata<TOperations> extends object
+  ? ResourceMetadata<TOperations>
+  : RecordFromList<TOperations> extends object ? RecordFromList<TOperations> : RecordFromDetail<TOperations> extends object ? RecordFromDetail<TOperations> : never
+export type ResourceQueryOf<TOperations> = ResourceQueryMetadata<TOperations> extends object
+  ? ResourceQueryMetadata<TOperations>
+  : OperationArgument<TOperations, 'list', 0> extends CollectionLoadContext<infer TValue> ? TValue : never
+export type ResourceCreateOf<TOperations> = ResourceCreateMetadata<TOperations> extends object ? ResourceCreateMetadata<TOperations> : OperationArgument<TOperations, 'create', 0> extends object ? OperationArgument<TOperations, 'create', 0> : never
+export type ResourceUpdateOf<TOperations> = ResourceUpdateMetadata<TOperations> extends object ? ResourceUpdateMetadata<TOperations> : OperationArgument<TOperations, 'update', 1> extends object ? OperationArgument<TOperations, 'update', 1> : never
+export type ResourceIdentityOf<TOperations> = ResourceIdentityMetadata<TOperations> extends RecordIdentity
+  ? ResourceIdentityMetadata<TOperations>
+  : OperationArgument<TOperations, 'update', 0> extends RecordIdentity ? OperationArgument<TOperations, 'update', 0> : OperationArgument<TOperations, 'delete', 0> extends RecordIdentity ? OperationArgument<TOperations, 'delete', 0> : never
+
+/**
+ * Keeps a narrow manual operation object while associating backend-neutral
+ * record/input metadata at compile time only. It returns the original object.
+ */
+export function defineResourceOperations<
+  TRecord extends object,
+  TQuery extends object = Record<string, never>,
+  TCreate extends object = TRecord,
+  TUpdate extends object = TCreate,
+  TIdentity extends RecordIdentity = RecordIdentityValue,
+>(): <const TOperations extends ResourceOperationContract<TRecord, TQuery, TCreate, TUpdate, TIdentity>>(
+  operations: TOperations,
+) => TOperations & ResourceOperationMetadata<TRecord, TQuery, TCreate, TUpdate, TIdentity>
+export function defineResourceOperations() {
+  return <TOperations extends object>(operations: TOperations) => operations
 }
 
 export interface ResourceSurfaceDefinition {
@@ -79,7 +150,7 @@ export interface ResourceSurfaceDefinition {
   fields?: readonly string[]
 }
 
-export type ResourceActionKey = 'list' | 'detail' | 'create' | 'update' | 'delete'
+export type ResourceActionKey = ResourceOperationKey
 export type ResourceActionTarget<TIdentity extends RecordIdentity = RecordIdentityValue> =
   | { name: string }
   | { name: string; params: (id: TIdentity) => Record<string, string | number> }
@@ -90,8 +161,11 @@ export interface ResourceActionDefinition<TIdentity extends RecordIdentity = Rec
   visible?: (context: { record?: Record<string, unknown>; access: AccessAdapter }) => boolean
 }
 
-export type ResourceActionsDefinition<TIdentity extends RecordIdentity = RecordIdentityValue> = Partial<
-  Record<ResourceActionKey, ResourceActionDefinition<TIdentity>>
+export type ResourceActionsDefinition<
+  TIdentity extends RecordIdentity = RecordIdentityValue,
+  TKey extends ResourceActionKey = ResourceActionKey,
+> = Partial<
+  Record<TKey, ResourceActionDefinition<TIdentity>>
 >
 
 export type NavigableResourceAction<TIdentity extends RecordIdentity = RecordIdentityValue> = ResourceAction<TIdentity> & {
@@ -145,25 +219,18 @@ export interface ResourceDefinition<
   TCreate extends object = Record<string, unknown>,
   TUpdate extends object = TCreate,
   TDeclaration extends IdentityDeclarationInput<TRecord> | undefined = undefined,
+  TOperations extends object = ResourceOperations<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>>,
 > {
   key: string
   fields: FieldCatalog<TRecord, TCreate>
   /** `['userId', 'roleId']` or `(record) => identity`; omitted means `record.id`. */
   identity?: TDeclaration
-  operations?: ResourceOperations<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>>
+  operations?: TOperations
   table?: ResourceSurfaceDefinition
   detail?: ResourceSurfaceDefinition
   form?: ResourceSurfaceDefinition & { initialData?: Partial<TCreate> }
   schemas?: ResourceSchemas<TRecord, TQuery, TCreate, TUpdate>
-  actions?: ResourceActionsDefinition<ResolvedIdentity<TRecord, TDeclaration>>
-}
-
-export interface ResourceCapabilities {
-  list: boolean
-  detail: boolean
-  create: boolean
-  update: boolean
-  delete: boolean
+  actions?: ResourceActionsDefinition<ResolvedIdentity<TRecord, TDeclaration>, ResourceOperationKeys<TOperations>>
 }
 
 /** Arguments for the collection surface: table data plus its control block. */
@@ -193,17 +260,17 @@ export interface DetailSurface<TRecord extends object> {
   controls: ViewControl[]
 }
 
-export interface Resource<
+export interface ResourceBase<
   TRecord extends object = Record<string, unknown>,
   TQuery extends object = Record<string, unknown>,
   TCreate extends object = Record<string, unknown>,
   TUpdate extends object = TCreate,
   TIdentity extends RecordIdentity = RecordIdentityValue,
+  TOperationKey extends ResourceActionKey = ResourceActionKey,
 > {
   key: string
   fields: FieldCatalog<TRecord, TCreate>
-  actions: Partial<Record<ResourceActionKey, ResourceAction<TIdentity>>>
-  capabilities: ResourceCapabilities
+  actions: Partial<Record<TOperationKey, ResourceAction<TIdentity>>>
   /** Record → identity, the direction the framework needs at runtime. */
   identity: (record: TRecord) => TIdentity
   /**
@@ -212,22 +279,50 @@ export interface Resource<
    * screen never hand-writes an identity into a URL.
    */
   rowLink?: (record: TRecord) => RouteLocationRaw
-  table: (args?: TableSurfaceArguments<TQuery>) => TableSurface<TRecord, TQuery>
-  detail: (args: DetailSurfaceArguments<TIdentity>) => DetailSurface<TRecord>
-  form: {
-    (): FormProps<TCreate>
-    (args: { initialData?: Partial<TCreate>; searchParameters?: Record<string, unknown> }): FormProps<TCreate>
-    (args: { id: TIdentity; initialData?: Partial<TUpdate>; searchParameters?: Record<string, unknown> }): FormProps<TUpdate>
-  }
-  remove: (id: TIdentity) => Promise<unknown>
   invalidate: (args?: { id?: TIdentity }) => Promise<void>
 }
+
+export type ListCapableResource<TRecord extends object = Record<string, unknown>, TQuery extends object = Record<string, unknown>> = {
+  table: (args?: TableSurfaceArguments<TQuery>) => TableSurface<TRecord, TQuery>
+}
+export type DetailCapableResource<TRecord extends object = Record<string, unknown>, TIdentity extends RecordIdentity = RecordIdentityValue> = {
+  detail: (args: DetailSurfaceArguments<TIdentity>) => DetailSurface<TRecord>
+}
+type CreateForm<TCreate extends object> = {
+  (): FormProps<TCreate>
+  (args: { initialData?: Partial<TCreate>; searchParameters?: Record<string, unknown> }): FormProps<TCreate>
+}
+type UpdateForm<TUpdate extends object, TIdentity extends RecordIdentity> = {
+  (args: { id: TIdentity; initialData?: Partial<TUpdate>; searchParameters?: Record<string, unknown> }): FormProps<TUpdate>
+}
+type FormCapability<TOperations, TCreate extends object, TUpdate extends object, TIdentity extends RecordIdentity> =
+  'create' extends ResourceOperationKeys<TOperations>
+    ? 'update' extends ResourceOperationKeys<TOperations>
+      ? { form: CreateForm<TCreate> & UpdateForm<TUpdate, TIdentity> }
+      : { form: CreateForm<TCreate> }
+    : 'update' extends ResourceOperationKeys<TOperations>
+      ? { form: UpdateForm<TUpdate, TIdentity> }
+      : {}
+
+/** Public resource surface follows literal operation keys, not runtime enumeration. */
+export type Resource<
+  TRecord extends object = Record<string, unknown>,
+  TQuery extends object = Record<string, unknown>,
+  TCreate extends object = Record<string, unknown>,
+  TUpdate extends object = TCreate,
+  TIdentity extends RecordIdentity = RecordIdentityValue,
+  TOperations extends object = ResourceOperations<TRecord, TQuery, TCreate, TUpdate, TIdentity>,
+> = ResourceBase<TRecord, TQuery, TCreate, TUpdate, TIdentity, ResourceOperationKeys<TOperations>>
+  & ('list' extends ResourceOperationKeys<TOperations> ? ListCapableResource<TRecord, TQuery> : {})
+  & ('detail' extends ResourceOperationKeys<TOperations> ? DetailCapableResource<TRecord, TIdentity> : {})
+  & FormCapability<TOperations, TCreate, TUpdate, TIdentity>
+  & ('delete' extends ResourceOperationKeys<TOperations> ? { remove: (id: TIdentity) => Promise<unknown> } : {})
 
 const operationNames = ['list', 'detail', 'create', 'update', 'delete'] as const
 
 function normalizeActions<TIdentity extends RecordIdentity>(
   resourceKey: string,
-  declarations: ResourceActionsDefinition<TIdentity> | undefined,
+  declarations: ResourceActionsDefinition<TIdentity, ResourceActionKey> | undefined,
 ): Partial<Record<ResourceActionKey, ResourceAction<TIdentity>>> {
   const actions: Partial<Record<ResourceActionKey, ResourceAction<TIdentity>>> = {}
   for (const key of operationNames) {
@@ -256,6 +351,30 @@ function memoize<TArgs, TResult>(create: (args: TArgs) => TResult) {
   }
 }
 
+/** Prefer this overload for inferred, narrow operation objects (including Hono). */
+export function defineResource<
+  const TOperations extends { readonly __record: object },
+  TRecord extends object = Extract<ResourceRecordOf<TOperations>, object>,
+  TQuery extends object = Extract<ResourceQueryOf<TOperations>, object>,
+  TCreate extends object = Extract<ResourceCreateOf<TOperations>, object>,
+  TUpdate extends object = Extract<ResourceUpdateOf<TOperations>, object>,
+  const TDeclaration extends IdentityDeclarationInput<TRecord> | undefined = undefined,
+>(
+  definition: ResourceDefinition<TRecord, TQuery, TCreate, TUpdate, TDeclaration, TOperations>,
+): Resource<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>, TOperations>
+
+/** Explicit generic spelling remains available for existing manual resources. */
+export function defineResource<
+  TRecord extends object = Record<string, unknown>,
+  TQuery extends object = Record<string, unknown>,
+  TCreate extends object = Record<string, unknown>,
+  TUpdate extends object = TCreate,
+  const TDeclaration extends IdentityDeclarationInput<TRecord> | undefined = undefined,
+  const TOperations extends ResourceOperationContract<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>> = ResourceOperations<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>>,
+>(
+  definition: ResourceDefinition<TRecord, TQuery, TCreate, TUpdate, TDeclaration, TOperations>,
+): Resource<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>, TOperations>
+
 /**
  * `TDeclaration` is inferred from the `identity` value — a `const` type
  * parameter keeps a key list's literal types — and resolves the identity shape
@@ -270,20 +389,13 @@ export function defineResource<
   TCreate extends object = Record<string, unknown>,
   TUpdate extends object = TCreate,
   const TDeclaration extends IdentityDeclarationInput<TRecord> | undefined = undefined,
+  const TOperations extends ResourceOperationContract<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>> = ResourceOperations<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>>,
 >(
-  definition: ResourceDefinition<TRecord, TQuery, TCreate, TUpdate, TDeclaration>,
-): Resource<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>> {
+  definition: ResourceDefinition<TRecord, TQuery, TCreate, TUpdate, TDeclaration, TOperations>,
+): Resource<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>, TOperations> {
   type TIdentity = ResolvedIdentity<TRecord, TDeclaration>
-  const operations = definition.operations ?? {}
-  const actions = normalizeActions(definition.key, definition.actions as ResourceActionsDefinition<TIdentity> | undefined)
-
-  const capabilities: ResourceCapabilities = {
-    list: Boolean(operations.list),
-    detail: Boolean(operations.detail),
-    create: Boolean(operations.create),
-    update: Boolean(operations.update),
-    delete: Boolean(operations.delete),
-  }
+  const operations: ResourceOperations<TRecord, TQuery, TCreate, TUpdate, TIdentity> = definition.operations ?? {}
+  const actions = normalizeActions(definition.key, definition.actions as ResourceActionsDefinition<TIdentity, ResourceActionKey> | undefined)
 
   const identity = resolveIdentityExtractor<TRecord, TIdentity>(definition.identity)
 
@@ -331,7 +443,7 @@ export function defineResource<
    */
   function controlContext() {
     const { adapters } = useResourceRuntime()
-    return { key: definition.key, capabilities, actions, access: adapters.access }
+    return { key: definition.key, actions, access: adapters.access }
   }
 
   function tableSurface(args?: TableSurfaceArguments<TQuery>): TableSurface<TRecord, TQuery> {
@@ -413,11 +525,13 @@ export function defineResource<
 
   const detailAction = actions.detail
 
-  return {
+  const resource: ResourceBase<TRecord, TQuery, TCreate, TUpdate, TIdentity, ResourceOperationKeys<TOperations>>
+    & ListCapableResource<TRecord, TQuery>
+    & DetailCapableResource<TRecord, TIdentity>
+    & { form: CreateForm<TCreate> & UpdateForm<TUpdate, TIdentity>; remove: (id: TIdentity) => Promise<unknown> } = {
     key: definition.key,
     fields: definition.fields,
     actions,
-    capabilities,
     identity,
     ...(detailAction?.to ? { rowLink: (record: TRecord) => {
       const to = detailAction.to!
@@ -425,10 +539,11 @@ export function defineResource<
     } } : {}),
     table: tableSurface,
     detail: detailSurface,
-    form: form as Resource<TRecord, TQuery, TCreate, TUpdate, TIdentity>['form'],
+    form: form as CreateForm<TCreate> & UpdateForm<TUpdate, TIdentity>,
     remove,
     invalidate,
   }
+  return resource as Resource<TRecord, TQuery, TCreate, TUpdate, TIdentity, TOperations>
 }
 
 /**
