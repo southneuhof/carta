@@ -37,20 +37,20 @@ const fields = defineFields<Row>()({
 const alpha = defineResource<Row>({
   key: 'alpha',
   fields,
-  operations: { list: async () => ({ data: rows, total: 40, limit: 10 }) },
+  operations: { list: async () => ({ data: rows, meta: { total: 40, pageSize: 10, totalPage: 4 } }) },
 })
 
 const beta = defineResource<Row>({
   key: 'beta',
   fields,
-  operations: { list: async () => ({ data: rows, total: 40, limit: 10 }) },
+  operations: { list: async () => ({ data: rows, meta: { total: 40, pageSize: 10, totalPage: 4 } }) },
 })
 
 /** The same contract, resolved synchronously with no promise in sight. */
 const offline = defineResource<Row>({
   key: 'offline',
   fields,
-  operations: { list: () => ({ data: rows, total: 40, limit: 10 }) },
+  operations: { list: () => ({ data: rows, meta: { total: 40, pageSize: 10, totalPage: 4 } }) },
 })
 
 const localQuery = ref<Record<string, unknown>>({ page: 1, limit: 10 })
@@ -88,7 +88,7 @@ const submitted = ref<Draft>()
     </section>
 
     <section data-fixture="local-query">
-      <Table :fields="fields" :load="() => ({ data: rows, total: 40, limit: 10 })" :query="localQuery" />
+      <Table :fields="fields" :load="() => ({ data: rows, meta: { total: 40, pageSize: 10, totalPage: 4 } })" :query="localQuery" />
     </section>
 
     <section data-fixture="draft">

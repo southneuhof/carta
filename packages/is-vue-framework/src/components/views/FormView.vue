@@ -11,8 +11,6 @@ import { useRouter, type RouteLocationRaw } from 'vue-router'
 import { toast } from 'vue-sonner'
 import type { FormProps, MaybePromise, RecordIdentity, SubmitError } from '../../contracts'
 import Form from '../core/Form.vue'
-import ViewControls from './ViewControls.vue'
-import { controlsAt, type ViewControl } from './controls'
 
 type FormOptions = {
   initialData?: Record<string, unknown>
@@ -101,7 +99,6 @@ type FormViewProps = ({
   title?: string
   description?: string
   submitLabel?: string
-  controls?: readonly ViewControl[]
 }
 
 const props = defineProps<FormViewProps>()
@@ -167,9 +164,7 @@ const instance = ref<{ submit: () => Promise<void>; reset: () => void; submittin
         <h1 v-if="title">{{ title }}</h1>
         <p v-if="description">{{ description }}</p>
       </slot>
-      <slot name="controls">
-        <ViewControls :controls="controlsAt(props.controls, 'primary')" label="Kontrol utama" />
-      </slot>
+      <slot name="controls" />
     </header>
 
     <slot name="body" v-bind="{ form: surface }">
@@ -194,9 +189,7 @@ const instance = ref<{ submit: () => Promise<void>; reset: () => void; submittin
     </slot>
 
     <footer>
-      <slot name="footer">
-        <ViewControls :controls="controlsAt(props.controls, 'secondary')" label="Kontrol tambahan" />
-      </slot>
+      <slot name="footer" />
     </footer>
   </section>
 </template>

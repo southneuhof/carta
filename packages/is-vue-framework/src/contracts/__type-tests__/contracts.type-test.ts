@@ -6,8 +6,7 @@
  */
 
 import { defineResource } from '../../resources'
-import type { Resource } from '../../resources'
-import type { ViewControl } from '../../components/views/controls'
+import type { Resource, RowAction } from '../../resources'
 import type {
   FieldCatalog,
   RecordIdentityValue,
@@ -48,11 +47,9 @@ const scopedTableProps: TableProps<Role, RoleQuery> = roles.table({
   searchParameters: { organisation_id: 'org-1' },
   namespace: 'archived',
 }).table
-const listControls: readonly ViewControl[] = roles.table().controls
-void listControls
+const rowActions: readonly RowAction[] | undefined = roles.table().rowControls?.({ id: roleId, name: 'Admin' })
+void rowActions
 const detailProps: DetailProps<Role> = roles.detail({ id: roleId }).detail
-const detailControls: readonly ViewControl[] = roles.detail({ id: roleId }).controls
-void detailControls
 const createProps: FormProps<RoleCreate> = roles.form()
 const prefilledCreateProps: FormProps<RoleCreate> = roles.form({ initialData: { name: 'copy' } })
 const updateProps: FormProps<RoleUpdate> = roles.form({ id: roleId })
@@ -196,7 +193,7 @@ const userRoles = defineResource({
   fields: userRoleFields,
   identity: ['userId', 'roleId'],
   operations: {
-    detail: ({ id }) => ({ userId: id?.userId, roleId: id?.roleId }),
+    detail: ({ id }) => ({ userId: id?.userId ?? '', roleId: id?.roleId ?? '', assignedAt: 'now' }),
     update: (id, input: UserRole) => ({ ...input, ...id }),
     delete: (id) => id.roleId,
   },
@@ -226,10 +223,10 @@ const compositeRowLink = userRoles.rowLink?.({
 })
 void compositeRowLink
 
-/* Custom controls must be actionable, and the standard set is patchable. */
+/* A resource without list behavior exposes no table surface. */
 // @ts-expect-error resource without typed list operation exposes no table surface
 userRoles.table()
-void userRoles.detail({ id: { userId: 'u-1', roleId: 'r-1' }, onDelete: () => undefined })
+void userRoles.detail({ id: { userId: 'u-1', roleId: 'r-1' } })
 
 /* A composite resource never accepts a scalar identity. */
 // @ts-expect-error a composite identity is not a scalar

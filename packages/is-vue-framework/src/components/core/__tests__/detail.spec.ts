@@ -107,12 +107,8 @@ describe('Detail core', () => {
     withSlot.unmount()
   })
 
-  it('normalizes a project record envelope through the data adapter', async () => {
-    const view = mountCore(
-      Detail,
-      { fields, load: async () => ({ data: record }) },
-      { adapters: { data: { normalizeRecord: (payload) => (payload as { data: Record<string, unknown> }).data as never } } },
-    )
+  it('consumes a canonical record result without a data adapter callback', async () => {
+    const view = mountCore(Detail, { fields, load: async () => record })
     await flush()
 
     expect(view.text()).toContain('Admin')

@@ -3,9 +3,9 @@ import type { CollectionResult, DataAdapter, RecordResult, SubmitError, Validati
 /**
  * Backend conventions of this project, kept out of framework components.
  *
- * Collections arrive as `{ data, total, limit }`; records arrive either bare or
- * wrapped in `{ data }`. Validation failures arrive as `{ message, errors }`,
- * where `errors` maps a property path to messages.
+ * Operation adapters own collection and record wire normalization. Validation
+ * failures arrive as `{ message, errors }`, where `errors` maps a property path
+ * to messages.
  */
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -16,18 +16,18 @@ export function normalizeCollection<TRecord extends object>(payload: unknown): C
   if (Array.isArray(payload)) return { data: payload as TRecord[] }
   if (!isRecord(payload) || !Array.isArray(payload.data)) return { data: [] }
 
-  const total = typeof payload.total === 'number' ? payload.total : undefined
-  const pageSize = typeof payload.limit === 'number' ? payload.limit : undefined
-  const page = typeof payload.page === 'number' ? payload.page : undefined
+  const nestedMeta = isRecord(payload.meta) ? payload.meta : undefined
+  const source = nestedMeta ? { ...payload, ...nestedMeta } : payload
+  const total = typeof source.total === 'number' ? source.total : undefined
+  const pageSize = typeof source.limit === 'number' ? source.limit : typeof source.pageSize === 'number' ? source.pageSize : undefined
+  const page = typeof source.page === 'number' ? source.page : undefined
+  const totalPage = typeof source.totalPage === 'number'
+    ? source.totalPage
+    : total != null && pageSize && pageSize > 0 ? Math.ceil(total / pageSize) : undefined
 
   return {
     data: payload.data as TRecord[],
-    meta: {
-      total,
-      page,
-      pageSize,
-      totalPage: total != null && pageSize ? Math.ceil(total / pageSize) : undefined,
-    },
+    meta: { total, page, pageSize, totalPage },
   }
 }
 

@@ -2,13 +2,9 @@
 /**
  * One overtime request and its verification timeline.
  *
- * Two things here are not ordinary CRUD. The workflow controls exist or not
- * depending on the record's state rather than on the resource's capabilities, so
- * they are custom `ViewControl` descriptors computed from the loaded record — an
- * unavailable control is **absent, not disabled**. And the record is loaded by this
- * route rather than by `DetailView`, because `DetailProps` does not hand its loaded
- * record back to the parent and the controls need it; the record is passed back
- * through `data`, so there is still one fetch.
+ * Workflow buttons exist or not depending on record state, so this route owns
+ * their markup. Record loads here because `DetailProps` does not hand loaded
+ * data back to parent; route passes it through `data`, so fetch remains one.
  *
  * None of this is authorization. The API decides; this only decides what to draw,
  * and a refusal still surfaces as a toast.
@@ -16,7 +12,7 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { DetailView, ListView, type ActionableControl } from '@southneuhof/is-vue-framework'
+import { DetailView, ListView } from '@southneuhof/is-vue-framework'
 import { overtimes } from '../overtimes.resource'
 import { type Overtime } from '../overtimes.operations'
 import { verificationSteps } from './verification-steps.resource'
@@ -106,29 +102,14 @@ function onReject() {
   void run(() => verifyOvertime(overtimeId.value, 'rejected', description), 'Pengajuan ditolak.')
 }
 
-// Absent, not disabled: a control the caller cannot use is never rendered.
-const workflowControls = computed<ActionableControl[]>(() => {
-  const workflow: ActionableControl[] = []
-  if (maySubmit.value) workflow.push({ key: 'submit', label: 'Kirim Verifikasi', loading: pending.value, onSelect: onSubmit })
-  if (mayVerify.value) {
-    workflow.push({ key: 'approve', label: 'Setujui', loading: pending.value, onSelect: onApprove })
-    workflow.push({ key: 'reject', label: 'Tolak', loading: pending.value, onSelect: () => (rejecting.value = true) })
-  }
-  return workflow
+const view = computed(() => {
+  const surface = overtimes.detail({ id: overtimeId.value })
+  return { ...surface, detail: { ...surface.detail, data: record.value } }
 })
 
-/**
- * The workflow controls ride along as `extra`, so the standard set still comes
- * from the resource. The record is handed over for the access policy and back
- * through `data`, keeping this screen at one fetch.
- */
-const view = computed(() => {
-  const surface = overtimes.detail({
-    id: overtimeId.value,
-    record: record.value,
-    controls: { extra: workflowControls.value },
-  })
-  return { ...surface, detail: { ...surface.detail, data: record.value } }
+const editTarget = computed(() => {
+  const target = overtimes.actions.update?.to
+  return typeof target === 'function' ? target(overtimeId.value) : target
 })
 
 function onBack() {
@@ -138,7 +119,17 @@ function onBack() {
 
 <template>
   <div>
-    <DetailView title="Detail Lembur" v-bind="view" />
+    <DetailView title="Detail Lembur" :detail="view.detail">
+      <template #controls>
+        <RouterLink v-if="editTarget" :to="editTarget"><Button>Ubah</Button></RouterLink>
+        <Button v-if="maySubmit" :disabled="pending" @click="onSubmit">Kirim Verifikasi</Button>
+        <Button v-if="mayVerify" :disabled="pending" @click="onApprove">Setujui</Button>
+        <Button v-if="mayVerify" color="error" :disabled="pending" @click="rejecting = true">Tolak</Button>
+      </template>
+      <template #footer>
+        <Button type="button" variant="text" data-back @click="onBack">Kembali</Button>
+      </template>
+    </DetailView>
 
     <section v-if="rejecting" data-reject-dialog>
       <label for="rejection-reason">Alasan penolakan</label>
@@ -149,6 +140,5 @@ function onBack() {
 
     <ListView title="Riwayat Verifikasi" :table="stepsTable" />
 
-    <button type="button" data-back @click="onBack">Kembali</button>
   </div>
 </template>

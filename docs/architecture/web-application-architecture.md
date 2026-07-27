@@ -90,9 +90,9 @@ actions: {
 }
 ```
 
-Use `controls.extra` for exceptional page workflows, `visible` for additional
-resource-action presentation restrictions, then explicit typed route metadata
-only when no resource owns target.
+Use route-owned `controls` and `footer` slots for page workflows. Use `visible`
+only for stable resource-action eligibility; API authorization remains
+authoritative.
 
 ## Layers
 
@@ -336,13 +336,12 @@ type ListSurface<TRecord, TQuery> = {
   title: string;
   description?: string;
   table: TableProps<TRecord, TQuery>;
-  controls: ListControls<TRecord>;
+  rowControls?: (record: TRecord) => RowAction[];
 };
 
 type DetailSurface<TRecord> = {
   title: string;
   detail: DetailProps<TRecord>;
-  controls: DetailControls<TRecord>;
 };
 
 type FormSurface<TInput> = {
@@ -627,37 +626,39 @@ export const localIncidents = defineResource({
 Backend validation errors are normalized by the project adapter before `Form`
 maps them to fields.
 
-## Standard controls and permissions
+## Route slots and row actions
 
-List and detail surface shells render standard controls from the intersection of:
+Resources generate table-row actions from intersection of:
 
 ```text
 resource operation exists
 + matching filesystem route exists
 + user permission allows operation
 + optional stable resource visibility policy allows operation
-= render control
+= render row action
 ```
 
-Denied controls disappear.
+Denied row actions disappear.
 
-The resource owns operation availability, default permission identity, and stable
-resource-level policies. Vue surface shells own control layout and rendering.
-One-off presentation belongs in route/component slots.
+Resources own data props, row-action eligibility, action route/permission
+metadata, and row navigation. Surface shells provide named layout slots.
+Routes own page action markup, labels, pending state, confirmations, and local
+handlers; action metadata does not authorize UI by itself.
 
 ```vue
-<ListView :table="incidents.table()" :controls="standardControls({ resource: incidents, surface: 'list' })">
+<ListView :resource="incidents">
+  <template #controls>
+    <RouterLink :to="incidents.actions.create!.to"><Button>Tambah</Button></RouterLink>
+  </template>
   <template #cell:status_code="{ record }">
     <IncidentStatus :incident="record" />
   </template>
 </ListView>
 ```
 
-Standard controls are list, detail, create, update, and delete. Excel export and
-print are app-level custom controls, not framework standard controls.
-
-Resource-level control configuration is an override, not the primary way standard
-controls are declared.
+`ListView`, `DetailView`, and `FormView` never infer page actions. `row-actions`
+remains special table rendering: callers may replace generated row actions with
+that slot.
 
 ## Renderer contracts
 

@@ -28,8 +28,8 @@ const rows = [
 ] as never
 
 describe('notifications resource', () => {
-  it('offers no write control, because notifications are produced by workflows', () => {
-    expect(notifications.table().controls).toEqual([])
+  it('offers no generated row action, because notifications are produced by workflows', () => {
+    expect(notifications.table().rowControls).toBeUndefined()
   })
 
   it('holds independent query state per namespace', () => {

@@ -15,6 +15,12 @@ import * as framework from '../index'
 const removedExports = [
   // Folded into the surface factories by plan 027; never public API again.
   'standardControls',
+  'ViewControls',
+  'ViewControl',
+  'ControlPlacement',
+  'controlsAt',
+  'ControlsArguments',
+  'ActionableControl',
   'resolveCRUDOperations',
   'useCRUDOperations',
   'defaultCRUDListOnExport',

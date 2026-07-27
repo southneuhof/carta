@@ -31,7 +31,7 @@ describe('overtimes resource', () => {
     const detailTarget = overtimes.actions.detail?.to
     expect(typeof detailTarget).toBe('function')
     expect((detailTarget as (id: string) => unknown)('o1')).toEqual({ name: 'hr-overtimes-detail', params: { overtimeId: 'o1' } })
-    expect(overtimes.detail({ id: 'o1' }).controls.map((control) => control.key)).not.toContain('delete')
+    expect(overtimes.table().rowControls?.({ id: 'o1' } as never).map((action) => action.key)).not.toContain('delete')
   })
   it('keeps caller-derived fields off the form', () => {
     // applicant, section and status come from the session server-side.

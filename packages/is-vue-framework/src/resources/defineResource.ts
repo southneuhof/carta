@@ -27,8 +27,6 @@ import type {
   TableProps,
   ValidationSchema,
 } from '../contracts'
-import type { ViewControl } from '../components/views/controls'
-import { standardControls, type ControlsArguments } from './controls'
 import { stableValue } from '../query/keys'
 import { invalidateResourceData } from '../query/client'
 import { selectSchema } from '../validation'
@@ -65,8 +63,9 @@ export interface ResourceOperations<
   TUpdate extends object = TCreate,
   TIdentity extends RecordIdentity = RecordIdentityValue,
 > {
-  list?: (context: CollectionLoadContext<TQuery>) => MaybePromise<unknown>
-  detail?: (context: RecordLoadContext<TIdentity>) => MaybePromise<unknown>
+  /** Operation adapters return canonical results; consumers never unwrap wire envelopes. */
+  list?: (context: CollectionLoadContext<TQuery>) => MaybePromise<CollectionResult<TRecord>>
+  detail?: (context: RecordLoadContext<TIdentity>) => MaybePromise<TRecord | undefined>
   create?: (input: TCreate) => MaybePromise<TRecord>
   update?: (id: TIdentity, input: TUpdate) => MaybePromise<TRecord>
   delete?: (id: TIdentity) => MaybePromise<unknown>
@@ -233,36 +232,32 @@ export interface ResourceDefinition<
   actions?: ResourceActionsDefinition<ResolvedIdentity<TRecord, TDeclaration>, ResourceOperationKeys<TOperations>>
 }
 
-/** Arguments for the collection surface: table data plus its control block. */
+/** Arguments for collection surface. `onDelete` enables generated row deletion. */
 export interface TableSurfaceArguments<TQuery extends object = Record<string, unknown>>
   extends TableFactoryArguments<TQuery> {
-  controls?: ControlsArguments
-  rowControls?: ControlsArguments
-  /** Delete remains route-owned because confirmation and feedback are screen policy. */
+  /** Confirmation and feedback remain route-owned. */
   onDelete?: (record: object) => void
 }
 
-/** Arguments for the record surface. Delete appears only with a handler. */
+/** Arguments for record surface. */
 export interface DetailSurfaceArguments<TIdentity extends RecordIdentity = RecordIdentityValue>
-  extends DetailFactoryArguments<TIdentity> {
-  onDelete?: () => void
-  /** The loaded record, when the access policy is record-dependent. */
-  record?: Record<string, unknown>
-  controls?: ControlsArguments
-}
+  extends DetailFactoryArguments<TIdentity> {}
+
+/** Per-record table actions. Page actions belong in route-owned view slots. */
+export type RowAction =
+  | { key: 'detail' | 'update'; label: string; to: RouteLocationRaw }
+  | { key: 'delete'; label: string; onSelect: () => void }
 
 /** Shell-ready collection bundle: `v-bind` it onto `ListView`. */
 export interface TableSurface<TRecord extends object, TQuery extends object> {
   table: TableProps<TRecord, TQuery>
-  controls: ViewControl[]
   /** Available per-record actions, already filtered through resource access policy. */
-  rowControls?: (record: TRecord) => ViewControl[]
+  rowControls: ((record: TRecord) => RowAction[]) | undefined
 }
 
 /** Shell-ready record bundle: `v-bind` it onto `DetailView`. */
 export interface DetailSurface<TRecord extends object> {
   detail: DetailProps<TRecord>
-  controls: ViewControl[]
 }
 
 export interface ResourceBase<
@@ -448,51 +443,37 @@ export function defineResource<
     return props
   })
 
-  /**
-   * The control projection reads only what the resource already declares, plus
-   * the runtime access adapter. Controls are rebuilt per call — the props they
-   * ride with stay memoized, so table state does not reset — because a bundle
-   * closes over route-supplied handlers that must not outlive their component.
-   */
-  function controlContext() {
-    const { adapters } = useResourceRuntime()
-    return { key: definition.key, actions, access: adapters.access }
+  function rowActions(record: TRecord, onDelete?: (record: object) => void): RowAction[] {
+    const { access } = useResourceRuntime().adapters
+    const id = identity(record)
+    const allowed = (operation: 'detail' | 'update' | 'delete') => {
+      const action = actions[operation]
+      const accessRecord = record as Record<string, unknown>
+      return Boolean(action && (action.permission === null || access.allows({ operation, permission: action.permission, record: accessRecord })) && (!action.visible || action.visible({ record: accessRecord, access })))
+    }
+    const result: RowAction[] = []
+    const detail = actions.detail
+    if (detail?.to && allowed('detail')) result.push({ key: 'detail', label: 'Detail', to: typeof detail.to === 'function' ? detail.to(id) : detail.to })
+    const update = actions.update
+    if (update?.to && allowed('update')) result.push({ key: 'update', label: 'Ubah', to: typeof update.to === 'function' ? update.to(id) : update.to })
+    if (actions.delete && onDelete && allowed('delete')) result.push({ key: 'delete', label: 'Hapus', onSelect: () => onDelete(record) })
+    return result
   }
 
   function tableSurface(args?: TableSurfaceArguments<TQuery>): TableSurface<TRecord, TQuery> {
-    const { controls, rowControls, onDelete, ...data } = args ?? {}
+    const { onDelete, ...data } = args ?? {}
     const hasRowControls = Boolean(actions.detail?.to || actions.update?.to || (actions.delete && onDelete))
     return {
       table: tableProps(data as TableFactoryArguments<TQuery>),
-      controls: standardControls({ ...controlContext(), surface: 'list', controls }),
-      ...(hasRowControls
-        ? {
-            rowControls: (record: TRecord) =>
-              standardControls({
-                ...controlContext(),
-                surface: 'row',
-                id: identity(record),
-                record: record as Record<string, unknown>,
-                onDelete: onDelete ? () => onDelete(record) : undefined,
-                controls: rowControls,
-              }),
-          }
-        : {}),
+      rowControls: hasRowControls
+        ? (record: TRecord) => rowActions(record, onDelete)
+        : undefined,
     }
   }
 
   function detailSurface(args: DetailSurfaceArguments<TIdentity>): DetailSurface<TRecord> {
-    const { controls, onDelete, record, ...data } = args
     return {
-      detail: detailProps(data as DetailFactoryArguments<TIdentity>),
-      controls: standardControls({
-        ...controlContext(),
-        surface: 'detail',
-        id: args.id,
-        record,
-        onDelete,
-        controls,
-      }),
+      detail: detailProps(args),
     }
   }
 

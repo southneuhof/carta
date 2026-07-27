@@ -50,9 +50,8 @@ const { userRoles } = await import('./[userId]/detail/roles/user-roles.resource'
 const { loadUserRoles, setUserRole } = await import('./[userId]/detail/roles/user-roles.operations')
 
 describe('users resource', () => {
-  it('hides create and delete controls through inference, with no explicit false', () => {
-    expect(users.table().controls).toEqual([])
-    expect(users.detail({ id: 'u1' }).controls.map((control) => control.key)).toEqual(['list', 'update'])
+  it('provides only row actions resource can derive', () => {
+    expect(users.table().rowControls?.({ id: 'u1', name: 'Admin', email: 'a@b.c', emailVerified: false, image: null, createdAt: '', updatedAt: '' }).map((action) => action.key)).toEqual(['detail', 'update'])
   })
 
   it('binds native props straight to the cores', () => {

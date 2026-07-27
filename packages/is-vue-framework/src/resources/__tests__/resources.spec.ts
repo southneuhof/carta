@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { h } from 'vue'
 import { z } from 'zod'
 import { defineResource, resourceActionForRoute, resetResourceActionRegistry } from '../defineResource'
 import { registerResourceRuntime, resetResourceRuntimeForTests } from '../runtime'
@@ -25,7 +26,7 @@ function ordinaryResource(spies: Record<string, ReturnType<typeof vi.fn>> = {}) 
     key: 'roles',
     fields,
     operations: {
-      list: spies.list ?? (async () => ({ data: records, total: 1, limit: 10 })),
+      list: spies.list ?? (async () => ({ data: records, meta: { total: 1, pageSize: 10, totalPage: 1 } })),
       detail: spies.detail ?? (async ({ id }) => records.find((role) => role.id === String(id))),
       create: spies.create ?? (async (input) => ({ id: '2', ...input })),
       update: spies.update ?? (async (id, input) => ({ id, ...input })),
@@ -129,24 +130,14 @@ describe('defineResource factories', () => {
     expect(roles.form({ id: '1' })).not.toBe(roles.form())
   })
 
-  /**
-   * Control customization and a delete handler never key the memo, so the table
-   * keeps its state across a control change; the handler itself is never cached
-   * because a stale closure would outlive the component that supplied it.
-   */
-  it('keeps core props stable across control arguments without caching handlers', () => {
+  it('keeps core props stable across row-delete handlers without caching closures', () => {
     const roles = ordinaryResource()
     const first = () => undefined
     const second = () => undefined
 
-    expect(roles.table({ controls: { labels: { create: 'Baru' } } }).table).toBe(roles.table().table)
-    expect(roles.detail({ id: '1', onDelete: first }).detail).toBe(roles.detail({ id: '1', onDelete: second }).detail)
-    expect(roles.detail({ id: '1', onDelete: first }).controls.find((control) => control.key === 'delete')?.onSelect).toBe(
-      first,
-    )
-    expect(roles.detail({ id: '1', onDelete: second }).controls.find((control) => control.key === 'delete')?.onSelect).toBe(
-      second,
-    )
+    expect(roles.table({ onDelete: first }).table).toBe(roles.table({ onDelete: second }).table)
+    expect(roles.table({ onDelete: first }).rowControls?.(records[0]).find((action) => action.key === 'delete')?.onSelect).toBeDefined()
+    expect(roles.table({ onDelete: second }).rowControls?.(records[0]).find((action) => action.key === 'delete')?.onSelect).toBeDefined()
   })
 
   it('wires create for form() and update for form({ id })', async () => {
@@ -304,46 +295,18 @@ describe('declared identity', () => {
   })
 })
 
-describe('standard controls, projected by the surface factories', () => {
+describe('generated row actions', () => {
   const denyAll: AccessAdapter = { allows: () => false }
 
-  /** Controls read the runtime access adapter; no route passes one by hand. */
+  /** Row actions read runtime access adapter; no route passes one by hand. */
   function withAccess(access: AccessAdapter) {
     registerResourceRuntime({ adapters: resolveFrameworkAdapters({ access }), queryClient: createFrameworkQueryClient() })
   }
 
-  it('renders create on the list surface when behavior, route, and access allow', () => {
-    expect(ordinaryResource().table().controls.map((control) => control.key)).toEqual(['create'])
-  })
-
-  it('hides controls whose behavior does not exist', () => {
-    const readOnly = defineResource<Role>({
-      key: 'roles',
-      fields,
-      operations: { list: async () => ({ data: records }) },
-      actions: {
-        list: { permission: 'roles.list', to: { name: 'roles-list' } },
-      },
-    })
-
-    expect(readOnly.table().controls).toEqual([])
-    expect(readOnly.detail({ id: '1' }).controls.map((control) => control.key)).toEqual(['list'])
-  })
-
-  it('hides controls whose action target is missing', () => {
-    const routeless = defineResource<Role>({
-      key: 'roles',
-      fields,
-      operations: { list: async () => ({ data: records }), create: async () => ({ id: '2', name: 'Admin' }) },
-    })
-
-    expect(routeless.table().controls).toEqual([])
-  })
-
-  it('removes denied controls instead of disabling them', () => {
+  it('removes denied row actions instead of disabling them', () => {
     withAccess(denyAll)
 
-    expect(ordinaryResource().detail({ id: '1', onDelete: () => undefined }).controls).toEqual([])
+    expect(ordinaryResource().table({ onDelete: () => undefined }).rowControls?.(records[0])).toEqual([])
   })
 
   it('checks access per operation with the resource permission identity', () => {
@@ -355,43 +318,10 @@ describe('standard controls, projected by the surface factories', () => {
       },
     })
 
-    const controls = ordinaryResource().detail({ id: '1', onDelete: () => undefined }).controls
+    const actions = ordinaryResource().table({ onDelete: () => undefined }).rowControls?.(records[0]) ?? []
 
-    expect(controls.map((control) => control.key)).toEqual(['list', 'update'])
+    expect(actions.map((action) => action.key)).toEqual(['detail', 'update'])
     expect(seen).toContain('roles.delete')
-  })
-
-  it('lets an override hide, relabel, or redirect a standard control', () => {
-    const controls = ordinaryResource().detail({
-      id: '1',
-      onDelete: () => undefined,
-      controls: { overrides: { list: false, update: { label: 'Sunting', to: '/custom/1' } } },
-    }).controls
-
-    expect(controls.map((control) => control.key)).toEqual(['update', 'delete'])
-    expect(controls[0]).toMatchObject({ label: 'Sunting', to: '/custom/1' })
-  })
-
-  it('appends custom controls after the standard set', () => {
-    const controls = ordinaryResource().table({
-      controls: { extra: [{ key: 'export', label: 'Excel', onSelect: () => undefined }] },
-    }).controls
-
-    expect(controls.map((control) => control.key)).toEqual(['create', 'export'])
-  })
-
-  it('offers delete only with a handler, so no control can lack one', () => {
-    const roles = ordinaryResource()
-
-    expect(roles.detail({ id: '1' }).controls.map((control) => control.key)).toEqual(['list', 'update'])
-    expect(roles.detail({ id: '1', onDelete: () => undefined }).controls.map((control) => control.key)).toEqual([
-      'list',
-      'update',
-      'delete',
-    ])
-    for (const control of roles.detail({ id: '1', onDelete: () => undefined }).controls) {
-      expect(Boolean(control.to || control.onSelect)).toBe(true)
-    }
   })
 
   it('projects only permitted record actions on the table surface', () => {
@@ -408,11 +338,10 @@ describe('standard controls, projected by the surface factories', () => {
     expect(roles.table({ onDelete: remove }).rowControls?.(records[0])).toEqual([])
   })
 
-  it('generates links from actions', () => {
-    const controls = ordinaryResource().detail({ id: '7', onDelete: () => undefined }).controls
+  it('generates row links from actions', () => {
+    const actions = ordinaryResource().table().rowControls?.({ id: '7', name: 'Admin' }) ?? []
 
-    expect(controls.find((control) => control.key === 'update')?.to).toEqual({ name: 'roles-edit', params: { id: '7' } })
-    expect(controls.find((control) => control.key === 'list')?.to).toEqual({ name: 'roles-list' })
+    expect(actions.find((action) => action.key === 'update')?.to).toEqual({ name: 'roles-edit', params: { id: '7' } })
   })
 })
 
@@ -443,12 +372,12 @@ describe('row links', () => {
 })
 
 describe('resource props inside shells', () => {
-  it('binds a resource to ListView with inferred controls', async () => {
+  it('binds a resource to ListView with no inferred page controls', async () => {
     const roles = ordinaryResource()
     const view = mountCore(ListView, { title: 'Role', ...roles.table() })
     await flush()
 
-    expect(view.find('[data-control="create"]')?.getAttribute('href')).toBe('/')
+    expect(view.find('[data-control="create"]')).toBeNull()
     expect(view.text()).toContain('Admin')
     view.unmount()
   })
@@ -457,7 +386,6 @@ describe('resource props inside shells', () => {
     const resource = {
       table: () => ({
         table: { fields, data: records },
-        controls: [],
         rowControls: () => [
           { key: 'detail', label: 'Detail', to: '/roles/1' },
           { key: 'update', label: 'Ubah', to: '/roles/1/edit' },
@@ -470,6 +398,23 @@ describe('resource props inside shells', () => {
     expect(view.find('[aria-label="Detail"]')).not.toBeNull()
     expect(view.find('[aria-label="Ubah"]')).not.toBeNull()
     expect(view.find('[aria-label="Hapus"]')).toBeNull()
+    view.unmount()
+  })
+
+  it('gives an explicit row-actions slot precedence over resource row controls', async () => {
+    const resource = {
+      table: () => ({
+        table: { fields, data: records },
+        rowControls: () => [{ key: 'detail', label: 'Resource detail', to: '/roles/1' }],
+      }),
+    }
+    const view = mountCore(ListView, { resource }, {
+      slots: { 'row-actions': () => h('button', { 'aria-label': 'Slot action' }, 'Slot action') },
+    })
+    await flush()
+
+    expect(view.find('[aria-label="Slot action"]')).not.toBeNull()
+    expect(view.find('[aria-label="Resource detail"]')).toBeNull()
     view.unmount()
   })
 

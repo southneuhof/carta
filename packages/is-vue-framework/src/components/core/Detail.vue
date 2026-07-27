@@ -9,7 +9,6 @@ import { computed } from 'vue'
 import type { DetailProps, RecordLoadContext, RecordResult } from '../../contracts'
 import { resolveFields } from '../../fields'
 import { useLoader } from '../../query'
-import { useFrameworkAdapters } from '../../adapters/projectAdapters'
 import { useRendererRegistry } from '../../renderers/registry'
 import { assertSingleDataSource, ownerOf, recordCacheKey } from './useCoreData'
 
@@ -19,7 +18,6 @@ const props = withDefaults(defineProps<DetailProps>(), {
 
 assertSingleDataSource('Detail', props.data, props.load)
 
-const adapters = useFrameworkAdapters()
 const renderers = useRendererRegistry('detail')
 
 const fields = computed(() => resolveFields({ fields: props.fields, surface: 'detail' }))
@@ -30,7 +28,6 @@ const loaded = useLoader<RecordLoadContext, RecordResult>({
   context: computed(() => ({ id: props.id, searchParameters: props.searchParameters ?? {} })),
   load: computed(() => props.load),
   data: computed(() => props.data),
-  normalize: (result) => adapters.data.normalizeRecord(result),
 })
 
 const record = computed(() => loaded.data.value)

@@ -39,12 +39,14 @@ describe('createHonoResourceOperations', () => {
 
   it('normalizes data, serializes query and identity, and preserves override-friendly wrappers', async () => {
     const rpc = hc<typeof app>('https://api.test', { fetch: fetchMock })
-    const operations = createHonoResourceOperations(rpc.roles)
+    const normalizeCollection = vi.fn((value) => ({ data: (value as any).data, meta: { page: 2, pageSize: 25, total: 1, totalPage: 1 } }))
+    const normalizeRecord = vi.fn((value) => (value as any).data)
+    const operations = createHonoResourceOperations(rpc.roles, { normalizeCollection, normalizeRecord })
     const overridden = { ...operations, list: vi.fn(operations.list) }
 
     await expect(overridden.list({ query: { page: 2, status: 'draft', blank: '', absent: null }, searchParameters: { page: 1, search: 'old' } })).resolves.toEqual({
       data: [{ id: 'r1', name: 'Admin' }],
-      meta: { page: 2, pageSize: 25, total: 1 },
+      meta: { page: 2, pageSize: 25, total: 1, totalPage: 1 },
     })
     const listUrl = new URL(String(fetchMock.mock.calls[0]?.[0]))
     expect(Object.fromEntries(listUrl.searchParams)).toEqual({ page: '2', search: 'old', status: 'draft' })
@@ -54,5 +56,7 @@ describe('createHonoResourceOperations', () => {
     await expect(operations.create({ name: 'Editor' })).resolves.toEqual({ id: 'r2', name: 'Editor' })
     await expect(operations.update('r1', { name: 'Updated' })).resolves.toEqual({ id: 'r1' })
     await expect(operations.delete('r1')).resolves.toEqual({ deleted: 'r1' })
+    expect(normalizeCollection).toHaveBeenCalledTimes(1)
+    expect(normalizeRecord).toHaveBeenCalledTimes(3)
   })
 })

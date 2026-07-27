@@ -1,6 +1,7 @@
 import type { InferRequestType, InferResponseType } from 'hono/client'
 import type { StatusCode } from 'hono/utils/http-status'
 import type { CollectionResult, RecordIdentity } from '../contracts'
+import { defaultDataAdapter, type DataAdapter } from '../adapters/projectAdapters'
 import type { ResourceOperations } from '../resources/defineResource'
 
 /** Exact Hono request input. This stays type-only. */
@@ -124,32 +125,22 @@ async function payload(response: Response): Promise<unknown> {
   if (!response.ok) throw value
   return value
 }
-function normalizeCollection(value: unknown): CollectionResult<object> {
-  const response = value as { data: object[]; page?: number; limit?: number; total?: number }
-  return { data: response.data, meta: { page: response.page, pageSize: response.limit, total: response.total } }
-}
-function unwrapRecord(value: unknown): object {
-  if (!value || typeof value !== 'object' || !('data' in value) || !value.data || typeof value.data !== 'object') {
-    throw new Error('[is-vue-framework] Hono mutation response must contain an object data record.')
-  }
-  return value.data
-}
 function typedOperations<T>(operations: object): T {
   return operations as T
 }
 
-export function createHonoResourceOperations<const TRoute>(route: TRoute): HonoResourceOperations<TRoute> {
+export function createHonoResourceOperations<const TRoute>(route: TRoute, dataAdapter: Pick<DataAdapter, 'normalizeCollection' | 'normalizeRecord'> = defaultDataAdapter): HonoResourceOperations<TRoute> {
   const source = route as RuntimeRoute
   const operations = {
     list: async ({ query, searchParameters }: { query: Record<string, unknown>; searchParameters: Record<string, unknown> }) =>
-      normalizeCollection(await payload(await source.list.$get({ query: wireQuery({ ...searchParameters, ...query }) }))),
+      dataAdapter.normalizeCollection(await payload(await source.list.$get({ query: wireQuery({ ...searchParameters, ...query }) }))),
     detail: async ({ id, searchParameters }: { id: RecordIdentity; searchParameters: Record<string, unknown> }) => {
       if (id === undefined) return undefined
       const value = await payload(await source.detail[':id'].$get({ param: { id: identity(id) }, query: wireQuery(searchParameters) }))
-      return (value as { data: object }).data
+      return dataAdapter.normalizeRecord(value)
     },
-    create: async (input: object) => unwrapRecord(await payload(await source.create.$post({ json: input }))),
-    update: async (id: RecordIdentity, input: object) => unwrapRecord(await payload(await source.update[':id'].$patch({ param: { id: identity(id) }, json: input }))),
+    create: async (input: object) => dataAdapter.normalizeRecord(await payload(await source.create.$post({ json: input }))),
+    update: async (id: RecordIdentity, input: object) => dataAdapter.normalizeRecord(await payload(await source.update[':id'].$patch({ param: { id: identity(id) }, json: input }))),
     delete: async (id: RecordIdentity) => payload(await source.delete[':id'].$delete({ param: { id: identity(id) } })),
   }
   return typedOperations<HonoResourceOperations<TRoute>>(operations)

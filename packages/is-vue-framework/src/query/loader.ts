@@ -21,8 +21,6 @@ export interface LoaderOptions<TContext extends LoadSignalContext, TResult> {
   /** Externally controlled data; disables loading entirely. */
   data?: MaybeRef<TResult | undefined>
   enabled?: MaybeRefOrGetter<boolean>
-  /** Applied to the loader result before it reaches the component. */
-  normalize?: (result: unknown) => TResult
 }
 
 export interface LoaderState<TResult> {
@@ -60,9 +58,8 @@ export function useLoader<TContext extends LoadSignalContext, TResult>(
       if (!load) throw new Error('[is-vue-framework] No loader supplied.')
       const context = { ...toValue(options.context), signal } as TContext
       const result = await load(context)
-      const normalized = options.normalize ? options.normalize(result) : (result as TResult)
       // The cache rejects `undefined`, but "no record" is a legitimate result.
-      return (normalized ?? missingResult) as TResult
+      return (result ?? missingResult) as TResult
     },
   })
 

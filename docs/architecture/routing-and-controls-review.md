@@ -35,21 +35,21 @@ Open: where the resolution runs (`beforeWriteFiles` tree edit vs. a navigation g
 
 ### Current state
 
-`ViewControl` (`packages/is-vue-framework/src/components/views/controls.ts`) is a button or link: `key`, `label`, optional `icon`, `placement` (`primary` / `secondary` / `row`), and either `onSelect` or `to`. Shells render what they are handed, filtered by placement; they resolve nothing themselves.
+Earlier design used page-action descriptors with placement and route/handler fields. Shells rendered descriptors filtered by placement; they resolved nothing themselves.
 
-`standardControls()` (`packages/is-vue-framework/src/resources/controls.ts`) infers the five standard controls — `list`, `detail`, `create`, `update`, `delete` — from a resource and a surface (`list` or `detail`). A control is emitted only when the capability is declared, a route target exists, and access allows it; anything else is absent rather than disabled. Detail throws without `id`. `overrides` and `labels` patch the result.
+Earlier factory helper inferred list, detail, create, update, and delete page actions from a resource surface. An action appeared only when capability, route target, and access allowed it; otherwise it was absent.
 
 Every CRUD route calls it the same way:
 
 ```ts
-const controls = computed(() => standardControls({ resource: users, surface: 'detail', id: userId.value }))
+const actions = computed(() => /* inferred page actions for users and userId */ [])
 ```
 
 ### Position
 
 Code smell. Flagged, not yet diagnosed — revisit before building on it.
 
-Points to examine when it is revisited: the same call is repeated in every CRUD route to produce a derivable result; `standardControls` couples resource capabilities, route targets, and access into one helper the shells then treat as opaque; and the surface/`id`/throw contract is enforced at runtime rather than by types.
+Points to examine when it is revisited: repeated projection couples resource capabilities, route targets, and access into one helper shells treat as opaque; surface and identity contracts are enforced at runtime rather than by types.
 
 ## Addendum (2026-07-27): decided design
 
@@ -71,10 +71,10 @@ Decided with the maintainer in review of the findings above. This section is the
 
 ### Controls
 
-- Capabilities, permissions, and route targets already live on the resource; the smell was the per-route re-projection. **Standard controls fold into the surface factories** (`resource.detail({ id })`, `resource.table()`), which return shell-ready bundles consumed via `v-bind`. `standardControls` becomes internal; its runtime surface/`id` throws become type errors.
+- Capabilities, permissions, and route targets already live on resource; previous decision folded page actions into surface factories.
 - The table bundle exposes record → detail navigation (via the identity extractor plus `routes.detail`) so list screens stop hand-writing `String(record.id)`.
 - Placement, custom per-screen actions, and local handlers (delete confirmation UX) remain route-authored — model definitions do not absorb UI placement.
-- Shells stay exactly as dumb as `components/views/controls.ts` promises: they render what they are handed and resolve nothing.
+- Shells render slots and resolve nothing.
 
 ### Detail routing, shells, and tabs
 
@@ -127,7 +127,7 @@ design:
   identity has no key name to match, so those routes name the param:
   `identityFromRoute(users, route, 'userId')`.
 
-`.layout.vue` now has one meaning in both positions, `standardControls` is internal, every `/…/:id`
+`.layout.vue` now has one meaning in both positions, page-action inference is internal, every `/…/:id`
 URL redirects to its first valid tab, and detail lives at `/detail` for users, roles, and overtimes.
 
 ### Superseded by plans 029–032 (2026-07-27)
@@ -138,9 +138,8 @@ while route files map typed URL params → scalar or composite identity. There i
 reflection.
 
 `ListView` and `DetailView` have resource-first forms (`:resource`, plus explicit `:id` for detail)
-that call the existing surface factories internally. Raw `:table` and `:detail` forms remain for
-composed screens. Resource-first detail owns standard delete feedback, invalidation, and replacement
-to the resource list target.
+that call surface factories internally. Raw `:table` and `:detail` forms remain for composed screens.
+The then-current resource-first detail owned delete feedback, invalidation, and replacement to list.
 
 Route-local `definePage()` and JSON5 `<route>` metadata are removed. One typed application manifest
 catalogs every route-bearing SFC, owns names/meta/navigation presentation, and is applied to generated
@@ -160,3 +159,11 @@ RouteTab lists child-content names only; detail resource targets remain named pa
 shared owner from resolved Vue Router matched-record identity. At bare owner URL it selects first
 resolvable/permitted child with `router.replace`, preserving params/dotted query keys. Zero valid
 children leave parent intact; active children, siblings, and deeper descendants never redirect.
+
+### Superseded by Plan 047 (2026-07-28)
+
+Generic page-action descriptors and factory-projected page actions are removed. Resource surfaces
+now contain only core props, plus resource-generated row actions for tables. Routes author every
+page-level Create, Edit, Delete, Back, export, and workflow interaction in named view slots. The
+row-action distinction from this review remains: row eligibility stays resource-derived, while API
+authorization remains authoritative.

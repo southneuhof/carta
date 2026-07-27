@@ -5,26 +5,12 @@ import { h } from 'vue'
 import ListView from '../ListView.vue'
 import DetailView from '../DetailView.vue'
 import FormView from '../FormView.vue'
-import { controlsAt } from '../controls'
 import { flush, mountCore } from '../../core/__tests__/harness'
 
 const viewsRoot = join(__dirname, '..')
 
 const tableProps = { fields: { name: { label: 'Nama' } }, data: [{ name: 'Admin' }] }
 const detailProps = { fields: { name: { label: 'Nama' } }, data: { name: 'Admin' } }
-
-describe('control descriptors', () => {
-  it('defaults to primary placement and filters by placement', () => {
-    const controls = [
-      { key: 'create', label: 'Tambah' },
-      { key: 'export', label: 'Ekspor', placement: 'secondary' as const },
-    ]
-
-    expect(controlsAt(controls, 'primary').map((control) => control.key)).toEqual(['create'])
-    expect(controlsAt(controls, 'secondary').map((control) => control.key)).toEqual(['export'])
-    expect(controlsAt(undefined, 'primary')).toEqual([])
-  })
-})
 
 describe('ListView', () => {
   it('renders chrome around the table and forwards table props unchanged', async () => {
@@ -38,30 +24,34 @@ describe('ListView', () => {
     view.unmount()
   })
 
-  it('renders controls as ordinary buttons and links', async () => {
-    const onSelect = vi.fn()
-    const view = mountCore(ListView, {
-      table: tableProps,
-      controls: [
-        { key: 'create', label: 'Tambah', to: '/roles/new' },
-        { key: 'refresh', label: 'Segarkan', onSelect },
-        { key: 'export', label: 'Ekspor', placement: 'secondary', disabled: true },
-      ],
+  it('renders controls and footer only from named slots', async () => {
+    const view = mountCore(ListView, { table: tableProps }, {
+      slots: {
+        controls: () => h('button', { 'data-controls-slot': '' }, 'Tambah'),
+        footer: () => h('button', { 'data-footer-slot': '' }, 'Kembali'),
+      },
     })
     await flush()
 
-    expect(view.find<HTMLAnchorElement>('[data-control="create"]')?.getAttribute('href')).toBe('/roles/new')
-    view.find<HTMLButtonElement>('[data-control="refresh"]')!.click()
-    expect(onSelect).toHaveBeenCalledOnce()
-    expect(view.find<HTMLButtonElement>('[data-control="export"]')?.disabled).toBe(true)
+    expect(view.find('[data-controls-slot]')).not.toBeNull()
+    expect(view.find('[data-footer-slot]')).not.toBeNull()
     view.unmount()
   })
 
-  it('omits controls the caller did not supply', async () => {
+  it('omits page action regions without slots', async () => {
     const view = mountCore(ListView, { table: tableProps })
     await flush()
 
-    expect(view.all('[data-control]')).toEqual([])
+    expect(view.find('footer')).toBeNull()
+    view.unmount()
+  })
+
+  it('keeps raw table surfaces free of resource row controls', async () => {
+    const view = mountCore(ListView, { table: tableProps })
+    await flush()
+
+    expect(view.all('th').map((cell) => cell.textContent)).toEqual(['Nama'])
+    expect(view.find('[aria-label="Aksi baris"]')).toBeNull()
     view.unmount()
   })
 
@@ -109,20 +99,17 @@ describe('DetailView', () => {
     view.unmount()
   })
 
-  it('renders edit and delete controls only when supplied', async () => {
-    const onSelect = vi.fn()
-    const view = mountCore(DetailView, {
-      detail: detailProps,
-      controls: [
-        { key: 'edit', label: 'Ubah', to: '/roles/1/edit' },
-        { key: 'delete', label: 'Hapus', onSelect },
-      ],
+  it('renders controls and footer only from named slots', async () => {
+    const view = mountCore(DetailView, { detail: detailProps }, {
+      slots: {
+        controls: () => h('button', { 'data-controls-slot': '' }, 'Ubah'),
+        footer: () => h('button', { 'data-footer-slot': '' }, 'Kembali'),
+      },
     })
     await flush()
 
-    view.find<HTMLButtonElement>('[data-control="delete"]')!.click()
-    expect(onSelect).toHaveBeenCalledOnce()
-    expect(view.find('[data-control="edit"]')?.getAttribute('href')).toBe('/roles/1/edit')
+    expect(view.find('[data-controls-slot]')).not.toBeNull()
+    expect(view.find('[data-footer-slot]')).not.toBeNull()
     view.unmount()
   })
 
@@ -174,6 +161,20 @@ describe('FormView', () => {
     expect(update.find('h1')?.textContent).toBe('Ubah Role')
     create.unmount()
     update.unmount()
+  })
+
+  it('renders page action slots without generic fallbacks', async () => {
+    const view = mountCore(FormView, { formProps: formProps(async () => undefined) }, {
+      slots: {
+        controls: () => h('button', { 'data-controls-slot': '' }, 'Bantuan'),
+        footer: () => h('button', { 'data-footer-slot': '' }, 'Kembali'),
+      },
+    })
+    await flush()
+
+    expect(view.find('[data-controls-slot]')).not.toBeNull()
+    expect(view.find('[data-footer-slot]')).not.toBeNull()
+    view.unmount()
   })
 
   it('renders submit and cancel chrome and re-emits form events', async () => {

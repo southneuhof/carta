@@ -29,10 +29,10 @@ describe('Table core', () => {
     view.unmount()
   })
 
-  it('accepts an asynchronous loader and normalizes the envelope', async () => {
+  it('accepts a canonical asynchronous collection result', async () => {
     const view = mountCore(Table, {
       fields,
-      load: async () => ({ data: rows, total: 20, limit: 10 }),
+      load: async () => ({ data: rows, meta: { total: 20, pageSize: 10, totalPage: 2 } }),
     })
     await flush()
 
@@ -51,7 +51,7 @@ describe('Table core', () => {
     const location = createMemoryQueryLocationAdapter()
     const view = mountCore(
       Table,
-      { fields, namespace: 'roles', load: async () => ({ data: rows, total: 40, limit: 10 }) },
+      { fields, namespace: 'roles', load: async () => ({ data: rows, meta: { total: 40, pageSize: 10, totalPage: 4 } }) },
       { adapters: { query: location } },
     )
     await flush()
@@ -66,8 +66,8 @@ describe('Table core', () => {
   it('keeps duplicate instances independent through explicit namespaces', async () => {
     const location = createMemoryQueryLocationAdapter()
     const Host = defineComponent(() => () => [
-      h(Table, { fields, namespace: 'assignees', load: async () => ({ data: rows, total: 40, limit: 10 }) }),
-      h(Table, { fields, namespace: 'archived', load: async () => ({ data: rows, total: 40, limit: 10 }) }),
+      h(Table, { fields, namespace: 'assignees', load: async () => ({ data: rows, meta: { total: 40, pageSize: 10, totalPage: 4 } }) }),
+      h(Table, { fields, namespace: 'archived', load: async () => ({ data: rows, meta: { total: 40, pageSize: 10, totalPage: 4 } }) }),
     ])
     const view = mountCore(Host, {}, { adapters: { query: location } })
     await flush()
@@ -203,7 +203,7 @@ describe('Table core', () => {
   it('keeps pagination one-based and within normalized server bounds', async () => {
     const view = mountCore(Table, {
       fields,
-      load: () => ({ data: rows, total: 20, limit: 10 }),
+      load: () => ({ data: rows, meta: { total: 20, pageSize: 10, totalPage: 2 } }),
     })
     await flush()
 
@@ -223,7 +223,7 @@ describe('Table core', () => {
     const view = mountCore(Table, {
       fields,
       pagination: 'always',
-      load: () => ({ data: rows, total: 1, limit: 10 }),
+      load: () => ({ data: rows, meta: { total: 1, pageSize: 10, totalPage: 1 } }),
     })
     await flush()
 
@@ -395,8 +395,7 @@ describe('Table core', () => {
         namespace: 'roles',
         load: ({ query }: { query: Record<string, unknown> }) => ({
           data: query.page === 2 ? [{ name: 'Owner', status: 'active' }] : rows,
-          total: 20,
-          limit: 10,
+          meta: { total: 20, pageSize: 10, totalPage: 2 },
         }),
       },
       { adapters: { query: location } },

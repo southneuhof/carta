@@ -1,0 +1,26 @@
+import { describe, expect, it } from 'vitest'
+import { normalizeCollection, normalizeRecord } from './normalize'
+
+describe('web data adapter', () => {
+  it('normalizes the project collection envelope once', () => {
+    expect(normalizeCollection({ data: [{ id: '1' }], page: 1, limit: 10, total: 21 })).toEqual({
+      data: [{ id: '1' }],
+      meta: { page: 1, pageSize: 10, total: 21, totalPage: 3 },
+    })
+  })
+
+  it('preserves canonical nested metadata', () => {
+    expect(normalizeCollection({
+      data: [{ id: '1' }],
+      meta: { page: 2, pageSize: 10, total: 21, totalPage: 3 },
+    })).toEqual({
+      data: [{ id: '1' }],
+      meta: { page: 2, pageSize: 10, total: 21, totalPage: 3 },
+    })
+  })
+
+  it('unwraps record envelopes using the configured adapter function shape', () => {
+    expect(normalizeRecord({ data: { id: '1' } })).toEqual({ id: '1' })
+    expect(normalizeRecord({ id: '1' })).toEqual({ id: '1' })
+  })
+})

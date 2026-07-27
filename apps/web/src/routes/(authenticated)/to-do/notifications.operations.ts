@@ -1,8 +1,9 @@
 import { createHonoResourceOperations, parseHonoResponse, type HonoResponseOf } from '@southneuhof/is-vue-framework/hono'
 import type { ResourceRecordOf } from '@southneuhof/is-vue-framework'
 import { rpc } from '@/framework/rpc'
+import { dataAdapter } from '@/framework/adapters/data/normalize'
 
-export const notificationOperations = createHonoResourceOperations(rpc.notifications)
+export const notificationOperations = createHonoResourceOperations(rpc.notifications, dataAdapter)
 export type NotificationRecord = ResourceRecordOf<typeof notificationOperations>
 export type NotificationStatus = NotificationRecord['statusCode']
 

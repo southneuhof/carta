@@ -37,10 +37,6 @@ describe('roles resource', () => {
     expect(roles.actions.delete).toMatchObject({ permission: 'roles.delete' })
     expect(roles.actions.delete?.to).toBeUndefined()
   })
-  it('shows controls from declared actions', () => {
-    expect(roles.table().controls.map((control) => control.key)).toEqual(['create'])
-  })
-
   it('produces core props that bind directly, with no adapter shape', () => {
     const { table } = roles.table()
     const { detail } = roles.detail({ id: '1' })
@@ -61,25 +57,19 @@ describe('roles resource', () => {
     expect(roles.form({ id: '1' }).schema?.validate({}).success).toBe(true)
   })
 
-  it('infers standard controls from behavior and routes', () => {
-    expect(roles.table().controls.map((control) => control.key)).toEqual(['create'])
-    expect(roles.detail({ id: '1', onDelete: () => undefined }).controls.map((control) => control.key)).toEqual([
-      'list',
-      'update',
-      'delete',
-    ])
+  it('provides row actions while route slots own page actions', () => {
+    expect(roles.table().rowControls?.({ id: '1', name: 'Admin' } as never).map((action) => action.key)).toEqual(['detail', 'update'])
   })
 
   /** Access reaches the factories through the runtime adapter, not per call. */
-  it('hides denied controls entirely', () => {
+  it('hides denied row actions entirely', () => {
     const access: AccessAdapter = { allows: ({ operation }) => operation === 'list' }
     registerResourceRuntime({
       adapters: resolveFrameworkAdapters({ access }),
       queryClient: createFrameworkQueryClient(),
     })
 
-    expect(roles.table().controls).toEqual([])
-    expect(roles.detail({ id: '1', onDelete: () => undefined }).controls.map((control) => control.key)).toEqual(['list'])
+    expect(roles.table().rowControls?.({ id: '1', name: 'Admin' } as never)).toEqual([])
   })
 })
 

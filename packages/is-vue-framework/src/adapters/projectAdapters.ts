@@ -9,12 +9,11 @@
 import { inject, type InjectionKey } from 'vue'
 import type {
   AccessAdapter,
-  CollectionMeta,
   CollectionResult,
+  RecordResult,
   QueryLocationAdapter,
   QueryNamespace,
   QueryValues,
-  RecordResult,
   SubmitError,
   ValidationSchema,
 } from '../contracts'
@@ -65,26 +64,23 @@ function readNumber(source: Record<string, unknown>, key: string): number | unde
   return typeof value === 'number' ? value : undefined
 }
 
-function collectMeta(source: Record<string, unknown>): CollectionMeta | undefined {
+function collectMeta(source: Record<string, unknown>) {
   const total = readNumber(source, 'total')
   const page = readNumber(source, 'page')
   const pageSize = readNumber(source, 'limit') ?? readNumber(source, 'pageSize')
   const declaredTotalPage = readNumber(source, 'totalPage')
   const totalPage = declaredTotalPage ?? (total != null && pageSize ? Math.ceil(total / pageSize) : undefined)
-  const meta: CollectionMeta = { total, page, pageSize, totalPage }
+  const meta = { total, page, pageSize, totalPage }
   return Object.values(meta).some((value) => value !== undefined) ? meta : undefined
 }
 
-/**
- * Conservative default: accepts a bare array, `{ data: [...] }`, or
- * `{ data: [...], total, limit, page }`. Anything else yields an empty
- * collection rather than guessing at a project envelope.
- */
 export const defaultDataAdapter: DataAdapter = {
   normalizeCollection: <TRecord extends object>(payload: unknown): CollectionResult<TRecord> => {
     if (Array.isArray(payload)) return { data: payload as TRecord[] }
     if (isRecord(payload) && Array.isArray(payload.data)) {
-      const meta = collectMeta(payload)
+      const nestedMeta = isRecord(payload.meta) ? payload.meta : undefined
+      const source = nestedMeta ? { ...payload, ...nestedMeta } : payload
+      const meta = collectMeta(source)
       return meta ? { data: payload.data as TRecord[], meta } : { data: payload.data as TRecord[] }
     }
     return { data: [] }

@@ -6,11 +6,5 @@ import type { User } from './users.operations'
 </script>
 
 <template>
-  <ListView title="Pengguna" :resource="users" :table-options="{ pagination: 'always' }">
-    <template #cell:name="{ value, record }">
-      <RouterLink :to="users.rowLink!(record as User)">
-        {{ value }}
-      </RouterLink>
-    </template>
-  </ListView>
+  <ListView title="Pengguna" :resource="users" :table-options="{ pagination: 'always' }"/>
 </template>

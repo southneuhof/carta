@@ -269,7 +269,7 @@ async function toggle(record: RolePermission, next: boolean) {
 | a field that appears conditionally | `form.behavior.visible` |
 | a schema the manifest does not have | `schemas` on the resource, or `schema` on the component |
 | a non-RPC or offline collection | `operations: { list: () => ({ data }) }` — `load` is universal |
-| a control the inference cannot know about | a custom `ViewControl` descriptor or a shell slot |
+| page action or workflow UI | direct markup in the route's `controls` or `footer` slot |
 
 ## 6. URL compatibility
 

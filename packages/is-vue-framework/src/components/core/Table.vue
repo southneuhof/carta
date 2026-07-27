@@ -11,7 +11,6 @@ import { getCoreRowModel, useVueTable, type ColumnDef } from '@tanstack/vue-tabl
 import type { CollectionLoadContext, CollectionResult, QueryValues, TableProps } from '../../contracts'
 import { resolveFields } from '../../fields'
 import { useLoader, useNamespacedQuery } from '../../query'
-import { useFrameworkAdapters } from '../../adapters/projectAdapters'
 import { useRendererRegistry } from '../../renderers/registry'
 import { assertSingleDataSource, collectionCacheKey, ownerOf } from './useCoreData'
 
@@ -27,7 +26,6 @@ const emit = defineEmits<{
 
 assertSingleDataSource('Table', props.data, props.load)
 
-const adapters = useFrameworkAdapters()
 const renderers = useRendererRegistry('table')
 
 const fields = computed(() => resolveFields({ fields: props.fields, surface: 'table' }))
@@ -47,7 +45,6 @@ const loaded = useLoader<CollectionLoadContext, CollectionResult>({
   context: computed(() => ({ query: query.values.value, searchParameters: props.searchParameters ?? {} })),
   load: computed(() => props.load),
   data: computed(() => (props.data ? { data: props.data } : undefined)),
-  normalize: (result) => adapters.data.normalizeCollection(result),
 })
 
 const rows = computed(() => loaded.data.value?.data ?? [])
@@ -143,7 +140,7 @@ defineExpose({ refresh: loaded.refresh, query: query.values })
       </slot>
     </div>
 
-    <div v-else class="overflow-x-auto rounded-xl bg-surface-container-low shadow-sm">
+    <div v-else class="overflow-x-auto rounded-xl">
       <table class="min-w-full border-collapse">
         <thead class="bg-surface-container-high text-on-surface-variant">
           <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
