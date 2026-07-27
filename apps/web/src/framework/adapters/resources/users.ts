@@ -60,10 +60,10 @@ export const users = defineResource<User, UserQuery, UserDraft, UserDraft>({
     create: fromZod<UserDraft>(user.schemas.create),
     update: fromZod<UserDraft>(user.schemas.update),
   },
-  routes: {
-    list: '/settings/users',
-    detail: (id) => `/settings/users/${id}`,
-    update: (id) => `/settings/users/${id}/edit`,
+  actions: {
+    list: { permission: 'users.list', to: { name: 'settings-users' } },
+    detail: { permission: 'users.detail', to: { name: 'settings-users-detail', params: (id) => ({ userId: id }) } },
+    update: { permission: 'users.update', to: { name: 'settings-users-edit', params: (id) => ({ userId: id }) } },
   },
 })
 
@@ -82,7 +82,7 @@ export interface AssignableRole extends Record<string, unknown> {
  * single `roleId` off the user record.
  */
 export async function loadAssignableRoles(userId: string): Promise<{ data: AssignableRole[] }> {
-  const [roleResult, assignedResponse] = await Promise.all([roles.table().load!({ query: { limit: 100 }, searchParameters: {} }), rpc.users[':userId'].roles.$get({ param: { userId } })])
+  const [roleResult, assignedResponse] = await Promise.all([roles.table().table.load!({ query: { limit: 100 }, searchParameters: {} }), rpc.users[':userId'].roles.$get({ param: { userId } })])
 
   const assignments = assignedResponse.ok ? ((await assignedResponse.json()) as { data?: { id: string; assigned: boolean }[] }).data : undefined
   const assigned = new Set((assignments ?? []).filter((entry) => entry.assigned).map((entry) => entry.id))
@@ -95,6 +95,13 @@ export async function loadAssignableRoles(userId: string): Promise<{ data: Assig
     })),
   }
 }
+
+export const userRoles = defineResource<AssignableRole>({
+  key: 'user-roles',
+  fields: defineFields<AssignableRole>()({ name: { label: 'Role' }, active: { label: 'Aktif' } }),
+  operations: { list: async ({ searchParameters }) => loadAssignableRoles(String(searchParameters.user_id ?? '')) },
+  actions: { list: { permission: 'users.update', to: { name: 'settings-users-detail-roles' } } },
+})
 
 /** Assigns or revokes one role for a user; the caller owns optimistic state. */
 export async function setUserRole(userId: string, roleId: string, active: boolean): Promise<void> {

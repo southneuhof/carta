@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from 'vitest'
-import { standardControls } from '@southneuhof/is-vue-framework'
 
 const ok = (payload: unknown) => ({ ok: true, json: async () => payload })
 
@@ -46,7 +45,7 @@ vi.mock('@/framework/rpc', () => ({
   },
 }))
 
-const { users, loadAssignableRoles, setUserRole } = await import('./users')
+const { users, userRoles, loadAssignableRoles, setUserRole } = await import('./users')
 
 describe('users resource', () => {
   it('derives only the operations the API exposes', () => {
@@ -54,23 +53,38 @@ describe('users resource', () => {
   })
 
   it('hides create and delete controls through inference, with no explicit false', () => {
-    expect(standardControls({ resource: users, surface: 'list' })).toEqual([])
-    expect(standardControls({ resource: users, surface: 'detail', id: 'u1' }).map((control) => control.key)).toEqual(['list', 'update'])
+    expect(users.table().controls).toEqual([])
+    expect(users.detail({ id: 'u1' }).controls.map((control) => control.key)).toEqual(['list', 'update'])
   })
 
   it('binds native props straight to the cores', () => {
-    expect(users.table().namespace).toBe('users')
-    expect(users.detail({ id: 'u1' }).id).toBe('u1')
+    expect(users.table().table.namespace).toBe('users')
+    expect(users.detail({ id: 'u1' }).detail.id).toBe('u1')
     expect(Object.keys(users.form({ id: 'u1' }).fields as Record<string, unknown>)).toEqual(['name', 'email'])
   })
 
+  it('links a row to its detail screen through the identity extractor', () => {
+    expect(users.rowLink!({ id: 'u1', name: 'Admin', email: 'a@b.c', createdAt: '', updatedAt: '' })).toEqual({
+      name: 'settings-users-detail',
+      params: { userId: 'u1' },
+    })
+  })
+
+  it('declares standard targets and permissions in its actions', () => {
+    expect(users.actions.list).toMatchObject({ permission: 'users.list', routeName: 'settings-users' })
+    expect(users.actions.update).toMatchObject({ permission: 'users.update', routeName: 'settings-users-edit' })
+  })
+
   it('carries no single-role field, because roles are a many-to-many assignment', () => {
-    expect(users.table().fields).not.toHaveProperty('roleId')
+    expect(users.table().table.fields).not.toHaveProperty('roleId')
     expect(Object.keys(users.form({ id: 'u1' }).fields as Record<string, unknown>)).not.toContain('roleId')
   })
 })
 
 describe('user role mapping', () => {
+  it('owns its child collection target and borrowed parent permission', () => {
+    expect(userRoles.actions.list).toMatchObject({ permission: 'users.update', routeName: 'settings-users-detail-roles' })
+  })
   it('marks every role the user actively holds, not one single assignment', async () => {
     const result = await loadAssignableRoles('u1')
 

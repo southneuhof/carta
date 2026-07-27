@@ -14,8 +14,19 @@ below.
 | Retired | Replacement |
 | --- | --- |
 | `CRUDComposite` + `?<name>_view=` query state | one filesystem route file per screen |
-| `CRUDList` | `ListView` + `resource.table()` |
-| `CRUDDetail` | `DetailView` + `resource.detail({ id })` |
+| `CRUDList` | `<ListView :resource="resource" />`; raw `resource.table()` remains escape hatch |
+| `CRUDDetail` | `<DetailView :resource="resource" :id="id" />`; raw `resource.detail({ id })` remains escape hatch |
+
+## Routing and resource-first views
+
+Resource targets use Vue Router `RouteLocationRaw`, preferably named locations. A resource maps its
+scalar or composite identity forward into route params; route components explicitly map params back
+to their identity. Do not serialize composite objects into one URL segment or infer identity from a
+whole params bag.
+
+`DetailView` resource mode owns standard deletion: `remove`, normalized feedback, then
+`router.replace(resource.actions.list?.to)` where available. Use raw detail mode for workflows that need
+preloaded data or custom delete behavior. `id` is always explicit; views never inspect current route.
 | `CRUDCreate` | `FormView` + `resource.form()` |
 | `CRUDUpdate` | `FormView` + `resource.form({ id })` |
 | `useCRUDOperations` / `FrameworkCRUDRuntime` | `defineResource({ operations })`, derived from RPC by `createRpcOperations` |
@@ -44,11 +55,12 @@ export const roles = defineResource<Role, RoleQuery, RoleDraft, RoleDraft>({
   detail: { fields: ['name', 'createdAt'] },
   form: { fields: ['name'] },
   schemas: { create: fromZod(roleSchemas.create), update: fromZod(roleSchemas.update) },
-  routes: {
-    list: '/settings/roles',
-    create: '/settings/roles/new',
-    detail: (id) => `/settings/roles/${id}`,
-    update: (id) => `/settings/roles/${id}/edit`,
+  actions: {
+    list: { permission: 'roles.list', to: { name: 'settings-roles' } },
+    create: { permission: 'roles.create', to: { name: 'settings-roles-new' } },
+    detail: { permission: 'roles.detail', to: { name: 'settings-roles-detail', params: (id) => ({ roleId: id }) } },
+    update: { permission: 'roles.update', to: { name: 'settings-roles-edit', params: (id) => ({ roleId: id }) } },
+    delete: { permission: 'roles.delete' },
   },
 })
 ```
@@ -63,27 +75,40 @@ never renders — no `actions: { create: false }` needed.
 settings/roles/
   index.route.vue          -> /settings/roles
   new.route.vue            -> /settings/roles/new
-  [roleId].route.vue       -> parent layout (tabs + <RouterView/>)
   [roleId]/
-    index.route.vue        -> /settings/roles/:roleId
+    detail.route.vue       -> /settings/roles/:roleId/detail
     edit.route.vue         -> /settings/roles/:roleId/edit
-    permissions/
-      index.route.vue      -> /settings/roles/:roleId/permissions
+    detail/permissions/
+      index.route.vue      -> /settings/roles/:roleId/detail/permissions
 ```
 
 ```vue
 <!-- index.route.vue -->
 <script setup lang="ts">
-import { ListView, standardControls } from '@southneuhof/is-vue-framework'
+import { ListView } from '@southneuhof/is-vue-framework'
 import { roles } from '@/framework/adapters/resources/roles'
-
-const controls = standardControls({ resource: roles, surface: 'list' })
 </script>
 
 <template>
-  <ListView title="Roles" :table="roles.table()" :controls="controls" />
+  <ListView title="Roles" :resource="roles" />
 </template>
 ```
+
+Filesystem owns URL structure and names: static segments joined by `-`, with
+route groups, `index`, and dynamic params omitted. `new` stays `new`; `edit`
+stays `edit`; no semantic aliases exist. Resources own standard action targets
+and permissions; navigation manifest owns only ordered entrypoints. Record
+parents render `DetailView`, ordered action tabs, then `AppRouterView`; every
+child deliberately renders detail-under. Each `AppRouterView` owns one
+transition boundary at its injected RouterView depth. Its key is rendered record
+identity plus that named record's concrete inherited-param path, never full leaf
+URL: child/sibling changes leave parent mounted, parent-param changes remount
+parent, and query/hash changes do neither. Shells remain outside this boundary.
+
+`RouteTab` contains a child resource action plus label. Mounted Tabs replaces
+bare owning parent with first valid child using `router.replace`; zero valid
+children leave parent detail visible.
+Tabs selects content only; it neither owns nor suppresses transitions.
 
 ```vue
 <!-- [roleId]/edit.route.vue — the same Form the create route uses, with no mode -->
@@ -102,6 +127,18 @@ const table = computed(() => rolePermissions.table({ searchParameters: { role_id
 ```
 
 There is no `parent` option, no nested-resource kind, and no injected record.
+
+Child resource owns its action; parent only places it:
+
+```ts
+const tabs = [{ action: rolePermissions.actions.list!, label: 'Permissions' }]
+```
+
+For composite identity, action params map declared identity explicitly:
+
+```ts
+detail: { permission: 'userRoles.detail', to: { name: 'settings-user-roles-detail', params: ({ userId, roleId }) => ({ userId, roleId }) } }
+```
 
 ## 4. Keep custom workflows as code
 

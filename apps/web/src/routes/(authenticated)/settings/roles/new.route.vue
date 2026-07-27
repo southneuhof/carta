@@ -4,13 +4,12 @@ import { toast } from 'vue-sonner'
 import { FormView } from '@southneuhof/is-vue-framework'
 import { roles } from '@/framework/adapters/resources/roles'
 
-definePage({ name: 'roles-create', meta: { title: 'Tambah Role', moduleName: 'settings' } })
 
 const router = useRouter()
 
 function onSubmitted() {
   toast.success('Role berhasil dibuat.')
-  void router.push(roles.routes.list!)
+  void router.push(roles.actions.list!.to as never)
 }
 </script>
 

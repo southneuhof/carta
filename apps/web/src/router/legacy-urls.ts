@@ -87,7 +87,10 @@ export function legacyViewRedirect(to: RouteLocationNormalized): RouteLocationRa
       return { path: feature.base, query }
     }
 
-    return { path: build(id ?? ''), query }
+    // List/create builders intentionally ignore identity. Detail/update have
+    // already returned above when no identity exists.
+    if (id === undefined) return { path: build(''), query }
+    return { path: build(id), query }
   }
 
   return undefined

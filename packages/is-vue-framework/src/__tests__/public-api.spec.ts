@@ -11,6 +11,8 @@ import * as framework from '../index'
  * outright under a major version bump rather than deprecated.
  */
 const removedExports = [
+  // Folded into the surface factories by plan 027; never public API again.
+  'standardControls',
   'resolveCRUDOperations',
   'useCRUDOperations',
   'defaultCRUDListOnExport',
@@ -23,7 +25,6 @@ const currentExports = [
   'resolveFields',
   'createBehaviorRuntime',
   'defineResource',
-  'standardControls',
   'Table',
   'Detail',
   'Form',

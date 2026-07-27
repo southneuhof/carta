@@ -60,7 +60,7 @@ describe('RPC resource operations', () => {
     const resource = defineResource({ key: 'offline-roles', fields: {}, operations: { list: () => ({ data: rows }) } })
 
     expect(resource.capabilities.list).toBe(true)
-    expect(await resource.table().load!({ query: {}, searchParameters: {} })).toEqual({ data: rows })
+    expect(await resource.table().table.load!({ query: {}, searchParameters: {} })).toEqual({ data: rows })
   })
 
   it('lets an explicit override replace a derived operation', async () => {
@@ -72,7 +72,7 @@ describe('RPC resource operations', () => {
       operations: { ...createRpcOperations(route as unknown as RpcCRUDRoute), list },
     })
 
-    await resource.table().load!({ query: {}, searchParameters: {} })
+    await resource.table().table.load!({ query: {}, searchParameters: {} })
 
     expect(list).toHaveBeenCalled()
     expect(route.list.$get).not.toHaveBeenCalled()

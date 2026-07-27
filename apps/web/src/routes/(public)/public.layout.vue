@@ -3,10 +3,6 @@ import LoginBackground from '@/assets/app/login/login-background.svg'
 import AppRouterView from '@/components/routing/AppRouterView.vue'
 </script>
 
-<route lang="json5">
-{ meta: { requiresAuth: false } }
-</route>
-
 <template>
   <div class="flex max-h-screen min-h-screen w-full items-center justify-center bg-cover p-8" :style="{ backgroundImage: `url(${LoginBackground})` }">
     <div class="w-full max-w-screen-sm"><AppRouterView /></div>

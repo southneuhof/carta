@@ -5,15 +5,16 @@ import { toast } from 'vue-sonner'
 import { FormView } from '@southneuhof/is-vue-framework'
 import { users } from '@/framework/adapters/resources/users'
 
-definePage({ name: 'users-update', meta: { title: 'Ubah Pengguna', moduleName: 'settings' } })
+// Not listed in the parent tab array, so it is reachable from the update
+// control and by URL, but is never a tab.
 
-const route = useRoute()
+const route = useRoute('settings-users-edit')
 const router = useRouter()
-const userId = computed(() => String((route.params as { userId?: string }).userId ?? ''))
+const userId = computed(() => route.params.userId)
 
 function onSubmitted() {
   toast.success('Pengguna berhasil diperbarui.')
-  void router.push(users.routes.detail!(userId.value))
+  void router.push((users.actions.detail!.to as (id: string) => unknown)(userId.value) as never)
 }
 </script>
 

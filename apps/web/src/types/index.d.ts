@@ -275,31 +275,6 @@ declare global {
     visible: boolean
   }
 
-  export type RouteSeparator = {
-    name: string
-  }
-
-  export type Route = {
-    title: string
-    name: string
-    icon: string
-    meta?: Object
-    permission?: string
-  }
-
-  export type Module = {
-    title: string
-    name: string
-    permission?: string
-    icon: [string, string] | string
-    description?: string
-    meta?: Object
-    routes: Array<{ separator?: boolean } & (RouteSeparator | Route)>
-    children?: Array<Route>
-  }
-
-  export type Modules = Array<Module>
-
   export type QueryParameters = {
     page?: number
     limit?: number

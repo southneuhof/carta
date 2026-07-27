@@ -127,6 +127,158 @@ the slice's result rather than its proposal. Read that before starting a second 
    route, with notification dispatch after commit? (024, Step 5)
 3. Can a record-state-dependent control be expressed without a framework change? (025, Step 3)
 
+## Web routing and controls overhaul (added 2026-07-27)
+
+Planned against commit `e4f345c`. The design was decided with the maintainer on 2026-07-27 and is
+recorded in the Addendum of
+[docs/architecture/routing-and-controls-review.md](../docs/architecture/routing-and-controls-review.md)
+— that Addendum is the specification; the plans implement it in order. Summary of the decisions:
+identity is a declared shape per resource (`{id}` from `record.id` is the default, not framework
+language; list and function spellings; `TIdentity` inferred and threaded end-to-end); standard
+controls fold into the resource surface factories and `standardControls` goes internal; detail is
+always an explicit `/detail` sibling with a `.layout.vue` shell, a first-valid-tab guard, and
+`meta.tabs` on the shell as the single presentation source (child meta owns access truth). Clean
+break on URLs: every detail URL gains `/detail`, no legacy redirects.
+
+| Plan | Title | Priority | Effort | Depends on | Status |
+|---|---|---|---|---|---|
+| [026](026-declared-identity-shapes.md) | Declared identity shapes with composite support | P1 | M | — | DONE |
+| [027](027-fold-controls-into-factories.md) | Fold standard controls into the resource surface factories | P1 | M | 026 | DONE |
+| [028](028-detail-shells-tabs-and-urls.md) | Detail shells, first-valid-tab resolution, and the /detail URL convention | P1 | L | 026, 027 | DONE |
+
+### Track dependency notes
+
+- 026 is contracts + `defineResource` only and must leave every existing resource definition and
+  route file compiling **unchanged** — its STOP conditions enforce the no-manual-generic and
+  zero-app-edit requirements.
+- 027 breaks the factory return shapes (bundles consumed via `v-bind`) and migrates the six
+  `standardControls` call sites plus four adapter specs in the same plan. It gives
+  `resource.identity` its first runtime consumer (`rowLink`).
+- 028 is the only plan that touches URLs and the routing plugin. It depends on 027 so that changed
+  `routes.detail` targets propagate through the factory bundles automatically. The guard, `Tabs`,
+  and `identityFromRoute` live in the app's router integration layer; `is-vue-framework` stays
+  router-agnostic (a 028 STOP condition).
+- These plans supersede the review note's §2 flag on `controls.ts` and amend the shared invariant
+  "standard controls are inferred from behavior + route target + UI access" — the inference now
+  happens inside the factories rather than at call sites; the absence rule is unchanged.
+
+## Web CRUD route simplification (revision added 2026-07-27)
+
+Planned against commit `e4f345c` with the uncommitted implementation of plans 026–028 present
+(watched source diff SHA-256:
+`40c525fc1794f7156fde6f7d135fc27056564233d8a950ac8002917b88a3a843`). Maintainer review accepted
+Vue Router as a framework dependency, rejected inverse resource/route identity reflection, kept
+parent-owned tab membership, and restored bare record URLs for detail. Plans 029–031 implement that
+revision without removing composite identity support. A later clarification requires detail pages
+with presented children to keep all ID-context routes inside parameter folders. Marked
+`[roleId]/index.route.vue` / `[userId]/index.route.vue` files are promoted into named parents by the
+app route-tree hook; same file owns default DetailView, tab entrypoints, and child outlet.
+
+| Plan | Title | Priority | Effort | Depends on | Status |
+|---|---|---|---|---|---|
+| [029](029-use-vue-router-resource-targets.md) | Make resource navigation native to Vue Router | P1 | M | 026–028 | DONE |
+| [030](030-add-resource-first-view-shells.md) | Add resource-first ListView and DetailView shells | P1 | M | 029 | DONE |
+| [031](031-simplify-detail-routes-and-tabs.md) | Make in-folder index details explicit route parents | P1 | L | 029, 030 | DONE |
+
+### Revision dependency notes
+
+- 029 runs first: named `RouteLocationRaw` targets decouple resource navigation from the URL moves in
+  031 and prove explicit composite identity → route-param mapping.
+- 030 consumes 029 so DetailView can derive delete, report failure, and navigate with the resource's
+  typed list target. Raw factory/view modes remain escape hatches.
+- 031 runs last: explicit build-only marker promotes in-folder index detail into named parent owning
+  DetailView fallback, tabs, and child outlet. It deletes record layouts, removes shell machinery,
+  enforces route permission meta, and deletes identity reflection.
+- 026 remains authoritative for composite identity types/extractors. 031 supersedes only its later
+  runtime-reflection addition (`identityKeys`).
+- 027 remains authoritative for surface factories and inferred controls. 030 adds a resource-first
+  component layer over those factories.
+- 031 supersedes 028's `/detail`, first-valid-tab, `meta.tabs`, and `identityFromRoute` decisions.
+  Plan 028 stays `DONE` as implementation history until 031 lands and records the supersession in
+  architecture docs.
+
+### Reconciliation result (2026-07-27)
+
+The first post-execution review returned plans 029–031 to `IN PROGRESS`:
+
+- 029: framework tests/type-check and web tests pass, but web type-check fails because the composite
+  contract fixture names nonexistent app routes (`user-role-detail` / `user-role-update`).
+- 030: resource-first shells and derived delete exist, but the required resource-mode and delete
+  lifecycle tests were not added.
+- 031: first execution used separate record layouts. Two follow-ups proved Vue Router 5.1 `_parent`
+  cannot retain detail names. Sibling parameter files were rejected because ID-context files must
+  stay inside parameter folders. Final revision is backed by executable real-generator proof at
+  `plans/proofs/031-index-parent/prove.mjs`: marked `[roleId]/index.route.vue` generates
+  `roles-detail` with typed `roleId`, edit/permissions children, and no runtime marker. Required
+  Tabs/permission-guard tests also remain absent; five route files retain
+  cast-plus-empty-string param extraction; and app installs no access adapter, so
+  `createPermissionGuard()` resolves through permissive default. `app.use(router)` also precedes
+  `FrameworkPlugin`, which would make initial navigation race any future installed access adapter.
+- Reconciliation complete: composite fixture now uses valid path targets; resource/delete, parent,
+  tab, and guard coverage exists; marked-index promotion is integrated; access adapter installs before
+  router navigation; typed params replace route casts. Framework and web type-checks/tests, proof, and
+  production build pass.
+
+## Typed route manifest and native detail parents (clean-break revision added 2026-07-27)
+
+Maintainer accepted a complete breaking migration after plan 031: filesystem remains structural
+truth, one typed app manifest becomes semantic/navigation truth, and native `_parent.route.vue`
+provides recursive detail-under composition inside ID folders. No mixed metadata mode or
+compatibility layer is allowed.
+
+| Plan | Title | Priority | Effort | Depends on | Status |
+|---|---|---|---|---|---|
+| [032](032-typed-route-manifest-native-parents.md) | Typed route manifest and native detail parents | P1 | L | 029–031 | DONE |
+| [033](033-auto-select-first-valid-tab.md) | Auto-select first valid child tab at bare parent URLs | P1 | M | 032 | DONE |
+| [034](034-scope-route-transitions-to-outlet-depth.md) | Scope route transitions to rendered outlet depth | P1 | M | 032, 033 | DONE |
+
+### Clean-break dependency notes
+
+- 032 is atomic because manifest application, removal of route-local metadata, and replacement of
+  marked index parents must land together to keep generated names/meta valid.
+- Real Vue Router generator proof at `plans/proofs/031-native-parent-typed/prove.mjs` confirms
+  manifest-backed native `_parent` retains named parent, metadata, typed params, and children.
+- Navigation becomes ordered projection of route catalog. Hidden/detail routes remain cataloged but
+  do not appear in sidebar.
+- Every native-parent child, including edit, renders under DetailView by explicit maintainer decision.
+- 033 keeps resource detail targets on named parents. Mounted `Tabs` infers its owning matched record
+  and replaces a bare owner with the first resolvable/permitted child; sibling and deeper routes are
+  never selected merely because no tab is active.
+- 034 makes transition ownership recursive: each `AppRouterView` keys the record rendered at its own
+  depth. Child navigation preserves detail parents; record or parent-identity changes still animate
+  the route page.
+
+## File routes and resource actions as single truth (clean-break revision added 2026-07-27)
+
+Planned against commit `e4f345c` with Plans 026–034 implemented in the dirty working tree (watched
+source diff SHA-256:
+`85c3b9a48dc9eb929293384b7a0030ec8e84ce84eb84c0bc9362fdf87296b1be`).
+Maintainer rejected the full per-route manifest and accepted a complete breaking migration:
+filesystem static segments mechanically produce route names; resource `actions` own each standard
+target plus permission; navigation keeps entrypoints only. Dynamic params, route groups, and
+`index` do not appear in names. `new` and `edit` remain literal—no CRUD synonym mapping.
+
+| Plan | Title | Priority | Effort | Depends on | Status |
+|---|---|---|---|---|---|
+| [035](035-prove-mechanical-file-routes.md) | Prove mechanical file-route names and lazy action discovery | P1 | S | 034 | DONE |
+| [036](036-make-files-and-resource-actions-route-truth.md) | Make file routes and resource actions the only CRUD route truth | P1 | L | 035 | DONE |
+
+### Single-truth dependency notes
+
+- 035 is proof-only. It uses the installed Vue Router generator/runtime to prove documented
+  same-name file/folder detail nesting, static-only names with typed inherited params, and lazy
+  resource registration before `beforeResolve`. Production migration must not start if either proof
+  fails.
+- 036 is atomic because route names, URLs, resource targets, permission lookup, navigation, tabs,
+  and generated types reference one another. A staged dual API would temporarily create the exact
+  second source of truth this track removes.
+- Final detail shape is
+  `[id]/detail.route.vue` plus `[id]/detail/<child>/index.route.vue`; edit/create are siblings.
+  `_parent.route.vue` and its manifest name restoration are deleted.
+- Final resource shape is `actions.{list,detail,create,update,delete}`. Every declared action spells
+  permission explicitly; named targets expose their name structurally for direct-entry guard lookup.
+  Child collections own their actions; parent details own only tab label/order/placement.
+
 ## Dependency and delivery notes
 
 - **Full-scope sequential phases (decided 2026-07-26)**: plans 001-006 are executed at full scope in order, each with its own complete verification gates. A walking-skeleton re-scoping was considered and reverted: it violated the plan-writing rules (self-containment, machine-checkable boundaries), and the framework is not co-developed with an app, so longer wall-clock time before the first slice is acceptable. Early-validation duty falls on plan 000's compile-time contract tests and plan 006's ordinary-resource fixture.

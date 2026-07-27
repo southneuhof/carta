@@ -6,10 +6,6 @@ import NotificationInbox from '@/components/navigations/NotificationInbox.vue'
 import { useScreenStore } from '@/stores/screen'
 </script>
 
-<route lang="json5">
-{ meta: { requiresAuth: true } }
-</route>
-
 <template>
   <div class="flex w-full flex-row">
     <Sidebar v-if="useScreenStore().isAtLeast('lg')" />

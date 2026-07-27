@@ -51,11 +51,12 @@ export const roles = defineResource<Role, RoleQuery, RoleDraft, RoleDraft>({
     create: fromZod<RoleDraft>(role.schemas.create),
     update: fromZod<RoleDraft>(role.schemas.update),
   },
-  routes: {
-    list: '/settings/roles',
-    create: '/settings/roles/new',
-    detail: (id) => `/settings/roles/${id}`,
-    update: (id) => `/settings/roles/${id}/edit`,
+  actions: {
+    list: { permission: 'roles.list', to: { name: 'settings-roles' } },
+    create: { permission: 'roles.create', to: { name: 'settings-roles-new' } },
+    detail: { permission: 'roles.detail', to: { name: 'settings-roles-detail', params: (id) => ({ roleId: id }) } },
+    update: { permission: 'roles.update', to: { name: 'settings-roles-edit', params: (id) => ({ roleId: id }) } },
+    delete: { permission: 'roles.delete' },
   },
 })
 
@@ -86,6 +87,9 @@ export const rolePermissions = defineResource<RolePermission>({
       const payload = (await response.json()) as { data: RolePermission[]; total?: number }
       return { data: payload.data, meta: { total: payload.total } }
     },
+  },
+  actions: {
+    list: { permission: 'roles.update', to: { name: 'settings-roles-detail-permissions' } },
   },
 })
 

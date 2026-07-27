@@ -156,7 +156,7 @@ describe('legacy app services', () => {
     expect(mocks.storage.localStorage.clear).toHaveBeenCalledOnce()
     expect(mocks.storage.cookie.clear).toHaveBeenCalledOnce()
     expect(mocks.permissions.clear).toHaveBeenCalledOnce()
-    expect(mocks.router.push).toHaveBeenCalledExactlyOnceWith({ name: 'login', force: true })
+    expect(mocks.router.push).toHaveBeenCalledExactlyOnceWith({ name: 'auth-login', force: true })
   })
 
   it('URI-encodes detail identity segments', async () => {

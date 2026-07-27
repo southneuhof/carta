@@ -1,5 +1,10 @@
-import { describe, expect, it, vi } from 'vitest'
-import { standardControls } from '@southneuhof/is-vue-framework'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import {
+  createFrameworkQueryClient,
+  registerResourceRuntime,
+  resetResourceRuntimeForTests,
+  resolveFrameworkAdapters,
+} from '@southneuhof/is-vue-framework'
 import type { AccessAdapter } from '@southneuhof/is-vue-framework'
 
 const ok = (payload: unknown) => ({ ok: true, json: async () => payload })
@@ -19,14 +24,25 @@ vi.mock('@/framework/rpc', () => ({
 
 const { roles, rolePermissions } = await import('./roles')
 
+afterEach(() => resetResourceRuntimeForTests())
+
 describe('roles resource', () => {
+  it('declares exact standard action permissions and targets', () => {
+    expect(roles.actions.list).toMatchObject({ permission: 'roles.list', routeName: 'settings-roles' })
+    expect(roles.actions.create).toMatchObject({ permission: 'roles.create', routeName: 'settings-roles-new' })
+    const detailTarget = roles.actions.detail?.to
+    expect(typeof detailTarget).toBe('function')
+    expect((detailTarget as (id: string) => unknown)('1')).toEqual({ name: 'settings-roles-detail', params: { roleId: '1' } })
+    expect(roles.actions.delete).toMatchObject({ permission: 'roles.delete' })
+    expect(roles.actions.delete?.to).toBeUndefined()
+  })
   it('derives every ordinary operation from the RPC route', () => {
     expect(roles.capabilities).toEqual({ list: true, detail: true, create: true, update: true, delete: true })
   })
 
   it('produces core props that bind directly, with no adapter shape', () => {
-    const table = roles.table()
-    const detail = roles.detail({ id: '1' })
+    const { table } = roles.table()
+    const { detail } = roles.detail({ id: '1' })
     const create = roles.form()
     const update = roles.form({ id: '1' })
 
@@ -45,21 +61,33 @@ describe('roles resource', () => {
   })
 
   it('infers standard controls from behavior and routes', () => {
-    expect(standardControls({ resource: roles, surface: 'list' }).map((control) => control.key)).toEqual(['create'])
-    expect(standardControls({ resource: roles, surface: 'detail', id: '1', onDelete: () => undefined }).map((control) => control.key)).toEqual(['list', 'update', 'delete'])
+    expect(roles.table().controls.map((control) => control.key)).toEqual(['create'])
+    expect(roles.detail({ id: '1', onDelete: () => undefined }).controls.map((control) => control.key)).toEqual([
+      'list',
+      'update',
+      'delete',
+    ])
   })
 
+  /** Access reaches the factories through the runtime adapter, not per call. */
   it('hides denied controls entirely', () => {
-    const readOnly: AccessAdapter = { allows: ({ operation }) => operation === 'list' }
+    const access: AccessAdapter = { allows: ({ operation }) => operation === 'list' }
+    registerResourceRuntime({
+      adapters: resolveFrameworkAdapters({ access }),
+      queryClient: createFrameworkQueryClient(),
+    })
 
-    expect(standardControls({ resource: roles, surface: 'list', access: readOnly })).toEqual([])
-    expect(standardControls({ resource: roles, surface: 'detail', id: '1', access: readOnly, onDelete: () => undefined }).map((control) => control.key)).toEqual(['list'])
+    expect(roles.table().controls).toEqual([])
+    expect(roles.detail({ id: '1', onDelete: () => undefined }).controls.map((control) => control.key)).toEqual(['list'])
   })
 })
 
 describe('role permissions resource', () => {
+  it('owns child target while borrowing its parent update permission', () => {
+    expect(rolePermissions.actions.list).toMatchObject({ permission: 'roles.update', routeName: 'settings-roles-detail-permissions' })
+  })
   it('is scoped by an ordinary searchParameters entry, with no parent vocabulary', () => {
-    const props = rolePermissions.table({ searchParameters: { role_id: '1' } })
+    const props = rolePermissions.table({ searchParameters: { role_id: '1' } }).table
 
     expect(props.searchParameters).toEqual({ role_id: '1' })
     expect(Object.keys(props)).not.toContain('parent')
@@ -70,6 +98,6 @@ describe('role permissions resource', () => {
   })
 
   it('returns an empty collection when no role is in scope', async () => {
-    expect(await rolePermissions.table().load!({ query: {}, searchParameters: {} })).toEqual({ data: [] })
+    expect(await rolePermissions.table().table.load!({ query: {}, searchParameters: {} })).toEqual({ data: [] })
   })
 })

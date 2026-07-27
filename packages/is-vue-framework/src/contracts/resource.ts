@@ -9,10 +9,10 @@
  * Plan 006 implements `defineResource` against these contracts.
  */
 
-import type { AccessPolicy, ResourceOperation } from './access'
+import type { AccessPolicy } from './access'
 import type { DetailProps, FormProps, TableProps } from './components'
 import type { FieldCatalog } from './fields'
-import type { RecordIdentity } from './load'
+import type { RecordIdentity, RecordIdentityValue } from './load'
 import type { QueryNamespace } from './query'
 import type { ValidationSchema } from './validation'
 
@@ -30,15 +30,23 @@ export interface ResourceSchemas<
   update?: ValidationSchema<TUpdate>
 }
 
+/**
+ * Two spellings of an identity declaration: the key list (first-class — it
+ * yields the extractor and the identity type from one declaration) and the
+ * extractor function (escape hatch for derived or renamed shapes).
+ */
+export type IdentityDeclaration<TRecord extends object, TIdentity extends RecordIdentity = RecordIdentity> =
+  | readonly (keyof TRecord & string)[]
+  | ((record: TRecord) => TIdentity)
+
 export interface ResourceDefinitionBase<
   TRecord extends object = Record<string, unknown>,
   TDraft extends object = TRecord,
+  TIdentity extends RecordIdentity = RecordIdentityValue,
 > {
   key: ResourceKey
-  identity?: (record: TRecord) => RecordIdentity
+  identity?: IdentityDeclaration<TRecord, TIdentity>
   fields?: FieldCatalog<TRecord, TDraft>
-  /** Permission identity per operation; defaults derive from `key`. */
-  permissions?: Partial<Record<ResourceOperation, string>>
   policy?: AccessPolicy<TRecord>
 }
 
@@ -48,8 +56,8 @@ export interface TableFactoryArguments<TQuery extends object = Record<string, un
   query?: TQuery
 }
 
-export interface DetailFactoryArguments {
-  id: RecordIdentity
+export interface DetailFactoryArguments<TIdentity extends RecordIdentity = RecordIdentityValue> {
+  id: TIdentity
   searchParameters?: Record<string, unknown>
 }
 
@@ -58,8 +66,11 @@ export interface CreateFormFactoryArguments<TCreate extends object = Record<stri
   searchParameters?: Record<string, unknown>
 }
 
-export interface UpdateFormFactoryArguments<TUpdate extends object = Record<string, unknown>> {
-  id: RecordIdentity
+export interface UpdateFormFactoryArguments<
+  TUpdate extends object = Record<string, unknown>,
+  TIdentity extends RecordIdentity = RecordIdentityValue,
+> {
+  id: TIdentity
   initialData?: Partial<TUpdate>
   searchParameters?: Record<string, unknown>
 }
@@ -75,18 +86,19 @@ export interface ResourcePropFactories<
   TQuery extends object = Record<string, unknown>,
   TCreate extends object = Record<string, unknown>,
   TUpdate extends object = TCreate,
+  TIdentity extends RecordIdentity = RecordIdentityValue,
 > {
   table: (args?: TableFactoryArguments<TQuery>) => TableProps<TRecord, TQuery>
-  detail: (args: DetailFactoryArguments) => DetailProps<TRecord>
+  detail: (args: DetailFactoryArguments<TIdentity>) => DetailProps<TRecord>
   form: {
     (): FormProps<TCreate>
     (args: CreateFormFactoryArguments<TCreate>): FormProps<TCreate>
-    (args: UpdateFormFactoryArguments<TUpdate>): FormProps<TUpdate>
+    (args: UpdateFormFactoryArguments<TUpdate, TIdentity>): FormProps<TUpdate>
   }
 }
 
-export interface ResourceInvalidationArguments {
-  id?: RecordIdentity
+export interface ResourceInvalidationArguments<TIdentity extends RecordIdentity = RecordIdentityValue> {
+  id?: TIdentity
   searchParameters?: Record<string, unknown>
 }
 
@@ -95,9 +107,10 @@ export interface Resource<
   TQuery extends object = Record<string, unknown>,
   TCreate extends object = Record<string, unknown>,
   TUpdate extends object = TCreate,
-> extends ResourceDefinitionBase<TRecord, TCreate>,
-    ResourcePropFactories<TRecord, TQuery, TCreate, TUpdate> {
+  TIdentity extends RecordIdentity = RecordIdentityValue,
+> extends ResourceDefinitionBase<TRecord, TCreate, TIdentity>,
+    ResourcePropFactories<TRecord, TQuery, TCreate, TUpdate, TIdentity> {
   schemas?: ResourceSchemas<TRecord, TQuery, TCreate, TUpdate>
   /** Semantic invalidation for custom workflows; never a raw query key. */
-  invalidate: (args?: ResourceInvalidationArguments) => Promise<void>
+  invalidate: (args?: ResourceInvalidationArguments<TIdentity>) => Promise<void>
 }

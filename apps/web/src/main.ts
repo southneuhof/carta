@@ -53,8 +53,8 @@ declare module 'vue' {
 
 document.addEventListener('DOMContentLoaded', async () => {
   app.use(createPinia())
-  app.use(router)
   app.use(FrameworkPlugin, { runtime: frameworkRuntime, defaults: appDefaults, adapters: createFrameworkAdapters(router) })
+  app.use(router)
   app.use(
     VueTippy,
     // optional

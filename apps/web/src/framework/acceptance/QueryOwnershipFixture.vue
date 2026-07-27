@@ -74,17 +74,17 @@ const submitted = ref<Draft>()
 <template>
   <div>
     <section data-fixture="two-resources">
-      <Table v-bind="alpha.table()" />
-      <Table v-bind="beta.table()" />
+      <Table v-bind="alpha.table().table" />
+      <Table v-bind="beta.table().table" />
     </section>
 
     <section data-fixture="duplicate-resource">
-      <Table v-bind="alpha.table()" />
-      <Table v-bind="alpha.table({ namespace: 'archived' })" />
+      <Table v-bind="alpha.table().table" />
+      <Table v-bind="alpha.table({ namespace: 'archived' }).table" />
     </section>
 
     <section data-fixture="offline">
-      <Table v-bind="offline.table()" />
+      <Table v-bind="offline.table().table" />
     </section>
 
     <section data-fixture="local-query">

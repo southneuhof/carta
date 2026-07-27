@@ -1,20 +1,15 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
-import { ListView, standardControls } from '@southneuhof/is-vue-framework'
-import { users } from '@/framework/adapters/resources/users'
+import { ListView } from '@southneuhof/is-vue-framework'
+import { users, type User } from '@/framework/adapters/resources/users'
 
-definePage({ name: 'users', meta: { title: 'Pengguna', moduleName: 'settings' } })
-
-const router = useRouter()
-const controls = standardControls({ resource: users, surface: 'list' })
 </script>
 
 <template>
-  <ListView title="Pengguna" :table="users.table()" :controls="controls">
+  <ListView title="Pengguna" :resource="users">
     <template #cell:name="{ value, record }">
-      <a :href="users.routes.detail?.(String(record.id))" @click.prevent="router.push(users.routes.detail!(String(record.id)))">
+      <RouterLink :to="users.rowLink!(record as User)">
         {{ value }}
-      </a>
+      </RouterLink>
     </template>
   </ListView>
 </template>

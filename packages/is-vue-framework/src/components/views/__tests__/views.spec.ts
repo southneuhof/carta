@@ -213,8 +213,8 @@ describe('FormView', () => {
 describe('shell boundaries', () => {
   const shellFiles = readdirSync(viewsRoot).filter((entry) => entry.endsWith('.vue') || entry.endsWith('.ts'))
 
-  it('imports no router, store, runtime, or RPC dependency', () => {
-    const forbidden = ['vue-router', 'pinia', '../../runtime', '../../adapters', '@southneuhof/sdk']
+  it('imports no store or RPC dependency', () => {
+    const forbidden = ['pinia', '../../runtime', '../../adapters', '@southneuhof/sdk']
     const offenders = shellFiles.flatMap((file) => {
       const source = readFileSync(join(viewsRoot, file), 'utf8')
       return forbidden.filter((specifier) => source.includes(`'${specifier}`)).map((specifier) => `${file}: ${specifier}`)
@@ -225,8 +225,8 @@ describe('shell boundaries', () => {
 
   it('forwards core props with v-bind instead of translating them', () => {
     for (const [file, binding] of [
-      ['ListView.vue', 'v-bind="props.table"'],
-      ['DetailView.vue', 'v-bind="props.detail"'],
+      ['ListView.vue', 'v-bind="surface.table"'],
+      ['DetailView.vue', 'v-bind="surface.detail"'],
       ['FormView.vue', 'v-bind="props.form"'],
     ]) {
       expect(readFileSync(join(viewsRoot, file), 'utf8')).toContain(binding)

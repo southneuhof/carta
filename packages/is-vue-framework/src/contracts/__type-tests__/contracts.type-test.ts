@@ -5,8 +5,12 @@
  * They deliberately live outside `__tests__/`, which `tsconfig.json` excludes.
  */
 
+import { defineResource } from '../../resources'
 import type { Resource } from '../../resources'
+import type { ViewControl } from '../../components/views/controls'
 import type {
+  FieldCatalog,
+  RecordIdentityValue,
   CollectionResult,
   DetailProps,
   FormProps,
@@ -38,13 +42,17 @@ declare const roles: Resource<Role, RoleQuery, RoleCreate, RoleUpdate>
 declare const roleId: string
 declare const maybeRoleId: string | undefined
 
-/* Factory outputs are exactly the native core component props. */
-const tableProps: TableProps<Role, RoleQuery> = roles.table()
+/* Surface factories return shell-ready bundles over the native core props. */
+const tableProps: TableProps<Role, RoleQuery> = roles.table().table
 const scopedTableProps: TableProps<Role, RoleQuery> = roles.table({
   searchParameters: { organisation_id: 'org-1' },
   namespace: 'archived',
-})
-const detailProps: DetailProps<Role> = roles.detail({ id: roleId })
+}).table
+const listControls: readonly ViewControl[] = roles.table().controls
+void listControls
+const detailProps: DetailProps<Role> = roles.detail({ id: roleId }).detail
+const detailControls: readonly ViewControl[] = roles.detail({ id: roleId }).controls
+void detailControls
 const createProps: FormProps<RoleCreate> = roles.form()
 const prefilledCreateProps: FormProps<RoleCreate> = roles.form({ initialData: { name: 'copy' } })
 const updateProps: FormProps<RoleUpdate> = roles.form({ id: roleId })
@@ -64,7 +72,7 @@ roles.detail({ id: maybeRoleId })
 roles.detail({})
 
 /* Nested placement is scoping, never a resource kind. */
-const nestedTableProps: TableProps<Role, RoleQuery> = roles.table({ searchParameters: { incident_id: 'incident-1' } })
+const nestedTableProps: TableProps<Role, RoleQuery> = roles.table({ searchParameters: { incident_id: 'incident-1' } }).table
 void nestedTableProps
 // @ts-expect-error there is no parent vocabulary
 roles.table({ parent: { incident_id: 'incident-1' } })
@@ -169,3 +177,112 @@ const invalidBehavior: FormProps<RoleCreate> = {
   submit: submitRole,
 }
 void invalidBehavior
+
+/* ------------------------------------------------------------------------- *
+ * Declared identity shapes (plan 026).
+ * ------------------------------------------------------------------------- */
+
+interface UserRole extends Record<string, unknown> {
+  userId: string
+  roleId: string
+  assignedAt: string
+}
+
+const userRoleFields: FieldCatalog<UserRole, UserRole> = { userId: { label: 'Pengguna' }, roleId: { label: 'Role' } }
+
+/* The key list is the first-class spelling: one declaration yields the type. */
+const userRoles = defineResource({
+  key: 'userRoles',
+  fields: userRoleFields,
+  identity: ['userId', 'roleId'],
+  operations: {
+    detail: ({ id }) => ({ userId: id?.userId, roleId: id?.roleId }),
+    update: (id, input: UserRole) => ({ ...input, ...id }),
+    delete: (id) => id.roleId,
+  },
+  actions: {
+    detail: { permission: 'user-roles.detail', to: { name: 'user-roles-detail', params: ({ userId, roleId }) => ({ userId, roleId }) } },
+    update: { permission: 'user-roles.update', to: { name: 'user-roles-edit', params: ({ userId, roleId }) => ({ userId, roleId }) } },
+  },
+})
+
+const compositeIdentity: { userId: string; roleId: string } = userRoles.identity({
+  userId: 'u-1',
+  roleId: 'r-1',
+  assignedAt: 'now',
+})
+void compositeIdentity
+void userRoles.detail({ id: { userId: 'u-1', roleId: 'r-1' } })
+void userRoles.form({ id: { userId: 'u-1', roleId: 'r-1' } })
+void userRoles.remove({ userId: 'u-1', roleId: 'r-1' })
+void userRoles.invalidate({ id: { userId: 'u-1', roleId: 'r-1' } })
+void (typeof userRoles.actions.update?.to === 'function' && userRoles.actions.update.to({ userId: 'u-1', roleId: 'r-1' }))
+
+/* A composite resource gets a typed row link with no route code (plan 027). */
+const compositeRowLink = userRoles.rowLink?.({
+  userId: 'u-1',
+  roleId: 'r-1',
+  assignedAt: 'now',
+})
+void compositeRowLink
+
+/* Custom controls must be actionable, and the standard set is patchable. */
+void userRoles.table({
+  controls: {
+    labels: { create: 'Tugaskan' },
+    overrides: { create: false },
+    extra: [{ key: 'export', label: 'Excel', onSelect: () => undefined }],
+  },
+})
+userRoles.table({
+  // @ts-expect-error a control with neither a target nor a handler is unrepresentable
+  controls: { extra: [{ key: 'export', label: 'Excel' }] },
+})
+void userRoles.detail({ id: { userId: 'u-1', roleId: 'r-1' }, onDelete: () => undefined })
+
+/* A composite resource never accepts a scalar identity. */
+// @ts-expect-error a composite identity is not a scalar
+userRoles.detail({ id: 'u-1' })
+// @ts-expect-error a composite identity is not a scalar
+typeof userRoles.actions.update?.to === 'function' && userRoles.actions.update.to('u-1')
+// @ts-expect-error every declared key is required
+userRoles.detail({ id: { userId: 'u-1' } })
+
+/* The function spelling is the escape hatch; its return type is the identity.
+ * Inference runs from the extractor outwards, so its parameter is annotated. */
+const derivedIdentity = defineResource({
+  key: 'derivedUserRoles',
+  fields: userRoleFields,
+  identity: (record: UserRole) => `${record.userId}:${record.roleId}`,
+  actions: { detail: { permission: 'user-roles.detail', to: { name: 'user-roles-detail', params: (id) => ({ id }) } } },
+})
+const derivedIdentityValue: string = derivedIdentity.identity({ userId: 'u-1', roleId: 'r-1', assignedAt: 'now' })
+void derivedIdentityValue
+void derivedIdentity.detail({ id: 'u-1:r-1' })
+// @ts-expect-error the declared identity is a string
+derivedIdentity.detail({ id: { userId: 'u-1' } })
+
+/* The loader is checked against the declared identity, at the definition site. */
+defineResource({
+  key: 'mismatched',
+  fields: userRoleFields,
+  identity: ['userId', 'roleId'],
+  operations: {
+    // @ts-expect-error a scalar-id loader cannot serve a composite resource
+    detail: ({ id }: { id?: string; searchParameters: Record<string, unknown> }) => id,
+  },
+})
+
+/* Unconfigured identity keeps today's scalar default, extracted from `record.id`. */
+const scalarIdentity = defineResource({
+  key: 'roles',
+  fields: { name: { label: 'Nama' } } as FieldCatalog<Role, Role>,
+  operations: { detail: ({ id }) => ({ id: String(id), name: 'Admin' }) },
+  actions: { detail: { permission: 'roles.detail', to: { name: 'roles-detail', params: (id) => ({ id }) } } },
+})
+const scalarIdentityValue: RecordIdentityValue = scalarIdentity.identity({ id: 'r-1', name: 'Admin' })
+void scalarIdentityValue
+void scalarIdentity.detail({ id: 'r-1' })
+void scalarIdentity.detail({ id: 7 })
+// @ts-expect-error a scalar resource takes no composite identity
+scalarIdentity.detail({ id: { userId: 'u-1' } })

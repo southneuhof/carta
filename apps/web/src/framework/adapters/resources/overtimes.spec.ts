@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from 'vitest'
-import { standardControls } from '@southneuhof/is-vue-framework'
 
 const ok = (payload: unknown) => ({ ok: true, json: async () => payload })
 
@@ -25,10 +24,18 @@ vi.mock('@/framework/rpc', () => ({
 const { overtimes, verificationSteps, submitOvertime, verifyOvertime, loadOvertime, overtimeFields } = await import('./overtimes')
 
 describe('overtimes resource', () => {
+  it('declares mechanical route targets in actions', () => {
+    expect(overtimes.actions.list).toMatchObject({ permission: 'overtimes.list', routeName: 'hr-overtimes' })
+    const detailTarget = overtimes.actions.detail?.to
+    expect(typeof detailTarget).toBe('function')
+    expect((detailTarget as (id: string) => unknown)('o1')).toEqual({ name: 'hr-overtimes-detail', params: { overtimeId: 'o1' } })
+    expect(overtimes.actions.delete).toMatchObject({ permission: 'overtimes.delete' })
+    expect(overtimes.actions.delete?.to).toBeUndefined()
+  })
   it('derives only the operations the API exposes', () => {
     // No delete: a submitted request is a record, so the control never appears.
     expect(overtimes.capabilities).toEqual({ list: true, detail: true, create: true, update: true, delete: false })
-    expect(standardControls({ resource: overtimes, surface: 'detail', id: 'o1' }).map((control) => control.key)).not.toContain('delete')
+    expect(overtimes.detail({ id: 'o1' }).controls.map((control) => control.key)).not.toContain('delete')
   })
 
   it('keeps caller-derived fields off the form', () => {
@@ -71,7 +78,7 @@ describe('overtime workflow calls', () => {
 
 describe('verification timeline', () => {
   it('is an ordinary collection scoped by a search parameter', async () => {
-    const result = await verificationSteps.table().load!({ query: {}, searchParameters: { overtime_id: 'o1' } })
+    const result = await verificationSteps.table().table.load!({ query: {}, searchParameters: { overtime_id: 'o1' } })
 
     expect(stepsGet).toHaveBeenCalledWith({ param: { id: 'o1' } })
     expect((result as { data: unknown[] }).data).toHaveLength(1)
@@ -79,7 +86,7 @@ describe('verification timeline', () => {
 
   it('loads nothing when no record is in scope, rather than every chain', async () => {
     stepsGet.mockClear()
-    const result = await verificationSteps.table().load!({ query: {}, searchParameters: {} })
+    const result = await verificationSteps.table().table.load!({ query: {}, searchParameters: {} })
 
     expect(stepsGet).not.toHaveBeenCalled()
     expect((result as { data: unknown[] }).data).toEqual([])

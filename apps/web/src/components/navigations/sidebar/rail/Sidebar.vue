@@ -1,35 +1,33 @@
 <script setup lang="ts">
 import RailItem from './layouts/RailItem.vue'
 import RailExpand from './layouts/RailExpand.vue'
-import navigationManifest from '@/components/navigations/navigation-manifest'
+import { activeNavigationModule, visibleNavigation } from '@/manifest'
 import Logo from '@/assets/corporate/common/Logo.vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { onClickOutside } from '@vueuse/core'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
-import { permissions } from '@/stores/permissions'
+import { allowsPermission } from '@/framework/adapters/bundle'
 
 const sidebarexpand = ref<HTMLElement>()
 const sidebarState = ref<{index?: number, open: boolean}>({index: undefined, open: false})
-const accessibleNavigation = navigationManifest.flatMap((item) => {
-  if (item.routes.length === 1) {
-    return permissions().has(`view-${item.permission || item.name}`) ? [item] : []
+const accessibleNavigation = computed(() => visibleNavigation(allowsPermission))
+const router = useRouter()
+const route = useRoute()
+const activeModule = computed(() => activeNavigationModule(route.path, (to) => router.resolve(to as never), allowsPermission))
+
+function selectModule(index: number) {
+  const item = accessibleNavigation.value[index]
+  sidebarState.value.index = index
+  if (item.routes.length === 1 && !('separator' in item.routes[0])) {
+    sidebarState.value.open = false
+    return router.push({ name: item.routes[0].name } as never)
   }
-
-  const routes: any[] = []
-  item.routes.forEach((route: any) => {
-    if (route.separator) {
-      if (routes.length && !routes[routes.length - 1].separator) routes.push(route)
-      return
-    }
-    if (route.name && permissions().has(`view-${route.permission || route.name}`)) routes.push(route)
-  })
-  if (routes[routes.length - 1]?.separator) routes.pop()
-
-  return routes.length ? [{ ...item, routes }] : []
-})
+  sidebarState.value.open = true
+}
 
 onClickOutside(
-  (sidebarexpand as any),
+  sidebarexpand,
   (element) => {
     if (['file'].includes((element.target as HTMLElement)?.id)) return
     sidebarState.value.open = false
@@ -48,17 +46,10 @@ onClickOutside(
           v-for="(item, index) in accessibleNavigation"
           :key="item.name"
           :title="item.title"
-          :state="item.name === String($route.meta.moduleName) ? 2 : sidebarState.index === index ? 1 : 0"
-          @click="() => {
-            sidebarState.index = index
-            if (item.routes.length === 1) {
-              sidebarState.open = false
-              return $router.push({name: (item.routes[0] as any).name})
-            }
-            sidebarState.open = true
-          }"
+          :state="item.name === activeModule ? 2 : sidebarState.index === index ? 1 : 0"
+          @click="selectModule(index)"
         >
-          <Icon size="3xl" :fill="item.name === String($route.meta.moduleName)" :name="(item.icon as any)"></Icon>
+          <Icon size="3xl" :fill="item.name === activeModule" :name="item.icon"></Icon>
         </RailItem>
       </div>
       <RailItem

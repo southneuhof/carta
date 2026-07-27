@@ -60,6 +60,40 @@ behavior explicit.
 6. **Hide mechanics, not intent.** Standard HTTP mechanics may be inferred;
    resource identity, parent scope, and custom workflows remain visible.
 
+## CRUD route truth
+
+Files own URLs and generated names. A name joins static file segments with `-`;
+route groups, `index`, and dynamic params are omitted. Thus `new` remains
+`new`, `edit` remains `edit`, and parameter renames never rename a screen.
+
+Resources own standard actions: each action gives explicit permission and an
+optional named target. Navigation manifest owns only entrypoint order and
+presentation. A detail child owns its collection action; its parent only gives
+that action a tab label and order. Direct entry is authorized from registered
+resource action after lazy route evaluation; exceptional non-resource routes may
+declare explicit route metadata.
+
+```text
+settings/roles/
+  index.route.vue                         settings-roles
+  new.route.vue                           settings-roles-new
+  [roleId]/edit.route.vue                 settings-roles-edit
+  [roleId]/detail.route.vue               settings-roles-detail
+  [roleId]/detail/permissions/index.route.vue
+                                           settings-roles-detail-permissions
+```
+
+```ts
+actions: {
+  list: { permission: 'roles.list', to: { name: 'settings-roles' } },
+  detail: { permission: 'roles.detail', to: { name: 'settings-roles-detail', params: (id) => ({ roleId: id }) } },
+}
+```
+
+Use `controls.extra` for exceptional page workflows, `visible` for additional
+resource-action presentation restrictions, then explicit typed route metadata
+only when no resource owns target.
+
 ## Layers
 
 ```text
@@ -234,14 +268,18 @@ components with CRUD assumptions.
   standard controls, and `Detail`.
 - `FormView` composes a Card/container, title, form toolbar, and `Form`.
 
-Normal route usage stays concise:
+Normal resource route usage stays concise:
 
 ```vue
-<ListView :table="incidents.table()" />
-<DetailView :detail="incidents.detail({ id: incidentId })" />
+<ListView :resource="incidents" />
+<DetailView :resource="incidents" :id="incidentId" />
 <FormView :form="incidents.form()" />
 <FormView :form="incidents.form({ id: incidentId })" />
 ```
+
+`ListView` and `DetailView` call the resource surface factories internally.
+Raw `:table` and `:detail` modes remain for composed screens; resource-first
+detail owns standard delete feedback and list replacement.
 
 The primitives remain available for custom composition:
 
@@ -658,9 +696,20 @@ schema (`refine` or a discriminated union), never duplicated in behavior.
 The app uses HTML5 history (`createWebHistory`). It stays fully static; the only
 hosting requirement is a fallback rule serving `index.html` for unknown paths.
 Legacy hash URLs are normalized client-side on boot, and legacy query-state URLs
-(`?roles_view=detail&roles_id=1`) redirect to their route. Links between sibling
-routes under a shared parent layout preserve the siblings' namespaced query
-params within that subtree; leaving the subtree drops them.
+(`?roles_view=detail&roles_id=1`) redirect to their route. Native `_parent`
+detail routes render detail-under unconditionally. `RouteTab` lists only child
+content routes; Tabs infers its owning matched record and replaces a bare parent
+with first resolvable/permitted child. No valid child leaves parent intact;
+sibling/deeper routes stay untouched. Replacement preserves inherited params and
+dotted sibling query keys, preventing Back loops.
+
+`AppRouterView` owns one transition boundary per rendered RouterView depth. Its
+key uses rendered record identity, that named record's concrete inherited-param
+path, and record-scoped refresh state; never full leaf URL. Parent-to-child and
+sibling-child navigation therefore keeps parent detail mounted, parent-param or
+record changes remount their own outlet, and query/hash changes do not
+transition. Detail parents render `AppRouterView` for child content; Tabs does
+not control animation. Auth/public shells remain outside route-page transitions.
 
 ## Vocabulary rules
 
@@ -749,8 +798,8 @@ resource, routing, and state-machine responsibilities move elsewhere:
 
 | Current component | Target responsibility                                         |
 | ----------------- | ------------------------------------------------------------- |
-| `CRUDList`        | `ListView` shell plus `resource.table()`                      |
-| `CRUDDetail`      | `DetailView` shell plus `resource.detail({ id })`             |
+| `CRUDList`        | `ListView :resource="resource"` (or raw `resource.table()` composition) |
+| `CRUDDetail`      | `DetailView :resource="resource" :id="id"` (or raw `resource.detail({ id })` composition) |
 | `CRUDCreate`      | `FormView` shell plus `resource.form()`                       |
 | `CRUDUpdate`      | `FormView` shell plus `resource.form({ id })`                 |
 | `CRUDComposite`   | Removed; filesystem routes select surfaces                    |
@@ -836,4 +885,3 @@ The shipped vertical slices are `roles` (list, create, detail, edit, and nested
 permissions) and `users` (list, detail, edit, and role mapping). `incidents`
 lives in a downstream repository and is covered by the downstream checklist in
 the migration guide.
-

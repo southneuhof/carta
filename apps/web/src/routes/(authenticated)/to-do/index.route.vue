@@ -13,12 +13,11 @@ import { ListView } from '@southneuhof/is-vue-framework'
 import { notifications, type NotificationRecord } from '@/framework/adapters/resources/notifications'
 import { notificationRoute } from '@/framework/notifications/moduleRoutes'
 
-definePage({ name: 'to-do', meta: { title: 'To Do', moduleName: 'to-do' } })
 
 const router = useRouter()
 
 const table = computed(() =>
-  notifications.table({ namespace: 'to-do', searchParameters: { notificationType: 'verification' } }),
+  notifications.table({ namespace: 'to-do', searchParameters: { notificationType: 'verification' } }).table,
 )
 
 function open(record: NotificationRecord) {

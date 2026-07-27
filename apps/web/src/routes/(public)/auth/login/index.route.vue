@@ -14,7 +14,6 @@ import TextInput from '@southneuhof/is-vue-framework/components/inputs/TextInput
 import PasswordInput from '@southneuhof/is-vue-framework/components/inputs/PasswordInput.vue'
 import { rpc } from '@/framework/rpc'
 
-definePage({ name: 'login', meta: { title: 'Login' } })
 
 const BYPASS_ALL_PERMISSIONS = import.meta.env.VITE_APP_BYPASS_ALL_PERMISSIONS === 'true'
 const loginMessage = ref<{ message: string; type: 'error' | 'warning' | 'info' | 'success' | undefined }>({ message: '', type: undefined })

@@ -241,7 +241,7 @@ class AppServices {
       return
     }
 
-    router.push({ name: 'login', force: true })
+    router.push({ name: 'auth-login', force: true })
   }
 
   private async downloadResponse(response: Response, fallbackFilename: string) {

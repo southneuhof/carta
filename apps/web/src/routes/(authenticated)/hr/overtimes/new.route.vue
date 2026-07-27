@@ -4,7 +4,6 @@ import { toast } from 'vue-sonner'
 import { FormView } from '@southneuhof/is-vue-framework'
 import { overtimes } from '@/framework/adapters/resources/overtimes'
 
-definePage({ name: 'overtime-create', meta: { title: 'Ajukan Lembur', moduleName: 'hr' } })
 
 const router = useRouter()
 
@@ -15,7 +14,7 @@ const router = useRouter()
 function onSubmitted(result: unknown) {
   toast.success('Pengajuan lembur tersimpan sebagai draft.')
   const id = (result as { data?: { id?: string } } | undefined)?.data?.id
-  void router.push(id ? overtimes.routes.detail!(id) : overtimes.routes.list!)
+  void router.push(id ? (overtimes.actions.detail!.to as (id: string) => unknown)(id) as never : overtimes.actions.list!.to as never)
 }
 </script>
 

@@ -15,7 +15,7 @@ import type { NotificationRecord } from '@/framework/adapters/resources/notifica
  */
 export const notificationRoutes = {
   overtimes: (notification: NotificationRecord) => ({
-    name: 'overtime-detail' as const,
+    name: 'hr-overtimes-detail' as const,
     params: { overtimeId: notification.moduleId as string },
   }),
 } satisfies Record<string, (notification: NotificationRecord) => RouteLocationRaw>

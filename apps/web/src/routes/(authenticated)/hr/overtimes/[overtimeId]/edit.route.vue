@@ -5,17 +5,16 @@ import { toast } from 'vue-sonner'
 import { FormView } from '@southneuhof/is-vue-framework'
 import { overtimes } from '@/framework/adapters/resources/overtimes'
 
-definePage({ name: 'overtime-edit', meta: { title: 'Ubah Lembur', moduleName: 'hr' } })
 
-const route = useRoute()
+const route = useRoute('hr-overtimes-edit')
 const router = useRouter()
-const overtimeId = computed(() => String((route.params as { overtimeId?: string }).overtimeId ?? ''))
+const overtimeId = computed(() => route.params.overtimeId)
 
 // Editing is only possible while the request is a draft; the API answers 409
 // otherwise, and the detail screen hides the control once it is submitted.
 function onSubmitted() {
   toast.success('Pengajuan lembur diperbarui.')
-  void router.push(overtimes.routes.detail!(overtimeId.value))
+  void router.push((overtimes.actions.detail!.to as (id: string) => unknown)(overtimeId.value) as never)
 }
 </script>
 

@@ -2,13 +2,9 @@
 import { titleCase } from '@southneuhof/utilities/string'
 import ProfileSegment from '../../../layouts/ProfileSegment.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import type { VisibleNavigationModule } from '@/manifest'
 
-const props = defineProps({
-  menus: {
-    type: Object,
-    required: false,
-  },
-})
+defineProps<{ menus?: VisibleNavigationModule }>()
 </script>
 
 <template>
@@ -21,12 +17,12 @@ const props = defineProps({
           <hr/>
           <div class="flex flex-col gap-2">
             <div v-for="submenu in menus.routes" :key="submenu.name">
-              <div v-if="submenu.separator" class="text-muted px-4 py-2 text-sm">{{ submenu.name }}</div>
+              <div v-if="'separator' in submenu" class="text-muted px-4 py-2 text-sm">{{ submenu.name }}</div>
               <button v-else-if="String($route.name) === submenu.name" class="overlay flex w-full flex-row items-center gap-4 rounded-full bg-primary p-4 text-on-primary after:hover:bg-on-primary/[8%] after:active:bg-on-primary/[12%]    ">
                 <Icon :FILL="1" :name="submenu.icon"></Icon>
                 <div class="text-left">{{ titleCase(submenu.title) }}</div>
               </button>
-              <button v-else @click="() => $router.push({name: submenu.name})" class="overlay flex w-full flex-row items-center gap-4 rounded-full p-4 text-on-surface after:hover:bg-on-surface/[8%] after:active:bg-on-surface/[12%]   ">
+              <button v-else @click="() => $router.push({ name: submenu.name } as never)" class="overlay flex w-full flex-row items-center gap-4 rounded-full p-4 text-on-surface after:hover:bg-on-surface/[8%] after:active:bg-on-surface/[12%]   ">
                 <Icon :name="submenu.icon"></Icon>
                 <div class="text-left">{{ titleCase(submenu.title) }}</div>
               </button>

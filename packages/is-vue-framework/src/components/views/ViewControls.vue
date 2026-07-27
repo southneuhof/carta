@@ -8,9 +8,16 @@ defineProps<{ controls: readonly ViewControl[]; label: string }>()
 <template>
   <div v-if="controls.length" class="is-view-controls" role="group" :aria-label="label">
     <template v-for="control in controls" :key="control.key">
-      <a v-if="control.to" :href="control.to" :data-control="control.key" :aria-disabled="control.disabled || undefined">
-        {{ control.label }}
-      </a>
+      <RouterLink v-if="control.to" v-slot="{ href, navigate }" custom :to="control.to">
+        <a
+          :href="href"
+          :data-control="control.key"
+          :aria-disabled="control.disabled || control.loading || undefined"
+          @click="(event) => !(control.disabled || control.loading) && navigate(event)"
+        >
+          {{ control.label }}
+        </a>
+      </RouterLink>
       <button
         v-else
         type="button"

@@ -28,7 +28,7 @@ const open = ref(false)
 const unread = ref(0)
 const rows = ref<NotificationRecord[]>([])
 
-const table = computed(() => notifications.table({ namespace: 'inbox' }))
+const table = computed(() => notifications.table({ namespace: 'inbox' }).table)
 
 async function refreshCount() {
   try {
@@ -70,7 +70,7 @@ async function toggle() {
   open.value = !open.value
   if (!open.value) return
 
-  const loaded = await notifications.table({ namespace: 'inbox' }).load!({ query: {}, searchParameters: {} })
+  const loaded = await notifications.table({ namespace: 'inbox' }).table.load!({ query: {}, searchParameters: {} })
   rows.value = (loaded as { data: NotificationRecord[] }).data
 
   // Only what was actually shown, and only what was actually unread.

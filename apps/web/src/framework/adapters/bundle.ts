@@ -1,7 +1,29 @@
 import type { Router } from 'vue-router'
-import type { FrameworkAdaptersInput } from '@southneuhof/is-vue-framework'
+import type { AccessAdapter, FrameworkAdaptersInput, ResourceOperation } from '@southneuhof/is-vue-framework'
 import { dataAdapter } from './data/normalize'
 import { createRouteQueryAdapter } from './query/routeQuery'
+import { permissions } from '@/stores/permissions'
+
+const legacyPermissionPrefix: Record<ResourceOperation, string> = {
+  list: 'view',
+  detail: 'show',
+  create: 'create',
+  update: 'update',
+  delete: 'delete',
+}
+
+/** Bridges canonical resource permissions (`roles.detail`) to app grants. */
+export const accessAdapter: AccessAdapter = {
+  allows: ({ permission }) => allowsPermission(permission),
+}
+
+/** Maps a canonical action permission to this app's legacy persisted grant. */
+export function allowsPermission(permission: string | null | undefined): boolean {
+  if (!permission) return true
+  const match = permission.match(/^(.*)\.(list|detail|create|update|delete)$/)
+  if (!match) return permissions().has(permission)
+  return permissions().has(`${legacyPermissionPrefix[match[2] as ResourceOperation]}-${match[1]}`)
+}
 
 /**
  * Project-specific adapter bundle installed with the framework plugin.
@@ -14,6 +36,7 @@ import { createRouteQueryAdapter } from './query/routeQuery'
 export function createFrameworkAdapters(router: Router): FrameworkAdaptersInput {
   return {
     data: dataAdapter,
+    access: accessAdapter,
     query: createRouteQueryAdapter(router),
     queryDefaults: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: false },
   }

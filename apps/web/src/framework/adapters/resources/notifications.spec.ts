@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from 'vitest'
-import { standardControls } from '@southneuhof/is-vue-framework'
 
 const ok = (payload: unknown) => ({ ok: true, json: async () => payload })
 
@@ -30,14 +29,14 @@ const rows = [
 describe('notifications resource', () => {
   it('exposes no writes, because notifications are produced by workflows', () => {
     expect(notifications.capabilities).toMatchObject({ list: true, detail: true, create: false, update: false, delete: false })
-    expect(standardControls({ resource: notifications, surface: 'list' })).toEqual([])
+    expect(notifications.table().controls).toEqual([])
   })
 
   it('holds independent query state per namespace', () => {
     // Two namespaces over one resource is a stated release gate: paging the
     // drawer must not move the to-do tab.
-    const inbox = notifications.table({ namespace: 'inbox' })
-    const todo = notifications.table({ namespace: 'to-do' })
+    const inbox = notifications.table({ namespace: 'inbox' }).table
+    const todo = notifications.table({ namespace: 'to-do' }).table
 
     expect(inbox.namespace).toBe('inbox')
     expect(todo.namespace).toBe('to-do')

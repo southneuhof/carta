@@ -19,7 +19,7 @@ function notification(overrides: Partial<NotificationRecord> = {}): Notification
 
 describe('notification deep links', () => {
   it('resolves a registered module to its screen', () => {
-    expect(notificationRoute(notification())).toEqual({ name: 'overtime-detail', params: { overtimeId: 'o1' } })
+    expect(notificationRoute(notification())).toEqual({ name: 'hr-overtimes-detail', params: { overtimeId: 'o1' } })
   })
 
   it('returns null for a module this app has no screen for', () => {

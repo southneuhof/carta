@@ -1,4 +1,5 @@
 import { createApp, defineComponent, h, nextTick, type Component } from 'vue'
+import { createMemoryHistory, createRouter } from 'vue-router'
 import { FrameworkPlugin } from '../../../adapters/plugin'
 import { createFrameworkQueryClient } from '../../../query'
 import type { FrameworkAdaptersInput } from '../../../adapters/projectAdapters'
@@ -23,6 +24,11 @@ export function mountCore(component: Component, props: Record<string, unknown>, 
       },
     }),
   )
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [{ path: '/:pathMatch(.*)*', name: 'test-route', component: { render: () => null } }],
+  })
+  app.use(router)
   app.use(FrameworkPlugin, {
     runtime: {},
     adapters: options.adapters,

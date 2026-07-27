@@ -11,6 +11,7 @@ export type {
   RecordLoadContext,
   MaybePromise,
   RecordIdentity,
+  RecordIdentityValue,
 } from './load'
 
 export type { CollectionMeta, CollectionResult, RecordResult } from './results'
@@ -59,6 +60,7 @@ export type {
   ResourceKey,
   ResourceSchemas,
   ResourceDefinitionBase,
+  IdentityDeclaration,
   TableFactoryArguments,
   DetailFactoryArguments,
   CreateFormFactoryArguments,

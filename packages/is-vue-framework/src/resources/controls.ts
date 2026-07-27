@@ -1,5 +1,5 @@
 /**
- * Standard control inference.
+ * Standard control inference — internal to the resource surface factories.
  *
  * A standard control renders only when the resource actually has the behavior,
  * a route target exists where one is needed, and UI access allows it. Anything
@@ -7,27 +7,46 @@
  *
  * Standard controls are list, detail, create, update, and delete. Excel export
  * and print are not standard: applications add them as ordinary custom control
- * descriptors.
+ * descriptors, through the `extra` block on a factory's `controls` argument.
+ *
+ * This is not public API. `resource.table()` and `resource.detail({ id })`
+ * return the projection already applied, so no caller repeats it per route.
  */
 import type { AccessAdapter, RecordIdentity, ResourceOperation } from '../contracts'
 import type { ViewControl } from '../components/views/controls'
-import type { Resource } from './defineResource'
+import type { ResourceAction, ResourceActionKey, ResourceCapabilities } from './defineResource'
+import type { RouteLocationRaw } from 'vue-router'
 
-export type StandardControlName = Extract<ResourceOperation, 'list' | 'detail' | 'create' | 'update' | 'delete'>
+export type StandardControlName = Extract<ResourceOperation, ResourceActionKey>
 
 export type ControlOverride = false | Partial<ViewControl>
 
-export interface StandardControlOptions {
-  resource: Resource<never, never, never, never> | Resource
-  surface: 'list' | 'detail'
-  /** Required for record-scoped controls on the detail surface. */
-  id?: RecordIdentity
-  record?: Record<string, unknown>
-  access?: AccessAdapter
+/**
+ * A control the shells can actually act on. A descriptor with neither a target
+ * nor a handler used to throw at runtime; it is now unrepresentable.
+ */
+export type ActionableControl = ViewControl & ({ to: RouteLocationRaw } | { onSelect: () => void })
+
+/** Per-surface control customization: route-authored, never model-declared. */
+export interface ControlsArguments {
   overrides?: Partial<Record<StandardControlName, ControlOverride>>
-  /** Handler for controls with no route target, such as delete. */
-  onDelete?: () => void
   labels?: Partial<Record<StandardControlName, string>>
+  /** Custom controls, appended after the standard set. */
+  extra?: readonly ActionableControl[]
+}
+
+export interface StandardControlOptions<TIdentity extends RecordIdentity = RecordIdentity> {
+  key: string
+  capabilities: ResourceCapabilities
+  actions: Partial<Record<StandardControlName, ResourceAction<TIdentity>>>
+  surface: 'list' | 'detail'
+  /** Present on the detail surface, where controls are record-scoped. */
+  id?: TIdentity
+  record?: Record<string, unknown>
+  access: AccessAdapter
+  /** Delete has no route target, so the surface only offers it with a handler. */
+  onDelete?: () => void
+  controls?: ControlsArguments
 }
 
 const defaultLabels: Record<StandardControlName, string> = {
@@ -38,50 +57,53 @@ const defaultLabels: Record<StandardControlName, string> = {
   delete: 'Hapus',
 }
 
-function allowed(options: StandardControlOptions, operation: StandardControlName): boolean {
-  const access = options.access
-  if (!access) return true
-  return access.allows({ operation, permission: options.resource.permissions[operation], record: options.record })
+type AccessInput<TIdentity extends RecordIdentity> = Pick<StandardControlOptions<TIdentity>, 'access' | 'record' | 'actions'>
+
+function allowed<TIdentity extends RecordIdentity>(options: AccessInput<TIdentity>, operation: StandardControlName): boolean {
+  const action = options.actions[operation]
+  return Boolean(action && (action.permission === null || options.access.allows({ operation, permission: action.permission, record: options.record })) && (!action.visible || action.visible({ record: options.record, access: options.access })))
 }
 
-export function standardControls(options: StandardControlOptions): ViewControl[] {
-  const { resource, overrides = {} } = options
+export function standardControls<TIdentity extends RecordIdentity>(
+  options: StandardControlOptions<TIdentity>,
+): ViewControl[] {
+  const { capabilities, actions } = options
+  const overrides = options.controls?.overrides ?? {}
   const controls: ViewControl[] = []
 
   const add = (name: StandardControlName, base: Omit<ViewControl, 'key' | 'label'>) => {
     const override = overrides[name]
     if (override === false) return
-    controls.push({ key: name, label: options.labels?.[name] ?? defaultLabels[name], ...base, ...(override ?? {}) })
+    controls.push({
+      key: name,
+      label: options.controls?.labels?.[name] ?? defaultLabels[name],
+      ...base,
+      ...(override ?? {}),
+    })
   }
 
   if (options.surface === 'list') {
-    if (resource.capabilities.create && resource.routes.create && allowed(options, 'create')) {
-      add('create', { to: resource.routes.create, placement: 'primary' })
+    const create = actions.create
+    if (capabilities.create && create?.to && typeof create.to !== 'function' && allowed(options, 'create')) {
+      add('create', { to: create.to, placement: 'primary' })
     }
   }
 
   if (options.surface === 'detail') {
-    if (options.id === undefined) {
-      throw new Error(`[is-vue-framework] Detail controls for "${resource.key}" need the record id.`)
+    const list = actions.list
+    const update = actions.update
+    if (list?.to && typeof list.to !== 'function' && allowed(options, 'list')) {
+      add('list', { to: list.to, placement: 'secondary' })
     }
-    if (resource.routes.list && allowed(options, 'list')) {
-      add('list', { to: resource.routes.list, placement: 'secondary' })
+    if (capabilities.update && update?.to && options.id !== undefined && allowed(options, 'update')) {
+      add('update', { to: typeof update.to === 'function' ? update.to(options.id) : update.to, placement: 'primary' })
     }
-    if (resource.capabilities.update && resource.routes.update && allowed(options, 'update')) {
-      add('update', { to: resource.routes.update(options.id), placement: 'primary' })
-    }
-    if (resource.capabilities.delete && allowed(options, 'delete')) {
+    if (capabilities.delete && actions.delete && options.onDelete && allowed(options, 'delete')) {
       add('delete', { onSelect: options.onDelete, placement: 'primary' })
     }
   }
 
-  for (const control of controls) {
-    if (!control.to && !control.onSelect) {
-      throw new Error(
-        `[is-vue-framework] Control "${control.key}" on resource "${resource.key}" has neither a handler nor a route target.`,
-      )
-    }
-  }
+  controls.push(...(options.controls?.extra ?? []))
 
   return controls
 }

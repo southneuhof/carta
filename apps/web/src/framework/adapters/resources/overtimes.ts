@@ -78,11 +78,12 @@ export const overtimes = defineResource<Overtime, OvertimeQuery, OvertimeDraft, 
     create: fromZod<OvertimeDraft>(overtime.schemas.create),
     update: fromZod<OvertimeDraft>(overtime.schemas.update),
   },
-  routes: {
-    list: '/hr/overtimes',
-    create: '/hr/overtimes/new',
-    detail: (id) => `/hr/overtimes/${id}`,
-    update: (id) => `/hr/overtimes/${id}/edit`,
+  actions: {
+    list: { permission: 'overtimes.list', to: { name: 'hr-overtimes' } },
+    create: { permission: 'overtimes.create', to: { name: 'hr-overtimes-new' } },
+    detail: { permission: 'overtimes.detail', to: { name: 'hr-overtimes-detail', params: (id) => ({ overtimeId: id }) } },
+    update: { permission: 'overtimes.update', to: { name: 'hr-overtimes-edit', params: (id) => ({ overtimeId: id }) } },
+    delete: { permission: 'overtimes.delete' },
   },
 })
 

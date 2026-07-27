@@ -12,6 +12,8 @@
  * rendered.
  */
 
+import type { RouteLocationRaw } from 'vue-router'
+
 export type ControlPlacement = 'primary' | 'secondary' | 'row'
 
 export interface ViewControl {
@@ -24,8 +26,8 @@ export interface ViewControl {
   loading?: boolean
   /** Ordinary Vue handler. */
   onSelect?: () => void
-  /** Navigation target as a plain href; the route owns route building. */
-  to?: string
+  /** Vue Router target; the route owns route building. */
+  to?: RouteLocationRaw
 }
 
 export function controlsAt(controls: readonly ViewControl[] | undefined, placement: ControlPlacement): ViewControl[] {

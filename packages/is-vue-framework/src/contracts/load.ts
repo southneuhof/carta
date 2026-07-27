@@ -23,10 +23,17 @@ export interface CollectionLoadContext<TQuery = Record<string, unknown>> extends
 }
 
 /** Context handed to a single-record loader. */
-export interface RecordLoadContext extends LoadSignalContext {
-  id?: RecordIdentity
+export interface RecordLoadContext<TIdentity extends RecordIdentity = RecordIdentity> extends LoadSignalContext {
+  id?: TIdentity
   searchParameters: Record<string, unknown>
 }
 
-/** Stable identity of one record. */
-export type RecordIdentity = string | number
+/** One scalar component of a record identity. */
+export type RecordIdentityValue = string | number
+
+/**
+ * Stable identity of one record: a scalar, or a flat record of scalars for
+ * composite keys. `{ id }` extracted from `record.id` is the framework default,
+ * not the framework language — a resource declares its own identity shape.
+ */
+export type RecordIdentity = RecordIdentityValue | Readonly<Record<string, RecordIdentityValue>>

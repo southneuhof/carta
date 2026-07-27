@@ -5,15 +5,16 @@ import { toast } from 'vue-sonner'
 import { FormView } from '@southneuhof/is-vue-framework'
 import { roles } from '@/framework/adapters/resources/roles'
 
-definePage({ name: 'roles-update', meta: { title: 'Ubah Role', moduleName: 'settings' } })
+// Not listed in the parent tab array, so it is reachable from the update
+// control and by URL, but is never a tab.
 
-const route = useRoute()
+const route = useRoute('settings-roles-edit')
 const router = useRouter()
-const roleId = computed(() => String((route.params as { roleId?: string }).roleId ?? ''))
+const roleId = computed(() => route.params.roleId)
 
 function onSubmitted() {
   toast.success('Role berhasil diperbarui.')
-  void router.push(roles.routes.detail!(roleId.value))
+  void router.push((roles.actions.detail!.to as (id: string) => unknown)(roleId.value) as never)
 }
 </script>
 

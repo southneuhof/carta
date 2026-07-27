@@ -1,13 +1,28 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { RouterView, useRoute } from 'vue-router'
+import { computed, inject, unref } from 'vue'
+import { RouterView, useRoute, useRouter, viewDepthKey } from 'vue-router'
+import type { RouteNamedMap } from 'vue-router/auto-routes'
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
 import { keyManager } from '@/stores/keyManager'
 
 const route = useRoute()
+const router = useRouter()
+const viewDepth = inject(viewDepthKey, 0)
+
+const renderedRecord = computed(() => {
+  let depth = unref(viewDepth)
+  while (route.matched[depth] && !route.matched[depth].components) depth++
+  return route.matched[depth]
+})
 
 const routeViewKey = computed(() => {
-  return `${route.path}${String(keyManager().value[String(route.name)])}`
+  const record = renderedRecord.value
+  if (!record) return 'unmatched'
+  if (record.name == null) return `${record.path}:undefined`
+
+  const name = String(record.name)
+  const path = router.resolve({ name: record.name as keyof RouteNamedMap }).path
+  return `${name}:${path}:${String(keyManager().value[name])}`
 })
 </script>
 

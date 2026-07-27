@@ -2,13 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
   hasPermission: vi.fn(),
-  manifest: [
-    { name: 'dashboard', routes: [{ name: 'dashboard' }] },
-    { name: 'settings', routes: [{ separator: true, name: 'System' }, { name: 'users' }] },
-  ] as any,
 }))
 
-vi.mock('@/components/navigations/navigation-manifest', () => ({ default: mocks.manifest }))
 vi.mock('@/stores/permissions', () => ({ permissions: () => ({ has: mocks.hasPermission }) }))
 
 import { getDefaultAuthenticatedRouteLocation, getFirstAccessibleRouteName, resolvePostLoginRoute } from '../navigation'
@@ -19,18 +14,18 @@ describe('navigation helpers', () => {
     mocks.hasPermission.mockImplementation((permission: string) => permission === 'view-users' || permission === 'view-dashboard')
   })
 
-  it('returns the first accessible route name from the manifest', () => {
+  it('returns first manifest entrypoint, including explicit public actions', () => {
     mocks.hasPermission.mockImplementation((permission: string) => permission === 'view-users')
 
-    expect(getFirstAccessibleRouteName()).toBe('users')
-    expect(getDefaultAuthenticatedRouteLocation()).toEqual({ name: 'users' })
+    expect(getFirstAccessibleRouteName()).toBe('dashboard')
+    expect(getDefaultAuthenticatedRouteLocation()).toEqual({ name: 'dashboard' })
   })
 
-  it('returns null when no accessible route exists', () => {
+  it('keeps public dashboard available when no persisted grant exists', () => {
     mocks.hasPermission.mockReturnValue(false)
 
-    expect(getFirstAccessibleRouteName()).toBeNull()
-    expect(getDefaultAuthenticatedRouteLocation()).toBeNull()
+    expect(getFirstAccessibleRouteName()).toBe('dashboard')
+    expect(getDefaultAuthenticatedRouteLocation()).toEqual({ name: 'dashboard' })
   })
 
   it('prefers stored post-login redirect and falls back when redirect is invalid', () => {
@@ -38,7 +33,7 @@ describe('navigation helpers', () => {
 
     const router = {
       resolve: (path: string) => {
-        if (path === '/settings/users') return { matched: [{}], name: 'users', path }
+        if (path === '/settings/users') return { matched: [{}], name: 'settings-users', path }
         if (path === '/') return { matched: [{}], name: 'root', path }
         return { matched: [], name: undefined, path }
       },

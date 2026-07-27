@@ -1,21 +1,14 @@
 <script setup lang="ts">
 import { titleCase } from '@southneuhof/utilities/string'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import type { NavigationIcon, VisibleNavigationEntry } from '@/manifest'
 
-const props = defineProps({
-  active: {
-    type: Boolean,
-    required: true,
-  },
-  route: {
-    type: Object,
-    required: true,
-  },
-})
+type NavItemRoute = { title: string; icon: NavigationIcon | 'user' | 'arrow-left'; routes?: VisibleNavigationEntry[] }
+const props = defineProps<{ active: boolean; route: NavItemRoute }>()
 
-const hasNestedRoutes = (route: any) => {
+const hasNestedRoutes = (route: NavItemRoute) => {
   if (!route?.routes) return false
-  return route.routes.filter((item: any) => !item.separator).length > 1
+  return route.routes.filter((item) => !('separator' in item)).length > 1
 }
 </script>
 
