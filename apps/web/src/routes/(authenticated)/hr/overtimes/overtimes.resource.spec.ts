@@ -26,12 +26,11 @@ const { verificationSteps } = await import('./[overtimeId]/verification-steps.re
 const { submitOvertime, verifyOvertime, loadOvertime } = await import('./[overtimeId]/overtime-workflow.operations')
 
 describe('overtimes resource', () => {
-  it('declares mechanical route targets in actions', () => {
-    expect(overtimes.actions.list).toMatchObject({ permission: 'overtimes.list', routeName: 'hr-overtimes' })
-    const detailTarget = overtimes.actions.detail?.to
-    expect(typeof detailTarget).toBe('function')
-    expect((detailTarget as (id: string) => unknown)('o1')).toEqual({ name: 'hr-overtimes-detail', params: { overtimeId: 'o1' } })
-    expect(overtimes.table().rowControls?.({ id: 'o1' } as never).map((action) => action.key)).not.toContain('delete')
+  it('declares mechanical route targets in capabilities', () => {
+    expect(overtimes.capabilities.list).toMatchObject({ permission: 'overtimes.list', to: { name: 'hr-overtimes' } })
+    const detailTarget = overtimes.capabilities.detail?.to
+    expect(detailTarget?.params('o1')).toEqual({ overtimeId: 'o1' })
+    expect(overtimes.table().canDelete).toBeUndefined()
   })
   it('keeps caller-derived fields off the form', () => {
     // applicant, section and status come from the session server-side.

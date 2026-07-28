@@ -108,12 +108,12 @@ const view = computed(() => {
 })
 
 const editTarget = computed(() => {
-  const target = overtimes.actions.update?.to
-  return typeof target === 'function' ? target(overtimeId.value) : target
+  const target = overtimes.capabilities.update?.to
+  return target && { name: target.name, params: target.params(overtimeId.value) }
 })
 
 function onBack() {
-  void router.push(overtimes.actions.list!.to as never)
+  void router.push({ name: overtimes.capabilities.list!.to!.name })
 }
 </script>
 

@@ -6,8 +6,10 @@
  * error states. It owns no Card, page header, route navigation, or action
  * control — those belong to the view shells.
  */
-import { computed, ref, toRef } from 'vue'
+import { computed, ref, toRef, watch } from 'vue'
 import { getCoreRowModel, useVueTable, type ColumnDef } from '@tanstack/vue-table'
+import draggable from 'vuedraggable'
+import Icon from '../base/Icon.vue'
 import type { CollectionLoadContext, CollectionResult, QueryValues, TableProps } from '../../contracts'
 import { resolveFields } from '../../fields'
 import { useLoader, useNamespacedQuery } from '../../query'
@@ -22,6 +24,7 @@ const props = withDefaults(defineProps<TableProps>(), {
 const emit = defineEmits<{
   (event: 'update:query', query: QueryValues): void
   (event: 'row-click', record: Record<string, unknown>, index: number): void
+  (event: 'row-reorder', rows: Record<string, unknown>[]): void
 }>()
 
 assertSingleDataSource('Table', props.data, props.load)
@@ -48,6 +51,8 @@ const loaded = useLoader<CollectionLoadContext, CollectionResult>({
 })
 
 const rows = computed(() => loaded.data.value?.data ?? [])
+const orderedRows = ref<Record<string, unknown>[]>([])
+watch(rows, (value) => { orderedRows.value = [...value] }, { immediate: true })
 const meta = computed(() => loaded.data.value?.meta)
 const empty = computed(() => !loaded.loading.value && !loaded.error.value && rows.value.length === 0)
 const totalPage = computed(() => meta.value?.totalPage)
@@ -70,6 +75,20 @@ const columns = computed<ColumnDef<Record<string, unknown>>[]>(() =>
   })),
 )
 const fieldsByKey = computed(() => new Map(fields.value.map((field) => [field.key, field])))
+const storageKey = computed(() => `is-table:${props.namespace ?? 'default'}:column-sizes`)
+const columnSizes = ref<Record<string, number>>({})
+if (typeof window !== 'undefined') {
+  try { columnSizes.value = JSON.parse(window.localStorage.getItem(storageKey.value) ?? '{}') } catch { /* malformed storage */ }
+}
+watch(columnSizes, (value) => { if (typeof window !== 'undefined') window.localStorage.setItem(storageKey.value, JSON.stringify(value)) }, { deep: true })
+function resizeColumn(id: string, event: PointerEvent) {
+  const parent = (event.currentTarget as HTMLElement).parentElement
+  const start = parent?.getBoundingClientRect().width ?? 0
+  const startX = event.clientX
+  const move = (e: PointerEvent) => { columnSizes.value[id] = Math.max(80, start + e.clientX - startX) }
+  const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up) }
+  window.addEventListener('pointermove', move); window.addEventListener('pointerup', up)
+}
 
 function update(patch: QueryValues) {
   query.update(patch)
@@ -77,9 +96,7 @@ function update(patch: QueryValues) {
 }
 
 const table = useVueTable<Record<string, unknown>>({
-  get data() {
-    return rows.value
-  },
+  get data() { return orderedRows.value },
   get columns() {
     return columns.value
   },
@@ -213,18 +230,18 @@ defineExpose({ refresh: loaded.refresh, query: query.values })
     <nav v-if="showPagination" class="flex items-center justify-end gap-2 px-1 pt-1" aria-label="Pagination">
       <button
         type="button"
-        class="inline-flex h-8 items-center rounded-md px-3 text-xs font-medium text-on-surface transition-colors hover:bg-on-surface/[8%] disabled:cursor-not-allowed disabled:opacity-[.38]"
+        class="inline-flex h-8 items-center rounded-md text-xs font-medium text-on-surface transition-colors hover:bg-on-surface/[8%] disabled:cursor-not-allowed disabled:opacity-[.38]"
         :disabled="!table.getCanPreviousPage()"
         @click="table.previousPage()"
       >
         Sebelumnya
       </button>
-      <span class="min-w-16 rounded-md bg-surface-container-high px-2.5 py-1.5 text-center text-xs font-medium tabular-nums text-on-surface-variant">
+      <span class="min-w-8 rounded-md text-center text-xs font-medium tabular-nums text-muted">
         {{ pagination.pageIndex + 1 }} / {{ totalPage }}
       </span>
       <button
         type="button"
-        class="inline-flex h-8 items-center rounded-md px-3 text-xs font-medium text-on-surface transition-colors hover:bg-on-surface/[8%] disabled:cursor-not-allowed disabled:opacity-[.38]"
+        class="inline-flex h-8 items-center rounded-md text-xs font-medium text-on-surface transition-colors hover:bg-on-surface/[8%] disabled:cursor-not-allowed disabled:opacity-[.38]"
         :disabled="!table.getCanNextPage()"
         @click="table.nextPage()"
       >

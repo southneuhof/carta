@@ -14,19 +14,21 @@ const router = useRouter()
 const roleId = route.params.roleId
 const deleting = ref(false)
 const updateTarget = (() => {
-  const target = roles.actions.update?.to
-  return typeof target === 'function' ? target(roleId) : target
+  const target = roles.capabilities?.update?.to
+  return target && { name: target.name, params: target.params(roleId) }
 })()
 
-const tabs = [{ action: rolePermissions.actions.list! as import('@southneuhof/is-vue-framework').NavigableResourceAction, label: 'Permissions' }] as const satisfies readonly RouteTab[]
+const tabs = rolePermissions.capabilities?.list
+  ? [{ action: rolePermissions.capabilities.list, label: 'Permissions' }] as const satisfies readonly RouteTab[]
+  : []
 
 async function remove() {
   if (deleting.value) return
   deleting.value = true
   try {
-    await roles.remove(roleId)
+    await roles.delete(roleId)
     toast.success('Data berhasil dihapus.')
-    await router.replace(roles.actions.list!.to as never)
+    await router.replace({ name: roles.capabilities?.list?.to?.name })
   } catch (error) {
     toast.error(useResourceRuntime().adapters.data.normalizeError(error).message || 'Gagal menghapus data.')
   } finally {
@@ -43,7 +45,7 @@ async function remove() {
         <Button color="error" :disabled="deleting" @click="remove">Hapus</Button>
       </template>
       <template #footer>
-        <RouterLink :to="roles.actions.list!.to as never"><Button variant="text">Kembali</Button></RouterLink>
+        <RouterLink :to="{ name: roles.capabilities?.list?.to?.name }"><Button variant="text">Kembali</Button></RouterLink>
       </template>
     </DetailView>
     <Tabs label="Role" :items="tabs" />

@@ -53,8 +53,8 @@ behavior explicit.
    detail, create, update, and delete operations without repeating transport calls.
 3. **Core components own data presentation and editing.** They do not own page
    chrome, routes, resources, permissions, or CRUD modes.
-4. **Surface shells own the application look.** Cards, headers, toolbars, and
-   standard controls remain consistent without being pushed into core components.
+4. **Surface shells own the application look.** Cards, headers, toolbars, route-owned
+   page slots, and row-action affordances remain consistent without being pushed into core components.
 5. **Configuration describes data. Code expresses control flow.** When behavior
    needs branching, sequencing, or substantial side effects, use ordinary code.
 6. **Hide mechanics, not intent.** Standard HTTP mechanics may be inferred;
@@ -90,7 +90,8 @@ actions: {
 }
 ```
 
-Use route-owned `controls` and `footer` slots for page workflows. Use `visible`
+`ListView` renders permitted standard create/detail/update/delete capabilities;
+use route-owned `controls` and `footer` slots only for custom page workflows. Use `visible`
 only for stable resource-action eligibility; API authorization remains
 authoritative.
 
@@ -292,10 +293,10 @@ There is no `mode="create"` or `mode="update"` prop.
 Surface shells preserve the normal application look without contaminating core
 components with CRUD assumptions.
 
-- `ListView` composes a Card/container, title, list toolbar, standard controls,
-  and `Table`.
+- `ListView` composes a Card/container, title, list toolbar, route-owned page
+  slots, row-action fallback, and `Table`.
 - `DetailView` composes a Card/container, title, detail toolbar, layout regions,
-  standard controls, and `Detail`.
+  route-owned page slots, and `Detail`.
 - `FormView` composes a Card/container, title, form toolbar, and `Form`.
 
 Normal resource route usage stays concise:
@@ -333,19 +334,19 @@ Conceptually:
 
 ```ts
 type ListSurface<TRecord, TQuery> = {
-  title: string;
-  description?: string;
   table: TableProps<TRecord, TQuery>;
-  rowControls?: (record: TRecord) => RowAction[];
+  createRoute?: RouteLocationRaw;
+  detailRoute?: (record: TRecord) => RouteLocationRaw | undefined;
+  updateRoute?: (record: TRecord) => RouteLocationRaw | undefined;
+  canDelete?: (record: TRecord) => boolean;
+  deleteRecord?: (record: TRecord) => Promise<unknown>;
 };
 
 type DetailSurface<TRecord> = {
-  title: string;
   detail: DetailProps<TRecord>;
 };
 
 type FormSurface<TInput> = {
-  title: string;
   form: FormProps<TInput>;
 };
 ```
@@ -353,7 +354,7 @@ type FormSurface<TInput> = {
 Use exact surfaces:
 
 ```vue
-<ListView :table="incidents.table()" />
+<Table v-bind="incidents.table().table" />
 ```
 
 Do not bind a whole resource:
@@ -647,9 +648,6 @@ handlers; action metadata does not authorize UI by itself.
 
 ```vue
 <ListView :resource="incidents">
-  <template #controls>
-    <RouterLink :to="incidents.actions.create!.to"><Button>Tambah</Button></RouterLink>
-  </template>
   <template #cell:status_code="{ record }">
     <IncidentStatus :incident="record" />
   </template>
@@ -910,7 +908,7 @@ These cases are covered by tests in the framework package and by
 - default field access and extraordinary `read`/`write` fields;
 - custom renderer slots and direct core-component usage;
 - nested resource scope without nested-specific component vocabulary;
-- inferred standard controls with denied controls hidden;
+- inferred row actions with denied actions hidden;
 - `ListView`, `DetailView`, and `FormView` preserving the normal application look.
 
 The shipped vertical slices are `roles` (list, create, detail, edit, and nested

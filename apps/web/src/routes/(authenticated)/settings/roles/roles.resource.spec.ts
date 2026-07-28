@@ -28,14 +28,13 @@ const { rolePermissions } = await import('./[roleId]/detail/permissions/role-per
 afterEach(() => resetResourceRuntimeForTests())
 
 describe('roles resource', () => {
-  it('declares exact standard action permissions and targets', () => {
-    expect(roles.actions.list).toMatchObject({ permission: 'roles.list', routeName: 'settings-roles' })
-    expect(roles.actions.create).toMatchObject({ permission: 'roles.create', routeName: 'settings-roles-create' })
-    const detailTarget = roles.actions.detail?.to
-    expect(typeof detailTarget).toBe('function')
-    expect((detailTarget as (id: string) => unknown)('1')).toEqual({ name: 'settings-roles-detail', params: { roleId: '1' } })
-    expect(roles.actions.delete).toMatchObject({ permission: 'roles.delete' })
-    expect(roles.actions.delete?.to).toBeUndefined()
+  it('declares exact standard capability permissions and targets', () => {
+    expect(roles.capabilities.list).toMatchObject({ permission: 'roles.list', to: { name: 'settings-roles' } })
+    expect(roles.capabilities.create).toMatchObject({ permission: 'roles.create', to: { name: 'settings-roles-create' } })
+    const detailTarget = roles.capabilities.detail?.to
+    expect(detailTarget?.params('1')).toEqual({ roleId: '1' })
+    expect(roles.capabilities.delete).toMatchObject({ permission: 'roles.delete' })
+    expect('to' in roles.capabilities.delete!).toBe(false)
   })
   it('produces core props that bind directly, with no adapter shape', () => {
     const { table } = roles.table()
@@ -57,8 +56,11 @@ describe('roles resource', () => {
     expect(roles.form({ id: '1' }).schema?.validate({}).success).toBe(true)
   })
 
-  it('provides row actions while route slots own page actions', () => {
-    expect(roles.table().rowControls?.({ id: '1', name: 'Admin' } as never).map((action) => action.key)).toEqual(['detail', 'update'])
+  it('projects standard routes and delete capability separately', () => {
+    const surface = roles.table()
+    expect(surface.detailRoute?.({ id: '1', name: 'Admin' } as never)).toEqual({ name: 'settings-roles-detail', params: { roleId: '1' } })
+    expect(surface.updateRoute?.({ id: '1', name: 'Admin' } as never)).toEqual({ name: 'settings-roles-edit', params: { roleId: '1' } })
+    expect(surface.canDelete?.({ id: '1', name: 'Admin' } as never)).toBe(true)
   })
 
   /** Access reaches the factories through the runtime adapter, not per call. */
@@ -69,13 +71,15 @@ describe('roles resource', () => {
       queryClient: createFrameworkQueryClient(),
     })
 
-    expect(roles.table().rowControls?.({ id: '1', name: 'Admin' } as never)).toEqual([])
+    const surface = roles.table()
+    expect(surface.detailRoute?.({ id: '1', name: 'Admin' } as never)).toBeUndefined()
+    expect(surface.canDelete?.({ id: '1', name: 'Admin' } as never)).toBe(false)
   })
 })
 
 describe('role permissions resource', () => {
   it('owns child target while borrowing its parent update permission', () => {
-    expect(rolePermissions.actions.list).toMatchObject({ permission: 'roles.update', routeName: 'settings-roles-detail-permissions' })
+    expect(rolePermissions.capabilities.list).toMatchObject({ permission: 'roles.update', to: { name: 'settings-roles-detail-permissions' } })
   })
   it('is scoped by an ordinary searchParameters entry, with no parent vocabulary', () => {
     const props = rolePermissions.table({ searchParameters: { role_id: '1' } }).table

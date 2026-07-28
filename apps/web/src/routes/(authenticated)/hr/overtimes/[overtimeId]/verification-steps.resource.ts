@@ -12,5 +12,5 @@ export const verificationStepFields = defineFields<VerificationStep>()({
 })
 export const verificationSteps = defineResource({
   key: 'verification-steps', fields: verificationStepFields,
-  operations: { list: async ({ searchParameters }) => loadVerificationSteps(String(searchParameters.overtime_id ?? '')) },
+  capabilities: { list: { handler: async ({ searchParameters }: { searchParameters: Record<string, unknown> }) => loadVerificationSteps(String(searchParameters.overtime_id ?? '')), permission: 'overtimes.detail' } },
 })

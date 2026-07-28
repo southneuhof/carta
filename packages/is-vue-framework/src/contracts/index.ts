@@ -59,12 +59,9 @@ export type { TableProps, DetailProps, FormProps, FormSubmitHandler } from './co
 export type {
   ResourceKey,
   ResourceSchemas,
-  ResourceDefinitionBase,
   IdentityDeclaration,
   TableFactoryArguments,
   DetailFactoryArguments,
   CreateFormFactoryArguments,
   UpdateFormFactoryArguments,
-  ResourcePropFactories,
-  ResourceInvalidationArguments,
 } from './resource'

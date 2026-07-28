@@ -51,7 +51,9 @@ const { loadUserRoles, setUserRole } = await import('./[userId]/detail/roles/use
 
 describe('users resource', () => {
   it('provides only row actions resource can derive', () => {
-    expect(users.table().rowControls?.({ id: 'u1', name: 'Admin', email: 'a@b.c', emailVerified: false, image: null, createdAt: '', updatedAt: '' }).map((action) => action.key)).toEqual(['detail', 'update'])
+    const record = { id: 'u1', name: 'Admin', email: 'a@b.c', emailVerified: false, image: null, createdAt: '', updatedAt: '' }
+    expect(users.table().detailRoute?.(record)).toEqual({ name: 'settings-users-detail', params: { userId: 'u1' } })
+    expect(users.table().updateRoute?.(record)).toEqual({ name: 'settings-users-edit', params: { userId: 'u1' } })
   })
 
   it('binds native props straight to the cores', () => {
@@ -61,15 +63,15 @@ describe('users resource', () => {
   })
 
   it('links a row to its detail screen through the identity extractor', () => {
-    expect(users.rowLink!({ id: 'u1', name: 'Admin', email: 'a@b.c', emailVerified: false, image: null, createdAt: '', updatedAt: '' })).toEqual({
+    expect(users.detailRoute!({ id: 'u1', name: 'Admin', email: 'a@b.c', emailVerified: false, image: null, createdAt: '', updatedAt: '' })).toEqual({
       name: 'settings-users-detail',
       params: { userId: 'u1' },
     })
   })
 
-  it('declares standard targets and permissions in its actions', () => {
-    expect(users.actions.list).toMatchObject({ permission: 'users.list', routeName: 'settings-users' })
-    expect(users.actions.update).toMatchObject({ permission: 'users.update', routeName: 'settings-users-edit' })
+  it('declares standard targets and permissions in its capabilities', () => {
+    expect(users.capabilities.list).toMatchObject({ permission: 'users.list', to: { name: 'settings-users' } })
+    expect(users.capabilities.update).toMatchObject({ permission: 'users.update', to: { name: 'settings-users-edit' } })
   })
 
   it('carries no single-role field, because roles are a many-to-many assignment', () => {
@@ -80,7 +82,7 @@ describe('users resource', () => {
 
 describe('user role mapping', () => {
   it('owns its child collection target and borrowed parent permission', () => {
-    expect(userRoles.actions.list).toMatchObject({ permission: 'users.update', routeName: 'settings-users-detail-roles' })
+    expect(userRoles.capabilities.list).toMatchObject({ permission: 'users.update', to: { name: 'settings-users-detail-roles' } })
   })
   it('marks every role the user actively holds, not one single assignment', async () => {
     const result = await loadUserRoles('u1')

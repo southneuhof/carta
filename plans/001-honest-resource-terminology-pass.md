@@ -1,6 +1,6 @@
 # 001 — Honest resource terminology pass
 
-Status: TODO  
+Status: Done
 Depends on: none
 
 ## Goal

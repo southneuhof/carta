@@ -34,23 +34,23 @@ const fields = defineFields<Row>()({
 })
 
 /** Ordinary resource: everything it needs is the catalog plus a loader. */
-const alpha = defineResource<Row>({
+const alpha = defineResource({
   key: 'alpha',
   fields,
-  operations: { list: async () => ({ data: rows, meta: { total: 40, pageSize: 10, totalPage: 4 } }) },
+  capabilities: { list: { handler: async () => ({ data: rows, meta: { total: 40, pageSize: 10, totalPage: 4 } }), permission: null } },
 })
 
-const beta = defineResource<Row>({
+const beta = defineResource({
   key: 'beta',
   fields,
-  operations: { list: async () => ({ data: rows, meta: { total: 40, pageSize: 10, totalPage: 4 } }) },
+  capabilities: { list: { handler: async () => ({ data: rows, meta: { total: 40, pageSize: 10, totalPage: 4 } }), permission: null } },
 })
 
 /** The same contract, resolved synchronously with no promise in sight. */
-const offline = defineResource<Row>({
+const offline = defineResource({
   key: 'offline',
   fields,
-  operations: { list: () => ({ data: rows, meta: { total: 40, pageSize: 10, totalPage: 4 } }) },
+  capabilities: { list: { handler: () => ({ data: rows, meta: { total: 40, pageSize: 10, totalPage: 4 } }), permission: null } },
 })
 
 const localQuery = ref<Record<string, unknown>>({ page: 1, limit: 10 })

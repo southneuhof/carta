@@ -218,7 +218,7 @@ describe('FormView', () => {
   } = {}) {
     return {
       __formCapabilities: 'create' as const,
-      actions: {
+      capabilities: {
         create: {},
         ...(options.detail ? { detail: { to: options.detail } } : {}),
         ...(options.list ? { list: { to: options.list } } : {}),
@@ -341,3 +341,4 @@ describe('shell boundaries', () => {
     view.unmount()
   })
 })
+

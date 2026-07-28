@@ -6,8 +6,8 @@ import { defineNavigation, type NavigationIcon, type NavigationModule } from './
 export const navigation = defineNavigation([
   { name: 'dashboard', title: 'Dashboard', icon: 'home', description: 'Dashboard', routes: [{ to: { name: 'dashboard' }, permission: null, title: 'Dashboard', icon: 'home' }] },
   { name: 'to-do', title: 'To Do', icon: 'inbox', description: 'Tugas verifikasi', routes: [{ to: { name: 'to-do' }, permission: null, title: 'To Do', icon: 'inbox' }] },
-  { name: 'hr', title: 'Kepegawaian', icon: 'folder', description: 'Kepegawaian', routes: [{ action: overtimes.actions.list!, title: 'Lembur', icon: 'folder' }] },
-  { name: 'settings', title: 'Pengaturan', icon: 'settings', description: 'Pengaturan', routes: [{ separator: 'System' }, { action: users.actions.list!, title: 'Users', icon: 'folder' }, { action: roles.actions.list!, title: 'Roles', icon: 'folder' }] },
+  { name: 'hr', title: 'Kepegawaian', icon: 'folder', description: 'Kepegawaian', routes: [{ action: overtimes.capabilities.list!, title: 'Lembur', icon: 'folder' }] },
+  { name: 'settings', title: 'Pengaturan', icon: 'settings', description: 'Pengaturan', routes: [{ separator: 'System' }, { action: users.capabilities.list!, title: 'Users', icon: 'folder' }, { action: roles.capabilities.list!, title: 'Roles', icon: 'folder' }] },
 ] as const satisfies readonly NavigationModule[])
 
 export type VisibleNavigationRoute = { name: string; to: unknown; title: string; icon: NavigationIcon }

@@ -12,15 +12,14 @@ export const userFields = defineFields<User, UserUpdate>()({
 export const users = defineResource({
   key: 'users',
   fields: userFields,
-  operations: userOperations,
   table: { fields: ['name', 'email', 'createdAt', 'updatedAt'] },
   detail: { fields: ['name', 'email', 'createdAt', 'updatedAt'] },
   form: { fields: ['name'] },
   schemas: { update: fromZod<UserUpdate>(user.schemas.update) },
-  actions: {
-    list: { permission: 'users.list', to: { name: 'settings-users' } },
-    detail: { permission: 'users.detail', to: { name: 'settings-users-detail', params: (id) => ({ userId: id }) } },
-    update: { permission: 'users.update', to: { name: 'settings-users-edit', params: (id) => ({ userId: id }) } },
+  capabilities: {
+    list: { handler: userOperations.list, permission: 'users.list', to: { name: 'settings-users' } },
+    detail: { handler: userOperations.detail, permission: 'users.detail', to: { name: 'settings-users-detail', params: (id) => ({ userId: id }) } },
+    update: { handler: userOperations.update, permission: 'users.update', to: { name: 'settings-users-edit', params: (id) => ({ userId: id }) } },
   },
 })
 

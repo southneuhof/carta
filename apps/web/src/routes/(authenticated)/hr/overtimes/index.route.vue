@@ -7,11 +7,8 @@ import type { Overtime } from './overtimes.operations'
 
 <template>
   <ListView title="Lembur" :resource="overtimes">
-    <template #controls>
-      <RouterLink :to="overtimes.actions.create!.to as never"><Button>Tambah</Button></RouterLink>
-    </template>
     <template #cell:date="{ value, record }">
-      <RouterLink :to="overtimes.rowLink!(record as Overtime)">
+      <RouterLink :to="overtimes.detailRoute!(record as Overtime)">
         {{ value }}
       </RouterLink>
     </template>

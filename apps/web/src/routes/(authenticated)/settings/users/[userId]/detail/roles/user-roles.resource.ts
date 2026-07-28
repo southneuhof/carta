@@ -6,6 +6,5 @@ export const userRoleFields = defineFields<UserRole>()({ name: { label: 'Role' }
 export const userRoles = defineResource({
   key: 'user-roles',
   fields: userRoleFields,
-  operations: { list: async ({ searchParameters }) => loadUserRoles(String(searchParameters.user_id ?? '')) },
-  actions: { list: { permission: 'users.update', to: { name: 'settings-users-detail-roles' } } },
+  capabilities: { list: { handler: async ({ searchParameters }) => loadUserRoles(String(searchParameters.user_id ?? '')), permission: 'users.update', to: { name: 'settings-users-detail-roles' } } },
 })

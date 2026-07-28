@@ -1,6 +1,6 @@
 # 002 — Contract and docs reconciliation after terminology pass
 
-Status: TODO  
+Status: Done
 Depends on: 001-honest-resource-terminology-pass
 
 ## Goal

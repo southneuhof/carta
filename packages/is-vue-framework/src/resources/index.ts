@@ -10,25 +10,26 @@ export type {
   ResourceCreateOf,
   ResourceUpdateOf,
   ResourceIdentityOf,
-  ResourceAction,
-  ResourceActionsDefinition,
-  ResourceActionDefinition,
-  ResourceActionKey,
-  ResourceActionTarget,
-  NavigableResourceAction,
+  AnyHandler,
+  ResourceCapability,
+  ResourceCapabilitiesDefinition,
+  ResourceCapabilityKey,
+  ResourceCapabilityTarget,
+  NavigableResourceCapability,
+  NormalizedResourceCapability,
+  RegisteredResourceCapability,
   ResourceSurfaceDefinition,
   ResolvedIdentity,
   IdentityDeclarationInput,
   TableSurface,
   TableSurfaceArguments,
-  RowAction,
   DetailSurface,
   DetailSurfaceArguments,
   ResourceBase,
   ListCapableResource,
   DetailCapableResource,
 } from './defineResource'
-export { resourceActionForRoute, resetResourceActionRegistry } from './defineResource'
+export { resourceCapabilityForRoute, resetResourceCapabilityRegistry } from './defineResource'
 
 export { registerResourceRuntime, resetResourceRuntimeForTests, useResourceRuntime } from './runtime'
 export type { ResourceRuntime } from './runtime'

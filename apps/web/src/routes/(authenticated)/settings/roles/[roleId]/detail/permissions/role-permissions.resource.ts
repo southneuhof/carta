@@ -6,6 +6,5 @@ export const rolePermissionFields = defineFields<RolePermission>()({ name: { lab
 export const rolePermissions = defineResource({
   key: 'role-permissions',
   fields: rolePermissionFields,
-  operations: { list: async ({ searchParameters }) => loadRolePermissions(String(searchParameters.role_id ?? '')) },
-  actions: { list: { permission: 'roles.update', to: { name: 'settings-roles-detail-permissions' } } },
+  capabilities: { list: { handler: async ({ searchParameters }: { searchParameters: Record<string, unknown> }) => loadRolePermissions(String(searchParameters.role_id ?? '')), permission: 'roles.update', to: { name: 'settings-roles-detail-permissions' } } },
 })

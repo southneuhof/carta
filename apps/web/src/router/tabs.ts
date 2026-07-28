@@ -1,7 +1,5 @@
-import type { NavigableResourceAction } from '@southneuhof/is-vue-framework'
-
 /** Ordered child routes rendered as record-page tabs. */
 export interface RouteTab {
-  action: NavigableResourceAction
+  action: { permission: string | null; to?: { name: string } }
   label: string
 }

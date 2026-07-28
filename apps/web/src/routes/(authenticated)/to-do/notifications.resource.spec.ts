@@ -29,7 +29,9 @@ const rows = [
 
 describe('notifications resource', () => {
   it('offers no generated row action, because notifications are produced by workflows', () => {
-    expect(notifications.table().rowControls).toBeUndefined()
+    expect(notifications.table().detailRoute).toBeUndefined()
+    expect(notifications.table().updateRoute).toBeUndefined()
+    expect(notifications.table().canDelete).toBeUndefined()
   })
 
   it('holds independent query state per namespace', () => {

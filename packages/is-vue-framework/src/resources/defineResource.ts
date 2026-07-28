@@ -127,6 +127,35 @@ export type ResourceIdentityOf<TOperations> = ResourceIdentityMetadata<TOperatio
   ? ResourceIdentityMetadata<TOperations>
   : OperationArgument<TOperations, 'update', 0> extends RecordIdentity ? OperationArgument<TOperations, 'update', 0> : OperationArgument<TOperations, 'delete', 0> extends RecordIdentity ? OperationArgument<TOperations, 'delete', 0> : never
 
+type CapabilityHandlerAt<TCapabilities, TKey extends PropertyKey> = TCapabilities extends Record<TKey, ResourceCapability<infer THandler>> ? THandler : never
+type CapabilityReturn<THandler> = THandler extends (...arguments_: never[]) => infer TResult ? Awaited<TResult> : never
+type CapabilityHandlerArgument<THandler, TIndex extends number> = THandler extends (...arguments_: infer TArguments) => unknown ? TArguments[TIndex] : never
+type CapabilityRecordOf<TCapabilities> = CapabilityReturn<CapabilityHandlerAt<TCapabilities, 'list'>> extends CollectionResult<infer TRecord>
+  ? TRecord : Exclude<CapabilityReturn<CapabilityHandlerAt<TCapabilities, 'detail'>>, undefined>
+type CapabilityQueryOf<TCapabilities> = CapabilityHandlerArgument<CapabilityHandlerAt<TCapabilities, 'list'>, 0> extends CollectionLoadContext<infer TQuery> ? TQuery : Record<string, never>
+type CapabilityCreateOf<TCapabilities> = CapabilityHandlerArgument<CapabilityHandlerAt<TCapabilities, 'create'>, 0> extends infer TValue ? TValue extends object ? TValue : Record<string, never> : Record<string, never>
+type CapabilityUpdateOf<TCapabilities> = CapabilityHandlerArgument<CapabilityHandlerAt<TCapabilities, 'update'>, 1> extends infer TValue ? TValue extends object ? TValue : Record<string, never> : Record<string, never>
+type CapabilityIdentityOf<TCapabilities> = CapabilityHandlerArgument<CapabilityHandlerAt<TCapabilities, 'update'>, 0> extends RecordIdentity
+  ? CapabilityHandlerArgument<CapabilityHandlerAt<TCapabilities, 'update'>, 0>
+  : CapabilityHandlerArgument<CapabilityHandlerAt<TCapabilities, 'delete'>, 0> extends RecordIdentity ? CapabilityHandlerArgument<CapabilityHandlerAt<TCapabilities, 'delete'>, 0> : RecordIdentityValue
+
+function standardHandlers<
+  TRecord extends object,
+  TQuery extends object,
+  TCreate extends object,
+  TUpdate extends object,
+  TIdentity extends RecordIdentity,
+  const TCapabilities extends ResourceCapabilitiesDefinition<TRecord, TQuery, TCreate, TUpdate, TIdentity>,
+>(capabilities: TCapabilities): Partial<StandardCapabilityHandlers<TRecord, TQuery, TCreate, TUpdate, TIdentity>> {
+  return {
+    list: capabilities.list?.handler,
+    detail: capabilities.detail?.handler,
+    create: capabilities.create?.handler,
+    update: capabilities.update?.handler,
+    delete: capabilities.delete?.handler,
+  }
+}
+
 /**
  * Keeps a narrow manual operation object while associating backend-neutral
  * record/input metadata at compile time only. It returns the original object.
@@ -149,62 +178,74 @@ export interface ResourceSurfaceDefinition {
   fields?: readonly string[]
 }
 
-export type ResourceActionKey = ResourceOperationKey
-export type ResourceActionTarget<TIdentity extends RecordIdentity = RecordIdentityValue> =
+export type AnyHandler = (...arguments_: never[]) => unknown
+export type ResourceCapabilityKey = ResourceOperationKey
+export type ResourceCapabilityTarget<TIdentity extends RecordIdentity = RecordIdentityValue> =
   | { name: string }
   | { name: string; params: (id: TIdentity) => Record<string, string | number> }
 
-export interface ResourceActionDefinition<TIdentity extends RecordIdentity = RecordIdentityValue> {
+export interface ResourceCapability<THandler extends AnyHandler = AnyHandler, TIdentity extends RecordIdentity = RecordIdentityValue> {
+  handler: THandler
   permission: string | null
-  to?: ResourceActionTarget<TIdentity>
+  to?: ResourceCapabilityTarget<TIdentity>
   visible?: (context: { record?: Record<string, unknown>; access: AccessAdapter }) => boolean
 }
 
-export type ResourceActionsDefinition<
-  TIdentity extends RecordIdentity = RecordIdentityValue,
-  TKey extends ResourceActionKey = ResourceActionKey,
-> = Partial<
-  Record<TKey, ResourceActionDefinition<TIdentity>>
->
+type StandardCapabilityHandlers<
+  TRecord extends object,
+  TQuery extends object,
+  TCreate extends object,
+  TUpdate extends object,
+  TIdentity extends RecordIdentity,
+> = Required<ResourceOperations<TRecord, TQuery, TCreate, TUpdate, TIdentity>>
 
-export type NavigableResourceAction<TIdentity extends RecordIdentity = RecordIdentityValue> = ResourceAction<TIdentity> & {
+export type ResourceCapabilitiesDefinition<
+  TRecord extends object = Record<string, unknown>,
+  TQuery extends object = Record<string, unknown>,
+  TCreate extends object = Record<string, unknown>,
+  TUpdate extends object = TCreate,
+  TIdentity extends RecordIdentity = RecordIdentityValue,
+> = Partial<{ [TKey in ResourceOperationKey]: ResourceCapability<StandardCapabilityHandlers<TRecord, TQuery, TCreate, TUpdate, TIdentity>[TKey], TIdentity> }>
+  & Record<string, ResourceCapability>
+
+export type NavigableResourceCapability<TIdentity extends RecordIdentity = RecordIdentityValue> = ResourceCapability<AnyHandler, TIdentity> & {
   routeName: string
   to: RouteLocationRaw | ((id: TIdentity) => RouteLocationRaw)
 }
 
-export interface ResourceAction<TIdentity extends RecordIdentity = RecordIdentityValue> {
-  key: ResourceActionKey
+export interface NormalizedResourceCapability<TIdentity extends RecordIdentity = RecordIdentityValue> {
+  key: string
   permission: string | null
   routeName?: string
   to?: RouteLocationRaw | ((id: TIdentity) => RouteLocationRaw)
   visible?: (context: { record?: Record<string, unknown>; access: AccessAdapter }) => boolean
 }
 
-export interface RegisteredResourceAction {
+export interface RegisteredResourceCapability {
   resourceKey: string
-  action: ResourceActionKey
+  capability: string
   permission: string | null
-  visible?: ResourceAction['visible']
+  visible?: NormalizedResourceCapability['visible']
 }
 
-const actionRegistry = new Map<string, RegisteredResourceAction>()
+const capabilityRegistry = new Map<string, RegisteredResourceCapability>()
 
-export function resourceActionForRoute(name: string): RegisteredResourceAction | undefined {
-  return actionRegistry.get(name)
+export function resourceCapabilityForRoute(name: string): RegisteredResourceCapability | undefined {
+  return capabilityRegistry.get(name)
 }
 
-export function resetResourceActionRegistry(): void {
-  actionRegistry.clear()
+export function resetResourceCapabilityRegistry(): void {
+  capabilityRegistry.clear()
 }
 
-function registerResourceAction(name: string, action: RegisteredResourceAction): void {
-  const existing = actionRegistry.get(name)
+function registerResourceCapability(name: string, capability: RegisteredResourceCapability): void {
+  const existing = capabilityRegistry.get(name)
   if (!existing) {
-    actionRegistry.set(name, action)
+    capabilityRegistry.set(name, capability)
     return
   }
-  if (existing.resourceKey === action.resourceKey && existing.action === action.action && existing.permission === action.permission && existing.visible === action.visible) return
-  throw new Error(`[is-vue-framework] Route action conflict for "${name}": ${existing.resourceKey}.${existing.action} and ${action.resourceKey}.${action.action}.`)
+  if (existing.resourceKey === capability.resourceKey && existing.capability === capability.capability && existing.permission === capability.permission && existing.visible === capability.visible) return
+  throw new Error(`[is-vue-framework] Route capability conflict for "${name}": ${existing.resourceKey}.${existing.capability} and ${capability.resourceKey}.${capability.capability}.`)
 }
 
 /**
@@ -218,41 +259,35 @@ export interface ResourceDefinition<
   TCreate extends object = Record<string, unknown>,
   TUpdate extends object = TCreate,
   TDeclaration extends IdentityDeclarationInput<TRecord> | undefined = undefined,
-  TOperations extends object = ResourceOperations<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>>,
+  TCapabilities extends object = ResourceCapabilitiesDefinition<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>>,
 > {
   key: string
   fields: FieldCatalog<TRecord, TCreate>
   /** `['userId', 'roleId']` or `(record) => identity`; omitted means `record.id`. */
   identity?: TDeclaration
-  operations?: TOperations
+  capabilities: TCapabilities
   table?: ResourceSurfaceDefinition
   detail?: ResourceSurfaceDefinition
   form?: ResourceSurfaceDefinition & { initialData?: Partial<TCreate> }
   schemas?: ResourceSchemas<TRecord, TQuery, TCreate, TUpdate>
-  actions?: ResourceActionsDefinition<ResolvedIdentity<TRecord, TDeclaration>, ResourceOperationKeys<TOperations>>
 }
 
-/** Arguments for collection surface. `onDelete` enables generated row deletion. */
+/** Arguments for collection surface. */
 export interface TableSurfaceArguments<TQuery extends object = Record<string, unknown>>
-  extends TableFactoryArguments<TQuery> {
-  /** Confirmation and feedback remain route-owned. */
-  onDelete?: (record: object) => void
-}
+  extends TableFactoryArguments<TQuery> {}
 
 /** Arguments for record surface. */
 export interface DetailSurfaceArguments<TIdentity extends RecordIdentity = RecordIdentityValue>
   extends DetailFactoryArguments<TIdentity> {}
 
-/** Per-record table actions. Page actions belong in route-owned view slots. */
-export type RowAction =
-  | { key: 'detail' | 'update'; label: string; to: RouteLocationRaw }
-  | { key: 'delete'; label: string; onSelect: () => void }
-
 /** Shell-ready collection bundle: `v-bind` it onto `ListView`. */
 export interface TableSurface<TRecord extends object, TQuery extends object> {
   table: TableProps<TRecord, TQuery>
-  /** Available per-record actions, already filtered through resource access policy. */
-  rowControls: ((record: TRecord) => RowAction[]) | undefined
+  createRoute: RouteLocationRaw | undefined
+  detailRoute: ((record: TRecord) => RouteLocationRaw | undefined) | undefined
+  updateRoute: ((record: TRecord) => RouteLocationRaw | undefined) | undefined
+  canDelete: ((record: TRecord) => boolean) | undefined
+  deleteRecord: ((record: TRecord) => Promise<unknown>) | undefined
 }
 
 /** Shell-ready record bundle: `v-bind` it onto `DetailView`. */
@@ -266,19 +301,19 @@ export interface ResourceBase<
   TCreate extends object = Record<string, unknown>,
   TUpdate extends object = TCreate,
   TIdentity extends RecordIdentity = RecordIdentityValue,
-  TOperationKey extends ResourceActionKey = ResourceActionKey,
+  TCapabilities extends object = ResourceCapabilitiesDefinition<TRecord, TQuery, TCreate, TUpdate, TIdentity>,
 > {
   key: string
   fields: FieldCatalog<TRecord, TCreate>
-  actions: Partial<Record<TOperationKey, ResourceAction<TIdentity>>>
+  capabilities: TCapabilities
   /** Record → identity, the direction the framework needs at runtime. */
   identity: (record: TRecord) => TIdentity
   /**
-   * Record → detail href, composed from the identity extractor and
+   * Record → detail route, composed from the identity extractor and
    * `actions.detail`. Absent when the resource has no detail route, so a list
    * screen never hand-writes an identity into a URL.
    */
-  rowLink?: (record: TRecord) => RouteLocationRaw
+  detailRoute?: (record: TRecord) => RouteLocationRaw
   invalidate: (args?: { id?: TIdentity }) => Promise<void>
 }
 
@@ -295,19 +330,19 @@ type CreateForm<TCreate extends object, TRecord extends object> = {
 type UpdateForm<TUpdate extends object, TRecord extends object, TIdentity extends RecordIdentity> = {
   (args: { id: TIdentity; initialData?: Partial<TUpdate>; searchParameters?: Record<string, unknown> }): FormProps<TUpdate, TRecord>
 }
-type FormCapability<TOperations, TRecord extends object, TCreate extends object, TUpdate extends object, TIdentity extends RecordIdentity> =
-  'create' extends ResourceOperationKeys<TOperations>
-    ? 'update' extends ResourceOperationKeys<TOperations>
+type FormCapability<TCapabilities, TRecord extends object, TCreate extends object, TUpdate extends object, TIdentity extends RecordIdentity> =
+  TCapabilities extends Record<'create', ResourceCapability>
+    ? TCapabilities extends Record<'update', ResourceCapability>
       ? { form: CreateForm<TCreate, TRecord> & UpdateForm<TUpdate, TRecord, TIdentity> }
       : { form: CreateForm<TCreate, TRecord> }
-    : 'update' extends ResourceOperationKeys<TOperations>
+    : TCapabilities extends Record<'update', ResourceCapability>
       ? { form: UpdateForm<TUpdate, TRecord, TIdentity> }
       : {}
 
-type FormCapabilities<TOperations> =
-  'create' extends ResourceOperationKeys<TOperations>
-    ? 'update' extends ResourceOperationKeys<TOperations> ? 'create-update' : 'create'
-    : 'update' extends ResourceOperationKeys<TOperations> ? 'update' : never
+type FormCapabilities<TCapabilities> =
+  TCapabilities extends Record<'create', ResourceCapability>
+    ? TCapabilities extends Record<'update', ResourceCapability> ? 'create-update' : 'create'
+    : TCapabilities extends Record<'update', ResourceCapability> ? 'update' : never
 
 /** Public resource surface follows literal operation keys, not runtime enumeration. */
 export type Resource<
@@ -316,34 +351,32 @@ export type Resource<
   TCreate extends object = Record<string, unknown>,
   TUpdate extends object = TCreate,
   TIdentity extends RecordIdentity = RecordIdentityValue,
-  TOperations extends object = ResourceOperations<TRecord, TQuery, TCreate, TUpdate, TIdentity>,
-> = ResourceBase<TRecord, TQuery, TCreate, TUpdate, TIdentity, ResourceOperationKeys<TOperations>>
-  & ('list' extends ResourceOperationKeys<TOperations> ? ListCapableResource<TRecord, TQuery> : {})
-  & ('detail' extends ResourceOperationKeys<TOperations> ? DetailCapableResource<TRecord, TIdentity> : {})
-  & FormCapability<TOperations, TRecord, TCreate, TUpdate, TIdentity>
+  TCapabilities extends ResourceCapabilitiesDefinition<TRecord, TQuery, TCreate, TUpdate, TIdentity> = ResourceCapabilitiesDefinition<TRecord, TQuery, TCreate, TUpdate, TIdentity>,
+> = ResourceBase<TRecord, TQuery, TCreate, TUpdate, TIdentity, TCapabilities>
+  & (TCapabilities extends Record<'list', ResourceCapability> ? ListCapableResource<TRecord, TQuery> : {})
+  & (TCapabilities extends Record<'detail', ResourceCapability> ? DetailCapableResource<TRecord, TIdentity> : {})
+  & FormCapability<TCapabilities, TRecord, TCreate, TUpdate, TIdentity>
   /** Compile-time capability tag; no runtime property is emitted. */
-  & { readonly __formCapabilities: FormCapabilities<TOperations> }
-  & ('delete' extends ResourceOperationKeys<TOperations> ? { remove: (id: TIdentity) => Promise<unknown> } : {})
+  & { readonly __formCapabilities: FormCapabilities<TCapabilities> }
+  & (TCapabilities extends Record<'delete', ResourceCapability> ? { delete: (id: TIdentity) => Promise<unknown> } : {})
 
 const operationNames = ['list', 'detail', 'create', 'update', 'delete'] as const
 
-function normalizeActions<TIdentity extends RecordIdentity>(
+function normalizeCapabilities<TIdentity extends RecordIdentity>(
   resourceKey: string,
-  declarations: ResourceActionsDefinition<TIdentity, ResourceActionKey> | undefined,
-): Partial<Record<ResourceActionKey, ResourceAction<TIdentity>>> {
-  const actions: Partial<Record<ResourceActionKey, ResourceAction<TIdentity>>> = {}
-  for (const key of operationNames) {
-    const declaration = declarations?.[key]
-    if (!declaration) continue
+  declarations: Record<string, ResourceCapability<AnyHandler, TIdentity>>,
+): Record<string, NormalizedResourceCapability<TIdentity>> {
+  const capabilities: Record<string, NormalizedResourceCapability<TIdentity>> = {}
+  for (const [key, declaration] of Object.entries(declarations)) {
     const target = declaration.to
     const to = target && ('params' in target
       ? ((id: TIdentity) => ({ name: target.name, params: target.params(id) } as unknown as RouteLocationRaw))
       : ({ name: target.name } as unknown as RouteLocationRaw))
-    const action: ResourceAction<TIdentity> = { key, permission: declaration.permission, visible: declaration.visible, ...(target ? { routeName: target.name, to } : {}) }
-    actions[key] = action
-    if (target) registerResourceAction(target.name, { resourceKey, action: key, permission: action.permission, visible: action.visible })
+    const capability: NormalizedResourceCapability<TIdentity> = { key, permission: declaration.permission, visible: declaration.visible, ...(target ? { routeName: target.name, to } : {}) }
+    capabilities[key] = capability
+    if (target) registerResourceCapability(target.name, { resourceKey, capability: key, permission: capability.permission, visible: capability.visible })
   }
-  return actions
+  return capabilities
 }
 
 function memoize<TArgs, TResult>(create: (args: TArgs) => TResult) {
@@ -358,51 +391,21 @@ function memoize<TArgs, TResult>(create: (args: TArgs) => TResult) {
   }
 }
 
-/** Prefer this overload for inferred, narrow operation objects (including Hono). */
 export function defineResource<
-  const TOperations extends { readonly __record: object },
-  TRecord extends object = Extract<ResourceRecordOf<TOperations>, object>,
-  TQuery extends object = Extract<ResourceQueryOf<TOperations>, object>,
-  TCreate extends object = Extract<ResourceCreateOf<TOperations>, object>,
-  TUpdate extends object = Extract<ResourceUpdateOf<TOperations>, object>,
+  const TCapabilities extends Record<string, ResourceCapability>,
+  TRecord extends object = Extract<CapabilityRecordOf<TCapabilities>, object>,
+  TQuery extends object = Extract<CapabilityQueryOf<TCapabilities>, object>,
+  TCreate extends object = Extract<CapabilityCreateOf<TCapabilities>, object>,
+  TUpdate extends object = Extract<CapabilityUpdateOf<TCapabilities>, object>,
   const TDeclaration extends IdentityDeclarationInput<TRecord> | undefined = undefined,
 >(
-  definition: ResourceDefinition<TRecord, TQuery, TCreate, TUpdate, TDeclaration, TOperations>,
-): Resource<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>, TOperations>
-
-/** Explicit generic spelling remains available for existing manual resources. */
-export function defineResource<
-  TRecord extends object = Record<string, unknown>,
-  TQuery extends object = Record<string, unknown>,
-  TCreate extends object = Record<string, unknown>,
-  TUpdate extends object = TCreate,
-  const TDeclaration extends IdentityDeclarationInput<TRecord> | undefined = undefined,
-  const TOperations extends ResourceOperationContract<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>> = ResourceOperations<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>>,
->(
-  definition: ResourceDefinition<TRecord, TQuery, TCreate, TUpdate, TDeclaration, TOperations>,
-): Resource<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>, TOperations>
-
-/**
- * `TDeclaration` is inferred from the `identity` value — a `const` type
- * parameter keeps a key list's literal types — and resolves the identity shape
- * every operation, route builder, and factory then speaks. A call site that
- * spells earlier type arguments explicitly must spell this one too, because
- * TypeScript falls back to defaults rather than inference for a partially
- * supplied type-argument list.
- */
-export function defineResource<
-  TRecord extends object = Record<string, unknown>,
-  TQuery extends object = Record<string, unknown>,
-  TCreate extends object = Record<string, unknown>,
-  TUpdate extends object = TCreate,
-  const TDeclaration extends IdentityDeclarationInput<TRecord> | undefined = undefined,
-  const TOperations extends ResourceOperationContract<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>> = ResourceOperations<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>>,
->(
-  definition: ResourceDefinition<TRecord, TQuery, TCreate, TUpdate, TDeclaration, TOperations>,
-): Resource<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>, TOperations> {
+  definition: ResourceDefinition<TRecord, TQuery, TCreate, TUpdate, TDeclaration, TCapabilities> & {
+    capabilities: TCapabilities & ResourceCapabilitiesDefinition<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>>
+  },
+): Resource<TRecord, TQuery, TCreate, TUpdate, ResolvedIdentity<TRecord, TDeclaration>, TCapabilities> {
   type TIdentity = ResolvedIdentity<TRecord, TDeclaration>
-  const operations: ResourceOperations<TRecord, TQuery, TCreate, TUpdate, TIdentity> = definition.operations ?? {}
-  const actions = normalizeActions(definition.key, definition.actions as ResourceActionsDefinition<TIdentity, ResourceActionKey> | undefined)
+  const handlers = standardHandlers<TRecord, TQuery, TCreate, TUpdate, TIdentity, TCapabilities>(definition.capabilities)
+  const capabilities = normalizeCapabilities<TIdentity>(definition.key, definition.capabilities)
 
   const identity = resolveIdentityExtractor<TRecord, TIdentity>(definition.identity)
 
@@ -423,8 +426,8 @@ export function defineResource<
     }
     if (args?.query) props.query = args.query
     if (args?.pagination !== undefined) props.pagination = args.pagination
-    if (operations.list) {
-      props.load = (context) => operations.list!(context) as MaybePromise<CollectionResult<TRecord>>
+    if (handlers.list) {
+      props.load = (context) => handlers.list!(context)
     }
     if (definition.table?.fields) props.fields = pickFields(definition.fields, definition.table.fields) as never
     return props
@@ -437,37 +440,34 @@ export function defineResource<
       namespace: definition.key,
       searchParameters: args.searchParameters ?? {},
     }
-    if (operations.detail) {
-      props.load = (context) => operations.detail!(context as RecordLoadContext<TIdentity>) as never
+    if (handlers.detail) {
+      props.load = (context) => handlers.detail!(context as RecordLoadContext<TIdentity>) as never
     }
     return props
   })
 
-  function rowActions(record: TRecord, onDelete?: (record: object) => void): RowAction[] {
+  function allowed(record: TRecord, operation: 'detail' | 'update' | 'delete'): boolean {
     const { access } = useResourceRuntime().adapters
-    const id = identity(record)
-    const allowed = (operation: 'detail' | 'update' | 'delete') => {
-      const action = actions[operation]
-      const accessRecord = record as Record<string, unknown>
-      return Boolean(action && (action.permission === null || access.allows({ operation, permission: action.permission, record: accessRecord })) && (!action.visible || action.visible({ record: accessRecord, access })))
-    }
-    const result: RowAction[] = []
-    const detail = actions.detail
-    if (detail?.to && allowed('detail')) result.push({ key: 'detail', label: 'Detail', to: typeof detail.to === 'function' ? detail.to(id) : detail.to })
-    const update = actions.update
-    if (update?.to && allowed('update')) result.push({ key: 'update', label: 'Ubah', to: typeof update.to === 'function' ? update.to(id) : update.to })
-    if (actions.delete && onDelete && allowed('delete')) result.push({ key: 'delete', label: 'Hapus', onSelect: () => onDelete(record) })
-    return result
+    const capability = capabilities[operation]
+    const accessRecord = record as Record<string, unknown>
+    return Boolean(capability && (capability.permission === null || access.allows({ operation, permission: capability.permission, record: accessRecord })) && (!capability.visible || capability.visible({ record: accessRecord, access })))
   }
 
   function tableSurface(args?: TableSurfaceArguments<TQuery>): TableSurface<TRecord, TQuery> {
-    const { onDelete, ...data } = args ?? {}
-    const hasRowControls = Boolean(actions.detail?.to || actions.update?.to || (actions.delete && onDelete))
+    const data = args
+    const create = capabilities.create
+    const { access } = useResourceRuntime().adapters
+    const createRoute = create?.to && typeof create.to !== 'function' && (create.permission === null || access.allows({ operation: 'create', permission: create.permission })) && (!create.visible || create.visible({ access })) ? create.to : undefined
+    const detail = capabilities.detail
+    const update = capabilities.update
+    const hasDelete = Boolean(capabilities.delete && handlers.delete)
     return {
       table: tableProps(data as TableFactoryArguments<TQuery>),
-      rowControls: hasRowControls
-        ? (record: TRecord) => rowActions(record, onDelete)
-        : undefined,
+      createRoute,
+      detailRoute: detail?.to ? (record) => allowed(record, 'detail') ? (typeof detail.to === 'function' ? detail.to(identity(record)) : detail.to) : undefined : undefined,
+      updateRoute: update?.to ? (record) => allowed(record, 'update') ? (typeof update.to === 'function' ? update.to(identity(record)) : update.to) : undefined : undefined,
+      canDelete: hasDelete ? (record) => allowed(record, 'delete') : undefined,
+      deleteRecord: hasDelete ? (record) => deleteResource(identity(record)) : undefined,
     }
   }
 
@@ -489,8 +489,8 @@ export function defineResource<
         namespace: `${definition.key}.create`,
         schema: schemaFor('create') as ValidationSchema<TCreate> | undefined,
         submit: async (draft) => {
-          if (!operations.create) throw new Error(`[is-vue-framework] Resource "${definition.key}" has no create behavior.`)
-          const result = await operations.create(draft as TCreate)
+          if (!handlers.create) throw new Error(`[is-vue-framework] Resource "${definition.key}" has no create capability.`)
+          const result = await handlers.create(draft as TCreate)
           await invalidate()
           return result
         },
@@ -506,14 +506,14 @@ export function defineResource<
       namespace: `${definition.key}.update.${identityToken(id)}`,
       schema: schemaFor('update') as ValidationSchema<TUpdate> | undefined,
       submit: async (draft) => {
-        if (!operations.update) throw new Error(`[is-vue-framework] Resource "${definition.key}" has no update behavior.`)
-        const result = await operations.update(id, draft as TUpdate)
+        if (!handlers.update) throw new Error(`[is-vue-framework] Resource "${definition.key}" has no update capability.`)
+        const result = await handlers.update(id, draft as TUpdate)
         await invalidate({ id })
         return result
       },
     }
-    if (operations.detail) {
-      props.load = (context) => operations.detail!({ ...context, id }) as never
+    if (handlers.detail) {
+      props.load = (context) => handlers.detail!({ ...context, id }) as never
     }
     if (args.initialData) props.initialData = args.initialData as unknown as Partial<TUpdate>
     return props
@@ -524,34 +524,34 @@ export function defineResource<
     await invalidateResourceData(queryClient, { resource: definition.key, id: args?.id })
   }
 
-  async function remove(id: TIdentity): Promise<unknown> {
-    if (!operations.delete) throw new Error(`[is-vue-framework] Resource "${definition.key}" has no delete behavior.`)
-    const result = await operations.delete(id)
+  async function deleteResource(id: TIdentity): Promise<unknown> {
+    if (!handlers.delete) throw new Error(`[is-vue-framework] Resource "${definition.key}" has no delete capability.`)
+    const result = await handlers.delete(id)
     await invalidate({ id })
     return result
   }
 
-  const detailAction = actions.detail
+  const detailCapability = capabilities.detail
 
-  const resource: ResourceBase<TRecord, TQuery, TCreate, TUpdate, TIdentity, ResourceOperationKeys<TOperations>>
+  const resource: ResourceBase<TRecord, TQuery, TCreate, TUpdate, TIdentity, TCapabilities>
     & ListCapableResource<TRecord, TQuery>
     & DetailCapableResource<TRecord, TIdentity>
-    & { form: CreateForm<TCreate, TRecord> & UpdateForm<TUpdate, TRecord, TIdentity>; remove: (id: TIdentity) => Promise<unknown> } = {
+    & { form: CreateForm<TCreate, TRecord> & UpdateForm<TUpdate, TRecord, TIdentity>; delete: (id: TIdentity) => Promise<unknown> } = {
     key: definition.key,
     fields: definition.fields,
-    actions,
+    capabilities: definition.capabilities,
     identity,
-    ...(detailAction?.to ? { rowLink: (record: TRecord) => {
-      const to = detailAction.to!
+    ...(detailCapability?.to ? { detailRoute: (record: TRecord) => {
+      const to = detailCapability.to!
       return typeof to === 'function' ? to(identity(record)) : to
     } } : {}),
     table: tableSurface,
     detail: detailSurface,
     form: form as CreateForm<TCreate, TRecord> & UpdateForm<TUpdate, TRecord, TIdentity>,
-    remove,
+    delete: deleteResource,
     invalidate,
   }
-  return resource as typeof resource & Pick<Resource<TRecord, TQuery, TCreate, TUpdate, TIdentity, TOperations>, '__formCapabilities'>
+  return resource as Resource<TRecord, TQuery, TCreate, TUpdate, TIdentity, TCapabilities>
 }
 
 /**

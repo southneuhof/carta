@@ -37,7 +37,7 @@ Open: where the resolution runs (`beforeWriteFiles` tree edit vs. a navigation g
 
 Earlier design used page-action descriptors with placement and route/handler fields. Shells rendered descriptors filtered by placement; they resolved nothing themselves.
 
-Earlier factory helper inferred list, detail, create, update, and delete page actions from a resource surface. An action appeared only when capability, route target, and access allowed it; otherwise it was absent.
+`ListView` now renders only standard create/detail/update/delete capability controls. Create is projected as `createRoute`; row actions are fixed detail/update/delete branches. Custom controls remain route-owned.
 
 Every CRUD route calls it the same way:
 
@@ -108,12 +108,12 @@ design:
   declaration too; a call site that spells none infers everything from `fields` and `identity`. The
   function spelling needs its parameter annotated when `TRecord` is itself inferred. No existing call
   site changed.
-- **Row links** (027): `rowLink` is a resource member, not a member of the table bundle. A function
+- **Detail routes** (027): `detailRoute` is a resource member, not a member of the table bundle. A function
   inside the bundle survives `v-bind` onto a shell only as a fallthrough attribute, which Vue renders
-  into the DOM; keeping the bundles `{ table, controls }` / `{ detail, controls }` left the shells
+  into the DOM; keeping the bundles `{ table, detailRoute, updateRoute, canDelete, deleteRecord }` / `{ detail }` left the shells
   untouched, as the plan required.
-- **Control freshness** (027): the core props stay memoized, the `controls` array and the bundle
-  wrapper are rebuilt per call. Memoizing a bundle would cache a closure over a route's `onDelete`
+- **Capability freshness**: the core props stay memoized; route/delete eligibility functions evaluate
+  access and visibility at render or click time, never from route callbacks.
   handler — functions drop out of the memo key — and hand a second mount the first component's dead
   handler.
 - **Shell meta spelling** (028): `meta.tabs` is declared in the layout's `<route lang="json5">`

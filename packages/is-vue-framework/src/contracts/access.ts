@@ -1,10 +1,10 @@
 /**
  * UI access contracts. Backend authorization stays authoritative; these only
- * decide whether a standard control is presented.
+ * decide whether a resource action is presented.
  *
- * A standard control renders when the resource operation exists, a matching
+ * A resource action renders when the resource operation exists, a matching
  * route exists, the user is allowed, and the resource policy allows it.
- * Denied controls disappear.
+ * Denied actions disappear.
  */
 
 export type ResourceOperation = 'list' | 'detail' | 'create' | 'update' | 'delete'

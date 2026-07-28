@@ -6,11 +6,8 @@ import type { Role } from './roles.operations'
 
 <template>
   <ListView title="Roles" :resource="roles">
-    <template #controls>
-      <RouterLink :to="roles.actions.create!.to as never"><Button>Tambah</Button></RouterLink>
-    </template>
     <template #cell:name="{ value, record }">
-      <RouterLink :to="roles.rowLink!(record as Role)">
+      <RouterLink :to="roles.detailRoute!(record as Role)">
         {{ value }}
       </RouterLink>
     </template>

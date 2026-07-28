@@ -5,9 +5,9 @@ const fields = { name: { label: 'Name' } }
 type Props = InstanceType<typeof FormView>['$props']
 type RecordResult = Record<string, unknown>
 type ResultFormProps = FormProps<Record<string, unknown>, RecordResult>
-const createOnly = { __formCapabilities: 'create' as const, actions: { create: {} }, identity: () => '1', form: (() => ({ fields, submit: async () => ({ id: '1' }) })) as { (): ResultFormProps; (args: { initialData?: { name?: string }; searchParameters?: Record<string, unknown> }): ResultFormProps } }
-const updateOnly = { __formCapabilities: 'update' as const, actions: { update: {} }, identity: () => '1', form: (_args: { id: string; initialData?: { name?: string }; searchParameters?: Record<string, unknown> }) => ({ fields, submit: async () => ({ id: '1' }) }) }
-const both = { __formCapabilities: 'create-update' as const, actions: { create: {}, update: {} }, identity: () => '1', form: (() => ({ fields, submit: async () => ({ id: '1' }) })) as typeof createOnly.form & typeof updateOnly.form }
+const createOnly = { __formCapabilities: 'create' as const, capabilities: { create: {} }, identity: () => '1', form: (() => ({ fields, submit: async () => ({ id: '1' }) })) as { (): ResultFormProps; (args: { initialData?: { name?: string }; searchParameters?: Record<string, unknown> }): ResultFormProps } }
+const updateOnly = { __formCapabilities: 'update' as const, capabilities: { update: {} }, identity: () => '1', form: (_args: { id: string; initialData?: { name?: string }; searchParameters?: Record<string, unknown> }) => ({ fields, submit: async () => ({ id: '1' }) }) }
+const both = { __formCapabilities: 'create-update' as const, capabilities: { create: {}, update: {} }, identity: () => '1', form: (() => ({ fields, submit: async () => ({ id: '1' }) })) as typeof createOnly.form & typeof updateOnly.form }
 
 const create: Props = { resource: createOnly }
 const update: Props = { resource: updateOnly, id: '1' }

@@ -27,7 +27,7 @@ export interface FormSubmissionContext<TRecord extends object, TIdentity extends
 }
 
 type BivariantMethod<TArgument, TResult> = { method(argument: TArgument): TResult }['method']
-type ResourceAction = { to?: RouteLocationRaw | BivariantMethod<RecordIdentity, RouteLocationRaw> }
+type ResourceCapability = { to?: RouteLocationRaw | BivariantMethod<RecordIdentity, RouteLocationRaw> | { name: string; params: BivariantMethod<RecordIdentity, Record<string, string | number>> } }
 type ResourceFormOptions = {
   afterSubmit?: BivariantMethod<FormSubmissionContext<Record<string, unknown>, RecordIdentity>, MaybePromise<void>>
   successMessage?: string | false
@@ -35,7 +35,7 @@ type ResourceFormOptions = {
 
 type CreateFormResource = {
   readonly __formCapabilities: 'create'
-  actions: { create?: unknown; update?: never; detail?: ResourceAction; list?: ResourceAction }
+  capabilities: { create?: unknown; update?: never; detail?: ResourceCapability; list?: ResourceCapability }
   identity: BivariantMethod<Record<string, unknown>, RecordIdentity>
   form(): FormProps<Record<string, unknown>, Record<string, unknown>>
   form(args: FormOptions): FormProps<Record<string, unknown>, Record<string, unknown>>
@@ -43,14 +43,14 @@ type CreateFormResource = {
 
 type UpdateFormResource = {
   readonly __formCapabilities: 'update'
-  actions: { create?: never; update?: unknown; detail?: ResourceAction; list?: ResourceAction }
+  capabilities: { create?: never; update?: unknown; detail?: ResourceCapability; list?: ResourceCapability }
   identity: BivariantMethod<Record<string, unknown>, RecordIdentity>
   form(args: FormOptions & { id: RecordIdentity }): FormProps<Record<string, unknown>, Record<string, unknown>>
 } & ResourceFormOptions
 
 type CreateUpdateFormResource = {
   readonly __formCapabilities: 'create-update'
-  actions: { create?: unknown; update?: unknown; detail?: ResourceAction; list?: ResourceAction }
+  capabilities: { create?: unknown; update?: unknown; detail?: ResourceCapability; list?: ResourceCapability }
   identity: BivariantMethod<Record<string, unknown>, RecordIdentity>
   form(): FormProps<Record<string, unknown>, Record<string, unknown>>
   form(args: FormOptions): FormProps<Record<string, unknown>, Record<string, unknown>>
@@ -60,7 +60,7 @@ type CreateUpdateFormResource = {
 export type ResourceFormViewProps<TRecord extends object, TIdentity extends RecordIdentity, TCreate extends object, TUpdate extends object = TCreate> = {
   resource: {
     identity: (record: TRecord) => TIdentity
-    actions: { detail?: { to?: RouteLocationRaw | ((id: TIdentity) => RouteLocationRaw) }; list?: { to?: RouteLocationRaw } }
+    capabilities: { detail?: { to?: { name: string } | { name: string; params: (id: TIdentity) => Record<string, string | number> } }; list?: { to?: { name: string } } }
     form: {
       (): FormProps<TCreate, TRecord>
       (args: FormOptions): FormProps<TCreate, TRecord>
@@ -118,11 +118,14 @@ const emit = defineEmits<{
 }>()
 
 function defaultTarget(record: Record<string, unknown>): RouteLocationRaw | undefined {
-  const detail = props.resource?.actions.detail?.to
+  const detail = props.resource?.capabilities?.detail?.to
   if (typeof detail === 'function') return detail(props.resource!.identity(record))
-  if (detail) return detail
-  const list = props.resource?.actions.list?.to
-  return typeof list === 'function' ? undefined : list
+  if (typeof detail === 'string') return detail
+  if (detail && typeof detail === 'object' && 'params' in detail && typeof detail.params === 'function') return { name: detail.name, params: detail.params(props.resource!.identity(record)) } as RouteLocationRaw
+  if (detail) return detail as RouteLocationRaw
+  const list = props.resource?.capabilities?.list?.to
+  if (typeof list === 'string') return list
+  return list ? list as RouteLocationRaw : undefined
 }
 
 async function submitted(result: unknown) {

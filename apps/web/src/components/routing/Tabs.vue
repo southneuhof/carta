@@ -19,18 +19,17 @@ const router = useRouter()
 const tabs = computed(() => {
   return props.items.flatMap((item) => {
     let target
+    const to = item.action.to
+    if (!to) return []
     try {
-      const to = item.action.to
-      if (typeof to === 'function') return []
       target = router.resolve({ ...(to as object), params: route.params } as never)
     } catch {
       return []
     }
-    if (target.name !== item.action.routeName || !target.matched.length) return []
+    if (target.name !== to.name || !target.matched.length) return []
     const access = useResourceRuntime().adapters.access
-    if (item.action.permission !== null && !access.allows({ operation: item.action.key, permission: item.action.permission })) return []
-    if (item.action.visible && !item.action.visible({ access })) return []
-    return [{ ...item, to: target, active: route.name === item.action.routeName }]
+    if (item.action.permission !== null && !access.allows({ operation: 'detail', permission: item.action.permission })) return []
+    return [{ ...item, to: target, active: route.name === target.name }]
   })
 })
 
@@ -70,9 +69,9 @@ watchEffect(() => {
   <nav v-if="tabs.length > 1" :aria-label="props.label ?? 'Tab'">
     <RouterLink
       v-for="tab in tabs"
-      :key="tab.action.routeName"
+      :key="tab.action.to?.name"
       :to="{ path: tab.to.path, query: siblingQuery() }"
-      :data-tab="tab.action.routeName"
+      :data-tab="tab.action.to?.name"
       :aria-current="tab.active ? 'page' : undefined"
     >
       {{ tab.label }}

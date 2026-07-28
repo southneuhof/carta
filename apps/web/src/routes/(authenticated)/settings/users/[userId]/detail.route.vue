@@ -10,11 +10,13 @@ import { userRoles } from './detail/roles/user-roles.resource'
 const route = useRoute('settings-users-detail')
 const userId = route.params.userId
 const updateTarget = (() => {
-  const target = users.actions.update?.to
-  return typeof target === 'function' ? target(userId) : target
+  const target = users.capabilities?.update?.to
+  return target && { name: target.name, params: target.params(userId) }
 })()
 
-const tabs = [{ action: userRoles.actions.list! as import('@southneuhof/is-vue-framework').NavigableResourceAction, label: 'Role' }] as const satisfies readonly RouteTab[]
+const tabs = userRoles.capabilities?.list
+  ? [{ action: userRoles.capabilities.list, label: 'Role' }] as const satisfies readonly RouteTab[]
+  : []
 </script>
 
 <template>
@@ -24,7 +26,7 @@ const tabs = [{ action: userRoles.actions.list! as import('@southneuhof/is-vue-f
         <RouterLink v-if="updateTarget" :to="updateTarget"><Button>Ubah</Button></RouterLink>
       </template>
       <template #footer>
-        <RouterLink :to="users.actions.list!.to as never"><Button variant="text">Kembali</Button></RouterLink>
+        <RouterLink :to="{ name: users.capabilities?.list?.to?.name }"><Button variant="text">Kembali</Button></RouterLink>
       </template>
     </DetailView>
     <Tabs label="Pengguna" :items="tabs" />
