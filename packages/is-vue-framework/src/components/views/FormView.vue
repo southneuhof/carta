@@ -9,12 +9,15 @@
 import { computed, ref } from 'vue'
 import { useRouter, type RouteLocationRaw } from 'vue-router'
 import { toast } from 'vue-sonner'
-import type { FormProps, MaybePromise, RecordIdentity, SubmitError } from '../../contracts'
+import type { FieldContext, FormProps, MaybePromise, RecordIdentity, SubmitError } from '../../contracts'
 import Form from '../core/Form.vue'
+import Button from '../base/Button.vue'
+import Card from '../base/Card.vue'
 
 type FormOptions = {
   initialData?: Record<string, unknown>
   searchParameters?: Record<string, unknown>
+  context?: FieldContext
 }
 
 export interface FormSubmissionContext<TRecord extends object, TIdentity extends RecordIdentity> {
@@ -157,39 +160,47 @@ async function submitted(result: unknown) {
   }
 }
 
-const instance = ref<{ submit: () => Promise<void>; reset: () => void; submitting: boolean } | null>(null)
+const instance = ref<{ submit: () => Promise<void>; reset: () => void; submitting: boolean; validating: boolean } | null>(null)
 </script>
 
 <template>
-  <section class="is-form-view">
-    <header>
-      <slot name="header">
-        <h1 v-if="title">{{ title }}</h1>
-        <p v-if="description">{{ description }}</p>
-      </slot>
-      <slot name="controls" />
-    </header>
+  <section class="is-form-view flex flex-col gap-4">
+    <Card variant="outlined" color="surfaceContainer" class="gap-0 p-0">
+      <header class="flex flex-col gap-3 border-b border-outline/[12%] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
+        <slot name="header">
+          <div class="min-w-0">
+            <h1 v-if="title" class="text-lg font-semibold leading-6 tracking-tight text-on-surface">{{ title }}</h1>
+            <p v-if="description" class="mt-1 text-sm leading-5 text-on-surface-variant">{{ description }}</p>
+          </div>
+        </slot>
+        <div v-if="$slots.controls" class="flex flex-wrap items-center gap-2">
+          <slot name="controls" />
+        </div>
+      </header>
 
-    <slot name="body" v-bind="{ form: surface }">
-      <Form
-        ref="instance"
-        v-bind="surface"
-        @submitted="submitted"
-        @error="emit('error', $event)"
-      >
-        <template v-for="(_, name) in $slots" #[name]="slotProps" :key="name">
-          <slot :name="name" v-bind="slotProps ?? {}" />
-        </template>
-        <template #controls>
-          <slot name="form-controls" :submit="() => instance?.submit()" :reset="() => instance?.reset()">
-            <div class="is-form-view-controls">
-              <button type="submit" :disabled="instance?.submitting">{{ submitLabel ?? 'Simpan' }}</button>
-              <button type="button" @click="instance?.reset()">Batal</button>
-            </div>
-          </slot>
-        </template>
-      </Form>
-    </slot>
+      <div class="p-5 sm:p-6">
+        <slot name="body" v-bind="{ form: surface }">
+          <Form
+            ref="instance"
+            v-bind="surface"
+            @submitted="submitted"
+            @error="emit('error', $event)"
+          >
+            <template v-for="(_, name) in $slots" #[name]="slotProps" :key="name">
+              <slot :name="name" v-bind="slotProps ?? {}" />
+            </template>
+            <template #controls>
+              <slot name="form-controls" :submit="() => instance?.submit()" :reset="() => instance?.reset()">
+                <div class="is-form-view-controls flex flex-col gap-2 pt-5 sm:flex-row sm:justify-end">
+                  <Button type="button" variant="text" class="w-full sm:w-auto" :disabled="instance?.submitting || instance?.validating" @click="instance?.reset()">Batal</Button>
+                  <Button type="submit" class="w-full sm:w-auto" :disabled="instance?.submitting || instance?.validating">{{ instance?.submitting ? 'Menyimpan…' : submitLabel ?? 'Simpan' }}</Button>
+                </div>
+              </slot>
+            </template>
+          </Form>
+        </slot>
+      </div>
+    </Card>
 
     <footer>
       <slot name="footer" />

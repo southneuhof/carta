@@ -43,6 +43,8 @@ export interface FormRendererContext<TDraft = Record<string, unknown>, TValue = 
   error?: string
   touched: boolean
   disabled: boolean
+  validating: boolean
+  formValidating: boolean
 }
 
 /**
@@ -69,8 +71,18 @@ export interface FieldBehavior<TDraft = Record<string, unknown>, TValue = unknow
   disabled?: (context: FieldBehaviorContext<TDraft, TValue>) => boolean
   /** Shallow-merges over the static `props` of the same projection. */
   props?: (context: FieldBehaviorContext<TDraft, TValue>) => Record<string, unknown>
+  /** Atomically changes presentation only; identity, accessors, and validation stay static. */
+  presentation?: (context: FieldBehaviorContext<TDraft, TValue>) => FieldBehaviorPresentation
   derived?: (context: FieldBehaviorContext<TDraft, TValue>) => TValue
-  resetWhen?: (context: FieldBehaviorContext<TDraft, TValue>) => boolean
+  /** Identity is compared with `Object.is`; changed identity clears this field. */
+  resetWhen?: (context: FieldBehaviorContext<TDraft, TValue>) => unknown
+}
+
+export interface FieldBehaviorPresentation {
+  renderer?: string | null
+  label?: string | null
+  props?: Record<string, unknown> | null
+  span?: number | null
 }
 
 /** Widget selection shared by every surface projection. */

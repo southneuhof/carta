@@ -55,23 +55,30 @@ defineExpose({ refresh: loaded.refresh })
       <p>Data tidak ditemukan.</p>
     </slot>
 
-    <dl v-else>
-      <template v-for="entry in entries" :key="entry.field.key">
-        <dt>{{ entry.field.label }}</dt>
-        <dd :data-emphasis="entry.field.emphasis">
-          <slot :name="`value:${entry.field.key}`" :value="entry.value" :record="record" :field="entry.field">
-            <component
-              :is="renderers.require(entry.field.renderer)"
-              v-if="entry.field.renderer"
-              v-bind="entry.field.props"
-              :value="entry.value"
-              :record="record"
-              :field="entry.field"
-            />
-            <template v-else>{{ entry.value ?? '-' }}</template>
-          </slot>
-        </dd>
-      </template>
-    </dl>
+    <div v-else class="overflow-x-auto">
+      <table class="w-full border-collapse">
+        <tbody>
+          <tr v-for="entry in entries" :key="entry.field.key">
+            <th scope="row" class="w-px whitespace-nowrap py-1 pe-3 text-left align-top text-sm font-medium text-on-surface">
+              {{ entry.field.label }}
+            </th>
+            <td aria-hidden="true" class="w-px whitespace-nowrap py-1 pe-3 align-top text-on-surface-variant">:</td>
+            <td :data-emphasis="entry.field.emphasis" class="min-w-0 break-words py-1 text-sm text-on-surface">
+              <slot :name="`value:${entry.field.key}`" :value="entry.value" :record="record" :field="entry.field">
+                <component
+                  :is="renderers.require(entry.field.renderer)"
+                  v-if="entry.field.renderer"
+                  v-bind="entry.field.props"
+                  :value="entry.value"
+                  :record="record"
+                  :field="entry.field"
+                />
+                <template v-else>{{ entry.value ?? '-' }}</template>
+              </slot>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>

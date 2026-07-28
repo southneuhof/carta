@@ -25,6 +25,7 @@ export type {
   DisplayRendererContext,
   FormRendererContext,
   FieldBehavior,
+  FieldBehaviorPresentation,
   FieldBehaviorContext,
   FieldRendererSelection,
   FieldDisplayProjection,
@@ -38,7 +39,7 @@ export type {
   FieldSelection,
 } from './fields'
 
-export type { ValidationIssue, ValidationResult, ValidationSchema, SubmitError } from './validation'
+export type { ValidationIssue, ValidationResult, ValidationSchema, SubmitError, FormValidationTrigger, FormValidatorContext, FormValidatorResult, FormValidator, FormValidatorDefinition, FormValidatorInput } from './validation'
 
 export type { ResourceOperation, AccessRequest, AccessAdapter, AccessPolicy } from './access'
 
@@ -59,6 +60,7 @@ export type { TableProps, DetailProps, FormProps, FormSubmitHandler, RowReorderP
 export type {
   ResourceKey,
   ResourceSchemas,
+  ResourceValidators,
   IdentityDeclaration,
   TableFactoryArguments,
   DetailFactoryArguments,

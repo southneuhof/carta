@@ -12,7 +12,8 @@
 
 import type { RecordIdentity, RecordIdentityValue } from './load'
 import type { QueryNamespace } from './query'
-import type { ValidationSchema } from './validation'
+import type { FormValidator, ValidationSchema } from './validation'
+import type { FieldContext } from './fields'
 
 export type ResourceKey = string
 
@@ -26,6 +27,11 @@ export interface ResourceSchemas<
   query?: ValidationSchema<TQuery>
   create?: ValidationSchema<TCreate>
   update?: ValidationSchema<TUpdate>
+}
+
+export interface ResourceValidators<TCreate extends object = Record<string, unknown>, TUpdate extends object = TCreate> {
+  create?: readonly FormValidator<TCreate>[]
+  update?: readonly FormValidator<TUpdate>[]
 }
 
 /**
@@ -56,6 +62,7 @@ export interface DetailFactoryArguments<TIdentity extends RecordIdentity = Recor
 export interface CreateFormFactoryArguments<TCreate extends object = Record<string, unknown>> {
   initialData?: Partial<TCreate>
   searchParameters?: Record<string, unknown>
+  context?: FieldContext
 }
 
 export interface UpdateFormFactoryArguments<
@@ -65,4 +72,5 @@ export interface UpdateFormFactoryArguments<
   id: TIdentity
   initialData?: Partial<TUpdate>
   searchParameters?: Record<string, unknown>
+  context?: FieldContext
 }

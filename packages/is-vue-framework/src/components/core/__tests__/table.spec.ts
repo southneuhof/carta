@@ -122,6 +122,42 @@ describe('Table core', () => {
     view.unmount()
   })
 
+  it('settles repeated successful query result changes', async () => {
+    const Host = defineComponent({
+      setup(_, { expose }) {
+        const query = ref<Record<string, unknown>>({ page: 1, limit: 10 })
+        expose({ query })
+        return () => h(Table, {
+          fields,
+          namespace: 'roles',
+          query: query.value,
+          load: ({ query: activeQuery }: { query: Record<string, unknown> }) => ({
+            data: activeQuery.search ? [] : rows,
+            meta: activeQuery.search
+              ? { total: 0, page: 1, pageSize: 10, totalPage: 0 }
+              : { total: 2, page: 1, pageSize: 10, totalPage: 1 },
+          }),
+        })
+      },
+    })
+    const view = mountCore(Host, {})
+    await flush()
+
+    for (let index = 0; index < 30; index += 1) {
+      view.exposed().query = index % 2
+        ? { page: 1, limit: 10 }
+        : { page: 1, limit: 10, search: 'no-match' }
+      await flush()
+      if (index % 2) expect(view.all('tbody tr')).toHaveLength(2)
+      else expect(view.text()).toContain('No data')
+    }
+
+    view.exposed().query = { page: 1, limit: 10 }
+    await flush()
+    expect(view.all('tbody tr')).toHaveLength(2)
+    view.unmount()
+  })
+
   it('keeps duplicate instances independent through explicit namespaces', async () => {
     const location = createMemoryQueryLocationAdapter()
     const Host = defineComponent(() => () => [
@@ -326,7 +362,7 @@ describe('Table core', () => {
     expect(actionHeader?.classList.contains('right-0')).toBe(true)
     expect(actionCells).toHaveLength(rows.length)
     expect(actionCells.every((cell) => cell.classList.contains('sticky') && cell.classList.contains('right-0'))).toBe(true)
-    expect(actionCells.every((cell) => cell.classList.contains('bg-surface-container-low') && cell.classList.contains('before:bg-gradient-to-l'))).toBe(true)
+    expect(actionCells.every((cell) => cell.classList.contains('is-table-row-action') && cell.classList.contains('bg-surface-container'))).toBe(true)
     view.find<HTMLButtonElement>('.row-action')!.click()
     expect(onRowClick).not.toHaveBeenCalled()
     view.unmount()
@@ -336,9 +372,11 @@ describe('Table core', () => {
     const pending = deferred<{ data: typeof rows }>()
     const loading = mountCore(Table, { fields, load: () => pending.promise })
     expect(loading.text()).toContain('Memuat')
+    expect(loading.find('[role="status"]')?.parentElement?.classList.contains('bg-surface-container')).toBe(true)
     pending.resolve({ data: [] })
     await flush()
     expect(loading.text()).toContain('No data')
+    expect(loading.find('p')?.parentElement?.classList.contains('bg-surface-container')).toBe(true)
     loading.unmount()
 
     const failing = mountCore(Table, {

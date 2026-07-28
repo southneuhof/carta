@@ -14,10 +14,10 @@
  */
 
 import type { CollectionLoadContext, Load, RecordIdentity, RecordLoadContext, MaybePromise } from './load'
-import type { FieldsInput } from './fields'
+import type { FieldContext, FieldsInput } from './fields'
 import type { CollectionResult, RecordResult } from './results'
 import type { QueryNamespace, QueryValues } from './query'
-import type { SubmitError, ValidationSchema } from './validation'
+import type { FormValidatorInput, SubmitError, ValidationSchema } from './validation'
 
 export interface TableProps<
   TRecord extends object = Record<string, unknown>,
@@ -80,6 +80,10 @@ export interface FormPropsBase<TInput extends object = Record<string, unknown>, 
   searchParameters?: Record<string, unknown>
   /** Validates the visibility-filtered draft before submission. */
   schema?: ValidationSchema<TInput>
+  /** Sync or async rules composed after successful schema validation. */
+  validators?: readonly FormValidatorInput<TInput>[]
+  /** Stable caller-owned information made available to behavior and validators. */
+  context?: FieldContext
   /** Normalizes a rejected submission into field-level issues. */
   normalizeError?: (error: unknown) => SubmitError
   /** Cache identity for the optional initial-data load. */

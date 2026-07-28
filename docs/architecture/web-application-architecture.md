@@ -295,15 +295,15 @@ components with CRUD assumptions.
 
 - `ListView` composes a Card/container, title, list toolbar, route-owned page
   slots, row-action fallback, and `Table`.
-- `DetailView` composes a Card/container, title, detail toolbar, layout regions,
-  route-owned page slots, and `Detail`.
+- `DetailView` composes a deterministic back target, required title, optional
+  route-owned `controls`, and `Detail`.
 - `FormView` composes a Card/container, title, form toolbar, and `Form`.
 
 Normal resource route usage stays concise:
 
 ```vue
 <ListView :resource="incidents" />
-<DetailView :resource="incidents" :id="incidentId" />
+<DetailView title="Incident" :back-to="{ name: 'incidents' }" :resource="incidents" :id="incidentId" />
 <FormView :resource="incidents" />
 <FormView :resource="incidents" :id="incidentId" />
 ```
@@ -894,6 +894,26 @@ The migration shipped in this order (see `plans/000`-`plans/009`):
     wrappers and `CRUDComposite`.
 
 ## Acceptance gates
+
+## Form presentation, effects, and validation
+
+Form fields keep stable identity, accessors, and schemas for one mounted form.
+`behavior.presentation` may atomically change only `renderer`, `label`, `props`,
+and `span`; `undefined` inherits static presentation and `null` clears that
+property. Presentation reads draft values reactively, but it cannot fetch data,
+write values, or declare manual dependency lists.
+
+Derived fields are canonical and read-only. `derived` and `resetWhen` settle
+synchronously before validation and submit. `resetWhen` records its first
+identity without clearing, then clears only on identity change. Hidden fields
+are omitted from payloads; disabled fields remain in validation and submission.
+Value-writing derived/reset dependency cycles throw with their field path.
+
+Zod validates first and produces parsed submit data. Optional sync or async
+validators then receive parsed `data`, visible raw `draft`, stable `initial`,
+caller `context`, and an `AbortSignal`. Default triggers are blur and submit;
+newer runs abort older remote checks. Client validation improves feedback only:
+backend submission remains authoritative.
 
 These cases are covered by tests in the framework package and by
 `apps/web/src/framework/acceptance/QueryOwnershipFixture.vue`:

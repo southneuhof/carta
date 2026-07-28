@@ -268,4 +268,20 @@ describe('field behavior', () => {
     expect(onDependencies).not.toHaveBeenCalled()
     scope.stop()
   })
+
+  it('projects atomic presentation and rejects value-effect cycles', async () => {
+    const { draft, runtime, scope } = runtimeFor({
+      mode: {},
+      cause: { form: { renderer: 'text', props: { clearable: true }, behavior: { presentation: ({ draft }) => draft.mode === 'file' ? { renderer: 'file', label: 'Lampiran', props: null, span: 4 } : {} } } },
+    }, { mode: 'text' })
+    expect(runtime.state('cause').value.renderer).toBeUndefined()
+    draft.mode = 'file'
+    await nextTick()
+    expect(runtime.state('cause').value).toMatchObject({ renderer: 'file', label: 'Lampiran', props: {}, span: 4 })
+    scope.stop()
+
+    const cycle = runtimeFor({ a: { form: { behavior: { derived: ({ draft }) => draft.b } } }, b: { form: { behavior: { derived: ({ draft }) => draft.a } } } }, {})
+    expect(() => cycle.connect()).toThrow('Value-effect cycle: a -> b -> a')
+    cycle.scope.stop()
+  })
 })

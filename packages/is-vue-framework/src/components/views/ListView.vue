@@ -202,7 +202,7 @@ const canExport = computed(() => props.export !== false && Boolean(surface.value
 
 <template>
   <section class="is-list-view">
-    <Card variant="outlined" color="surfaceContainerLow" class="gap-0 p-0">
+    <Card variant="outlined" color="surfaceContainer" class="gap-0 p-0">
       <header class="flex flex-col gap-4 border-b border-outline/[16%] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex flex-col items-start sm:flex-row sm:items-center gap-4">
           <slot name="header">

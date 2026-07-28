@@ -21,12 +21,9 @@ const tabs = userRoles.capabilities?.list
 
 <template>
   <div class="flex flex-col gap-4">
-    <DetailView title="Detail Pengguna" :resource="users" :id="userId">
+    <DetailView title="Detail Pengguna" :back-to="{ name: users.capabilities?.list?.to?.name }" :resource="users" :id="userId">
       <template #controls>
         <RouterLink v-if="updateTarget" :to="updateTarget"><Button>Ubah</Button></RouterLink>
-      </template>
-      <template #footer>
-        <RouterLink :to="{ name: users.capabilities?.list?.to?.name }"><Button variant="text">Kembali</Button></RouterLink>
       </template>
     </DetailView>
     <Tabs label="Pengguna" :items="tabs" />

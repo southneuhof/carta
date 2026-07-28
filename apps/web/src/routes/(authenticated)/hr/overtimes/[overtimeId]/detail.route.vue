@@ -10,7 +10,7 @@
  * and a refusal still surfaces as a toast.
  */
 import { computed, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { DetailView, ListView } from '@southneuhof/is-vue-framework'
 import { overtimes } from '../overtimes.resource'
@@ -22,7 +22,6 @@ import { orgIdentity, type OrgIdentity } from '@/framework/identity'
 
 
 const route = useRoute('hr-overtimes-detail')
-const router = useRouter()
 const overtimeId = computed(() => route.params.overtimeId)
 
 const record = ref<Overtime | undefined>()
@@ -112,22 +111,16 @@ const editTarget = computed(() => {
   return target && { name: target.name, params: target.params(overtimeId.value) }
 })
 
-function onBack() {
-  void router.push({ name: overtimes.capabilities.list!.to!.name })
-}
 </script>
 
 <template>
   <div>
-    <DetailView title="Detail Lembur" :detail="view.detail">
+    <DetailView title="Detail Lembur" :back-to="{ name: overtimes.capabilities.list!.to!.name }" :detail="view.detail">
       <template #controls>
         <RouterLink v-if="editTarget" :to="editTarget"><Button>Ubah</Button></RouterLink>
         <Button v-if="maySubmit" :disabled="pending" @click="onSubmit">Kirim Verifikasi</Button>
         <Button v-if="mayVerify" :disabled="pending" @click="onApprove">Setujui</Button>
         <Button v-if="mayVerify" color="error" :disabled="pending" @click="rejecting = true">Tolak</Button>
-      </template>
-      <template #footer>
-        <Button type="button" variant="text" data-back @click="onBack">Kembali</Button>
       </template>
     </DetailView>
 

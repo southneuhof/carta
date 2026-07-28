@@ -3,7 +3,7 @@ import { defineComponent, h, ref } from 'vue'
 import { z } from 'zod'
 import Form from '../Form.vue'
 import { fromZod } from '../../../validation'
-import { flush, mountCore } from './harness'
+import { deferred, flush, mountCore } from './harness'
 
 const fields = {
   name: { label: 'Nama', form: { renderer: undefined } },
@@ -352,8 +352,11 @@ describe('Form core', () => {
     })
     await flush()
 
-    expect(view.find('.grid')?.className).toContain('grid-cols-12')
+    expect(view.find('.grid')?.classList.contains('grid-cols-12')).toBe(true)
+    expect(view.find('.grid')?.classList.contains('gap-y-5')).toBe(true)
     expect(view.find('.is-form-field')?.getAttribute('style')).toContain('span 4')
+    expect(view.find('.is-form-field')?.classList.contains('flex')).toBe(true)
+    expect(view.find('.is-form-field')?.classList.contains('gap-2')).toBe(true)
     view.unmount()
   })
 
@@ -371,7 +374,110 @@ describe('Form core', () => {
     const input = inputs(view)[0]
     const label = view.find('label')!
     expect(label.getAttribute('for')).toBe(input.id)
+    expect(label.classList.contains('font-medium')).toBe(true)
     expect(input.getAttribute('aria-describedby')).toBe(view.find('[role="alert"]')!.id)
+    expect(view.find(`#${input.getAttribute('aria-describedby')}`)?.classList.contains('text-error')).toBe(true)
+    view.unmount()
+  })
+
+  it('composes async validators after parsed schema data and renders root failures', async () => {
+    const seen: unknown[] = []
+    const submit = vi.fn(async () => undefined)
+    const view = mountCore(Form, {
+      fields,
+      schema: fromZod(z.object({ name: z.string().transform((value) => value.trim()) })),
+      initialData: { name: ' Admin ' },
+      validators: [({ data }) => { seen.push(data); return { path: [], message: 'Form ditolak' } }],
+      submit,
+    })
+    await flush()
+    view.find('form')!.dispatchEvent(new Event('submit'))
+    await flush()
+    expect(seen).toEqual([{ name: 'Admin' }])
+    expect(submit).not.toHaveBeenCalled()
+    expect(view.find('#form-errors')?.textContent).toContain('Form ditolak')
+    expect(view.find('#form-errors')?.classList.contains('bg-error-container')).toBe(true)
+    view.unmount()
+  })
+
+  it('renders retry feedback and default submit controls with framework states', async () => {
+    let attempts = 0
+    const loading = mountCore(Form, {
+      fields,
+      load: async () => {
+        attempts += 1
+        throw new Error('Gagal memuat')
+      },
+      submit: async () => undefined,
+    })
+    await flush()
+
+    const loadError = loading.find('[role="alert"]')!
+    expect(loadError.parentElement?.classList.contains('bg-error-container')).toBe(true)
+    loading.all('button').find((button) => button.textContent === 'Coba lagi')!.click()
+    await flush()
+    expect(attempts).toBe(2)
+    loading.unmount()
+
+    const pending = deferred<void>()
+    const submitting = mountCore(Form, {
+      fields,
+      validators: [async () => {
+        await pending.promise
+      }],
+      submit: async () => undefined,
+    })
+    await flush()
+    const submit = submitting.find<HTMLButtonElement>('button[type="submit"]')!
+    expect(submit.classList.contains('bg-primary')).toBe(true)
+    submitting.find('form')!.dispatchEvent(new Event('submit'))
+    await flush()
+    expect(submit.disabled).toBe(true)
+    pending.resolve()
+    await flush()
+    submitting.unmount()
+  })
+
+  it('keeps input and control slots as full visual replacements', async () => {
+    const view = mountCore(Form, { fields, submit: async () => undefined }, {
+      slots: {
+        'input:name': () => h('span', { 'data-input-slot': '' }, 'Input khusus'),
+        controls: () => h('button', { type: 'button', 'data-controls-slot': '' }, 'Kontrol khusus'),
+      },
+    })
+    await flush()
+
+    expect(view.find('[data-input-slot]')).not.toBeNull()
+    expect(view.find('[data-controls-slot]')).not.toBeNull()
+    expect(view.find('button[type="submit"]')).toBeNull()
+    view.unmount()
+  })
+
+  it('aborts stale async validation and never publishes its rejection', async () => {
+    const first = deferred<{ path: string[]; message: string } | undefined>()
+    let calls = 0
+    let aborted = false
+    const view = mountCore(Form, {
+      fields,
+      initialData: { name: 'Admin' },
+      validators: [{ path: ['name'], validate: ({ signal }) => {
+        calls += 1
+        if (calls === 1) {
+          signal.addEventListener('abort', () => { aborted = true })
+          return first.promise
+        }
+      } }],
+      submit: async () => undefined,
+    })
+    await flush()
+    inputs(view)[0].dispatchEvent(new Event('blur'))
+    await flush()
+    inputs(view)[0].dispatchEvent(new Event('blur'))
+    await flush()
+    first.resolve({ path: ['name'], message: 'Terlambat' })
+    await flush()
+    expect(aborted).toBe(true)
+    expect(view.text()).not.toContain('Terlambat')
     view.unmount()
   })
 })

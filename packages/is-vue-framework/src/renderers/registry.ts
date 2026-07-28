@@ -7,6 +7,7 @@
  * routes, permission stores, or resource operations.
  */
 import { inject, type Component, type InjectionKey } from 'vue'
+import { builtInFormRenderers } from './form'
 
 export type RendererSurface = 'table' | 'detail' | 'form'
 
@@ -54,7 +55,7 @@ export function createRendererRegistries(input: RendererRegistriesInput = {}): R
   return {
     table: createRendererRegistry('table', input.table),
     detail: createRendererRegistry('detail', input.detail),
-    form: createRendererRegistry('form', input.form),
+    form: createRendererRegistry('form', { ...builtInFormRenderers, ...input.form }),
   }
 }
 

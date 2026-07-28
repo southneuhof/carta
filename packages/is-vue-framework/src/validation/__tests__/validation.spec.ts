@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
 import { z as z4 } from 'zod/v4'
 import { fromZod, inferFieldLayers, requiredSchemaKeys } from '../zod'
-import { assertNoHiddenRequiredFields, selectSchema, validateDraft } from '../select'
+import { assertNoHiddenRequiredFields, selectSchema, validateDraft, validateDraftAsync } from '../select'
 import { resolveFields } from '../../fields'
 import type { ValidationSchema } from '../../contracts'
 
@@ -232,5 +232,32 @@ describe('draft validation', () => {
     const opaque: ValidationSchema = { validate: () => ({ success: true, data: {} }) }
 
     expect(() => assertNoHiddenRequiredFields(opaque, ['cause'])).not.toThrow()
+  })
+})
+
+describe('composed validators', () => {
+  it('passes parsed data to ordered async validators and keeps Zod first', async () => {
+    const calls: string[] = []
+    const result = await validateDraftAsync({
+      schema: fromZod(z.object({ name: z.string().transform((value) => value.trim()) })),
+      draft: { name: ' Admin ' },
+      trigger: 'submit',
+      initial: {}, context: {}, signal: new AbortController().signal,
+      validators: [
+        ({ data }) => { calls.push(data.name); return { path: ['name'], message: 'first' } },
+        async () => [{ path: [], message: 'second' }],
+      ],
+    })
+    expect(calls).toEqual(['Admin'])
+    expect(result).toMatchObject({ success: false, issues: [{ message: 'first' }, { message: 'second' }] })
+  })
+
+  it('does not call custom validators when schema validation fails and normalizes thrown failures', async () => {
+    let called = false
+    const invalid = await validateDraftAsync({ schema: fromZod(z.object({ name: z.string().min(3) })), draft: { name: 'x' }, trigger: 'submit', initial: {}, context: {}, signal: new AbortController().signal, validators: [() => { called = true }] })
+    expect(invalid.success).toBe(false)
+    expect(called).toBe(false)
+    const operational = await validateDraftAsync({ draft: { name: 'ok' }, trigger: 'submit', initial: {}, context: {}, signal: new AbortController().signal, validators: [() => { throw new Error('offline') }] })
+    expect(operational).toMatchObject({ success: false, issues: [{ path: [], message: 'offline', kind: 'operational' }] })
   })
 })

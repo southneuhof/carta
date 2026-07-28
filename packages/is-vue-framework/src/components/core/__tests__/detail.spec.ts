@@ -14,8 +14,12 @@ describe('Detail core', () => {
     const view = mountCore(Detail, { fields, data: record })
     await flush()
 
-    expect(view.all('dt').map((node) => node.textContent)).toEqual(['Nama', 'Ruas'])
-    expect(view.all('dd').map((node) => node.textContent)).toEqual(['Admin', 'Ruas 1'])
+    expect(view.all('table')).toHaveLength(1)
+    expect(view.all('tr')).toHaveLength(2)
+    expect(view.all('th[scope="row"]').map((node) => node.textContent)).toEqual(['Nama', 'Ruas'])
+    expect(view.all('td[aria-hidden="true"]').map((node) => node.textContent)).toEqual([':', ':'])
+    expect(view.all('td:not([aria-hidden])').map((node) => node.textContent)).toEqual(['Admin', 'Ruas 1'])
+    expect(view.all('dt, dd')).toHaveLength(0)
     view.unmount()
   })
 
@@ -95,6 +99,7 @@ describe('Detail core', () => {
     )
     await flush()
     expect(withRenderer.find('em')?.textContent).toBe('Admin')
+    expect(withRenderer.find('td em')?.textContent).toBe('Admin')
     withRenderer.unmount()
 
     const withSlot = mountCore(
@@ -104,6 +109,7 @@ describe('Detail core', () => {
     )
     await flush()
     expect(withSlot.find('strong')?.textContent).toBe('Admin')
+    expect(withSlot.find('td strong')?.textContent).toBe('Admin')
     withSlot.unmount()
   })
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { createApp, defineComponent, h } from 'vue'
 import { createRendererRegistries, createRendererRegistry, useRendererRegistries } from '../registry'
 import { FrameworkPlugin } from '../../adapters/plugin'
+import { builtInFormRenderers } from '../form'
 
 const Chip = defineComponent({ name: 'Chip', setup: () => () => h('span') })
 const ProjectChip = defineComponent({ name: 'ProjectChip', setup: () => () => h('em') })
@@ -22,6 +23,43 @@ function mountWithRenderers(renderers: Parameters<typeof createRendererRegistrie
 }
 
 describe('renderer registry', () => {
+  it('renders the core text control with native value, ARIA, and state behavior', () => {
+    const updated: unknown[] = []
+    const host = document.createElement('div')
+    const app = createApp(defineComponent({
+      setup: () => () => h(builtInFormRenderers.text, {
+        id: 'field-name',
+        value: 'Admin',
+        error: 'Sudah dipakai',
+        disabled: true,
+        class: 'custom-control',
+        'aria-invalid': 'true',
+        'aria-describedby': 'error-name',
+        setValue: (value: unknown) => updated.push(value),
+        'onValidation:touch': () => updated.push('touched'),
+      }),
+    }))
+    app.mount(host)
+
+    const wrapper = host.firstElementChild!
+    const input = host.querySelector<HTMLInputElement>('input')!
+    expect(input.value).toBe('Admin')
+    expect(input.id).toBe('field-name')
+    expect(input.getAttribute('aria-invalid')).toBe('true')
+    expect(input.getAttribute('aria-describedby')).toBe('error-name')
+    expect(input.classList.contains('custom-control')).toBe(false)
+    expect(wrapper.classList.contains('custom-control')).toBe(true)
+    expect(wrapper.classList.contains('outline-error')).toBe(true)
+    expect(wrapper.classList.contains('bg-surface-variant/50')).toBe(true)
+    expect(wrapper.classList.contains('cursor-not-allowed')).toBe(true)
+
+    input.value = 'Editor'
+    input.dispatchEvent(new Event('input'))
+    input.dispatchEvent(new Event('blur'))
+    expect(updated).toEqual(['Editor', 'touched'])
+    app.unmount()
+  })
+
   it('looks up registered renderers per surface', () => {
     const registry = createRendererRegistry('table', { chip: Chip })
 

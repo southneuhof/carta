@@ -14,7 +14,7 @@
  * the visibility-filtered draft.
  */
 import type { SchemaAdapter } from '../adapters/projectAdapters'
-import type { ResourceOperation, ValidationResult, ValidationSchema } from '../contracts'
+import type { FieldContext, FormValidationTrigger, FormValidatorDefinition, FormValidatorInput, ResourceOperation, ValidationIssue, ValidationResult, ValidationSchema } from '../contracts'
 import { fromZod } from './zod'
 
 export interface SchemaSelection {
@@ -73,6 +73,49 @@ export function validateDraft<TDraft extends object>(
   assertNoHiddenRequiredFields(schema, options.hiddenKeys ?? [])
   if (!schema) return { success: true, data: draft as TDraft }
   return schema.validate(draft)
+}
+
+export function validatorDefinition<TData extends object>(validator: FormValidatorInput<TData>): FormValidatorDefinition<TData> {
+  return typeof validator === 'function' ? { validate: validator } : validator
+}
+
+export function validatorsForTrigger<TData extends object>(validators: readonly FormValidatorInput<TData>[], trigger: FormValidationTrigger) {
+  return validators.map(validatorDefinition).filter((validator) => (validator.triggers ?? ['blur', 'submit']).includes(trigger))
+}
+
+export interface AsyncDraftValidationOptions<TData extends object> extends DraftValidationOptions<TData> {
+  validators?: readonly FormValidatorInput<TData>[]
+  trigger: FormValidationTrigger
+  initial: Partial<TData>
+  context: FieldContext
+  field?: string
+  signal: AbortSignal
+  settle?: () => void
+}
+
+export type AsyncDraftValidationResult<TData> = ValidationResult<TData> & { operationalIssues?: ValidationIssue[] }
+
+/** Zod stays sync; custom rules make orchestration async after parsed data exists. */
+export async function validateDraftAsync<TData extends object>(options: AsyncDraftValidationOptions<TData>): Promise<AsyncDraftValidationResult<TData>> {
+  options.settle?.()
+  const schemaResult = validateDraft(options)
+  if (!schemaResult.success || options.signal.aborted) return schemaResult
+  const matching = validatorsForTrigger(options.validators ?? [], options.trigger)
+  const results = await Promise.all(matching.map(async (validator) => {
+    try {
+      const result = await validator.validate({ data: schemaResult.data, draft: options.draft, initial: options.initial, context: options.context, field: options.field, signal: options.signal })
+      if (!result) return []
+      return Array.isArray(result) ? [...result] : [result]
+    } catch (error) {
+      if (options.signal.aborted) return []
+      return [{ path: [], message: error instanceof Error ? error.message : 'Validation failed unexpectedly.', kind: 'operational' as const }]
+    }
+  }))
+  if (options.signal.aborted) return { success: true, data: schemaResult.data }
+  const issues = results.flat()
+  if (!issues.length) return schemaResult
+  const operationalIssues = issues.filter((issue) => issue.kind === 'operational')
+  return { success: false, issues, ...(operationalIssues.length ? { operationalIssues } : {}) }
 }
 
 export { fromZod }

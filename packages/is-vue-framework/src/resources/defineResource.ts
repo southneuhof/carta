@@ -17,12 +17,15 @@ import type {
   DetailFactoryArguments,
   DetailProps,
   FieldCatalog,
+  FieldContext,
+  FormValidator,
   FormProps,
   MaybePromise,
   RecordIdentity,
   RecordIdentityValue,
   RecordLoadContext,
   ResourceSchemas,
+  ResourceValidators,
   TableFactoryArguments,
   TableProps,
   ValidationSchema,
@@ -270,6 +273,7 @@ export interface ResourceDefinition<
   detail?: ResourceSurfaceDefinition
   form?: ResourceSurfaceDefinition & { initialData?: Partial<TCreate> }
   schemas?: ResourceSchemas<TRecord, TQuery, TCreate, TUpdate>
+  validators?: ResourceValidators<TCreate, TUpdate>
 }
 
 /** Arguments for collection surface. */
@@ -325,10 +329,10 @@ export type DetailCapableResource<TRecord extends object = Record<string, unknow
 }
 type CreateForm<TCreate extends object, TRecord extends object> = {
   (): FormProps<TCreate, TRecord>
-  (args: { initialData?: Partial<TCreate>; searchParameters?: Record<string, unknown> }): FormProps<TCreate, TRecord>
+  (args: { initialData?: Partial<TCreate>; searchParameters?: Record<string, unknown>; context?: FieldContext }): FormProps<TCreate, TRecord>
 }
 type UpdateForm<TUpdate extends object, TRecord extends object, TIdentity extends RecordIdentity> = {
-  (args: { id: TIdentity; initialData?: Partial<TUpdate>; searchParameters?: Record<string, unknown> }): FormProps<TUpdate, TRecord>
+  (args: { id: TIdentity; initialData?: Partial<TUpdate>; searchParameters?: Record<string, unknown>; context?: FieldContext }): FormProps<TUpdate, TRecord>
 }
 type FormCapability<TCapabilities, TRecord extends object, TCreate extends object, TUpdate extends object, TIdentity extends RecordIdentity> =
   TCapabilities extends Record<'create', ResourceCapability>
@@ -487,7 +491,7 @@ export function defineResource<
     }
   }
 
-  const form = memoize((args: { id?: TIdentity; initialData?: Partial<TCreate>; searchParameters?: Record<string, unknown> } | undefined) => {
+  const form = memoize((args: { id?: TIdentity; initialData?: Partial<TCreate>; searchParameters?: Record<string, unknown>; context?: FieldContext } | undefined) => {
     const fields = (definition.form?.fields ? pickFields(definition.fields, definition.form.fields) : definition.fields) as never
     const searchParameters = args?.searchParameters ?? {}
     const initialData = (args?.initialData ?? definition.form?.initialData) as Partial<TCreate> | undefined
@@ -498,6 +502,8 @@ export function defineResource<
         searchParameters,
         namespace: `${definition.key}.create`,
         schema: schemaFor('create') as ValidationSchema<TCreate> | undefined,
+        validators: definition.validators?.create as readonly FormValidator<TCreate>[] | undefined,
+        context: args?.context,
         submit: async (draft) => {
           if (!handlers.create) throw new Error(`[is-vue-framework] Resource "${definition.key}" has no create capability.`)
           const result = await handlers.create(draft as TCreate)
@@ -515,6 +521,8 @@ export function defineResource<
       searchParameters,
       namespace: `${definition.key}.update.${identityToken(id)}`,
       schema: schemaFor('update') as ValidationSchema<TUpdate> | undefined,
+      validators: definition.validators?.update as readonly FormValidator<TUpdate>[] | undefined,
+      context: args?.context,
       submit: async (draft) => {
         if (!handlers.update) throw new Error(`[is-vue-framework] Resource "${definition.key}" has no update capability.`)
         const result = await handlers.update(id, draft as TUpdate)

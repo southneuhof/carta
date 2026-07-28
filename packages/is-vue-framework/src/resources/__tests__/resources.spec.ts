@@ -49,4 +49,22 @@ describe('resource capabilities', () => {
     expect(value.table().canDelete?.({ id: '1', name: 'One' })).toBe(true)
     resetResourceRuntimeForTests()
   })
+
+  it('selects create/update validators and forwards factory context', () => {
+    registerResourceRuntime({ queryClient: createFrameworkQueryClient(), adapters: resolveFrameworkAdapters() })
+    const create = () => undefined
+    const update = () => undefined
+    const value = defineResource({
+      key: 'validator-records', fields,
+      capabilities: {
+        create: { handler: async (input: { name: string }) => ({ id: '1', ...input }), permission: null },
+        update: { handler: async (id: string, input: { name?: string }) => ({ id, name: input.name ?? '' }), permission: null },
+      },
+      validators: { create: [create], update: [update] },
+    })
+    expect(value.form({ context: { source: 'create' } }).validators).toEqual([create])
+    expect(value.form({ id: '1', context: { source: 'update' } }).validators).toEqual([update])
+    expect(value.form({ id: '1', context: { source: 'update' } }).context).toEqual({ source: 'update' })
+    resetResourceRuntimeForTests()
+  })
 })

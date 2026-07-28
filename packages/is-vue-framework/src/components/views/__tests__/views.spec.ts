@@ -5,7 +5,7 @@ import { h } from 'vue'
 import ListView from '../ListView.vue'
 import DetailView from '../DetailView.vue'
 import FormView from '../FormView.vue'
-import { flush, mountCore } from '../../core/__tests__/harness'
+import { deferred, flush, mountCore } from '../../core/__tests__/harness'
 
 const viewsRoot = join(__dirname, '..')
 
@@ -44,6 +44,7 @@ describe('ListView', () => {
     expect(view.text()).toContain('Daftar role')
     expect(view.all('th').map((cell) => cell.textContent)).toEqual(['Nama'])
     expect(view.text()).toContain('Admin')
+    expect(view.find('.is-list-view > div')?.classList.contains('bg-surface-container')).toBe(true)
     view.unmount()
   })
 
@@ -252,45 +253,57 @@ describe('ListView', () => {
 
 describe('DetailView', () => {
   it('renders chrome around the detail and forwards its props unchanged', async () => {
-    const view = mountCore(DetailView, { title: 'Role', detail: detailProps })
+    const view = mountCore(DetailView, { title: 'Role', backTo: { name: 'test-route' }, detail: detailProps })
     await flush()
 
     expect(view.find('h1')?.textContent).toBe('Role')
-    expect(view.all('dt').map((node) => node.textContent)).toEqual(['Nama'])
+    expect(view.all('th[scope="row"]').map((node) => node.textContent)).toEqual(['Nama'])
     expect(view.text()).toContain('Admin')
+    expect(view.all('.is-detail-view > div').every((card) => card.classList.contains('bg-surface-container'))).toBe(true)
     view.unmount()
   })
 
-  it('renders controls and footer only from named slots', async () => {
-    const view = mountCore(DetailView, { detail: detailProps }, {
+  it('renders required navigation chrome and controls without a footer', async () => {
+    const view = mountCore(DetailView, { title: 'Role', backTo: { name: 'test-route' }, detail: detailProps }, {
       slots: {
         controls: () => h('button', { 'data-controls-slot': '' }, 'Ubah'),
-        footer: () => h('button', { 'data-footer-slot': '' }, 'Kembali'),
       },
     })
     await flush()
 
+    expect(view.all('h1')).toHaveLength(1)
+    expect(view.find('h1')?.textContent).toBe('Role')
+    const back = view.find<HTMLAnchorElement>('a[aria-label="Kembali"]')
+    expect(back).not.toBeNull()
+    expect(back?.getAttribute('href')).toBe(view.router.resolve({ name: 'test-route' }).href)
     expect(view.find('[data-controls-slot]')).not.toBeNull()
-    expect(view.find('[data-footer-slot]')).not.toBeNull()
+    expect(view.find('header > div [data-controls-slot]')).not.toBeNull()
+    expect(view.find('footer')).toBeNull()
     view.unmount()
   })
 
-  it('exposes a print region and value slots', async () => {
+  it('forwards value slots', async () => {
     const view = mountCore(
       DetailView,
-      { detail: detailProps },
+      { title: 'Role', backTo: { name: 'test-route' }, detail: detailProps },
       {
         slots: {
-          print: () => h('p', 'Cetak'),
           'value:name': (scope) => h('em', String((scope as { value: unknown }).value)),
         },
       },
     )
     await flush()
 
-    expect(view.text()).toContain('Cetak')
     expect(view.find('em')?.textContent).toBe('Admin')
     view.unmount()
+  })
+
+  it('contains no removed regions or router history logic', () => {
+    const source = readFileSync(join(viewsRoot, 'DetailView.vue'), 'utf8')
+
+    for (const forbidden of ['name="header"', 'name="body"', 'name="print"', 'name="footer"', 'description', 'router.back', 'useRouter']) {
+      expect(source).not.toContain(forbidden)
+    }
   })
 })
 
@@ -325,6 +338,24 @@ describe('FormView', () => {
     update.unmount()
   })
 
+  it('composes title, description, and form in one outlined surface card', async () => {
+    const view = mountCore(FormView, {
+      title: 'Tambah Role',
+      description: 'Atur akses pengguna.',
+      formProps: formProps(async () => undefined),
+    })
+    await flush()
+
+    const card = view.find('.is-form-view > div')!
+    expect(card.classList.contains('bg-surface-container')).toBe(true)
+    expect(card.classList.contains('border-outline/[16%]')).toBe(true)
+    expect(view.find('header')?.classList.contains('border-b')).toBe(true)
+    expect(view.find('h1')?.classList.contains('text-lg')).toBe(true)
+    expect(view.text()).toContain('Atur akses pengguna.')
+    expect(card.contains(view.find('form')!)).toBe(true)
+    view.unmount()
+  })
+
   it('renders page action slots without generic fallbacks', async () => {
     const view = mountCore(FormView, { formProps: formProps(async () => undefined) }, {
       slots: {
@@ -335,6 +366,7 @@ describe('FormView', () => {
     await flush()
 
     expect(view.find('[data-controls-slot]')).not.toBeNull()
+    expect(view.find('header [data-controls-slot]')).not.toBeNull()
     expect(view.find('[data-footer-slot]')).not.toBeNull()
     view.unmount()
   })
@@ -356,6 +388,28 @@ describe('FormView', () => {
     view.unmount()
   })
 
+  it('uses responsive text and filled form actions while submitting', async () => {
+    const pending = deferred<{ id: number }>()
+    const view = mountCore(FormView, { formProps: formProps(async () => pending.promise) })
+    await flush()
+
+    const actions = view.find('.is-form-view-controls')!
+    const [cancel, submit] = [...actions.querySelectorAll<HTMLButtonElement>('button')]
+    expect(actions.classList.contains('border-t')).toBe(true)
+    expect(actions.classList.contains('sm:flex-row')).toBe(true)
+    expect(cancel.classList.contains('bg-transparent')).toBe(true)
+    expect(submit.classList.contains('bg-primary')).toBe(true)
+    expect(cancel.classList.contains('w-full')).toBe(true)
+    view.find('form')!.dispatchEvent(new Event('submit'))
+    await flush()
+    expect(view.text()).toContain('Menyimpan…')
+    expect(cancel.disabled).toBe(true)
+    expect(submit.disabled).toBe(true)
+    pending.resolve({ id: 1 })
+    await flush()
+    view.unmount()
+  })
+
   it('resets the draft through the cancel control', async () => {
     const view = mountCore(FormView, { formProps: formProps(async () => undefined) })
     await flush()
@@ -370,6 +424,32 @@ describe('FormView', () => {
 
     expect(view.find<HTMLInputElement>('input')!.value).toBe('Admin')
     view.unmount()
+  })
+
+  it('lets body, header, and form controls slots replace their defaults', async () => {
+    const view = mountCore(FormView, { title: 'Tambah Role', formProps: formProps(async () => undefined) }, {
+      slots: {
+        header: () => h('h2', { 'data-header-slot': '' }, 'Header khusus'),
+        body: () => h('p', { 'data-body-slot': '' }, 'Badan khusus'),
+        'form-controls': () => h('button', { 'data-form-controls-slot': '' }, 'Kontrol khusus'),
+      },
+    })
+    await flush()
+
+    expect(view.find('[data-header-slot]')).not.toBeNull()
+    expect(view.find('[data-body-slot]')).not.toBeNull()
+    expect(view.find('[data-form-controls-slot]')).toBeNull()
+    expect(view.find('h1')).toBeNull()
+    expect(view.find('form')).toBeNull()
+    view.unmount()
+
+    const formControls = mountCore(FormView, { formProps: formProps(async () => undefined) }, {
+      slots: { 'form-controls': () => h('button', { 'data-form-controls-slot': '' }, 'Kontrol khusus') },
+    })
+    await flush()
+    expect(formControls.find('[data-form-controls-slot]')).not.toBeNull()
+    expect(formControls.find('.is-form-view-controls')).toBeNull()
+    formControls.unmount()
   })
 
   function resourceForm(options: {

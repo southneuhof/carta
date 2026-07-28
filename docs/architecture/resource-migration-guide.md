@@ -260,6 +260,18 @@ async function toggle(record: RolePermission, next: boolean) {
 
 ## 5. Escape hatches, in order of preference
 
+## Async validators stay advisory
+
+Attach operation-specific validators to a resource when a rule needs runtime
+context or an application/backend endpoint. Honor `AbortSignal`, return issues
+with field paths, and avoid sending validation requests on every keystroke by
+default. Password, card, and other sensitive checks must use application/backend
+endpoints; never put credentials or payment handling in framework validators.
+
+An async validator improves form feedback, but authoritative validation repeats
+on backend submission. A thrown network/server error becomes a form-level error
+and blocks submit rather than being treated as a valid rejection.
+
 | Need | Escape hatch |
 | --- | --- |
 | one different prop at a call site | object spread: `{ ...roles.form({ id }), submit }` |

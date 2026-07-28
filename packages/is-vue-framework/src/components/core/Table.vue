@@ -100,6 +100,7 @@ const loaded = useLoader<CollectionLoadContext, CollectionResult>({
 
 const rows = computed(() => loaded.data.value?.data ?? [])
 const orderedRows = ref<Record<string, unknown>[]>([])
+const tableData = computed(() => props.reorderable ? orderedRows.value : rows.value)
 watch(rows, (next) => { orderedRows.value = [...next] }, { immediate: true })
 const meta = computed(() => loaded.data.value?.meta)
 const empty = computed(() => !loaded.loading.value && !loaded.error.value && rows.value.length === 0)
@@ -195,9 +196,7 @@ function reorder(event: { oldIndex?: number; newIndex?: number }) {
 }
 
 const table = useVueTable<Record<string, unknown>>({
-  get data() {
-    return props.reorderable ? orderedRows.value : rows.value
-  },
+  data: tableData,
   get columns() {
     return columns.value
   },
@@ -299,7 +298,7 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
 
 <template>
   <div class="is-table flex flex-col gap-3 text-sm text-on-surface">
-    <div v-if="loaded.loading.value" class="flex min-h-40 items-center justify-center rounded-xl bg-surface-container-low px-6 py-10 text-on-surface-variant">
+    <div v-if="loaded.loading.value" class="flex min-h-40 items-center justify-center rounded-xl bg-surface-container px-6 py-10 text-on-surface-variant">
       <slot name="loading">
         <p role="status" aria-live="polite">Memuat…</p>
       </slot>
@@ -311,7 +310,7 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
       </slot>
     </div>
 
-    <div v-else-if="empty" class="flex min-h-40 items-center justify-center rounded-xl bg-surface-container-low px-6 py-10 text-on-surface-variant">
+    <div v-else-if="empty" class="flex min-h-40 items-center justify-center rounded-xl bg-surface-container px-6 py-10 text-on-surface-variant">
       <slot name="empty">
         <p>No data</p>
       </slot>
@@ -336,7 +335,7 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
               <button
                 v-if="field.sortable && !props.reorderable"
                 type="button"
-                class="-mx-2 inline-flex rounded-md px-2 font-semibold transition-colors hover:bg-primary/[10%] hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                class="-mx-2 inline-flex rounded-md px-2 font-semibold  hover:bg-primary/[10%] hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 @click="table.getColumn(field.key)?.toggleSorting()"
               >
                 {{ field.label }}
@@ -368,14 +367,14 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
           @end="reorder"
         >
           <template #item="{ element: record, index }">
-            <tr class="group transition-colors hover:bg-primary/[6%] focus-within:bg-primary/[6%]" @click="emit('row-click', record, index)">
+            <tr class="group  hover:bg-primary/[6%] focus-within:bg-primary/[6%]" @click="emit('row-click', record, index)">
               <td v-for="field in visibleFields" :key="field.key" :style="{ textAlign: field.align }" class="whitespace-nowrap px-4 py-3.5 text-on-surface">
                 <slot :name="`cell:${field.key}`" :value="valueFor(record, field)" :record="record" :field="field" :index="index">
                   <component :is="rendererFor(field.renderer)" v-if="field.renderer" v-bind="field.props" :value="valueFor(record, field)" :record="record" :field="field" :index="index" />
                   <template v-else>{{ valueFor(record, field) ?? '-' }}</template>
                 </slot>
               </td>
-              <td v-if="$slots['row-actions']" class="sticky right-0 z-10 w-px bg-surface-container-low px-3 py-2 text-right transition-colors before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-10 before:bg-gradient-to-l before:from-surface-container-low before:to-transparent before:content-[''] group-hover:bg-primary/[6%] group-hover:before:from-primary/[6%] group-focus-within:bg-primary/[6%] group-focus-within:before:from-primary/[6%]" @click.stop><slot name="row-actions" :record="record" :index="index" /></td>
+              <td v-if="$slots['row-actions']" class="is-table-row-action sticky right-0 z-10 w-px bg-surface-container px-3 py-2 text-right  before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-10 before:bg-gradient-to-l before:content-['']" @click.stop><slot name="row-actions" :record="record" :index="index" /></td>
             </tr>
           </template>
         </Draggable>
@@ -383,7 +382,7 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
           <tr
             v-for="(row, index) in table.getRowModel().rows"
             :key="row.id"
-            class="group transition-colors hover:bg-primary/[6%] focus-within:bg-primary/[6%]"
+            class="group  hover:bg-primary/[6%] focus-within:bg-primary/[6%]"
             @click="emit('row-click', row.original, index)"
           >
             <td
@@ -411,7 +410,7 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
                 <template v-else>{{ valueFor(row.original, field) ?? '-' }}</template>
               </slot>
             </td>
-            <td v-if="$slots['row-actions']" class="sticky right-0 z-10 w-px bg-surface-container-low px-3 py-2 text-right transition-colors before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-10 before:bg-gradient-to-l before:from-surface-container-low before:to-transparent before:content-[''] group-hover:bg-primary/[6%] group-hover:before:from-primary/[6%] group-focus-within:bg-primary/[6%] group-focus-within:before:from-primary/[6%]" @click.stop>
+            <td v-if="$slots['row-actions']" class="is-table-row-action sticky right-0 z-10 w-px bg-surface-container px-3 py-2 text-right  before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-10 before:bg-gradient-to-l before:content-['']" @click.stop>
               <slot name="row-actions" :record="row.original" :index="index" />
             </td>
           </tr>
@@ -460,3 +459,26 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
     </nav>
   </div>
 </template>
+
+<style scoped>
+.is-table-row-action {
+  --is-table-surface: rgb(var(--md-sys-color-surface-container));
+  --is-table-hover-surface: color-mix(in srgb, var(--is-table-surface) 94%, rgb(var(--md-sys-color-primary)));
+
+  background-color: var(--is-table-surface);
+}
+
+.is-table-row-action::before {
+  background-image: linear-gradient(to left, var(--is-table-surface), transparent);
+}
+
+.group:hover .is-table-row-action,
+.group:focus-within .is-table-row-action {
+  background-color: var(--is-table-hover-surface);
+}
+
+.group:hover .is-table-row-action::before,
+.group:focus-within .is-table-row-action::before {
+  background-image: linear-gradient(to left, var(--is-table-hover-surface), transparent);
+}
+</style>

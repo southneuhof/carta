@@ -39,13 +39,10 @@ async function remove() {
 
 <template>
   <div class="flex flex-col gap-4">
-    <DetailView title="Detail Role" :resource="roles" :id="roleId">
+    <DetailView title="Detail Role" :back-to="{ name: roles.capabilities?.list?.to?.name }" :resource="roles" :id="roleId">
       <template #controls>
         <RouterLink v-if="updateTarget" :to="updateTarget"><Button>Ubah</Button></RouterLink>
         <Button color="error" :disabled="deleting" @click="remove">Hapus</Button>
-      </template>
-      <template #footer>
-        <RouterLink :to="{ name: roles.capabilities?.list?.to?.name }"><Button variant="text">Kembali</Button></RouterLink>
       </template>
     </DetailView>
     <Tabs label="Role" :items="tabs" />
