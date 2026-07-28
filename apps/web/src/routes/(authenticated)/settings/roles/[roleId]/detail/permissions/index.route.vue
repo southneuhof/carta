@@ -14,6 +14,7 @@ import { ListView } from '@southneuhof/is-vue-framework'
 import { rolePermissions } from './role-permissions.resource'
 import { setRolePermission, type RolePermission } from './role-permissions.operations'
 import CopyPermissionsDialog from './CopyPermissionsDialog.vue'
+import { Button } from '@southneuhof/is-vue-framework/components/base'
 
 
 const route = useRoute('settings-roles-detail-permissions')
@@ -61,7 +62,7 @@ async function onCopied() {
 <template>
   <ListView title="Permissions" :table="table">
     <template #filters>
-      <CopyPermissionsDialog :target-role-id="roleId" @copied="onCopied" />
+      <Button>Copy from Another Role</Button>
     </template>
 
     <template #cell:name="{ value, record }">
