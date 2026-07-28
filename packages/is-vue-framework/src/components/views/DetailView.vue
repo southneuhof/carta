@@ -39,7 +39,7 @@ const surface = computed(() => {
 </script>
 
 <template>
-  <section class="is-detail-view flex flex-col gap-4">
+  <section class="is-detail-view flex flex-col gap-2">
     <Card variant="outlined" color="surfaceContainer" class="gap-0 p-0">
       <header class="flex flex-col gap-2 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex min-w-0 items-center gap-3">

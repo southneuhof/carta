@@ -3,8 +3,8 @@ import { role } from '@southneuhof/api/routes/roles/roles.entity'
 import { roleOperations, type Role, type RoleCreate, type RoleUpdate } from './roles.operations'
 
 export const roleFields = defineFields<Role, RoleCreate>()({
-  name: { label: 'Nama Role', table: { sortable: true }, form: { renderer: 'text' } },
-  createdAt: { label: 'Dibuat', display: { format: 'datetime' }, form: false },
+  name: { label: 'Role Name', table: { sortable: true }, form: { renderer: 'text' } },
+  createdAt: { label: 'Created', display: { format: 'datetime' }, form: false },
 })
 
 export const roles = defineResource({

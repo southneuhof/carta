@@ -3,10 +3,10 @@ import { user } from '@southneuhof/api/routes/users/users.entity'
 import { userOperations, type User, type UserUpdate } from './users.operations'
 
 export const userFields = defineFields<User, UserUpdate>()({
-  name: { label: 'Nama', table: { sortable: true }, form: { renderer: 'text' } },
+  name: { label: 'Name', table: { sortable: true }, form: { renderer: 'text' } },
   email: { label: 'Email', table: { sortable: true }, form: false },
-  createdAt: { label: 'Dibuat', display: { format: 'datetime' }, form: false },
-  updatedAt: { label: 'Diubah', display: { format: 'datetime' }, form: false },
+  createdAt: { label: 'Created', display: { format: 'datetime' }, form: false },
+  updatedAt: { label: 'Updated', display: { format: 'datetime' }, form: false },
 })
 
 export const users = defineResource({

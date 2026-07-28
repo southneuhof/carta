@@ -6,13 +6,15 @@
  * exposed contract. Like Form itself, it never learns whether the submission
  * creates or updates.
  */
-import { computed, ref } from 'vue'
-import { useRouter, type RouteLocationRaw } from 'vue-router'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { onBeforeRouteLeave, useRouter, type RouteLocationRaw } from 'vue-router'
 import { toast } from 'vue-sonner'
 import type { FieldContext, FormProps, MaybePromise, RecordIdentity, SubmitError } from '../../contracts'
 import Form from '../core/Form.vue'
 import Button from '../base/Button.vue'
 import Card from '../base/Card.vue'
+import Dialog from '../base/Dialog.vue'
+import Icon from '../base/Icon.vue'
 
 type FormOptions = {
   initialData?: Record<string, unknown>
@@ -137,12 +139,19 @@ async function submitted(result: unknown) {
   emit('submitted', record)
   if (!props.resource) return
 
-  const successMessage = props.resource.successMessage === undefined ? 'Data berhasil disimpan.' : props.resource.successMessage
+  const successMessage = props.resource.successMessage === undefined ? 'Changes saved.' : props.resource.successMessage
   if (successMessage) toast.success(successMessage)
   let handled = false
   const navigate = async (to: RouteLocationRaw) => {
     handled = true
-    await router.replace(to)
+    allowNextLeave.value = true
+    try {
+      const result = await router.replace(to)
+      if (result) allowNextLeave.value = false
+    } catch (error) {
+      allowNextLeave.value = false
+      throw error
+    }
   }
   const context: FormSubmissionContext<Record<string, unknown>, RecordIdentity> = {
     record,
@@ -156,28 +165,79 @@ async function submitted(result: unknown) {
     await props.resource.afterSubmit?.(context)
     if (!handled && context.defaultTo) await navigate(context.defaultTo)
   } catch {
-    toast.error('Data tersimpan, tetapi tindakan lanjutan gagal.')
+    toast.error('Changes saved, but the next action could not be completed.')
   }
 }
 
-const instance = ref<{ submit: () => Promise<void>; reset: () => void; submitting: boolean; validating: boolean } | null>(null)
+const instance = ref<{ submit: () => Promise<void>; reset: () => void; submitting: boolean; validating: boolean; dirty: boolean } | null>(null)
+const discardDialogOpen = ref(false)
+const allowNextLeave = ref(false)
+let resolvePendingLeave: ((allow: boolean) => void) | undefined
+
+function settlePendingLeave(allow: boolean) {
+  const resolve = resolvePendingLeave
+  resolvePendingLeave = undefined
+  discardDialogOpen.value = false
+  resolve?.(allow)
+}
+
+onBeforeRouteLeave(() => {
+  if (allowNextLeave.value) {
+    allowNextLeave.value = false
+    return true
+  }
+  if (!instance.value?.dirty) return true
+
+  discardDialogOpen.value = true
+  return new Promise<boolean>((resolve) => {
+    resolvePendingLeave = resolve
+  })
+})
+
+function beforeUnload(event: BeforeUnloadEvent) {
+  event.preventDefault()
+  event.returnValue = ''
+}
+
+onMounted(() => {
+  watch(
+    () => instance.value?.dirty ?? false,
+    (dirty) => {
+      if (dirty) window.addEventListener('beforeunload', beforeUnload)
+      else window.removeEventListener('beforeunload', beforeUnload)
+    },
+    { immediate: true },
+  )
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('beforeunload', beforeUnload)
+  settlePendingLeave(false)
+})
 </script>
 
 <template>
   <section class="is-form-view flex flex-col gap-4">
     <Card variant="outlined" color="surfaceContainer" class="gap-0 p-0">
-      <header class="flex flex-col gap-3 border-b border-outline/[12%] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
-        <slot name="header">
-          <div class="min-w-0">
-            <h1 v-if="title" class="text-lg font-semibold leading-6 tracking-tight text-on-surface">{{ title }}</h1>
-            <p v-if="description" class="mt-1 text-sm leading-5 text-on-surface-variant">{{ description }}</p>
-          </div>
-        </slot>
+      <header class="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
+        <div class="flex min-w-0 items-center gap-3">
+          <Button kind="icon" variant="standard" aria-label="Back" @click="router.back()">
+            <template #icon><Icon name="arrow-left" /></template>
+          </Button>
+          <slot name="header">
+            <div class="min-w-0">
+              <h1 v-if="title" class="text-lg font-semibold leading-6 tracking-tight text-on-surface">{{ title }}</h1>
+              <p v-if="description" class="mt-1 text-sm leading-5 text-on-surface-variant">{{ description }}</p>
+            </div>
+          </slot>
+        </div>
         <div v-if="$slots.controls" class="flex flex-wrap items-center gap-2">
           <slot name="controls" />
         </div>
       </header>
+    </Card>
 
+    <Card variant="outlined" color="surfaceContainer" class="p-0">
       <div class="p-5 sm:p-6">
         <slot name="body" v-bind="{ form: surface }">
           <Form
@@ -189,11 +249,11 @@ const instance = ref<{ submit: () => Promise<void>; reset: () => void; submittin
             <template v-for="(_, name) in $slots" #[name]="slotProps" :key="name">
               <slot :name="name" v-bind="slotProps ?? {}" />
             </template>
-            <template #controls>
-              <slot name="form-controls" :submit="() => instance?.submit()" :reset="() => instance?.reset()">
+            <template #actions>
+              <slot name="form-actions" :submit="() => instance?.submit()" :reset="() => instance?.reset()">
                 <div class="is-form-view-controls flex flex-col gap-2 pt-5 sm:flex-row sm:justify-end">
-                  <Button type="button" variant="text" class="w-full sm:w-auto" :disabled="instance?.submitting || instance?.validating" @click="instance?.reset()">Batal</Button>
-                  <Button type="submit" class="w-full sm:w-auto" :disabled="instance?.submitting || instance?.validating">{{ instance?.submitting ? 'Menyimpan…' : submitLabel ?? 'Simpan' }}</Button>
+                  <Button type="button" variant="text" class="w-full sm:w-auto" :disabled="instance?.submitting || instance?.validating" @click="router.back()">Cancel</Button>
+                  <Button type="submit" class="w-full sm:w-auto" :disabled="instance?.submitting || instance?.validating">{{ instance?.submitting ? 'Saving…' : submitLabel ?? 'Save' }}</Button>
                 </div>
               </slot>
             </template>
@@ -201,6 +261,16 @@ const instance = ref<{ submit: () => Promise<void>; reset: () => void; submittin
         </slot>
       </div>
     </Card>
+
+    <Dialog v-model="discardDialogOpen" @close="settlePendingLeave(false)">
+      <template #trigger><button type="button" class="sr-only" aria-hidden="true" tabindex="-1">Open discard changes dialog</button></template>
+      <template #title>Discard unsaved changes?</template>
+      <template #description>You have unsaved changes. If you leave now, they will be lost.</template>
+      <template #footer>
+        <Button type="button" variant="text" @click="settlePendingLeave(false)">Stay</Button>
+        <Button type="button" color="error" @click="settlePendingLeave(true)">Discard changes</Button>
+      </template>
+    </Dialog>
 
     <footer>
       <slot name="footer" />

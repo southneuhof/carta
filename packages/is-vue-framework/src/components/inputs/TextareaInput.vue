@@ -53,9 +53,9 @@ watch(
 <template>
   <BaseInput v-bind="props">
     <div
-      :class="`flex h-full flex-row items-center gap-4 rounded-lg pl-4 pt-3 outline  outline-1 outline-outline/[24%] transition-all ease-linear focus-within:outline-2 ${
-        error ? 'outline-error ' : ''
-      } ${disabled ? 'pointer-events-none cursor-not-allowed !bg-surface-variant/50 ' : ''}`"
+      :class="`flex h-full flex-row items-center gap-4 rounded-lg bg-transparent pl-4 pt-3 outline outline-1 outline-outline/[24%] transition-[outline-color,box-shadow] duration-150 ease-out focus-within:outline-secondary focus-within:ring-1 focus-within:ring-secondary/30 ${
+        error ? 'outline-error focus-within:outline-error focus-within:ring-error/30 ' : ''
+      } ${disabled ? 'pointer-events-none cursor-not-allowed opacity-60 ' : ''}`"
     >
       <textarea class="h-full w-full bg-transparent focus-visible:outline-none" :rows="rows" :placeholder="placeholder" v-model="inputValue" @beforeinput="(e) => checkInput(e as InputEvent)" />
       <div v-if="$slots.action" class="mr-4 max-h-min"><slot name="action"></slot></div>

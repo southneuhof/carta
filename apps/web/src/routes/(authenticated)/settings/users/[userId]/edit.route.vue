@@ -12,5 +12,5 @@ const userId = computed(() => route.params.userId)
 </script>
 
 <template>
-  <FormView title="Ubah Pengguna" :resource="users" :id="userId" />
+  <FormView title="Edit User" :resource="users" :id="userId" />
 </template>

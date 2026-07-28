@@ -4,5 +4,5 @@ import { roles } from './roles.resource'
 </script>
 
 <template>
-  <FormView title="Tambah Role" :resource="roles" />
+  <FormView title="Create Role" :resource="roles" />
 </template>

@@ -50,7 +50,12 @@ describe('renderer registry', () => {
     expect(input.classList.contains('custom-control')).toBe(false)
     expect(wrapper.classList.contains('custom-control')).toBe(true)
     expect(wrapper.classList.contains('outline-error')).toBe(true)
-    expect(wrapper.classList.contains('bg-surface-variant/50')).toBe(true)
+    expect(wrapper.classList.contains('bg-transparent')).toBe(true)
+    expect(wrapper.classList.contains('outline-1')).toBe(true)
+    expect(wrapper.classList.contains('focus-within:outline-error')).toBe(true)
+    expect(wrapper.classList.contains('focus-within:ring-error/30')).toBe(true)
+    expect(wrapper.classList.contains('transition-[outline-color,box-shadow]')).toBe(true)
+    expect(wrapper.classList.contains('bg-surface-variant/50')).toBe(false)
     expect(wrapper.classList.contains('cursor-not-allowed')).toBe(true)
 
     input.value = 'Editor'

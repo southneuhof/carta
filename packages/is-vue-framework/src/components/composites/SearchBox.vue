@@ -9,7 +9,7 @@ const props = defineProps({
   },
   placeholder: {
     type: String,
-    default: 'Cari...',
+    default: 'Search...',
   },
 })
 

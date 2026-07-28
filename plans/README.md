@@ -16,7 +16,7 @@ update the status after implementation and review.
 | 023 | Add dynamic field presentation and safe value effects | P1 | M | 022 | DONE |
 | 024 | Add composed synchronous and asynchronous form validation | P1 | L | 022, 023 | DONE |
 | 025 | Design and wire the core form surface | P1 | M | 022, 023, 024 | DONE |
-| 026 | Refine form controls, navigation, and unsaved-change protection | P1 | L | 025 | TODO |
+| 026 | Refine form controls, navigation, and unsaved-change protection | P1 | L | 025 | DONE |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) |
 

@@ -261,7 +261,7 @@ defineExpose({ draft, reset, submit, refresh: loaded.refresh, dirty, submitting,
   <form novalidate class="flex flex-col gap-5" @submit.prevent="submit">
     <slot v-if="loaded.loading.value" name="loading">
       <div class="rounded-lg bg-surface-container px-4 py-3 text-sm text-on-surface">
-        <p role="status" aria-live="polite">Memuat…</p>
+        <p role="status" aria-live="polite">Loading…</p>
       </div>
     </slot>
 
@@ -269,7 +269,7 @@ defineExpose({ draft, reset, submit, refresh: loaded.refresh, dirty, submitting,
       <slot name="load-error" :error="loaded.error.value" :refresh="loaded.refresh">
         <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-error-container px-4 py-3 text-on-error-container">
           <p role="alert" class="text-sm leading-5">{{ loaded.error.value.message }}</p>
-          <Button type="button" variant="text" class="min-w-0 px-4" @click="loaded.refresh">Coba lagi</Button>
+          <Button type="button" variant="text" class="min-w-0 px-4" @click="loaded.refresh">Retry</Button>
         </div>
       </slot>
     </template>
@@ -328,9 +328,9 @@ defineExpose({ draft, reset, submit, refresh: loaded.refresh, dirty, submitting,
             :aria-invalid="issueFor(field.key) ? 'true' : undefined"
             :aria-describedby="issueFor(field.key) ? `error-${field.key}` : undefined"
             :class="[
-              'min-h-12 w-full rounded-lg bg-surface px-4 py-3 text-on-surface outline outline-1 outline-outline/[24%] transition-none focus:outline-2 focus:outline-primary',
-              issueFor(field.key) ? 'outline-2 outline-error focus:outline-error' : '',
-              props.disabled || behavior.state(field.key).value.disabled ? 'cursor-not-allowed bg-surface-variant/50 text-on-surface-variant' : '',
+              'min-h-12 w-full rounded-lg bg-transparent px-4 py-3 text-on-surface outline outline-1 outline-outline/[24%] transition-[outline-color,box-shadow] duration-150 ease-out focus:outline-secondary focus:ring-1 focus:ring-secondary/30',
+              issueFor(field.key) ? 'outline-error focus:outline-error focus:ring-error/30' : '',
+              props.disabled || behavior.state(field.key).value.disabled ? 'cursor-not-allowed text-on-surface-variant opacity-60' : '',
             ]"
             @input="setValue(field.key, ($event.target as HTMLInputElement).value)"
             @blur="touch(field.key)"
@@ -341,8 +341,8 @@ defineExpose({ draft, reset, submit, refresh: loaded.refresh, dirty, submitting,
       </div>
       </div>
 
-      <slot name="controls" :submit="submit" :reset="reset" :submitting="submitting" :dirty="dirty">
-        <Button v-if="!isModelBound" type="submit" :disabled="props.disabled || loaded.loading.value || validating || submitting">Simpan</Button>
+      <slot name="actions" :submit="submit" :reset="reset" :submitting="submitting" :dirty="dirty">
+        <Button v-if="!isModelBound" type="submit" :disabled="props.disabled || loaded.loading.value || validating || submitting">Save</Button>
       </slot>
     </template>
   </form>

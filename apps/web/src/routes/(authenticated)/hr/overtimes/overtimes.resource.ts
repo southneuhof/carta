@@ -3,17 +3,17 @@ import { overtime } from '@southneuhof/api/routes/overtimes/overtimes.entity'
 import { overtimeOperations, type Overtime, type OvertimeCreate, type OvertimeStatus, type OvertimeUpdate } from './overtimes.operations'
 
 export const overtimeStatusLabels: Record<OvertimeStatus, string> = {
-  draft: 'Draft', waiting: 'Menunggu Verifikasi', approved: 'Disetujui', rejected: 'Ditolak',
+  draft: 'Draft', waiting: 'Awaiting verification', approved: 'Approved', rejected: 'Rejected',
 }
 
 export const overtimeFields = defineFields<Overtime, OvertimeCreate>()({
-  date: { label: 'Tanggal', table: { sortable: true }, form: { renderer: 'date' } },
-  startTime: { label: 'Jam Mulai', form: { renderer: 'text' } },
-  estimatedMinutes: { label: 'Durasi (menit)', form: { renderer: 'number' } },
-  applicantEmployeeId: { label: 'Pemohon', read: (record) => record.applicant?.fullName ?? record.applicantEmployeeId, form: false },
+  date: { label: 'Date', table: { sortable: true }, form: { renderer: 'date' } },
+  startTime: { label: 'Start time', form: { renderer: 'text' } },
+  estimatedMinutes: { label: 'Duration (minutes)', form: { renderer: 'number' } },
+  applicantEmployeeId: { label: 'Applicant', read: (record) => record.applicant?.fullName ?? record.applicantEmployeeId, form: false },
   statusCode: { label: 'Status', read: (record) => overtimeStatusLabels[record.statusCode] ?? record.statusCode, form: false },
-  description: { label: 'Keterangan', form: { renderer: 'text' } },
-  createdAt: { label: 'Dibuat', display: { format: 'datetime' }, form: false },
+  description: { label: 'Description', form: { renderer: 'text' } },
+  createdAt: { label: 'Created', display: { format: 'datetime' }, form: false },
 })
 
 export const overtimes = defineResource({

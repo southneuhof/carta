@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
-import { h } from 'vue'
+import { createApp, defineComponent, h } from 'vue'
+import { createMemoryHistory, createRouter, RouterView } from 'vue-router'
+import { FrameworkPlugin } from '../../../adapters/plugin'
 import ListView from '../ListView.vue'
 import DetailView from '../DetailView.vue'
 import FormView from '../FormView.vue'
@@ -36,15 +38,19 @@ function installStorage() {
 }
 
 describe('ListView', () => {
-  it('renders chrome around the table and forwards table props unchanged', async () => {
-    const view = mountCore(ListView, { title: 'Role', description: 'Daftar role', table: tableProps })
+  it('renders toolbar and table in separate outlined cards', async () => {
+    const view = mountCore(ListView, { title: 'Role', description: 'Manage roles.', table: tableProps })
     await flush()
 
     expect(view.find('h1')?.textContent).toBe('Role')
-    expect(view.text()).toContain('Daftar role')
+    expect(view.text()).toContain('Manage roles.')
     expect(view.all('th').map((cell) => cell.textContent)).toEqual(['Nama'])
     expect(view.text()).toContain('Admin')
-    expect(view.find('.is-list-view > div')?.classList.contains('bg-surface-container')).toBe(true)
+    const cards = view.all('.is-list-view > div')
+    expect(cards).toHaveLength(2)
+    expect(cards.every((card) => card.classList.contains('bg-surface-container'))).toBe(true)
+    expect(cards[0].contains(view.find('header')!)).toBe(true)
+    expect(cards[1].contains(view.find('table')!)).toBe(true)
     view.unmount()
   })
 
@@ -316,14 +322,14 @@ describe('FormView', () => {
 
   it('runs the same chrome for create-like and update-like props, with no mode anywhere', async () => {
     const createSubmit = vi.fn(async () => undefined)
-    const create = mountCore(FormView, { title: 'Tambah Role', formProps: formProps(createSubmit) })
+    const create = mountCore(FormView, { title: 'Create Role', formProps: formProps(createSubmit) })
     await flush()
     create.find('form')!.dispatchEvent(new Event('submit'))
     await flush()
 
     const updateSubmit = vi.fn(async () => undefined)
     const update = mountCore(FormView, {
-      title: 'Ubah Role',
+      title: 'Edit Role',
       formProps: { ...formProps(updateSubmit), load: async () => ({ name: 'Editor' }) },
     })
     await flush()
@@ -332,27 +338,28 @@ describe('FormView', () => {
 
     expect(createSubmit).toHaveBeenCalledWith({ name: 'Admin' })
     expect(updateSubmit).toHaveBeenCalledWith({ name: 'Editor' })
-    expect(create.find('h1')?.textContent).toBe('Tambah Role')
-    expect(update.find('h1')?.textContent).toBe('Ubah Role')
+    expect(create.find('h1')?.textContent).toBe('Create Role')
+    expect(update.find('h1')?.textContent).toBe('Edit Role')
     create.unmount()
     update.unmount()
   })
 
-  it('composes title, description, and form in one outlined surface card', async () => {
+  it('uses DetailView-style navigation and body cards', async () => {
     const view = mountCore(FormView, {
-      title: 'Tambah Role',
-      description: 'Atur akses pengguna.',
+      title: 'Create Role',
+      description: 'Set user access.',
       formProps: formProps(async () => undefined),
     })
     await flush()
 
-    const card = view.find('.is-form-view > div')!
-    expect(card.classList.contains('bg-surface-container')).toBe(true)
-    expect(card.classList.contains('border-outline/[16%]')).toBe(true)
-    expect(view.find('header')?.classList.contains('border-b')).toBe(true)
+    const cards = view.all('.is-form-view > div')
+    expect(cards).toHaveLength(2)
+    expect(cards.every((card) => card.classList.contains('bg-surface-container'))).toBe(true)
+    expect(cards.every((card) => card.classList.contains('border-outline/[16%]'))).toBe(true)
     expect(view.find('h1')?.classList.contains('text-lg')).toBe(true)
-    expect(view.text()).toContain('Atur akses pengguna.')
-    expect(card.contains(view.find('form')!)).toBe(true)
+    expect(view.text()).toContain('Set user access.')
+    expect(cards[1].contains(view.find('form')!)).toBe(true)
+    expect(view.find<HTMLButtonElement>('button[aria-label="Back"]')).not.toBeNull()
     view.unmount()
   })
 
@@ -381,7 +388,7 @@ describe('FormView', () => {
     await flush()
 
     expect(view.text()).toContain('Kirim')
-    view.find<HTMLButtonElement>('button[type="submit"]')!.click()
+    view.find('form')!.dispatchEvent(new Event('submit'))
     await flush()
 
     expect(onSubmitted).toHaveBeenCalledWith({ id: 1 })
@@ -394,7 +401,8 @@ describe('FormView', () => {
     await flush()
 
     const actions = view.find('.is-form-view-controls')!
-    const [cancel, submit] = [...actions.querySelectorAll<HTMLButtonElement>('button')]
+    const cancel = actions.querySelector<HTMLButtonElement>('button[type="button"]')!
+    const submit = actions.querySelector<HTMLButtonElement>('button[type="submit"]')!
     expect(actions.classList.contains('border-t')).toBe(true)
     expect(actions.classList.contains('sm:flex-row')).toBe(true)
     expect(cancel.classList.contains('bg-transparent')).toBe(true)
@@ -402,7 +410,7 @@ describe('FormView', () => {
     expect(cancel.classList.contains('w-full')).toBe(true)
     view.find('form')!.dispatchEvent(new Event('submit'))
     await flush()
-    expect(view.text()).toContain('Menyimpan…')
+    expect(view.text()).toContain('Saving…')
     expect(cancel.disabled).toBe(true)
     expect(submit.disabled).toBe(true)
     pending.resolve({ id: 1 })
@@ -410,7 +418,7 @@ describe('FormView', () => {
     view.unmount()
   })
 
-  it('resets the draft through the cancel control', async () => {
+  it('uses browser history through Cancel without resetting the draft', async () => {
     const view = mountCore(FormView, { formProps: formProps(async () => undefined) })
     await flush()
 
@@ -419,37 +427,39 @@ describe('FormView', () => {
     input.dispatchEvent(new Event('input'))
     await flush()
 
-    view.all('button').find((button) => button.textContent === 'Batal')!.dispatchEvent(new MouseEvent('click'))
+    const back = vi.spyOn(view.router, 'back')
+    view.all<HTMLButtonElement>('button').find((button) => button.textContent === 'Cancel')!.click()
     await flush()
 
-    expect(view.find<HTMLInputElement>('input')!.value).toBe('Admin')
+    expect(view.find<HTMLInputElement>('input')!.value).toBe('Diubah')
+    expect(back).toHaveBeenCalledOnce()
     view.unmount()
   })
 
-  it('lets body, header, and form controls slots replace their defaults', async () => {
-    const view = mountCore(FormView, { title: 'Tambah Role', formProps: formProps(async () => undefined) }, {
+  it('lets body, header, and form actions slots replace their defaults', async () => {
+    const view = mountCore(FormView, { title: 'Create Role', formProps: formProps(async () => undefined) }, {
       slots: {
         header: () => h('h2', { 'data-header-slot': '' }, 'Header khusus'),
         body: () => h('p', { 'data-body-slot': '' }, 'Badan khusus'),
-        'form-controls': () => h('button', { 'data-form-controls-slot': '' }, 'Kontrol khusus'),
+        'form-actions': () => h('button', { 'data-form-actions-slot': '' }, 'Custom action'),
       },
     })
     await flush()
 
     expect(view.find('[data-header-slot]')).not.toBeNull()
     expect(view.find('[data-body-slot]')).not.toBeNull()
-    expect(view.find('[data-form-controls-slot]')).toBeNull()
+    expect(view.find('[data-form-actions-slot]')).toBeNull()
     expect(view.find('h1')).toBeNull()
     expect(view.find('form')).toBeNull()
     view.unmount()
 
-    const formControls = mountCore(FormView, { formProps: formProps(async () => undefined) }, {
-      slots: { 'form-controls': () => h('button', { 'data-form-controls-slot': '' }, 'Kontrol khusus') },
+    const formActions = mountCore(FormView, { formProps: formProps(async () => undefined) }, {
+      slots: { 'form-actions': () => h('button', { 'data-form-actions-slot': '' }, 'Custom action') },
     })
     await flush()
-    expect(formControls.find('[data-form-controls-slot]')).not.toBeNull()
-    expect(formControls.find('.is-form-view-controls')).toBeNull()
-    formControls.unmount()
+    expect(formActions.find('[data-form-actions-slot]')).not.toBeNull()
+    expect(formActions.find('.is-form-view-controls')).toBeNull()
+    formActions.unmount()
   })
 
   function resourceForm(options: {
@@ -470,6 +480,67 @@ describe('FormView', () => {
       afterSubmit: options.afterSubmit,
     }
   }
+
+  async function mountRoutedFormView() {
+    const host = document.createElement('div')
+    document.body.append(host)
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        {
+          path: '/form',
+          name: 'form',
+          component: FormView,
+          props: {
+            title: 'Edit Role',
+            formProps: formProps(async () => undefined),
+          },
+        },
+        { path: '/other', name: 'other', component: defineComponent({ setup: () => () => h('p', 'Other page') }) },
+      ],
+    })
+    const app = createApp(defineComponent({ setup: () => () => h(RouterView) }))
+    app.use(router)
+    app.use(FrameworkPlugin, { runtime: {} })
+    await router.push({ name: 'form' })
+    await router.isReady()
+    app.mount(host)
+    await flush()
+
+    return { host, router, unmount: () => { app.unmount(); host.remove() } }
+  }
+
+  it('guards dirty route exits, preserves drafts when staying, and registers native unload protection', async () => {
+    const view = await mountRoutedFormView()
+    const input = view.host.querySelector<HTMLInputElement>('input')!
+    const cleanUnload = new Event('beforeunload', { cancelable: true })
+    window.dispatchEvent(cleanUnload)
+    expect(cleanUnload.defaultPrevented).toBe(false)
+
+    input.value = 'Editor'
+    input.dispatchEvent(new Event('input'))
+    await flush()
+
+    const dirtyUnload = new Event('beforeunload', { cancelable: true })
+    window.dispatchEvent(dirtyUnload)
+    expect(dirtyUnload.defaultPrevented).toBe(true)
+
+    const navigation = view.router.push({ name: 'other' })
+    await flush()
+    expect(document.body.textContent).toContain('Discard unsaved changes?')
+    ;[...document.body.querySelectorAll<HTMLButtonElement>('button')].find((button) => button.textContent === 'Stay')!.click()
+    await navigation
+    await flush()
+    expect(view.router.currentRoute.value.name).toBe('form')
+    expect(view.host.querySelector<HTMLInputElement>('input')!.value).toBe('Editor')
+
+    const discardNavigation = view.router.push({ name: 'other' })
+    await flush()
+    ;[...document.body.querySelectorAll<HTMLButtonElement>('button')].find((button) => button.textContent === 'Discard changes')!.click()
+    await discardNavigation
+    expect(view.router.currentRoute.value.name).toBe('other')
+    view.unmount()
+  })
 
   it('derives detail navigation, then list fallback, and stays without either target', async () => {
     const detail = mountCore(FormView, { resource: resourceForm({ detail: (id) => `/records/${id}`, list: '/records' }) })

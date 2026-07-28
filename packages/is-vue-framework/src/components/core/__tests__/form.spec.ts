@@ -34,6 +34,20 @@ describe('Form core', () => {
     view.unmount()
   })
 
+  it('keeps fallback inputs transparent with the secondary focus treatment', async () => {
+    const view = mountCore(Form, { fields: { name: { label: 'Name' } }, submit: async () => undefined })
+    await flush()
+
+    const input = view.find<HTMLInputElement>('input')!
+    expect(input.classList.contains('bg-transparent')).toBe(true)
+    expect(input.classList.contains('outline-1')).toBe(true)
+    expect(input.classList.contains('focus:outline-secondary')).toBe(true)
+    expect(input.classList.contains('focus:ring-1')).toBe(true)
+    expect(input.classList.contains('transition-[outline-color,box-shadow]')).toBe(true)
+    expect(input.classList.contains('bg-surface')).toBe(false)
+    view.unmount()
+  })
+
   it('loads then submits with the same component and no mode prop — the update-like case', async () => {
     const submit = vi.fn(async () => undefined)
     const view = mountCore(Form, {
@@ -414,7 +428,7 @@ describe('Form core', () => {
 
     const loadError = loading.find('[role="alert"]')!
     expect(loadError.parentElement?.classList.contains('bg-error-container')).toBe(true)
-    loading.all('button').find((button) => button.textContent === 'Coba lagi')!.click()
+    loading.all('button').find((button) => button.textContent === 'Retry')!.click()
     await flush()
     expect(attempts).toBe(2)
     loading.unmount()
@@ -442,13 +456,13 @@ describe('Form core', () => {
     const view = mountCore(Form, { fields, submit: async () => undefined }, {
       slots: {
         'input:name': () => h('span', { 'data-input-slot': '' }, 'Input khusus'),
-        controls: () => h('button', { type: 'button', 'data-controls-slot': '' }, 'Kontrol khusus'),
+        actions: () => h('button', { type: 'button', 'data-actions-slot': '' }, 'Custom action'),
       },
     })
     await flush()
 
     expect(view.find('[data-input-slot]')).not.toBeNull()
-    expect(view.find('[data-controls-slot]')).not.toBeNull()
+    expect(view.find('[data-actions-slot]')).not.toBeNull()
     expect(view.find('button[type="submit"]')).toBeNull()
     view.unmount()
   })

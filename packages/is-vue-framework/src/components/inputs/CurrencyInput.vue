@@ -70,7 +70,7 @@ const currencyValue = computed(() => {
       <slot name="label"></slot>
     </template>
     <div
-      :class="twMerge(`flex flex-row items-center gap-4 rounded-lg py-3 pl-4 outline  outline-1 outline-outline/[24%] transition-all ease-linear focus-within:outline-2 ${disabled ? 'pointer-events-none cursor-not-allowed !bg-surface-variant/50 ' : ''}`, ($attrs.class as string))"
+      :class="twMerge(`flex flex-row items-center gap-4 rounded-lg bg-transparent py-3 pl-4 outline outline-1 outline-outline/[24%] transition-[outline-color,box-shadow] duration-150 ease-out focus-within:outline-secondary focus-within:ring-1 focus-within:ring-secondary/30 ${disabled ? 'pointer-events-none cursor-not-allowed opacity-60 ' : ''}`, ($attrs.class as string))"
     >
       <Icon v-if="props.icon" :name="(props.icon as any)" />
       <p>

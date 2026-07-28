@@ -13,5 +13,5 @@ const overtimeId = computed(() => route.params.overtimeId)
 </script>
 
 <template>
-  <FormView title="Ubah Lembur" :resource="overtimes" :id="overtimeId" />
+  <FormView title="Edit Overtime" :resource="overtimes" :id="overtimeId" />
 </template>

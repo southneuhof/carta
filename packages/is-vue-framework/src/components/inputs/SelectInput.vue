@@ -263,8 +263,8 @@ onMounted(() => {
         <template #trigger>
           <div
             :key="`${String(displayValue)}`"
-            :class="`flex w-full min-w-0 max-w-full flex-row items-center justify-between gap-2 overflow-hidden rounded-lg bg-surface-container px-4 py-2 outline outline-1 outline-outline/[24%] ${
-              disabled ? 'pointer-events-none cursor-not-allowed !bg-surface-variant/50 ' : ''
+            :class="`flex w-full min-w-0 max-w-full flex-row items-center justify-between gap-2 overflow-hidden rounded-lg bg-transparent px-4 py-2 outline outline-1 outline-outline/[24%] transition-[outline-color,box-shadow] duration-150 ease-out focus-within:outline-secondary focus-within:ring-1 focus-within:ring-secondary/30 ${
+              disabled ? 'pointer-events-none cursor-not-allowed opacity-60 ' : ''
             } ${$attrs.class || ''}`"
           >
             <p v-if="displayValue" class="min-w-0 max-w-full flex-1 truncate text-start">{{ displayValue }}</p>

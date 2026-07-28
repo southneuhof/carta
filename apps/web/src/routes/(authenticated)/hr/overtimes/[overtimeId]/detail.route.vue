@@ -76,29 +76,29 @@ async function run(work: () => Promise<void>, success: string) {
     await refresh()
     toast.success(success)
   } catch {
-    toast.error('Tindakan gagal. Silakan coba lagi.')
+    toast.error('Action failed. Please try again.')
   } finally {
     pending.value = false
   }
 }
 
 function onSubmit() {
-  void run(() => submitOvertime(overtimeId.value), 'Pengajuan dikirim untuk verifikasi.')
+  void run(() => submitOvertime(overtimeId.value), 'Request sent for verification.')
 }
 
 function onApprove() {
-  void run(() => verifyOvertime(overtimeId.value, 'approved'), 'Pengajuan disetujui.')
+  void run(() => verifyOvertime(overtimeId.value, 'approved'), 'Request approved.')
 }
 
 function onReject() {
   const description = rejectionReason.value.trim()
   if (!description) {
-    toast.error('Alasan penolakan wajib diisi.')
+    toast.error('A rejection reason is required.')
     return
   }
   rejecting.value = false
   rejectionReason.value = ''
-  void run(() => verifyOvertime(overtimeId.value, 'rejected', description), 'Pengajuan ditolak.')
+  void run(() => verifyOvertime(overtimeId.value, 'rejected', description), 'Request rejected.')
 }
 
 const view = computed(() => {
@@ -115,23 +115,23 @@ const editTarget = computed(() => {
 
 <template>
   <div>
-    <DetailView title="Detail Lembur" :back-to="{ name: overtimes.capabilities.list!.to!.name }" :detail="view.detail">
+    <DetailView title="Overtime Details" :back-to="{ name: overtimes.capabilities.list!.to!.name }" :detail="view.detail">
       <template #controls>
-        <RouterLink v-if="editTarget" :to="editTarget"><Button>Ubah</Button></RouterLink>
-        <Button v-if="maySubmit" :disabled="pending" @click="onSubmit">Kirim Verifikasi</Button>
-        <Button v-if="mayVerify" :disabled="pending" @click="onApprove">Setujui</Button>
-        <Button v-if="mayVerify" color="error" :disabled="pending" @click="rejecting = true">Tolak</Button>
+        <RouterLink v-if="editTarget" :to="editTarget"><Button>Edit</Button></RouterLink>
+        <Button v-if="maySubmit" :disabled="pending" @click="onSubmit">Send for Verification</Button>
+        <Button v-if="mayVerify" :disabled="pending" @click="onApprove">Approve</Button>
+        <Button v-if="mayVerify" color="error" :disabled="pending" @click="rejecting = true">Reject</Button>
       </template>
     </DetailView>
 
     <section v-if="rejecting" data-reject-dialog>
-      <label for="rejection-reason">Alasan penolakan</label>
+      <label for="rejection-reason">Rejection reason</label>
       <textarea id="rejection-reason" v-model="rejectionReason" data-rejection-reason></textarea>
-      <button type="button" data-confirm-reject @click="onReject">Tolak Pengajuan</button>
-      <button type="button" data-cancel-reject @click="rejecting = false">Batal</button>
+      <button type="button" data-confirm-reject @click="onReject">Reject request</button>
+      <button type="button" data-cancel-reject @click="rejecting = false">Cancel</button>
     </section>
 
-    <ListView title="Riwayat Verifikasi" :table="stepsTable" />
+    <ListView title="Verification History" :table="stepsTable" />
 
   </div>
 </template>

@@ -24,9 +24,9 @@ const coreTextRenderer = defineComponent({
       const { class: className, ...inputAttrs } = attrs
       return h('div', {
         class: twMerge(
-          'flex min-h-12 items-center rounded-lg bg-surface px-4 py-3 text-on-surface outline outline-1 outline-outline/[24%] transition-none focus-within:outline-2 focus-within:outline-primary',
-          props.error ? 'outline-2 outline-error focus-within:outline-error' : '',
-          props.disabled ? 'cursor-not-allowed bg-surface-variant/50 text-on-surface-variant' : '',
+          'flex min-h-12 items-center rounded-lg bg-transparent px-4 py-3 text-on-surface outline outline-1 outline-outline/[24%] transition-[outline-color,box-shadow] duration-150 ease-out focus-within:outline-secondary focus-within:ring-1 focus-within:ring-secondary/30',
+          props.error ? 'outline-error focus-within:outline-error focus-within:ring-error/30' : '',
+          props.disabled ? 'cursor-not-allowed text-on-surface-variant opacity-60' : '',
           className as string | undefined,
         ),
       }, h('input', {
