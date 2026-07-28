@@ -38,9 +38,13 @@ export type IdentityDeclaration<TRecord extends object, TIdentity extends Record
   | ((record: TRecord) => TIdentity)
 
 export interface TableFactoryArguments<TQuery extends object = Record<string, unknown>> {
+  /** Fixed loader scope (for example a parent record ID), never user-entered filters. */
   searchParameters?: Record<string, unknown>
+  /** URL query identity; later also identifies browser table preferences. */
   namespace?: QueryNamespace
+  /** User collection controls such as page, search, filters, and sorting. */
   query?: TQuery
+  reorderable?: boolean
   pagination?: 'auto' | 'always' | false
 }
 

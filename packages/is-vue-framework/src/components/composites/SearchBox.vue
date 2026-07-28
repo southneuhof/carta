@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { debounce } from '@southneuhof/utilities/object'
-import { ref, watch } from 'vue'
+import { onBeforeUnmount, ref, watch } from 'vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 
 const props = defineProps({
@@ -17,14 +16,23 @@ const props = defineProps({
 const modelValue = defineModel<string>({ default: '' })
 
 const value = ref<string>(modelValue.value)
-const debouncedSetValue = debounce(() => (modelValue.value = value.value), 300)
+let debounceTimer: ReturnType<typeof setTimeout> | undefined
+
+function debouncedSetValue() {
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => (modelValue.value = value.value), 300)
+}
 
 watch(value, () => {
   if (!props.debounced) modelValue.value = value.value
   else debouncedSetValue()
 })
 
-watch(modelValue, () => (value.value = modelValue.value))
+watch(modelValue, () => {
+  clearTimeout(debounceTimer)
+  value.value = modelValue.value
+})
+onBeforeUnmount(() => clearTimeout(debounceTimer))
 </script>
 
 <template>

@@ -63,6 +63,7 @@ span a,
     @apply relative after:absolute after:bottom-0 after:left-0 after:right-0 after:top-0 after:hidden after:rounded-[inherit] hover:after:flex;
   }
 
+
   .bg-muted {
     @apply bg-on-surface/[38%];
   }

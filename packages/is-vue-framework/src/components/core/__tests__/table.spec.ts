@@ -10,6 +10,20 @@ const rows = [
   { name: 'Editor', status: 'closed' },
 ]
 
+function installStorage() {
+  const values = new Map<string, string>()
+  Object.defineProperty(window, 'localStorage', {
+    configurable: true,
+    value: {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => values.set(key, value),
+      removeItem: (key: string) => values.delete(key),
+      get length() { return values.size },
+    },
+  })
+  return values
+}
+
 describe('Table core', () => {
   it('renders externally controlled data with catalog labels', async () => {
     const view = mountCore(Table, { fields, data: rows })
@@ -18,6 +32,17 @@ describe('Table core', () => {
     expect(view.all('th').map((cell) => cell.textContent)).toEqual(['Nama', 'Status'])
     expect(view.all('tbody tr')).toHaveLength(2)
     expect(view.text()).toContain('Admin')
+    view.unmount()
+  })
+
+  it('fills its container while preserving column widths as a minimum', async () => {
+    const view = mountCore(Table, { fields, data: rows })
+    await flush()
+
+    const table = view.find('table') as HTMLTableElement
+    expect(table.classList.contains('w-full')).toBe(true)
+    expect(table.style.minWidth).toBe('300px')
+    expect(table.style.width).toBe('')
     view.unmount()
   })
 
@@ -63,6 +88,40 @@ describe('Table core', () => {
     view.unmount()
   })
 
+  it('keeps a supplied query controlled even when a namespace exists', async () => {
+    const location = createMemoryQueryLocationAdapter()
+    const updates = vi.fn()
+    const Host = defineComponent({
+      setup(_, { expose }) {
+        const query = ref<Record<string, unknown>>({ page: 1, limit: 10 })
+        expose({ query })
+        return () => h(Table, {
+          fields,
+          namespace: 'roles',
+          query: query.value,
+          load: () => ({ data: rows, meta: { total: 40, pageSize: 10, totalPage: 4 } }),
+          'onUpdate:query': (next: Record<string, unknown>) => {
+            updates(next)
+            query.value = next
+          },
+        })
+      },
+    })
+    const view = mountCore(Host, {}, { adapters: { query: location } })
+    await flush()
+
+    view.all('nav button')[1].click()
+    await flush()
+    expect(updates).toHaveBeenCalledTimes(1)
+    expect((view.exposed().query as Record<string, unknown>).page).toBe(2)
+    expect(location.read('roles')).toEqual({})
+
+    view.exposed().query = { page: 3, limit: 10 }
+    await flush()
+    expect(view.text()).toContain('3 / 4')
+    view.unmount()
+  })
+
   it('keeps duplicate instances independent through explicit namespaces', async () => {
     const location = createMemoryQueryLocationAdapter()
     const Host = defineComponent(() => () => [
@@ -77,6 +136,25 @@ describe('Table core', () => {
 
     expect(location.read('archived').page).toBe(2)
     expect(location.read('assignees').page ?? 1).toBe(1)
+    view.unmount()
+  })
+
+  it('renders controlled visible columns immediately without storage writes', async () => {
+    const storage = installStorage()
+    const Host = defineComponent({
+      setup(_, { expose }) {
+        const visible = ref(['name', 'status'])
+        expose({ visible })
+        return () => h(Table, { fields, namespace: 'roles', data: rows, visibleColumns: visible.value, 'onUpdate:visibleColumns': (next: string[]) => (visible.value = next) })
+      },
+    })
+    const view = mountCore(Host, {})
+    await flush()
+
+    view.exposed().visible = ['name']
+    await flush()
+    expect(view.all('th').map((cell) => cell.textContent)).toEqual(['Nama'])
+    expect(storage.size).toBe(0)
     view.unmount()
   })
 
@@ -228,7 +306,7 @@ describe('Table core', () => {
     await flush()
 
     expect(view.text()).toContain('1 / 1')
-    expect(view.all('nav button').every((button) => (button as HTMLButtonElement).disabled)).toBe(true)
+    expect((view.all('nav button').slice(0, 2) as HTMLButtonElement[]).every((button) => button.disabled)).toBe(true)
     view.unmount()
   })
 

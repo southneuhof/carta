@@ -7,20 +7,40 @@
  * forwarded with `v-bind` and never translated, so a resource prop factory
  * result binds directly.
  */
-import { computed, ref, useSlots } from 'vue'
+import { computed, getCurrentInstance, ref, useSlots, watch } from 'vue'
 import { toast } from 'vue-sonner'
-import type { RecordIdentity, TableProps } from '../../contracts'
+import type { FieldsInput, QueryValues, RecordIdentity, TableProps, ValidationSchema } from '../../contracts'
 import type { ListCapableResource, TableSurfaceArguments } from '../../resources/defineResource'
+import { resolveFields } from '../../fields'
+import { useNamespacedQuery } from '../../query'
 import Table from '../core/Table.vue'
+import Form from '../core/Form.vue'
 import Button from '../base/Button.vue'
 import Card from '../base/Card.vue'
 import Dialog from '../base/Dialog.vue'
 import Icon from '../base/Icon.vue'
+import Popover from '../base/Popover.vue'
 import SearchBox from '../composites/SearchBox.vue'
+import Switch from '../inputs/Switch.vue'
+import { createWorkbook, downloadWorkbook, type ListExportOptions } from '../../services'
+import { useTablePreferences } from '../core/useTablePreferences'
+
+export interface ListFilters<TQuery extends object = Record<string, unknown>> {
+  fields: FieldsInput<TQuery, TQuery>
+  schema?: ValidationSchema<TQuery>
+  defaults?: Partial<TQuery>
+  label?: string
+  resetLabel?: string
+}
 
 type ListViewProps = {
   title?: string
   description?: string
+  /** Controlled user collection state. Search/filter values belong here. */
+  query?: QueryValues
+  /** Explicit query fields for live filtering; record fields are never inferred. */
+  filters?: ListFilters
+  export?: ListExportOptions | false
 } & (
   | {
       resource: ListCapableResource<Record<string, unknown>, Record<string, unknown>>
@@ -31,6 +51,10 @@ type ListViewProps = {
 )
 
 const props = defineProps<ListViewProps>()
+const emit = defineEmits<{
+  (event: 'update:query', query: QueryValues): void
+  (event: 'export-error', error: unknown): void
+}>()
 const slots = useSlots()
 
 type ListViewSurface = {
@@ -48,9 +72,72 @@ const surface = computed<ListViewSurface>(() =>
     : { table: props.table!, createRoute: undefined, detailRoute: undefined, updateRoute: undefined, canDelete: undefined, deleteRecord: undefined },
 )
 
+const hasQueryBinding = 'query' in (getCurrentInstance()?.vnode.props ?? {})
+const queryDefaults = computed<QueryValues>(() => ({ page: 1, limit: 10, ...(props.filters?.defaults ?? {}) }))
+const localQuery = ref<QueryValues>({ ...queryDefaults.value, ...(props.query ?? {}) })
+const tableNamespace = computed(() => surface.value.table.namespace)
+const queryState = useNamespacedQuery({
+  namespace: computed(() => tableNamespace.value ?? 'table'),
+  defaults: queryDefaults,
+  local: hasQueryBinding || !tableNamespace.value ? localQuery : undefined,
+})
+const queryValues = queryState.values
+
+watch(
+  () => props.query,
+  (value) => {
+    if (!hasQueryBinding) return
+    localQuery.value = { ...queryDefaults.value, ...(value ?? {}) }
+  },
+)
+
+function updateQuery(patch: QueryValues) {
+  queryState.update(patch)
+  emit('update:query', queryValues.value)
+}
+
+function updateSearch(search: string) {
+  updateQuery({ search: search || undefined, page: 1 })
+}
+
+function updateFilters(next: Record<string, unknown>) {
+  updateQuery({ ...next, page: 1 })
+}
+
+function resetFilters() {
+  const preserved = { search: queryValues.value.search, limit: queryValues.value.limit }
+  queryState.reset()
+  queryState.update({ ...preserved, page: 1 })
+  emit('update:query', queryValues.value)
+}
+
 const passthroughSlots = computed(() => Object.entries(slots).filter(([name]) => !['header', 'controls', 'filters', 'body', 'footer', 'row-actions'].includes(name)))
 
 const deleting = ref(false)
+const exporting = ref(false)
+const tableRef = ref<{ refresh: () => Promise<unknown> }>()
+const columnFields = computed(() => resolveFields({ fields: surface.value.table.fields, surface: 'table' }))
+const columnKeys = computed(() => columnFields.value.map((field) => field.key))
+const columnPreferences = useTablePreferences(tableNamespace, columnKeys, computed(() => surface.value.table.minColumnWidth ?? 96))
+const columnSizing = ref<Record<string, number>>({ ...columnPreferences.sizes.value })
+watch(columnPreferences.sizes, (sizes) => { columnSizing.value = { ...sizes } })
+
+function setVisibleColumns(next: string[]) {
+  const normalized = columnKeys.value.filter((key) => next.includes(key))
+  const hasActions = Boolean(slots['row-actions'] || surface.value.detailRoute || surface.value.updateRoute || surface.value.canDelete)
+  if (!hasActions && normalized.length === 0 && columnKeys.value.length) return
+  columnPreferences.setVisible(normalized)
+}
+
+function setColumnSizing(next: Record<string, number>) {
+  columnSizing.value = { ...next }
+  columnPreferences.setSizes(next)
+}
+
+function resetColumns() {
+  columnPreferences.resetColumns()
+  columnSizing.value = {}
+}
 
 async function remove(record: Record<string, unknown>, close: (value: boolean) => void) {
   if (deleting.value) return
@@ -65,6 +152,56 @@ async function remove(record: Record<string, unknown>, close: (value: boolean) =
     deleting.value = false
   }
 }
+
+async function exportRows() {
+  if (props.export === false || exporting.value) return
+  exporting.value = true
+  try {
+    const { page: _page, limit: _limit, ...activeQuery } = queryValues.value
+    const options = props.export ?? {}
+    const searchParameters = surface.value.table.searchParameters ?? {}
+    let rows: Record<string, unknown>[]
+    if (options.load) {
+      const result = await options.load({ query: activeQuery, searchParameters })
+      rows = Array.isArray(result) ? result : result.data
+    } else if (surface.value.table.data) rows = [...surface.value.table.data]
+    else if (surface.value.table.load) {
+      const pageSize = Number.isInteger(options.pageSize) && options.pageSize! > 0 ? options.pageSize! : 500
+      rows = []
+      let page = 1
+      const seen = new Set<string>()
+      while (page <= 10_000) {
+        const result = await surface.value.table.load({ query: { ...activeQuery, page, limit: pageSize }, searchParameters } as never)
+        const batch = result.data ?? []
+        const signature = JSON.stringify(batch.map((row) => row))
+        if (seen.has(signature)) throw new Error('[is-vue-framework] Export loader repeated a page.')
+        seen.add(signature)
+        rows.push(...batch)
+        const meta = result.meta
+        if (meta?.totalPage != null) {
+          if (meta.totalPage < 0 || page >= meta.totalPage) break
+        } else if (meta?.total != null) {
+          if (meta.total < 0 || rows.length >= meta.total) break
+        } else if (batch.length < pageSize) break
+        page += 1
+      }
+    } else return
+    const fields = columnFields.value.filter((field) => columnPreferences.visibleKeys.value.includes(field.key))
+    if (!fields.length) throw new Error('[is-vue-framework] Export requires one visible column.')
+    const workbook = createWorkbook(rows, fields, options)
+    const fallback = `${surface.value.table.namespace ?? 'export'}-${Date.now()}`.replace(/[^a-zA-Z0-9._-]/g, '-')
+    const filename = typeof options.filename === 'function' ? options.filename({ query: activeQuery }) : options.filename ?? fallback
+    downloadWorkbook(workbook, filename)
+    toast.success('Export berhasil dibuat.')
+  } catch (error) {
+    toast.error('Export gagal dibuat.')
+    emit('export-error', error)
+  } finally {
+    exporting.value = false
+  }
+}
+
+const canExport = computed(() => props.export !== false && Boolean(surface.value.table.data || surface.value.table.load))
 </script>
 
 <template>
@@ -78,7 +215,55 @@ async function remove(record: Record<string, unknown>, close: (value: boolean) =
               <p v-if="description" class="mt-1 text-sm text-on-surface-variant">{{ description }}</p>
             </div>
           </slot>
-        <SearchBox/>
+        <SearchBox :model-value="String(queryValues.search ?? '')" @update:model-value="updateSearch" />
+        <Popover v-if="filters">
+          <template #trigger>
+            <Button kind="icon" variant="standard" aria-label="Filter">
+              <template #icon><Icon name="filter" /></template>
+            </Button>
+          </template>
+          <template #content>
+            <div class="w-80 rounded-xl border border-outline/[16%] bg-surface p-4 shadow-lg">
+              <slot name="filter-content" :query="queryValues" :reset="resetFilters">
+                <p v-if="filters.label" class="mb-3 text-sm font-semibold">{{ filters.label }}</p>
+                <Form
+                  :fields="filters.fields"
+                  :schema="filters.schema"
+                  :model-value="queryValues"
+                  @update:model-value="updateFilters"
+                />
+                <div class="mt-3 flex justify-end">
+                  <Button type="button" variant="text" @click="resetFilters">{{ filters.resetLabel ?? 'Reset filter' }}</Button>
+                </div>
+              </slot>
+            </div>
+          </template>
+        </Popover>
+        <Dialog>
+          <template #trigger>
+            <Button kind="icon" variant="standard" aria-label="Columns">
+              <template #icon><Icon name="table" /></template>
+            </Button>
+          </template>
+          <template #title>Columns</template>
+          <template #content>
+            <slot name="column-dialog" :fields="columnFields" :reset="resetColumns">
+              <label v-for="field in columnFields" :key="field.key" class="flex items-center justify-between gap-4">
+                <span>{{ field.label ?? field.key }}</span>
+                <Switch
+                  :model-value="columnPreferences.visibleKeys.value.includes(field.key)"
+                  @update:model-value="(visible) => setVisibleColumns(visible ? [...columnPreferences.visibleKeys.value, field.key] : columnPreferences.visibleKeys.value.filter((key) => key !== field.key))"
+                />
+              </label>
+              <Button type="button" variant="text" @click="resetColumns">Reset columns</Button>
+            </slot>
+          </template>
+        </Dialog>
+        <slot name="export-controls" :export="exportRows" :exporting="exporting">
+          <Button v-if="canExport" kind="icon" variant="standard" aria-label="Export Excel" :disabled="exporting" @click="exportRows">
+            <template #icon><Icon name="file-excel" /></template>
+          </Button>
+        </slot>
         </div>
         <RouterLink v-if="surface.createRoute" :to="surface.createRoute">
           <Button><template #icon><Icon name="add" /></template>Tambah</Button>
@@ -92,7 +277,7 @@ async function remove(record: Record<string, unknown>, close: (value: boolean) =
 
       <slot name="body" v-bind="{ table: surface.table }">
         <div class="p-3 sm:p-4">
-          <Table v-bind="surface.table">
+          <Table ref="tableRef" v-bind="surface.table" :query="queryValues" :visible-columns="columnPreferences.visibleKeys.value" :column-sizing="columnSizing" @update:query="updateQuery" @update:visible-columns="setVisibleColumns" @update:column-sizing="setColumnSizing">
             <template v-if="$slots['row-actions'] || surface.detailRoute || surface.updateRoute || surface.canDelete" #row-actions="{ record }">
               <div class="flex items-center justify-end gap-1" aria-label="Row actions">
                 <RouterLink v-if="surface.detailRoute?.(record)" v-slot="{ href, navigate }" custom :to="surface.detailRoute(record)!">

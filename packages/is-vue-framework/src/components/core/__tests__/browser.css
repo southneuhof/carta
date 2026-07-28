@@ -1,0 +1,17 @@
+.is-table table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.is-table th {
+  position: relative;
+}
+
+.is-table [role='separator'] {
+  position: absolute;
+  inset-block: 0;
+  right: 0;
+  width: 12px;
+  touch-action: none;
+}

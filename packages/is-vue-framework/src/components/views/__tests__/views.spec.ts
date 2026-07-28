@@ -12,6 +12,29 @@ const viewsRoot = join(__dirname, '..')
 const tableProps = { fields: { name: { label: 'Nama' } }, data: [{ name: 'Admin' }] }
 const detailProps = { fields: { name: { label: 'Nama' } }, data: { name: 'Admin' } }
 
+function installStorage() {
+  const values = new Map<string, string>()
+  const setItem = vi.fn((key: string, value: string) => values.set(key, value))
+  const descriptor = Object.getOwnPropertyDescriptor(window, 'localStorage')
+  Object.defineProperty(window, 'localStorage', {
+    configurable: true,
+    value: {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem,
+      removeItem: (key: string) => values.delete(key),
+      get length() { return values.size },
+    },
+  })
+  return {
+    values,
+    setItem,
+    restore: () => {
+      if (descriptor) Object.defineProperty(window, 'localStorage', descriptor)
+      else delete (window as { localStorage?: Storage }).localStorage
+    },
+  }
+}
+
 describe('ListView', () => {
   it('renders chrome around the table and forwards table props unchanged', async () => {
     const view = mountCore(ListView, { title: 'Role', description: 'Daftar role', table: tableProps })
@@ -55,6 +78,90 @@ describe('ListView', () => {
     view.unmount()
   })
 
+  it('updates visible columns immediately, coalesces persistence, and reset cancels pending visibility', async () => {
+    vi.useFakeTimers()
+    const storage = installStorage()
+    let view: ReturnType<typeof mountCore> | undefined
+    try {
+      view = mountCore(ListView, {
+        table: {
+          namespace: 'roles',
+          fields: { name: { label: 'Nama' }, status: { label: 'Status' } },
+          data: [{ name: 'Admin', status: 'active' }],
+        },
+      })
+      await flush()
+
+      view.find<HTMLButtonElement>('[aria-label="Columns"]')!.click()
+      await flush()
+      const statusSwitch = [...document.querySelectorAll<HTMLButtonElement>('label button')][1]
+      statusSwitch.click()
+      await flush()
+      expect(view.all('th').map((cell) => cell.textContent)).toEqual(['Nama'])
+      statusSwitch.click()
+      await flush()
+      expect(view.all('th').map((cell) => cell.textContent)).toEqual(['Nama', 'Status'])
+      statusSwitch.click()
+      await flush()
+      expect(view.all('th').map((cell) => cell.textContent)).toEqual(['Nama'])
+      expect(storage.setItem).not.toHaveBeenCalled()
+
+      await vi.advanceTimersByTimeAsync(200)
+      expect(storage.setItem).toHaveBeenCalledTimes(1)
+      expect(storage.setItem).toHaveBeenCalledWith(
+        'is-framework:roles:table:visible-columns',
+        JSON.stringify({ known: ['name', 'status'], visible: ['name'] }),
+      )
+
+      storage.setItem.mockClear()
+      statusSwitch.click()
+      await flush()
+      ;[...document.querySelectorAll<HTMLButtonElement>('button')].find((button) => button.textContent === 'Reset columns')!.click()
+      await flush()
+      await vi.advanceTimersByTimeAsync(200)
+      expect(storage.setItem).not.toHaveBeenCalled()
+      expect(storage.values.has('is-framework:roles:table:visible-columns')).toBe(false)
+    } finally {
+      view?.unmount()
+      storage.restore()
+      vi.useRealTimers()
+    }
+  })
+
+  it('flushes final column visibility when unmounted before debounce expiry', async () => {
+    vi.useFakeTimers()
+    const storage = installStorage()
+    let view: ReturnType<typeof mountCore> | undefined
+    try {
+      view = mountCore(ListView, {
+        table: {
+          namespace: 'roles',
+          fields: { name: { label: 'Nama' }, status: { label: 'Status' } },
+          data: [{ name: 'Admin', status: 'active' }],
+        },
+      })
+      await flush()
+      view.find<HTMLButtonElement>('[aria-label="Columns"]')!.click()
+      await flush()
+      ;[...document.querySelectorAll<HTMLButtonElement>('label button')][1].click()
+      await flush()
+
+      view.unmount()
+      view = undefined
+      expect(storage.setItem).toHaveBeenCalledTimes(1)
+      expect(storage.setItem).toHaveBeenCalledWith(
+        'is-framework:roles:table:visible-columns',
+        JSON.stringify({ known: ['name', 'status'], visible: ['name'] }),
+      )
+      await vi.advanceTimersByTimeAsync(200)
+      expect(storage.setItem).toHaveBeenCalledTimes(1)
+    } finally {
+      view?.unmount()
+      storage.restore()
+      vi.useRealTimers()
+    }
+  })
+
   it('lets slots replace the header and the body entirely', async () => {
     const view = mountCore(
       ListView,
@@ -84,6 +191,61 @@ describe('ListView', () => {
     await flush()
 
     expect(view.find('strong')?.textContent).toBe('Admin')
+    view.unmount()
+  })
+
+  it('sends debounced search through the table query and resets page', async () => {
+    vi.useFakeTimers()
+    const contexts: Record<string, unknown>[] = []
+    const view = mountCore(ListView, {
+      table: {
+        fields: { name: { label: 'Nama' } },
+        load: ({ query }: { query: Record<string, unknown> }) => {
+          contexts.push({ ...query })
+          return { data: [{ name: 'Admin' }] }
+        },
+      },
+      query: { page: 4, limit: 10 },
+    })
+    await flush()
+
+    const search = view.find<HTMLInputElement>('header input')!
+    search.value = 'admin'
+    search.dispatchEvent(new Event('input'))
+    await vi.advanceTimersByTimeAsync(300)
+    await flush()
+
+    expect(contexts.at(-1)).toMatchObject({ search: 'admin', page: 1, limit: 10 })
+    view.unmount()
+    vi.useRealTimers()
+  })
+
+  it('renders model-bound filter Form and resets filters without clearing search or limit', async () => {
+    const contexts: Record<string, unknown>[] = []
+    const view = mountCore(ListView, {
+      table: {
+        fields: { name: { label: 'Nama' } },
+        load: ({ query }: { query: Record<string, unknown> }) => {
+          contexts.push({ ...query })
+          return { data: [{ name: 'Admin' }] }
+        },
+      },
+      query: { search: 'admin', limit: 25, page: 3 },
+      filters: { fields: { active: { label: 'Aktif' } }, defaults: { active: 'yes' } },
+    })
+    await flush()
+
+    view.find<HTMLButtonElement>('[aria-label="Filter"]')!.click()
+    await flush()
+    const filter = document.querySelector<HTMLInputElement>('#field-active')!
+    filter.value = 'no'
+    filter.dispatchEvent(new Event('input'))
+    await flush()
+    expect(contexts.at(-1)).toMatchObject({ active: 'no', search: 'admin', limit: 25, page: 1 })
+
+    ;[...document.querySelectorAll('button')].find((button) => button.textContent === 'Reset filter')!.dispatchEvent(new MouseEvent('click'))
+    await flush()
+    expect(contexts.at(-1)).toMatchObject({ active: 'yes', search: 'admin', limit: 25, page: 1 })
     view.unmount()
   })
 })
@@ -341,4 +503,3 @@ describe('shell boundaries', () => {
     view.unmount()
   })
 })
-

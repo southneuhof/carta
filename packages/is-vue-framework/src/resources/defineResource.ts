@@ -426,6 +426,16 @@ export function defineResource<
     }
     if (args?.query) props.query = args.query
     if (args?.pagination !== undefined) props.pagination = args.pagination
+    if (args?.reorderable) {
+      props.reorderable = true
+      props.rowKey = (record) => {
+        const value = identity(record)
+        if (typeof value !== 'string' && typeof value !== 'number') {
+          throw new Error('[is-vue-framework] Reorderable resources require a primitive identity.')
+        }
+        return value
+      }
+    }
     if (handlers.list) {
       props.load = (context) => handlers.list!(context)
     }

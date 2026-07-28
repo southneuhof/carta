@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import { z } from 'zod'
 import Form from '../Form.vue'
 import { fromZod } from '../../../validation'
@@ -284,6 +284,77 @@ describe('Form core', () => {
 
     view.unmount()
     locked.unmount()
+  })
+
+  it('infers model-bound operation from binding presence, including an undefined model', async () => {
+    const emitted: Record<string, unknown>[] = []
+    const view = mountCore(Form, {
+      fields,
+      modelValue: undefined,
+      'onUpdate:modelValue': (value: Record<string, unknown>) => emitted.push(value),
+    })
+    await flush()
+
+    expect(inputs(view)[0].value).toBe('')
+    type(view, 0, 'Filter')
+    await flush()
+
+    expect(emitted).toEqual([{ name: 'Filter' }])
+    expect(view.find('button[type="submit"]')).toBeNull()
+    view.unmount()
+  })
+
+  it('synchronizes a model-bound Form in both directions without stale keys', async () => {
+    const Host = defineComponent({
+      setup(_, { expose }) {
+        const model = ref<Record<string, unknown>>({ name: 'Awal', note: 'lama' })
+        expose({ model })
+        return () => h(Form, { fields, modelValue: model.value, 'onUpdate:modelValue': (value: Record<string, unknown>) => (model.value = value) })
+      },
+    })
+    const view = mountCore(Host, {})
+    await flush()
+
+    type(view, 0, 'Lokal')
+    await flush()
+    expect((view.exposed().model as Record<string, unknown>).name).toBe('Lokal')
+
+    view.exposed().model = { name: 'Parent baru' }
+    await flush()
+    expect(inputs(view)[0].value).toBe('Parent baru')
+    expect(inputs(view)[1].value).toBe('')
+    view.unmount()
+  })
+
+  it('touches validation on blur and focuses first visible invalid field', async () => {
+    const view = mountCore(Form, {
+      fields,
+      schema: fromZod(z.object({ name: z.string().min(3, 'Minimal 3 karakter') })),
+      initialData: { name: 'ab' },
+      submit: async () => undefined,
+    })
+    await flush()
+
+    inputs(view)[0].dispatchEvent(new Event('blur'))
+    await flush()
+    expect(view.text()).toContain('Minimal 3 karakter')
+
+    view.find('form')!.dispatchEvent(new Event('submit'))
+    await flush()
+    expect(document.activeElement).toBe(inputs(view)[0])
+    view.unmount()
+  })
+
+  it('renders resolved field spans inside a 12-column grid', async () => {
+    const view = mountCore(Form, {
+      fields: { name: { label: 'Nama', form: { span: 4 } } },
+      submit: async () => undefined,
+    })
+    await flush()
+
+    expect(view.find('.grid')?.className).toContain('grid-cols-12')
+    expect(view.find('.is-form-field')?.getAttribute('style')).toContain('span 4')
+    view.unmount()
   })
 
   it('associates labels and errors with their inputs', async () => {
