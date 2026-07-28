@@ -840,7 +840,7 @@
     "semantic_hash": "c4a6ac05baddc3ef58be75f492f8a72f"
   },
   "apps/web/src/route-map.d.ts": {
-    "mtime": 1785239165.285857,
+    "mtime": 1785241899.3447447,
     "ast_hash": "b8ea7f8982ee06b0012acfb0ec6777fb",
     "semantic_hash": ""
   },
@@ -2675,8 +2675,8 @@
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/core/Table.vue": {
-    "mtime": 1785241430.880176,
-    "ast_hash": "b766ddfcaad702ff1df84be104d6cd79",
+    "mtime": 1785243565.9919477,
+    "ast_hash": "673b2c2b7c9d1453815ec2f8283666f0",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/core/__tests__/detail.spec.ts": {
@@ -3105,8 +3105,8 @@
     "semantic_hash": ""
   },
   "plans/README.md": {
-    "mtime": 1785241530.608106,
-    "ast_hash": "2cc2bd15ae47881be4627313e4f72755",
+    "mtime": 1785243641.8715062,
+    "ast_hash": "212d89490b359c48d5cd6cf50649d5c2",
     "semantic_hash": ""
   },
   "pnpm-workspace.yaml": {
@@ -3880,8 +3880,8 @@
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/core/__tests__/Table.browser.spec.ts": {
-    "mtime": 1785240315.8599877,
-    "ast_hash": "8f630ffe5a637de91633d8104f996bbc",
+    "mtime": 1785243463.3507159,
+    "ast_hash": "73942eca8452264eb502776e721596f9",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/vitest.browser.config.ts": {
@@ -3912,6 +3912,11 @@
   "plans/016-unify-listview-column-visibility-state.md": {
     "mtime": 1785241530.6073563,
     "ast_hash": "cbf54d18ecc03eb2ad849bd1157a7b9a",
+    "semantic_hash": ""
+  },
+  "plans/017-rebuild-table-visibility-rendering.md": {
+    "mtime": 1785243641.8700933,
+    "ast_hash": "e67d62bcfc8dd4d736ae6276159aa73f",
     "semantic_hash": ""
   }
 }

@@ -8,6 +8,18 @@
   position: relative;
 }
 
+.is-table .sticky {
+  position: sticky;
+}
+
+.is-table .right-0 {
+  right: 0;
+}
+
+.is-table .overflow-x-auto {
+  overflow-x: auto;
+}
+
 .is-table [role='separator'] {
   position: absolute;
   inset-block: 0;

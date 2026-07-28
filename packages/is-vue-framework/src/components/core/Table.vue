@@ -299,19 +299,19 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
 
 <template>
   <div class="is-table flex flex-col gap-3 text-sm text-on-surface">
-    <div v-if="loaded.loading.value" class="flex min-h-40 items-center justify-center rounded-xl border border-outline/[16%] bg-surface-container-low px-6 py-10 text-on-surface-variant">
+    <div v-if="loaded.loading.value" class="flex min-h-40 items-center justify-center rounded-xl bg-surface-container-low px-6 py-10 text-on-surface-variant">
       <slot name="loading">
         <p role="status" aria-live="polite">Memuat…</p>
       </slot>
     </div>
 
-    <div v-else-if="loaded.error.value" class="flex min-h-40 items-center justify-center rounded-xl border border-error/[24%] bg-error-container/[28%] px-6 py-10 text-on-error-container">
+    <div v-else-if="loaded.error.value" class="flex min-h-40 items-center justify-center rounded-xl bg-error-container/[28%] px-6 py-10 text-on-error-container">
       <slot name="error" :error="loaded.error.value">
         <p role="alert">{{ loaded.error.value?.message }}</p>
       </slot>
     </div>
 
-    <div v-else-if="empty" class="flex min-h-40 items-center justify-center rounded-xl border border-dashed border-outline/[32%] bg-surface-container-low px-6 py-10 text-on-surface-variant">
+    <div v-else-if="empty" class="flex min-h-40 items-center justify-center rounded-xl bg-surface-container-low px-6 py-10 text-on-surface-variant">
       <slot name="empty">
         <p>No data</p>
       </slot>
@@ -355,10 +355,8 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
             <th
               v-if="$slots['row-actions']"
               scope="col"
-              class="w-px whitespace-nowrap border-b border-outline/[16%] px-4 py-2 text-right text-xs font-semibold"
-            >
-              Aksi
-            </th>
+              class="sticky right-0 z-20 w-px whitespace-nowrap border-b border-outline/[16%] bg-surface-container-high px-4 py-2 text-right text-xs font-semibold"
+            />
           </tr>
         </thead>
         <Draggable
@@ -370,14 +368,14 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
           @end="reorder"
         >
           <template #item="{ element: record, index }">
-            <tr class="transition-colors hover:bg-primary/[6%] focus-within:bg-primary/[6%]" @click="emit('row-click', record, index)">
+            <tr class="group transition-colors hover:bg-primary/[6%] focus-within:bg-primary/[6%]" @click="emit('row-click', record, index)">
               <td v-for="field in visibleFields" :key="field.key" :style="{ textAlign: field.align }" class="whitespace-nowrap px-4 py-3.5 text-on-surface">
                 <slot :name="`cell:${field.key}`" :value="valueFor(record, field)" :record="record" :field="field" :index="index">
                   <component :is="rendererFor(field.renderer)" v-if="field.renderer" v-bind="field.props" :value="valueFor(record, field)" :record="record" :field="field" :index="index" />
                   <template v-else>{{ valueFor(record, field) ?? '-' }}</template>
                 </slot>
               </td>
-              <td v-if="$slots['row-actions']" class="w-px px-3 py-2 text-right" @click.stop><slot name="row-actions" :record="record" :index="index" /></td>
+              <td v-if="$slots['row-actions']" class="sticky right-0 z-10 w-px bg-surface-container-low px-3 py-2 text-right transition-colors before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-10 before:bg-gradient-to-l before:from-surface-container-low before:to-transparent before:content-[''] group-hover:bg-primary/[6%] group-hover:before:from-primary/[6%] group-focus-within:bg-primary/[6%] group-focus-within:before:from-primary/[6%]" @click.stop><slot name="row-actions" :record="record" :index="index" /></td>
             </tr>
           </template>
         </Draggable>
@@ -385,7 +383,7 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
           <tr
             v-for="(row, index) in table.getRowModel().rows"
             :key="row.id"
-            class="transition-colors hover:bg-primary/[6%] focus-within:bg-primary/[6%]"
+            class="group transition-colors hover:bg-primary/[6%] focus-within:bg-primary/[6%]"
             @click="emit('row-click', row.original, index)"
           >
             <td
@@ -413,7 +411,7 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
                 <template v-else>{{ valueFor(row.original, field) ?? '-' }}</template>
               </slot>
             </td>
-            <td v-if="$slots['row-actions']" class="w-px px-3 py-2 text-right" @click.stop>
+            <td v-if="$slots['row-actions']" class="sticky right-0 z-10 w-px bg-surface-container-low px-3 py-2 text-right transition-colors before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-10 before:bg-gradient-to-l before:from-surface-container-low before:to-transparent before:content-[''] group-hover:bg-primary/[6%] group-hover:before:from-primary/[6%] group-focus-within:bg-primary/[6%] group-focus-within:before:from-primary/[6%]" @click.stop>
               <slot name="row-actions" :record="row.original" :index="index" />
             </td>
           </tr>

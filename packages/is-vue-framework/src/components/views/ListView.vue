@@ -96,10 +96,6 @@ function updateQuery(patch: QueryValues) {
   emit('update:query', queryValues.value)
 }
 
-function updateSearch(search: string) {
-  updateQuery({ search: search || undefined, page: 1 })
-}
-
 function updateFilters(next: Record<string, unknown>) {
   updateQuery({ ...next, page: 1 })
 }
@@ -215,7 +211,10 @@ const canExport = computed(() => props.export !== false && Boolean(surface.value
               <p v-if="description" class="mt-1 text-sm text-on-surface-variant">{{ description }}</p>
             </div>
           </slot>
-        <SearchBox :model-value="String(queryValues.search ?? '')" @update:model-value="updateSearch" />
+        <SearchBox
+          :model-value="String(queryValues.search ?? '')"
+          @update:model-value="(search: string) => updateQuery({ search: search || undefined, page: 1 })"
+        />
         <Popover v-if="filters">
           <template #trigger>
             <Button kind="icon" variant="standard" aria-label="Filter">

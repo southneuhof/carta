@@ -24,9 +24,11 @@ function mount(options: {
   controlledVisibility?: boolean
   fields?: Record<string, { label: string }>
   data?: Record<string, unknown>[]
+  rowActions?: boolean
+  width?: string
 } = {}) {
   const host = document.createElement('div')
-  host.style.width = '700px'
+  host.style.width = options.width ?? '700px'
   document.body.append(host)
   const namespace = options.namespace ?? `browser-table-${namespaces.size}`
   namespaces.add(namespace)
@@ -34,20 +36,26 @@ function mount(options: {
   const sizing = ref<Record<string, number>>({})
   const visibleColumns = ref(Object.keys(options.fields ?? fields))
   const app = createApp({
-    render: () => h(Table, {
-      namespace,
-      fields: options.fields ?? fields,
-      data: options.data ?? data,
-      ...(options.controlled ? { columnSizing: sizing.value } : {}),
-      ...(options.controlledVisibility ? { visibleColumns: visibleColumns.value } : {}),
-      'onUpdate:columnSizing': (next: Record<string, number>) => {
-        commits.push(next)
-        if (options.controlled) sizing.value = next
+    render: () => h(
+      Table,
+      {
+        namespace,
+        fields: options.fields ?? fields,
+        data: options.data ?? data,
+        ...(options.controlled ? { columnSizing: sizing.value } : {}),
+        ...(options.controlledVisibility ? { visibleColumns: visibleColumns.value } : {}),
+        'onUpdate:columnSizing': (next: Record<string, number>) => {
+          commits.push(next)
+          if (options.controlled) sizing.value = next
+        },
+        'onUpdate:visibleColumns': (next: string[]) => {
+          if (options.controlledVisibility) visibleColumns.value = next
+        },
       },
-      'onUpdate:visibleColumns': (next: string[]) => {
-        if (options.controlledVisibility) visibleColumns.value = next
-      },
-    }),
+      options.rowActions
+        ? { 'row-actions': ({ record }: { record: Record<string, unknown> }) => h('button', { class: 'row-action' }, String(record.name)) }
+        : undefined,
+    ),
   })
   app.use(FrameworkPlugin, { runtime: {}, queryClient: createFrameworkQueryClient({ retry: 0, staleTime: 0 }) })
   app.mount(host)
@@ -98,6 +106,30 @@ describe('Table browser interactions', () => {
     expect(row.classList.contains('transition-colors')).toBe(true)
     expect(row.classList.contains('hover:bg-primary/[6%]')).toBe(true)
     expect(row.classList.contains('focus-within:bg-primary/[6%]')).toBe(true)
+  })
+
+  it('keeps blank action header and action cells pinned during horizontal scroll', async () => {
+    const wideFields = Object.fromEntries(Array.from({ length: 10 }, (_, index) => [`field${index}`, { label: `Field ${index}` }]))
+    const wideData = [Object.fromEntries(Array.from({ length: 10 }, (_, index) => [`field${index}`, `value-${index}`]))]
+    const { host } = mount({ fields: wideFields, data: wideData, rowActions: true, width: '300px' })
+    await frame()
+
+    const scrollContainer = host.querySelector<HTMLElement>('.is-table .overflow-x-auto')!
+    const actionHeader = host.querySelector<HTMLElement>('thead th:last-child')!
+    const actionCell = host.querySelector<HTMLElement>('tbody td:last-child')!
+    expect(actionHeader.textContent?.trim()).toBe('')
+    expect(getComputedStyle(actionHeader).position).toBe('sticky')
+    expect(getComputedStyle(actionCell).position).toBe('sticky')
+    expect(scrollContainer.scrollWidth).toBeGreaterThan(scrollContainer.clientWidth)
+    scrollContainer.scrollLeft = 200
+    await frame()
+
+    expect(scrollContainer.scrollLeft).toBe(200)
+    const scrollportRight = scrollContainer.getBoundingClientRect().left + scrollContainer.clientWidth
+    expect(scrollportRight - actionHeader.getBoundingClientRect().right).toBeGreaterThanOrEqual(0)
+    expect(scrollportRight - actionHeader.getBoundingClientRect().right).toBeLessThanOrEqual(12)
+    expect(scrollportRight - actionCell.getBoundingClientRect().right).toBeGreaterThanOrEqual(0)
+    expect(scrollportRight - actionCell.getBoundingClientRect().right).toBeLessThanOrEqual(12)
   })
 
   it('settles controlled visibility updates without cumulative renderer work', async () => {
