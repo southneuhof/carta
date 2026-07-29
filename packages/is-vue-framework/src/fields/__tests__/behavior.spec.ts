@@ -284,4 +284,24 @@ describe('field behavior', () => {
     expect(() => cycle.connect()).toThrow('Value-effect cycle: a -> b -> a')
     cycle.scope.stop()
   })
+
+  it('resolves base props after dynamic presentation renderer selection', async () => {
+    const draft = reactive<Draft>({ mode: 'lookup' })
+    const fields = resolveFields<Record<string, unknown>, Draft>({
+      fields: { value: { form: { renderer: 'text', props: { static: true }, behavior: {
+        props: () => ({ behavior: true }),
+        presentation: ({ draft }) => draft.mode === 'lookup' ? { renderer: 'lookup', props: { presentation: true } } : { props: null },
+      } } } },
+      surface: 'form',
+    })
+    const resolveBaseProps = vi.fn((_field, renderer) => ({ renderer, base: true, static: false }))
+    const scope = effectScope()
+    const runtime = scope.run(() => createBehaviorRuntime<Draft>({ fields, draft, resolveBaseProps }))!
+    expect(runtime.state('value').value.props).toEqual({ renderer: 'lookup', base: true, static: false, behavior: true, presentation: true })
+    draft.mode = 'clear'
+    await nextTick()
+    expect(runtime.state('value').value.props).toEqual({})
+    expect(resolveBaseProps).toHaveBeenLastCalledWith(expect.anything(), 'text')
+    scope.stop()
+  })
 })

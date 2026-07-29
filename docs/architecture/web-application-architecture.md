@@ -945,3 +945,16 @@ The shipped vertical slices are `roles` (list, create, detail, edit, and nested
 permissions) and `users` (list, detail, edit, and role mapping). `incidents`
 lives in a downstream repository and is covered by the downstream checklist in
 the migration guide.
+
+## Input source resolution
+
+Web installs one `appInputProps` registry. It translates resource and option
+array sources into native lookup/select/radio/checkbox props before Form calls
+the renderer. File and image adapters provide signal-forwarding upload and
+strict persisted asset conversion. Core Form and input components remain
+resource-agnostic; explicit field props remain app overrides.
+
+Feature resources do not import or call `appInputProps`. They author ordinary
+field projections such as
+`{ renderer: 'lookup', source: sections, props: { searchParameters } }`.
+Only application bootstrap installs the registry; core Form consumes it.

@@ -7,6 +7,7 @@ import { createFrameworkAdapters } from './framework/adapters/bundle'
 import { fileManagerOptions } from './framework/adapters/fileManager'
 import { appFieldRenderers } from './framework/fields/renderers'
 import { appFieldDefaults } from '@/configs/defaults'
+import { appInputProps } from './framework/inputs/registry'
 import { dictionary } from '@/configs/dictionary'
 import App from './App.vue'
 import router from './router'
@@ -59,6 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     adapters: createFrameworkAdapters(router),
     fieldDefaults: appFieldDefaults,
     renderers: appFieldRenderers,
+    inputProps: appInputProps,
   })
   app.use(FileManagerPlugin, fileManagerOptions)
   app.use(router)

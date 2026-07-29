@@ -635,5 +635,8 @@
   "633": "LocationInput.spec.ts",
   "634": "6.6.2 - 2023-08-09",
   "635": "MultiLocationInput.spec.ts",
-  "637": "demo.layout.vue"
+  "636": "6.8.2 - 2023-12-11",
+  "637": "demo.layout.vue",
+  "638": "Universal `load` contract",
+  "639": "Shared field catalog"
 }

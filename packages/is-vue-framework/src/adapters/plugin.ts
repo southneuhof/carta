@@ -5,6 +5,7 @@ import { frameworkFieldDefaultsKey, resolveFrameworkFieldDefaults, type Framewor
 import { frameworkAdaptersKey, resolveFrameworkAdapters, type FrameworkAdaptersInput } from './projectAdapters'
 import { createFrameworkQueryClient, frameworkQueryClientKey } from '../query/client'
 import { createRendererRegistries, rendererRegistriesKey, type RendererRegistriesInput } from '../renderers/registry'
+import { emptyInputPropsRegistry, inputPropsRegistryKey, type InputPropsRegistry } from '../renderers/inputProps'
 import { registerResourceRuntime } from '../resources/runtime'
 
 export interface FrameworkPluginOptions {
@@ -15,6 +16,8 @@ export interface FrameworkPluginOptions {
   queryClient?: QueryClient
   /** Project renderer implementations, registered per surface. */
   renderers?: RendererRegistriesInput
+  /** App-owned source-to-native-input-props registry. */
+  inputProps?: InputPropsRegistry
 }
 
 export const FrameworkPlugin: Plugin<[options?: FrameworkPluginOptions]> = {
@@ -26,6 +29,7 @@ export const FrameworkPlugin: Plugin<[options?: FrameworkPluginOptions]> = {
     app.provide(frameworkAdaptersKey, adapters)
 
     app.provide(rendererRegistriesKey, createRendererRegistries(options?.renderers))
+    app.provide(inputPropsRegistryKey, options.inputProps ?? emptyInputPropsRegistry())
 
     const queryClient = options?.queryClient ?? createFrameworkQueryClient(adapters.queryDefaults)
     app.provide(frameworkQueryClientKey, queryClient)

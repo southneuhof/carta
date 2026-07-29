@@ -111,3 +111,31 @@ controls intentionally expose Vue's controlled `modelValue` /
 `update:modelValue` contract. Renderer adapter maps core `value` and `setValue`
 to that contract. This boundary is stable, not deprecated; business validation
 remains core/schema-owned.
+
+## Source registry
+
+Fields may now declare opaque app data under `source`; `props` stays native
+input props. Install an app-owned `inputProps` registry on `FrameworkPlugin`.
+Form resolves registry defaults, normalized source, explicit props, behavior
+props, and presentation props in that order. Merges are shallow; presentation
+`props: null` clears all resolved input props. Form-owned value, errors,
+disabled state, and handlers still win.
+
+```ts
+{
+  renderer: 'lookup',
+  source: sections,
+  props: {
+    searchParameters: { private: true },
+  },
+}
+```
+
+Resource and field modules author this plain object; they do not import or call
+the registry. Application bootstrap installs the registry once, and Form uses it
+to translate `source` before invoking the selected renderer.
+
+Normalizers are pure and synchronous: select references and handler functions,
+never fetch. Inputs receive no source or resource object. This does not restore
+the removed wired runtime; no endpoint discovery or input-side interpretation
+is added.

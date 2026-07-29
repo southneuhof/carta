@@ -61,6 +61,10 @@ const currentExports = [
   'resolveFrameworkAdapters',
   'resolveFrameworkFieldDefaults',
   'useFrameworkFieldDefaults',
+  'createInputPropsRegistry',
+  'emptyInputPropsRegistry',
+  'inputPropsRegistryKey',
+  'useInputPropsRegistry',
 ]
 
 describe('public API surface', () => {

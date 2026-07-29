@@ -15,16 +15,29 @@ Framework 2.0 supports one canonical plugin options object:
 app.use(FrameworkPlugin, {
   adapters,
   renderers,
-  fieldDefaults: {
-    shared: { props: { dense: true } },
-    table: { align: 'start' },
-  },
+  inputProps: appInputProps,
+  fieldDefaults: { table: { align: 'start' } },
 })
 ```
 
 `fieldDefaults` are uniform surface policy and apply to every field on that
-surface. Key-specific labels, formats, accessors, options, and renderer choices
+surface. Renderer-wide defaults and source translation belong in `inputProps`.
+Key-specific labels, formats, accessors, options, and renderer choices
 belong in an explicit `FieldCatalog` or named catalog preset.
+
+`source` is opaque app authoring data. Form resolves it synchronously through
+the app registry before invoking an input; inputs receive only their native
+props. Resolution is shallow: registry defaults, normalized source, explicit
+field props, behavior props, presentation props, then Form-controlled props.
+Field catalogs author ordinary objects and do not import or call the registry:
+
+```ts
+form: {
+  renderer: 'lookup',
+  source: sections,
+  props: { searchParameters: { private: true } },
+}
+```
 
 This is a clean break. Runtime capability objects, legacy defaults,
 model-config, and config-driven composite Table/Detail/Form/Tree components

@@ -49,12 +49,13 @@ export const appFieldDefaults = {
           },
         },
       },
-      form: { renderer: 'radio', props: { required: true, data: activeOptions } },
+      form: { renderer: 'radio', source: activeOptions, props: { required: true } },
     },
     statusCode: {
       label: 'Status',
       display: { renderer: 'chip', props: { options: statusDisplayOptions } },
-      form: { renderer: 'radio', props: { required: true, data: statusOptions } },
+      table: { align: 'center' },
+      form: { renderer: 'radio', source: statusOptions, props: { required: true } },
     },
     status: { table: { align: 'center' } },
     createdAt: {

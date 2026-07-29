@@ -5,6 +5,7 @@ import { frameworkFieldDefaultsKey } from '../../fields'
 import { frameworkAdaptersKey } from '../projectAdapters'
 import { frameworkQueryClientKey } from '../../query'
 import { rendererRegistriesKey } from '../../renderers/registry'
+import { createInputPropsRegistry, inputPropsRegistryKey } from '../../renderers/inputProps'
 import { useResourceRuntime } from '../../resources/runtime'
 
 const App = defineComponent(() => () => h('div'))
@@ -18,7 +19,8 @@ describe('FrameworkPlugin', () => {
   })
 
   it('provides canonical options per app', () => {
-    const first = createApp(App).use(FrameworkPlugin, { fieldDefaults: { shared: { props: { dense: true } } } })
+    const inputProps = createInputPropsRegistry({ lookup: { normalize: (source: string) => ({ source }) } })
+    const first = createApp(App).use(FrameworkPlugin, { fieldDefaults: { shared: { renderer: 'text' } }, inputProps })
     const second = createApp(App).use(FrameworkPlugin, { fieldDefaults: { table: { align: 'end' } } })
     for (const app of [first, second]) {
       expect(app._context.provides[frameworkAdaptersKey as symbol]).toBeDefined()
@@ -29,6 +31,7 @@ describe('FrameworkPlugin', () => {
       .not.toBe(second._context.provides[frameworkFieldDefaultsKey as symbol])
     expect(useResourceRuntime().fieldDefaults)
       .toBe(second._context.provides[frameworkFieldDefaultsKey as symbol])
+    expect(first._context.provides[inputPropsRegistryKey as symbol]).toBe(inputProps)
   })
 
   it('rejects legacy options at compile time', () => {

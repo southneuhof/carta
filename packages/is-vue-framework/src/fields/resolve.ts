@@ -25,6 +25,7 @@ export interface FieldLayer {
   label?: string | null
   renderer?: string | null
   props?: Record<string, unknown> | null
+  source?: unknown | null
   format?: string | null
   sortable?: boolean | null
   align?: 'start' | 'center' | 'end' | null
@@ -43,6 +44,7 @@ export interface ResolvedSurfaceField<
   label: string
   renderer?: string
   props: Record<string, unknown>
+  source?: unknown
   read?: FieldDefinition<TRecord, TDraft>['read']
   write?: FieldDefinition<TRecord, TDraft>['write']
   /** Form surface only; table and detail carry no behavior block. */
@@ -116,6 +118,8 @@ function surfaceLayer(definition: FieldDefinition, surface: FieldSurface): Field
 export function mergeFieldLayers(layers: readonly (FieldLayer | undefined)[]): FieldLayer {
   const result: FieldLayer = {}
   let props: Record<string, unknown> | null | undefined
+  let source: unknown
+  let hasSource = false
 
   for (const layer of layers) {
     if (!layer) continue
@@ -126,9 +130,14 @@ export function mergeFieldLayers(layers: readonly (FieldLayer | undefined)[]): F
     }
     if (layer.props === null) props = undefined
     else if (layer.props !== undefined) props = { ...(props ?? {}), ...layer.props }
+    if (layer.source !== undefined) {
+      hasSource = layer.source !== null
+      source = layer.source
+    }
   }
 
   result.props = props ?? {}
+  if (hasSource) result.source = source
   return result
 }
 
@@ -171,6 +180,7 @@ export function resolveFields<
       read: definition.read ?? defaultDefinition?.read,
       write: definition.write ?? defaultDefinition?.write,
     }
+    if (merged.source !== undefined) field.source = merged.source
 
     if (merged.renderer != null) field.renderer = merged.renderer
     if (merged.format != null) field.format = merged.format

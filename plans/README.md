@@ -47,9 +47,10 @@ update the status after implementation and review.
 | 054 | Apply shared popup-safety defaults to every datepicker input | P1 | M | — | DONE |
 | 055 | Add a core-native DialogForm composite | P1 | M | — | DONE |
 | 056 | Show uploads inline and align TableInput row actions | P1 | M | — | DONE — focused suite and typecheck pass; unrelated core Table test remains pre-existing |
-| 057 | Add a typed input-props registry and honest source contract | P1 | M | — | TODO |
-| 058 | Resolve input props at the plugin and Form boundary | P1 | L | 057 | TODO |
-| 059 | Install web input defaults and migrate field sources | P1 | L | 057, 058 | TODO |
+| 057 | Add a typed input-props registry and honest source contract | P1 | M | — | DONE — typed `field()` helper superseded by 060 |
+| 058 | Resolve input props at the plugin and Form boundary | P1 | L | 057 | DONE |
+| 059 | Install web input defaults and migrate field sources | P1 | L | 057, 058 | DONE — helper-based authoring superseded by 060 |
+| 060 | Restore plain input-source authoring | P1 | M | — | DONE |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line reason)
 
@@ -150,9 +151,19 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJE
 - 059 depends on 057–058. It defines web-owned resource/option/upload adapters,
   installs them once, migrates current authored fields, and converges docs and
   boundary tests.
+- 060 corrects the in-progress 057–059 implementation before acceptance. It
+  removes the runtime registry's no-op field-authoring helper and redundant
+  source-presence flag, restores plain field objects, and makes unknown sources
+  fail loudly.
 
 ## Verification notes
 
+- 057–060: focused framework tests pass 46/46; focused web tests pass
+  17/17; both package typechecks pass; full web tests pass 186/186;
+  `git diff --check` passes.
+- Current full framework tests pass 344/345. The sole failure remains the
+  pre-existing `components/core/__tests__/table.spec.ts:390` empty-state class
+  assertion; plan 060 touches no Table source or tests.
 - 052–054: focused regression suite passes 70/70; framework typecheck passes;
   `git diff --check` passes.
 - Full framework suite passes 320/321. Sole failure is the pre-existing,

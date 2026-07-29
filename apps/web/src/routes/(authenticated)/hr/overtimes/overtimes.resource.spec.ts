@@ -42,6 +42,7 @@ vi.mock('@/framework/rpc', () => ({
 const { overtimes, overtimeFields, overtimeListFilters } = await import('./overtimes.resource')
 const { tollSections, applicants, jobPositions } = await import('./overtime-lookups.resource')
 const { tollSectionOperations, applicantOperations, jobPositionOperations } = await import('./overtime-lookups.operations')
+const { appInputProps } = await import('@/framework/inputs/registry')
 const { verificationSteps } = await import('./[overtimeId]/verification-steps.resource')
 const { submitOvertime, verifyOvertime, loadOvertime } = await import('./[overtimeId]/overtime-workflow.operations')
 
@@ -74,27 +75,34 @@ describe('overtimes resource', () => {
     expect(jobPositions.capabilities.detail.handler).toBe(jobPositionOperations.detail)
   })
 
-  it('passes lookup capabilities directly with narrow metadata', () => {
+  it('authors lookup sources and resolves exact native capabilities', () => {
     const section = overtimeFields.sectionId.form as any
     const applicant = overtimeFields.applicantEmployeeId.form as any
     const position = (overtimeListFilters.fields as any).jobPositionId.form
 
-    expect(section.props).toMatchObject({
+    expect(section.source).toBe(tollSections)
+    expect(applicant.source).toBe(applicants)
+    expect(position.source).toBe(jobPositions)
+    expect(section.props).toBeUndefined()
+    expect(applicant.props).toBeUndefined()
+    expect(appInputProps.resolve('lookup', {
+      source: section.source,
+      context: { field: { key: 'sectionId' } },
+    })).toMatchObject({
       fields: tollSections.fields,
       load: tollSections.capabilities.list.handler,
       loadDetail: tollSections.capabilities.detail.handler,
-      pick: 'id',
-      view: 'name',
+      namespace: tollSections.key,
     })
-    expect(applicant.props).toMatchObject({
+    expect(appInputProps.resolve('lookup', {
+      source: applicant.source,
+      props: applicant.behavior.props({ draft: { sectionId: 'north' } }),
+    })).toMatchObject({
       fields: applicants.fields,
       load: applicants.capabilities.list.handler,
       loadDetail: applicants.capabilities.detail.handler,
-      pick: 'id',
-      view: 'fullName',
+      searchParameters: { sectionId: 'north' },
     })
-    expect(position.props.load).toBe(jobPositions.capabilities.list.handler)
-    expect(position.props.loadDetail).toBe(jobPositions.capabilities.detail.handler)
 
     expect(applicant.behavior.props({ draft: { sectionId: 'north' } })).toEqual({
       searchParameters: { sectionId: 'north' },

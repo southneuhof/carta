@@ -4,18 +4,17 @@ import { resolveFrameworkFieldDefaults } from '../defaults'
 describe('framework field defaults', () => {
   it('merges shared and surface layers with field-layer semantics', () => {
     const input = {
-      shared: { renderer: 'text', props: { dense: true, size: 'md' }, label: 'Shared' },
-      table: { props: { size: 'sm' }, label: null, align: 'end' as const },
+      shared: { renderer: 'text', label: 'Shared' },
+      table: { label: null, align: 'end' as const },
     }
     const resolved = resolveFrameworkFieldDefaults(input)
     expect(resolved.table).toEqual({
-      renderer: 'text', label: undefined, align: 'end', props: { dense: true, size: 'sm' },
+      renderer: 'text', label: undefined, align: 'end', props: {},
     })
     expect(resolved.detail).toEqual({
-      renderer: 'text', label: 'Shared', props: { dense: true, size: 'md' },
+      renderer: 'text', label: 'Shared', props: {},
     })
     expect(resolved.fields).toEqual({})
-    expect(input.shared.props).toEqual({ dense: true, size: 'md' })
   })
 
   it('clones keyed field defaults', () => {
@@ -36,8 +35,8 @@ describe('framework field defaults', () => {
   })
 
   it('returns independent layers and nested props', () => {
-    const first = resolveFrameworkFieldDefaults({ shared: { props: { dense: true } } })
-    const second = resolveFrameworkFieldDefaults({ shared: { props: { dense: true } } })
+    const first = resolveFrameworkFieldDefaults({ shared: { renderer: 'text' } })
+    const second = resolveFrameworkFieldDefaults({ shared: { renderer: 'text' } })
     expect(first.table).not.toBe(first.detail)
     expect(first.table.props).not.toBe(first.detail.props)
     expect(first.table.props).not.toBe(second.table.props)

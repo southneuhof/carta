@@ -19,6 +19,7 @@ import { inferFieldLayers, validateDraftAsync, validatorDefinition, validatorsFo
 import { useLoader } from '../../query'
 import { useFrameworkAdapters } from '../../adapters/projectAdapters'
 import { useRendererRegistry } from '../../renderers/registry'
+import { useInputPropsRegistry } from '../../renderers/inputProps'
 import Button from '../base/Button.vue'
 import { assertSingleDataSource, ownerOf, recordCacheKey } from './useCoreData'
 
@@ -47,6 +48,7 @@ if (isDevelopment && isModelBound && (!hasModelValue || !hasModelListener)) {
 const adapters = useFrameworkAdapters()
 const renderers = useRendererRegistry('form')
 const fieldDefaults = useFrameworkFieldDefaults()
+const inputProps = useInputPropsRegistry()
 
 const fields = computed(() => {
   const schema = props.schema as { source?: Parameters<typeof inferFieldLayers>[0] } | undefined
@@ -126,7 +128,16 @@ watch(
   { immediate: true },
 )
 
-const behavior = createBehaviorRuntime({ fields: fields.value, draft, context: props.context })
+const behavior = createBehaviorRuntime({
+  fields: fields.value,
+  draft,
+  context: props.context,
+  resolveBaseProps: (field, renderer) => inputProps.resolve(renderer, {
+    ...(field.source !== undefined ? { source: field.source } : {}),
+    props: field.props,
+    context: { field: { key: field.key, label: field.label } },
+  }),
+})
 behavior.connect((key, value) => {
   draft[key] = value
   edited.delete(key)

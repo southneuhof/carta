@@ -3,30 +3,6 @@ import { overtime } from '@southneuhof/api/routes/overtimes/overtimes.entity'
 import { overtimeOperations, type Overtime, type OvertimeCreate, type OvertimeListQuery, type OvertimeStatus, type OvertimeUpdate } from './overtimes.operations'
 import { applicants, jobPositions, tollSections } from './overtime-lookups.resource'
 
-const sections = {
-  fields: tollSections.fields,
-  load: tollSections.capabilities.list.handler,
-  loadDetail: tollSections.capabilities.detail.handler,
-  pick: 'id',
-  view: 'name',
-}
-
-const employees = {
-  fields: applicants.fields,
-  load: applicants.capabilities.list.handler,
-  loadDetail: applicants.capabilities.detail.handler,
-  pick: 'id',
-  view: 'fullName',
-}
-
-const positions = {
-  fields: jobPositions.fields,
-  load: jobPositions.capabilities.list.handler,
-  loadDetail: jobPositions.capabilities.detail.handler,
-  pick: 'id',
-  view: 'name',
-}
-
 export const overtimeStatusLabels: Record<OvertimeStatus, string> = {
   draft: 'Draft',
   waiting: 'Menunggu Verifikasi',
@@ -38,14 +14,14 @@ export const overtimeFields = defineFields<Overtime, OvertimeCreate>()({
   sectionId: {
     label: 'Ruas',
     read: (record) => record.section?.name ?? record.sectionId,
-    form: { renderer: 'lookup', props: sections },
+    form: { renderer: 'lookup', source: tollSections },
   },
   applicantEmployeeId: {
     label: 'Karyawan',
     read: (record) => record.applicant?.fullName ?? record.applicantEmployeeId,
     form: {
       renderer: 'lookup',
-      props: employees,
+      source: applicants,
       behavior: {
         visible: ({ draft }) => Boolean(draft.sectionId),
         disabled: ({ draft }) => !draft.sectionId,
@@ -62,21 +38,14 @@ export const overtimeFields = defineFields<Overtime, OvertimeCreate>()({
 })
 
 const overtimeFilterFields = defineFields<OvertimeListQuery, OvertimeListQuery>()({
-    sectionId: { label: 'Ruas', form: { renderer: 'lookup', props: sections } },
-    applicantEmployeeId: { label: 'Karyawan', form: { renderer: 'lookup', props: employees } },
+    sectionId: { label: 'Ruas', form: { renderer: 'lookup', source: tollSections } },
+    applicantEmployeeId: { label: 'Karyawan', form: { renderer: 'lookup', source: applicants } },
     startDate: { label: 'Tanggal mulai', form: { renderer: 'date' } },
     endDate: { label: 'Tanggal akhir', form: { renderer: 'date' } },
-    jobPositionId: { label: 'Jabatan', form: { renderer: 'lookup', props: positions } },
+    jobPositionId: { label: 'Jabatan', form: { renderer: 'lookup', source: jobPositions } },
     statusCode: {
       label: 'Status',
-      form: {
-        renderer: 'radio',
-        props: {
-          data: Object.entries(overtimeStatusLabels).map(([id, name]) => ({ id, name })),
-          pick: 'id',
-          view: 'name',
-        },
-      },
+      form: { renderer: 'radio', source: Object.entries(overtimeStatusLabels).map(([id, name]) => ({ id, name })) },
     },
 })
 

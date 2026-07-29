@@ -108,6 +108,8 @@ export interface FieldDetailProjection extends FieldDisplayProjection {
 }
 
 export interface FieldFormProjection<TDraft = Record<string, unknown>, TValue = unknown> extends FieldRendererSelection {
+  /** Opaque app-owned authoring data; resolved before renderer invocation. */
+  source?: unknown
   behavior?: FieldBehavior<TDraft, TValue>
   span?: number
 }

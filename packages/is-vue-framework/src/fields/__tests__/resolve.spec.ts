@@ -116,6 +116,18 @@ describe('field resolution', () => {
     expect(cleared.props).toEqual({})
   })
 
+  it('carries form source with precedence and null clearing', () => {
+    const [overridden] = resolveFields({
+      fields: { name: { form: { source: 'field' } } },
+      surface: 'form',
+      defaults: { source: 'defaults' },
+      overrides: { name: { source: 'override' } },
+    })
+    const [cleared] = resolveFields({ fields: { name: { form: { source: 'field' } } }, surface: 'form', overrides: { name: { source: null } } })
+    expect(overridden.source).toBe('override')
+    expect(cleared.source).toBeUndefined()
+  })
+
   it('carries behavior only on the form surface', () => {
     const fields = { name: { form: { behavior: { visible: () => true } } } }
 

@@ -5,6 +5,7 @@ import { FrameworkPlugin } from '../plugin'
 import { frameworkAdaptersKey } from '../projectAdapters'
 import { frameworkQueryClientKey } from '../../query/client'
 import { rendererRegistriesKey } from '../../renderers/registry'
+import { inputPropsRegistryKey } from '../../renderers/inputProps'
 
 describe('framework injection keys', () => {
   it('uses realm-stable symbols for every plugin-provided dependency', () => {
@@ -12,6 +13,17 @@ describe('framework injection keys', () => {
     expect(frameworkAdaptersKey).toBe(Symbol.for('is-vue-framework-adapters'))
     expect(frameworkQueryClientKey).toBe(Symbol.for('is-vue-framework-query-client'))
     expect(rendererRegistriesKey).toBe(Symbol.for('is-vue-framework-renderers'))
+    expect(inputPropsRegistryKey).toBe(Symbol.for('is-vue-framework-input-props'))
+  })
+
+  it('keeps empty input-props registries isolated per app', () => {
+    const App = defineComponent(() => () => h('div'))
+    const first = createApp(App).use(FrameworkPlugin)
+    const second = createApp(App).use(FrameworkPlugin)
+    const firstRegistry = first._context.provides[inputPropsRegistryKey as symbol] as { resolve: Function }
+    const secondRegistry = second._context.provides[inputPropsRegistryKey as symbol] as { resolve: Function }
+    expect(firstRegistry).not.toBe(secondRegistry)
+    expect(firstRegistry.resolve('x', { props: { x: 1 } })).toEqual({ x: 1 })
   })
 
   it('keeps provided field defaults isolated per Vue app', () => {

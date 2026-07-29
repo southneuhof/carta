@@ -18,6 +18,7 @@ export interface BehaviorRuntimeOptions<TDraft extends object> {
   draft: TDraft
   context?: FieldContext
   onDependencies?: (key: string, dependencies: readonly string[]) => void
+  resolveBaseProps?: (field: ResolvedSurfaceField<Record<string, unknown>, TDraft>, renderer: string) => Record<string, unknown>
 }
 
 export interface BehaviorRuntime<TDraft extends object> {
@@ -111,7 +112,8 @@ export function createBehaviorRuntime<TDraft extends object>(options: BehaviorRu
       const disabled = Boolean(behavior?.derived) || (behavior?.disabled ? evaluate(field.key, (draft, value) => behavior.disabled!({ draft, value, context })) : false)
       let presentation: FieldBehaviorPresentation | undefined
       if (behavior?.presentation) presentation = evaluate(field.key, (draft, value) => behavior.presentation!({ draft, value, context }))
-      let props = field.props
+      const renderer = presentation?.renderer === undefined ? field.renderer : presentation.renderer ?? undefined
+      let props = renderer && options.resolveBaseProps ? options.resolveBaseProps(field, renderer) : field.props
       if (behavior?.props) props = { ...props, ...evaluate(field.key, (draft, value) => behavior.props!({ draft, value, context })) }
       if (presentation?.props === null) props = {}
       else if (presentation?.props) props = { ...props, ...presentation.props }

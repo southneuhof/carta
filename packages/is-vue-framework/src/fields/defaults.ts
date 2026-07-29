@@ -2,11 +2,13 @@ import { inject, type InjectionKey } from 'vue'
 import type { FieldCatalog, FieldDefinition } from '../contracts'
 import { mergeFieldLayers, type FieldLayer } from './resolve'
 
+export type FrameworkSurfaceDefaults = Omit<FieldLayer, 'props' | 'source'>
+
 export interface FrameworkFieldDefaultsInput {
-  shared?: FieldLayer
-  table?: FieldLayer
-  detail?: FieldLayer
-  form?: FieldLayer
+  shared?: FrameworkSurfaceDefaults
+  table?: FrameworkSurfaceDefaults
+  detail?: FrameworkSurfaceDefaults
+  form?: FrameworkSurfaceDefaults
   /** App-owned defaults selected by normalized field key. */
   fields?: FieldCatalog
 }
