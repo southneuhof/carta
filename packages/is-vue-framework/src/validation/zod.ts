@@ -42,6 +42,22 @@ export function normalizeZodIssues(issues: readonly ZodIssueLike[]): ValidationI
   return issues.map((issue) => ({ path: [...issue.path] as (string | number)[], message: issue.message }))
 }
 
+function normalizeRequiredIssues(
+  issues: readonly ZodIssueLike[],
+  input: unknown,
+  requiredKeys: readonly string[],
+): ValidationIssue[] {
+  const record = input && typeof input === 'object' ? input as Record<string, unknown> : {}
+  const required = new Set(requiredKeys)
+  return normalizeZodIssues(issues).map((issue) => {
+    const [key] = issue.path
+    if (issue.path.length === 1 && typeof key === 'string' && required.has(key) && record[key] === undefined) {
+      return { ...issue, message: 'Required' }
+    }
+    return issue
+  })
+}
+
 export interface ZodValidationSchema<TOutput> extends ValidationSchema<TOutput> {
   /** Keys the schema requires; used for the hidden-but-required diagnostic. */
   requiredKeys: string[]
@@ -63,13 +79,14 @@ export function requiredSchemaKeys(schema: ZodSchemaLike): string[] {
 }
 
 export function fromZod<TOutput>(schema: ZodSchemaLike): ZodValidationSchema<TOutput> {
+  const requiredKeys = requiredSchemaKeys(schema)
   return {
     source: schema,
-    requiredKeys: requiredSchemaKeys(schema),
+    requiredKeys,
     validate: (input: unknown): ValidationResult<TOutput> => {
       const result = schema.safeParse(input)
       if (result.success) return { success: true, data: result.data as TOutput }
-      return { success: false, issues: normalizeZodIssues(result.error?.issues ?? []) }
+      return { success: false, issues: normalizeRequiredIssues(result.error?.issues ?? [], input, requiredKeys) }
     },
   }
 }
@@ -138,9 +155,10 @@ export function inferFieldLayers(schema: ZodSchemaLike): Record<string, FieldLay
     if (!renderer) continue
 
     const layer: FieldLayer = { renderer }
+    if (!value.isOptional?.()) layer.props = { required: true }
     if (tag === 'enum' || tag === 'nativeenum') {
       const options = enumOptions(inner)
-      if (options) layer.props = { options }
+      if (options) layer.props = { ...layer.props, options }
     }
     layers[key] = layer
   }

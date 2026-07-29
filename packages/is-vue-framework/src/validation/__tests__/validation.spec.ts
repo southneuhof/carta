@@ -43,6 +43,27 @@ describe('zod bridge', () => {
     if (!result.success) expect(result.issues.length).toBeGreaterThan(1)
   })
 
+  it('uses Required only for omitted top-level required values', () => {
+    const schema = fromZod(z.object({
+      name: z.string(),
+      nickname: z.string().optional(),
+      code: z.string().min(1, 'Code cannot be empty'),
+    }))
+
+    const omitted = schema.validate({ code: '' })
+    expect(omitted).toMatchObject({
+      success: false,
+      issues: expect.arrayContaining([
+        { path: ['name'], message: 'Required' },
+        { path: ['code'], message: 'Code cannot be empty' },
+      ]),
+    })
+
+    const wrongType = schema.validate({ name: 42, code: 'ok' })
+    expect(wrongType.success).toBe(false)
+    if (!wrongType.success) expect(wrongType.issues[0]?.message).not.toBe('Required')
+  })
+
   it('keeps cross-field refine errors on their declared path', () => {
     const result = fromZod(passwordSchema).validate({ password: 'a', confirmation: 'b' })
 
@@ -55,7 +76,7 @@ describe('zod bridge', () => {
     expect(requiredSchemaKeys(z.string())).toEqual([])
   })
 
-  it('infers renderers from schema metadata without copying constraints', () => {
+  it('infers renderers and required presentation from schema metadata', () => {
     const layers = inferFieldLayers(
       z.object({
         name: z.string().min(3),
@@ -65,10 +86,10 @@ describe('zod bridge', () => {
       }),
     )
 
-    expect(layers.name).toEqual({ renderer: 'text' })
+    expect(layers.name).toEqual({ renderer: 'text', props: { required: true } })
     expect(layers.age).toEqual({ renderer: 'number' })
-    expect(layers.active).toEqual({ renderer: 'switch' })
-    expect(layers.status).toEqual({ renderer: 'select', props: { options: ['open', 'closed'] } })
+    expect(layers.active).toEqual({ renderer: 'switch', props: { required: true } })
+    expect(layers.status).toEqual({ renderer: 'select', props: { required: true, options: ['open', 'closed'] } })
   })
 
   it('feeds inferred metadata into field resolution as the schema layer', () => {
@@ -79,7 +100,7 @@ describe('zod bridge', () => {
     })
 
     expect(field.renderer).toBe('select')
-    expect(field.props).toEqual({ options: ['open', 'closed'] })
+    expect(field.props).toEqual({ required: true, options: ['open', 'closed'] })
   })
 
   it('changes validation when the schema changes, with no renderer edit', () => {
@@ -126,6 +147,27 @@ describe('zod v4 dialect', () => {
     expect(result.issues.find((issue) => issue.path.join('.') === 'name')?.message).toBe('Nama minimal 3 karakter')
   })
 
+  it('uses Required only for omitted top-level required values', () => {
+    const schema = fromZod(z4.object({
+      name: z4.string(),
+      nickname: z4.string().optional(),
+      code: z4.string().min(1, 'Code cannot be empty'),
+    }))
+
+    const omitted = schema.validate({ code: '' })
+    expect(omitted).toMatchObject({
+      success: false,
+      issues: expect.arrayContaining([
+        { path: ['name'], message: 'Required' },
+        { path: ['code'], message: 'Code cannot be empty' },
+      ]),
+    })
+
+    const wrongType = schema.validate({ name: 42, code: 'ok' })
+    expect(wrongType.success).toBe(false)
+    if (!wrongType.success) expect(wrongType.issues[0]?.message).not.toBe('Required')
+  })
+
   it('reports required keys for the hidden-but-required diagnostic', () => {
     expect(requiredSchemaKeys(createSchema4).sort()).toEqual(['address', 'name', 'tags'])
     expect(requiredSchemaKeys(z4.string())).toEqual([])
@@ -141,10 +183,10 @@ describe('zod v4 dialect', () => {
       }),
     )
 
-    expect(layers.name).toEqual({ renderer: 'text' })
+    expect(layers.name).toEqual({ renderer: 'text', props: { required: true } })
     expect(layers.age).toEqual({ renderer: 'number' })
-    expect(layers.active).toEqual({ renderer: 'switch' })
-    expect(layers.status).toEqual({ renderer: 'select', props: { options: ['open', 'closed'] } })
+    expect(layers.active).toEqual({ renderer: 'switch', props: { required: true } })
+    expect(layers.status).toEqual({ renderer: 'select', props: { required: true, options: ['open', 'closed'] } })
   })
 
   it('unwraps optional, nullable, and default wrappers to the inner renderer', () => {
@@ -158,7 +200,7 @@ describe('zod v4 dialect', () => {
 
     expect(layers.note).toEqual({ renderer: 'text' })
     expect(layers.retired).toEqual({ renderer: 'switch' })
-    expect(layers.closedAt).toEqual({ renderer: 'date' })
+    expect(layers.closedAt).toEqual({ renderer: 'date', props: { required: true } })
   })
 
   it('keeps cross-field refine errors on their declared path', () => {

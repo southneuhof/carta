@@ -19,7 +19,6 @@ const forbiddenImports = [
   'components/composites/Form.vue',
   'components/composites/Table.vue',
   'components/composites/Detail.vue',
-  'components/composites/DialogForm.vue',
   'runtimeDefaults',
   'adapters/defaults',
 ]

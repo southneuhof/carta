@@ -6,5 +6,5 @@ import type { User } from './users.operations'
 </script>
 
 <template>
-  <ListView title="Users" :resource="users" :table-options="{ pagination: 'always' }"/>
+  <ListView title="Users" :resource="users"/>
 </template>

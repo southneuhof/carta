@@ -368,7 +368,7 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
             <th
               v-if="$slots['row-actions']"
               scope="col"
-              class="sticky right-0 z-20 w-px whitespace-nowrap border-b border-outline-variant bg-surface-container-high px-4 py-2 text-right text-xs font-semibold"
+              class="sticky right-0 z-10 w-px whitespace-nowrap border-b border-outline-variant bg-surface-container-high px-4 py-2 text-right text-xs font-semibold"
             />
           </tr>
         </thead>

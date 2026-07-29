@@ -3,6 +3,7 @@ export * from './query'
 export * from './fields'
 export * from './validation'
 export { Table, Detail, Form } from './components/core'
+export { DialogForm } from './components/composites'
 export * from './components/views'
 export * from './resources'
 export {

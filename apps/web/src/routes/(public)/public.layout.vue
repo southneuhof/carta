@@ -5,6 +5,6 @@ import AppRouterView from '@/components/routing/AppRouterView.vue'
 
 <template>
   <div class="flex max-h-screen min-h-screen w-full items-center justify-center bg-cover p-8" :style="{ backgroundImage: `url(${LoginBackground})` }">
-    <div class="w-full max-w-screen-2xl"><AppRouterView /></div>
+    <div data-public-layout-content class="w-full max-w-screen-sm"><AppRouterView /></div>
   </div>
 </template>

@@ -59,7 +59,16 @@ export type {
   QueryAdapters,
 } from './query'
 
-export type { TableProps, DetailProps, FormProps, FormSubmitHandler, RowReorderPayload } from './components'
+export type {
+  TableProps,
+  DetailProps,
+  FormProps,
+  FormSubmitHandler,
+  DialogFormProps,
+  DialogFormCloseReason,
+  DialogFormCloseContext,
+  RowReorderPayload,
+} from './components'
 
 export type {
   ResourceKey,

@@ -5,6 +5,7 @@ import BaseInput from './BaseInput.vue'
 import { commonProps } from './commonprops'
 import { formatTimeValue, parseTimeValue, type TimeParts } from './timeInput.utils'
 import { ref, watch } from 'vue'
+import { datepickerPopupClass, datepickerPopupConfig, datepickerTeleportProp } from './datepickerPopup'
 
 const props = defineProps({
   locale: {
@@ -14,6 +15,9 @@ const props = defineProps({
   defaultToCurrent: {
     type: Boolean,
     default: false,
+  },
+  teleport: {
+    ...datepickerTeleportProp,
   },
   ...commonProps,
 })
@@ -62,6 +66,14 @@ function displayFormatter(value: Record<string, any>) {
 
 <template>
   <BaseInput v-bind="props">
-    <Datepicker v-model="internalValue" :format="displayFormatter" time-picker :dark="useColorPreference().value === 'dark'" />
+    <Datepicker
+      v-model="internalValue"
+      :format="displayFormatter"
+      time-picker
+      :dark="useColorPreference().value === 'dark'"
+      :teleport="teleport"
+      :config="datepickerPopupConfig"
+      :class="datepickerPopupClass"
+    />
   </BaseInput>
 </template>

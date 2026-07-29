@@ -42,6 +42,10 @@ update the status after implementation and review.
 | 049 | Clean-break legacy configuration into core field defaults | P1 | L | — | DONE |
 | 050 | Make resource list handlers directly reusable as option loaders | P1 | M | — | BLOCKED — unrelated dirty Table/Card work fails full suite |
 | 051 | Use resource capability handlers for overtime lookup inputs | P1 | L | 050 | DONE |
+| 052 | Move form-level errors to toasts and make required validation explicit | P1 | M | — | DONE |
+| 053 | Theme all datepicker surfaces with application design tokens | P1 | S | — | DONE |
+| 054 | Apply shared popup-safety defaults to every datepicker input | P1 | M | — | DONE |
+| 055 | Add a core-native DialogForm composite | P1 | M | — | DONE |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) |
 
@@ -117,6 +121,29 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) |
   passes their capability handlers directly to Lookup, and deletes the legacy
   service-backed lookup factories. Plan 050's implemented focused changes are
   sufficient; its unrelated full-suite blocker does not block 051.
+- 052 groups one form-validation UX contract: root/submission failures move to
+  toast, while schema-required metadata drives both the red label marker and
+  the `Required` missing-value message. Keeping these together prevents label,
+  renderer, and validation semantics from drifting.
+- 053 is independent and may run alongside 052 or 054. It changes only the
+  Vue Datepicker palette mapping.
+- 054 is independent of 053 at code level. Execute 053 before 054 when doing
+  manual review so the five-component overflow matrix also verifies final
+  themed popup appearance.
+- 055 is independent of resource and input migrations. It composes existing
+  base Dialog and core Form contracts, then migrates TableInput as first
+  consumer. It must not restore legacy model-config or CRUD APIs.
+
+## Verification notes
+
+- 052–054: focused regression suite passes 70/70; framework typecheck passes;
+  `git diff --check` passes.
+- Full framework suite passes 320/321. Sole failure is the pre-existing,
+  out-of-scope `components/core/__tests__/table.spec.ts:390` empty-state class
+  assertion; no table source or test changed in these plans.
+- Browser verification: Date, Time, DateRange, Month, and Year popups all render
+  visibly outside the input-catalog `<main>` teleport boundary. Live picker
+  background/primary/text CSS variables resolve from active app theme tokens.
 
 ## Findings considered and rejected
 

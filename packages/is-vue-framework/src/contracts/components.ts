@@ -112,3 +112,31 @@ export interface FormModelProps<TInput extends object = Record<string, unknown>,
 export type FormProps<TInput extends object = Record<string, unknown>, TResult = unknown> =
   | FormSubmitProps<TInput, TResult>
   | FormModelProps<TInput, TResult>
+
+export type DialogFormCloseReason = 'cancel' | 'dismiss'
+
+export interface DialogFormCloseContext {
+  reason: DialogFormCloseReason
+  dirty: boolean
+  submitting: boolean
+  validating: boolean
+}
+
+/**
+ * Core Form props plus dialog lifecycle and presentation policy.
+ *
+ * The default `v-model` remains Form draft data. Dialog visibility uses the
+ * separate named `v-model:open` declared by DialogForm.
+ */
+export type DialogFormProps<
+  TInput extends object = Record<string, unknown>,
+  TResult = unknown,
+> = FormProps<TInput, TResult> & {
+  title?: string
+  description?: string
+  closeOnSubmitted?: boolean
+  beforeClose?: (context: DialogFormCloseContext) => MaybePromise<boolean>
+  cancelLabel?: string
+  submitLabel?: string
+  submittingLabel?: string
+}

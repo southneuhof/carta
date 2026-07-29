@@ -12,6 +12,7 @@
  * the submitted draft, and validation runs on the visibility-filtered draft.
  */
 import { computed, getCurrentInstance, nextTick, onUnmounted, reactive, ref, watch } from 'vue'
+import { toast } from 'vue-sonner'
 import type { FormProps, FormValidationTrigger, RecordLoadContext, SubmitError, ValidationIssue } from '../../contracts'
 import { createBehaviorRuntime, resolveFields, useFrameworkFieldDefaults } from '../../fields'
 import { inferFieldLayers, validateDraftAsync, validatorDefinition, validatorsForTrigger } from '../../validation'
@@ -69,7 +70,6 @@ const draft = reactive<Record<string, unknown>>({ ...(isModelBound ? props.model
 const edited = reactive(new Set<string>())
 const touched = reactive<Record<string, boolean>>({})
 const issues = ref<ValidationIssue[]>([])
-const submitError = ref<SubmitError>()
 const submitting = ref(false)
 const validating = ref(false)
 const validatingPaths = ref(new Set<string>())
@@ -137,10 +137,12 @@ const hiddenKeys = computed(() => fields.value.map((field) => field.key).filter(
 const visibleFields = computed(() => fields.value.filter((field) => behavior.state(field.key).value.visible))
 const dirty = computed(() => (isModelBound ? !shallowEqual(draft, modelBaseline.value) : edited.size > 0))
 const displayedIssues = computed(() => issues.value.filter((issue) => issue.path.length === 0 || submitAttempted.value || touched[String(issue.path[0])]))
-const rootIssues = computed(() => displayedIssues.value.filter((issue) => issue.path.length === 0))
-
 function issueFor(key: string) {
   return displayedIssues.value.find((issue) => issue.path[0] === key)?.message
+}
+
+function isRequired(key: string) {
+  return behavior.state(key).value.props.required === true
 }
 
 function rendererFor(key: string, fallback?: string): string | undefined {
@@ -208,10 +210,7 @@ watch(hiddenKeys, (keys) => {
 async function focusFirstInvalid() {
   await nextTick()
   const key = displayedIssues.value.map((issue) => String(issue.path[0])).find((entry) => entry !== 'undefined' && !hiddenKeys.value.includes(entry))
-  if (!key) {
-    document.getElementById('form-errors')?.focus()
-    return
-  }
+  if (!key) return
   const element = document.getElementById(`field-${key}`)
   element?.scrollIntoView?.({ block: 'nearest' })
   element?.focus?.()
@@ -225,18 +224,17 @@ function reset() {
   edited.clear()
   issues.value = []
   submitAttempted.value = false
-  submitError.value = undefined
   emit('reset')
 }
 
 async function submit() {
   if (props.disabled || submitting.value || validating.value) return
   issues.value = []
-  submitError.value = undefined
   submitAttempted.value = true
 
   const validation = await validate('submit')
   if (!validation.success) {
+    for (const issue of displayedIssues.value.filter((entry) => entry.path.length === 0)) toast.error(issue.message)
     await focusFirstInvalid()
     return
   }
@@ -251,8 +249,8 @@ async function submit() {
     emit('submitted', result)
   } catch (error) {
     const normalized = (props.normalizeError ?? adapters.data.normalizeError)(error)
-    submitError.value = normalized
     if (normalized.issues) issues.value = normalized.issues
+    toast.error(normalized.message)
     emit('error', normalized)
   } finally {
     submitting.value = false
@@ -282,11 +280,6 @@ defineExpose({ draft, reset, submit, refresh: loaded.refresh, dirty, submitting,
     </template>
 
     <template v-else>
-      <p v-if="submitError" role="alert" class="rounded-lg bg-error-container px-4 py-3 text-sm leading-5 text-on-error-container">{{ submitError.message }}</p>
-      <div v-if="rootIssues.length" id="form-errors" tabindex="-1" role="alert" aria-live="polite" class="rounded-lg bg-error-container px-4 py-3 text-on-error-container">
-        <p v-for="(issue, index) in rootIssues" :key="index" :data-operational="issue.kind === 'operational' || undefined">{{ issue.message }}</p>
-      </div>
-
       <div class="grid grid-cols-12 gap-x-4 gap-y-5">
       <div
         v-for="field in visibleFields"
@@ -294,7 +287,10 @@ defineExpose({ draft, reset, submit, refresh: loaded.refresh, dirty, submitting,
         class="is-form-field flex min-w-0 flex-col gap-2"
         :style="{ gridColumn: `span ${Math.min(12, Math.max(1, (behavior.state(field.key).value.span === undefined ? field.span : behavior.state(field.key).value.span) ?? 12))} / span ${Math.min(12, Math.max(1, (behavior.state(field.key).value.span === undefined ? field.span : behavior.state(field.key).value.span) ?? 12))}` }"
       >
-        <label :for="`field-${field.key}`" class="text-sm font-medium leading-5 text-on-surface">{{ behavior.state(field.key).value.label === undefined ? field.label : behavior.state(field.key).value.label ?? field.key }}</label>
+        <label :for="`field-${field.key}`" class="text-sm font-medium leading-5 text-on-surface">
+          {{ behavior.state(field.key).value.label === undefined ? field.label : behavior.state(field.key).value.label ?? field.key }}
+          <span v-if="isRequired(field.key)" class="text-error" aria-hidden="true">*</span>
+        </label>
 
         <slot
           :name="`input:${field.key}`"
@@ -324,6 +320,7 @@ defineExpose({ draft, reset, submit, refresh: loaded.refresh, dirty, submitting,
             :validating="validatingPaths.has(field.key)"
             :form-validating="validating"
             :aria-invalid="issueFor(field.key) ? 'true' : undefined"
+            :aria-required="isRequired(field.key) ? 'true' : undefined"
             :aria-describedby="issueFor(field.key) ? `error-${field.key}` : undefined"
             @validation:touch="touch(field.key)"
           />
@@ -333,6 +330,7 @@ defineExpose({ draft, reset, submit, refresh: loaded.refresh, dirty, submitting,
             :value="draft[field.key] ?? ''"
             :disabled="props.disabled || behavior.state(field.key).value.disabled"
             :aria-invalid="issueFor(field.key) ? 'true' : undefined"
+            :aria-required="isRequired(field.key) ? 'true' : undefined"
             :aria-describedby="issueFor(field.key) ? `error-${field.key}` : undefined"
             :class="[
               'min-h-12 w-full rounded-lg bg-transparent px-4 py-3 text-on-surface outline outline-1 outline-outline/[24%] transition-[outline-color,box-shadow] duration-150 ease-out focus:outline-secondary focus:ring-1 focus:ring-secondary/30',

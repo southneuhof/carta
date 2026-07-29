@@ -842,10 +842,12 @@ records the manual translation.
 Framework configuration follows the same clean break. `FrameworkPlugin`
 accepts only canonical `adapters`, `renderers`, `queryClient`, and optional
 surface-wide `fieldDefaults`. Legacy runtime/default/model-config APIs and
-config-driven composite Table, Detail, Form, DialogForm, and Tree components
-are removed. `fieldDefaults` apply uniformly to every field on one surface;
-key-specific reuse stays explicit in `FieldCatalog` presets. No compatibility
-converter or automatic field-name normalization exists.
+config-driven composite Table, Detail, Form, and Tree components are removed.
+The legacy config-driven `DialogForm` name is reused by a core-native,
+resource-agnostic `Dialog` + `Form` composite with no compatibility API.
+`fieldDefaults` apply uniformly to every field on one surface; key-specific
+reuse stays explicit in `FieldCatalog` presets. No compatibility converter or
+automatic field-name normalization exists.
 
 ## Suggested project structure
 

@@ -3,12 +3,11 @@ import { type PropType } from 'vue'
 import type { FieldsInput, RowReorderPayload, TableProps } from '../../../contracts'
 import { commonProps } from '../../inputs/commonprops'
 import BaseInput from '../../inputs/BaseInput.vue'
-import Form from '../../core/Form.vue'
 import Table from '../../core/Table.vue'
-import Dialog from '../../base/Dialog.vue'
 import Button from '../../base/Button.vue'
 import Icon from '../../base/Icon.vue'
 import ConfirmationDialog from '../ConfirmationDialog.vue'
+import DialogForm from '../DialogForm.vue'
 import type {
   TableInputFormOptions,
   TableInputRow,
@@ -53,7 +52,13 @@ const modelValue = defineModel<TableInputRow[]>({ default: () => [] })
 const emit = defineEmits<{ (event: 'validation:touch'): void }>()
 
 function cloneRow(row: TableInputRow): TableInputRow {
-  if (typeof structuredClone === 'function') return structuredClone(row)
+  if (typeof structuredClone === 'function') {
+    try {
+      return structuredClone(row)
+    } catch {
+      // Vue exposes table records through reactive proxies, which structuredClone rejects.
+    }
+  }
   return JSON.parse(JSON.stringify(row)) as TableInputRow
 }
 
@@ -86,31 +91,22 @@ function reorderRows(payload: RowReorderPayload<TableInputRow>) {
     <div class="flex flex-col gap-4">
       <div class="flex flex-row items-center justify-between gap-4">
         <p class="text-xl">{{ label || title }}</p>
-        <Dialog v-if="!disabled">
+        <DialogForm
+          v-if="!disabled"
+          v-bind="form"
+          :fields="fields"
+          :initial-data="{}"
+          title="Tambah baris"
+          description="Isi data baris baru."
+          cancel-label="Batal"
+          submit-label="Simpan"
+          :submit="createRow"
+        >
           <template #trigger>
             <slot v-if="$slots['create-button']" name="create-button" />
             <Button v-else type="button"><Icon name="add" />Tambah</Button>
           </template>
-          <template #content="{ setOpen }">
-            <Form
-              v-bind="form"
-              :fields="fields"
-              :initial-data="{}"
-              :submit="async (payload) => {
-                const result = createRow(payload)
-                setOpen(false)
-                return result
-              }"
-            >
-              <template #actions="{ submit, submitting }">
-                <div class="flex justify-end gap-2">
-                  <Button type="button" variant="tonal" @click="setOpen(false)">Batal</Button>
-                  <Button type="button" :disabled="submitting" @click="submit"><Icon name="save" />Simpan</Button>
-                </div>
-              </template>
-            </Form>
-          </template>
-        </Dialog>
+        </DialogForm>
       </div>
 
       <Table
@@ -124,36 +120,30 @@ function reorderRows(payload: RowReorderPayload<TableInputRow>) {
       >
         <template v-if="!disabled" #row-actions="{ record, index }">
           <div class="flex flex-row items-center gap-2">
-            <Dialog>
+            <DialogForm
+              v-bind="form"
+              :fields="fields"
+              :initial-data="cloneRow(record)"
+              title="Ubah baris"
+              description="Ubah data baris yang dipilih."
+              cancel-label="Batal"
+              submit-label="Simpan"
+              :submit="(payload) => replaceRow(index, payload)"
+            >
               <template #trigger>
                 <Button type="button" kind="icon" color="warning" variant="tonal" aria-label="Edit row">
-                  <Icon name="edit" />
+                  <template #icon>
+                    <Icon name="edit" />
+                  </template>
                 </Button>
               </template>
-              <template #content="{ setOpen }">
-                <Form
-                  v-bind="form"
-                  :fields="fields"
-                  :initial-data="cloneRow(record)"
-                  :submit="async (payload) => {
-                    const result = replaceRow(index, payload)
-                    setOpen(false)
-                    return result
-                  }"
-                >
-                  <template #actions="{ submit, submitting }">
-                    <div class="flex justify-end gap-2">
-                      <Button type="button" variant="tonal" @click="setOpen(false)">Batal</Button>
-                      <Button type="button" :disabled="submitting" @click="submit"><Icon name="save" />Simpan</Button>
-                    </div>
-                  </template>
-                </Form>
-              </template>
-            </Dialog>
+            </DialogForm>
             <ConfirmationDialog :on-confirm="() => deleteRow(index)">
               <template #trigger>
                 <Button type="button" kind="icon" color="error" variant="tonal" aria-label="Delete row">
-                  <Icon name="delete-bin" />
+                  <template #icon>
+                    <Icon name="delete-bin" />
+                  </template>
                 </Button>
               </template>
             </ConfirmationDialog>

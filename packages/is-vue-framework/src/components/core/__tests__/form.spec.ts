@@ -5,6 +5,9 @@ import Form from '../Form.vue'
 import { fromZod } from '../../../validation'
 import { deferred, flush, mountCore } from './harness'
 
+const mocks = vi.hoisted(() => ({ toastError: vi.fn() }))
+vi.mock('vue-sonner', () => ({ toast: { error: mocks.toastError } }))
+
 const fields = {
   name: { label: 'Nama', form: { renderer: undefined } },
   note: { label: 'Catatan' },
@@ -146,6 +149,7 @@ describe('Form core', () => {
   })
 
   it('maps normalized server issues back onto fields', async () => {
+    mocks.toastError.mockClear()
     const view = mountCore(Form, {
       fields,
       initialData: { name: 'Admin' },
@@ -165,6 +169,8 @@ describe('Form core', () => {
     await flush()
 
     expect(view.text()).toContain('Sudah dipakai')
+    expect(mocks.toastError).toHaveBeenCalledOnce()
+    expect(mocks.toastError).toHaveBeenCalledWith('Ditolak')
     view.unmount()
   })
 
@@ -417,7 +423,26 @@ describe('Form core', () => {
     view.unmount()
   })
 
-  it('composes async validators after parsed schema data and renders root failures', async () => {
+  it('marks schema-required labels and controls once', async () => {
+    const view = mountCore(Form, {
+      fields,
+      schema: fromZod(z.object({ name: z.string(), note: z.string().optional() })),
+      submit: async () => undefined,
+    })
+    await flush()
+
+    const labels = view.all('label')
+    expect(labels[0]?.textContent).toContain('Nama')
+    expect(labels[0]?.textContent).toContain('*')
+    expect(labels[0]?.querySelectorAll('.text-error')).toHaveLength(1)
+    expect(labels[1]?.textContent).not.toContain('*')
+    expect(inputs(view)[0]?.getAttribute('aria-required')).toBe('true')
+    expect(inputs(view)[1]?.getAttribute('aria-required')).toBeNull()
+    view.unmount()
+  })
+
+  it('composes async validators after parsed schema data and toasts root failures', async () => {
+    mocks.toastError.mockClear()
     const seen: unknown[] = []
     const submit = vi.fn(async () => undefined)
     const view = mountCore(Form, {
@@ -432,8 +457,10 @@ describe('Form core', () => {
     await flush()
     expect(seen).toEqual([{ name: 'Admin' }])
     expect(submit).not.toHaveBeenCalled()
-    expect(view.find('#form-errors')?.textContent).toContain('Form ditolak')
-    expect(view.find('#form-errors')?.classList.contains('bg-error-container')).toBe(true)
+    expect(mocks.toastError).toHaveBeenCalledOnce()
+    expect(mocks.toastError).toHaveBeenCalledWith('Form ditolak')
+    expect(view.find('#form-errors')).toBeNull()
+    expect(view.text()).not.toContain('Form ditolak')
     view.unmount()
   })
 

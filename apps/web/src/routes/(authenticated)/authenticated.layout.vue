@@ -14,8 +14,11 @@ function closeMobileNavigation() {
 </script>
 
 <template>
-  <div class="grid min-h-screen w-full grid-cols-1 grid-rows-[auto_1fr] bg-background text-on-surface lg:h-screen lg:grid-cols-[18rem_minmax(0,1fr)] lg:grid-rows-[3rem_minmax(0,1fr)]">
-    <div class="hidden h-14 items-center gap-2 overflow-hidden bg-surface-container px-4 lg:flex">
+  <div
+    class="grid min-h-screen w-full grid-cols-1 grid-rows-[auto_1fr] bg-background text-on-surface lg:h-screen lg:grid-cols-[18rem_minmax(0,1fr)] lg:grid-rows-[var(--app-toolbar-height)_minmax(0,1fr)]"
+    style="--app-toolbar-height: 3.5rem"
+  >
+    <div class="hidden h-full items-center gap-2 overflow-hidden bg-surface-container px-4 lg:flex">
       <Logo class="size-8 shrink-0" />
       <span class="truncate text-sm font-semibold">Information System</span>
     </div>

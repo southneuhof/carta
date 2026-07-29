@@ -5,6 +5,7 @@ import BaseInput from './BaseInput.vue'
 import { commonProps } from './commonprops'
 import { ref, watch } from 'vue'
 import { lightFormat } from 'date-fns'
+import { datepickerPopupClass, datepickerPopupConfig, datepickerTeleportProp } from './datepickerPopup'
 
 const props = defineProps({
   locale: {
@@ -24,6 +25,9 @@ const props = defineProps({
   },
   minDate: {
     type: String,
+  },
+  teleport: {
+    ...datepickerTeleportProp,
   },
   ...commonProps,
 })
@@ -80,6 +84,9 @@ function displayFormatter(date: Date) {
       :inline="inline"
       :format="displayFormatter"
       :dark="useColorPreference().value === 'dark'"
+      :teleport="teleport"
+      :config="datepickerPopupConfig"
+      :class="datepickerPopupClass"
     />
   </BaseInput>
 </template>

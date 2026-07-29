@@ -272,7 +272,7 @@ async function selectFileManagerAsset(payload: ManagedAsset) {
                 <template #trigger>
                   <button
                     type="button"
-                    class="relative flex h-40 w-40 items-center justify-center rounded-xl outline-dashed outline-2 outline-outline transition-colors"
+                    class="relative flex h-40 w-40 items-center justify-center rounded-xl outline-dashed outline-2 outline-outline-variant transition-colors"
                     :class="{ 'bg-primary/10 outline-primary/[33%]': isDragActive }"
                     @dragover="handleDragOver"
                     @dragleave="handleDragLeave"
@@ -280,7 +280,7 @@ async function selectFileManagerAsset(payload: ManagedAsset) {
                   >
                     <Icon name="image-add" size="2xl" class="text-on-surface"></Icon>
                     <div class="absolute left-0 top-0 h-full w-full">
-                      <div v-if="uploadPercentage != 0 && uploadPercentage != 100" class="absolute h-40 w-40 rounded-xl bg-tertiary/20" :style="{ width: uploadPercentage + '%' }"></div>
+                      <div v-if="uploadPercentage != 0 && uploadPercentage != 100" class="absolute h-40 w-40 rounded-xl" :style="{ width: uploadPercentage + '%' }"></div>
                     </div>
                   </button>
                 </template>

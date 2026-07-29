@@ -5,6 +5,7 @@ import BaseInput from './BaseInput.vue'
 import { commonProps } from './commonprops'
 import type { ComponentPublicInstance } from 'vue'
 import { nextTick, onMounted, ref } from 'vue'
+import { datepickerPopupClass, datepickerPopupConfig, datepickerTeleportProp } from './datepickerPopup'
 
 const props = defineProps({
   locale: {
@@ -18,6 +19,9 @@ const props = defineProps({
   defaultToCurrent: {
     type: Boolean,
     default: false,
+  },
+  teleport: {
+    ...datepickerTeleportProp,
   },
   ...commonProps,
 })
@@ -65,6 +69,9 @@ onMounted(() => {
       :inline="inline"
       :format="displayFormatter"
       :dark="useColorPreference().value === 'dark'"
+      :teleport="teleport"
+      :config="datepickerPopupConfig"
+      :class="datepickerPopupClass"
       @open="scrollToCurrentYear"
     />
   </BaseInput>

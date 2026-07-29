@@ -32,4 +32,16 @@ describe('BaseInput', () => {
     expect(touch).toHaveBeenCalledTimes(1)
     app.unmount()
   })
+
+  it('does not render an orphan required marker without a local label', () => {
+    const host = document.createElement('div')
+    const app = createApp(defineComponent({
+      setup: () => () => h(BaseInput, { required: true }, () => h('input', { required: true })),
+    }))
+    app.mount(host)
+
+    expect(host.textContent).not.toContain('*')
+    expect(host.querySelector('input')?.required).toBe(true)
+    app.unmount()
+  })
 })

@@ -5,6 +5,7 @@ import { useColorPreference } from '@southneuhof/is-vue-framework/adapters/state
 import { ref, type PropType, watch, computed } from 'vue'
 import BaseInput from './BaseInput.vue'
 import { lightFormat } from 'date-fns'
+import { datepickerPopupClass, datepickerPopupConfig, datepickerTeleportProp } from './datepickerPopup'
 
 const props = defineProps({
   locale: {
@@ -18,6 +19,9 @@ const props = defineProps({
   inline: {
     type: Boolean,
     default: false,
+  },
+  teleport: {
+    ...datepickerTeleportProp,
   },
   ...commonProps,
 })
@@ -90,6 +94,16 @@ const testRef = ref()
 
 <template>
   <BaseInput v-bind="props">
-    <Datepicker :range="unit === 'arbitrary'" :week-picker="unit === 'week'" :inline="inline" v-model="internalValue" :format="displayFormatter" :dark="useColorPreference().value === 'dark'" />
+    <Datepicker
+      :range="unit === 'arbitrary'"
+      :week-picker="unit === 'week'"
+      :inline="inline"
+      v-model="internalValue"
+      :format="displayFormatter"
+      :dark="useColorPreference().value === 'dark'"
+      :teleport="teleport"
+      :config="datepickerPopupConfig"
+      :class="datepickerPopupClass"
+    />
   </BaseInput>
 </template>

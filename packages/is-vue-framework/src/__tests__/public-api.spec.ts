@@ -46,6 +46,7 @@ const currentExports = [
   'Table',
   'Detail',
   'Form',
+  'DialogForm',
   'ListView',
   'DetailView',
   'FormView',
@@ -80,11 +81,18 @@ describe('public API surface', () => {
       'src/components/composites/Table.vue',
       'src/components/composites/Detail.vue',
       'src/components/composites/Form.vue',
-      'src/components/composites/DialogForm.vue',
       'src/components/composites/Tree',
     ]) {
       expect(existsSync(resolve(process.cwd(), path)), `unexpected path: ${path}`).toBe(false)
     }
+  })
+
+  it('keeps DialogForm on the core-native boundary', () => {
+    const source = readFileSync(resolve(process.cwd(), 'src/components/composites/DialogForm.vue'), 'utf8')
+
+    expect(source).toContain("../core/Form.vue")
+    expect(source).toContain("../base/Dialog.vue")
+    expect(source).not.toMatch(/InputConfig|fieldsAlias|beforeSubmit|extraData|components\/composites\/Form|@success/)
   })
 
   it('keeps Hono integration explicit and out of the root entry point', async () => {

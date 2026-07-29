@@ -194,7 +194,7 @@ const { isOverDropZone } = useDropZone(dropZoneRef as any, onDrop)
       </div>
       <template v-if="!isUploading">
         <div v-if="props.multi || items.length == 0" class="flex flex-col gap-2">
-          <div ref="dropZoneRef" class="flex w-full flex-col items-center justify-center gap-4 rounded-md py-8 outline-dashed outline-2 outline-outline/[24%]" :class="{ 'bg-primary/10 outline-primary/[33%]': isOverDropZone }">
+          <div ref="dropZoneRef" class="flex w-full flex-col items-center justify-center gap-4 rounded-md py-8 outline-dashed outline-2 outline-outline-variant" :class="{ 'bg-primary/10 outline-primary/[33%]': isOverDropZone }">
             <div v-if="!isOverDropZone" class="flex flex-row items-center gap-4">
               <div class="text-black-light font-bold">Letakkan file anda di sini</div>
               <div class="text-black-light">/</div>

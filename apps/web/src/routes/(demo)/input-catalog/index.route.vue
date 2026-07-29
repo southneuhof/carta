@@ -23,7 +23,7 @@ async function submit(value: InputCatalogDraft) {
 
 <template>
   <main class="mx-auto grid w-full max-w-screen-2xl gap-6 lg:grid-cols-[minmax(0,1fr)_24rem]">
-    <section class="rounded-xl border border-outline-variant bg-surface-container p-5 sm:p-6">
+    <section class="rounded-xl border border-outline-variant bg-surface-container text-on-surface p-5 sm:p-6">
       <h1 class="text-2xl font-semibold text-on-surface">Input catalog</h1>
       <p class="mt-2 text-sm text-on-surface-variant">Local, unauthenticated renderer inspection. No values leave this page.</p>
       <Form

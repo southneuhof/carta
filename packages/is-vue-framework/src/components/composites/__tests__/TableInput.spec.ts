@@ -68,6 +68,7 @@ describe('TableInput surface', () => {
     expect(view.text()).toContain('Tambah')
     expect(view.all('[aria-label="Edit row"]')).toHaveLength(2)
     expect(view.all('[aria-label="Delete row"]')).toHaveLength(2)
+    expect(view.text()).not.toContain('DataCloneError')
     view.unmount()
   })
 
@@ -114,11 +115,11 @@ describe('TableInput surface', () => {
 describe('TableInput core migration boundary', () => {
   const source = readFileSync(resolve(process.cwd(), 'src/components/composites/form-inputs/TableInput.vue'), 'utf8')
 
-  it('composes core Table, core Form, and base Dialog', () => {
+  it('composes core Table with core-native DialogForm', () => {
     expect(source).toContain("../../core/Table.vue")
-    expect(source).toContain("../../core/Form.vue")
-    expect(source).toContain("../../base/Dialog.vue")
-    expect(source).not.toContain('DialogForm')
+    expect(source).toContain("../DialogForm.vue")
+    expect(source).not.toContain("../../core/Form.vue")
+    expect(source).not.toContain("../../base/Dialog.vue")
     expect(source).not.toContain('../Table.vue')
     expect(source).not.toMatch(/keyManager|fieldsAlias|draggable/)
   })
@@ -130,7 +131,11 @@ describe('TableInput core migration boundary', () => {
   })
 
   it('commits only through validated Form submissions', () => {
-    expect(source).toContain(':submit="async (payload) => {')
+    expect(source).toContain(':submit="createRow"')
+    expect(source).toContain(':submit="(payload) => replaceRow(index, payload)"')
+    expect(source).toContain('title="Tambah baris"')
+    expect(source).toContain('title="Ubah baris"')
+    expect(source).not.toContain('setOpen(false)')
     expect(source).not.toMatch(/@input=.*createRow|@click=.*createRow/)
   })
 
