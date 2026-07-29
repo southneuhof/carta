@@ -355,7 +355,7 @@ describe('FormView', () => {
     const cards = view.all('.is-form-view > div')
     expect(cards).toHaveLength(2)
     expect(cards.every((card) => card.classList.contains('bg-surface-container'))).toBe(true)
-    expect(cards.every((card) => card.classList.contains('border-outline/[16%]'))).toBe(true)
+    expect(cards.every((card) => card.classList.contains('border-outline-variant'))).toBe(true)
     expect(view.find('h1')?.classList.contains('text-lg')).toBe(true)
     expect(view.text()).toContain('Set user access.')
     expect(cards[1].contains(view.find('form')!)).toBe(true)

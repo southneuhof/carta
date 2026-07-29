@@ -56,7 +56,7 @@ renderers, value slots, and `refresh()` must remain unchanged.
   page layout or route controls.
 - Styling convention: use existing design-token utilities such as
   `text-on-surface`, `text-on-surface-variant`, and
-  `border-outline/[16%]`; do not introduce literal colors or component-local CSS.
+  `border-outline-variant`; do not introduce literal colors or component-local CSS.
 - `Table.vue:252-255` documents TanStack Table as private collection-table
   machinery. Do not import `@tanstack/vue-table` into `Detail.vue`.
 
@@ -230,4 +230,3 @@ Stop and report instead of improvising if:
   make tests pass while producing a wrong accessibility tree.
 - If section rows are later required, add a framework-owned field projection
   contract first; do not revive the legacy `"S|"` string sentinel.
-

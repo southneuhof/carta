@@ -304,13 +304,13 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
       </slot>
     </div>
 
-    <div v-else-if="loaded.error.value" class="flex min-h-40 items-center justify-center rounded-xl bg-error-container/[28%] px-6 py-10 text-on-error-container">
+    <div v-else-if="loaded.error.value" class="flex min-h-40 items-center justify-center rounded-xl px-6 py-10">
       <slot name="error" :error="loaded.error.value">
         <p role="alert">{{ loaded.error.value?.message }}</p>
       </slot>
     </div>
 
-    <div v-else-if="empty" class="flex min-h-40 items-center justify-center rounded-xl bg-surface-container px-6 py-10 text-on-surface-variant">
+    <div v-else-if="empty" class="flex min-h-40 items-center justify-center rounded-xl px-6 py-10">
       <slot name="empty">
         <p>No data</p>
       </slot>
@@ -319,18 +319,25 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
     <div v-else class="overflow-x-auto rounded-xl">
       <table class="w-full border-collapse table-auto" :style="{ minWidth: `${tableMinimumWidth}px` }">
         <colgroup>
+          <col v-if="$slots['row-prefix']" style="width: 1%" />
           <col v-for="field in visibleFields" :key="field.key" :style="{ width: `${sizeFor(field.key)}px` }" />
           <col v-if="$slots['row-actions']" style="width: 64px" />
         </colgroup>
         <thead class="bg-surface-container-high text-on-surface-variant">
           <tr>
             <th
+              v-if="$slots['row-prefix']"
+              scope="col"
+              class="w-px whitespace-nowrap border-b border-outline-variant bg-surface-container-high px-3 py-2"
+              style="width: 1%"
+            />
+            <th
               v-for="field in visibleFields"
               :key="field.key"
               :ref="(element) => setHeaderElement(field.key, element)"
               scope="col"
               :style="{ textAlign: field.align }"
-              class="relative whitespace-nowrap text-start border-b border-outline/[16%] px-4 py-2 text-xs font-semibold"
+              class="relative whitespace-nowrap text-start border-b border-outline-variant px-4 py-2 text-xs font-semibold"
             >
               <button
                 v-if="field.sortable && !props.reorderable"
@@ -354,7 +361,7 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
             <th
               v-if="$slots['row-actions']"
               scope="col"
-              class="sticky right-0 z-20 w-px whitespace-nowrap border-b border-outline/[16%] bg-surface-container-high px-4 py-2 text-right text-xs font-semibold"
+              class="sticky right-0 z-20 w-px whitespace-nowrap border-b border-outline-variant bg-surface-container-high px-4 py-2 text-right text-xs font-semibold"
             />
           </tr>
         </thead>
@@ -368,6 +375,9 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
         >
           <template #item="{ element: record, index }">
             <tr class="group transition-colors hover:bg-primary/[6%] focus-within:bg-primary/[6%]" @click="emit('row-click', record, index)">
+              <td v-if="$slots['row-prefix']" class="w-px whitespace-nowrap px-3 py-2" style="width: 1%" @click.stop>
+                <slot name="row-prefix" :record="record" :index="index" />
+              </td>
               <td v-for="field in visibleFields" :key="field.key" :style="{ textAlign: field.align }" class="whitespace-nowrap px-4 py-3.5 text-on-surface">
                 <slot :name="`cell:${field.key}`" :value="valueFor(record, field)" :record="record" :field="field" :index="index">
                   <component :is="rendererFor(field.renderer)" v-if="field.renderer" v-bind="field.props" :value="valueFor(record, field)" :record="record" :field="field" :index="index" />
@@ -385,6 +395,9 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
             class="group transition-colors hover:bg-primary/[6%] focus-within:bg-primary/[6%]"
             @click="emit('row-click', row.original, index)"
           >
+            <td v-if="$slots['row-prefix']" class="w-px whitespace-nowrap pr-0 pl-3 py-2" style="width: 1%" @click.stop>
+              <slot name="row-prefix" :record="row.original" :index="index" />
+            </td>
             <td
               v-for="field in visibleFields"
               :key="field.key"

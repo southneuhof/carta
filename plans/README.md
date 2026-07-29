@@ -33,6 +33,12 @@ update the status after implementation and review.
 | 040 | Migrate File Manager UI and web adapter to canonical assets | P1 | L | 039 | DONE |
 | 041 | Standardize upload operations and optional File Manager picking | P1 | L | 039, 040 | DONE |
 | 042 | Remove obsolete wired runtime capabilities and publish migration guidance | P1 | M | 035–041 | DONE |
+| 043 | Establish behavioral coverage for migrated input contracts | P1 | L | — | TODO |
+| 044 | Preserve CheckboxGroup model values across interaction | P1 | S | 043 | TODO |
+| 045 | Drive upload controls from shared mutation state | P1 | M | 043 | TODO |
+| 046 | Move asset compatibility conversion out of framework inputs | P1 | M | 043 | TODO |
+| 047 | Remove legacy validation ownership from input components | P2 | M | 043 | TODO |
+| 048 | Name and document the controlled input adapter | P2 | S | — | TODO |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) |
 
@@ -82,6 +88,20 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) |
 - 042 is the convergence gate. Run only after 035–041 are DONE; it removes old
   runtime capabilities, updates remaining callers/docs, runs full workspace
   verification, and refreshes graphify output.
+- 043 establishes executable option/upload contracts before fixing or
+  refactoring migrated inputs.
+- 044 depends on 043 because `uniqueIDAs` and preloaded model behavior must be
+  characterized before removing CheckboxGroup's shadow selection state.
+- 045 depends on 043 because progress, error, cancellation, and concurrent
+  pending behavior need observable regression tests before state ownership
+  changes.
+- 046 depends on 043 because canonical asset conversion must preserve scalar,
+  multi, ordering, and File Manager selection behavior while rejecting backend
+  aliases.
+- 047 depends on 043 so removing legacy validation injections cannot silently
+  change controlled value or touch behavior.
+- 048 is independent: it records and documents the deliberate controlled
+  `v-model` boundary without changing input behavior.
 
 ## Findings considered and rejected
 
@@ -103,3 +123,7 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) |
 - Treating `$setup.loaded is undefined` as a loader defect: rejected. `Form`
   and `Table` assign `loaded` only after their framework injections; a missing
   injection aborts setup first, so the template error is secondary.
+- Rewriting controlled `v-model` inputs as native `value`/`setValue` renderers:
+  rejected because parent-owned `v-model` is the deliberate reusable input
+  contract. Plan 048 only renames, tests, and documents the adapter between
+  core Form and controlled inputs.

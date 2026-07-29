@@ -178,7 +178,7 @@ watch(() => modelValue.value, hydrate, { deep: true })
               pagination="always"
               @row-click="toggle"
             >
-              <template #row-actions="{ record }">
+              <template #row-prefix="{ record }">
                 <Checkbox v-if="multi" :on-toggle="() => toggle(record)" static :checked="selectedIds.includes(record[pick])" />
                 <Radio v-else :checked="selectedIds[0] === record[pick]" @click="toggle(record)" />
               </template>

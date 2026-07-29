@@ -7,6 +7,8 @@ describe('LookupInput migration boundary', () => {
     const source = readFileSync(resolve(process.cwd(), 'src/components/composites/form-inputs/LookupInput.vue'), 'utf8')
     expect(source).toContain("../../core/Table.vue")
     expect(source).toContain('loadDetail')
+    expect(source).toContain('#row-prefix')
+    expect(source.match(/#row-actions="\{ record \}"/g)).toHaveLength(1)
     expect(source).not.toMatch(/getAPI|useFrameworkRuntime|list-rowActions/)
   })
 })

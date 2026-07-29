@@ -63,7 +63,7 @@ module.exports = {
         },
         outline: {
           DEFAULT: 'rgb(var(--md-sys-color-outline) / <alpha-value>)',
-          variant: 'rgb(var(--md-sys-color-outline-variant) / <alpha-value>)',
+          variant: 'rgb(var(--md-sys-color-outline) / 16%)',
         },
         inverse: {
           surface: 'rgb(var(--md-sys-color-inverse-surface) / <alpha-value>)',

@@ -31,7 +31,6 @@ const builtInInputComponents: Record<string, Component> = {
   'checkbox-group': defineAsyncComponent(() => import('../inputs/CheckboxGroupInput.vue')),
   separator: defineAsyncComponent(() => import('./form-inputs/FormSeparator.vue')),
   canvas: defineAsyncComponent(() => import('../inputs/DrawingCanvas.vue')),
-  'iso-clause': defineAsyncComponent(() => import('../inputs/ISOClauseInput.vue')),
 }
 
 let appInputComponents: Record<string, Component> = {}

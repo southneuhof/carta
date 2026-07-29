@@ -98,7 +98,7 @@ const foregroundClassMap: Record<CardColorRole, string> = {
 
 const variantClassMap: Record<CardVariant, string> = {
   filled: '',
-  outlined: 'border border-outline/[16%]',
+  outlined: 'border border-outline-variant',
   elevated: '',
 }
 

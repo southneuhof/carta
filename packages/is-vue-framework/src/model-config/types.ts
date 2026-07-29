@@ -36,7 +36,6 @@ export type KnownFieldType =
   | 'table'
   | 'separator'
   | 'canvas'
-  | 'iso-clause'
   | 'custom'
 
 import type { ZodTypeAny } from 'zod'

@@ -5,7 +5,7 @@ export const inputCatalogKeys = [
   'date', 'daterange', 'month', 'year', 'tag', 'currency', 'switch', 'checkbox',
   'lookup', 'location', 'multi-location', 'rich-text',
   'icon-select', 'table', 'time', 'number', 'checkbox-group',
-  'separator', 'canvas', 'iso-clause',
+  'separator', 'canvas',
 ] as const
 
 export type InputCatalogKey = (typeof inputCatalogKeys)[number]
@@ -22,6 +22,11 @@ const localLocationOperations = {
 }
 const localList = async () => ({ data: options, meta: { total: options.length, totalPage: 1 } })
 const localDetail = async ({ id }: { id?: string | number | Readonly<Record<string, string | number>> }) => options.find((item) => item.id === id)
+const tableRowFields = {
+  id: { label: 'Code', form: { renderer: 'text' } },
+  item: { label: 'Item', form: { renderer: 'text' } },
+  quantity: { label: 'Quantity', form: { renderer: 'number' } },
+}
 
 const fixtureProps: Partial<Record<InputCatalogKey, Record<string, unknown>>> = {
   select: { data: options, pick: 'id', view: 'name' },
@@ -38,7 +43,13 @@ const fixtureProps: Partial<Record<InputCatalogKey, Record<string, unknown>>> = 
   },
   location: { operations: localLocationOperations },
   'multi-location': { operations: localLocationOperations },
-  table: { form: {}, table: {}, fields: [] },
+  table: {
+    fields: tableRowFields,
+    form: {},
+    table: { pagination: false },
+    reorderable: true,
+    rowKey: 'id',
+  },
   canvas: { width: 320, height: 160, onSave: async (image: string) => image },
   currency: { currency: 'IDR', locale: 'id-ID' },
   tag: { placeholder: 'Add tag' },
@@ -51,7 +62,6 @@ const labels: Partial<Record<InputCatalogKey, string>> = {
   'rich-text': 'Rich text',
   'icon-select': 'Icon select',
   'checkbox-group': 'Checkbox group',
-  'iso-clause': 'ISO clause',
 }
 
 export const inputCatalogFields = Object.fromEntries(inputCatalogKeys.map((key) => [
@@ -84,7 +94,10 @@ export const inputCatalogInitialData: Partial<InputCatalogDraft> = {
   number: 60,
   'checkbox-group': ['one'],
   'multi-location': [],
-  table: [],
+  table: [
+    { id: 'ROW-1', item: 'Inspection', quantity: 1 },
+    { id: 'ROW-2', item: 'Maintenance', quantity: 2 },
+  ],
 }
 
 export function serializeCatalogValue(value: unknown): string {

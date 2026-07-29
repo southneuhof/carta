@@ -107,7 +107,6 @@ export const componentTypeMap: Record<string, FormInputComponent> = {
   separator: TextInput,
   canvas: TextInput,
   'file-manager': TextInput,
-  'iso-clause': TextInput,
   custom: TextInput,
 } as const
 

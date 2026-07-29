@@ -24,6 +24,7 @@ function mount(options: {
   controlledVisibility?: boolean
   fields?: Record<string, { label: string }>
   data?: Record<string, unknown>[]
+  rowPrefix?: boolean
   rowActions?: boolean
   width?: string
 } = {}) {
@@ -52,9 +53,14 @@ function mount(options: {
           if (options.controlledVisibility) visibleColumns.value = next
         },
       },
-      options.rowActions
-        ? { 'row-actions': ({ record }: { record: Record<string, unknown> }) => h('button', { class: 'row-action' }, String(record.name)) }
-        : undefined,
+      {
+        ...(options.rowPrefix
+          ? { 'row-prefix': ({ record }: { record: Record<string, unknown> }) => h('button', { class: 'row-prefix' }, String(record.name)) }
+          : {}),
+        ...(options.rowActions
+          ? { 'row-actions': ({ record }: { record: Record<string, unknown> }) => h('button', { class: 'row-action' }, String(record.name)) }
+          : {}),
+      },
     ),
   })
   app.use(FrameworkPlugin, { runtime: {}, queryClient: createFrameworkQueryClient({ retry: 0, staleTime: 0 }) })
@@ -130,6 +136,19 @@ describe('Table browser interactions', () => {
     expect(scrollportRight - actionHeader.getBoundingClientRect().right).toBeLessThanOrEqual(12)
     expect(scrollportRight - actionCell.getBoundingClientRect().right).toBeGreaterThanOrEqual(0)
     expect(scrollportRight - actionCell.getBoundingClientRect().right).toBeLessThanOrEqual(12)
+  })
+
+  it('renders row-prefix before first data column and row-actions after last', async () => {
+    const { host } = mount({ rowPrefix: true, rowActions: true, data: [data[0]] })
+    await frame()
+
+    const cells = [...host.querySelectorAll<HTMLElement>('tbody td')]
+    expect(cells[0].querySelector('.row-prefix')).not.toBeNull()
+    expect(cells[0].getBoundingClientRect().width).toBeLessThanOrEqual(64)
+    expect(cells[0].getBoundingClientRect().width).toBeLessThan(cells[1].getBoundingClientRect().width)
+    expect(getComputedStyle(cells[0]).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+    expect(cells[1].textContent).toContain('User 0')
+    expect(cells.at(-1)?.querySelector('.row-action')).not.toBeNull()
   })
 
   it('settles controlled visibility updates without cumulative renderer work', async () => {

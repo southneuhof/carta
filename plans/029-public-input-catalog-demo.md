@@ -31,7 +31,7 @@ registers exactly these 31 built-ins:
 `date`, `daterange`, `month`, `year`, `tag`, `currency`, `switch`, `checkbox`,
 `lookup`, `master-lookup`, `location`, `multi-location`, `rich-text`,
 `icon-select`, `table`, `time`, `dynamic-form`, `number`, `checkbox-group`,
-`separator`, `canvas`, `file-manager`, `iso-clause`.
+`separator`, `canvas`, `file-manager`.
 
 Inspect each target's props and existing tests under
 `packages/is-vue-framework/src/components/inputs/__tests__` before selecting

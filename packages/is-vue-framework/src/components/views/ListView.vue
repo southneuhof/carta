@@ -327,33 +327,18 @@ const canExport = computed(
                   </Button>
                 </template>
                 <template #content>
-                  <div
-                    class="w-80 rounded-xl border border-outline/[16%] bg-surface p-4 shadow-lg"
+                  <Form
+                    :fields="filters.fields"
+                    :schema="filters.schema"
+                    :model-value="queryValues"
+                    @update:model-value="updateFilters"
+                  />
+                  <Button
+                    type="button"
+                    variant="text"
+                    @click="resetFilters"
+                    >{{ filters.resetLabel ?? "Reset filter" }}</Button
                   >
-                    <slot
-                      name="filter-content"
-                      :query="queryValues"
-                      :reset="resetFilters"
-                    >
-                      <p v-if="filters.label" class="mb-3 text-sm font-semibold">
-                        {{ filters.label }}
-                      </p>
-                      <Form
-                        :fields="filters.fields"
-                        :schema="filters.schema"
-                        :model-value="queryValues"
-                        @update:model-value="updateFilters"
-                      />
-                      <div class="mt-3 flex justify-end">
-                        <Button
-                          type="button"
-                          variant="text"
-                          @click="resetFilters"
-                          >{{ filters.resetLabel ?? "Reset filter" }}</Button
-                        >
-                      </div>
-                    </slot>
-                  </div>
                 </template>
               </Popover>
               <Dialog>
@@ -429,7 +414,7 @@ const canExport = computed(
 
       <div
         v-if="$slots.filters"
-        class="border-t border-outline/[16%] px-5 py-3 sm:px-6"
+        class="border-t border-outline-variant px-5 py-3 sm:px-6"
       >
         <slot name="filters" />
       </div>
@@ -546,7 +531,7 @@ const canExport = computed(
 
       <footer
         v-if="$slots.footer"
-        class="border-t border-outline/[16%] px-5 py-3"
+        class="border-t border-outline-variant px-5 py-3"
       >
         <slot name="footer" />
       </footer>

@@ -120,8 +120,8 @@ the currently supported stable keys (`text`, `textarea`, `password`, `number`,
 `currency`, `select`, `radio`, `date`, `daterange`, `month`, `year`, `time`,
 `checkbox`, `checkbox-group`, `switch`, `file`, `image`, `tag`, `color`,
 `lookup`, `master-lookup`, `location`, `multi-location`, `rich-text`,
-`icon-select`, `table`, `dynamic-form`, `separator`, `canvas`, `file-manager`,
-and `iso-clause`).
+`icon-select`, `table`, `dynamic-form`, `separator`, `canvas`, and
+`file-manager`).
 
 Each entry must be a core-compatible adapter, not the legacy component directly.
 The adapter must:
@@ -268,4 +268,3 @@ Stop and report if:
   implement core context directly and may later replace adapters one by one.
 - Review bundle impact from async imports, but do not convert them to eager
   imports.
-

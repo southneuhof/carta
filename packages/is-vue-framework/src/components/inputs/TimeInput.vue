@@ -3,6 +3,7 @@ import Datepicker from '@vuepic/vue-datepicker'
 import { useColorPreference } from '@southneuhof/is-vue-framework/adapters/state'
 import BaseInput from './BaseInput.vue'
 import { commonProps } from './commonprops'
+import { formatTimeValue, parseTimeValue, type TimeParts } from './timeInput.utils'
 import { ref, watch } from 'vue'
 
 const props = defineProps({
@@ -20,10 +21,10 @@ const props = defineProps({
 const modelValue = defineModel<string>()
 // if (props.defaultToCurrent && !modelValue.value) modelValue.value = {hours: String(new Date().getHours()), minutes: String(new Date().getMinutes()), seconds: String(new Date().getSeconds())}
 
-const internalValue = ref()
+const internalValue = ref<TimeParts | null>()
 
-if (props.defaultToCurrent) internalValue.value = { hours: String(new Date().getHours()), minutes: String(new Date().getMinutes()), seconds: String(new Date().getSeconds()) }
-else if (modelValue.value) internalValue.value = { hours: Number(modelValue.value.split(':')[0]), minutes: Number(modelValue.value.split(':')[1]), seconds: Number(modelValue.value.split(':')[2]) }
+if (props.defaultToCurrent) internalValue.value = { hours: new Date().getHours(), minutes: new Date().getMinutes(), seconds: new Date().getSeconds() }
+else if (modelValue.value) internalValue.value = parseTimeValue(modelValue.value)
 
 watch(
   internalValue,
@@ -32,9 +33,7 @@ watch(
       if (modelValue.value != null) modelValue.value = ''
       return
     }
-    modelValue.value = `${Number(internalValue.value?.hours || 0) <= 9 ? `0${internalValue.value?.hours}` : internalValue.value?.hours}:${
-      Number(internalValue.value?.minutes || 0) <= 9 ? `0${internalValue.value?.minutes}` : internalValue.value?.minutes
-    }:${Number(internalValue.value?.seconds || 0) <= 9 ? `0${internalValue.value?.seconds}` : internalValue.value?.seconds}`
+    modelValue.value = formatTimeValue(internalValue.value)
   },
   { immediate: props.defaultToCurrent }
 )
@@ -46,7 +45,7 @@ watch(
       if (internalValue.value != null) internalValue.value = null
       return
     }
-    const [hours, minutes, seconds] = newValue.split(':').map((item) => Number(item))
+    const { hours, minutes, seconds } = parseTimeValue(newValue)
     const currentHours = Number(internalValue.value?.hours)
     const currentMinutes = Number(internalValue.value?.minutes)
     const currentSeconds = Number(internalValue.value?.seconds)

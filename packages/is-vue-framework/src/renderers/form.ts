@@ -106,5 +106,4 @@ export const builtInFormRenderers: Record<string, Component> = {
   table: legacyInput(() => import('../components/composites/form-inputs/TableInput.vue')),
   separator: legacyInput(() => import('../components/composites/form-inputs/FormSeparator.vue')),
   canvas: legacyInput(() => import('../components/inputs/DrawingCanvas.vue')),
-  'iso-clause': legacyInput(() => import('../components/inputs/ISOClauseInput.vue')),
 }
