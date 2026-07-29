@@ -53,6 +53,36 @@ describe('upload operation boundary', () => {
     mounted.app.unmount()
   })
 
+  it('forwards each operation progress to its own observer', async () => {
+    const first = deferred<string>()
+    const second = deferred<string>()
+    const report: Array<(value: { loaded: number; total?: number }) => void> = []
+    let call = 0
+    const upload = vi.fn((_blob: Blob, context: any) => {
+      report.push(context.onProgress)
+      return call++ === 0 ? first.promise : second.promise
+    })
+    const mounted = withApp(() => useUploadMutation(() => upload))
+    const firstProgress: Array<{ loaded: number; total?: number }> = []
+    const secondProgress: Array<{ loaded: number; total?: number }> = []
+    const one = mounted.result.execute(new Blob(), undefined, (value) => firstProgress.push(value))
+    const two = mounted.result.execute(new Blob(), undefined, (value) => secondProgress.push(value))
+
+    report[0]({ loaded: 10, total: 100 })
+    report[1]({ loaded: 80, total: 100 })
+    expect(firstProgress).toEqual([{ loaded: 10, total: 100 }])
+    expect(secondProgress).toEqual([{ loaded: 80, total: 100 }])
+    expect(mounted.result.pending.value).toBe(true)
+
+    second.resolve('second')
+    await two
+    expect(mounted.result.pending.value).toBe(true)
+    first.resolve('first')
+    await one
+    expect(mounted.result.pending.value).toBe(false)
+    mounted.app.unmount()
+  })
+
   it('normalizes error state while rethrowing original rejection', async () => {
     const reason = new Error('broken')
     const mounted = withApp(() => useUploadMutation(() => async () => { throw reason }))

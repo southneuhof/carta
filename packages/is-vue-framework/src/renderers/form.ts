@@ -7,6 +7,7 @@
  */
 import { defineAsyncComponent, defineComponent, h, type Component } from 'vue'
 import { twMerge } from 'tailwind-merge'
+import FileInput from '../components/inputs/FileInput.vue'
 
 const coreTextRenderer = defineComponent({
   name: 'CoreTextRenderer',
@@ -94,7 +95,7 @@ export const builtInFormRenderers: Record<string, Component> = {
   checkbox: controlledInput(() => import('../components/inputs/CheckboxInput.vue')),
   'checkbox-group': controlledInput(() => import('../components/inputs/CheckboxGroupInput.vue')),
   switch: controlledInput(() => import('../components/inputs/Switch.vue')),
-  file: controlledInput(() => import('../components/inputs/FileInput.vue')),
+  file: adaptVModelInput(FileInput),
   image: controlledInput(() => import('../components/inputs/ImageInput.vue')),
   tag: controlledInput(() => import('../components/inputs/TagInput.vue')),
   color: controlledInput(() => import('../components/inputs/ColorInput.vue')),

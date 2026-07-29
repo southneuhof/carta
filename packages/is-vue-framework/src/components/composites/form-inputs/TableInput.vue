@@ -119,7 +119,7 @@ function reorderRows(payload: RowReorderPayload<TableInputRow>) {
         @row-reorder="reorderRows"
       >
         <template v-if="!disabled" #row-actions="{ record, index }">
-          <div class="flex flex-row items-center gap-2">
+          <div class="flex items-center justify-end gap-1" aria-label="Row actions">
             <DialogForm
               v-bind="form"
               :fields="fields"
@@ -131,7 +131,7 @@ function reorderRows(payload: RowReorderPayload<TableInputRow>) {
               :submit="(payload) => replaceRow(index, payload)"
             >
               <template #trigger>
-                <Button type="button" kind="icon" color="warning" variant="tonal" aria-label="Edit row">
+                <Button type="button" kind="icon" variant="standard" aria-label="Edit row">
                   <template #icon>
                     <Icon name="edit" />
                   </template>
@@ -140,7 +140,7 @@ function reorderRows(payload: RowReorderPayload<TableInputRow>) {
             </DialogForm>
             <ConfirmationDialog :on-confirm="() => deleteRow(index)">
               <template #trigger>
-                <Button type="button" kind="icon" color="error" variant="tonal" aria-label="Delete row">
+                <Button type="button" kind="icon" color="error" variant="standard" aria-label="Delete row">
                   <template #icon>
                     <Icon name="delete-bin" />
                   </template>

@@ -68,6 +68,9 @@ describe('TableInput surface', () => {
     expect(view.text()).toContain('Tambah')
     expect(view.all('[aria-label="Edit row"]')).toHaveLength(2)
     expect(view.all('[aria-label="Delete row"]')).toHaveLength(2)
+    expect(view.all('[aria-label="Row actions"]')).toHaveLength(2)
+    expect(view.all('[aria-label="Row actions"]')[0].className).toContain('justify-end')
+    expect(view.all('[aria-label="Row actions"]')[0].className).toContain('gap-1')
     expect(view.text()).not.toContain('DataCloneError')
     view.unmount()
   })
@@ -143,5 +146,13 @@ describe('TableInput core migration boundary', () => {
     expect(source).toContain('TableInput reorderable mode requires rowKey')
     expect(source).toContain(':reorderable="reorderable && !disabled"')
     expect(source).toContain('v-if="!disabled"')
+  })
+
+  it('matches ListView standard row action styling', () => {
+    expect(source).toContain('class="flex items-center justify-end gap-1" aria-label="Row actions"')
+    expect(source).toContain('kind="icon" variant="standard" aria-label="Edit row"')
+    expect(source).toContain('kind="icon" color="error" variant="standard" aria-label="Delete row"')
+    expect(source).not.toMatch(/color="warning" variant="tonal" aria-label="Edit row"/)
+    expect(source).not.toMatch(/color="error" variant="tonal" aria-label="Delete row"/)
   })
 })

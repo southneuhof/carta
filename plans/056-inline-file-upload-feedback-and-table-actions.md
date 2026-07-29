@@ -99,6 +99,8 @@ Framework conventions to preserve:
 - `packages/is-vue-framework/src/components/inputs/__tests__/upload-operations.spec.ts`
 - `packages/is-vue-framework/src/components/composites/form-inputs/TableInput.vue`
 - `packages/is-vue-framework/src/components/composites/__tests__/TableInput.spec.ts`
+- `graphify-out/` generated knowledge-graph artifacts (updated by the required
+  repository graph maintenance command after source changes)
 - `plans/README.md`
 
 **Out of scope**:

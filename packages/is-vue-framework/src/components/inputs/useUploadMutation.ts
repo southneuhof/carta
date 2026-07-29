@@ -9,7 +9,11 @@ export function useUploadMutation<TResult>(operation: () => UploadOperation<TRes
   const error = ref<SubmitError>()
   const controllers = new Set<AbortController>()
 
-  async function execute(file: Blob, destination?: string): Promise<TResult> {
+  async function execute(
+    file: Blob,
+    destination?: string,
+    onProgress?: (value: UploadProgress) => void,
+  ): Promise<TResult> {
     const upload = operation()
     if (!upload) throw new Error('[is-vue-framework] Upload operation is not configured.')
     const controller = new AbortController()
@@ -20,7 +24,10 @@ export function useUploadMutation<TResult>(operation: () => UploadOperation<TRes
       return await upload(file, {
         destination,
         signal: controller.signal,
-        onProgress: (value) => { progress.value = value },
+        onProgress: (value) => {
+          progress.value = value
+          onProgress?.(value)
+        },
       })
     } catch (reason) {
       error.value = adapters.data.normalizeError(reason)

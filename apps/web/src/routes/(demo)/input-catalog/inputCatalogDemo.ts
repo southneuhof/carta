@@ -29,6 +29,7 @@ const tableRowFields = {
 }
 
 const fixtureProps: Partial<Record<InputCatalogKey, Record<string, unknown>>> = {
+  file: { multi: true },
   select: { data: options, pick: 'id', view: 'name' },
   radio: { data: options, pick: 'id', view: 'name' },
   'checkbox-group': { data: options, pick: 'id', view: 'name' },

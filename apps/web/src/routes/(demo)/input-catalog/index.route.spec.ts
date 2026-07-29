@@ -1,11 +1,18 @@
 import { describe, expect, it } from 'vitest'
 import { builtInFormRenderers } from '@southneuhof/is-vue-framework'
-import { inputCatalogKeys, serializeCatalogValue } from './inputCatalogDemo'
+import { inputCatalogFields, inputCatalogKeys, serializeCatalogValue } from './inputCatalogDemo'
 
 describe('public input catalog', () => {
   it('tracks every built-in renderer exactly once', () => {
     expect(new Set(inputCatalogKeys).size).toBe(inputCatalogKeys.length)
     expect([...inputCatalogKeys].sort()).toEqual(Object.keys(builtInFormRenderers).sort())
+  })
+
+  it('keeps the File catalog surface open for file selection', () => {
+    const form = inputCatalogFields.file.form
+    expect(form).not.toBe(false)
+    if (!form) throw new Error('File catalog form projection is missing.')
+    expect(form.props).toMatchObject({ multi: true })
   })
 
   it('serializes opaque and circular debug values safely', () => {
