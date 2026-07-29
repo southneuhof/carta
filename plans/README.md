@@ -46,6 +46,7 @@ update the status after implementation and review.
 | 053 | Theme all datepicker surfaces with application design tokens | P1 | S | — | DONE |
 | 054 | Apply shared popup-safety defaults to every datepicker input | P1 | M | — | DONE |
 | 055 | Add a core-native DialogForm composite | P1 | M | — | DONE |
+| 056 | Show uploads inline and align TableInput row actions | P1 | M | — | TODO |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) |
 
@@ -133,6 +134,10 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) |
 - 055 is independent of resource and input migrations. It composes existing
   base Dialog and core Form contracts, then migrates TableInput as first
   consumer. It must not restore legacy model-config or CRUD APIs.
+- 056 is a focused UI repair. It supersedes only FileInput's global-loader step
+  in rejected plan 045; it does not schedule 045's ImageInput/CameraInput
+  refactor. Its TableInput action styling is independent of plan 055's
+  DialogForm contract.
 
 ## Verification notes
 
@@ -159,6 +164,9 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) |
 - A global TanStack Table replacement: the table core is not the issue. The
   failure is the Vue adapter's non-reactive data branch, selected by this
   project's `data` getter; retain TanStack Table and change that handoff only.
+- Plan 045 as the FileInput execution target: rejected for this request. Its
+  global mutation-led progress UI retains a whole-input loading state, while
+  plan 056 specifies immediate per-file transient rows and isolated progress.
 - TanStack Table inside `Detail`: rejected because a key/value record has no
   sorting, pagination, resizing, or column state. Native table semantics provide
   aligned row headers without collection state machinery.
