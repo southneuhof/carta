@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, type PropType } from 'vue'
+import { type PropType } from 'vue'
 import type { OptionLoad, QueryNamespace } from '../../contracts'
 import { commonProps } from './commonprops'
 import BaseInput from './BaseInput.vue'
@@ -27,29 +27,19 @@ const props = defineProps({
 const modelValue = defineModel<any[]>({ default: () => [] })
 
 const { options: data, loading, error, refresh } = useOptionSource(props)
-const selected = ref<any>([])
-
-onMounted(() => {
-  if (props.uniqueIDAs) {
-    const parsed = modelValue.value.map((item) => ({ ...item, [props.pick]: item[props.uniqueIDAs!], [props.uniqueIDAs!]: undefined }))
-    modelValue.value = parsed
-    selected.value = parsed
-  }
-})
+function identity(item: any) {
+  return props.uniqueIDAs && item?.[props.pick] === undefined ? item?.[props.uniqueIDAs] : item?.[props.pick]
+}
 
 function handleItemClick(item: any) {
-  if ((modelValue.value as any[]).map((item) => item[props.pick]).includes(item[props.pick]))
-    selected.value = (selected.value as any[]).filter((selectedItem: any) => selectedItem[props.pick] !== item[props.pick])
-  else selected.value = [...(selected.value as any[]), item]
-
-  modelValue.value = (selected.value as any[])?.map((item: any) => {
-    const correspondingValue = (modelValue.value as any[])?.find((mv) => mv[props.pick] === item[props.pick])
-    if (correspondingValue) return correspondingValue
-    else {
-      if (!props.uniqueIDAs) return item
-      else return { ...item, [props.uniqueIDAs]: item[props.pick], [props.pick]: undefined }
-    }
-  })
+  const current = modelValue.value ?? []
+  const itemIdentity = item[props.pick]
+  if (current.some((value) => identity(value) === itemIdentity))
+    modelValue.value = current.filter((value) => identity(value) !== itemIdentity)
+  else
+    modelValue.value = [...current, props.uniqueIDAs
+      ? Object.fromEntries(Object.entries(item).filter(([key]) => key !== props.pick).concat([[props.uniqueIDAs, itemIdentity]]))
+      : item]
 }
 </script>
 
@@ -59,7 +49,7 @@ function handleItemClick(item: any) {
     <p v-else-if="error" class="text-error">{{ error.message }} <button type="button" @click="refresh">Coba lagi</button></p>
     <div v-else class="grid gap-4 grid-dynamic-[250px]">
       <template v-for="item in data">
-        <Checkbox :label="item[view]" :onToggle="() => handleItemClick(item)" :checked="!!modelValue.find((mvItem) => mvItem[pick] === item[pick])" />
+        <Checkbox :label="item[view]" :onToggle="() => handleItemClick(item)" :checked="!!modelValue.find((mvItem) => identity(mvItem) === item[pick])" />
       </template>
     </div>
   </BaseInput>

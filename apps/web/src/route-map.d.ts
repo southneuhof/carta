@@ -66,6 +66,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    'notifications': RouteRecordInfo<
+      'notifications',
+      '/notifications',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     'settings-roles': RouteRecordInfo<
       'settings-roles',
       '/settings/roles',
@@ -184,6 +191,7 @@ declare module 'vue-router/auto-routes' {
         | 'hr-overtimes-create'
         | 'hr-overtimes-detail'
         | 'hr-overtimes-edit'
+        | 'notifications'
         | 'settings-roles'
         | 'settings-roles-create'
         | 'settings-roles-detail'
@@ -234,6 +242,14 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/hr/overtimes/create.route.vue': {
       routes:
         | 'hr-overtimes-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/notifications/index.route.vue': {
+      routes:
+        | 'notifications'
       views:
         | never
       pathParamNames:

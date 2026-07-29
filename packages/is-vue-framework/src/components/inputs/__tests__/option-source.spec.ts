@@ -1,6 +1,8 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import CheckboxGroupInput from '../CheckboxGroupInput.vue'
+import { mountInput } from './harness'
 
 const input = (name: string) => readFileSync(resolve(process.cwd(), 'src/components/inputs', name), 'utf8')
 
@@ -9,5 +11,41 @@ describe('explicit option sources', () => {
     const source = input(name)
     expect(source).toContain('useOptionSource')
     expect(source).not.toMatch(/getAPI|defaultSelectGetData|useFrameworkRuntime/)
+  })
+
+  it('preserves controlled checkbox values across add, remove, and external replacement', async () => {
+    const a = { id: 1, name: 'A' }
+    const b = { id: 2, name: 'B' }
+    const c = { id: 3, name: 'C' }
+    const mounted = mountInput(CheckboxGroupInput, { model: [a, b], props: { data: [a, b, c] } })
+    const inputs = mounted.host.querySelectorAll<HTMLInputElement>('input[type=checkbox]')
+
+    inputs[2].parentElement!.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    await mounted.flush()
+    expect(mounted.model.value).toEqual([a, b, c])
+
+    inputs[0].parentElement!.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    await mounted.flush()
+    expect(mounted.model.value).toEqual([b, c])
+
+    mounted.model.value = [a]
+    await mounted.flush()
+    inputs[2].parentElement!.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    await mounted.flush()
+    expect(mounted.model.value).toEqual([a, c])
+    mounted.cleanup()
+  })
+
+  it('maps new checkbox values through uniqueIDAs without changing existing fields', async () => {
+    const existing = { choiceId: 1, note: 'keep' }
+    const mounted = mountInput(CheckboxGroupInput, {
+      model: [existing],
+      props: { data: [{ id: 1, name: 'A' }, { id: 2, name: 'B' }], uniqueIDAs: 'choiceId' },
+    })
+    mounted.host.querySelectorAll<HTMLInputElement>('input[type=checkbox]')[1].parentElement!
+      .dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    await mounted.flush()
+    expect(mounted.model.value).toEqual([existing, { name: 'B', choiceId: 2 }])
+    mounted.cleanup()
   })
 })

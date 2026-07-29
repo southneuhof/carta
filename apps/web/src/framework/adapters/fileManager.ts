@@ -1,7 +1,7 @@
 import type { FileManagerPluginOptions, ManagedAsset } from '@southneuhof/is-vue-framework/file-manager'
 import services from '@/utils/services'
 
-function canonicalAsset(input: any, parentId: string | null = null): ManagedAsset {
+export function canonicalAsset(input: any, parentId: string | null = null): ManagedAsset {
   const source = input?.data && typeof input.data === 'object' ? input.data : input
   const id = String(source.id ?? source.uuid ?? source.path ?? source.url ?? '')
   if (!id) throw new Error('File Manager returned an asset without identity.')
@@ -53,8 +53,16 @@ export const fileManagerOptions: FileManagerPluginOptions<any> = {
       return canonicalAsset(value)
     },
     async toModel(asset) {
-      const source = asset.metadata?.source as any
-      return source ?? { path: asset.id, url: asset.previewUrl, filename: asset.name, content_type: asset.mimeType, size: asset.size }
+      if (asset.kind !== 'file') throw new Error('Folders cannot be persisted as input asset values.')
+      return {
+        kind: 'file' as const,
+        path: asset.id,
+        url: asset.previewUrl ?? asset.id,
+        name: asset.name,
+        size: asset.size,
+        mimeType: asset.mimeType,
+        updatedAt: asset.updatedAt,
+      }
     },
   },
 }

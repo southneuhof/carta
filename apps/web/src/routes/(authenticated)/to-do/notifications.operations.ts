@@ -6,6 +6,7 @@ import { dataAdapter } from '@/framework/adapters/data/normalize'
 export const notificationOperations = createHonoResourceOperations(rpc.notifications, dataAdapter)
 export type NotificationRecord = ResourceRecordOf<typeof notificationOperations>
 export type NotificationStatus = NotificationRecord['statusCode']
+export const NOTIFICATIONS_SEEN_EVENT = 'notifications-seen'
 
 type UnreadEndpoint = (typeof rpc.notifications)['unread-count']['$get']
 type MarkSeenEndpoint = (typeof rpc.notifications)['mark-seen']['$post']

@@ -9,10 +9,6 @@ const props = defineProps({
     type: Array as PropType<Array<'number' | 'text'>>,
     default: ['text', 'number'],
   },
-  validator: {
-    type: Function as PropType<(value: string) => boolean>,
-    default: () => true,
-  },
   placeholder: {
     type: String,
     default: '',

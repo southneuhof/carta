@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { createApp, defineComponent, h } from 'vue'
 import { createRendererRegistries, createRendererRegistry, useRendererRegistries } from '../registry'
 import { FrameworkPlugin } from '../../adapters/plugin'
-import { builtInFormRenderers } from '../form'
+import { adaptVModelInput, builtInFormRenderers } from '../form'
 
 const Chip = defineComponent({ name: 'Chip', setup: () => () => h('span') })
 const ProjectChip = defineComponent({ name: 'ProjectChip', setup: () => () => h('em') })
@@ -23,6 +23,47 @@ function mountWithRenderers(renderers: Parameters<typeof createRendererRegistrie
 }
 
 describe('renderer registry', () => {
+  it('adapts core controlled state to Vue v-model without leaking core-only props', () => {
+    const received: Record<string, unknown> = {}
+    const updated: unknown[] = []
+    const Input = defineComponent({
+      inheritAttrs: false,
+      props: { modelValue: null, id: String, disabled: Boolean, error: String },
+      emits: ['update:modelValue', 'validation:touch'],
+      setup(props, { attrs, emit }) {
+        Object.assign(received, props, attrs)
+        return () => h('button', {
+          onClick: () => {
+            emit('update:modelValue', 'next')
+            emit('validation:touch')
+          },
+        })
+      },
+    })
+    const host = document.createElement('div')
+    const app = createApp(defineComponent({
+      setup: () => () => h(adaptVModelInput(Input), {
+        value: 'current',
+        setValue: (value: unknown) => updated.push(value),
+        id: 'asset',
+        disabled: true,
+        error: 'bad',
+        ordinary: 'yes',
+        draft: { hidden: true },
+        field: { hidden: true },
+        touched: true,
+        'onValidation:touch': () => updated.push('touch'),
+      }),
+    }))
+    app.mount(host)
+    host.querySelector('button')!.click()
+    expect(received).toMatchObject({ modelValue: 'current', id: 'asset', disabled: true, error: 'bad', ordinary: 'yes' })
+    expect(received).not.toHaveProperty('draft')
+    expect(received).not.toHaveProperty('field')
+    expect(received).not.toHaveProperty('touched')
+    expect(updated).toEqual(['next', 'touch'])
+    app.unmount()
+  })
   it('renders the core text control with native value, ARIA, and state behavior', () => {
     const updated: unknown[] = []
     const host = document.createElement('div')

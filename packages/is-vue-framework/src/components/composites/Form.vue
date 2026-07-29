@@ -143,6 +143,10 @@ function handleFieldTouch(field: string) {
   validateField(field)
 }
 
+function resolveFieldError(field: string) {
+  return fieldTouched.value[field] || submitAttempted.value ? fieldErrors.value[field] || '' : ''
+}
+
 function resolveFieldBindMap(field: string) {
   const activeInputConfig = inputConfig.value[field] as (typeof inputConfig.value)[string] & { bind?: FieldBindMap } | undefined
   return {
@@ -409,6 +413,7 @@ defineExpose({ reload, submitForm })
                       ...fieldDependencyData[field]?.props?.value,
                       ...resolveFieldModelBindings(field),
                       ...resolveFieldModelListeners(field),
+                      error: resolveFieldError(field),
                     }"
                   />
                   <template #fallback>
@@ -432,6 +437,7 @@ defineExpose({ reload, submitForm })
                       ...fieldDependencyData[field]?.props?.value,
                       ...resolveFieldModelBindings(field),
                       ...resolveFieldModelListeners(field),
+                      error: resolveFieldError(field),
                     }"
                   />
                   <template #fallback>

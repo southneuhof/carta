@@ -22,7 +22,7 @@ const mutation = useUploadMutation(() => props.upload)
 const isCameraOpen = ref(false)
 const isPhotoTaken = ref(false)
 const isShotPhoto = ref(false)
-const loading = ref(false)
+const cameraLoading = ref(false)
 const camera = ref()
 const canvas = ref()
 const canvasProperties = ref({
@@ -32,7 +32,7 @@ const canvasProperties = ref({
 const image = ref((props.modelValue as any)?.url)
 
 const createCameraElement = () => {
-  loading.value = true
+  cameraLoading.value = true
   Object.assign(window, { constraints: { video: true, audio: false } })
   navigator.mediaDevices.getUserMedia((window as any).constraints).then((stream) => {
     camera.value.srcObject = stream
@@ -40,9 +40,9 @@ const createCameraElement = () => {
       width: stream.getVideoTracks()[0].getSettings().width || 450,
       height: stream.getVideoTracks()[0].getSettings().height || 338,
     }
-    loading.value = false
+    cameraLoading.value = false
   }).catch((error) => {
-    loading.value = false
+    cameraLoading.value = false
     toast.error(error instanceof Error ? error.message : String(error))
   })
 }
@@ -92,21 +92,14 @@ const resetComponentState = () => {
   image.value = undefined
 }
 
-const uploadPercentage = ref(0)
-const uploadDetail = ref()
-
 const handleFileUpload = async (file: File) => {
   const reader = new FileReader()
   reader.readAsDataURL(file)
-  uploadPercentage.value = 0
-  loading.value = true
   try {
     const result = await mutation.execute(file)
     emit('update:modelValue', await props.toModel(result))
   } catch (error) {
-    toast.error(error instanceof Error ? error.message : String(error))
-  } finally {
-    loading.value = false
+    toast.error(mutation.error.value?.message ?? (error instanceof Error ? error.message : String(error)))
   }
 }
 
@@ -147,7 +140,7 @@ onUnmounted(stopCameraStream)
         </template>
         <template #content="{ setOpen }">
           <div class="flex h-full w-full flex-col items-center gap-4">
-            <div v-if="loading" class="flex items-center justify-center" :style="{ width: canvasProperties.width, height: canvasProperties.height }">
+            <div v-if="cameraLoading || mutation.pending.value" class="flex items-center justify-center" :style="{ width: canvasProperties.width, height: canvasProperties.height }">
               <Spinner />
             </div>
             <video v-show="!isPhotoTaken" ref="camera" class="max-w-full" :width="canvasProperties.width" :height="canvasProperties.height" autoplay></video>

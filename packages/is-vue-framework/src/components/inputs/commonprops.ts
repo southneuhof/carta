@@ -23,4 +23,8 @@ export const commonProps = {
     type: String,
     default: '',
   },
+  required: {
+    type: Boolean,
+    default: false,
+  },
 }

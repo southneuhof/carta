@@ -42,9 +42,9 @@ const coreTextRenderer = defineComponent({
   },
 })
 
-function legacyComponent(input: Component): Component {
+export function adaptVModelInput(input: Component): Component {
   return defineComponent({
-    name: 'CoreFormRendererAdapter',
+    name: 'ControlledFormInputAdapter',
     inheritAttrs: false,
     props: {
       value: { type: null, default: undefined },
@@ -73,37 +73,37 @@ function legacyComponent(input: Component): Component {
   })
 }
 
-function legacyInput(loader: () => Promise<{ default: Component }>): Component {
-  return legacyComponent(defineAsyncComponent(loader))
+function controlledInput(loader: () => Promise<{ default: Component }>): Component {
+  return adaptVModelInput(defineAsyncComponent(loader))
 }
 
 /** Stable built-in renderer keys. Applications may override any entry. */
 export const builtInFormRenderers: Record<string, Component> = {
   text: coreTextRenderer,
-  textarea: legacyInput(() => import('../components/inputs/TextareaInput.vue')),
-  password: legacyInput(() => import('../components/inputs/PasswordInput.vue')),
-  number: legacyInput(() => import('../components/inputs/NumberInput.vue')),
-  currency: legacyInput(() => import('../components/inputs/NumberInput.vue')),
-  select: legacyInput(() => import('../components/inputs/SelectInput.vue')),
-  radio: legacyInput(() => import('../components/inputs/RadioGroupInput.vue')),
-  date: legacyInput(() => import('../components/inputs/DateInput.vue')),
-  daterange: legacyInput(() => import('../components/inputs/DateRangeInput.vue')),
-  month: legacyInput(() => import('../components/inputs/MonthInput.vue')),
-  year: legacyInput(() => import('../components/inputs/YearInput.vue')),
-  time: legacyInput(() => import('../components/inputs/TimeInput.vue')),
-  checkbox: legacyInput(() => import('../components/inputs/CheckboxInput.vue')),
-  'checkbox-group': legacyInput(() => import('../components/inputs/CheckboxGroupInput.vue')),
-  switch: legacyInput(() => import('../components/inputs/Switch.vue')),
-  file: legacyInput(() => import('../components/inputs/FileInput.vue')),
-  image: legacyInput(() => import('../components/inputs/ImageInput.vue')),
-  tag: legacyInput(() => import('../components/inputs/TagInput.vue')),
-  color: legacyInput(() => import('../components/inputs/ColorInput.vue')),
-  lookup: legacyInput(() => import('../components/composites/form-inputs/LookupInput.vue')),
-  location: legacyInput(() => import('../components/composites/form-inputs/LocationInput.vue')),
-  'multi-location': legacyInput(() => import('../components/composites/form-inputs/MultiLocationInput.vue')),
-  'rich-text': legacyInput(() => import('../components/inputs/RichTextInput.vue')),
-  'icon-select': legacyInput(() => import('../components/inputs/IconSelectInput.vue')),
-  table: legacyInput(() => import('../components/composites/form-inputs/TableInput.vue')),
-  separator: legacyInput(() => import('../components/composites/form-inputs/FormSeparator.vue')),
-  canvas: legacyInput(() => import('../components/inputs/DrawingCanvas.vue')),
+  textarea: controlledInput(() => import('../components/inputs/TextareaInput.vue')),
+  password: controlledInput(() => import('../components/inputs/PasswordInput.vue')),
+  number: controlledInput(() => import('../components/inputs/NumberInput.vue')),
+  currency: controlledInput(() => import('../components/inputs/NumberInput.vue')),
+  select: controlledInput(() => import('../components/inputs/SelectInput.vue')),
+  radio: controlledInput(() => import('../components/inputs/RadioGroupInput.vue')),
+  date: controlledInput(() => import('../components/inputs/DateInput.vue')),
+  daterange: controlledInput(() => import('../components/inputs/DateRangeInput.vue')),
+  month: controlledInput(() => import('../components/inputs/MonthInput.vue')),
+  year: controlledInput(() => import('../components/inputs/YearInput.vue')),
+  time: controlledInput(() => import('../components/inputs/TimeInput.vue')),
+  checkbox: controlledInput(() => import('../components/inputs/CheckboxInput.vue')),
+  'checkbox-group': controlledInput(() => import('../components/inputs/CheckboxGroupInput.vue')),
+  switch: controlledInput(() => import('../components/inputs/Switch.vue')),
+  file: controlledInput(() => import('../components/inputs/FileInput.vue')),
+  image: controlledInput(() => import('../components/inputs/ImageInput.vue')),
+  tag: controlledInput(() => import('../components/inputs/TagInput.vue')),
+  color: controlledInput(() => import('../components/inputs/ColorInput.vue')),
+  lookup: controlledInput(() => import('../components/composites/form-inputs/LookupInput.vue')),
+  location: controlledInput(() => import('../components/composites/form-inputs/LocationInput.vue')),
+  'multi-location': controlledInput(() => import('../components/composites/form-inputs/MultiLocationInput.vue')),
+  'rich-text': controlledInput(() => import('../components/inputs/RichTextInput.vue')),
+  'icon-select': controlledInput(() => import('../components/inputs/IconSelectInput.vue')),
+  table: controlledInput(() => import('../components/composites/form-inputs/TableInput.vue')),
+  separator: controlledInput(() => import('../components/composites/form-inputs/FormSeparator.vue')),
+  canvas: controlledInput(() => import('../components/inputs/DrawingCanvas.vue')),
 }

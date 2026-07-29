@@ -1,26 +1,24 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { onClickOutside } from '@vueuse/core'
 import { visibleNavigation } from '@/manifest'
 import { allowsPermission } from '@/framework/adapters/bundle'
-import Logo from '@/assets/corporate/common/Logo.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import ProfileSegment from '../../layouts/ProfileSegment.vue'
 
 const route = useRoute()
 const navigation = computed(() => visibleNavigation(allowsPermission))
-const open = ref(false)
+const props = defineProps<{ open: boolean }>()
+const emit = defineEmits<{ close: [] }>()
 const drawer = ref<HTMLElement>()
-const trigger = ref<HTMLButtonElement>()
 
-function close(returnFocus = false) {
-  if (!open.value) return
-  open.value = false
-  if (returnFocus) void nextTick(() => trigger.value?.focus())
+function close() {
+  if (!props.open) return
+  emit('close')
 }
 function onKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape') close(true)
+  if (event.key === 'Escape') close()
 }
 onClickOutside(drawer, () => close(), { ignore: ['[data-mobile-menu-trigger]'] })
 watch(() => route.fullPath, () => close())
@@ -29,15 +27,11 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
 </script>
 
 <template>
-  <header class="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-outline-variant bg-surface px-4 lg:hidden">
-    <button ref="trigger" data-mobile-menu-trigger type="button" aria-label="Open menu" :aria-expanded="open" @click="open = true"><Icon name="menu" /></button>
-    <Logo class="w-10" />
-  </header>
   <div v-if="open" class="fixed inset-0 z-40 bg-black/40 lg:hidden" aria-hidden="true" @click="close()" />
   <aside ref="drawer" class="fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-surface-container shadow-xl transition-transform lg:hidden" :class="open ? 'translate-x-0' : '-translate-x-full'" :aria-hidden="!open">
     <div class="flex h-16 items-center justify-between border-b border-outline-variant px-4">
       <span class="font-semibold">Navigation</span>
-      <button type="button" aria-label="Close menu" @click="close(true)"><Icon name="close" /></button>
+      <button type="button" aria-label="Close menu" @click="close()"><Icon name="close" /></button>
     </div>
     <nav aria-label="Mobile navigation" class="flex-1 overflow-y-auto p-3">
       <section v-for="module in navigation" :key="module.name" class="mb-4">

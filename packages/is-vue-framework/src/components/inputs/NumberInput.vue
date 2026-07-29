@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { PropType } from 'vue'
 import { computed, ref, watch } from 'vue'
 import BaseInput from './BaseInput.vue'
 import { commonProps } from './commonprops'
@@ -25,15 +24,6 @@ const props = defineProps({
   },
   defaultValue: {
     type: Number,
-  },
-  validator: {
-    type: Function as PropType<(value: string, formData?: Record<string, any>) => boolean>,
-    default: () => true,
-  },
-  formData: {
-    type: Object,
-    required: false,
-    default: () => ({}),
   },
   locale: {
     type: String,

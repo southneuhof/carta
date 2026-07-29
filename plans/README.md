@@ -33,12 +33,13 @@ update the status after implementation and review.
 | 040 | Migrate File Manager UI and web adapter to canonical assets | P1 | L | 039 | DONE |
 | 041 | Standardize upload operations and optional File Manager picking | P1 | L | 039, 040 | DONE |
 | 042 | Remove obsolete wired runtime capabilities and publish migration guidance | P1 | M | 035–041 | DONE |
-| 043 | Establish behavioral coverage for migrated input contracts | P1 | L | — | TODO |
-| 044 | Preserve CheckboxGroup model values across interaction | P1 | S | 043 | TODO |
-| 045 | Drive upload controls from shared mutation state | P1 | M | 043 | TODO |
-| 046 | Move asset compatibility conversion out of framework inputs | P1 | M | 043 | TODO |
-| 047 | Remove legacy validation ownership from input components | P2 | M | 043 | TODO |
-| 048 | Name and document the controlled input adapter | P2 | S | — | TODO |
+| 043 | Establish behavioral coverage for migrated input contracts | P1 | L | — | BLOCKED — unrelated dirty Table/Card work fails full suite |
+| 044 | Preserve CheckboxGroup model values across interaction | P1 | S | 043 | BLOCKED — unrelated dirty Table/Card work fails full suite |
+| 045 | Drive upload controls from shared mutation state | P1 | M | 043 | BLOCKED — unrelated dirty Table/Card work fails full suite |
+| 046 | Move asset compatibility conversion out of framework inputs | P1 | M | 043 | BLOCKED — unrelated dirty Table/Card work fails full suite |
+| 047 | Remove legacy validation ownership from input components | P2 | M | 043 | BLOCKED — unrelated dirty Table/Card work fails full suite |
+| 048 | Name and document the controlled input adapter | P2 | S | — | BLOCKED — unrelated dirty Table/Card work fails full suite |
+| 049 | Clean-break legacy configuration into core field defaults | P1 | L | — | TODO |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) |
 
@@ -102,6 +103,9 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) |
   change controlled value or touch behavior.
 - 048 is independent: it records and documents the deliberate controlled
   `v-model` boundary without changing input behavior.
+- 049 is independent of blocked input plans. It is one breaking convergence
+  pass: replace runtime/default/model-config surfaces with core field defaults
+  and explicit catalogs, then delete every legacy API and in-repo consumer.
 
 ## Findings considered and rejected
 
@@ -127,3 +131,17 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) |
   rejected because parent-owned `v-model` is the deliberate reusable input
   contract. Plan 048 only renames, tests, and documents the adapter between
   core Form and controlled inputs.
+- Translating legacy parallel field maps into another key-specific global map:
+  rejected because resources own typed field semantics and exact field names;
+  plan 049 permits only surface-wide defaults plus explicit catalog presets.
+- Automatically normalizing snake_case defaults into camelCase resource keys:
+  rejected because casing does not prove semantic identity and would hide
+  backend/resource boundaries.
+- Registering dormant `chip`, `html`, or `array-clauses` renderers during the
+  defaults migration: rejected until a live migrated resource defines their
+  value/props contract and behavioral test.
+- Adding core table/header class APIs solely for unused legacy CSS maps:
+  rejected until a current migrated screen proves a layout requirement.
+- Retaining deprecated defaults/runtime overloads during plan 049: rejected.
+  Framework 2.0 takes a full clean break; migration docs replace compatibility
+  code, aliases, adapters, fallbacks, and dual signatures.

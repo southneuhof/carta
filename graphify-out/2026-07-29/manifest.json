@@ -705,8 +705,8 @@
     "semantic_hash": "5780e896c2b145b4b3b71a1f28ff84d4"
   },
   "apps/web/src/components/navigations/layouts/ProfileSegment.vue": {
-    "mtime": 1785305248.0166647,
-    "ast_hash": "e4d07a9de3d71feee1d4c9e9d3f9395e",
+    "mtime": 1785314985.6863616,
+    "ast_hash": "c3d8d09bb5886213b0dca858ecbc4301",
     "semantic_hash": ""
   },
   "apps/web/src/components/navigations/sidebar/drawer/NavigationDrawer.vue": {
@@ -775,8 +775,8 @@
     "semantic_hash": "54a37650517bfccda715fe6aef5a68f8"
   },
   "apps/web/src/framework/adapters/fileManager.ts": {
-    "mtime": 1785310045.591737,
-    "ast_hash": "86223d63f4db396c04556402ad17b845",
+    "mtime": 1785316011.6334302,
+    "ast_hash": "0c521915a2f4e0ad00a30b601dd0e762",
     "semantic_hash": ""
   },
   "apps/web/src/framework/adapters/index.ts": {
@@ -835,7 +835,7 @@
     "semantic_hash": "c4a6ac05baddc3ef58be75f492f8a72f"
   },
   "apps/web/src/route-map.d.ts": {
-    "mtime": 1785314688.2353551,
+    "mtime": 1785316101.6499507,
     "ast_hash": "104a454372e060b6c31e98b255929be8",
     "semantic_hash": ""
   },
@@ -1295,9 +1295,9 @@
     "semantic_hash": "7154074e5044e59ce616b0699e508860"
   },
   "packages/is-vue-framework/src/components/base/Popover.vue": {
-    "mtime": 1783848193.8199472,
-    "ast_hash": "bcf8c0f4d896c22dbd11bb293cdcd311",
-    "semantic_hash": "bcf8c0f4d896c22dbd11bb293cdcd311"
+    "mtime": 1785315674.468645,
+    "ast_hash": "543733db58c8325b15b6087540c60aa1",
+    "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/base/Skeleton.vue": {
     "mtime": 1783777690.6915867,
@@ -1390,9 +1390,9 @@
     "semantic_hash": "57583968c79c3f2f428020126b4556a3"
   },
   "packages/is-vue-framework/src/components/composites/Form.vue": {
-    "mtime": 1783884386.968425,
-    "ast_hash": "ac5a7183592f9a5c8d0d3f863a25ea38",
-    "semantic_hash": "ac5a7183592f9a5c8d0d3f863a25ea38"
+    "mtime": 1785316190.9082582,
+    "ast_hash": "4a232ae1ce74a08a1e7634d23f47b849",
+    "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/composites/IframePreviewDialog.vue": {
     "mtime": 1783777690.695355,
@@ -1510,18 +1510,18 @@
     "semantic_hash": "d446f94adc01a027180dc470baff91b8"
   },
   "packages/is-vue-framework/src/components/inputs/BaseInput.vue": {
-    "mtime": 1783837157.1943333,
-    "ast_hash": "19c8e7cbeba935925384f78a2abf747b",
-    "semantic_hash": "19c8e7cbeba935925384f78a2abf747b"
+    "mtime": 1785315824.1751502,
+    "ast_hash": "e498f935b3e51c14a441032532910923",
+    "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/inputs/CameraInput.vue": {
-    "mtime": 1785309888.5759656,
-    "ast_hash": "74cd8e7ddc22a8e3b815e24eb0c9eb2c",
+    "mtime": 1785315899.7636118,
+    "ast_hash": "ac1469f93eec152dc1b2cd4bd0aff437",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/inputs/CheckboxGroupInput.vue": {
-    "mtime": 1785309629.840566,
-    "ast_hash": "666bea8932b4da327f0da38d4a0ce83a",
+    "mtime": 1785315824.1729941,
+    "ast_hash": "87106fe7dd256868df2e79cee82dee14",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/inputs/CheckboxInput.vue": {
@@ -1550,8 +1550,8 @@
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/inputs/FileInput.vue": {
-    "mtime": 1785310248.7038736,
-    "ast_hash": "e42973a25d052dd6b80fdba2944528b4",
+    "mtime": 1785315849.3215687,
+    "ast_hash": "fa154fdb699da9500191f7c91274c230",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/inputs/IconSelectInput.vue": {
@@ -1560,8 +1560,8 @@
     "semantic_hash": "cfc5d9b45c46af57cb9eb240be736779"
   },
   "packages/is-vue-framework/src/components/inputs/ImageInput.vue": {
-    "mtime": 1785310248.7102334,
-    "ast_hash": "4715bd1aa3e4550bf183d3eb7f7fb454",
+    "mtime": 1785316146.073422,
+    "ast_hash": "d8e1c2acab8efe5ec38e69291c3d15ea",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/inputs/MonthInput.vue": {
@@ -1570,14 +1570,14 @@
     "semantic_hash": "e74d8b9707e3935ad803a626445d1c73"
   },
   "packages/is-vue-framework/src/components/inputs/NumberInput.vue": {
-    "mtime": 1785311534.8812597,
-    "ast_hash": "ee5b5634914e34916c078f41822c94fb",
+    "mtime": 1785315849.3234432,
+    "ast_hash": "95d1f5c07fbfe03e40a51160e90688aa",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/inputs/PasswordInput.vue": {
-    "mtime": 1783777690.7005434,
-    "ast_hash": "693dd71a82143a16b922cecb803c09cb",
-    "semantic_hash": "693dd71a82143a16b922cecb803c09cb"
+    "mtime": 1785315849.324881,
+    "ast_hash": "1877ea79425db78d2277afecc2501d03",
+    "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/inputs/Radio.vue": {
     "mtime": 1783777690.7006366,
@@ -1615,8 +1615,8 @@
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/inputs/TextareaInput.vue": {
-    "mtime": 1785260109.306111,
-    "ast_hash": "b105a3d9f8a75c0638e85785ea71865e",
+    "mtime": 1785315849.3243208,
+    "ast_hash": "cb9b8da0086d32d75ad7a5a4ebc6135d",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/inputs/TimeInput.vue": {
@@ -1635,9 +1635,9 @@
     "semantic_hash": "5bf1dbf5cbf07f6b7331c95ac029759e"
   },
   "packages/is-vue-framework/src/components/inputs/__tests__/assetValue.spec.ts": {
-    "mtime": 1783777690.7021208,
-    "ast_hash": "96da07e548a66a73b8007f6d2d1eda33",
-    "semantic_hash": "96da07e548a66a73b8007f6d2d1eda33"
+    "mtime": 1785316146.0741327,
+    "ast_hash": "ab3241e549336b0532ebe909848fb3e8",
+    "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/inputs/__tests__/boundary.spec.ts": {
     "mtime": 1783777690.7022355,
@@ -1655,9 +1655,9 @@
     "semantic_hash": "b93386f2a8c09e7507a991f9ecfeb0d0"
   },
   "packages/is-vue-framework/src/components/inputs/assetValue.ts": {
-    "mtime": 1783777690.7025418,
-    "ast_hash": "d4f85e27163f2b216f629c0c041a079a",
-    "semantic_hash": "d4f85e27163f2b216f629c0c041a079a"
+    "mtime": 1785316039.480712,
+    "ast_hash": "f5d44acb067da7cadb4d46e1b5f88bdb",
+    "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/inputs/color.utils.ts": {
     "mtime": 1783777690.7026765,
@@ -1665,9 +1665,9 @@
     "semantic_hash": "981ed39ef8f4a985005f20980ebd44d4"
   },
   "packages/is-vue-framework/src/components/inputs/commonprops.ts": {
-    "mtime": 1783777690.7027683,
-    "ast_hash": "c713a7d86dfc9fbd750f6050c4fdfd60",
-    "semantic_hash": "c713a7d86dfc9fbd750f6050c4fdfd60"
+    "mtime": 1785315824.1755168,
+    "ast_hash": "5241663773dc6cef2c6f580a685e825c",
+    "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/inputs/iconSelect.utils.ts": {
     "mtime": 1783777690.7028747,
@@ -2635,8 +2635,8 @@
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/core/Table.vue": {
-    "mtime": 1785314495.7820344,
-    "ast_hash": "7fde0606482966f4fe55ab0522c36878",
+    "mtime": 1785315079.6016757,
+    "ast_hash": "26270a6d0b70ca01e586dc040adee0d3",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/core/__tests__/detail.spec.ts": {
@@ -2680,8 +2680,8 @@
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/views/ListView.vue": {
-    "mtime": 1785314495.7834013,
-    "ast_hash": "e1520ea666494f11ea2491658c67efe0",
+    "mtime": 1785315631.2063475,
+    "ast_hash": "20b49948c6b3215874a58691248e6d10",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/views/__tests__/views.spec.ts": {
@@ -2835,8 +2835,8 @@
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/renderers/__tests__/registry.spec.ts": {
-    "mtime": 1785260466.2911234,
-    "ast_hash": "f14fd1ffd5f23b7f7c2f06976ecbfa86",
+    "mtime": 1785315971.6922784,
+    "ast_hash": "4d705dd3440eb73d96734938ad7e70b8",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/renderers/registry.ts": {
@@ -3795,8 +3795,8 @@
     "semantic_hash": ""
   },
   "plans/README.md": {
-    "mtime": 1785310224.8927312,
-    "ast_hash": "1ad5c7fbfa32136ed1f974a60eed3eed",
+    "mtime": 1785316223.6589382,
+    "ast_hash": "f34f73ca8ff676436da20113a0dff303",
     "semantic_hash": ""
   },
   "plans/019-use-reactive-tanstack-table-data.md": {
@@ -3815,8 +3815,8 @@
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/renderers/form.ts": {
-    "mtime": 1785311903.8725288,
-    "ast_hash": "6db8e993c4c5e6de4a1d7bb19f96fc28",
+    "mtime": 1785315824.1761453,
+    "ast_hash": "64edb2a2940fae8ff54bdc873aec9069",
     "semantic_hash": ""
   },
   "plans/022-wire-core-form-renderers-and-schema-metadata.md": {
@@ -3945,13 +3945,13 @@
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/inputs/__tests__/option-source.spec.ts": {
-    "mtime": 1785310554.4493237,
-    "ast_hash": "67984942d55e71f7cabf8997b987eecd",
+    "mtime": 1785316039.4815192,
+    "ast_hash": "da85b8e477678832d63109f2ed2a8666",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/inputs/__tests__/upload-operations.spec.ts": {
-    "mtime": 1785310554.4501312,
-    "ast_hash": "2f819380c74021233861d05b8ed2fee6",
+    "mtime": 1785316039.48239,
+    "ast_hash": "dae65cc8be60a3461717e46b1356498a",
     "semantic_hash": ""
   },
   "packages/is-vue-framework/src/components/inputs/optionalAssetProvider.ts": {
@@ -4015,8 +4015,8 @@
     "semantic_hash": ""
   },
   "docs/architecture/input-data-migration.md": {
-    "mtime": 1785310224.8907034,
-    "ast_hash": "d35a3b661418e660a6c8ef93f1a09e9c",
+    "mtime": 1785316011.6324077,
+    "ast_hash": "441ab81cbb1743008d906669a29723b5",
     "semantic_hash": ""
   },
   "plans/035-remove-retired-form-inputs.md": {
@@ -4107,6 +4107,51 @@
   "packages/is-vue-framework/src/components/composites/form-inputs/tableInput.types.ts": {
     "mtime": 1785314564.8794494,
     "ast_hash": "730414ad06ae2d9bd24163a9449fa306",
+    "semantic_hash": ""
+  },
+  "apps/web/src/framework/adapters/__tests__/fileManager.spec.ts": {
+    "mtime": 1785316091.1697078,
+    "ast_hash": "ea700eb6eed64812d6e9cfb034f6a644",
+    "semantic_hash": ""
+  },
+  "packages/is-vue-framework/src/components/inputs/__tests__/base-input.spec.ts": {
+    "mtime": 1785315971.6909585,
+    "ast_hash": "009d490a0ff71230a105b7fcf5926a43",
+    "semantic_hash": ""
+  },
+  "packages/is-vue-framework/src/components/inputs/__tests__/harness.ts": {
+    "mtime": 1785315971.68848,
+    "ast_hash": "884ed2054f5e6e303cd890982230ddde",
+    "semantic_hash": ""
+  },
+  "plans/043-characterize-input-migration-contracts.md": {
+    "mtime": 1785315433.9971066,
+    "ast_hash": "88965cca808a9185ef1ace8a5d67f4cc",
+    "semantic_hash": ""
+  },
+  "plans/044-preserve-checkbox-group-model.md": {
+    "mtime": 1785315433.9979937,
+    "ast_hash": "b7fce7a2a46961c38480f59f9f4327af",
+    "semantic_hash": ""
+  },
+  "plans/045-converge-upload-mutation-state.md": {
+    "mtime": 1785315513.1481328,
+    "ast_hash": "44bb9aa02f7a9d87d71da25d6c8c14b0",
+    "semantic_hash": ""
+  },
+  "plans/046-enforce-canonical-input-assets.md": {
+    "mtime": 1785315513.148807,
+    "ast_hash": "94ccd65034e2f17f97382b8b14a406e9",
+    "semantic_hash": ""
+  },
+  "plans/047-remove-legacy-input-validation-state.md": {
+    "mtime": 1785315597.5250826,
+    "ast_hash": "fc27911b2ed6d69814c495cb1f4a1f1f",
+    "semantic_hash": ""
+  },
+  "plans/048-rename-controlled-input-adapter.md": {
+    "mtime": 1785315597.5256662,
+    "ast_hash": "911489a26bf5866b232f9d21b9c2123d",
     "semantic_hash": ""
   }
 }

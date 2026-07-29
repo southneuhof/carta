@@ -73,3 +73,29 @@ unmount; app owns backend response conversion. Removed runtime members include
 `select`, `radioGroup`, `checkboxGroup`, `lookup`, `fileInput`, `imageInput`,
 `upload`, `location`, and `fileManager`. Removed components:
 `MasterLookupInput` and `DynamicFormInput`.
+
+Persisted file and image values use one backend-neutral shape:
+
+```ts
+{
+  kind: 'file',
+  path: '/storage/public/report.pdf',
+  url: 'https://cdn.example/report.pdf',
+  name: 'report.pdf',
+  size: 1234,
+  mimeType: 'application/pdf',
+  updatedAt: '2026-07-29T00:00:00.000Z',
+}
+```
+
+Framework inputs validate this shape and do not read backend aliases such as
+`content_type`, `filename`, or `updated_at`. Convert those fields in app-owned
+upload `toModel` and File Manager value adapters.
+
+## Controlled inputs
+
+Core Form owns draft data, touched state, and schema validation. Reusable
+controls intentionally expose Vue's controlled `modelValue` /
+`update:modelValue` contract. Renderer adapter maps core `value` and `setValue`
+to that contract. This boundary is stable, not deprecated; business validation
+remains core/schema-owned.

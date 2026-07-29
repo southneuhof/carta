@@ -3,7 +3,6 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { activeNavigationModule, visibleNavigation } from '@/manifest'
 import { allowsPermission } from '@/framework/adapters/bundle'
-import Logo from '@/assets/corporate/common/Logo.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import ProfileSegment from '../../layouts/ProfileSegment.vue'
 
@@ -14,12 +13,7 @@ const activeModule = computed(() => activeNavigationModule(route.path, (to) => r
 </script>
 
 <template>
-  <aside class="sticky top-0 hidden h-screen w-72 shrink-0 flex-col border-r border-outline-variant bg-surface-container text-on-surface lg:flex">
-    <div class="flex h-20 items-center gap-3 border-b border-outline-variant px-6">
-      <Logo class="w-10" />
-      <span class="font-semibold">Information System</span>
-    </div>
-
+  <aside class="hidden min-h-0 flex-col border-r border-outline-variant bg-surface-container text-on-surface lg:flex">
     <nav aria-label="Main navigation" class="flex-1 overflow-y-auto px-3 py-4">
       <section v-for="module in navigation" :key="module.name" class="mb-5">
         <h2 class="px-3 pb-2 text-xs font-semibold uppercase tracking-wide text-on-surface-variant">{{ module.title }}</h2>

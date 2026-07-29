@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineAsyncComponent, ref, watch, type PropType } from 'vue'
+import { computed, defineAsyncComponent, ref, watch, type PropType } from 'vue'
 import type { UploadOperation } from '../../contracts'
 import { toast } from 'vue-sonner'
 import ImagePreview from '@southneuhof/is-vue-framework/components/base/ImagePreview.vue'
@@ -12,7 +12,7 @@ import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
 import Popover from '@southneuhof/is-vue-framework/components/base/Popover.vue'
 import { Dialog, DialogContent } from '@southneuhof/is-vue-framework/components/base/Dialog/index'
-import { isImageAssetValue, normalizeFileAssetValue, type FileAssetValue } from './assetValue'
+import { isImageAssetValue, toInputAssetValue, type InputAssetValue } from './assetValue'
 import { useOptionalAssetProvider, type ManagedAsset } from './optionalAssetProvider'
 import { useUploadMutation } from './useUploadMutation'
 
@@ -46,10 +46,6 @@ const props = defineProps({
     required: false,
     default: '',
   },
-  transform: {
-    type: Object,
-    required: false,
-  },
   uploadPath: {
     type: String,
     default: '',
@@ -66,16 +62,17 @@ const AssetPicker = defineAsyncComponent(() => import('../../file-manager/AssetP
 const mutation = useUploadMutation(() => props.upload)
 const imageURLResolver = props.imageURLResolver ?? ((payload: any) => ({ imageURL: payload?.url ?? '', thumbnailURL: payload?.url ?? '' }))
 
-type ImageAssetValue = FileAssetValue & { order_number?: number }
+type ImageAssetValue = InputAssetValue & { order_number?: number }
 
 const modelValue = defineModel<ImageAssetValue | Array<ImageAssetValue>>()
 const emit = defineEmits(['update:modelValue', 'update:uploadState', 'validation:touch'])
 
-const uploadPercentage = ref(0)
-const uploadDetail = ref()
-const loading = ref(false)
+const uploadPercentage = computed(() => {
+  const value = mutation.progress.value
+  return value?.total ? Math.round((value.loaded / value.total) * 100) : undefined
+})
 const images = ref<Array<any>>([])
-const isUploading = ref(false)
+const isUploading = mutation.pending
 const isDragActive = ref(false)
 const isReplaceDragActive = ref(false)
 const fileInput = ref<HTMLInputElement>()
@@ -98,14 +95,10 @@ const emitData = () => {
 
 const handleUpload = (file?: File, options: { replace?: boolean } = {}) => {
   if (!file) return
-  loading.value = true
   if (file.size > props.maxSize * 1000000) {
     toast.error('Ukuran berkas terlalu besar')
-    loading.value = false
     return
   }
-  uploadPercentage.value = 0
-  isUploading.value = true
   mutation.execute(file, props.uploadPath)
     .then((res) => {
       return props.toModel(res)
@@ -119,13 +112,10 @@ const handleUpload = (file?: File, options: { replace?: boolean } = {}) => {
         images.value.push(normalized)
       }
       emitData()
-      loading.value = false
-      isUploading.value = false
       emit('validation:touch')
     })
     .catch(() => {
-      loading.value = false
-      isUploading.value = false
+      toast.error(mutation.error.value?.message ?? 'Gagal mengunggah gambar')
     })
 }
 
@@ -211,20 +201,12 @@ function resolvePreviewURLs(payload: ImageAssetValue) {
 }
 
 function resolveDragKey(item: ImageAssetValue, index: number): string {
-  return item?.url || item?.path || item?.data || `image-${index}`
+  return item?.url || item?.path || `image-${index}`
 }
 
 function normalizeImageAsset(payload: unknown): ImageAssetValue | null {
-  const normalized = normalizeFileAssetValue(payload)
+  const normalized = toInputAssetValue(payload)
   if (!normalized) return null
-
-  if (props.transform) {
-    const transformed = { ...normalized }
-    for (const key of Object.keys(props.transform)) {
-      transformed[props.transform[key]] = transformed[key]
-    }
-    return transformed as ImageAssetValue
-  }
 
   return normalized as ImageAssetValue
 }

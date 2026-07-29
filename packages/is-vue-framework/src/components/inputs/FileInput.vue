@@ -12,7 +12,7 @@ import Tooltip from '@southneuhof/is-vue-framework/components/base/Tooltip.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Popover from '@southneuhof/is-vue-framework/components/base/Popover.vue'
 import { Dialog, DialogContent } from '@southneuhof/is-vue-framework/components/base/Dialog/index'
-import { normalizeFileAssetValue, type FileAssetValue } from './assetValue'
+import { toInputAssetValue, type InputAssetValue } from './assetValue'
 import { useDropZone } from '@vueuse/core'
 import { useOptionalAssetProvider, type ManagedAsset } from './optionalAssetProvider'
 import { useUploadMutation } from './useUploadMutation'
@@ -52,11 +52,12 @@ const acceptTypes = computed(() => props.accept ?? [])
 const maxFileSize = computed(() => props.maxSize ?? 10)
 const acceptTypesPretty = computed(() => acceptTypes.value.map((type: string) => MIME_TYPE_NAMES[type] ?? type))
 
-const uploadPercentage = ref(0)
-const uploadDetail = ref()
-const loading = ref(false)
-const items = ref<Array<FileAssetValue>>([])
-const isUploading = ref(false)
+const uploadPercentage = computed(() => {
+  const value = mutation.progress.value
+  return value?.total ? Math.round((value.loaded / value.total) * 100) : undefined
+})
+const items = ref<Array<InputAssetValue>>([])
+const isUploading = mutation.pending
 const sourcePopoverOpen = ref(false)
 const fileManagerOpen = ref(false)
 const fileInput = ref<HTMLInputElement>()
@@ -65,9 +66,9 @@ const dropZoneRef = ref<HTMLDivElement>()
 const modelValue = defineModel<any>()
 if (modelValue.value) {
   if (Array.isArray(modelValue.value)) {
-    items.value = modelValue.value.map((item) => normalizeFileAssetValue(item)).filter((item): item is FileAssetValue => Boolean(item))
+    items.value = modelValue.value.map((item) => toInputAssetValue(item)).filter((item): item is InputAssetValue => Boolean(item))
   } else {
-    const normalized = normalizeFileAssetValue(modelValue.value)
+    const normalized = toInputAssetValue(modelValue.value)
     if (normalized) items.value.push(normalized)
   }
 }
@@ -83,25 +84,20 @@ const handleFileUpload = (files: File | File[]) => {
 
   fileArray.forEach((file) => {
     if (!validateFileLike(file.type, file.size)) return
-    isUploading.value = true
     mutation.execute(file, props.uploadPath)
       .then((res) => {
         return props.toModel(res)
       })
       .then((model) => {
-        const normalized = normalizeFileAssetValue(model)
+        const normalized = toInputAssetValue(model)
         if (!normalized) throw new Error('Invalid upload response')
         if (props.multi) items.value.push(normalized)
         else items.value = [normalized]
-        loading.value = false
-        uploadPercentage.value = 0
-        isUploading.value = false
         emitChanges()
         emit('validation:touch')
       })
       .catch((err) => {
-        toast.error(`Gagal mengunggah berkas: ${err}`)
-        isUploading.value = false
+        toast.error(`Gagal mengunggah berkas: ${mutation.error.value?.message ?? String(err)}`)
       })
   })
 }
@@ -138,9 +134,9 @@ function validateFileLike(contentType?: string, size?: number): boolean {
 
 async function selectFileManagerAsset(payload: ManagedAsset) {
   if (!fileManager || payload.kind === 'folder') return
-  const normalized = normalizeFileAssetValue(await fileManager.values.toModel(payload))
+  const normalized = toInputAssetValue(await fileManager.values.toModel(payload))
   if (!normalized) return
-  if (!validateFileLike(normalized.content_type, normalized.size)) return
+  if (!validateFileLike(normalized.mimeType, normalized.size)) return
 
   if (props.multi) items.value.push(normalized)
   else items.value = [normalized]
@@ -158,9 +154,9 @@ function handleFileDelete(index: number) {
 }
 
 watch(modelValue, () => {
-  if (Array.isArray(modelValue.value)) items.value = modelValue.value.map((item) => normalizeFileAssetValue(item)).filter((item): item is FileAssetValue => Boolean(item))
+  if (Array.isArray(modelValue.value)) items.value = modelValue.value.map((item) => toInputAssetValue(item)).filter((item): item is InputAssetValue => Boolean(item))
   else if (modelValue.value) {
-    const normalized = normalizeFileAssetValue(modelValue.value)
+    const normalized = toInputAssetValue(modelValue.value)
     items.value = normalized ? [normalized] : []
   }
   else items.value = []
@@ -186,7 +182,7 @@ const { isOverDropZone } = useDropZone(dropZoneRef as any, onDrop)
       <div v-if="items.length > 0" class="flex flex-row flex-wrap items-center gap-4">
         <template v-for="(item, index) in items" :key="index">
           <FileComponent
-            :filename="item?.filename || item.path.split('/').pop()"
+            :filename="item.name"
             :url="item?.url"
             :ext="item?.url?.split('.')[1]"
             :action="{
