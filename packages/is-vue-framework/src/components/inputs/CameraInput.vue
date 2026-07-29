@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, type PropType } from 'vue'
 import { toast } from 'vue-sonner'
-import { missingRuntimeCapability, useFrameworkRuntime } from '@southneuhof/is-vue-framework'
+import type { UploadOperation } from '../../contracts'
+import { useUploadMutation } from './useUploadMutation'
 import Dialog from '../base/Dialog.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
@@ -12,9 +13,11 @@ const props = defineProps({
     type: String,
     required: false,
   },
+  upload: { type: Function as PropType<UploadOperation<any>>, required: true },
+  toModel: { type: Function as PropType<(result: any) => unknown | Promise<unknown>>, required: true },
 })
-const runtime = useFrameworkRuntime()
 const emit = defineEmits(['update:modelValue'])
+const mutation = useUploadMutation(() => props.upload)
 
 const isCameraOpen = ref(false)
 const isPhotoTaken = ref(false)
@@ -38,11 +41,14 @@ const createCameraElement = () => {
       height: stream.getVideoTracks()[0].getSettings().height || 338,
     }
     loading.value = false
+  }).catch((error) => {
+    loading.value = false
+    toast.error(error instanceof Error ? error.message : String(error))
   })
 }
 
 const stopCameraStream = () => {
-  let tracks = camera.value.srcObject.getTracks()
+  let tracks = camera.value?.srcObject?.getTracks?.() ?? []
   if (tracks) {
     tracks.forEach((track: any) => {
       track.stop()
@@ -89,21 +95,19 @@ const resetComponentState = () => {
 const uploadPercentage = ref(0)
 const uploadDetail = ref()
 
-const handleFileUpload = (file: File) => {
+const handleFileUpload = async (file: File) => {
   const reader = new FileReader()
   reader.readAsDataURL(file)
   uploadPercentage.value = 0
-  const fileUpload = runtime.upload?.fileUpload
-  if (!fileUpload) missingRuntimeCapability('upload.fileUpload')
-  fileUpload(file, '', (event: any) => {
-      uploadDetail.value = file
-      uploadPercentage.value = Math.round((100 * event.loaded) / event.total)
-    })
-    .then((res) => {
-      emit('update:modelValue', res.data)
-      loading.value = false
-    })
-    .catch((err) => {})
+  loading.value = true
+  try {
+    const result = await mutation.execute(file)
+    emit('update:modelValue', await props.toModel(result))
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : String(error))
+  } finally {
+    loading.value = false
+  }
 }
 
 const dataURItoFile = (dataURI: string) => {
@@ -129,6 +133,7 @@ const commitPhoto = () => {
 onMounted(() => {
   if (isCameraOpen.value == true) deactivateCamera()
 })
+onUnmounted(stopCameraStream)
 </script>
 
 <template>

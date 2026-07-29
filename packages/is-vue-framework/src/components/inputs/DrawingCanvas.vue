@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { dataURItoBlob } from '@southneuhof/utilities/object'
 import { ref, onMounted, type PropType } from 'vue'
-import { missingRuntimeCapability, useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 import BaseInput from './BaseInput.vue'
 import { commonProps } from './commonprops'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
@@ -24,14 +22,6 @@ const props = defineProps({
   },
   ...commonProps,
 })
-const runtime = useFrameworkRuntime()
-const onSave = props.onSave ?? (async (image: string) => {
-  const blob = dataURItoBlob(image)
-  const fileUploadNoAuth = runtime.upload?.fileUploadNoAuth
-  if (!fileUploadNoAuth) missingRuntimeCapability('upload.fileUploadNoAuth')
-  return await fileUploadNoAuth(blob, () => {})
-})
-
 const modelValue = defineModel()
 
 const canvas = ref<any>(null)
@@ -91,7 +81,8 @@ const setToErase = () => {
 const saveImage = async () => {
   if (canvas.value) {
     const image = canvas.value.toDataURL('image/png')
-    modelValue.value = await onSave(image)
+    if (!props.onSave) return
+    modelValue.value = await props.onSave(image)
     isSaved.value = true
   }
 }
@@ -167,7 +158,7 @@ const clearCanvas = () => {
         </div>
         <Tooltip>
           <template #trigger>
-            <Button color="info" @click="saveImage">
+            <Button color="info" :disabled="!props.onSave" @click="saveImage">
               <Icon name="save" />
             </Button>
           </template>

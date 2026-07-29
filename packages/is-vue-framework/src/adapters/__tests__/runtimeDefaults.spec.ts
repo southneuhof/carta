@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { defaultFileInputUpload, defaultImageInputUpload, defaultImageURLResolver, defaultTableGetData, getTableFieldTypes } from '../../runtimeDefaults'
+import { defaultTableGetData, getTableFieldTypes } from '../../runtimeDefaults'
 
 describe('runtime defaults', () => {
   it('uses supplied table runtime', async () => {
@@ -15,23 +15,5 @@ describe('runtime defaults', () => {
 
   it('throws when required runtime capability is missing', async () => {
     await expect(defaultTableGetData('users', undefined, {})).rejects.toThrow('Missing runtime capability: table.getData')
-  })
-
-  it('prefers file-manager upload runtime', async () => {
-    const uploadFile = vi.fn(async () => ({ url: '/file' }))
-    const legacy = vi.fn()
-    const file = new File(['file'], 'file.txt')
-    await expect(defaultFileInputUpload(file, 'docs', undefined, { fileManager: { uploadFile }, fileInput: { fileUpload: legacy } })).resolves.toEqual({ url: '/file' })
-    expect(legacy).not.toHaveBeenCalled()
-  })
-
-  it('keeps image URL pure fallback', () => {
-    expect(defaultImageURLResolver({ url: 'https://example.test/a.jpg' })).toEqual({ imageURL: 'https://example.test/a.jpg', thumbnailURL: 'https://example.test/a.jpg' })
-  })
-
-  it('uses supplied image runtime', async () => {
-    const fileUpload = vi.fn(async () => ({ url: '/image' }))
-    const file = new File(['image'], 'image.png')
-    await expect(defaultImageInputUpload(file, undefined, undefined, { imageInput: { fileUpload } })).resolves.toEqual({ url: '/image' })
   })
 })

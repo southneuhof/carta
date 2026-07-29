@@ -16,6 +16,13 @@ export interface LoadSignalContext {
 
 export type Load<TContext, TResult> = (context: TContext) => MaybePromise<TResult>
 
+export interface OptionLoadContext extends LoadSignalContext {
+  searchParameters: Record<string, unknown>
+}
+
+export type OptionLoad<TOption extends object> =
+  Load<OptionLoadContext, readonly TOption[] | import('./results').CollectionResult<TOption>>
+
 /** Context handed to a collection loader. */
 export interface CollectionLoadContext<TQuery = Record<string, unknown>> extends LoadSignalContext {
   query: TQuery

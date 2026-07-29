@@ -12,9 +12,13 @@ export type {
   MaybePromise,
   RecordIdentity,
   RecordIdentityValue,
+  OptionLoadContext,
+  OptionLoad,
 } from './load'
 
 export type { CollectionMeta, CollectionResult, RecordResult } from './results'
+export type { UploadProgress, UploadContext, UploadOperation } from './upload'
+export type { Coordinate, LocationPrediction, LocationOperations } from './location'
 
 export type {
   FieldKey,

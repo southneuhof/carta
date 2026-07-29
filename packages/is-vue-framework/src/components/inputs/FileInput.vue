@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, watch, computed, type PropType } from 'vue'
-import { defaultFileInputUpload, type FileInputUploadRuntime } from '@southneuhof/is-vue-framework/runtimeDefaults'
+import { defineAsyncComponent, ref, watch, computed, type PropType } from 'vue'
+import type { UploadOperation } from '../../contracts'
 import FileComponent from '@southneuhof/is-vue-framework/components/utils/FileComponent.vue'
 import { toast } from 'vue-sonner'
 import BaseInput from './BaseInput.vue'
@@ -11,11 +11,11 @@ import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
 import Tooltip from '@southneuhof/is-vue-framework/components/base/Tooltip.vue'
 import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import Popover from '@southneuhof/is-vue-framework/components/base/Popover.vue'
-import FileManager from '@southneuhof/is-vue-framework/components/utils/FileManager/FileManager.vue'
 import { Dialog, DialogContent } from '@southneuhof/is-vue-framework/components/base/Dialog/index'
 import { normalizeFileAssetValue, type FileAssetValue } from './assetValue'
 import { useDropZone } from '@vueuse/core'
-import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
+import { useOptionalAssetProvider, type ManagedAsset } from './optionalAssetProvider'
+import { useUploadMutation } from './useUploadMutation'
 
 const props = defineProps({
   accept: {
@@ -37,13 +37,13 @@ const props = defineProps({
     type: String,
     default: '',
   },
-  fileUpload: {
-    type: Function as PropType<FileInputUploadRuntime>,
-  },
+  upload: Function as PropType<UploadOperation<any>>,
+  toModel: { type: Function as PropType<(result: any) => unknown | Promise<unknown>>, default: (result: unknown) => result },
   ...commonProps,
 })
-const runtime = useFrameworkRuntime()
-const fileUpload = props.fileUpload ?? ((file: File, directory?: string, onUploadProgress?: (progress: { loaded: number; total: number }) => void) => defaultFileInputUpload(file, directory, onUploadProgress, runtime))
+const fileManager = useOptionalAssetProvider()
+const AssetPicker = defineAsyncComponent(() => import('../../file-manager/AssetPicker.vue'))
+const mutation = useUploadMutation(() => props.upload)
 const emit = defineEmits<{
   (event: 'validation:touch'): void
 }>()
@@ -84,12 +84,12 @@ const handleFileUpload = (files: File | File[]) => {
   fileArray.forEach((file) => {
     if (!validateFileLike(file.type, file.size)) return
     isUploading.value = true
-    fileUpload(file, props.uploadPath, (event: any) => {
-        uploadDetail.value = file
-        uploadPercentage.value = Math.round((100 * event.loaded) / event.total)
-      })
+    mutation.execute(file, props.uploadPath)
       .then((res) => {
-        const normalized = normalizeFileAssetValue(res)
+        return props.toModel(res)
+      })
+      .then((model) => {
+        const normalized = normalizeFileAssetValue(model)
         if (!normalized) throw new Error('Invalid upload response')
         if (props.multi) items.value.push(normalized)
         else items.value = [normalized]
@@ -113,11 +113,13 @@ function handleInputChange(event: Event) {
 }
 
 function openDevicePicker() {
+  if (!props.upload) return
   sourcePopoverOpen.value = false
   fileInput.value?.click()
 }
 
 function openFileManager() {
+  if (!fileManager) return
   sourcePopoverOpen.value = false
   fileManagerOpen.value = true
 }
@@ -134,9 +136,10 @@ function validateFileLike(contentType?: string, size?: number): boolean {
   return true
 }
 
-function selectFileManagerAsset(payload: unknown) {
-  const normalized = normalizeFileAssetValue(payload)
-  if (!normalized || normalized.type === 'folder') return
+async function selectFileManagerAsset(payload: ManagedAsset) {
+  if (!fileManager || payload.kind === 'folder') return
+  const normalized = normalizeFileAssetValue(await fileManager.values.toModel(payload))
+  if (!normalized) return
   if (!validateFileLike(normalized.content_type, normalized.size)) return
 
   if (props.multi) items.value.push(normalized)
@@ -210,11 +213,11 @@ const { isOverDropZone } = useDropZone(dropZoneRef as any, onDrop)
                 </template>
                 <template #content>
                   <div class="min-w-56 rounded-lg border border-outline/[12%] bg-surface-container p-1 text-on-surface shadow-elevation-3">
-                    <button type="button" class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-on-surface/[8%]" @click="openDevicePicker">
+                    <button v-if="props.upload" type="button" class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-on-surface/[8%]" @click="openDevicePicker">
                       <Icon name="upload-cloud" size="sm" />
                       <span>Upload from device</span>
                     </button>
-                    <button type="button" class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-on-surface/[8%]" @click="openFileManager">
+                    <button v-if="fileManager" type="button" class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-on-surface/[8%]" @click="openFileManager">
                       <Icon name="folder-2" size="sm" />
                       <span>Choose from file manager</span>
                     </button>
@@ -264,14 +267,7 @@ const { isOverDropZone } = useDropZone(dropZoneRef as any, onDrop)
   </BaseInput>
   <Dialog v-model:open="fileManagerOpen">
     <DialogContent class="flex h-[60vh] max-w-[60vw] flex-col">
-      <FileManager :activePath="props.uploadPath || '/storage/public'">
-        <template #footer="{ data }">
-          <div class="flex flex-row items-center justify-end gap-2">
-            <Button kind="button" variant="text" type="button" @click="() => (fileManagerOpen = false)">Cancel</Button>
-            <Button type="button" :disabled="!data || data.type === 'folder'" @click="() => selectFileManagerAsset(data)">Open</Button>
-          </div>
-        </template>
-      </FileManager>
+      <AssetPicker @select="selectFileManagerAsset" @cancel="fileManagerOpen = false" />
     </DialogContent>
   </Dialog>
 </template>

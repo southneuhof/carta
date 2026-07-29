@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, watch, type PropType } from 'vue'
-import { defaultImageInputUpload, defaultImageURLResolver, type ImageInputUploadRuntime, type ImageInputURLResolverRuntime } from '@southneuhof/is-vue-framework/runtimeDefaults'
+import { defineAsyncComponent, ref, watch, type PropType } from 'vue'
+import type { UploadOperation } from '../../contracts'
 import { toast } from 'vue-sonner'
 import ImagePreview from '@southneuhof/is-vue-framework/components/base/ImagePreview.vue'
 import Draggable from 'vuedraggable'
@@ -11,10 +11,10 @@ import Chip from '@southneuhof/is-vue-framework/components/base/Chip.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
 import Popover from '@southneuhof/is-vue-framework/components/base/Popover.vue'
-import FileManager from '@southneuhof/is-vue-framework/components/utils/FileManager/FileManager.vue'
 import { Dialog, DialogContent } from '@southneuhof/is-vue-framework/components/base/Dialog/index'
 import { isImageAssetValue, normalizeFileAssetValue, type FileAssetValue } from './assetValue'
-import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
+import { useOptionalAssetProvider, type ManagedAsset } from './optionalAssetProvider'
+import { useUploadMutation } from './useUploadMutation'
 
 const props = defineProps({
   modelValue: {
@@ -54,17 +54,17 @@ const props = defineProps({
     type: String,
     default: '',
   },
-  fileUpload: {
-    type: Function as PropType<ImageInputUploadRuntime>,
-  },
+  upload: Function as PropType<UploadOperation<any>>,
+  toModel: { type: Function as PropType<(result: any) => unknown | Promise<unknown>>, default: (result: unknown) => result },
   imageURLResolver: {
-    type: Function as PropType<ImageInputURLResolverRuntime>,
+    type: Function as PropType<(payload: any) => { imageURL: string; thumbnailURL: string }>,
   },
   ...commonProps,
 })
-const runtime = useFrameworkRuntime()
-const fileUpload = props.fileUpload ?? ((file: File, directory?: string, onUploadProgress?: (progress: { loaded: number; total: number }) => void) => defaultImageInputUpload(file, directory, onUploadProgress, runtime))
-const imageURLResolver = props.imageURLResolver ?? ((payload: Record<string, any> | string) => defaultImageURLResolver(payload, runtime))
+const fileManager = useOptionalAssetProvider()
+const AssetPicker = defineAsyncComponent(() => import('../../file-manager/AssetPicker.vue'))
+const mutation = useUploadMutation(() => props.upload)
+const imageURLResolver = props.imageURLResolver ?? ((payload: any) => ({ imageURL: payload?.url ?? '', thumbnailURL: payload?.url ?? '' }))
 
 type ImageAssetValue = FileAssetValue & { order_number?: number }
 
@@ -106,12 +106,12 @@ const handleUpload = (file?: File, options: { replace?: boolean } = {}) => {
   }
   uploadPercentage.value = 0
   isUploading.value = true
-  fileUpload(file, props.uploadPath, (event: any) => {
-      uploadDetail.value = file
-      uploadPercentage.value = Math.round((100 * event.loaded) / event.total)
-    })
+  mutation.execute(file, props.uploadPath)
     .then((res) => {
-      const normalized = normalizeImageAsset(res)
+      return props.toModel(res)
+    })
+    .then((model) => {
+      const normalized = normalizeImageAsset(model)
       if (!normalized) throw new Error('Invalid upload response')
       if (options.replace && !props.multi && images.value.length) {
         images.value.splice(0, 1, normalized)
@@ -137,11 +137,13 @@ const handleFileUpload = (e: Event) => {
 }
 
 function openDevicePicker() {
+  if (!props.upload) return
   sourcePopoverOpen.value = false
   fileInput.value?.click()
 }
 
 function openFileManager() {
+  if (!fileManager) return
   sourcePopoverOpen.value = false
   fileManagerOpen.value = true
 }
@@ -227,13 +229,13 @@ function normalizeImageAsset(payload: unknown): ImageAssetValue | null {
   return normalized as ImageAssetValue
 }
 
-function selectFileManagerAsset(payload: unknown) {
-  if (!isImageAssetValue(payload)) {
+async function selectFileManagerAsset(payload: ManagedAsset) {
+  if (!fileManager || payload.kind !== 'file' || !payload.mimeType?.startsWith('image/')) {
     toast.error('Berkas yang dipilih bukan gambar')
     return
   }
 
-  const normalized = normalizeImageAsset(payload)
+  const normalized = normalizeImageAsset(await fileManager.values.toModel(payload))
   if (!normalized) return
 
   if (!props.multi) images.value = [normalized]
@@ -302,11 +304,11 @@ function selectFileManagerAsset(payload: unknown) {
                 </template>
                 <template #content>
                   <div class="min-w-56 rounded-lg border border-outline/[12%] bg-surface-container p-1 text-on-surface shadow-elevation-3">
-                    <button type="button" class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-on-surface/[8%]" @click="openDevicePicker">
+                    <button v-if="props.upload" type="button" class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-on-surface/[8%]" @click="openDevicePicker">
                       <Icon name="upload-cloud" size="sm" />
                       <span>Upload from device</span>
                     </button>
-                    <button type="button" class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-on-surface/[8%]" @click="openFileManager">
+                    <button v-if="fileManager" type="button" class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-on-surface/[8%]" @click="openFileManager">
                       <Icon name="folder-2" size="sm" />
                       <span>Choose from file manager</span>
                     </button>
@@ -326,14 +328,7 @@ function selectFileManagerAsset(payload: unknown) {
   </BaseInput>
   <Dialog v-model:open="fileManagerOpen">
     <DialogContent class="flex h-[60vh] max-w-[60vw] flex-col">
-      <FileManager :activePath="props.uploadPath || '/storage/public'">
-        <template #footer="{ data }">
-          <div class="flex flex-row items-center justify-end gap-2">
-            <Button kind="button" variant="text" type="button" @click="() => (fileManagerOpen = false)">Cancel</Button>
-            <Button type="button" :disabled="!data || data.type === 'folder'" @click="() => selectFileManagerAsset(data)">Open</Button>
-          </div>
-        </template>
-      </FileManager>
+      <AssetPicker :accept="(asset) => asset.kind === 'file' && !!asset.mimeType?.startsWith('image/')" @select="selectFileManagerAsset" @cancel="fileManagerOpen = false" />
     </DialogContent>
   </Dialog>
 </template>

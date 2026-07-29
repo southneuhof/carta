@@ -136,16 +136,16 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
-    'auth-login': RouteRecordInfo<
-      'auth-login',
-      '/auth/login',
+    'input-catalog': RouteRecordInfo<
+      'input-catalog',
+      '/input-catalog',
       Record<never, never>,
       Record<never, never>,
       | never
     >,
-    'input-catalog': RouteRecordInfo<
-      'input-catalog',
-      '/input-catalog',
+    'auth-login': RouteRecordInfo<
+      'auth-login',
+      '/auth/login',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -321,10 +321,25 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
+    'src/routes/(demo)/demo.layout.vue': {
+      routes:
+        | 'input-catalog'
+      views:
+        | 'default'
+      pathParamNames:
+        | never
+    }
+    'src/routes/(demo)/input-catalog/index.route.vue': {
+      routes:
+        | 'input-catalog'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
     'src/routes/(public)/public.layout.vue': {
       routes:
         | 'auth-login'
-        | 'input-catalog'
         | 'privacy-policy'
       views:
         | 'default'
@@ -334,14 +349,6 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(public)/auth/login/index.route.vue': {
       routes:
         | 'auth-login'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/routes/(public)/input-catalog/index.route.vue': {
-      routes:
-        | 'input-catalog'
       views:
         | never
       pathParamNames:

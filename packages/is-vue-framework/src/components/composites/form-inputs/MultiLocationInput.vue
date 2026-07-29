@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, type PropType } from 'vue'
+import type { LocationOperations } from '../../../contracts'
 import LocationInput from './LocationInput.vue'
 import BaseInput from '../../inputs/BaseInput.vue'
 import { commonProps } from '../../inputs/commonprops'
@@ -10,6 +11,7 @@ import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 
 const props = defineProps({
   ...commonProps,
+  operations: { type: Object as PropType<LocationOperations>, required: true },
 })
 
 const modelValue = defineModel<Array<any>>()
@@ -36,7 +38,7 @@ const tempLocation = ref()
           <Button><Icon name="add" />Tambah Lokasi</Button>
         </template>
         <template #content="{ setOpen }">
-          <LocationInput v-model="tempLocation" :formConfig="locationForm" />
+          <LocationInput v-model="tempLocation" :operations="operations" :formConfig="locationForm" />
           <Button @click="() => [modelValue?.push(tempLocation), setOpen(false)]">Simpan</Button>
         </template>
       </Dialog>
@@ -55,7 +57,7 @@ const tempLocation = ref()
                 </Card>
               </template>
               <template #content="{ setOpen }">
-                <LocationInput v-model="tempLocation" :formConfig="locationForm" />
+                <LocationInput v-model="tempLocation" :operations="operations" :formConfig="locationForm" />
                 <Button @click="() => setOpen(false)">Simpan</Button>
               </template>
             </Dialog>

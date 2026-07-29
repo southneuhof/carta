@@ -367,7 +367,7 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
           @end="reorder"
         >
           <template #item="{ element: record, index }">
-            <tr class="group  hover:bg-primary/[6%] focus-within:bg-primary/[6%]" @click="emit('row-click', record, index)">
+            <tr class="group transition-colors hover:bg-primary/[6%] focus-within:bg-primary/[6%]" @click="emit('row-click', record, index)">
               <td v-for="field in visibleFields" :key="field.key" :style="{ textAlign: field.align }" class="whitespace-nowrap px-4 py-3.5 text-on-surface">
                 <slot :name="`cell:${field.key}`" :value="valueFor(record, field)" :record="record" :field="field" :index="index">
                   <component :is="rendererFor(field.renderer)" v-if="field.renderer" v-bind="field.props" :value="valueFor(record, field)" :record="record" :field="field" :index="index" />
@@ -382,7 +382,7 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
           <tr
             v-for="(row, index) in table.getRowModel().rows"
             :key="row.id"
-            class="group  hover:bg-primary/[6%] focus-within:bg-primary/[6%]"
+            class="group transition-colors hover:bg-primary/[6%] focus-within:bg-primary/[6%]"
             @click="emit('row-click', row.original, index)"
           >
             <td

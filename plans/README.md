@@ -25,14 +25,14 @@ update the status after implementation and review.
 | 032 | Implement overtime web field, form, and route parity | P1 | L | 029, 030, 031 | DONE |
 | 033 | Complete overtime verification UI and acceptance flow | P1 | L | 030, 031, 032 | DONE |
 | 034 | Rework app shell into responsive SaaS layout | P1 | L | 028 | DONE |
-| 035 | Remove retired MasterLookupInput and DynamicFormInput surfaces | P1 | S | — | TODO |
-| 036 | Migrate Select, RadioGroup, and CheckboxGroup to explicit option sources | P1 | L | 035 | TODO |
-| 037 | Migrate LookupInput to the TanStack-backed core Table | P1 | L | 035 | TODO |
-| 038 | Migrate Location and MultiLocation to explicit map operations | P1 | M | 035 | TODO |
-| 039 | Create an optional backend-agnostic File Manager plugin | P1 | L | 035 | TODO |
-| 040 | Migrate File Manager UI and web adapter to canonical assets | P1 | L | 039 | TODO |
-| 041 | Standardize upload operations and optional File Manager picking | P1 | L | 039, 040 | TODO |
-| 042 | Remove obsolete wired runtime capabilities and publish migration guidance | P1 | M | 035–041 | TODO |
+| 035 | Remove retired MasterLookupInput and DynamicFormInput surfaces | P1 | S | — | DONE |
+| 036 | Migrate Select, RadioGroup, and CheckboxGroup to explicit option sources | P1 | L | 035 | DONE |
+| 037 | Migrate LookupInput to the TanStack-backed core Table | P1 | L | 035 | DONE |
+| 038 | Migrate Location and MultiLocation to explicit map operations | P1 | M | 035 | DONE |
+| 039 | Create an optional backend-agnostic File Manager plugin | P1 | L | 035 | DONE |
+| 040 | Migrate File Manager UI and web adapter to canonical assets | P1 | L | 039 | DONE |
+| 041 | Standardize upload operations and optional File Manager picking | P1 | L | 039, 040 | DONE |
+| 042 | Remove obsolete wired runtime capabilities and publish migration guidance | P1 | M | 035–041 | DONE |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) |
 

@@ -40,6 +40,11 @@ const props = defineProps({
     required: false,
     default: 'en-US',
   },
+  currency: {
+    type: String,
+    required: false,
+    default: '',
+  },
   ...commonProps,
 })
 
@@ -74,6 +79,18 @@ function emitChange(event: any) {
 }
 
 const numberValue = ref()
+const localizedPrefix = computed(() => {
+  if (props.prefix) return props.prefix
+  if (!props.currency) return ''
+
+  return new Intl.NumberFormat(props.locale, {
+    style: 'currency',
+    currency: props.currency,
+  })
+    .formatToParts(0)
+    .find((part) => part.type === 'currency')?.value ?? props.currency
+})
+
 watch(
   () => modelValue.value,
   () => {
@@ -94,7 +111,7 @@ watch(
       :class="twMerge(`flex flex-row items-center gap-4 rounded-lg bg-transparent py-3 pl-4 outline outline-1 outline-outline/[24%] transition-[outline-color,box-shadow] duration-150 ease-out focus-within:outline-secondary focus-within:ring-1 focus-within:ring-secondary/30 ${error ? 'outline-error focus-within:outline-error focus-within:ring-error/30 ' : ''} ${disabled ? 'pointer-events-none cursor-not-allowed opacity-60 ' : ''}`, ($attrs.class as string))"
     >
       <Icon v-if="props.icon" :name="(props.icon as any)" />
-      <p v-if="props.prefix">{{ prefix }}</p>
+      <p v-if="localizedPrefix">{{ localizedPrefix }}</p>
       <input
         :placeholder="String(placeholder)"
         :value="numberValue"

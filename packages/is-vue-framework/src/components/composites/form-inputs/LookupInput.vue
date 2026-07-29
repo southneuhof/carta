@@ -1,450 +1,207 @@
 <script setup lang="ts">
-import { defaultLookupGetData, defaultLookupGetDetail, getDefaultLookupFieldsAlias, defaultLookupDataFormatter } from '@southneuhof/is-vue-framework/runtimeDefaults'
-import { ref, type PropType, watch, computed, onMounted } from 'vue'
+import { computed, onMounted, ref, watch, type PropType } from 'vue'
+import type {
+  CollectionLoadContext,
+  CollectionResult,
+  FieldsInput,
+  Load,
+  QueryNamespace,
+  RecordLoadContext,
+  RecordResult,
+} from '../../../contracts'
+import { resolveFields } from '../../../fields'
 import { commonProps } from '../../inputs/commonprops'
 import Radio from '../../inputs/Radio.vue'
 import BaseInput from '../../inputs/BaseInput.vue'
-import Table from '../Table.vue'
 import Checkbox from '../../inputs/CheckboxInput.vue'
 import SearchBox from '../SearchBox.vue'
 import DialogForm from '../DialogForm.vue'
 import ConfirmationDialog from '../ConfirmationDialog.vue'
 import Dialog from '../../base/Dialog.vue'
-import Popover from '../../base/Popover.vue'
-import Form from '../Form.vue'
-import { keyManager } from '@southneuhof/is-vue-framework/adapters/state'
-import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
-import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
-import Chip from '@southneuhof/is-vue-framework/components/base/Chip.vue'
-import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
-import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
+import Button from '../../base/Button.vue'
+import Chip from '../../base/Chip.vue'
+import Icon from '../../base/Icon.vue'
+import Table from '../../core/Table.vue'
+
+type RecordData = Record<string, any>
 
 const props = defineProps({
   ...commonProps,
-  getData: {
-    type: Function as PropType<(getAPI: string, searchParameters?: object) => Promise<any>>,
-  },
-  getDetail: {
-    type: Function as PropType<(getAPI: string, id: string | number, searchParameters?: object) => Promise<any>>,
-  },
-  getAPI: {
-    type: String,
-    required: true,
-  },
-  showAPI: {
-    type: String,
-    required: false,
-    default: '',
-  },
-  paginated: {
-    type: Boolean,
-    default: true,
-  },
-  searchParameters: {
-    type: Object as PropType<Record<string, string>>,
-    default: () => ({}),
-  },
-  multi: {
-    type: Boolean,
-    default: false,
-  },
-  pick: {
-    type: String,
-    default: 'id',
-  },
-  transform: {
-    type: Object,
-  },
-  fields: {
-    type: Array<string>,
-    default: ['name'],
-  },
-  fieldsAlias: {
-    type: Object,
-  },
-  preview: {
-    type: String,
-  },
-  placeholder: {
-    type: String,
-    default: 'Pilih',
-  },
-  fieldsType: {
-    type: Object,
-  },
-  fieldsProxy: {
-    type: Object,
-  },
-  fieldsDictionary: {
-    type: Object,
-  },
-  fieldsParse: {
-    type: Object,
-  },
-  filterConfig: {
-    type: Object,
-  },
-  dataFormatter: {
-    type: Function,
-  },
-  inlineAddFormConfig: {
-    type: Object,
-  },
-  // `static=true` means manual commit mode:
-  // selection updates are staged and only committed when user clicks "Simpan".
-  // `static=false` keeps the existing save flow but still uses the same commit pipeline.
-  static: {
-    type: Boolean,
-    default: false,
-  },
-  onCommit: {
-    type: Function as PropType<(data: any) => any>,
-    default: () => {},
-  },
-  formDataSetter: {
-    type: Function as PropType<(newData: any) => void>,
-    default: () => {},
-  },
-  hidePreviewTable: {
-    type: Boolean,
-  },
-  formData: { type: Object },
-  onSelectData: { type: Function as PropType<(formData: any, selectedData: any, formDataSetter: (newData: any) => void) => void> },
+  fields: { type: [Array, Object] as PropType<FieldsInput<RecordData>>, required: true },
+  data: Array as PropType<RecordData[]>,
+  load: Function as PropType<Load<CollectionLoadContext, CollectionResult<RecordData>>>,
+  loadDetail: Function as PropType<Load<RecordLoadContext, RecordResult<RecordData>>>,
+  searchParameters: { type: Object as PropType<Record<string, unknown>>, default: () => ({}) },
+  namespace: String as PropType<QueryNamespace>,
+  view: String,
+  multi: { type: Boolean, default: false },
+  pick: { type: String, default: 'id' },
+  transform: Object as PropType<Record<string, string>>,
+  preview: String,
+  placeholder: { type: String, default: 'Pilih' },
+  static: { type: Boolean, default: false },
+  onCommit: { type: Function as PropType<(data: RecordData[]) => unknown>, default: () => {} },
+  formDataSetter: { type: Function as PropType<(newData: any) => void>, default: () => {} },
+  hidePreviewTable: Boolean,
+  formData: Object,
+  onSelectData: Function as PropType<(formData: any, selectedData: RecordData[], setter: (data: any) => void) => void>,
+  inlineAddFormConfig: Object,
 })
-const runtime = useFrameworkRuntime()
-const resolvedGetData = props.getData ?? ((getAPI: string, searchParameters?: object) => defaultLookupGetData(getAPI, searchParameters ?? {}, runtime.lookup))
-const resolvedGetDetail = props.getDetail ?? ((getAPI: string, id: string | number, searchParameters?: object) => defaultLookupGetDetail(getAPI, id, searchParameters, runtime.lookup))
-const resolvedFieldsAlias = props.fieldsAlias ?? getDefaultLookupFieldsAlias(runtime.lookup)
-const resolvedDataFormatter = props.dataFormatter ?? ((data: Array<Record<string, any>>, allowMulti: boolean, pick: string) => defaultLookupDataFormatter(data, allowMulti, pick, runtime.lookup))
 
 const modelValue = defineModel<any>()
-const emit = defineEmits<{
-  (event: 'validation:touch'): void
-}>()
-const inputValue = ref<Array<Record<string, any>>>([])
-const stagedInputValue = ref<Array<Record<string, any>>>([])
-const committedInputValue = ref<Array<Record<string, any>>>([])
-const hasChanged = ref(false)
-const isLoading = ref<boolean>(false)
+const emit = defineEmits<{ (event: 'validation:touch'): void }>()
+const resolvedFields = computed(() => resolveFields({ fields: props.fields, surface: 'table' }))
+const viewKey = computed(() => props.view ?? resolvedFields.value[0]?.key ?? props.pick)
+const committed = ref<RecordData[]>([])
+const staged = ref<RecordData[]>([])
+const busy = ref(false)
+const hydrationError = ref<string>()
+const search = ref('')
 
-const params = ref({
-  page: 1,
-  sort_by: '',
-  sort: 'DESC',
-  search: '',
-  ...props.searchParameters,
-})
-
-const filterParameters = ref<Record<string, any>>({ ...props.searchParameters })
-
-const combinedSearchParameters = computed(() => ({
-  ...params.value,
-  ...filterParameters.value,
-}))
-
-const filterProps = computed<Record<string, any>>(() => ({
-  fields: props.filterConfig?.fields || [],
-  fieldsAlias: props.filterConfig?.fieldsAlias || {},
-  inputConfig: props.filterConfig?.inputConfig || {},
-}))
-
-function deepClone<T>(value: T): T {
+function clone<T>(value: T): T {
   if (value == null) return value
-  try {
-    return JSON.parse(JSON.stringify(value))
-  } catch {
-    if (Array.isArray(value)) return [...value] as T
-    if (typeof value === 'object') return { ...(value as Record<string, any>) } as T
-    return value
-  }
+  return JSON.parse(JSON.stringify(value))
 }
 
-function isDeepEqual(valueA: unknown, valueB: unknown) {
-  if (valueA === valueB) return true
-  try {
-    return JSON.stringify(valueA) === JSON.stringify(valueB)
-  } catch {
-    return false
-  }
+function normalize(value: any): RecordData[] {
+  if (value == null) return []
+  if (props.multi) return Array.isArray(value) ? clone(value) : []
+  return typeof value === 'object' ? [clone(value)] : [{ [props.pick]: value }]
 }
 
-function normalizeModelSelection(rawValue: any) {
-  if (rawValue == null) return []
-
-  if (props.multi) {
-    if (!Array.isArray(rawValue) || rawValue.length === 0) return []
-    return deepClone(rawValue)
-  }
-
-  if (typeof rawValue === 'object') {
-    return [deepClone(rawValue)]
-  }
-
-  return [{ [props.pick]: rawValue }]
-}
-
-function syncSelection(selection: Array<Record<string, any>>, options?: { staged?: boolean; committed?: boolean }) {
-  inputValue.value = deepClone(selection)
-  if (options?.staged !== false) stagedInputValue.value = deepClone(selection)
-  if (options?.committed !== false) committedInputValue.value = deepClone(selection)
-}
-
-function syncFromModelValue() {
-  const normalizedSelection = normalizeModelSelection(modelValue.value)
-  syncSelection(normalizedSelection)
-}
-
-function formatSelectionForModel(selection: Array<Record<string, any>>) {
-  let data = selection
-  if (props.transform && selection.length) {
-    const transformedData = deepClone(selection)
-    const entries = Object.entries(props.transform)
-    transformedData.forEach((item: any) => {
-      entries.forEach(([sourceKey, targetKey]) => {
-        item[targetKey] = item[sourceKey]
-      })
+function forModel(selection: RecordData[]) {
+  let records = clone(selection)
+  if (props.transform) {
+    records = records.map((record) => {
+      const next = { ...record }
+      for (const [source, target] of Object.entries(props.transform!)) next[target] = next[source]
+      return next
     })
-    data = transformedData
   }
-  if (!data.length) return props.multi ? [] : null
-  return resolvedDataFormatter(data, props.multi, props.pick, props.fields)
+  if (props.multi) return records
+  return records[0]?.[props.pick] ?? null
 }
 
-function syncModelAndSelectHook(selection: Array<Record<string, any>>) {
-  modelValue.value = formatSelectionForModel(selection)
-  if (props.onSelectData) {
-    props.onSelectData(props.formData, selection, props.formDataSetter)
-  }
-}
-
-async function hydrateSingleSelectedData() {
-  if (props.multi) return
-  const selectedItem = inputValue.value?.[0]
-  if (!selectedItem) return
-  if (selectedItem[props.fields[0]]) return
-
-  const selectedId = selectedItem[props.pick]
-  if (selectedId == null || selectedId === '') return
-
+async function hydrate() {
+  const fallback = normalize(modelValue.value)
+  committed.value = fallback
+  staged.value = clone(fallback)
+  hydrationError.value = undefined
+  if (props.multi || !props.loadDetail || !fallback[0]) return
+  if (fallback[0][viewKey.value] != null) return
+  const id = fallback[0][props.pick]
+  if (id == null || id === '') return
   try {
-    const detailData = await resolvedGetDetail(props.getAPI, selectedId, props.searchParameters)
-    if (!detailData) return
-
-    syncSelection([deepClone(detailData)])
-  } catch {
-    // Ignore detail hydrate failure and keep fallback display state.
-  }
-}
-
-async function commitFromSelection(selection: Array<Record<string, any>>) {
-  const nextSelection = deepClone(selection)
-  committedInputValue.value = deepClone(nextSelection)
-  inputValue.value = deepClone(nextSelection)
-  isLoading.value = true
-  try {
-    await props.onCommit(nextSelection)
-    syncModelAndSelectHook(nextSelection)
-    emit('validation:touch')
-  } finally {
-    isLoading.value = false
-  }
-}
-
-function saveSelection() {
-  // `static=true` and `static=false` both commit from staged selection.
-  // This keeps the save action deterministic and avoids stale-commit bugs.
-  return commitFromSelection(stagedInputValue.value)
-}
-
-function nonStaticCommit() {
-  return saveSelection()
-}
-
-function resetStagedInputValue() {
-  stagedInputValue.value = deepClone(committedInputValue.value)
-}
-
-onMounted(() => {
-  syncFromModelValue()
-  hydrateSingleSelectedData()
-})
-
-watch(
-  () => modelValue.value,
-  async (newVal, oldVal) => {
-    if (isDeepEqual(newVal, oldVal)) return
-    if (isDeepEqual(newVal, formatSelectionForModel(inputValue.value))) return
-    if (!props.multi && typeof newVal !== 'object' && inputValue.value?.[0]?.[props.pick] === newVal && inputValue.value?.[0]?.[props.fields[0]]) return
-    syncFromModelValue()
-    await hydrateSingleSelectedData()
-  },
-  { deep: true }
-)
-
-const displayValue = computed(() => {
-  if (!inputValue.value?.length) return props.placeholder
-  if (props.preview && !hasChanged.value) return props.preview
-
-  if (!props.multi) {
-    return inputValue.value[0][props.fields[0]] || `${inputValue.value.length} Terpilih`
-  }
-
-  const itemNames = inputValue.value.map((item) => item[props.fields[0]]).filter((item) => item != null && item !== '')
-  if (itemNames.length) {
-    const visibleNames = itemNames.slice(0, 2).join(', ')
-    if (itemNames.length > 2) return `${visibleNames}, ${itemNames.length - 2} lainnya`
-    return visibleNames
-  }
-
-  return `${inputValue.value.length} Terpilih`
-})
-
-const selectedIds = computed(() => stagedInputValue.value.map((item: any) => item[props.pick]))
-const previewTableKey = computed(() => inputValue.value.map((item: any) => String(item?.[props.pick] ?? '')).join('|'))
-
-function handleClick(data: Record<string, any>) {
-  hasChanged.value = true
-  if (!props.multi) {
-    // If the clicked item is already selected, deselect it
-    if (stagedInputValue.value.length && stagedInputValue.value[0][props.pick] === data[props.pick]) {
-      stagedInputValue.value = []
-    } else {
-      stagedInputValue.value = [data]
+    const record = await props.loadDetail({ id, searchParameters: props.searchParameters })
+    if (record) {
+      committed.value = [clone(record)]
+      staged.value = [clone(record)]
     }
+  } catch (error) {
+    hydrationError.value = error instanceof Error ? error.message : String(error)
+  }
+}
+
+function toggle(record: RecordData) {
+  if (!props.multi) {
+    staged.value = staged.value[0]?.[props.pick] === record[props.pick] ? [] : [record]
     return
   }
-  const currentDataIndex = stagedInputValue.value.findIndex((item) => item[props.pick] === data[props.pick])
-  if (currentDataIndex == -1) stagedInputValue.value.push(data)
-  else stagedInputValue.value.splice(currentDataIndex, 1)
+  const index = staged.value.findIndex((item) => item[props.pick] === record[props.pick])
+  if (index < 0) staged.value = [...staged.value, record]
+  else staged.value = staged.value.filter((_, itemIndex) => itemIndex !== index)
 }
+
+async function commit() {
+  const selection = clone(staged.value)
+  busy.value = true
+  try {
+    await props.onCommit(selection)
+    committed.value = clone(selection)
+    modelValue.value = forModel(selection)
+    props.onSelectData?.(props.formData, selection, props.formDataSetter)
+    emit('validation:touch')
+  } finally {
+    busy.value = false
+  }
+}
+
+function reset() {
+  staged.value = clone(committed.value)
+}
+
+const selectedIds = computed(() => staged.value.map((item) => item[props.pick]))
+const displayValue = computed(() => {
+  if (props.preview) return props.preview
+  const labels = committed.value.map((item) => item[viewKey.value]).filter(Boolean)
+  if (!labels.length) return committed.value.length ? `${committed.value.length} Terpilih` : props.placeholder
+  return props.multi && labels.length > 2 ? `${labels.slice(0, 2).join(', ')}, ${labels.length - 2} lainnya` : labels.join(', ')
+})
+const combinedSearchParameters = computed(() => ({
+  ...props.searchParameters,
+  ...(search.value ? { search: search.value } : {}),
+}))
+
+onMounted(hydrate)
+watch(() => modelValue.value, hydrate, { deep: true })
 </script>
 
 <template>
   <BaseInput v-bind="props">
     <div class="flex flex-row items-center gap-2">
-      <Dialog @close="resetStagedInputValue">
+      <Dialog @close="reset">
         <template #trigger>
-          <slot v-if="$slots['trigger']" name="trigger"></slot>
-          <div
-            v-else
-            :key="`${String(displayValue)}`"
-            class="overlay flex max-w-fit cursor-pointer flex-row items-center justify-between gap-4 rounded-lg bg-surface-container-high px-4 py-2 after:bg-on-surface/[8%] after:active:bg-on-surface/[12%]"
-          >
-            <p v-if="displayValue" class="min-w-max">{{ displayValue }}</p>
+          <slot v-if="$slots.trigger" name="trigger" />
+          <div v-else class="overlay flex max-w-fit cursor-pointer items-center justify-between gap-4 rounded-lg bg-surface-container-high px-4 py-2">
+            <p class="min-w-max">{{ displayValue }}</p>
             <Icon name="arrow-right-up" />
           </div>
         </template>
         <template #content="{ setOpen }">
           <div class="flex flex-col gap-4">
-            <div class="flex flex-row items-center gap-2">
-              <SearchBox v-model="params.search" class="w-full" />
-              <Popover v-if="filterConfig?.fields?.length" :ignore="['#form-lookup']">
-                <template #trigger>
-                  <Button>
-                    <Icon name="filter" />
-                  </Button>
-                </template>
-                <template #content>
-                  <Card class="w-[350px] outline outline-1 outline-outline" color="surface">
-                    <Form
-                      :key="keyManager().value['sys_lookupinput_filter']"
-                      static
-                      :modelValue="filterParameters"
-                      @update:modelValue="(value) => (filterParameters = value as Record<string, any>)"
-                      :fields="filterProps.fields"
-                      :fieldsAlias="filterProps.fieldsAlias"
-                      :inputConfig="(filterProps.inputConfig as any)"
-                    />
-                    <Button
-                      @click="
-                        () => {
-                          filterParameters = {}
-                          keyManager().triggerChange('sys_lookupinput_filter')
-                        }
-                      "
-                    >
-                      Reset Filter
-                    </Button>
-                  </Card>
-                </template>
-              </Popover>
-            </div>
-            <div v-if="props.multi" class="flex flex-row flex-wrap items-center gap-2">
-              <Chip v-for="(item, index) in stagedInputValue" class="flex flex-row flex-wrap items-center gap-2">
-                <div>{{ item[fields[0]] }}</div>
-                <Icon size="xs" name="close" class="cursor-pointer" @click="() => stagedInputValue.splice(index, 1)"></Icon>
+            <SearchBox v-model="search" class="w-full" />
+            <p v-if="hydrationError" role="alert" class="text-sm text-error">{{ hydrationError }}</p>
+            <div v-if="multi" class="flex flex-row flex-wrap items-center gap-2">
+              <Chip v-for="(item, index) in staged" :key="String(item[pick])" class="flex items-center gap-2">
+                <span>{{ item[viewKey] }}</span>
+                <Icon size="xs" name="close" class="cursor-pointer" @click="staged.splice(index, 1)" />
               </Chip>
             </div>
             <Table
               :fields="fields"
-              :fieldsAlias="resolvedFieldsAlias"
-              :fieldsType="fieldsType"
-              :fieldsProxy="fieldsProxy"
-              :fieldsDictionary="fieldsDictionary"
-              :fieldsParse="fieldsParse"
-              :limitSet="[5, 10]"
-              :load="(query) => resolvedGetData(getAPI, query)"
-              :searchParameters="combinedSearchParameters"
-              paginated
-              :onRowClick="handleClick"
+              :data="data"
+              :load="load"
+              :namespace="namespace"
+              :search-parameters="combinedSearchParameters"
+              :page-size-options="[5, 10]"
+              :default-page-size="5"
+              pagination="always"
+              @row-click="toggle"
             >
-              <template #list-rowActions="{ data }">
-                <Checkbox v-if="multi" :onToggle="() => handleClick(data)" static :checked="selectedIds.includes(data[pick])" />
-                <Radio v-else :checked="selectedIds[0] == data[pick]" />
-              </template>
-              <template #pagination-lengthControl>
-                <div class="flex flex-row items-center gap-2">
-                  <slot v-if="$slots['actionButton']" v-bind="{ searchParameters: combinedSearchParameters, selectedData: stagedInputValue, setOpen, isLoading }" name="actionButton" />
-                  <Button
-                    v-if="static"
-                    :disabled="isLoading"
-                    @click="
-                      () => {
-                        saveSelection()
-                        setOpen(false)
-                      }
-                    "
-                    ><Icon name="save"></Icon>Simpan</Button
-                  >
-                  <Button
-                    v-else
-                    :disabled="isLoading"
-                    @click="
-                      () => {
-                        nonStaticCommit()
-                        setOpen(false)
-                      }
-                    "
-                    ><Icon name="save"></Icon>Simpan</Button
-                  >
-                </div>
+              <template #row-actions="{ record }">
+                <Checkbox v-if="multi" :on-toggle="() => toggle(record)" static :checked="selectedIds.includes(record[pick])" />
+                <Radio v-else :checked="selectedIds[0] === record[pick]" @click="toggle(record)" />
               </template>
             </Table>
+            <div class="flex flex-row items-center justify-end gap-2">
+              <slot v-if="$slots.actionButton" name="actionButton" v-bind="{ searchParameters: combinedSearchParameters, selectedData: staged, setOpen, isLoading: busy }" />
+              <Button :disabled="busy" @click="async () => { await commit(); setOpen(false) }">
+                <Icon name="save" />Simpan
+              </Button>
+            </div>
           </div>
         </template>
       </Dialog>
       <DialogForm v-if="inlineAddFormConfig" v-bind="(inlineAddFormConfig as any)">
-        <template #trigger>
-          <Button kind="icon" variant="standard"><Icon name="add"></Icon></Button>
-        </template>
+        <template #trigger><Button kind="icon" variant="standard"><Icon name="add" /></Button></template>
       </DialogForm>
     </div>
-    <Table v-if="multi && modelValue?.length && !hidePreviewTable" :key="previewTableKey" :data="modelValue" :fields="fields" :fieldsAlias="resolvedFieldsAlias">
-      <template #list-rowActions="{ data }">
-        <ConfirmationDialog
-          :onConfirm="
-            async () => {
-              handleClick(data)
-              await saveSelection()
-            }
-          "
-        >
-          <template #trigger>
-            <Button variant="tonal" color="error"><Icon name="delete-bin"></Icon></Button>
-          </template>
+    <Table v-if="multi && committed.length && !hidePreviewTable" :data="committed" :fields="fields" :pagination="false">
+      <template #row-actions="{ record }">
+        <ConfirmationDialog :on-confirm="async () => { toggle(record); await commit() }">
+          <template #trigger><Button variant="tonal" color="error"><Icon name="delete-bin" /></Button></template>
         </ConfirmationDialog>
       </template>
     </Table>
   </BaseInput>
 </template>
- 

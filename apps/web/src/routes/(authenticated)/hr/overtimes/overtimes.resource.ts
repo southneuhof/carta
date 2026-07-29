@@ -1,6 +1,29 @@
 import { defineFields, defineResource, fromZod } from '@southneuhof/is-vue-framework'
 import { overtime } from '@southneuhof/api/routes/overtimes/overtimes.entity'
 import { overtimeOperations, type Overtime, type OvertimeCreate, type OvertimeListQuery, type OvertimeStatus, type OvertimeUpdate } from './overtimes.operations'
+import { createLookupDetail, createLookupLoad } from '@/framework/adapters/lookup'
+
+const sections = {
+  fields: ['name'],
+  load: createLookupLoad<Record<string, unknown>>('toll-sections/list'),
+  loadDetail: createLookupDetail<Record<string, unknown>>('toll-sections/list'),
+  pick: 'id',
+  view: 'name',
+}
+const employees = {
+  fields: ['fullName'],
+  load: createLookupLoad<Record<string, unknown>>('employees/list'),
+  loadDetail: createLookupDetail<Record<string, unknown>>('employees/list'),
+  pick: 'id',
+  view: 'fullName',
+}
+const positions = {
+  fields: ['name'],
+  load: createLookupLoad<Record<string, unknown>>('job-positions/list'),
+  loadDetail: createLookupDetail<Record<string, unknown>>('job-positions/list'),
+  pick: 'id',
+  view: 'name',
+}
 
 export const overtimeStatusLabels: Record<OvertimeStatus, string> = {
   draft: 'Draft',
@@ -13,14 +36,14 @@ export const overtimeFields = defineFields<Overtime, OvertimeCreate>()({
   sectionId: {
     label: 'Ruas',
     read: (record) => record.section?.name ?? record.sectionId,
-    form: { renderer: 'lookup', props: { getAPI: 'toll-sections/list', pick: 'id', view: 'name' } },
+    form: { renderer: 'lookup', props: sections },
   },
   applicantEmployeeId: {
     label: 'Karyawan',
     read: (record) => record.applicant?.fullName ?? record.applicantEmployeeId,
     form: {
       renderer: 'lookup',
-      props: { getAPI: 'employees/list', pick: 'id', view: 'fullName' },
+      props: employees,
       behavior: {
         visible: ({ draft }) => Boolean(draft.sectionId),
         disabled: ({ draft }) => !draft.sectionId,
@@ -39,11 +62,11 @@ export const overtimeFields = defineFields<Overtime, OvertimeCreate>()({
 })
 
 const overtimeFilterFields = defineFields<OvertimeListQuery, OvertimeListQuery>()({
-    sectionId: { label: 'Ruas', form: { renderer: 'lookup', props: { getAPI: 'toll-sections/list', pick: 'id', view: 'name' } } },
-    applicantEmployeeId: { label: 'Karyawan', form: { renderer: 'lookup', props: { getAPI: 'employees/list', pick: 'id', view: 'fullName' } } },
+    sectionId: { label: 'Ruas', form: { renderer: 'lookup', props: sections } },
+    applicantEmployeeId: { label: 'Karyawan', form: { renderer: 'lookup', props: employees } },
     startDate: { label: 'Tanggal mulai', form: { renderer: 'date' } },
     endDate: { label: 'Tanggal akhir', form: { renderer: 'date' } },
-    jobPositionId: { label: 'Jabatan', form: { renderer: 'lookup', props: { getAPI: 'job-positions/list', pick: 'id', view: 'name' } } },
+    jobPositionId: { label: 'Jabatan', form: { renderer: 'lookup', props: positions } },
     statusCode: {
       label: 'Status',
       form: {

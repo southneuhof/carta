@@ -34,12 +34,9 @@ export type KnownFieldType =
   | 'rich-text'
   | 'icon-select'
   | 'table'
-  | 'dynamic-form'
   | 'separator'
   | 'canvas'
-  | 'file-manager'
   | 'iso-clause'
-  | 'master-lookup'
   | 'custom'
 
 import type { ZodTypeAny } from 'zod'

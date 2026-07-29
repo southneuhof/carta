@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { defaultSelectGetData } from '@southneuhof/is-vue-framework/runtimeDefaults'
 import { ref, type PropType, watch, computed, type ComputedRef, onMounted } from 'vue'
+import type { OptionLoad, QueryNamespace } from '../../contracts'
+import { useOptionSource } from './useOptionSource'
 import { commonProps } from './commonprops'
 import BaseInput from './BaseInput.vue'
 import Popover from '@southneuhof/is-vue-framework/components/base/Popover.vue'
 import TextInput from '@southneuhof/is-vue-framework/components/inputs/TextInput.vue'
 import Card from '@southneuhof/is-vue-framework/components/base/Card.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
-import { useFrameworkRuntime } from '@southneuhof/is-vue-framework'
 
 const props = defineProps({
   placeholder: {
@@ -16,23 +16,15 @@ const props = defineProps({
     default: 'Pilih',
   },
   data: {
-    type: Array as PropType<Array<Record<string, string>>>,
+    type: Array as PropType<readonly Record<string, any>[]>,
     required: false,
-    default: [],
   },
-  getAPI: {
-    type: String,
-    required: false,
-    default: '',
-  },
+  load: Function as PropType<OptionLoad<Record<string, any>>>,
+  namespace: String as PropType<QueryNamespace>,
   searchParameters: {
-    type: Object as PropType<Record<string, string>>,
+    type: Object as PropType<Record<string, unknown>>,
     required: false,
-    default: {},
-  },
-  getData: {
-    type: Function as PropType<(getAPI: string, searchParameters: object) => Promise<Array<any>>>,
-    required: false,
+    default: () => ({}),
   },
   defaultToFirst: {
     type: Boolean,
@@ -78,16 +70,27 @@ const props = defineProps({
   },
   ...commonProps,
 })
-const runtime = useFrameworkRuntime()
-const getData = props.getData ?? ((getAPI: string, searchParameters: object) => defaultSelectGetData(getAPI, searchParameters, runtime.select))
-
 const modelValue = defineModel<any[] | Record<string, string> | null | string>()
 const emit = defineEmits<{
   (event: 'validation:touch'): void
 }>()
 
-const loading = ref(true)
-const data = ref<Array<any>>([])
+const source = useOptionSource(props)
+const loading = source.loading
+const sourceError = source.error
+const data = computed(() => {
+  const values = [...source.options.value]
+  if (!props.transform) return values
+  const entries = Object.entries(props.transform)
+  return values.map((value: any) => {
+    const item = { ...value }
+    for (const [from, to] of entries) {
+      item[String(to)] = item[from]
+      delete item[from]
+    }
+    return item
+  })
+})
 const query = ref('')
 const selected = ref<any[] | Record<string, string> | null>()
 
@@ -165,26 +168,10 @@ displayValue = computed(() => {
   }
 })
 
-async function preflight() {
-  if (props.getAPI) data.value = await getData(props.getAPI, props.searchParameters)
-  else data.value = props.data
-  if (props.transform) {
-    const transformedData = JSON.parse(JSON.stringify(data.value))
-    const entries = Object.entries(props.transform)
-    transformedData.forEach((item: any) => {
-      entries.forEach((entry) => {
-        item[entry[1]] = item[entry[0]]
-        delete item[entry[0]]
-      })
-    })
-    data.value = transformedData
-  }
-
+function reconcileSelection() {
+  if (loading.value) return
   const hadValue = modelValue.value != null && (Array.isArray(modelValue.value) ? modelValue.value.length > 0 : true)
   pickSelected()
-  loading.value = false
-
-  // Only update modelValue if we're setting a default (no existing value) or if multi-select
   if (!hadValue || props.multi) {
     updateModelValue()
   }
@@ -247,7 +234,7 @@ function handleItemClick(item: any, setOpen: Function) {
   emit('validation:touch')
 }
 
-preflight()
+watch([data, loading], reconcileSelection, { immediate: true })
 
 onMounted(() => {
   watch(modelValue, () => {
@@ -286,7 +273,12 @@ onMounted(() => {
                 icon="search"
               />
             </div>
-            <div v-if="filteredData.length" class="h-full overflow-y-auto p-4">
+            <p v-if="loading" class="p-2 text-xs text-muted">Memuat data...</p>
+            <div v-else-if="sourceError" class="flex items-center gap-2 p-2 text-xs text-error">
+              <span>{{ sourceError.message }}</span>
+              <button type="button" @click="source.refresh">Coba lagi</button>
+            </div>
+            <div v-else-if="filteredData.length" class="h-full overflow-y-auto p-4">
               <Card
                 v-for="item in filteredData"
                 color="surfaceContainerHigh"

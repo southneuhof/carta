@@ -4,7 +4,6 @@ import { FrameworkPlugin } from '../../../adapters/plugin'
 import TextInput from '../TextInput.vue'
 import TextareaInput from '../TextareaInput.vue'
 import NumberInput from '../NumberInput.vue'
-import CurrencyInput from '../CurrencyInput.vue'
 import SelectInput from '../SelectInput.vue'
 
 const mounted: Array<ReturnType<typeof createApp>> = []
@@ -38,7 +37,7 @@ describe('text-like input surfaces', () => {
     ['text', TextInput, {}],
     ['textarea', TextareaInput, {}],
     ['number', NumberInput, {}],
-    ['currency', CurrencyInput, {}],
+    ['currency', NumberInput, { currency: 'IDR', locale: 'id-ID' }],
     ['select', SelectInput, { data: [{ id: '1', name: 'Admin' }] }],
   ])('keeps the %s control transparent with a subtle secondary focus ring', async (_name, component, props) => {
     const host = await mountInput(component, props)
@@ -52,5 +51,16 @@ describe('text-like input surfaces', () => {
     expect(control?.classList.contains('bg-surface')).toBe(false)
     expect(control?.classList.contains('bg-surface-container')).toBe(false)
     expect(control?.classList.contains('!bg-surface-variant/50')).toBe(false)
+  })
+
+  it('recreates a currency input through NumberInput props', async () => {
+    const host = await mountInput(NumberInput, {
+      currency: 'IDR',
+      locale: 'id-ID',
+      modelValue: 125000,
+    })
+
+    expect(host.querySelector('p')?.textContent).toBe('Rp')
+    expect(host.querySelector('input')?.value).toBe('125.000')
   })
 })
