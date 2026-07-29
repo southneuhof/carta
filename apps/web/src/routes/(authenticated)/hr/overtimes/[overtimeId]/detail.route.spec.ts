@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createApp, defineComponent, h, nextTick } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { FrameworkPlugin, createFrameworkQueryClient, resetResourceRuntimeForTests } from '@southneuhof/is-vue-framework'
+import { appFieldDefaults } from '@/configs/defaults'
+import { appFieldRenderers } from '@/framework/fields/renderers'
 
 const ok = (payload: unknown) => ({ ok: true, json: async () => payload })
 
@@ -57,7 +59,11 @@ async function mountRoute() {
   document.body.appendChild(host)
   const app = createApp(defineComponent(() => () => h(DetailRoute)))
   app.use(router)
-  app.use(FrameworkPlugin, { runtime: {}, queryClient: createFrameworkQueryClient({ retry: 0, staleTime: 0 }) })
+  app.use(FrameworkPlugin, {
+    fieldDefaults: appFieldDefaults,
+    queryClient: createFrameworkQueryClient({ retry: 0, staleTime: 0 }),
+    renderers: appFieldRenderers,
+  })
   app.mount(host)
   await flush()
 

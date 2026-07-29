@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import CheckboxGroupInput from '../CheckboxGroupInput.vue'
+import { defineFields, defineResource, type CollectionLoadContext, type CollectionResult } from '../../..'
 import { mountInput } from './harness'
 
 const input = (name: string) => readFileSync(resolve(process.cwd(), 'src/components/inputs', name), 'utf8')
@@ -11,6 +12,40 @@ describe('explicit option sources', () => {
     const source = input(name)
     expect(source).toContain('useOptionSource')
     expect(source).not.toMatch(/getAPI|defaultSelectGetData|useFrameworkRuntime/)
+  })
+
+  it('passes standard collection context to a resource list capability', async () => {
+    type Option = { id: number; name: string }
+    const load = vi.fn(async (
+      context: CollectionLoadContext<Record<string, never>>,
+    ): Promise<CollectionResult<Option>> => ({
+      data: [{ id: 1, name: 'A' }],
+      meta: { total: 1, totalPage: 1 },
+    }))
+    const resource = defineResource({
+      key: 'test-options',
+      fields: defineFields<Option>()({ name: {} }),
+      capabilities: {
+        list: { handler: load, permission: null },
+      },
+    })
+    const searchParameters = { active: true }
+    const mounted = mountInput(CheckboxGroupInput, {
+      model: [],
+      props: {
+        load: resource.capabilities.list.handler,
+        searchParameters,
+      },
+    })
+
+    await mounted.flush()
+
+    expect(load).toHaveBeenCalledOnce()
+    const context = load.mock.calls[0]?.[0]
+    expect(context).toMatchObject({ query: {}, searchParameters })
+    expect(context?.searchParameters).toStrictEqual(searchParameters)
+    expect(context?.signal).toBeInstanceOf(AbortSignal)
+    mounted.cleanup()
   })
 
   it('preserves controlled checkbox values across add, remove, and external replacement', async () => {

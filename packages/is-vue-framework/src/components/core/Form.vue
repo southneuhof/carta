@@ -13,7 +13,7 @@
  */
 import { computed, getCurrentInstance, nextTick, onUnmounted, reactive, ref, watch } from 'vue'
 import type { FormProps, FormValidationTrigger, RecordLoadContext, SubmitError, ValidationIssue } from '../../contracts'
-import { createBehaviorRuntime, resolveFields } from '../../fields'
+import { createBehaviorRuntime, resolveFields, useFrameworkFieldDefaults } from '../../fields'
 import { inferFieldLayers, validateDraftAsync, validatorDefinition, validatorsForTrigger } from '../../validation'
 import { useLoader } from '../../query'
 import { useFrameworkAdapters } from '../../adapters/projectAdapters'
@@ -45,10 +45,17 @@ if (isDevelopment && isModelBound && (!hasModelValue || !hasModelListener)) {
 
 const adapters = useFrameworkAdapters()
 const renderers = useRendererRegistry('form')
+const fieldDefaults = useFrameworkFieldDefaults()
 
 const fields = computed(() => {
   const schema = props.schema as { source?: Parameters<typeof inferFieldLayers>[0] } | undefined
-  return resolveFields({ fields: props.fields, surface: 'form', schema: schema?.source ? inferFieldLayers(schema.source) : undefined })
+  return resolveFields({
+    fields: props.fields,
+    surface: 'form',
+    defaults: fieldDefaults.form,
+    defaultFields: fieldDefaults.fields,
+    schema: schema?.source ? inferFieldLayers(schema.source) : undefined,
+  })
 })
 const owner = ownerOf(props.namespace, 'form')
 

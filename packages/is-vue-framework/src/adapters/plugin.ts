@@ -1,17 +1,14 @@
 import type { App, Plugin } from 'vue'
 import type { QueryClient } from '@tanstack/vue-query'
 import { VueQueryPlugin } from '@tanstack/vue-query'
-import type { FrameworkRuntime } from '../runtime'
-import { frameworkRuntimeKey } from '../runtime'
-import { frameworkDefaultsKey, resolveFrameworkDefaults, type FrameworkDefaultsInput } from './defaults'
+import { frameworkFieldDefaultsKey, resolveFrameworkFieldDefaults, type FrameworkFieldDefaultsInput } from '../fields/defaults'
 import { frameworkAdaptersKey, resolveFrameworkAdapters, type FrameworkAdaptersInput } from './projectAdapters'
 import { createFrameworkQueryClient, frameworkQueryClientKey } from '../query/client'
 import { createRendererRegistries, rendererRegistriesKey, type RendererRegistriesInput } from '../renderers/registry'
 import { registerResourceRuntime } from '../resources/runtime'
 
 export interface FrameworkPluginOptions {
-  runtime: FrameworkRuntime
-  defaults?: FrameworkDefaultsInput
+  fieldDefaults?: FrameworkFieldDefaultsInput
   /** Project-specific normalization, query location, and schema lookup. */
   adapters?: FrameworkAdaptersInput
   /** Injected cache client for tests and advanced projects. */
@@ -20,23 +17,10 @@ export interface FrameworkPluginOptions {
   renderers?: RendererRegistriesInput
 }
 
-function isPluginOptions(value: FrameworkRuntime | FrameworkPluginOptions): value is FrameworkPluginOptions {
-  return Object.prototype.hasOwnProperty.call(value, 'runtime')
-}
-
-export const FrameworkPlugin: Plugin<[runtimeOrOptions: FrameworkRuntime | FrameworkPluginOptions]> = {
-  install(app: App, runtimeOrOptions: FrameworkRuntime | FrameworkPluginOptions) {
-    if (!runtimeOrOptions || typeof runtimeOrOptions !== 'object') {
-      throw new Error('[vue-framework] FrameworkPlugin requires a runtime object.')
-    }
-
-    const runtime = isPluginOptions(runtimeOrOptions) ? runtimeOrOptions.runtime : runtimeOrOptions
-    if (!runtime || typeof runtime !== 'object') {
-      throw new Error('[vue-framework] FrameworkPlugin requires a runtime object.')
-    }
-    const options = isPluginOptions(runtimeOrOptions) ? runtimeOrOptions : undefined
-    app.provide(frameworkRuntimeKey, runtime)
-    app.provide(frameworkDefaultsKey, resolveFrameworkDefaults(options?.defaults))
+export const FrameworkPlugin: Plugin<[options?: FrameworkPluginOptions]> = {
+  install(app: App, options: FrameworkPluginOptions = {}) {
+    const fieldDefaults = resolveFrameworkFieldDefaults(options.fieldDefaults)
+    app.provide(frameworkFieldDefaultsKey, fieldDefaults)
 
     const adapters = resolveFrameworkAdapters(options?.adapters)
     app.provide(frameworkAdaptersKey, adapters)
@@ -46,6 +30,6 @@ export const FrameworkPlugin: Plugin<[runtimeOrOptions: FrameworkRuntime | Frame
     const queryClient = options?.queryClient ?? createFrameworkQueryClient(adapters.queryDefaults)
     app.provide(frameworkQueryClientKey, queryClient)
     app.use(VueQueryPlugin, { queryClient })
-    registerResourceRuntime({ adapters, queryClient })
+    registerResourceRuntime({ adapters, queryClient, fieldDefaults })
   },
 }

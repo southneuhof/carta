@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import * as framework from '../index'
 
@@ -27,6 +27,14 @@ const removedExports = [
   'defaultCRUDDetailOnExport',
   'ResourceCapabilities',
   'createHonoResourceOperations',
+  'FrameworkDefaultsInput',
+  'FrameworkRuntime',
+  'useFrameworkDefaults',
+  'useFrameworkRuntime',
+  'mergeModelConfig',
+  'InputConfig',
+  'ModelConfig',
+  'getInputComponentRegistry',
 ]
 
 const currentExports = [
@@ -50,6 +58,8 @@ const currentExports = [
   'invalidateResourceData',
   'createRendererRegistries',
   'resolveFrameworkAdapters',
+  'resolveFrameworkFieldDefaults',
+  'useFrameworkFieldDefaults',
 ]
 
 describe('public API surface', () => {
@@ -61,10 +71,20 @@ describe('public API surface', () => {
     for (const name of removedExports) expect(framework, `unexpected export: ${name}`).not.toHaveProperty(name)
   })
 
-  it('keeps the runtime free of CRUD capability groups', async () => {
-    const runtime = await import('../runtime')
-
-    expect(Object.keys(runtime)).not.toContain('FrameworkCRUDRuntime')
+  it('removes legacy configuration source paths', () => {
+    for (const path of [
+      'src/adapters/defaults.ts',
+      'src/runtime.ts',
+      'src/runtimeDefaults.ts',
+      'src/model-config',
+      'src/components/composites/Table.vue',
+      'src/components/composites/Detail.vue',
+      'src/components/composites/Form.vue',
+      'src/components/composites/DialogForm.vue',
+      'src/components/composites/Tree',
+    ]) {
+      expect(existsSync(resolve(process.cwd(), path)), `unexpected path: ${path}`).toBe(false)
+    }
   })
 
   it('keeps Hono integration explicit and out of the root entry point', async () => {

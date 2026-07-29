@@ -422,6 +422,7 @@ export function defineResource<
   }
 
   const tableProps = memoize((args: TableFactoryArguments<TQuery> | undefined) => {
+    const defaultFields = useResourceRuntime().fieldDefaults.fields
     const props: TableProps<TRecord, TQuery> = {
       fields: definition.fields as never,
       namespace: args?.namespace ?? definition.key,
@@ -443,13 +444,20 @@ export function defineResource<
     if (handlers.list) {
       props.load = (context) => handlers.list!(context)
     }
-    if (definition.table?.fields) props.fields = pickFields(definition.fields, definition.table.fields) as never
+    if (definition.table?.fields) {
+      props.fields = pickFields(definition.fields, definition.table.fields, defaultFields) as never
+    }
     return props
   })
 
   const detailProps = memoize((args: DetailFactoryArguments<TIdentity>) => {
+    const defaultFields = useResourceRuntime().fieldDefaults.fields
     const props: DetailProps<TRecord> = {
-      fields: (definition.detail?.fields ? pickFields(definition.fields, definition.detail.fields) : definition.fields) as never,
+      fields: (
+        definition.detail?.fields
+          ? pickFields(definition.fields, definition.detail.fields, defaultFields)
+          : definition.fields
+      ) as never,
       id: args.id,
       namespace: definition.key,
       searchParameters: args.searchParameters ?? {},
@@ -492,7 +500,12 @@ export function defineResource<
   }
 
   const form = memoize((args: { id?: TIdentity; initialData?: Partial<TCreate>; searchParameters?: Record<string, unknown>; context?: FieldContext } | undefined) => {
-    const fields = (definition.form?.fields ? pickFields(definition.fields, definition.form.fields) : definition.fields) as never
+    const defaultFields = useResourceRuntime().fieldDefaults.fields
+    const fields = (
+      definition.form?.fields
+        ? pickFields(definition.fields, definition.form.fields, defaultFields)
+        : definition.fields
+    ) as never
     const searchParameters = args?.searchParameters ?? {}
     const initialData = (args?.initialData ?? definition.form?.initialData) as Partial<TCreate> | undefined
 
@@ -600,12 +613,13 @@ function identityToken(id: RecordIdentity): string {
 function pickFields<TRecord extends object, TDraft extends object>(
   catalog: FieldCatalog<TRecord, TDraft>,
   keys: readonly string[],
+  defaultFields: FieldCatalog = {},
 ): FieldCatalog<TRecord, TDraft> {
   const picked: FieldCatalog<TRecord, TDraft> = {}
   for (const key of keys) {
     const field = catalog[key]
-    if (!field) throw new Error(`[is-vue-framework] Unknown field "${key}".`)
-    picked[key] = field
+    if (!field && !defaultFields[key]) throw new Error(`[is-vue-framework] Unknown field "${key}".`)
+    picked[key] = field ?? {}
   }
   return picked
 }

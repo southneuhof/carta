@@ -25,6 +25,17 @@ function installStorage() {
 }
 
 describe('Table core', () => {
+  it('applies uniform table defaults before explicit projections', async () => {
+    const view = mountCore(
+      Table,
+      { fields: { name: { label: 'Nama' }, status: { label: 'Status', table: { align: 'start' } } }, data: rows },
+      { fieldDefaults: { table: { align: 'end', props: { dense: true } } } },
+    )
+    await flush()
+    expect(view.all('tbody td').slice(0, 2).map((cell) => (cell as HTMLElement).style.textAlign)).toEqual(['end', 'start'])
+    view.unmount()
+  })
+
   it('renders externally controlled data with catalog labels', async () => {
     const view = mountCore(Table, { fields, data: rows })
     await flush()

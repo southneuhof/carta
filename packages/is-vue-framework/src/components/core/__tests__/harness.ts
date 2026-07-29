@@ -4,10 +4,12 @@ import { FrameworkPlugin } from '../../../adapters/plugin'
 import { createFrameworkQueryClient } from '../../../query'
 import type { FrameworkAdaptersInput } from '../../../adapters/projectAdapters'
 import type { RendererRegistriesInput } from '../../../renderers/registry'
+import type { FrameworkFieldDefaultsInput } from '../../../fields'
 
 export interface MountOptions {
   adapters?: FrameworkAdaptersInput
   renderers?: RendererRegistriesInput
+  fieldDefaults?: FrameworkFieldDefaultsInput
   slots?: Record<string, (scope: Record<string, unknown>) => unknown>
 }
 
@@ -30,8 +32,8 @@ export function mountCore(component: Component, props: Record<string, unknown>, 
   })
   app.use(router)
   app.use(FrameworkPlugin, {
-    runtime: {},
     adapters: options.adapters,
+    fieldDefaults: options.fieldDefaults,
     renderers: options.renderers,
     queryClient: createFrameworkQueryClient({ retry: 0, staleTime: 0 }),
   })

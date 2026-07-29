@@ -9,7 +9,7 @@ import {
   type FileManagerPluginOptions,
 } from '@southneuhof/is-vue-framework/file-manager'
 
-app.use(FrameworkPlugin, { runtime })
+app.use(FrameworkPlugin)
 app.use(FileManagerPlugin, fileManagerOptions)
 ```
 

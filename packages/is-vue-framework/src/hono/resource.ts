@@ -1,4 +1,4 @@
-import type { InferRequestType, InferResponseType } from 'hono/client'
+import type { ClientRequestOptions, InferRequestType, InferResponseType } from 'hono/client'
 import type { StatusCode } from 'hono/utils/http-status'
 import type { CollectionResult, RecordIdentity } from '../contracts'
 import { defaultDataAdapter, type DataAdapter } from '../adapters/projectAdapters'
@@ -56,8 +56,10 @@ type ListRecordOf<T> = DataOf<T> extends readonly (infer TValue)[] ? TValue : ne
 type JsonOf<TEndpoint> = HonoRequestOf<TEndpoint> extends { json: infer TValue } ? TValue : Record<string, never>
 type WireQueryOf<TEndpoint> = HonoRequestOf<TEndpoint> extends { query: infer TValue } ? TValue : Record<string, never>
 type ObjectJsonOf<TEndpoint> = JsonOf<TEndpoint> extends object ? JsonOf<TEndpoint> : Record<string, never>
+// Collection inputs split transport query state from application-owned
+// searchParameters. Either side may supply a wire key before list() merges them.
 type AdapterQuery<TWire extends object> = {
-  [TKey in keyof TWire]: TKey extends 'page' | 'limit' ? TWire[TKey] | number : TWire[TKey]
+  [TKey in keyof TWire]?: TKey extends 'page' | 'limit' ? TWire[TKey] | number : TWire[TKey]
 }
 type RecordOf<TRoute> = [ListEndpoint<TRoute>] extends [never]
   ? DataOf<HonoResponseOf<DetailGetEndpoint<TRoute>, 200>>
@@ -105,7 +107,7 @@ export type HonoResourceOperations<TRoute> = RecordOf<TRoute> extends object
     & OperationMetadata<RecordOf<TRoute>, QueryOf<TRoute>, ObjectJsonOf<CreateEndpoint<TRoute>>, ObjectJsonOf<UpdateEndpoint<TRoute>>>
   : never
 
-type RuntimeEndpoint = (input?: unknown) => Promise<Response>
+type RuntimeEndpoint = (input?: unknown, options?: ClientRequestOptions) => Promise<Response>
 type RuntimeRoute = {
   list: { $get: RuntimeEndpoint }
   detail: { ':id': { $get: RuntimeEndpoint } }
@@ -132,11 +134,17 @@ function typedOperations<T>(operations: object): T {
 export function createHonoResourceOperations<const TRoute>(route: TRoute, dataAdapter: Pick<DataAdapter, 'normalizeCollection' | 'normalizeRecord'> = defaultDataAdapter): HonoResourceOperations<TRoute> {
   const source = route as RuntimeRoute
   const operations = {
-    list: async ({ query, searchParameters }: { query: Record<string, unknown>; searchParameters: Record<string, unknown> }) =>
-      dataAdapter.normalizeCollection(await payload(await source.list.$get({ query: wireQuery({ ...searchParameters, ...query }) }))),
-    detail: async ({ id, searchParameters }: { id: RecordIdentity; searchParameters: Record<string, unknown> }) => {
+    list: async ({ query, searchParameters, signal }: { query: Record<string, unknown>; searchParameters: Record<string, unknown>; signal?: AbortSignal }) =>
+      dataAdapter.normalizeCollection(await payload(await source.list.$get(
+        { query: wireQuery({ ...searchParameters, ...query }) },
+        { init: { signal } },
+      ))),
+    detail: async ({ id, searchParameters, signal }: { id: RecordIdentity; searchParameters: Record<string, unknown>; signal?: AbortSignal }) => {
       if (id === undefined) return undefined
-      const value = await payload(await source.detail[':id'].$get({ param: { id: identity(id) }, query: wireQuery(searchParameters) }))
+      const value = await payload(await source.detail[':id'].$get(
+        { param: { id: identity(id) }, query: wireQuery(searchParameters) },
+        { init: { signal } },
+      ))
       return dataAdapter.normalizeRecord(value)
     },
     create: async (input: object) => dataAdapter.normalizeRecord(await payload(await source.create.$post({ json: input }))),

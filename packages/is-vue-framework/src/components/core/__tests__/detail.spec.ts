@@ -10,6 +10,17 @@ const fields = {
 const record = { name: 'Admin', rel_section_name: 'Ruas 1' }
 
 describe('Detail core', () => {
+  it('applies uniform detail defaults before explicit projections', async () => {
+    const view = mountCore(
+      Detail,
+      { fields: { name: { label: 'Nama' }, section: { label: 'Ruas', detail: { emphasis: 'muted' } } }, data: record },
+      { fieldDefaults: { detail: { emphasis: 'strong', props: { dense: true } } } },
+    )
+    await flush()
+    expect(view.all('td:not([aria-hidden])').map((cell) => cell.getAttribute('data-emphasis'))).toEqual(['strong', 'muted'])
+    view.unmount()
+  })
+
   it('renders externally controlled data with computed reads', async () => {
     const view = mountCore(Detail, { fields, data: record })
     await flush()

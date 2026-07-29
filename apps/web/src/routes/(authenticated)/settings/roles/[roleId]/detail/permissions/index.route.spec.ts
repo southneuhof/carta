@@ -71,7 +71,7 @@ async function mountRoute(roleId = 'role-1') {
   document.body.appendChild(host)
   const app = createApp(defineComponent(() => () => h(PermissionsRoute)))
   app.use(router)
-  app.use(FrameworkPlugin, { runtime: {}, queryClient: createFrameworkQueryClient({ retry: 0, staleTime: 0 }) })
+  app.use(FrameworkPlugin, { queryClient: createFrameworkQueryClient({ retry: 0, staleTime: 0 }) })
   app.mount(host)
   await flush()
 

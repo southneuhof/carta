@@ -501,7 +501,7 @@ describe('FormView', () => {
     })
     const app = createApp(defineComponent({ setup: () => () => h(RouterView) }))
     app.use(router)
-    app.use(FrameworkPlugin, { runtime: {} })
+    app.use(FrameworkPlugin )
     await router.push({ name: 'form' })
     await router.isReady()
     app.mount(host)

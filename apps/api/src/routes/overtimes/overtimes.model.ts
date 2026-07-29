@@ -6,7 +6,7 @@ import { eq } from 'drizzle-orm'
 import { getDb } from '../../db'
 import { orgIdentity } from '../../identity'
 import { overtime, overtimes } from './overtimes.entity'
-import { overtimeSteps, submitOvertime, verifyOvertime } from './overtimes.routes'
+import { overtimeApplicant, overtimeApplicants, overtimeSteps, submitOvertime, verifyOvertime } from './overtimes.routes'
 import { createScopedOvertimeSource, SCOPE_KEY } from './overtimes.source'
 
 const scopedSource = createScopedOvertimeSource(() => getDb())
@@ -74,6 +74,10 @@ export const overtimeModel = defineModel({
     submit: submitOvertime,
     verify: verifyOvertime,
     steps: overtimeSteps,
+    applicants: {
+      list: overtimeApplicants,
+      detail: overtimeApplicant,
+    },
     // No delete: a submitted request is a record.
   },
 })

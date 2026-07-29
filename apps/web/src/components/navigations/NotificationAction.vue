@@ -40,10 +40,10 @@ onUnmounted(() => window.removeEventListener(NOTIFICATIONS_SEEN_EVENT, refresh))
   <RouterLink
     :to="{ name: 'notifications' }"
     aria-label="Notifications"
-    class="relative flex size-11 items-center justify-center rounded-lg outline-none hover:bg-surface-variant focus-visible:ring-2 focus-visible:ring-primary"
+    class="relative flex size-8 items-center justify-center rounded-lg outline-none hover:bg-surface-variant focus-visible:ring-2 focus-visible:ring-primary"
     active-class="bg-primary-container text-on-primary-container"
   >
-    <Icon name="notification" />
+    <Icon name="notification" size="md" />
     <span
       v-if="unread > 0"
       data-unread-badge

@@ -39,7 +39,9 @@ update the status after implementation and review.
 | 046 | Move asset compatibility conversion out of framework inputs | P1 | M | 043 | BLOCKED — unrelated dirty Table/Card work fails full suite |
 | 047 | Remove legacy validation ownership from input components | P2 | M | 043 | BLOCKED — unrelated dirty Table/Card work fails full suite |
 | 048 | Name and document the controlled input adapter | P2 | S | — | BLOCKED — unrelated dirty Table/Card work fails full suite |
-| 049 | Clean-break legacy configuration into core field defaults | P1 | L | — | TODO |
+| 049 | Clean-break legacy configuration into core field defaults | P1 | L | — | DONE |
+| 050 | Make resource list handlers directly reusable as option loaders | P1 | M | — | BLOCKED — unrelated dirty Table/Card work fails full suite |
+| 051 | Use resource capability handlers for overtime lookup inputs | P1 | L | 050 | DONE |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) |
 
@@ -106,6 +108,15 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) |
 - 049 is independent of blocked input plans. It is one breaking convergence
   pass: replace runtime/default/model-config surfaces with core field defaults
   and explicit catalogs, then delete every legacy API and in-repo consumer.
+- 050 aligns simple option loaders with the existing collection context and
+  preserves cancellation through Hono operations, allowing resource capability
+  handlers to be assigned directly without introducing a new input abstraction.
+- 051 depends on 050's handler compatibility and cancellation guarantee. It
+  completes the missing typed, section-scoped overtime applicant list/detail
+  capability, defines read-only reference resources for all three lookups,
+  passes their capability handlers directly to Lookup, and deletes the legacy
+  service-backed lookup factories. Plan 050's implemented focused changes are
+  sufficient; its unrelated full-suite blocker does not block 051.
 
 ## Findings considered and rejected
 
@@ -145,3 +156,7 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) |
 - Retaining deprecated defaults/runtime overloads during plan 049: rejected.
   Framework 2.0 takes a full clean break; migration docs replace compatibility
   code, aliases, adapters, fallbacks, and dual signatures.
+- Replacing input `load`/`loadDetail` with a `source`, `operations`, endpoint
+  registry, or network bridge: rejected because the existing props truthfully
+  expose collection loading and scalar hydration, and resource capability
+  handlers already satisfy those roles directly.

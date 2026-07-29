@@ -19,7 +19,7 @@ async function mountInput(component: Component, props: Record<string, unknown> =
       ...props,
     }),
   }))
-  app.use(FrameworkPlugin, { runtime: {} })
+  app.use(FrameworkPlugin )
   mounted.push(app)
   app.mount(host)
   await nextTick()

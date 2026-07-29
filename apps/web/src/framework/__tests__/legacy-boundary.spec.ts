@@ -16,9 +16,20 @@ const forbiddenImports = [
   'adapters/crud-operations',
   'adapters/crudOperations',
   '@southneuhof/is-vue-framework/model-config',
+  'components/composites/Form.vue',
+  'components/composites/Table.vue',
+  'components/composites/Detail.vue',
+  'components/composites/DialogForm.vue',
+  'runtimeDefaults',
+  'adapters/defaults',
 ]
 
-const forbiddenIdentifiers = ['CRUDComposite', 'useCRUDOperations', 'resolveCRUDOperations', 'FrameworkCRUDRuntime']
+const forbiddenIdentifiers = [
+  'CRUDComposite', 'useCRUDOperations', 'resolveCRUDOperations', 'FrameworkCRUDRuntime',
+  'FrameworkDefaultsInput', 'FrameworkRuntime', 'useFrameworkDefaults',
+  'useFrameworkRuntime', 'mergeModelConfig', 'ModelConfig', 'InputConfig',
+  'fieldsAlias', 'fieldsProxy', 'fieldsParse', 'fieldsType', 'inputConfig',
+]
 
 function collectFiles(directory: string): string[] {
   return readdirSync(directory).flatMap((entry) => {

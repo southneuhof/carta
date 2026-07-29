@@ -1,6 +1,7 @@
 import type { MaybePromise } from './load'
 
 export interface Coordinate {
+  name?: string
   lat: number
   lng: number
   formatted_address?: string

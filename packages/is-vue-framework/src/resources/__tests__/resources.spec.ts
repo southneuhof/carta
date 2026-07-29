@@ -4,12 +4,18 @@ import { defineFields } from '../../fields'
 import { registerResourceRuntime, resetResourceRuntimeForTests } from '../runtime'
 import { createFrameworkQueryClient } from '../../query/client'
 import { resolveFrameworkAdapters } from '../../adapters/projectAdapters'
+import { resolveFrameworkFieldDefaults } from '../../fields/defaults'
+import { resolveFields } from '../../fields/resolve'
 
 type Record = { id: string; name: string }
 const fields = defineFields<Record>()({ name: { label: 'Name' } })
 
 function resource(access = { allows: () => true }) {
-  registerResourceRuntime({ queryClient: createFrameworkQueryClient(), adapters: resolveFrameworkAdapters({ access }) })
+  registerResourceRuntime({
+    queryClient: createFrameworkQueryClient(),
+    adapters: resolveFrameworkAdapters({ access }),
+    fieldDefaults: resolveFrameworkFieldDefaults(),
+  })
   return defineResource({
     key: 'records', fields,
     capabilities: {
@@ -24,6 +30,99 @@ function resource(access = { allows: () => true }) {
 }
 
 describe('resource capabilities', () => {
+  it('uses app field defaults as base definitions on every resource surface', () => {
+    type DefaultRecord = { id: string; name: string; createdAt: string }
+    type DefaultCreate = { name: string }
+    const fieldDefaults = resolveFrameworkFieldDefaults({
+      fields: {
+        name: { label: 'Default name', form: { renderer: 'text' } },
+        createdAt: {
+          label: 'Created',
+          display: { format: 'datetime' },
+          table: { class: 'whitespace-nowrap' },
+        },
+      },
+    })
+    registerResourceRuntime({
+      queryClient: createFrameworkQueryClient(),
+      adapters: resolveFrameworkAdapters(),
+      fieldDefaults,
+    })
+    const value = defineResource({
+      key: 'defaulted-records',
+      fields: defineFields<DefaultRecord, DefaultCreate>()({}),
+      table: { fields: ['createdAt'] },
+      detail: { fields: ['createdAt'] },
+      form: { fields: ['name'] },
+      capabilities: {
+        list: { handler: async () => ({ data: [] as DefaultRecord[] }), permission: null },
+        detail: {
+          handler: async ({ id }) => ({ id: String(id), name: 'One', createdAt: '2026-01-01' }),
+          permission: null,
+        },
+        create: {
+          handler: async (input: DefaultCreate) => ({ id: '1', createdAt: '2026-01-01', ...input }),
+          permission: null,
+        },
+      },
+    })
+
+    const tableFields = value.table().table.fields
+    const detailFields = value.detail({ id: '1' }).detail.fields
+    const formFields = value.form().fields
+    expect(Object.keys(tableFields as object)).toEqual(['createdAt'])
+    expect(Object.keys(detailFields as object)).toEqual(['createdAt'])
+    expect(Object.keys(formFields as object)).toEqual(['name'])
+    expect(resolveFields({
+      fields: tableFields,
+      surface: 'table',
+      defaultFields: fieldDefaults.fields,
+    })[0]).toMatchObject({
+      label: 'Created',
+      format: 'datetime',
+      class: 'whitespace-nowrap',
+    })
+    resetResourceRuntimeForTests()
+  })
+
+  it('keeps resource metadata above app defaults and rejects fields absent from both catalogs', () => {
+    type DefaultRecord = { id: string; createdAt: string; missing: string }
+    const fieldDefaults = resolveFrameworkFieldDefaults({
+      fields: { createdAt: { label: 'Default label' } },
+    })
+    registerResourceRuntime({
+      queryClient: createFrameworkQueryClient(),
+      adapters: resolveFrameworkAdapters(),
+      fieldDefaults,
+    })
+    const value = defineResource({
+      key: 'overridden-records',
+      fields: defineFields<DefaultRecord>()({
+        createdAt: { label: 'Resource label' },
+      }),
+      table: { fields: ['createdAt'] },
+      capabilities: {
+        list: { handler: async () => ({ data: [] as DefaultRecord[] }), permission: null },
+      },
+    })
+    expect(resolveFields({
+      fields: value.table().table.fields,
+      surface: 'table',
+      defaultFields: fieldDefaults.fields,
+    })[0].label).toBe('Resource label')
+
+    const invalid = defineResource({
+      key: 'invalid-defaulted-records',
+      fields: defineFields<DefaultRecord>()({}),
+      table: { fields: ['missing'] },
+      capabilities: {
+        list: { handler: async () => ({ data: [] as DefaultRecord[] }), permission: null },
+      },
+    })
+    expect(() => invalid.table()).toThrow('Unknown field "missing"')
+    resetResourceRuntimeForTests()
+  })
+
   it('keeps exact custom capability handler and standard surfaces', () => {
     const value = resource()
     expect(value.capabilities.verify.handler('1', 'approved')).resolves.toBeUndefined()
@@ -51,7 +150,11 @@ describe('resource capabilities', () => {
   })
 
   it('selects create/update validators and forwards factory context', () => {
-    registerResourceRuntime({ queryClient: createFrameworkQueryClient(), adapters: resolveFrameworkAdapters() })
+    registerResourceRuntime({
+      queryClient: createFrameworkQueryClient(),
+      adapters: resolveFrameworkAdapters(),
+      fieldDefaults: resolveFrameworkFieldDefaults(),
+    })
     const create = () => undefined
     const update = () => undefined
     const value = defineResource({

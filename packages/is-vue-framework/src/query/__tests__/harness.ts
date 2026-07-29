@@ -19,7 +19,7 @@ export function withApp<TResult>(setup: () => TResult, options: HarnessOptions =
       },
     }),
   )
-  app.use(FrameworkPlugin, { runtime: {}, ...options })
+  app.use(FrameworkPlugin, { ...options })
   app.mount(document.createElement('div'))
   return { result, app }
 }

@@ -1,4 +1,12 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  createFrameworkQueryClient,
+  registerResourceRuntime,
+  resetResourceRuntimeForTests,
+  resolveFrameworkAdapters,
+  resolveFrameworkFieldDefaults,
+} from '@southneuhof/is-vue-framework'
+import { appFieldDefaults } from '@/configs/defaults'
 
 const ok = (payload: unknown) => ({ ok: true, json: async () => payload })
 
@@ -48,6 +56,16 @@ vi.mock('@/framework/rpc', () => ({
 const { users } = await import('./users.resource')
 const { userRoles } = await import('./[userId]/detail/roles/user-roles.resource')
 const { loadUserRoles, setUserRole } = await import('./[userId]/detail/roles/user-roles.operations')
+
+beforeEach(() => {
+  registerResourceRuntime({
+    adapters: resolveFrameworkAdapters(),
+    queryClient: createFrameworkQueryClient(),
+    fieldDefaults: resolveFrameworkFieldDefaults(appFieldDefaults),
+  })
+})
+
+afterEach(() => resetResourceRuntimeForTests())
 
 describe('users resource', () => {
   it('provides only row actions resource can derive', () => {

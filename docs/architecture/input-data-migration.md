@@ -18,8 +18,7 @@ After:
 {
   renderer: 'select',
   props: {
-    load: ({ searchParameters, signal }) =>
-      appOptions.list(searchParameters, { signal }),
+    load: roles.capabilities.list.handler,
     pick: 'id',
     view: 'name',
   },
@@ -27,7 +26,9 @@ After:
 ```
 
 `SelectInput`, `RadioGroupInput`, and `CheckboxGroupInput` accept `data` or
-`load`, never both. Loader context contains `{ searchParameters, signal }`.
+`load`, never both. Loader context contains `{ query: {}, searchParameters,
+signal }`, matching a standard collection loader. Resource list capability
+handlers can therefore be passed directly.
 Returned values may be a readonly array or `{ data, meta }`.
 
 ## Lookup
@@ -41,16 +42,27 @@ Lookup uses core Table and strict field metadata:
     fields: ['name'],
     view: 'name',
     pick: 'id',
-    load: ({ query, searchParameters, signal }) =>
-      appRecords.list({ ...searchParameters, ...query }, { signal }),
-    loadDetail: ({ id, searchParameters, signal }) =>
-      appRecords.detail(id, searchParameters, { signal }),
+    load: roles.capabilities.list.handler,
+    loadDetail: roles.capabilities.detail.handler,
   },
 }
 ```
 
 Collection operations return `{ data, meta: { total, totalPage } }`.
 `loadDetail` hydrates scalar initial values.
+
+Overtime applicant lookup uses this contract directly:
+
+```ts
+{
+  load: applicants.capabilities.list.handler,
+  loadDetail: applicants.capabilities.detail.handler,
+  searchParameters: { sectionId },
+}
+```
+
+This is the input's native two-operation contract, not a compatibility layer.
+Applicant eligibility and section authorization remain server-owned.
 
 ## Location
 

@@ -7,7 +7,7 @@
  */
 import { computed } from 'vue'
 import type { DetailProps, RecordLoadContext, RecordResult } from '../../contracts'
-import { resolveFields } from '../../fields'
+import { displayValue, resolveFields, useFrameworkFieldDefaults } from '../../fields'
 import { useLoader } from '../../query'
 import { useRendererRegistry } from '../../renderers/registry'
 import { assertSingleDataSource, ownerOf, recordCacheKey } from './useCoreData'
@@ -19,8 +19,14 @@ const props = withDefaults(defineProps<DetailProps>(), {
 assertSingleDataSource('Detail', props.data, props.load)
 
 const renderers = useRendererRegistry('detail')
+const fieldDefaults = useFrameworkFieldDefaults()
 
-const fields = computed(() => resolveFields({ fields: props.fields, surface: 'detail' }))
+const fields = computed(() => resolveFields({
+  fields: props.fields,
+  surface: 'detail',
+  defaults: fieldDefaults.detail,
+  defaultFields: fieldDefaults.fields,
+}))
 const owner = ownerOf(props.namespace, 'detail')
 
 const loaded = useLoader<RecordLoadContext, RecordResult>({
@@ -34,7 +40,7 @@ const record = computed(() => loaded.data.value)
 const entries = computed(() =>
   fields.value.map((field) => ({
     field,
-    value: record.value ? (field.read ? field.read(record.value, {}) : record.value[field.key]) : undefined,
+    value: record.value ? displayValue(record.value, field) : undefined,
   })),
 )
 

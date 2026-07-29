@@ -18,15 +18,6 @@ const modelValue = defineModel<Array<any>>()
 
 if (!modelValue.value) modelValue.value = []
 
-const locationForm = {
-  inputConfig: {
-    name: { type: 'text' },
-  },
-  fieldsAlias: {
-    name: 'Nama Lokasi',
-  },
-}
-
 const tempLocation = ref()
 </script>
 
@@ -38,7 +29,7 @@ const tempLocation = ref()
           <Button><Icon name="add" />Tambah Lokasi</Button>
         </template>
         <template #content="{ setOpen }">
-          <LocationInput v-model="tempLocation" :operations="operations" :formConfig="locationForm" />
+          <LocationInput v-model="tempLocation" :operations="operations" />
           <Button @click="() => [modelValue?.push(tempLocation), setOpen(false)]">Simpan</Button>
         </template>
       </Dialog>
@@ -57,7 +48,7 @@ const tempLocation = ref()
                 </Card>
               </template>
               <template #content="{ setOpen }">
-                <LocationInput v-model="tempLocation" :operations="operations" :formConfig="locationForm" />
+                <LocationInput v-model="tempLocation" :operations="operations" />
                 <Button @click="() => setOpen(false)">Simpan</Button>
               </template>
             </Dialog>

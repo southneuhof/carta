@@ -9,7 +9,7 @@
 import { computed, getCurrentInstance, onBeforeUnmount, ref, toRef, useSlots, watch } from 'vue'
 import { getCoreRowModel, useVueTable, type ColumnDef, type ColumnSizingState } from '@tanstack/vue-table'
 import type { CollectionLoadContext, CollectionResult, QueryValues, RowReorderPayload, TableProps } from '../../contracts'
-import { resolveFields, type ResolvedSurfaceField } from '../../fields'
+import { displayValue, resolveFields, useFrameworkFieldDefaults, type ResolvedSurfaceField } from '../../fields'
 import { useLoader, useNamespacedQuery } from '../../query'
 import { useRendererRegistry } from '../../renderers/registry'
 import { assertSingleDataSource, collectionCacheKey, ownerOf } from './useCoreData'
@@ -38,9 +38,15 @@ const emit = defineEmits<{
 assertSingleDataSource('Table', props.data, props.load)
 
 const renderers = useRendererRegistry('table')
+const fieldDefaults = useFrameworkFieldDefaults()
 const slots = useSlots()
 
-const fields = computed(() => resolveFields({ fields: props.fields, surface: 'table' }))
+const fields = computed(() => resolveFields({
+  fields: props.fields,
+  surface: 'table',
+  defaults: fieldDefaults.table,
+  defaultFields: fieldDefaults.fields,
+}))
 const fieldKeys = computed(() => fields.value.map((field) => field.key))
 const minimumColumnWidth = computed(() => Number.isFinite(props.minColumnWidth) && props.minColumnWidth! > 0 ? props.minColumnWidth! : 96)
 const preferences = useTablePreferences(toRef(() => props.namespace), fieldKeys, minimumColumnWidth)
@@ -282,7 +288,7 @@ function cancelResize() {
 onBeforeUnmount(cancelResize)
 
 function valueFor(record: Record<string, unknown>, field: ResolvedSurfaceField) {
-  return field.read ? field.read(record, {}) : record[field.key]
+  return displayValue(record, field)
 }
 
 function sizeFor(key: string) {
@@ -337,6 +343,7 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
               :ref="(element) => setHeaderElement(field.key, element)"
               scope="col"
               :style="{ textAlign: field.align }"
+              :class="field.headerClass"
               class="relative whitespace-nowrap text-start border-b border-outline-variant px-4 py-2 text-xs font-semibold"
             >
               <button
@@ -378,7 +385,7 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
               <td v-if="$slots['row-prefix']" class="w-px whitespace-nowrap px-3 py-2" style="width: 1%" @click.stop>
                 <slot name="row-prefix" :record="record" :index="index" />
               </td>
-              <td v-for="field in visibleFields" :key="field.key" :style="{ textAlign: field.align }" class="whitespace-nowrap px-4 py-3.5 text-on-surface">
+              <td v-for="field in visibleFields" :key="field.key" :style="{ textAlign: field.align }" :class="field.class" class="whitespace-nowrap px-4 py-3.5 text-on-surface">
                 <slot :name="`cell:${field.key}`" :value="valueFor(record, field)" :record="record" :field="field" :index="index">
                   <component :is="rendererFor(field.renderer)" v-if="field.renderer" v-bind="field.props" :value="valueFor(record, field)" :record="record" :field="field" :index="index" />
                   <template v-else>{{ valueFor(record, field) ?? '-' }}</template>
@@ -402,6 +409,7 @@ defineExpose({ refresh: loaded.refresh, query: query.values, updateQuery })
               v-for="field in visibleFields"
               :key="field.key"
               :style="{ textAlign: field.align }"
+              :class="field.class"
               class="whitespace-nowrap px-4 py-3.5 text-on-surface"
             >
               <slot

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { type PropType } from 'vue'
 import { PopoverContent, PopoverPortal, PopoverRoot, PopoverTrigger } from 'radix-vue'
-import { twMerge } from 'tailwind-merge'
+import Card from './Card.vue'
 
 const props = defineProps({
   align: {
@@ -51,7 +51,7 @@ function setOpen(value: boolean) {
         :alignOffset="props.alignOffset"
         :sideOffset="props.sideOffset"
         :side="props.side"
-        :class="twMerge('z-[10] mx-2 w-full border border-outline-variant bg-surface-container data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 text-on-surface', props.contentClass)"
+        class="z-[10] mx-2 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
         @interact-outside="(event) => {
           const target = event.target as HTMLElement
           if (target?.closest('.dp__menu') || target?.closest('.dp__overlay')) {
@@ -59,7 +59,9 @@ function setOpen(value: boolean) {
           }
         }"
       >
-        <slot name="content" v-bind="{ setOpen }"></slot>
+        <Card :class="props.contentClass" variant="outlined">
+          <slot name="content" v-bind="{ setOpen }"></slot>
+        </Card>
       </PopoverContent>
     </PopoverPortal>
   </PopoverRoot>

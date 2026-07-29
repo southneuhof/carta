@@ -1,26 +1,28 @@
 import { defineFields, defineResource, fromZod } from '@southneuhof/is-vue-framework'
 import { overtime } from '@southneuhof/api/routes/overtimes/overtimes.entity'
 import { overtimeOperations, type Overtime, type OvertimeCreate, type OvertimeListQuery, type OvertimeStatus, type OvertimeUpdate } from './overtimes.operations'
-import { createLookupDetail, createLookupLoad } from '@/framework/adapters/lookup'
+import { applicants, jobPositions, tollSections } from './overtime-lookups.resource'
 
 const sections = {
-  fields: ['name'],
-  load: createLookupLoad<Record<string, unknown>>('toll-sections/list'),
-  loadDetail: createLookupDetail<Record<string, unknown>>('toll-sections/list'),
+  fields: tollSections.fields,
+  load: tollSections.capabilities.list.handler,
+  loadDetail: tollSections.capabilities.detail.handler,
   pick: 'id',
   view: 'name',
 }
+
 const employees = {
-  fields: ['fullName'],
-  load: createLookupLoad<Record<string, unknown>>('employees/list'),
-  loadDetail: createLookupDetail<Record<string, unknown>>('employees/list'),
+  fields: applicants.fields,
+  load: applicants.capabilities.list.handler,
+  loadDetail: applicants.capabilities.detail.handler,
   pick: 'id',
   view: 'fullName',
 }
+
 const positions = {
-  fields: ['name'],
-  load: createLookupLoad<Record<string, unknown>>('job-positions/list'),
-  loadDetail: createLookupDetail<Record<string, unknown>>('job-positions/list'),
+  fields: jobPositions.fields,
+  load: jobPositions.capabilities.list.handler,
+  loadDetail: jobPositions.capabilities.detail.handler,
   pick: 'id',
   view: 'name',
 }
@@ -47,7 +49,7 @@ export const overtimeFields = defineFields<Overtime, OvertimeCreate>()({
       behavior: {
         visible: ({ draft }) => Boolean(draft.sectionId),
         disabled: ({ draft }) => !draft.sectionId,
-        props: ({ draft }) => ({ searchParameters: { sectionId: String(draft.sectionId ?? ''), for: 'hr-applicant' } }),
+        props: ({ draft }) => ({ searchParameters: { sectionId: String(draft.sectionId ?? '') } }),
         resetWhen: ({ draft }) => draft.sectionId,
       },
     },
@@ -57,8 +59,6 @@ export const overtimeFields = defineFields<Overtime, OvertimeCreate>()({
   estimatedMinutes: { label: 'Estimasi Lama Lembur', display: { format: 'number' }, form: { renderer: 'number', props: { suffix: 'Menit', min: 1 } } },
   description: { label: 'Keterangan', form: { renderer: 'textarea' } },
   statusCode: { label: 'Status', read: (record) => overtimeStatusLabels[record.statusCode] ?? record.statusCode, form: false },
-  createdAt: { label: 'Dibuat', display: { format: 'datetime' }, form: false },
-  updatedAt: { label: 'Diperbarui', display: { format: 'datetime' }, form: false },
 })
 
 const overtimeFilterFields = defineFields<OvertimeListQuery, OvertimeListQuery>()({

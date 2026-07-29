@@ -63,7 +63,7 @@ function mount(options: {
       },
     ),
   })
-  app.use(FrameworkPlugin, { runtime: {}, queryClient: createFrameworkQueryClient({ retry: 0, staleTime: 0 }) })
+  app.use(FrameworkPlugin, { queryClient: createFrameworkQueryClient({ retry: 0, staleTime: 0 }) })
   app.mount(host)
   apps.push(app)
   return { app, commits, host, namespace, visibleColumns }

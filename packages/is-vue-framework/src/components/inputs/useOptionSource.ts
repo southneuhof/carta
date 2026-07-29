@@ -19,6 +19,7 @@ export function useOptionSource<TOption extends object>(
   const source = useLoader<OptionLoadContext, readonly TOption[] | CollectionResult<TOption>>({
     key: computed(() => ['option-source', props.namespace ?? owner, stableValue(toValue(searchParameters))]),
     context: computed(() => ({
+      query: {},
       searchParameters: toValue(searchParameters),
     })),
     data: toRef(props, 'data'),

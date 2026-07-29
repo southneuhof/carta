@@ -32,6 +32,8 @@ describe('route-owned resource boundaries', () => {
       'settings/users/[userId]/detail/roles/user-roles.operations.ts',
       'hr/overtimes/overtimes.resource.ts',
       'hr/overtimes/overtimes.operations.ts',
+      'hr/overtimes/overtime-lookups.resource.ts',
+      'hr/overtimes/overtime-lookups.operations.ts',
       'hr/overtimes/[overtimeId]/verification-steps.resource.ts',
       'hr/overtimes/[overtimeId]/verification-steps.operations.ts',
       'hr/overtimes/[overtimeId]/overtime-workflow.operations.ts',
@@ -81,12 +83,15 @@ describe('route-owned resource boundaries', () => {
         .join('|')
     )
 
-    expect(honoCalls).toEqual([
+    expect(honoCalls.sort()).toEqual([
       'rpc.overtimes, dataAdapter',
+      "rpc['toll-sections'], dataAdapter",
+      'rpc.overtimes.applicants, dataAdapter',
+      "rpc['job-positions'], dataAdapter",
       'rpc.roles, dataAdapter',
       'rpc.users, dataAdapter',
       'rpc.notifications, dataAdapter',
-    ])
+    ].sort())
     expect(source.match(forbidden)).toBeNull()
   })
 

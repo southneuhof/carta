@@ -1,11 +1,14 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   createFrameworkQueryClient,
   registerResourceRuntime,
   resetResourceRuntimeForTests,
   resolveFrameworkAdapters,
+  resolveFrameworkFieldDefaults,
+  resolveFields,
 } from '@southneuhof/is-vue-framework'
 import type { AccessAdapter } from '@southneuhof/is-vue-framework'
+import { appFieldDefaults } from '@/configs/defaults'
 
 const ok = (payload: unknown) => ({ ok: true, json: async () => payload })
 
@@ -25,6 +28,13 @@ vi.mock('@/framework/rpc', () => ({
 const { roles } = await import('./roles.resource')
 const { rolePermissions } = await import('./[roleId]/detail/permissions/role-permissions.resource')
 
+beforeEach(() => {
+  registerResourceRuntime({
+    adapters: resolveFrameworkAdapters(),
+    queryClient: createFrameworkQueryClient(),
+    fieldDefaults: resolveFrameworkFieldDefaults(appFieldDefaults),
+  })
+})
 afterEach(() => resetResourceRuntimeForTests())
 
 describe('roles resource', () => {
@@ -50,6 +60,22 @@ describe('roles resource', () => {
     expect(Object.keys(create.fields as Record<string, unknown>)).toEqual(['name'])
   })
 
+  it('inherits createdAt from app defaults without a resource field declaration', () => {
+    const { fields } = roles.table().table
+    const resolved = resolveFields({
+      fields,
+      surface: 'table',
+      defaultFields: resolveFrameworkFieldDefaults(appFieldDefaults).fields,
+    })
+
+    expect(Object.keys(fields as Record<string, unknown>)).toEqual(['name', 'createdAt'])
+    expect(resolved.find((field) => field.key === 'createdAt')).toMatchObject({
+      label: 'Dibuat',
+      format: 'datetime',
+      class: 'min-w-max whitespace-nowrap',
+    })
+  })
+
   it('validates create and update through the shared schemas', () => {
     expect(roles.form().schema?.validate({}).success).toBe(false)
     expect(roles.form().schema?.validate({ name: 'Editor' }).success).toBe(true)
@@ -69,6 +95,7 @@ describe('roles resource', () => {
     registerResourceRuntime({
       adapters: resolveFrameworkAdapters({ access }),
       queryClient: createFrameworkQueryClient(),
+      fieldDefaults: resolveFrameworkFieldDefaults(appFieldDefaults),
     })
 
     const surface = roles.table()

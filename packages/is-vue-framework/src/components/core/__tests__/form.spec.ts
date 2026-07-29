@@ -21,6 +21,29 @@ function type(view: ReturnType<typeof mountCore>, index: number, value: string) 
 }
 
 describe('Form core', () => {
+  it('applies default renderer while explicit form projection wins', async () => {
+    const DefaultRenderer = defineComponent({ props: { value: null }, setup: () => () => h('i', 'default') })
+    const ExplicitRenderer = defineComponent({ props: { value: null }, setup: () => () => h('b', 'explicit') })
+    const view = mountCore(
+      Form,
+      {
+        fields: {
+          name: { label: 'Nama' },
+          note: { label: 'Catatan', form: { renderer: 'explicit' } },
+        },
+        submit: async () => undefined,
+      },
+      {
+        fieldDefaults: { form: { renderer: 'default', props: { dense: true } } },
+        renderers: { form: { default: DefaultRenderer, explicit: ExplicitRenderer } },
+      },
+    )
+    await flush()
+    expect(view.find('i')?.textContent).toBe('default')
+    expect(view.find('b')?.textContent).toBe('explicit')
+    view.unmount()
+  })
+
   it('submits a draft with no loader — the create-like case', async () => {
     const submit = vi.fn(async () => ({ id: '1' }))
     const view = mountCore(Form, { fields, initialData: { name: 'Admin' }, submit })

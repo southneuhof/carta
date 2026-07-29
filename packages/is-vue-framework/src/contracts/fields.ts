@@ -98,6 +98,8 @@ export interface FieldDisplayProjection extends FieldRendererSelection {
 export interface FieldTableProjection extends FieldDisplayProjection {
   sortable?: boolean
   align?: 'start' | 'center' | 'end'
+  class?: string
+  headerClass?: string
 }
 
 export interface FieldDetailProjection extends FieldDisplayProjection {

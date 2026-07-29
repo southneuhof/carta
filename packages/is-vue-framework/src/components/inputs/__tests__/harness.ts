@@ -17,7 +17,7 @@ export function mountInput<T>(component: Component, options: {
       'onUpdate:modelValue': (value: T) => { model.value = value },
     }),
   }))
-  app.use(FrameworkPlugin, { runtime: {}, adapters: options.adapters })
+  app.use(FrameworkPlugin, { adapters: options.adapters })
   app.mount(host)
   return {
     app,

@@ -1,9 +1,23 @@
 # Legacy model config to field catalog
 
-There are no compatibility converters. Each screen is translated by hand during
-its migration slice (plans 007-008); this table is the reference, and
-`__tests__/legacy-mapping.spec.ts` is the worked example. Plan 009 folds this
-into the published migration guide.
+Framework 2.0 is a clean break. There are no compatibility converters, fallback
+readers, field-name normalization, or legacy config aliases. Each resource owns
+one explicit `FieldCatalog`; schemas own validation and resources own initial
+data, accessors, and options.
+
+`FrameworkPlugin` accepts optional `fieldDefaults` for uniform surface policy:
+
+```ts
+app.use(FrameworkPlugin, {
+  fieldDefaults: {
+    shared: { props: { dense: true } },
+    table: { align: 'start' },
+  },
+})
+```
+
+These defaults apply to every field on a surface. Key-specific reuse belongs in
+named catalog presets such as `timestampField(label)`.
 
 | Legacy config | Catalog equivalent | Notes |
 | --- | --- | --- |

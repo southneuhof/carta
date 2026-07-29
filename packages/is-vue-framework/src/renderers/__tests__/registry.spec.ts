@@ -17,7 +17,7 @@ function mountWithRenderers(renderers: Parameters<typeof createRendererRegistrie
       },
     }),
   )
-  app.use(FrameworkPlugin, { runtime: {}, renderers })
+  app.use(FrameworkPlugin, { renderers })
   app.mount(document.createElement('div'))
   return { app, registries: registries! }
 }

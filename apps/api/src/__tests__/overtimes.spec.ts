@@ -219,6 +219,7 @@ describe('overtime workflow', () => {
       { id: 'u-stranger', name: 'Orang Lain', email: 'stranger@example.com' },
       { id: 'u-admin', name: 'Admin', email: 'admin@example.com' },
       { id: 'u-unplaced', name: 'Tanpa Pegawai', email: 'unplaced@example.com' },
+      { id: 'u-inactive', name: 'Inactive', email: 'inactive@example.com' },
     ])
     await db.insert(accounts).values(
       await Promise.all(
@@ -242,6 +243,8 @@ describe('overtime workflow', () => {
       { id: 'emp-supervisor-south', fullName: 'Supervisor Selatan', userId: 'u-supervisor-south', sectionId: SOUTH, jobPositionId: 'pos-supervisor' },
       { id: 'emp-stranger', fullName: 'Orang Lain', userId: 'u-stranger', sectionId: NORTH, jobPositionId: 'pos-officer' },
       { id: 'emp-admin', fullName: 'Admin', userId: 'u-admin', sectionId: SOUTH, jobPositionId: 'pos-officer' },
+      { id: 'emp-inactive', fullName: 'Inactive', userId: 'u-inactive', sectionId: NORTH, jobPositionId: 'pos-officer', active: false },
+      { id: 'emp-unlinked', fullName: 'Unlinked', userId: null, sectionId: NORTH, jobPositionId: 'pos-officer' },
     ])
     await db.update(sectionGroups).set({ koregEmployeeId: 'emp-coordinator' }).where(eq(sectionGroups.id, 'group-north'))
 
@@ -261,6 +264,47 @@ describe('overtime workflow', () => {
     setTransport(undefined)
     vi.restoreAllMocks()
     await closeDb()
+  })
+
+  describe('applicant lookup', () => {
+    it('lists active account-linked employees in caller section with search and pagination metadata', async () => {
+      const response = await applicant.request(`/overtimes/applicants/list?sectionId=${NORTH}&search=Pem&page=1&limit=1`)
+      expect(response.status).toBe(200)
+      expect(await response.json()).toEqual({
+        data: [{ id: 'emp-applicant', fullName: 'Pemohon', sectionId: NORTH }],
+        page: 1,
+        limit: 1,
+        total: 1,
+      })
+    })
+
+    it('excludes inactive and account-unlinked employees', async () => {
+      const response = await applicant.request(`/overtimes/applicants/list?sectionId=${NORTH}&limit=100`)
+      const body = await response.json() as { data: { id: string }[] }
+      expect(body.data.map(({ id }) => id)).not.toEqual(expect.arrayContaining(['emp-inactive', 'emp-unlinked']))
+    })
+
+    it('rejects cross-section list requests for section-scoped callers', async () => {
+      const response = await applicant.request(`/overtimes/applicants/list?sectionId=${SOUTH}`)
+      expect(response.status).toBe(403)
+    })
+
+    it('allows all scope to select any section', async () => {
+      const admin = await signIn('admin@example.com')
+      const response = await admin.request(`/overtimes/applicants/list?sectionId=${NORTH}&search=Pem`)
+      expect(response.status).toBe(200)
+      expect(await response.json()).toMatchObject({ data: [{ id: 'emp-applicant' }], total: 1 })
+    })
+
+    it('hydrates eligible same-section applicant detail', async () => {
+      const response = await applicant.request('/overtimes/applicants/detail/emp-applicant')
+      expect(response.status).toBe(200)
+      expect(await response.json()).toEqual({ data: { id: 'emp-applicant', fullName: 'Pemohon', sectionId: NORTH } })
+    })
+
+    it.each(['emp-supervisor-south', 'emp-inactive', 'emp-unlinked'])('hides forbidden or ineligible detail %s', async (id) => {
+      expect((await applicant.request(`/overtimes/applicants/detail/${id}`)).status).toBe(404)
+    })
   })
 
   describe('creation', () => {

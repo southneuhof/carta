@@ -14,7 +14,7 @@ Current status:
 - `apps/api` is a placeholder for the future backend app.
 - `apps/base-mobile` is the active Expo mobile baseline.
 - `packages/contracts`, `packages/sdk`, and `packages/domain` are scaffolded package boundaries only.
-- `packages/is-vue-framework` contains Vue components, services, app patterns, and model-config runtime helpers.
+- `packages/is-vue-framework` contains canonical Vue core components, resources, fields, renderers, adapters, and query contracts.
 - `packages/apostle` contains HTTP helpers used by `vue-framework`.
 
 ## Workspace Layout

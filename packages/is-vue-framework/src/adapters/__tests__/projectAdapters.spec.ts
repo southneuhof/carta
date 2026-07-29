@@ -46,8 +46,8 @@ describe('adapter resolution', () => {
 
 describe('plugin installation', () => {
   it('isolates adapters between apps', () => {
-    const first = mountWith({ runtime: {}, adapters: { queryDefaults: { staleTime: 1 } } })
-    const second = mountWith({ runtime: {}, adapters: { queryDefaults: { staleTime: 2 } } })
+    const first = mountWith({ adapters: { queryDefaults: { staleTime: 1 } } })
+    const second = mountWith({ adapters: { queryDefaults: { staleTime: 2 } } })
 
     expect(first.adapters.queryDefaults.staleTime).toBe(1)
     expect(second.adapters.queryDefaults.staleTime).toBe(2)
@@ -75,13 +75,13 @@ describe('plugin installation', () => {
     const client = app._context.provides[frameworkQueryClientKey as symbol]
     app.unmount()
 
-    const reused = mountWith({ runtime: {}, queryClient: client as never })
+    const reused = mountWith({ queryClient: client as never })
     expect(reused.app._context.provides[frameworkQueryClientKey as symbol]).toBe(client)
     reused.app.unmount()
   })
 
   it('applies adapter query defaults to the created client', () => {
-    const { app } = mountWith({ runtime: {}, adapters: { queryDefaults: { staleTime: 1234, retry: 3 } } })
+    const { app } = mountWith({ adapters: { queryDefaults: { staleTime: 1234, retry: 3 } } })
     const client = app._context.provides[frameworkQueryClientKey as symbol] as {
       getDefaultOptions: () => { queries?: { staleTime?: number; retry?: number } }
     }

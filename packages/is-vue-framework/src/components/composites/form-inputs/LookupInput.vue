@@ -15,7 +15,6 @@ import Radio from '../../inputs/Radio.vue'
 import BaseInput from '../../inputs/BaseInput.vue'
 import Checkbox from '../../inputs/CheckboxInput.vue'
 import SearchBox from '../SearchBox.vue'
-import DialogForm from '../DialogForm.vue'
 import ConfirmationDialog from '../ConfirmationDialog.vue'
 import Dialog from '../../base/Dialog.vue'
 import Button from '../../base/Button.vue'
@@ -30,6 +29,7 @@ const props = defineProps({
   fields: { type: [Array, Object] as PropType<FieldsInput<RecordData>>, required: true },
   data: Array as PropType<RecordData[]>,
   load: Function as PropType<Load<CollectionLoadContext, CollectionResult<RecordData>>>,
+  /** Optional scalar-model hydration used when no selected record is available locally. */
   loadDetail: Function as PropType<Load<RecordLoadContext, RecordResult<RecordData>>>,
   searchParameters: { type: Object as PropType<Record<string, unknown>>, default: () => ({}) },
   namespace: String as PropType<QueryNamespace>,
@@ -45,7 +45,6 @@ const props = defineProps({
   hidePreviewTable: Boolean,
   formData: Object,
   onSelectData: Function as PropType<(formData: any, selectedData: RecordData[], setter: (data: any) => void) => void>,
-  inlineAddFormConfig: Object,
 })
 
 const modelValue = defineModel<any>()
@@ -83,7 +82,18 @@ function forModel(selection: RecordData[]) {
 }
 
 async function hydrate() {
-  const fallback = normalize(modelValue.value)
+  let fallback = normalize(modelValue.value)
+  const incomingIsScalar = modelValue.value != null && typeof modelValue.value !== 'object'
+  const current = committed.value[0]
+  if (
+    !props.multi
+    && incomingIsScalar
+    && fallback[0]
+    && current?.[props.pick] === fallback[0][props.pick]
+    && current[viewKey.value] != null
+  ) {
+    fallback = [clone(current)]
+  }
   committed.value = fallback
   staged.value = clone(fallback)
   hydrationError.value = undefined
@@ -134,7 +144,7 @@ const selectedIds = computed(() => staged.value.map((item) => item[props.pick]))
 const displayValue = computed(() => {
   if (props.preview) return props.preview
   const labels = committed.value.map((item) => item[viewKey.value]).filter(Boolean)
-  if (!labels.length) return committed.value.length ? `${committed.value.length} Terpilih` : props.placeholder
+  if (!labels.length) return committed.value.length ? `${committed.value.length} Selected` : props.placeholder
   return props.multi && labels.length > 2 ? `${labels.slice(0, 2).join(', ')}, ${labels.length - 2} lainnya` : labels.join(', ')
 })
 const combinedSearchParameters = computed(() => ({
@@ -192,9 +202,6 @@ watch(() => modelValue.value, hydrate, { deep: true })
           </div>
         </template>
       </Dialog>
-      <DialogForm v-if="inlineAddFormConfig" v-bind="(inlineAddFormConfig as any)">
-        <template #trigger><Button kind="icon" variant="standard"><Icon name="add" /></Button></template>
-      </DialogForm>
     </div>
     <Table v-if="multi && committed.length && !hidePreviewTable" :data="committed" :fields="fields" :pagination="false">
       <template #row-actions="{ record }">

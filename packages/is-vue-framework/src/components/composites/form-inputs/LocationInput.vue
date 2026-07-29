@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { GoogleMap, Marker } from 'vue3-google-map'
 import { computed, onBeforeUnmount, onMounted, ref, watch, type PropType } from 'vue'
-import type { Coordinate, LocationOperations, LocationPrediction } from '../../../contracts'
+import type { Coordinate, FieldCatalog, LocationOperations, LocationPrediction } from '../../../contracts'
 import { commonProps } from '../../inputs/commonprops'
 import Popover from '../../base/Popover.vue'
 import SearchBox from '../SearchBox.vue'
 import BaseInput from '../../inputs/BaseInput.vue'
-import Form from '../Form.vue'
+import Form from '../../core/Form.vue'
 import Button from '../../base/Button.vue'
 import Card from '../../base/Card.vue'
 import Icon from '../../base/Icon.vue'
@@ -16,7 +16,6 @@ import Tooltip from '../../base/Tooltip.vue'
 const props = defineProps({
   ...commonProps,
   operations: { type: Object as PropType<LocationOperations>, required: true },
-  formConfig: Object as PropType<any>,
 })
 const modelValue = defineModel<Coordinate>()
 const emit = defineEmits<{ (event: 'validation:touch'): void }>()
@@ -34,12 +33,20 @@ let detailController: AbortController | undefined
 let autocompleteGeneration = 0
 let detailGeneration = 0
 
+const locationFields = {
+  name: {
+    label: 'Nama Lokasi',
+    form: { renderer: 'text' },
+  },
+} satisfies FieldCatalog<Coordinate, Coordinate>
+
 const formModel = computed({
   get: () => modelValue.value as Coordinate,
   set: (value: Partial<Coordinate>) => {
     modelValue.value = {
       lat: Number(value?.lat ?? modelValue.value?.lat ?? center.value.lat),
       lng: Number(value?.lng ?? modelValue.value?.lng ?? center.value.lng),
+      name: value?.name ?? modelValue.value?.name,
       formatted_address: value?.formatted_address ?? modelValue.value?.formatted_address,
     }
   },
@@ -151,7 +158,7 @@ onBeforeUnmount(() => {
           <div v-if="modelValue">{{ modelValue.lat }}, {{ modelValue.lng }}<div v-if="modelValue.formatted_address">{{ modelValue.formatted_address }}</div></div>
           <p v-else class="text-muted">Pilih lokasi</p>
         </Card>
-        <Form v-if="formConfig && modelValue" v-model="formModel as any" v-bind="formConfig" />
+        <Form v-if="modelValue" v-model="formModel" :fields="locationFields" />
         <p v-if="error" role="alert" class="text-error">{{ error }}</p>
         <div v-if="loading" class="flex items-center gap-4"><Spinner />Memuat...</div>
       </div>

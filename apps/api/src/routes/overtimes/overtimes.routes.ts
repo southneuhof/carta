@@ -1,7 +1,7 @@
 import { forbidden, HttpError, notFound } from '@southneuhof/sprindle'
 import { defineRoute } from '@southneuhof/sprindle/routes'
 import type { ModelRuntimeContext } from '@southneuhof/sprindle/model'
-import { and, asc, eq } from 'drizzle-orm'
+import { and, asc, count, eq, ilike, isNotNull } from 'drizzle-orm'
 import type { TypedResponse } from 'hono'
 import { z } from 'zod/v4'
 import { getDb } from '../../db'
@@ -10,10 +10,16 @@ import { notifyAfterCommit, type DeliveredNotification } from '../../notificatio
 import { resolveRecipients } from '../notifications/recipients'
 import { advanceChain, currentStep, seedChain, type ActivatedNotification } from '../verification/chain'
 import { logVerifications } from '../verification/verification.entity'
+import { employees } from '../organization/organization.entity'
 import { overtime, overtimes, type OvertimeStatus } from './overtimes.entity'
 
 const MODULE = 'overtimes'
 type OvertimeOutput = TypedResponse<{ data: z.output<typeof overtime.schemas.select> }, 200, 'json'>
+type ApplicantRecord = { id: string; fullName: string; sectionId: string | null }
+type ApplicantListOutput = TypedResponse<{ data: ApplicantRecord[]; page: number; limit: number; total: number }, 200, 'json'>
+type ApplicantDetailOutput = TypedResponse<{ data: ApplicantRecord }, 200, 'json'>
+type ApplicantListInput = { query: { sectionId: string; page?: string; limit?: string; search?: string } }
+type ApplicantDetailInput = { param: { id: string }; query?: Record<string, string> }
 
 const verifySchema = z.object({
   decision: z.enum(['approved', 'rejected']),
@@ -21,6 +27,70 @@ const verifySchema = z.object({
 })
 
 type OvertimeRow = { id: string; sectionId: string; applicantEmployeeId: string; statusCode: OvertimeStatus; date: string }
+
+const applicantListQuery = z.object({
+  sectionId: z.string().trim().min(1),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  search: z.string().trim().optional(),
+})
+
+function applicantEligibility(sectionId?: string) {
+  return and(
+    eq(employees.active, true),
+    isNotNull(employees.userId),
+    sectionId ? eq(employees.sectionId, sectionId) : undefined,
+  )
+}
+
+export const overtimeApplicants = defineRoute<ApplicantListOutput, ModelRuntimeContext, 'get', ApplicantListInput>({
+  method: 'get',
+  action: async (args) => {
+    const query = applicantListQuery.parse(args.c.req.query())
+    const identity = await orgIdentity(args)
+    if (identity?.scope !== 'all' && (!identity?.sectionId || identity.sectionId !== query.sectionId)) {
+      throw forbidden('Ruas pemohon berada di luar cakupan Anda.')
+    }
+
+    const where = and(
+      applicantEligibility(query.sectionId),
+      ...(query.search ? [ilike(employees.fullName, `%${query.search}%`)] : []),
+    )
+    const offset = (query.page - 1) * query.limit
+    const [data, totals] = await Promise.all([
+      getDb()
+        .select({ id: employees.id, fullName: employees.fullName, sectionId: employees.sectionId })
+        .from(employees)
+        .where(where)
+        .orderBy(asc(employees.fullName), asc(employees.id))
+        .limit(query.limit)
+        .offset(offset),
+      getDb().select({ total: count() }).from(employees).where(where),
+    ])
+
+    return args.c.json({ data, page: query.page, limit: query.limit, total: totals[0]?.total ?? 0 })
+  },
+})
+
+export const overtimeApplicant = defineRoute<ApplicantDetailOutput, ModelRuntimeContext, 'get', '/:id', ApplicantDetailInput>({
+  path: '/:id',
+  method: 'get',
+  action: async (args) => {
+    const identity = await orgIdentity(args)
+    const id = args.c.req.param('id')
+    if (!id) throw notFound()
+    const rows = await getDb()
+      .select({ id: employees.id, fullName: employees.fullName, sectionId: employees.sectionId })
+      .from(employees)
+      .where(and(eq(employees.id, id), applicantEligibility()))
+      .limit(1)
+    const found = rows[0]
+    if (!found || (identity?.scope !== 'all' && (!identity?.sectionId || identity.sectionId !== found.sectionId))) {
+      throw notFound()
+    }
+    return args.c.json({ data: found })
+  },
+})
 
 async function loadOvertime(id: string | undefined): Promise<OvertimeRow> {
   if (!id) throw notFound()

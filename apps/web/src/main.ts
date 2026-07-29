@@ -3,10 +3,10 @@ import { createPinia } from 'pinia'
 import { configureParser, parse } from '@southneuhof/utilities/parse'
 import { FrameworkPlugin } from '@southneuhof/is-vue-framework'
 import { FileManagerPlugin } from '@southneuhof/is-vue-framework/file-manager'
-import { frameworkRuntime } from './framework/runtime'
 import { createFrameworkAdapters } from './framework/adapters/bundle'
 import { fileManagerOptions } from './framework/adapters/fileManager'
-import { appDefaults } from '@/configs/defaults'
+import { appFieldRenderers } from './framework/fields/renderers'
+import { appFieldDefaults } from '@/configs/defaults'
 import { dictionary } from '@/configs/dictionary'
 import App from './App.vue'
 import router from './router'
@@ -55,7 +55,11 @@ declare module 'vue' {
 
 document.addEventListener('DOMContentLoaded', async () => {
   app.use(createPinia())
-  app.use(FrameworkPlugin, { runtime: frameworkRuntime, defaults: appDefaults, adapters: createFrameworkAdapters(router) })
+  app.use(FrameworkPlugin, {
+    adapters: createFrameworkAdapters(router),
+    fieldDefaults: appFieldDefaults,
+    renderers: appFieldRenderers,
+  })
   app.use(FileManagerPlugin, fileManagerOptions)
   app.use(router)
   app.use(

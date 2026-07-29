@@ -4,5 +4,5 @@ import { overtimes } from './overtimes.resource'
 </script>
 
 <template>
-  <FormView title="Ajukan Lembur" description="Isi rincian lembur. Ruas dan karyawan tetap diverifikasi server." :resource="overtimes" success-message="Pengajuan lembur disimpan sebagai draft." />
+  <FormView title="Ajukan Lembur" :resource="overtimes" success-message="Pengajuan lembur disimpan sebagai draft." />
 </template>

@@ -28,6 +28,8 @@ export interface FieldLayer {
   format?: string | null
   sortable?: boolean | null
   align?: 'start' | 'center' | 'end' | null
+  class?: string | null
+  headerClass?: string | null
   emphasis?: 'strong' | 'muted' | null
   span?: number | null
   behavior?: FieldBehavior | null
@@ -48,6 +50,8 @@ export interface ResolvedSurfaceField<
   format?: string
   sortable?: boolean
   align?: 'start' | 'center' | 'end'
+  class?: string
+  headerClass?: string
   emphasis?: 'strong' | 'muted'
   span?: number
 }
@@ -62,13 +66,26 @@ export interface FieldResolutionOptions<
   keys?: readonly string[]
   /** Project-wide defaults applied to every field. */
   defaults?: FieldLayer
+  /** Project defaults selected by normalized field key. */
+  defaultFields?: FieldCatalog<TRecord, TDraft>
   /** Metadata inferred from schemas (plan 003), per field key. */
   schema?: Record<string, FieldLayer>
   /** Component-instance overrides, per field key. */
   overrides?: Record<string, FieldLayer>
 }
 
-const layerKeys = ['label', 'renderer', 'format', 'sortable', 'align', 'emphasis', 'span', 'behavior'] as const
+const layerKeys = [
+  'label',
+  'renderer',
+  'format',
+  'sortable',
+  'align',
+  'class',
+  'headerClass',
+  'emphasis',
+  'span',
+  'behavior',
+] as const
 
 /** Normalizes either accepted `fields` shape into a catalog plus its order. */
 export function toCatalog<TRecord extends object, TDraft extends object>(
@@ -96,7 +113,7 @@ function surfaceLayer(definition: FieldDefinition, surface: FieldSurface): Field
   return merged
 }
 
-function mergeLayers(layers: readonly (FieldLayer | undefined)[]): FieldLayer {
+export function mergeFieldLayers(layers: readonly (FieldLayer | undefined)[]): FieldLayer {
   const result: FieldLayer = {}
   let props: Record<string, unknown> | null | undefined
 
@@ -128,11 +145,19 @@ export function resolveFields<
     const definition = catalog[key]
     if (!definition) throw new Error(`[is-vue-framework] Unknown field "${key}".`)
 
+    const defaultDefinition = options.defaultFields?.[key]
+    const defaultProjection = defaultDefinition
+      ? surfaceLayer(defaultDefinition as FieldDefinition, options.surface)
+      : undefined
     const projection = surfaceLayer(definition as FieldDefinition, options.surface)
     if (projection === false) continue
+    if (definition[options.surface] === undefined && defaultProjection === false) continue
 
-    const merged = mergeLayers([
+    const merged = mergeFieldLayers([
       options.defaults,
+      defaultDefinition
+        ? { label: defaultDefinition.label, ...(defaultProjection === false ? {} : defaultProjection) }
+        : undefined,
       options.schema?.[key],
       { label: definition.label },
       projection,
@@ -143,14 +168,16 @@ export function resolveFields<
       key,
       label: merged.label ?? key,
       props: merged.props ?? {},
-      read: definition.read,
-      write: definition.write,
+      read: definition.read ?? defaultDefinition?.read,
+      write: definition.write ?? defaultDefinition?.write,
     }
 
     if (merged.renderer != null) field.renderer = merged.renderer
     if (merged.format != null) field.format = merged.format
     if (merged.sortable != null) field.sortable = merged.sortable
     if (merged.align != null) field.align = merged.align
+    if (merged.class != null) field.class = merged.class
+    if (merged.headerClass != null) field.headerClass = merged.headerClass
     if (merged.emphasis != null) field.emphasis = merged.emphasis
     if (merged.span != null) field.span = merged.span
     if (options.surface === 'form' && merged.behavior != null) field.behavior = merged.behavior as FieldBehavior<TDraft>

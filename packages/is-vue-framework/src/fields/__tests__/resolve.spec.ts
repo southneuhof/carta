@@ -80,6 +80,30 @@ describe('field resolution', () => {
     expect(field.label).toBe('Entry')
   })
 
+  it('applies keyed project defaults below schema and resource metadata', () => {
+    const [field] = resolveFields({
+      fields: { statusCode: { table: { renderer: 'resource' } } },
+      surface: 'table',
+      defaults: { props: { dense: true } },
+      defaultFields: {
+        statusCode: {
+          label: 'Status',
+          display: { renderer: 'chip', props: { color: 'neutral' } },
+          table: { align: 'center', class: 'whitespace-nowrap' },
+        },
+      },
+      schema: { statusCode: { props: { color: 'warning' } } },
+    })
+
+    expect(field).toMatchObject({
+      label: 'Status',
+      renderer: 'resource',
+      align: 'center',
+      class: 'whitespace-nowrap',
+      props: { dense: true, color: 'warning' },
+    })
+  })
+
   it('treats null as an explicit clear and undefined as inherit', () => {
     const [cleared] = resolveFields({
       fields: { name: { table: { renderer: 'entry' } } },

@@ -4,7 +4,6 @@ import { roleOperations, type Role, type RoleCreate, type RoleUpdate } from './r
 
 export const roleFields = defineFields<Role, RoleCreate>()({
   name: { label: 'Role Name', table: { sortable: true }, form: { renderer: 'text' } },
-  createdAt: { label: 'Created', display: { format: 'datetime' }, form: false },
 })
 
 export const roles = defineResource({

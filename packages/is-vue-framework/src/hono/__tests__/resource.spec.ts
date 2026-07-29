@@ -59,4 +59,18 @@ describe('createHonoResourceOperations', () => {
     expect(normalizeCollection).toHaveBeenCalledTimes(1)
     expect(normalizeRecord).toHaveBeenCalledTimes(3)
   })
+
+  it('forwards list and detail cancellation signals', async () => {
+    const rpc = hc<typeof app>('https://api.test', { fetch: fetchMock })
+    const operations = createHonoResourceOperations(rpc.roles)
+    const controller = new AbortController()
+
+    await operations.list({ query: {}, searchParameters: {}, signal: controller.signal })
+    await operations.detail({ id: 'r1', searchParameters: {}, signal: controller.signal })
+
+    expect(fetchMock.mock.calls[0]?.[1]?.signal).toBe(controller.signal)
+    expect(fetchMock.mock.calls[1]?.[1]?.signal).toBe(controller.signal)
+    controller.abort()
+    expect(controller.signal.aborted).toBe(true)
+  })
 })

@@ -1,104 +1,47 @@
-import type { FrameworkDefaultsInput } from '@southneuhof/is-vue-framework'
-import { z } from 'zod'
+import type { FrameworkFieldDefaultsInput } from '@southneuhof/is-vue-framework'
 
-export const appDefaults: FrameworkDefaultsInput = {
-  global: {
-    fieldSlots: {},
-    fieldsProxy: {
-      created_by: 'rel_created_by',
-      updated_by: 'rel_updated_by',
+const activeOptions = [
+  { name: 'Aktif', id: true },
+  { name: 'Nonaktif', id: false },
+] as const
+
+const statusOptions = [
+  { name: 'Aktif', id: 'active' },
+  { name: 'Nonaktif', id: 'non_active' },
+] as const
+
+const statusDisplayOptions = {
+  active: { color: 'success', label: 'Aktif' },
+  non_active: { color: 'neutral', label: 'Nonaktif' },
+  expired: { color: 'error', label: 'Kadaluwarsa' },
+  expiring_soon: { color: 'warning', label: 'Akan Kadaluwarsa' },
+} as const
+
+/**
+ * Web-app field defaults.
+ *
+ * Keys use the normalized camelCase record shape consumed by resources. Field
+ * catalogs remain authoritative: their definitions override these defaults.
+ * Validation belongs to resource schemas and initial values to form state.
+ */
+export const appFieldDefaults = {
+  fields: {
+    title: { label: 'Judul', form: { renderer: 'text', props: { required: true } } },
+    name: { label: 'Nama', form: { renderer: 'text', props: { required: true } } },
+    fullName: { form: { renderer: 'text', props: { required: true } } },
+    username: { form: { renderer: 'text', props: { required: true } } },
+    code: { label: 'Kode', form: { renderer: 'text', props: { required: true } } },
+    email: { form: { renderer: 'text', props: { required: true, type: 'email' } } },
+    telephone: { form: { renderer: 'text', props: { required: true, type: 'tel' } } },
+    description: {
+      label: 'Keterangan',
+      table: { class: 'line-clamp-3 overflow-ellipsis' },
+      form: { renderer: 'textarea' },
     },
-    inputConfig: {
-      title: { type: 'text', props: { required: true } },
-      name: { type: 'text', props: { required: true } },
-      fullname: { type: 'text', props: { required: true } },
-      username: { type: 'text', props: { required: true } },
-      code: { type: 'text', props: { required: true } },
-      email: {
-        type: 'text',
-        props: {
-          required: true,
-          validation: z.string().email('Format email tidak valid!'),
-        },
-      },
-      telephone: { type: 'text', props: { required: true } },
-      description: { type: 'textarea' },
-      active: {
-        type: 'radio',
-        props: {
-          required: true,
-          defaultValue: true,
-          data: [
-            { name: 'Aktif', id: true },
-            { name: 'Nonaktif', id: false },
-          ],
-        },
-      },
-      status_code: {
-        type: 'radio',
-        props: {
-          required: true,
-          data: [
-            { name: 'Aktif', id: 'active' },
-            { name: 'Nonaktif', id: 'non_active' },
-            { name: 'Kadaluwarsa', id: 'expired' },
-            { name: 'Akan Kadaluwarsa', id: 'expiring_soon' },
-          ],
-        },
-      },
-      start_date: { type: 'date' },
-      end_date: { type: 'date' },
-      year: { type: 'year' },
-    },
-    fieldsParse: {
-      created_at: 'datetime',
-      updated_at: 'datetime',
-      published_at: 'datetime',
-      date: 'date',
-    },
-    fieldsAlias: {
-      name: 'Nama',
-      code: 'Kode',
-      file: 'File',
-      description: 'Keterangan',
-      active: 'Status',
-      created_at: 'Dibuat',
-      updated_at: 'Diperbarui Pada',
-      updated_by: 'Diperbarui Oleh',
-      rel_created_by: 'Dibuat Oleh',
-      rel_updated_by: 'Diperbarui Oleh',
-      department_id: 'Unit Kerja',
-      created_by: 'Dibuat Oleh',
-      year: 'Tahun',
-      number: 'Nomor',
-      section_name: 'Ruas',
-      section_id: 'Ruas',
-      gate_name: 'Gerbang',
-      gate_id: 'Gerbang',
-      status_code: 'Status',
-      date: 'Tanggal',
-      start_date: 'Tanggal Mulai',
-      end_date: 'Tanggal Selesai',
-      published_at: 'Diterbitkan Pada',
-      title: 'Judul',
-      start_month: 'Periode Mulai',
-      end_month: 'Periode Selesai',
-      approval_description: 'Keterangan',
-      array_approval_attachment: 'Lampiran',
-      verification_description: 'Keterangan',
-      array_verification_attachment: 'Lampiran',
-      submission_description: 'Keterangan',
-      array_submission_attachment: 'Lampiran',
-    },
-    fieldsType: {
-      approval_description: { type: 'html' },
-      verification_description: { type: 'html' },
-      submission_description: { type: 'html' },
-      array_approval_attachment: { type: 'file' },
-      array_verification_attachment: { type: 'file' },
-      array_submission_attachment: { type: 'file' },
-      active: {
-        type: 'chip',
+    active: {
+      label: 'Status',
+      display: {
+        renderer: 'chip',
         props: {
           options: {
             true: { color: 'success', label: 'Aktif' },
@@ -106,54 +49,58 @@ export const appDefaults: FrameworkDefaultsInput = {
           },
         },
       },
-      status_code: {
-        type: 'chip',
-        props: {
-          options: {
-            active: { color: 'success', label: 'Aktif' },
-            non_active: { color: 'neutral', label: 'Nonaktif' },
-            expired: { color: 'error', label: 'Kadaluwarsa' },
-            expiring_soon: { color: 'warning', label: 'Akan Kadaluwarsa' },
-          },
-        },
-      },
+      form: { renderer: 'radio', props: { required: true, data: activeOptions } },
     },
+    statusCode: {
+      label: 'Status',
+      display: { renderer: 'chip', props: { options: statusDisplayOptions } },
+      form: { renderer: 'radio', props: { required: true, data: statusOptions } },
+    },
+    status: { table: { align: 'center' } },
+    createdAt: {
+      label: 'Dibuat',
+      read: (record) => record.createdAt,
+      display: { format: 'datetime' },
+      table: { class: 'min-w-max whitespace-nowrap' },
+    },
+    updatedAt: {
+      label: 'Diperbarui Pada',
+      read: (record) => record.updatedAt,
+      display: { format: 'datetime' },
+      table: { class: 'min-w-max whitespace-nowrap' },
+    },
+    publishedAt: {
+      label: 'Diterbitkan Pada',
+      display: { format: 'datetime' },
+      table: { class: 'min-w-max whitespace-nowrap' },
+    },
+    date: {
+      label: 'Tanggal',
+      display: { format: 'date' },
+      table: { class: 'w-max max-w-sm' },
+    },
+    startDate: { label: 'Tanggal Mulai', form: { renderer: 'date' } },
+    endDate: { label: 'Tanggal Selesai', form: { renderer: 'date' } },
+    year: { label: 'Tahun', form: { renderer: 'year' } },
+    file: { label: 'File' },
+    updatedBy: { label: 'Diperbarui Oleh', read: (record) => record.relUpdatedBy },
+    createdBy: { label: 'Dibuat Oleh', read: (record) => record.relCreatedBy },
+    departmentId: { label: 'Unit Kerja' },
+    number: { label: 'Nomor' },
+    sectionName: { label: 'Ruas' },
+    sectionId: { label: 'Ruas', table: { class: 'w-max max-w-sm' } },
+    gateName: { label: 'Gerbang' },
+    gateId: { label: 'Gerbang' },
+    assetId: { table: { class: 'w-max max-w-sm' } },
+    locationId: { table: { class: 'w-max max-w-sm' } },
+    startMonth: { label: 'Periode Mulai' },
+    endMonth: { label: 'Periode Selesai' },
+    approvalDescription: { label: 'Keterangan', display: { renderer: 'html' } },
+    verificationDescription: { label: 'Keterangan', display: { renderer: 'html' } },
+    submissionDescription: { label: 'Keterangan', display: { renderer: 'html' } },
+    arrayApprovalAttachment: { label: 'Lampiran', display: { renderer: 'file' } },
+    arrayVerificationAttachment: { label: 'Lampiran', display: { renderer: 'file' } },
+    arraySubmissionAttachment: { label: 'Lampiran', display: { renderer: 'file' } },
+    arrayClauses: { detail: { renderer: 'array-clauses' } },
   },
-  table: {
-    fieldsClass: {
-      created_at: 'min-w-max whitespace-nowrap',
-      updated_at: 'min-w-max whitespace-nowrap',
-      published_at: 'min-w-max whitespace-nowrap',
-      description: 'line-clamp-3 overflow-ellipsis',
-      section_id: 'w-max max-w-sm',
-      date: 'w-max max-w-sm',
-      asset_id: 'w-max max-w-sm',
-      location_id: 'w-max max-w-sm',
-    },
-    fieldsHeaderClass: {},
-    fieldsAlign: {
-      status_code: 'center',
-      status: 'center',
-    },
-  },
-  detail: {
-    fieldsType: {
-      array_clauses: { type: 'array-clauses' },
-    },
-  },
-  form: {
-    inputConfig: {
-      status_code: {
-        type: 'radio',
-        props: {
-          required: true,
-          defaultValue: true,
-          data: [
-            { name: 'Aktif', id: 'active' },
-            { name: 'Nonaktif', id: 'non_active' },
-          ],
-        },
-      },
-    },
-  },
-}
+} satisfies FrameworkFieldDefaultsInput

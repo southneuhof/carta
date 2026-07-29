@@ -1,12 +1,11 @@
 import { defineFields, defineResource, fromZod } from '@southneuhof/is-vue-framework'
 import { user } from '@southneuhof/api/routes/users/users.entity'
 import { userOperations, type User, type UserUpdate } from './users.operations'
+import { timestampField } from '@/framework/fields/presets'
 
 export const userFields = defineFields<User, UserUpdate>()({
   name: { label: 'Name', table: { sortable: true }, form: { renderer: 'text' } },
   email: { label: 'Email', table: { sortable: true }, form: false },
-  createdAt: { label: 'Created', display: { format: 'datetime' }, form: false },
-  updatedAt: { label: 'Updated', display: { format: 'datetime' }, form: false },
 })
 
 export const users = defineResource({
