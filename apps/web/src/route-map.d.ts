@@ -143,6 +143,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    'input-catalog': RouteRecordInfo<
+      'input-catalog',
+      '/input-catalog',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     'privacy-policy': RouteRecordInfo<
       'privacy-policy',
       '/privacy-policy',
@@ -317,6 +324,7 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(public)/public.layout.vue': {
       routes:
         | 'auth-login'
+        | 'input-catalog'
         | 'privacy-policy'
       views:
         | 'default'
@@ -326,6 +334,14 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(public)/auth/login/index.route.vue': {
       routes:
         | 'auth-login'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(public)/input-catalog/index.route.vue': {
+      routes:
+        | 'input-catalog'
       views:
         | never
       pathParamNames:

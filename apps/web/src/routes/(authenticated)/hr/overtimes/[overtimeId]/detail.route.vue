@@ -13,6 +13,7 @@ import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { DetailView, ListView } from '@southneuhof/is-vue-framework'
+import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import { overtimes } from '../overtimes.resource'
 import { type Overtime } from '../overtimes.operations'
 import { verificationSteps } from './verification-steps.resource'
@@ -75,8 +76,11 @@ async function run(work: () => Promise<void>, success: string) {
     await overtimes.invalidate({ id: overtimeId.value })
     await refresh()
     toast.success(success)
-  } catch {
-    toast.error('Action failed. Please try again.')
+  } catch (error) {
+    const message = error && typeof error === 'object' && 'message' in error
+      ? String(error.message)
+      : 'Action failed. Please try again.'
+    toast.error(message)
   } finally {
     pending.value = false
   }
@@ -93,12 +97,12 @@ function onApprove() {
 function onReject() {
   const description = rejectionReason.value.trim()
   if (!description) {
-    toast.error('A rejection reason is required.')
+    toast.error('Alasan penolakan wajib diisi.')
     return
   }
   rejecting.value = false
   rejectionReason.value = ''
-  void run(() => verifyOvertime(overtimeId.value, 'rejected', description), 'Request rejected.')
+  void run(() => verifyOvertime(overtimeId.value, 'rejected', description), 'Pengajuan ditolak.')
 }
 
 const view = computed(() => {
@@ -115,23 +119,23 @@ const editTarget = computed(() => {
 
 <template>
   <div>
-    <DetailView title="Overtime Details" :back-to="{ name: overtimes.capabilities.list!.to!.name }" :detail="view.detail">
+    <DetailView title="Detail Lembur" :back-to="{ name: overtimes.capabilities.list!.to!.name }" :detail="view.detail">
       <template #controls>
-        <RouterLink v-if="editTarget" :to="editTarget"><Button>Edit</Button></RouterLink>
-        <Button v-if="maySubmit" :disabled="pending" @click="onSubmit">Send for Verification</Button>
-        <Button v-if="mayVerify" :disabled="pending" @click="onApprove">Approve</Button>
-        <Button v-if="mayVerify" color="error" :disabled="pending" @click="rejecting = true">Reject</Button>
+        <RouterLink v-if="editTarget && isDraft" :to="editTarget"><Button>Edit</Button></RouterLink>
+        <Button v-if="maySubmit" :disabled="pending" @click="onSubmit">Kirim Verifikasi</Button>
+        <Button v-if="mayVerify" :disabled="pending" @click="onApprove">Setujui</Button>
+        <Button v-if="mayVerify" color="error" :disabled="pending" @click="rejecting = true">Tolak</Button>
       </template>
     </DetailView>
 
     <section v-if="rejecting" data-reject-dialog>
-      <label for="rejection-reason">Rejection reason</label>
+      <label for="rejection-reason">Alasan penolakan</label>
       <textarea id="rejection-reason" v-model="rejectionReason" data-rejection-reason></textarea>
-      <button type="button" data-confirm-reject @click="onReject">Reject request</button>
-      <button type="button" data-cancel-reject @click="rejecting = false">Cancel</button>
+      <button type="button" data-confirm-reject @click="onReject">Tolak pengajuan</button>
+      <button type="button" data-cancel-reject @click="rejecting = false">Batal</button>
     </section>
 
-    <ListView title="Verification History" :table="stepsTable" />
+    <ListView title="Riwayat Verifikasi" :table="stepsTable" />
 
   </div>
 </template>

@@ -59,7 +59,7 @@ export function createRendererRegistries(input: RendererRegistriesInput = {}): R
   }
 }
 
-export const rendererRegistriesKey: InjectionKey<RendererRegistries> = Symbol('is-vue-framework-renderers')
+export const rendererRegistriesKey: InjectionKey<RendererRegistries> = Symbol.for('is-vue-framework-renderers')
 
 export function useRendererRegistries(): RendererRegistries {
   const registries = inject(rendererRegistriesKey)

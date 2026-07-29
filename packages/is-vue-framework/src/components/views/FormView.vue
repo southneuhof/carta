@@ -14,7 +14,7 @@ import Form from '../core/Form.vue'
 import Button from '../base/Button.vue'
 import Card from '../base/Card.vue'
 import Dialog from '../base/Dialog.vue'
-import Icon from '../base/Icon.vue'
+import NavigationHeader from './NavigationHeader.vue'
 
 type FormOptions = {
   initialData?: Record<string, unknown>
@@ -217,25 +217,11 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section class="is-form-view flex flex-col gap-4">
-    <Card variant="outlined" color="surfaceContainer" class="gap-0 p-0">
-      <header class="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
-        <div class="flex min-w-0 items-center gap-3">
-          <Button kind="icon" variant="standard" aria-label="Back" @click="router.back()">
-            <template #icon><Icon name="arrow-left" /></template>
-          </Button>
-          <slot name="header">
-            <div class="min-w-0">
-              <h1 v-if="title" class="text-lg font-semibold leading-6 tracking-tight text-on-surface">{{ title }}</h1>
-              <p v-if="description" class="mt-1 text-sm leading-5 text-on-surface-variant">{{ description }}</p>
-            </div>
-          </slot>
-        </div>
-        <div v-if="$slots.controls" class="flex flex-wrap items-center gap-2">
-          <slot name="controls" />
-        </div>
-      </header>
-    </Card>
+  <section class="is-form-view flex flex-col gap-2">
+    <NavigationHeader :title="title" :description="description">
+      <template v-if="$slots.header" #header><slot name="header" /></template>
+      <template v-if="$slots.controls" #controls><slot name="controls" /></template>
+    </NavigationHeader>
 
     <Card variant="outlined" color="surfaceContainer" class="p-0">
       <div class="p-5 sm:p-6">
@@ -251,7 +237,7 @@ onBeforeUnmount(() => {
             </template>
             <template #actions>
               <slot name="form-actions" :submit="() => instance?.submit()" :reset="() => instance?.reset()">
-                <div class="is-form-view-controls flex flex-col gap-2 pt-5 sm:flex-row sm:justify-end">
+                <div class="is-form-view-controls flex flex-col gap-2 border-t border-outline-variant pt-5 sm:flex-row sm:justify-end">
                   <Button type="button" variant="text" class="w-full sm:w-auto" :disabled="instance?.submitting || instance?.validating" @click="router.back()">Cancel</Button>
                   <Button type="submit" class="w-full sm:w-auto" :disabled="instance?.submitting || instance?.validating">{{ instance?.submitting ? 'Saving…' : submitLabel ?? 'Save' }}</Button>
                 </div>

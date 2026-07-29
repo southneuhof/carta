@@ -50,7 +50,7 @@ export interface ResolvedFrameworkDefaults {
   mode: string
 }
 
-export const frameworkDefaultsKey: InjectionKey<ResolvedFrameworkDefaults> = Symbol('is-vue-framework-defaults')
+export const frameworkDefaultsKey: InjectionKey<ResolvedFrameworkDefaults> = Symbol.for('is-vue-framework-defaults')
 
 const DEFAULT_MODE = 'default'
 

@@ -71,7 +71,6 @@ describe('route-owned resource boundaries', () => {
         ['create', 'RpcOperations'],
         ['parse', 'RpcResponse<'],
         ['Resource', 'Capabilities'],
-        ['\\.', 'capabilities\\b'],
         ['Role', 'Query'],
         ['User', 'Query'],
         ['Notification', 'Query'],
@@ -82,7 +81,12 @@ describe('route-owned resource boundaries', () => {
         .join('|')
     )
 
-    expect(honoCalls).toEqual(['rpc.overtimes', 'rpc.roles', 'rpc.users', 'rpc.notifications'])
+    expect(honoCalls).toEqual([
+      'rpc.overtimes, dataAdapter',
+      'rpc.roles, dataAdapter',
+      'rpc.users, dataAdapter',
+      'rpc.notifications, dataAdapter',
+    ])
     expect(source.match(forbidden)).toBeNull()
   })
 

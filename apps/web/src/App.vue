@@ -31,11 +31,11 @@ onBeforeUnmount(() => {
 <template>
   <div class="text-black-text transition-colors">
     <Toaster position="bottom-center" richColors :theme="useColorPreference().value" />
-    <div class="flex h-full w-full items-center justify-center">
+    <div class="min-h-screen w-full">
       <Suspense :timeout="0">
         <RouterView />
         <template #fallback>
-          <div class="flex items-center justify-center">
+          <div class="flex min-h-screen items-center justify-center">
             <Spinner />
           </div>
         </template>

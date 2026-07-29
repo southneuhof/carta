@@ -32,11 +32,10 @@ describe('overtimes resource', () => {
     expect(detailTarget?.params('o1')).toEqual({ overtimeId: 'o1' })
     expect(overtimes.table().canDelete).toBeUndefined()
   })
-  it('keeps caller-derived fields off the form', () => {
-    // applicant, section and status come from the session server-side.
+  it('shows parity fields while keeping status off the form', () => {
+    // API still overwrites applicant and section from authenticated identity.
     const formFields = Object.keys(overtimes.form().fields as Record<string, unknown>)
-    expect(formFields).toEqual(['date', 'startTime', 'estimatedMinutes', 'description'])
-    expect(formFields).not.toContain('applicantEmployeeId')
+    expect(formFields).toEqual(['sectionId', 'applicantEmployeeId', 'date', 'startTime', 'estimatedMinutes', 'description'])
     expect(formFields).not.toContain('statusCode')
   })
 

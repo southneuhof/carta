@@ -11,7 +11,7 @@ import { defaultQueryRuntimeDefaults, type QueryRuntimeDefaults } from '../adapt
 import { recordKey, resourceKey } from './keys'
 import type { RecordIdentity } from '../contracts'
 
-export const frameworkQueryClientKey: InjectionKey<QueryClient> = Symbol('is-vue-framework-query-client')
+export const frameworkQueryClientKey: InjectionKey<QueryClient> = Symbol.for('is-vue-framework-query-client')
 
 export function createFrameworkQueryClient(defaults: QueryRuntimeDefaults = defaultQueryRuntimeDefaults): QueryClient {
   const resolved = { ...defaultQueryRuntimeDefaults, ...defaults }

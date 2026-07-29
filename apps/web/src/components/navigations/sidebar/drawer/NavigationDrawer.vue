@@ -1,117 +1,55 @@
 <script setup lang="ts">
-import ProfileSegment from '../../layouts/ProfileSegment.vue'
-import { activeNavigationModule, visibleNavigation, type VisibleNavigationEntry, type VisibleNavigationModule } from '@/manifest'
-import NavItem from './layouts/NavItem.vue'
-import { computed, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { onClickOutside } from '@vueuse/core'
-import Logo from '@/assets/corporate/common/Logo.vue'
-import { useRoute, useRouter } from 'vue-router'
-import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
-import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import { visibleNavigation } from '@/manifest'
 import { allowsPermission } from '@/framework/adapters/bundle'
+import Logo from '@/assets/corporate/common/Logo.vue'
+import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import ProfileSegment from '../../layouts/ProfileSegment.vue'
 
-const sidebarexpand = ref<HTMLElement>()
-const sidebarState = ref<{ index: number; open: boolean }>({ index: 0, open: false })
-const sidebarView = ref<'modules' | 'routes' | 'profile'>('modules')
-const router = useRouter()
 const route = useRoute()
-const accessibleNavigation = computed(() => visibleNavigation(allowsPermission))
-const activeModule = computed(() => activeNavigationModule(route.path, (to) => router.resolve(to as never), allowsPermission))
+const navigation = computed(() => visibleNavigation(allowsPermission))
+const open = ref(false)
+const drawer = ref<HTMLElement>()
+const trigger = ref<HTMLButtonElement>()
 
-const closeSidebar = () => {
-  sidebarState.value.open = false
-  sidebarView.value = 'modules'
+function close(returnFocus = false) {
+  if (!open.value) return
+  open.value = false
+  if (returnFocus) void nextTick(() => trigger.value?.focus())
 }
-
-const openSidebar = () => {
-  sidebarState.value.open = true
+function onKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape') close(true)
 }
-
-const nonSeparatorRoutes = (module: VisibleNavigationModule) => module.routes.filter((route): route is Exclude<VisibleNavigationEntry, { separator: true }> => !('separator' in route))
-
-const selectModule = (module: VisibleNavigationModule, index: number) => {
-  sidebarState.value.index = index
-  const routes = nonSeparatorRoutes(module)
-  if (routes.length <= 1) {
-    if (routes[0]?.name) {
-      router.push({ name: routes[0].name } as never)
-    }
-    closeSidebar()
-    return
-  }
-  sidebarView.value = 'routes'
-}
-
-const selectRoute = (routeName: string) => {
-  router.push({ name: routeName } as never)
-  closeSidebar()
-}
-
-onClickOutside(sidebarexpand, closeSidebar, { ignore: ['#sidebar', '#dialog', 'input', '#file', 'input#file'] })
+onClickOutside(drawer, () => close(), { ignore: ['[data-mobile-menu-trigger]'] })
+watch(() => route.fullPath, () => close())
+document.addEventListener('keydown', onKeydown)
+onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
 </script>
 
 <template>
-  <div class="sticky top-0 z-40 flex w-full flex-row justify-between bg-surface py-4">
-    <button aria-label="Open menu" @click="openSidebar"><Icon name="menu" /></button>
-    <Logo class="!max-w-12"></Logo>
-  </div>
-  <div
-    ref="sidebarexpand"
-    id="sidebar"
-    class="duration-[350ms] fixed top-0 z-50 flex max-h-screen min-h-screen min-w-[288px] max-w-[288px] flex-col gap-8 rounded-r-2xl border-x border-surface-variant/[25%] bg-surface-container p-8 text-on-surface transition-all"
-    :class="sidebarState.open ? 'left-0' : '-left-[288px]'"
-  >
-    <Button kind="icon" variant="standard" size="square" class="ml-2 w-fit" @click="closeSidebar"><Icon name="close" /></Button>
-    <TransitionGroup mode="out-in" tag="div" name="viewmode" class="min-w-full overflow-scroll">
-      <div v-if="sidebarView === 'modules'" class="flex flex-col gap-2">
-        <NavItem :key="item.name" v-for="(item, index) in accessibleNavigation" :route="item" :active="item.name === activeModule" @click="selectModule(item, index)" />
-        <NavItem :active="sidebarState.index === -1" :route="{ icon: 'user', title: 'Profil' }" @click="() => (sidebarView = 'profile')" />
-      </div>
-      <div v-else-if="sidebarView === 'routes'" class="flex flex-col gap-2">
-        <NavItem :active="false" :route="{ icon: 'arrow-left', title: 'Kembali' }" @click="sidebarView = 'modules'"></NavItem>
-        <div v-for="route in accessibleNavigation[sidebarState.index]?.routes ?? []" :key="route.name">
-          <div v-if="'separator' in route" class="px-4 py-2 text-sm text-muted">{{ route.name }}</div>
-          <NavItem v-else :active="route.name === String($route.name)" :route="route" @click="() => selectRoute(route.name)" />
-        </div>
-      </div>
-      <div v-else-if="sidebarView === 'profile'" class="flex flex-col gap-2">
-        <NavItem :active="false" :route="{ icon: 'arrow-left', title: 'Kembali' }" @click="() => (sidebarView = 'modules')"></NavItem>
-        <ProfileSegment />
-      </div>
-    </TransitionGroup>
-  </div>
+  <header class="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-outline-variant bg-surface px-4 lg:hidden">
+    <button ref="trigger" data-mobile-menu-trigger type="button" aria-label="Open menu" :aria-expanded="open" @click="open = true"><Icon name="menu" /></button>
+    <Logo class="w-10" />
+  </header>
+  <div v-if="open" class="fixed inset-0 z-40 bg-black/40 lg:hidden" aria-hidden="true" @click="close()" />
+  <aside ref="drawer" class="fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-surface-container shadow-xl transition-transform lg:hidden" :class="open ? 'translate-x-0' : '-translate-x-full'" :aria-hidden="!open">
+    <div class="flex h-16 items-center justify-between border-b border-outline-variant px-4">
+      <span class="font-semibold">Navigation</span>
+      <button type="button" aria-label="Close menu" @click="close(true)"><Icon name="close" /></button>
+    </div>
+    <nav aria-label="Mobile navigation" class="flex-1 overflow-y-auto p-3">
+      <section v-for="module in navigation" :key="module.name" class="mb-4">
+        <h2 class="px-3 pb-2 text-xs font-semibold uppercase text-on-surface-variant">{{ module.title }}</h2>
+        <template v-for="entry in module.routes" :key="entry.name">
+          <p v-if="'separator' in entry" class="px-3 pb-1 pt-3 text-xs text-on-surface-variant">{{ entry.name }}</p>
+          <RouterLink v-else :to="entry.to as never" class="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 hover:bg-surface-variant focus-visible:ring-2 focus-visible:ring-primary" :class="entry.name === String(route.name) ? 'bg-primary-container text-on-primary-container' : ''">
+            <Icon :name="entry.icon" /><span>{{ entry.title }}</span>
+          </RouterLink>
+        </template>
+      </section>
+    </nav>
+    <div class="border-t border-outline-variant p-3"><ProfileSegment /></div>
+  </aside>
 </template>
-
-<style scoped>
-.viewmode-enter-active,
-.viewmode-leave-active {
-  transition: all 0.1725s ease;
-  position: absolute;
-}
-
-.viewmode-leave-to {
-  opacity: 0;
-  transform: v-bind('sidebarView === "modules" ? "translateX(-5%)" : "translateX(5%)"');
-  min-width: 230px;
-  position: absolute;
-}
-.viewmode-enter-from {
-  opacity: 0;
-  transform: v-bind('sidebarView === "modules" ? "translateX(5%)" : "translateX(-5%)"');
-  min-width: 230px;
-  position: absolute;
-}
-
-.viewmode-enter-to,
-.viewmode-leave-from {
-  opacity: 1;
-  transform: translateX(0%);
-  min-width: 230px;
-  transition-delay: 0.1725s;
-  position: absolute;
-}
-.viewmode-move {
-  transition: all 0.17s ease;
-  position: absolute;
-}
-</style>

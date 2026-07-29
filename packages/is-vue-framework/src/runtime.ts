@@ -32,4 +32,4 @@ export function missingRuntimeCapability(name: string): never {
   throw new Error(`[vue-framework] Missing runtime capability: ${name}. Register it with FrameworkPlugin.`)
 }
 
-export const frameworkRuntimeKey: InjectionKey<FrameworkRuntime> = Symbol('is-vue-framework-runtime')
+export const frameworkRuntimeKey: InjectionKey<FrameworkRuntime> = Symbol.for('is-vue-framework-runtime')

@@ -139,7 +139,7 @@ export function resolveFrameworkAdapters(input: FrameworkAdaptersInput = {}): Re
   }
 }
 
-export const frameworkAdaptersKey: InjectionKey<ResolvedFrameworkAdapters> = Symbol('is-vue-framework-adapters')
+export const frameworkAdaptersKey: InjectionKey<ResolvedFrameworkAdapters> = Symbol.for('is-vue-framework-adapters')
 
 export function useFrameworkAdapters(): ResolvedFrameworkAdapters {
   const adapters = inject(frameworkAdaptersKey)

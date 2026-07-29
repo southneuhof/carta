@@ -9,3 +9,16 @@ export type OvertimeCreate = ResourceCreateOf<typeof overtimeOperations>
 export type OvertimeUpdate = ResourceUpdateOf<typeof overtimeOperations>
 export type OvertimeDraft = Pick<OvertimeCreate, 'date' | 'startTime' | 'estimatedMinutes' | 'description'>
 export type OvertimeStatus = Overtime['statusCode']
+export interface OvertimeListQuery {
+  page?: number
+  limit?: number
+  search?: string
+  sort?: string
+  order?: 'asc' | 'desc'
+  sectionId?: string
+  applicantEmployeeId?: string
+  startDate?: string
+  endDate?: string
+  jobPositionId?: string
+  statusCode?: OvertimeStatus
+}
