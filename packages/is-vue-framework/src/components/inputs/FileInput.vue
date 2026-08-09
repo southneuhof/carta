@@ -272,7 +272,7 @@ const canAddFile = computed(() => props.multi || rows.value.length === 0)
             <div v-if="!isOverDropZone" class="flex flex-row items-center gap-4">
               <div class="text-black-light font-bold">Letakkan file anda di sini</div>
               <div class="text-black-light">/</div>
-              <Popover v-model="sourcePopoverOpen">
+              <Popover v-model="sourcePopoverOpen" contentClass="p-0">
                 <template #trigger>
                   <Button type="button">
                     <template #icon>
@@ -282,7 +282,7 @@ const canAddFile = computed(() => props.multi || rows.value.length === 0)
                   </Button>
                 </template>
                 <template #content>
-                  <div class="min-w-56 rounded-lg border border-outline/[12%] bg-surface-container p-1 text-on-surface shadow-elevation-3">
+                  <div class="flex flex-col">
                     <button v-if="props.upload" type="button" class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-on-surface/[8%]" @click="openDevicePicker">
                       <Icon name="upload-cloud" size="sm" />
                       <span>Upload from device</span>

@@ -246,7 +246,7 @@ onMounted(() => {
 <template>
   <BaseInput v-bind="props">
     <div class="w-full min-w-0 max-w-full">
-      <Popover :class="$attrs.class" :disabled="disabled">
+      <Popover :class="$attrs.class" :disabled="disabled" contentClass="p-0">
         <template #trigger>
           <div
             :key="`${String(displayValue)}`"
@@ -278,7 +278,7 @@ onMounted(() => {
               <span>{{ sourceError.message }}</span>
               <button type="button" @click="source.refresh">Coba lagi</button>
             </div>
-            <div v-else-if="filteredData.length" class="h-full overflow-y-auto p-4">
+            <div v-else-if="filteredData.length" class="h-full overflow-y-auto">
               <Card
                 v-for="item in filteredData"
                 color="surfaceContainerHigh"

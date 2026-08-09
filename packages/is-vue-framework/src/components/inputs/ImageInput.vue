@@ -268,7 +268,7 @@ async function selectFileManagerAsset(payload: ManagedAsset) {
               </template>
             </Draggable>
             <template v-if="!isUploading">
-              <Popover v-if="(props.multi && images.length != (props.limit == -1 ? 99999 : props.limit)) || (!props.multi && !images[0])" v-model="sourcePopoverOpen">
+              <Popover v-if="(props.multi && images.length != (props.limit == -1 ? 99999 : props.limit)) || (!props.multi && !images[0])" v-model="sourcePopoverOpen" contentClass="p-0">
                 <template #trigger>
                   <button
                     type="button"
@@ -285,7 +285,7 @@ async function selectFileManagerAsset(payload: ManagedAsset) {
                   </button>
                 </template>
                 <template #content>
-                  <div class="min-w-56 rounded-lg border border-outline/[12%] bg-surface-container p-1 text-on-surface shadow-elevation-3">
+                  <div class="flex flex-col">
                     <button v-if="props.upload" type="button" class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-on-surface/[8%]" @click="openDevicePicker">
                       <Icon name="upload-cloud" size="sm" />
                       <span>Upload from device</span>
