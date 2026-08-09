@@ -52,6 +52,7 @@ update the status after implementation and review.
 | 059 | Install web input defaults and migrate field sources | P1 | L | 057, 058 | DONE — helper-based authoring superseded by 060 |
 | 060 | Restore plain input-source authoring | P1 | M | — | DONE |
 | 061 | Add an authenticated S3/MinIO presigned upload endpoint | P1 | M | — | DONE |
+| 062 | Integrate web file inputs with S3/MinIO storage | P1 | L | 061 | DONE — scoped checks pass; full workspace type-check is blocked by a pre-existing unrelated framework type-test error |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line reason)
 
@@ -226,3 +227,6 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJE
 - Plan 061 is independent of the completed framework file-manager plans because
   it is a backend-only proof route. It must not change the frontend's legacy
   upload protocol or add storage policy to Sprindle.
+- Plan 062 depends on Plan 061 because the web adapter uses its authenticated
+  upload response and extends the same API storage boundary for display, list,
+  and delete operations.

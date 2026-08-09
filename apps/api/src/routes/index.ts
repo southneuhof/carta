@@ -25,7 +25,7 @@ import {
   roleModel,
 } from './roles/roles'
 import { domain as usersDomain, userModel } from './users/users'
-import { presignedUploadRoute } from './files/files'
+import { deleteFileRoute, fileObjectRoute, listFilesRoute, presignedUploadRoute } from './files/files'
 
 export const domainParts = [
   authDomain,
@@ -46,7 +46,10 @@ const installedRoutes = [
   authRoutes.getSession,
   authRoutes.signOut,
   meRoute,
+  listFilesRoute,
   presignedUploadRoute,
+  fileObjectRoute,
+  deleteFileRoute,
   listRolePermissions,
   assignRolePermission,
   revokeRolePermission,

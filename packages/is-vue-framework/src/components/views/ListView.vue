@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="TRecord extends object = Record<string, unknown>, TQuery extends object = Record<string, unknown>">
 /**
  * Collection surface shell.
  *
@@ -52,16 +52,13 @@ type ListViewProps = {
   /** Controlled user collection state. Search/filter values belong here. */
   query?: QueryValues;
   /** Explicit query fields for live filtering; record fields are never inferred. */
-  filters?: ListFilters;
-  export?: ListExportOptions | false;
+  filters?: ListFilters<TQuery>;
+  export?: ListExportOptions<TRecord, TQuery> | false;
 } & (
   | {
-      resource: ListCapableResource<
-        Record<string, unknown>,
-        Record<string, unknown>
-      >;
+      resource: ListCapableResource<TRecord, TQuery>;
       table?: never;
-      tableOptions?: TableSurfaceArguments;
+      tableOptions?: TableSurfaceArguments<TQuery>;
     }
   | { table: TableProps; resource?: never; tableOptions?: never }
 );
@@ -77,23 +74,18 @@ type ListViewSurface = {
   table: TableProps;
   createRoute: import("vue-router").RouteLocationRaw | undefined;
   detailRoute:
-    | ((
-        record: Record<string, unknown>,
-      ) => import("vue-router").RouteLocationRaw | undefined)
+    | ((record: Record<string, unknown>) => import("vue-router").RouteLocationRaw | undefined)
     | undefined;
   updateRoute:
-    | ((
-        record: Record<string, unknown>,
-      ) => import("vue-router").RouteLocationRaw | undefined)
+    | ((record: Record<string, unknown>) => import("vue-router").RouteLocationRaw | undefined)
     | undefined;
   canDelete: ((record: Record<string, unknown>) => boolean) | undefined;
-  deleteRecord:
-    ((record: Record<string, unknown>) => Promise<unknown>) | undefined;
+  deleteRecord: ((record: Record<string, unknown>) => Promise<unknown>) | undefined;
 };
 
 const surface = computed<ListViewSurface>(() =>
   props.resource
-    ? props.resource.table(props.tableOptions)
+    ? props.resource.table(props.tableOptions) as unknown as ListViewSurface
     : {
         table: props.table!,
         createRoute: undefined,
@@ -226,7 +218,7 @@ async function exportRows() {
   exporting.value = true;
   try {
     const { page: _page, limit: _limit, ...activeQuery } = queryValues.value;
-    const options = props.export ?? {};
+    const options = (props.export ?? {}) as ListExportOptions;
     const searchParameters = surface.value.table.searchParameters ?? {};
     let rows: Record<string, unknown>[];
     if (options.load) {

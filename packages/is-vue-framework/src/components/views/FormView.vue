@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="TResource extends FormResourceConstraint = FormResourceConstraint">
 /**
  * Draft surface shell.
  *
@@ -10,6 +10,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { onBeforeRouteLeave, useRouter, type RouteLocationRaw } from 'vue-router'
 import { toast } from 'vue-sonner'
 import type { FieldContext, FormProps, MaybePromise, RecordIdentity, SubmitError } from '../../contracts'
+import type { FormResourceConstraint, FormSubmissionContext } from './FormView.types'
 import Form from '../core/Form.vue'
 import Button from '../base/Button.vue'
 import Card from '../base/Card.vue'
@@ -22,21 +23,32 @@ type FormOptions = {
   context?: FieldContext
 }
 
-export interface FormSubmissionContext<TRecord extends object, TIdentity extends RecordIdentity> {
-  record: TRecord
-  id: TIdentity
-  operation: 'create' | 'update'
-  defaultTo: RouteLocationRaw | undefined
-  navigate: (to: RouteLocationRaw) => Promise<void>
-  preventDefaultNavigation: () => void
-}
-
 type BivariantMethod<TArgument, TResult> = { method(argument: TArgument): TResult }['method']
 type ResourceCapability = { to?: RouteLocationRaw | BivariantMethod<RecordIdentity, RouteLocationRaw> | { name: string; params: BivariantMethod<RecordIdentity, Record<string, string | number>> } }
 type ResourceFormOptions = {
   afterSubmit?: BivariantMethod<FormSubmissionContext<Record<string, unknown>, RecordIdentity>, MaybePromise<void>>
   successMessage?: string | false
 }
+
+type FormResourceProps<TResource extends FormResourceConstraint> =
+  | {
+      resource: TResource & { readonly __formCapabilities: 'create' }
+      id?: never
+      formOptions?: FormOptions
+      formProps?: never
+    }
+  | {
+      resource: TResource & { readonly __formCapabilities: 'update' }
+      id: RecordIdentity
+      formOptions?: FormOptions
+      formProps?: never
+    }
+  | {
+      resource: TResource & { readonly __formCapabilities: 'create-update' }
+      id?: RecordIdentity
+      formOptions?: FormOptions
+      formProps?: never
+    }
 
 type CreateFormResource = {
   readonly __formCapabilities: 'create'
@@ -62,22 +74,6 @@ type CreateUpdateFormResource = {
   form(args: FormOptions & { id: RecordIdentity }): FormProps<Record<string, unknown>, Record<string, unknown>>
 } & ResourceFormOptions
 
-export type ResourceFormViewProps<TRecord extends object, TIdentity extends RecordIdentity, TCreate extends object, TUpdate extends object = TCreate> = {
-  resource: {
-    identity: (record: TRecord) => TIdentity
-    capabilities: { detail?: { to?: { name: string } | { name: string; params: (id: TIdentity) => Record<string, string | number> } }; list?: { to?: { name: string } } }
-    form: {
-      (): FormProps<TCreate, TRecord>
-      (args: FormOptions): FormProps<TCreate, TRecord>
-      (args: FormOptions & { id: TIdentity }): FormProps<TUpdate, TRecord>
-    }
-  }
-  id?: TIdentity
-  formOptions?: FormOptions
-  afterSubmit?: (context: FormSubmissionContext<TRecord, TIdentity>) => MaybePromise<void>
-  successMessage?: string | false
-}
-
 type FormViewProps = ({
   formProps: FormProps
   resource?: never
@@ -85,22 +81,7 @@ type FormViewProps = ({
   formOptions?: never
   afterSubmit?: never
   successMessage?: never
-} | {
-  resource: CreateFormResource
-  id?: never
-  formOptions?: FormOptions
-  formProps?: never
-} | {
-  resource: UpdateFormResource
-  id: RecordIdentity
-  formOptions?: FormOptions
-  formProps?: never
-} | {
-  resource: CreateUpdateFormResource
-  id?: RecordIdentity
-  formOptions?: FormOptions
-  formProps?: never
-}) & {
+} | FormResourceProps<TResource>) & {
   title?: string
   description?: string
   submitLabel?: string
@@ -109,9 +90,14 @@ type FormViewProps = ({
 const props = defineProps<FormViewProps>()
 const router = useRouter()
 
+type RuntimeFormResource = CreateFormResource | UpdateFormResource | CreateUpdateFormResource
+const resource = computed<RuntimeFormResource | undefined>(() => 'resource' in props && props.resource
+  ? props.resource as unknown as RuntimeFormResource
+  : undefined)
+
 const surface = computed(() => {
   if ('formProps' in props && props.formProps) return props.formProps
-  const form = props.resource!.form as (args?: FormOptions & { id?: RecordIdentity }) => FormProps<Record<string, unknown>, Record<string, unknown>>
+  const form = resource.value!.form as (args?: FormOptions & { id?: RecordIdentity }) => FormProps<Record<string, unknown>, Record<string, unknown>>
   return props.id === undefined
     ? (props.formOptions ? form(props.formOptions) : form())
     : form({ ...props.formOptions, id: props.id })
@@ -123,12 +109,12 @@ const emit = defineEmits<{
 }>()
 
 function defaultTarget(record: Record<string, unknown>): RouteLocationRaw | undefined {
-  const detail = props.resource?.capabilities?.detail?.to
-  if (typeof detail === 'function') return detail(props.resource!.identity(record))
+  const detail = resource.value?.capabilities?.detail?.to
+  if (typeof detail === 'function') return detail(resource.value!.identity(record))
   if (typeof detail === 'string') return detail
-  if (detail && typeof detail === 'object' && 'params' in detail && typeof detail.params === 'function') return { name: detail.name, params: detail.params(props.resource!.identity(record)) } as RouteLocationRaw
+  if (detail && typeof detail === 'object' && 'params' in detail && typeof detail.params === 'function') return { name: detail.name, params: detail.params(resource.value!.identity(record)) } as RouteLocationRaw
   if (detail) return detail as RouteLocationRaw
-  const list = props.resource?.capabilities?.list?.to
+  const list = resource.value?.capabilities?.list?.to
   if (typeof list === 'string') return list
   return list ? list as RouteLocationRaw : undefined
 }
@@ -137,9 +123,9 @@ async function submitted(result: unknown) {
   if (!result || typeof result !== 'object') return
   const record = result as Record<string, unknown>
   emit('submitted', record)
-  if (!props.resource) return
+  if (!resource.value) return
 
-  const successMessage = props.resource.successMessage === undefined ? 'Changes saved.' : props.resource.successMessage
+  const successMessage = resource.value.successMessage === undefined ? 'Changes saved.' : resource.value.successMessage
   if (successMessage) toast.success(successMessage)
   let handled = false
   const navigate = async (to: RouteLocationRaw) => {
@@ -155,14 +141,14 @@ async function submitted(result: unknown) {
   }
   const context: FormSubmissionContext<Record<string, unknown>, RecordIdentity> = {
     record,
-    id: props.id === undefined ? props.resource.identity(record) : props.id,
+    id: props.id === undefined ? resource.value.identity(record) : props.id,
     operation: props.id === undefined ? 'create' : 'update',
     defaultTo: defaultTarget(record),
     navigate,
     preventDefaultNavigation: () => { handled = true },
   }
   try {
-    await props.resource.afterSubmit?.(context)
+    await resource.value.afterSubmit?.(context)
     if (!handled && context.defaultTo) await navigate(context.defaultTo)
   } catch {
     toast.error('Changes saved, but the next action could not be completed.')

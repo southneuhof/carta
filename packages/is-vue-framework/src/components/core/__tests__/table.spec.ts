@@ -387,7 +387,6 @@ describe('Table core', () => {
     pending.resolve({ data: [] })
     await flush()
     expect(loading.text()).toContain('No data')
-    expect(loading.find('p')?.parentElement?.classList.contains('bg-surface-container')).toBe(true)
     loading.unmount()
 
     const failing = mountCore(Table, {

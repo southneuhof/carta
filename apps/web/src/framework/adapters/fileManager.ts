@@ -1,5 +1,5 @@
 import type { FileManagerPluginOptions, ManagedAsset } from '@southneuhof/is-vue-framework/file-manager'
-import services from '@/utils/services'
+import { deleteFile, fileUrl, listFiles, uploadFile } from './storage'
 
 export function canonicalAsset(input: any, parentId: string | null = null): ManagedAsset {
   const source = input?.data && typeof input.data === 'object' ? input.data : input
@@ -14,37 +14,25 @@ export function canonicalAsset(input: any, parentId: string | null = null): Mana
     mimeType,
     size: source.size == null ? undefined : Number(source.size),
     updatedAt: source.updatedAt ?? source.updated_at,
-    previewUrl: source.previewUrl ?? source.url,
+    previewUrl: source.previewUrl ?? source.url ?? fileUrl(id),
     metadata: { source },
   }
 }
 
-function rows(response: any): any[] {
-  if (Array.isArray(response)) return response
-  if (Array.isArray(response?.data)) return response.data
-  if (Array.isArray(response?.files)) return response.files
-  if (response?.data && typeof response.data === 'object') return Object.values(response.data)
-  return []
-}
-
 export const fileManagerOptions: FileManagerPluginOptions<any> = {
-  root: '/storage/public',
+  root: 'uploads/',
   operations: {
     async list({ parentId, sort, signal }) {
-      const response = await services.get('files', { dir: parentId, sort_by: sort?.field, sort: sort?.direction }, { init: { signal } })
-      const data = rows(response).map((asset) => canonicalAsset(asset, parentId))
-      return { data, meta: { total: Number(response?.total ?? data.length), totalPage: Number(response?.totalPage ?? 1) } }
+      void sort
+      const data = (await listFiles(parentId ?? 'uploads/', signal)).map((asset) => canonicalAsset(asset, parentId))
+      return { data, meta: { total: data.length, totalPage: 1 } }
     },
     async upload(file, { parentId, onProgress, signal }) {
-      const response = await services.fileUpload(file, parentId ?? '', (progress) => onProgress?.(progress), { init: { signal } })
-      return canonicalAsset(response, parentId)
-    },
-    async createFolder({ parentId, name, signal }) {
-      const response = await services.get('sync-file', { dir: parentId, folder_name: name }, { init: { signal } })
-      return canonicalAsset(response, parentId)
+      const response = await uploadFile(file, { signal, onProgress })
+      return canonicalAsset({ id: response.key, name: response.file.name, size: response.file.size, mimeType: response.file.type, url: response.url }, parentId)
     },
     async remove({ id, signal }) {
-      await services.post('delete-file', { path: id }, { init: { signal } })
+      await deleteFile(id, signal)
     },
   },
   values: {
@@ -57,7 +45,7 @@ export const fileManagerOptions: FileManagerPluginOptions<any> = {
       return {
         kind: 'file' as const,
         path: asset.id,
-        url: asset.previewUrl ?? asset.id,
+        url: asset.previewUrl ?? fileUrl(asset.id),
         name: asset.name,
         size: asset.size,
         mimeType: asset.mimeType,

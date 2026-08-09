@@ -1,4 +1,10 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 const PRESIGNED_URL_EXPIRES_IN = 15 * 60
@@ -54,4 +60,25 @@ export async function createPresignedUpload({ key, contentType }: PresignedUploa
   )
 
   return { url, expiresIn: PRESIGNED_URL_EXPIRES_IN }
+}
+
+export async function createPresignedDownload(key: string) {
+  const { bucket, client } = getStorage()
+  const url = await getSignedUrl(
+    client,
+    new GetObjectCommand({ Bucket: bucket, Key: key }),
+    { expiresIn: PRESIGNED_URL_EXPIRES_IN },
+  )
+
+  return { url, expiresIn: PRESIGNED_URL_EXPIRES_IN }
+}
+
+export async function listObjects(prefix: string) {
+  const { bucket, client } = getStorage()
+  return client.send(new ListObjectsV2Command({ Bucket: bucket, Prefix: prefix, Delimiter: '/' }))
+}
+
+export async function deleteObject(key: string) {
+  const { bucket, client } = getStorage()
+  await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }))
 }

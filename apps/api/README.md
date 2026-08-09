@@ -43,9 +43,27 @@ curl -X PUT '<paste-data.uploadUrl-here>' \
   --upload-file ./sample.txt
 ```
 
+The response includes `data.downloadUrl`, a stable authenticated API URL for
+displaying the object. The API creates a short-lived MinIO `GET` signature when
+the browser opens that URL. The API does not store file metadata.
+
+List objects under the application prefix:
+
+```sh
+curl -b cookies.txt "$API_URL/files?prefix=uploads/"
+```
+
+Delete an object with its server-generated key:
+
+```sh
+curl -b cookies.txt -X DELETE "$API_URL/files/object" \
+  -H 'Content-Type: application/json' \
+  --data '{"key":"uploads/<object-key>"}'
+```
+
 `S3_ENDPOINT` must be reachable by the browser that performs the `PUT`. The
-MinIO bucket CORS policy must allow `PUT` from `APP_ORIGIN`. This proof does
-not store file metadata or create download URLs.
+MinIO bucket CORS policy must allow `PUT` from `APP_ORIGIN` and allow the
+signed request headers, including `Content-Type`.
 
 Naming:
 

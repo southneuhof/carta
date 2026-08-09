@@ -6,21 +6,33 @@ import { app as rawApp } from '../app'
 import { getAuth } from '../routes/auth/auth'
 import { accounts } from '../routes/auth/auth.entity'
 import { users } from '../routes/users/users.entity'
-import { createPresignedUpload } from '../storage/s3'
+import { createPresignedDownload, createPresignedUpload, deleteObject, listObjects } from '../storage/s3'
 
-vi.mock('../storage/s3', () => ({ createPresignedUpload: vi.fn() }))
+vi.mock('../storage/s3', () => ({
+  createPresignedDownload: vi.fn(),
+  createPresignedUpload: vi.fn(),
+  deleteObject: vi.fn(),
+  listObjects: vi.fn(),
+}))
 const signer = vi.mocked(createPresignedUpload)
+const downloader = vi.mocked(createPresignedDownload)
+const remover = vi.mocked(deleteObject)
+const lister = vi.mocked(listObjects)
 
 let sessionCookie = ''
 
-function request(body: unknown, cookie = sessionCookie) {
+function routeRequest(path: string, method: string, body?: unknown, cookie = sessionCookie) {
   const headers = new Headers({ 'Content-Type': 'application/json' })
   if (cookie) headers.set('Cookie', cookie)
-  return rawApp.request('/files/presigned-url', {
-    method: 'POST',
+  return rawApp.request(path, {
+    method,
     headers,
-    body: typeof body === 'string' ? body : JSON.stringify(body),
+    body: body === undefined ? undefined : typeof body === 'string' ? body : JSON.stringify(body),
   })
+}
+
+function request(body: unknown, cookie = sessionCookie) {
+  return routeRequest('/files/presigned-url', 'POST', body, cookie)
 }
 
 async function resetSchema() {
@@ -79,6 +91,12 @@ describe('file upload presign route', () => {
   beforeEach(async () => {
     signer.mockReset()
     signer.mockResolvedValue({ url: 'https://storage.test/upload', expiresIn: 900 })
+    downloader.mockReset()
+    downloader.mockResolvedValue({ url: 'https://storage.test/download', expiresIn: 900 })
+    remover.mockReset()
+    remover.mockResolvedValue(undefined)
+    lister.mockReset()
+    lister.mockResolvedValue({ $metadata: {}, CommonPrefixes: [], Contents: [] })
     await resetSchema()
 
     await getDb().insert(users).values({ id: 'user-files', name: 'File User', email: 'files@example.com' })
@@ -125,6 +143,7 @@ describe('file upload presign route', () => {
     expect(call?.key).not.toContain('secret')
     expect(call?.contentType).toBe('text/plain')
     expect(body.data.key).toBe(call?.key)
+    expect(body.data.downloadUrl).toContain('/files/object?key=')
   })
 
   it('rejects invalid upload metadata before signing', async () => {
@@ -158,5 +177,53 @@ describe('file upload presign route', () => {
     } finally {
       log.mockRestore()
     }
+  })
+
+  it('lists objects and folders under an authenticated prefix', async () => {
+    lister.mockResolvedValueOnce({
+      $metadata: {},
+      CommonPrefixes: [{ Prefix: 'uploads/images/' }],
+      Contents: [{ Key: 'uploads/report.txt', Size: 12, LastModified: new Date('2026-08-10T00:00:00.000Z') }],
+    })
+
+    const response = await routeRequest('/files?prefix=uploads/', 'GET')
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toMatchObject({
+      data: [
+        { id: 'uploads/images/', kind: 'folder', name: 'images' },
+        {
+          id: 'uploads/report.txt',
+          kind: 'file',
+          name: 'report.txt',
+          mimeType: 'text/plain',
+          size: 12,
+          url: 'http://localhost/files/object?key=uploads%2Freport.txt',
+        },
+      ],
+      meta: { total: 2, totalPage: 1 },
+    })
+    expect(lister).toHaveBeenCalledWith('uploads/')
+  })
+
+  it('redirects authenticated display requests to a signed GET URL', async () => {
+    const response = await routeRequest('/files/object?key=uploads%2Freport.txt', 'GET')
+
+    expect(response.status).toBe(302)
+    expect(response.headers.get('Location')).toBe('https://storage.test/download')
+    expect(downloader).toHaveBeenCalledWith('uploads/report.txt')
+  })
+
+  it('deletes an authenticated object after validating its key', async () => {
+    const response = await routeRequest('/files/object', 'DELETE', { key: 'uploads/report.txt' })
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({ ok: true })
+    expect(remover).toHaveBeenCalledTimes(1)
+    expect(remover).toHaveBeenCalledWith('uploads/report.txt')
+
+    const invalid = await routeRequest('/files/object', 'DELETE', { key: '../report.txt' })
+    expect(invalid.status).toBe(400)
+    expect(remover).toHaveBeenCalledTimes(1)
   })
 })

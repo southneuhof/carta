@@ -145,69 +145,6 @@ class AppServices {
     return this.downloadResponse(await this.raw(path, query, options), filename)
   }
 
-  private uploadToPresignedUrl(file: File, uploadUrl: string, onUploadProgress?: (progress: { loaded: number; total: number }) => void) {
-    if (!onUploadProgress) {
-      return fetch(uploadUrl, { method: 'PUT', body: file })
-        .then((response) => {
-          if (!response.ok) throw new Error(`Presigned upload failed (status ${response.status})`)
-        })
-        .catch((error) => {
-          if (error instanceof Error && error.message.startsWith('Presigned upload failed')) throw error
-          throw new Error('Presigned upload failed due to a network error')
-        })
-    }
-
-    return new Promise<void>((resolve, reject) => {
-      const xhr = new XMLHttpRequest()
-      let settled = false
-      const fail = (error: Error) => {
-        if (settled) return
-        settled = true
-        reject(error)
-      }
-      const succeed = () => {
-        if (settled) return
-        settled = true
-        onUploadProgress({ loaded: file.size, total: file.size })
-        resolve()
-      }
-
-      xhr.upload.addEventListener('progress', (event) => {
-        const total = event.lengthComputable && event.total > 0 ? event.total : file.size
-        onUploadProgress({ loaded: Math.min(event.loaded, total), total })
-      })
-      xhr.addEventListener('load', () => {
-        if (xhr.status >= 200 && xhr.status < 300) succeed()
-        else fail(new Error(`Presigned upload failed (status ${xhr.status})`))
-      })
-      xhr.addEventListener('error', () => fail(new Error('Presigned upload failed due to a network error')))
-      xhr.addEventListener('abort', () => fail(new Error('Presigned upload was aborted')))
-      xhr.addEventListener('timeout', () => fail(new Error('Presigned upload timed out')))
-
-      try {
-        xhr.open('PUT', uploadUrl)
-        xhr.send(file)
-      } catch {
-        fail(new Error('Presigned upload could not be started'))
-      }
-    })
-  }
-
-  async fileUpload(file: File, directory: string = '', onUploadProgress?: (progress: { loaded: number; total: number }) => void, options?: ServiceRequestOptions) {
-    const presignResponse = await this.post('presigned-url', { dir: directory, filename: file.name, content_type: file.type }, options)
-    const { upload_url, file_path } = presignResponse
-    if (typeof upload_url !== 'string' || !upload_url || typeof file_path !== 'string' || !file_path) {
-      throw new Error('Presigned upload configuration is invalid')
-    }
-    await this.uploadToPresignedUrl(file, upload_url, onUploadProgress)
-    const register = await this.post('register-file', { path: file_path, size: file.size }, options)
-    return { success: true, path: file_path, data: file_path, url: register.url }
-  }
-
-  upload(file: File, directory: string = '', onUploadProgress?: (progress: { loaded: number; total: number }) => void, options?: ServiceRequestOptions) {
-    return this.fileUpload(file, directory, onUploadProgress, options)
-  }
-
   fileUploadNoAuth(file: Blob, _onUploadProgress?: (progress: { loaded: number; total: number }) => void, options?: ServiceRequestOptions) {
     const formData = new FormData()
     formData.append('file', file)
