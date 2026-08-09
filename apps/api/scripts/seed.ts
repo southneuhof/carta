@@ -36,12 +36,14 @@ async function main() {
     on conflict (id) do update set name = excluded.name, scope = excluded.scope;
 
     insert into permissions (id, code, name) values
-      ('view-user', 'view-user', 'View users'), ('show-user', 'show-user', 'Show user'),
-      ('create-user', 'create-user', 'Create user'), ('update-user', 'update-user', 'Update user'),
-      ('delete-user', 'delete-user', 'Delete user'),
-      ('view-role', 'view-role', 'View roles'), ('show-role', 'show-role', 'Show role'),
-      ('create-role', 'create-role', 'Create role'), ('update-role', 'update-role', 'Update role'),
-      ('delete-role', 'delete-role', 'Delete role')
+      ('view-users', 'view-users', 'View users'), ('show-users', 'show-users', 'Show users'),
+      ('update-users', 'update-users', 'Update users'),
+      ('view-roles', 'view-roles', 'View roles'), ('show-roles', 'show-roles', 'Show roles'),
+      ('create-roles', 'create-roles', 'Create roles'), ('update-roles', 'update-roles', 'Update roles'),
+      ('delete-roles', 'delete-roles', 'Delete roles'),
+      ('view-overtimes', 'view-overtimes', 'View overtime'), ('show-overtimes', 'show-overtimes', 'Show overtime'),
+      ('create-overtimes', 'create-overtimes', 'Create overtime'), ('update-overtimes', 'update-overtimes', 'Update overtime'),
+      ('view-notifications', 'view-notifications', 'View notifications'), ('show-notifications', 'show-notifications', 'Show notifications')
     on conflict (id) do update set code = excluded.code, name = excluded.name;
 
     insert into role_permissions (role_id, permission_id)
@@ -49,7 +51,7 @@ async function main() {
     on conflict (role_id, permission_id) do update set active = true;
 
     insert into role_permissions (role_id, permission_id)
-    select 'section-officer-role', id from permissions where code in ('view-user', 'show-user')
+    select 'section-officer-role', id from permissions where code in ('view-users', 'show-users')
     on conflict (role_id, permission_id) do update set active = true;
   `))
 

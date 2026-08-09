@@ -23,6 +23,8 @@
     "./rpc": "./src/rpc.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1106.0",
+    "@aws-sdk/s3-request-presigner": "^3.1106.0",
     "@better-auth/drizzle-adapter": "^1.6.23",
     "@hono/node-server": "^2.0.6",
     "@hono/zod-validator": "^0.8.0",

@@ -51,6 +51,7 @@ update the status after implementation and review.
 | 058 | Resolve input props at the plugin and Form boundary | P1 | L | 057 | DONE |
 | 059 | Install web input defaults and migrate field sources | P1 | L | 057, 058 | DONE — helper-based authoring superseded by 060 |
 | 060 | Restore plain input-source authoring | P1 | M | — | DONE |
+| 061 | Add an authenticated S3/MinIO presigned upload endpoint | P1 | M | — | DONE |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line reason)
 
@@ -172,6 +173,9 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJE
 - Browser verification: Date, Time, DateRange, Month, and Year popups all render
   visibly outside the input-catalog `<main>` teleport boundary. Live picker
   background/primary/text CSS variables resolve from active app theme tokens.
+- Plan 061: API tests pass 81/81, focused file-route tests pass 4/4, workspace
+  typecheck and lint exit 0, API/MinIO direct upload smoke passes, and
+  `git diff --check` passes. Workspace lint still reports existing warnings.
 
 ## Findings considered and rejected
 
@@ -219,3 +223,6 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJE
   replace native `load`/`loadDetail` input contracts or add a network bridge:
   app-owned synchronous normalizers translate an honest authored `source`
   before Form invokes a renderer, while resolved input props stay native.
+- Plan 061 is independent of the completed framework file-manager plans because
+  it is a backend-only proof route. It must not change the frontend's legacy
+  upload protocol or add storage policy to Sprindle.
