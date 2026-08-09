@@ -246,7 +246,6 @@ lockfile for this plan.
 - `apps/web/src/framework/__tests__/legacy-boundary.spec.ts`
 - `packages/is-vue-framework/README.md`
 - `docs/architecture/web-application-architecture.md`
-- generated `graphify-out/**` changes from final `graphify update .`
 - `plans/README.md` status row after implementation
 
 **Out of scope**:
@@ -458,8 +457,6 @@ one create and one edit TableInput dialog:
 - successful create/edit closes once and updates rows once;
 - Cancel does not mutate row data.
 
-Run `graphify update .` only after source/tests/docs are final.
-
 **Verify**:
 
 ```sh
@@ -469,7 +466,6 @@ pnpm --filter @southneuhof/framework-web exec vitest run src/framework/__tests__
 pnpm --filter @southneuhof/framework-web type-check
 pnpm --filter @southneuhof/framework-web build
 git diff --check
-graphify update .
 ```
 
 Expected: every command except full framework tests exits 0; full framework
@@ -509,7 +505,6 @@ output; graph update completes.
   `git diff --check` pass; full framework tests add no failure beyond documented
   `table.spec.ts:390`.
 - [ ] Manual create/edit Dialog checks pass.
-- [ ] `graphify update .` completes.
 - [ ] No files outside Scope changed except pre-existing dirty files.
 - [ ] `plans/README.md` row 055 marked DONE only after implementation review.
 
@@ -555,7 +550,7 @@ Status: COMPLETE — reviewed and approved.
   JSON serialization without changing row payload behavior.
 - Updated public API, legacy-boundary, package, and architecture documentation.
 - Verified framework type-check, 26 focused component/API tests, 3 web boundary
-  tests, `git diff --check`, and `graphify update .`.
+  tests, and `git diff --check`.
 - Manually verified create, edit, cancel, successful submit, accessible dialog
   naming, and trigger focus return in the real web app.
 - Full framework tests add no regression: 332 pass and only the documented,

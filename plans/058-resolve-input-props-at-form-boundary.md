@@ -92,7 +92,6 @@ renderer re-runs base resolution against that effective renderer.
 - `packages/is-vue-framework/src/components/core/Form.vue`
 - `packages/is-vue-framework/src/components/core/__tests__/harness.ts`
 - `packages/is-vue-framework/src/components/core/__tests__/form.spec.ts`
-- `graphify-out/` generated artifacts
 - `plans/README.md`
 
 **Out of scope**:
@@ -208,8 +207,8 @@ ordering and boundary ownership.
 
 ### Step 6: Verify and update graph
 
-Run focused tests, typecheck, package tests, and `git diff --check`; run
-`graphify update .`; inspect status for unrelated dirty work. Mark plan 058
+Run focused tests, typecheck, package tests, and `git diff --check`; inspect
+status for unrelated dirty work. Mark plan 058
 `DONE` only after review.
 
 ## Done criteria

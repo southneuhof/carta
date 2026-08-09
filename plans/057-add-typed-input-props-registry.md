@@ -134,7 +134,6 @@ props, `value`, `setValue`, `draft`, `field`, `disabled`, `error`, `touched`,
 - `packages/is-vue-framework/src/renderers/index.ts`
 - `packages/is-vue-framework/src/index.ts`
 - `packages/is-vue-framework/src/__tests__/public-api.spec.ts`
-- `graphify-out/` generated artifacts
 - `plans/README.md`
 
 **Out of scope**:
@@ -217,8 +216,8 @@ the realm-stable convention in `renderers/registry.ts`.
 
 ### Step 5: Verify and maintain the graph
 
-Run focused tests, typecheck, package tests, and `git diff --check`. Then run
-`graphify update .`. Inspect `git status --short`; do not overwrite unrelated
+Run focused tests, typecheck, package tests, and `git diff --check`. Inspect
+`git status --short`; do not overwrite unrelated
 dirty work. Mark plan 057 `DONE` only after review.
 
 ## Test plan
@@ -239,7 +238,6 @@ dirty work. Mark plan 057 `DONE` only after review.
 - [ ] Resolution is synchronous, shallow, non-mutating, and backend-neutral.
 - [ ] Typed helper catches source/prop mismatches.
 - [ ] Focused tests, package typecheck, tests, and diff check pass.
-- [ ] Graphify artifacts are refreshed after source changes.
 
 ## STOP conditions
 

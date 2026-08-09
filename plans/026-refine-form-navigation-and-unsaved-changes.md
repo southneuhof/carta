@@ -290,8 +290,6 @@ subtle secondary focus ring, two Card navigation format, Back and Cancel route
 behavior, dirty-leave dialog, and native refresh warning. Confirm an untouched
 form does not prompt and a successful save does not prompt during redirect.
 
-Then run `graphify update .` because framework and app source changed.
-
 **Verify**:
 
 ```sh
@@ -334,9 +332,7 @@ matches. Also run `rg -n "Nama|Tanggal|Jam Mulai|Durasi|Keterangan|Dibuat|Diubah
   are not blocked.
 - [ ] Focused/full framework tests, both typechecks, web build, and
   `git diff --check` pass.
-- [ ] `graphify update .` completes after source changes.
-- [ ] No files outside scope changed, apart from required `graphify-out/`
-  updates.
+- [ ] No files outside scope changed.
 - [ ] `plans/README.md` row 026 is marked DONE only after implementation
   review.
 

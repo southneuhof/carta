@@ -99,7 +99,7 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJE
   canonical assets while all four upload inputs move to one mutation contract.
 - 042 is the convergence gate. Run only after 035–041 are DONE; it removes old
   runtime capabilities, updates remaining callers/docs, runs full workspace
-  verification, and refreshes graphify output.
+  verification.
 - 043 establishes executable option/upload contracts before fixing or
   refactoring migrated inputs.
 - 044 depends on 043 because `uniqueIDAs` and preloaded model behavior must be

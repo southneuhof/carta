@@ -73,7 +73,6 @@ public API, timer, or user-flow change.
 - `packages/is-vue-framework/src/components/core/__tests__/Table.browser.spec.ts`
 - `plans/README.md`
 - `plans/018-evict-superseded-table-search-cache.md`
-- generated `graphify-out/` changes from the required graph update
 
 **Out of scope**:
 
@@ -138,8 +137,8 @@ exits 0 with all pointer, visibility, resize, and search tests passing.
 ### Step 4: Complete verification and update records
 
 Run these commands: `pnpm --filter @southneuhof/is-vue-framework type-check`,
-`pnpm --filter @southneuhof/is-vue-framework test`, `graphify update .`,
-`git diff --check`, and `git status --short`. All commands must succeed;
+`pnpm --filter @southneuhof/is-vue-framework test`, `git diff --check`, and
+`git status --short`. All commands must succeed;
 `git diff --check` must print nothing. Review scope, then set Plan 018 to DONE.
 
 ## Done criteria
@@ -151,7 +150,7 @@ Run these commands: `pnpm --filter @southneuhof/is-vue-framework type-check`,
   removed after the observer switches.
 - [ ] Unsearched, pagination/sort/filter, other-owner, and record caches stay.
 - [ ] Focused unit/browser tests, full framework tests, and type-check pass.
-- [ ] `graphify update .` and `git diff --check` pass.
+- [ ] `git diff --check` passes.
 
 ## STOP conditions
 

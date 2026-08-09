@@ -131,7 +131,6 @@ failing package is explicit.
 - `packages/is-vue-framework/README.md`
 - `docs/architecture/input-data-migration.md`
 - `docs/architecture/web-application-architecture.md`
-- `graphify-out/` generated artifacts
 - `plans/README.md`
 
 **Out of scope**:
@@ -267,8 +266,7 @@ app-owned, synchronous, and resolves before renderer invocation.
 
 ### Step 7: Run gates and refresh graph
 
-Run all focused, package, workspace, type, and diff checks. Run
-`graphify update .`. Inventory:
+Run all focused, package, workspace, type, and diff checks. Inventory:
 
 ```sh
 rg -n "renderer:\\s*['\"](lookup|select|radio|file|image)['\"].*props" apps/web/src

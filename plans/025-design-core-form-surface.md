@@ -360,8 +360,6 @@ Capture before/after screenshots in the implementation report, not in source
 control. If authentication or API state prevents the route check, report that
 manual gate as blocked; do not add test credentials or bypass auth.
 
-Finally run `graphify update .` because source files changed.
-
 **Verify**:
 
 ```sh
@@ -406,7 +404,6 @@ pixel snapshots.
 - [ ] Web build passes and emitted CSS contains target utilities.
 - [ ] Real roles-create form reviewed at mobile, desktop, and dark theme, or
   manual gate explicitly reported blocked by external auth/API state.
-- [ ] `graphify update .` completes after source changes.
 - [ ] `git diff --check` returns no output.
 - [ ] No files outside scope changed by this plan.
 - [ ] `plans/README.md` row 025 marked DONE only after implementation review.

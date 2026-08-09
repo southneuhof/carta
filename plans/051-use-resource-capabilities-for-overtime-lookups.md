@@ -388,8 +388,6 @@ the plan BLOCKED rather than marking it DONE.
 Run `git diff --check` and inspect `git status --short`. Confirm all new source
 changes are in scope and all pre-existing user changes remain intact.
 
-After implementation, run `graphify update .` as required by `AGENTS.md`.
-
 **Verify**:
 
 - `pnpm --filter @southneuhof/api type-check` → exit 0.
@@ -398,7 +396,6 @@ After implementation, run `graphify update .` as required by `AGENTS.md`.
 - `pnpm --filter @southneuhof/framework-web type-check` → exit 0.
 - `pnpm --filter @southneuhof/framework-web test` → all tests pass.
 - `git diff --check` → no output.
-- `graphify update .` → graph update completes successfully.
 
 ## Test plan
 
@@ -441,7 +438,6 @@ After implementation, run `graphify update .` as required by `AGENTS.md`.
 - [ ] The legacy lookup audit returns no production matches.
 - [ ] Focused tests, boundary tests, web typecheck, and web tests pass.
 - [ ] `git diff --check` returns no output.
-- [ ] `graphify update .` succeeds.
 - [ ] `plans/README.md` marks Plan 051 DONE after review.
 
 ## STOP conditions

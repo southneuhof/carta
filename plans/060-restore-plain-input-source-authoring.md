@@ -92,7 +92,6 @@ Only application bootstrap and core Form should consume the registry.
 - `packages/is-vue-framework/README.md`
 - `docs/architecture/input-data-migration.md`
 - `docs/architecture/web-application-architecture.md`
-- `graphify-out/` generated artifacts
 - `plans/README.md`
 - `plans/060-restore-plain-input-source-authoring.md`
 
@@ -185,8 +184,8 @@ rg -n "appInputProps\\.field|DefinedInputPropsRegistry|sourcePresent" \
 
 Expected: no matches.
 
-Run `graphify update .`. Review only this plan's hunks against the pre-existing
-dirty implementation and preserve unrelated work. On approval, mark plans
+Review only this plan's hunks against the pre-existing dirty implementation and
+preserve unrelated work. On approval, mark plans
 057–060 DONE; plan 060 supersedes only the typed `field()` authoring helper
 specified in 057/059.
 
@@ -212,7 +211,7 @@ specified in 057/059.
 - [ ] Defaults → normalized source → explicit props → behavior/presentation →
   Form-controlled precedence remains tested.
 - [ ] Focused tests, both package typechecks, package tests, and diff check pass.
-- [ ] Graphify is refreshed and plans 057–060 are marked DONE.
+- [ ] Plans 057–060 are marked DONE.
 
 ## STOP conditions
 

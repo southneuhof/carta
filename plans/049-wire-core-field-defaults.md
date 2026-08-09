@@ -300,7 +300,6 @@ If restored before execution, run `pnpm build` and require exit 0.
 - `apps/web/src/framework/__tests__/legacy-boundary.spec.ts`
 - architecture and migration docs
 - `plans/README.md`
-- `graphify-out/**` only through final `graphify update .`
 
 ### Delete
 
@@ -659,9 +658,6 @@ in-scope and must be migrated; none may be suppressed with compatibility code.
 
 After final source/docs state:
 
-```sh
-graphify update .
-```
 
 Review graph changes separately; preserve pre-existing dirty graph output.
 
@@ -734,7 +730,6 @@ Expected: only intentional negative-test literals; zero production matches.
 - [ ] Web tests/typecheck pass.
 - [ ] Root tests/typecheck and lint pass.
 - [ ] `git diff --check` passes.
-- [ ] `graphify update .` completes without corruption.
 - [ ] No unrelated dirty work is overwritten.
 - [ ] `plans/README.md` marks plan 049 DONE after implementation/review.
 

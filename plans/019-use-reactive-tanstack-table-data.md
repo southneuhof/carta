@@ -84,7 +84,6 @@ and public API.
 | Focused regression | `pnpm --filter @southneuhof/is-vue-framework test -- table.spec.ts` | exits 0; all Table unit tests, including the new repeated-query regression, pass |
 | Framework typecheck | `pnpm --filter @southneuhof/is-vue-framework type-check` | exits 0 with no TypeScript errors |
 | Browser regression suite | `pnpm --filter @southneuhof/is-vue-framework test:browser` | exits 0; all browser Table interaction tests pass |
-| Graph refresh | `graphify update .` | reports updated code graph without an extraction failure |
 | Diff validation | `git diff --check` | no output, exit 0 |
 
 ## Scope
@@ -102,7 +101,6 @@ and public API.
   - `packages/is-vue-framework/src/query/namespace.ts`
   - `apps/web/src/framework/adapters/query/routeQuery.ts`
 - `plans/README.md` and this plan's status
-- Generated `graphify-out/` updates required by the repository instructions
 
 **Out of scope**:
 
@@ -185,10 +183,9 @@ unchanged when the defect is fixed.
 ### Step 4: Run complete verification and update records
 
 Run the focused unit test, framework typecheck, and browser Table suite from
-the commands table. Then run `graphify update .`, `git diff --check`, and
+the commands table. Then run `git diff --check`, and
 `git status --short`. Inspect the status output: it may contain the two plan
-files and generated `graphify-out/` changes, but must not contain source edits
-outside this plan's scope.
+files, but must not contain source edits outside this plan's scope.
 
 After reviewing the final diff against this plan, set Plan 019's status row in
 `plans/README.md` to `DONE`. Keep Plan 018 rejected.
@@ -214,7 +211,7 @@ After reviewing the final diff against this plan, set Plan 019's status row in
 - [ ] No trace utility, trace calls, global trace flag, or console logging
   remains in source.
 - [ ] Framework typecheck and browser Table suite pass.
-- [ ] `graphify update .` and `git diff --check` pass.
+- [ ] `git diff --check` passes.
 - [ ] No source files outside the declared scope are modified.
 
 ## STOP conditions

@@ -224,9 +224,6 @@ as regression.
 
 After implementation source is final:
 
-```sh
-graphify update .
-```
 
 Graph changes are expected generated output. Do not use dirty graph files as a
 reason to skip update.
@@ -255,7 +252,6 @@ source/docs/tests, expected graph output, and pre-existing user changes.
 - [ ] Framework package tests/typecheck/browser pass.
 - [ ] Web tests/typecheck pass.
 - [ ] Root tests/typecheck pass.
-- [ ] `graphify update .` completed.
 - [ ] No unrelated user changes overwritten.
 
 ## STOP conditions
@@ -275,4 +271,3 @@ Future review should reject new endpoint-string props or runtime capability
 groups for data-bound inputs. Reads use explicit loader contracts; mutations use
 explicit operations. Optional app-wide subsystems use dedicated Vue plugins with
 app-local providers and lazy exports.
-
