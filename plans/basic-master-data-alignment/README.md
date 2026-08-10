@@ -1,9 +1,9 @@
 # Basic master-data alignment plans
 
-These plans are the first executable subset of
-`plans/002-make-current-administration-forms-functional.md`. They align only
-ordinary master-data CRUD screens with the legacy system. The legacy system is
-the business reference. The current application keeps its deliberate technical
+These plans first repair the resource boundary, then align ordinary catalog
+CRUD screens with the legacy system. `master-data` is a frontend-only route and
+navigation group. It must not exist in the API. The legacy system is the
+business reference. The current application keeps its deliberate technical
 changes: generated UUIDs, server audit data, and API permission checks.
 
 Run the plans in this order. Each implementation pass must use
@@ -14,14 +14,16 @@ only after implementation and review.
 
 | Plan | Title | Priority | Effort | Depends on | Status |
 |---|---|---|---|---|---|
-| 001 | Align Business Category CRUD surfaces | P1 | S | shared form baseline | TODO |
-| 002 | Align PTS Work Category and Root Cause CRUD surfaces | P1 | S | 001 | TODO |
+| 001 | Put each current resource in its own module | P1 | L | — | TODO |
+| 002 | Align Business Category CRUD surfaces | P1 | S | 001, shared form baseline | TODO |
+| 003 | Align PTS Work Category and Root Cause CRUD surfaces | P1 | S | 001, 002 | TODO |
 
 ## Scope boundary
 
-Included modules have only the standard list, detail, create, update, and
+Plans 002 and 003 include only the standard list, detail, create, update, and
 delete operations. Their business fields are `name`, `code`, `description`,
-and `active`.
+and `active`. Plan 001 moves all ten current resources because a partial move
+would leave the invalid API group in place. It does not change their behavior.
 
 Do not add client ID inputs or legacy Laravel audit fields. The database must
 generate UUIDs and the server must set audit data.
@@ -55,3 +57,5 @@ validation allowed an empty code. This is a deliberate current improvement.
   The new database owns UUIDs and audit values.
 - Add native route forms: rejected. Existing routes already use `FormView` and
   must continue to use the resource catalog.
+- Keep an API `master-data` module: rejected. It is a frontend-only semantic
+  grouping, not a backend ownership boundary.

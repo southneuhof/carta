@@ -80,9 +80,9 @@ Mode: standard CRUD.
 
 | Field | API create | API update | List | Detail | Form renderer | Source | Server supplied |
 |---|---|---|---|---|---|---|---|
-| `code` | required | optional | yes | yes | text | — | no |
 | `name` | required | optional | yes | yes | text | — | no |
-| `description` | optional | optional | no | no | textarea | — | no |
+| `code` | required, unique | optional | yes | yes | text | — | no |
+| `description` | optional | optional | yes | yes | textarea | — | no |
 | `active` | optional, default true | optional | yes | yes | checkbox | — | default only |
 
 ## Divisions
@@ -169,9 +169,9 @@ Mode: standard CRUD. This is master data, not Quality PTS.
 
 | Field | API create | API update | List | Detail | Form renderer | Source | Server supplied |
 |---|---|---|---|---|---|---|---|
-| `code` | required | optional | yes | yes | text | — | no |
 | `name` | required | optional | yes | yes | text | — | no |
-| `description` | optional | optional | no | no | textarea | — | no |
+| `code` | required, unique | optional | yes | yes | text | — | no |
+| `description` | optional | optional | yes | yes | textarea | — | no |
 | `active` | optional, default true | optional | yes | yes | checkbox | — | default only |
 
 ## Root Causes
@@ -183,9 +183,9 @@ Mode: standard CRUD.
 
 | Field | API create | API update | List | Detail | Form renderer | Source | Server supplied |
 |---|---|---|---|---|---|---|---|
-| `code` | required | optional | yes | yes | text | — | no |
 | `name` | required | optional | yes | yes | text | — | no |
-| `description` | optional | optional | no | no | textarea | — | no |
+| `code` | required, unique | optional | yes | yes | text | — | no |
+| `description` | optional | optional | yes | yes | textarea | — | no |
 | `active` | optional, default true | optional | yes | yes | checkbox | — | default only |
 
 ## Project Vendors

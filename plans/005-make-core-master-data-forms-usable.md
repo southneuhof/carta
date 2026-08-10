@@ -1,11 +1,11 @@
-# Plan 005: Make manual PTS master-data forms usable
+# Plan 005: Make manual PTS prerequisite forms usable
 
 > **Implementation instructions**: Use `$ads-hk-module-slice` for each module
 > group. Follow this plan after Plan 004. Use the
 > existing route-local resource pattern. Do not add a CRUD builder, a UI
 > dependency, or a new framework renderer.
 >
-> **Drift check (run first)**: `git diff --stat abb232f..HEAD -- apps/web/src/routes/(authenticated)/master-data apps/web/src/routes/(demo) apps/api/src/routes/master-data docs/manual-pts-parity.md`
+> **Drift check (run first)**: `git diff --stat abb232f..HEAD -- "apps/web/src/routes/(authenticated)/master-data" "apps/web/src/routes/(demo)" apps/api/src/routes docs/manual-pts-parity.md`
 > Stop if the input catalog or a needed resource contract differs from this
 > plan.
 
@@ -22,14 +22,14 @@
 
 The PTS prerequisite tables have routes, but their forms use relationship UUIDs
 as text. For example, `businessCategoryId`, `divisionId`, `projectId`,
-`parentId`, `uomId`, and `numberVariableCode` are raw text inputs in
-`master-data.resources.ts`. An administrator cannot safely create the records
+`parentId`, `uomId`, and `numberVariableCode` are raw text inputs in the old
+shared resource catalog. An administrator cannot safely create the records
 that manual PTS needs without internal IDs.
 
 ## Current state
 
-- `apps/web/src/routes/(authenticated)/master-data/master-data.resources.ts:118-176`
-  uses `renderer: 'text'` for Division and Project relationships.
+- The colocated Division and Project resources use `renderer: 'text'` for
+  their relationship fields before this plan.
 - The route tree already has list, create, detail, and edit pages for all ten
   PTS prerequisite masters under
   `apps/web/src/routes/(authenticated)/master-data/`.
@@ -56,7 +56,7 @@ resource tests beside it, `apps/web/src/manifest/navigation.ts` only if a
 current PTS prerequisite route is absent, and `docs/manual-pts-parity.md`.
 
 **Out of scope:** database changes, PTS transaction pages, copied catalog
-files, framework packages, and master-data families outside manual PTS.
+files, framework packages, and resource modules outside manual PTS.
 
 ## Git workflow
 
@@ -68,11 +68,10 @@ files, framework packages, and master-data families outside manual PTS.
 
 ### Step 1: Add typed lookup sources once
 
-Create one adjacent lookup resource file for the existing PTS prerequisite
-operations. Reuse the exact `createHonoResourceOperations` handlers already
-created in `master-data.resources.ts`; do not create a second API endpoint.
-Each row displays a business label: `code — name`, Project `number — name`,
-or name when it has no code.
+Keep lookup sources in the owning colocated resource modules. Reuse the local
+`createHonoResourceOperations` handlers; do not create a second API endpoint
+or a shared master-data lookup file. Each row displays a business label:
+`code — name`, Project `number — name`, or name when it has no code.
 
 **Verify**: Web type check exits 0 and the lookup file has no `any` cast.
 
@@ -110,7 +109,7 @@ Do not change this route.
 
 ## Test plan
 
-- Add a resource configuration test beside `master-data.resources.ts`.
+- Add a resource configuration test beside each affected local resource file.
 - Use `overtimes.resource.spec.ts:70-130` as the test structure.
 - Assert field configuration and reset behavior. Do not snapshot pages or call
   the live API from a browser unit test.

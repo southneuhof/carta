@@ -6,7 +6,7 @@
 > occurs, stop and report it. Update this plan row after implementation and
 > review.
 >
-> **Drift check (run first)**: `git diff --stat 7945196..HEAD -- apps/api/src/routes/users apps/api/src/routes/roles apps/api/src/routes/master-data apps/web/src/routes/(authenticated)/settings apps/web/src/routes/(authenticated)/master-data apps/web/src/App.vue`
+> **Drift check (run first)**: `git diff --stat 7945196..HEAD -- apps/api/src/routes "apps/web/src/routes/(authenticated)/settings" "apps/web/src/routes/(authenticated)/master-data" apps/web/src/App.vue`
 > If a module does not match this plan's current-state list, update the module
 > inventory first. Do not create a second form path.
 
@@ -57,9 +57,8 @@ workflow rules in Plans 003–006.
   credentials.
 - `apps/web/src/routes/(authenticated)/settings/roles/roles.resource.ts`
   omits required `roleGroupId` and exposes `assignmentScope` as text.
-- `apps/web/src/routes/(authenticated)/master-data/master-data.resources.ts`
-  contains current relationship fields. Some are text renderers and need
-  lookup sources rather than UUID entry.
+- The ten master-data web resource folders contain relationship fields. Their
+  colocated resource definitions must use lookup sources rather than UUID entry.
 - `apps/web/src/App.vue` captures a child error but does not render a visible
   fallback.
 - `apps/web/src/routes/(demo)/input-catalog/` is the renderer smoke page. It
@@ -93,6 +92,8 @@ database/schema → API contract → normalized operation → resource → FormV
   Number Configuration display-order generation
 - `apps/api/src/routes/users/` for the existing custom credential-create
   contract only
+- direct resource folders under `apps/api/src/routes/`; do not create or use
+  `apps/api/src/routes/master-data/`
 - `apps/web/src/routes/(authenticated)/settings/`
 - `apps/web/src/routes/(authenticated)/master-data/`
 - focused API and web tests beside the affected modules
@@ -154,10 +155,12 @@ business fields; do not add legacy role mechanisms.
 **Verify**: focused Settings resource tests mount each create Form/FormView and
 assert every required API field has a usable renderer.
 
-### Step 3: Repair standard master-data resources and routes by dependency group — DONE
+### Step 3: Repair standard master-data resources and routes by dependency group
 
-Use the skill path for all ten current master-data modules. Keep their existing
-resource route structure. Replace every current foreign-key text field with a
+First complete `plans/basic-master-data-alignment/001-separate-resource-modules.md`.
+Use the skill path for all ten colocated resource modules. Keep the frontend
+route group and each resource's local route structure. Replace every current
+foreign-key text field with a
 `lookup` that uses a list-and-detail capable existing resource. Add dependent
 visibility, filtering, and reset behavior where a parent controls a child.
 
@@ -394,9 +397,8 @@ do not change framework code.
 
 Evidence: legacy `backend-ads-laravel/app/Models/BusinessCategories.php:26-29,64-93`,
 legacy `frontend-ads-vuejs/src/app/configs/business-categories.ts`, current
-`apps/api/src/routes/master-data/master-data.entity.ts`, `master-data.ts`,
-`master-data.resources.ts` (`businessCategories`), and current business-category
-route files.
+colocated Business Category API entity/model, local web resource, and current
+business-category route files.
 
 | Surface | Legacy contract | Current contract | Classification |
 |---|---|---|---|

@@ -11,10 +11,10 @@ an optional framework repair.
 | Plan | Title | Priority | Effort | Depends on | Status |
 |---|---|---|---|---|---|
 | 001 | Repair shared active form fields | P1 | S | — | DONE |
-| 002 | Make current administration forms functional | P1 | L | 001 | TODO — start with `basic-master-data-alignment/` |
+| 002 | Make current administration forms functional | P1 | L | 001 | TODO — start with `basic-master-data-alignment/001-separate-resource-modules.md` |
 | 003 | Establish the manual PTS parity ledger | P1 | S | 002 | TODO |
 | 004 | Align manual PTS prerequisite master data | P1 | L | 003 | TODO |
-| 005 | Make manual PTS master-data forms usable | P1 | M | 004 | TODO |
+| 005 | Make manual PTS prerequisite forms usable | P1 | M | 004 | TODO |
 | 006 | Complete manual PTS field and screen parity | P1 | L | 003, 005 | TODO |
 | 007 | Harden framework renderer and source merging | P2 | M | 001 | BLOCKED — requires explicit framework approval |
 
@@ -28,9 +28,12 @@ REJECTED (with a one-line reason).
 - Plan 002 covers the four Settings modules and ten current master-data
   modules. It excludes Quality PTS because PTS has separate business fields and
   workflow rules.
-- Execute `basic-master-data-alignment/README.md` first. It is the ordinary
-  CRUD subset of Plan 002; it leaves relationship, media, lifecycle, tree, and
-  numbering modules for later Plan 002 subsets.
+- Execute `basic-master-data-alignment/001-separate-resource-modules.md` first.
+  It moves all current resources to direct API modules and colocated web
+  resource folders. `master-data` remains frontend-only. Then execute Plans 002
+  and 003 in that folder. They are the ordinary CRUD subset of Plan 002 and
+  leave relationship, media, lifecycle, tree, and numbering modules for later
+  Plan 002 subsets.
 - Plan 003 starts PTS only after current administration forms work. It records
   the field-parity contract before any PTS migration or form change.
 - Plan 004 changes PTS prerequisite contracts before Plan 005 completes their

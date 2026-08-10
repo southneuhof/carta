@@ -5,7 +5,7 @@
 > change application source, database migrations, or framework packages. This
 > plan creates the contract for later plans.
 >
-> **Drift check (run first)**: `git diff --stat abb232f..HEAD -- apps/api/src/routes/master-data apps/api/src/routes/qhsse-pts apps/web/src/routes/(authenticated)/master-data apps/web/src/routes/(authenticated)/quality/pts plans`
+> **Drift check (run first)**: `git diff --stat abb232f..HEAD -- apps/api/src/routes "apps/web/src/routes/(authenticated)/master-data" "apps/web/src/routes/(authenticated)/quality/pts" plans`
 > If a cited file changed, compare the current field list with this plan. Stop
 > if a legacy field already has a different mapping.
 

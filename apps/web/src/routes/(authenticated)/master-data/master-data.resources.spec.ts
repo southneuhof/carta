@@ -15,6 +15,8 @@ import {
   numberVariables,
   projects,
   projectVendors,
+  ptsWorkCategories,
+  rootCauses,
   uoms,
   workItems,
 } from './master-data.resources'
@@ -29,7 +31,7 @@ beforeEach(() => {
 
 afterEach(() => resetResourceRuntimeForTests())
 
-function fields(fields: unknown, surface: 'form' | 'table') {
+function fields(fields: unknown, surface: 'form' | 'table' | 'detail') {
   return resolveFields({
     fields: fields as never,
     surface,
@@ -86,5 +88,21 @@ describe('master-data resource forms', () => {
     expect(Object.keys(workItems.form().fields)).toEqual(expect.arrayContaining(['projectId', 'code', 'name']))
     expect(Object.keys(projectVendors.form().fields)).toContain('projectId')
     expect(Object.keys(numberConfigs.form().fields)).toEqual(expect.arrayContaining(['numberVariableCode', 'displayOrder']))
+  })
+
+  it('aligns standard master-data surfaces', () => {
+    const expectedKeys = ['name', 'code', 'description', 'active']
+    const expectedRenderers = ['text', 'text', 'textarea', 'checkbox']
+
+    for (const resource of [businessCategories, ptsWorkCategories, rootCauses]) {
+      expect(fields(resource.table().table.fields, 'table').map((field) => field.key)).toEqual(expectedKeys)
+      expect(fields(resource.detail({ id: '1' }).detail.fields, 'detail').map((field) => field.key)).toEqual(expectedKeys)
+
+      const formFields = fields(resource.form().fields, 'form')
+      expect(formFields.map((field) => field.key)).toEqual(expectedKeys)
+      expect(formFields.map((field) => field.renderer)).toEqual(expectedRenderers)
+      expect(formFields.every((field) => field.source === undefined)).toBe(true)
+      expect(formFields.map((field) => field.key)).not.toEqual(expect.arrayContaining(['id', 'createdAt', 'updatedAt', 'createdByUserId', 'updatedByUserId']))
+    }
   })
 })

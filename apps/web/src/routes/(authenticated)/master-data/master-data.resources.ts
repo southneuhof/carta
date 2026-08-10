@@ -103,12 +103,14 @@ export type NumberConfig = z.output<typeof numberConfig.schemas.select> & Record
 export const businessCategories = defineResource({
   key: 'business-categories',
   fields: defineFields<BusinessCategory, z.input<typeof businessCategory.schemas.create>>()({
-    code: { label: 'Business Category', table: { sortable: true }, form: { renderer: 'text' } },
     name: { label: 'Name', form: { renderer: 'text' } },
+    code: { label: 'Code', table: { sortable: true }, form: { renderer: 'text' } },
+    description: { label: 'Description', form: { renderer: 'textarea' } },
     active: { label: 'Active', form: { renderer: 'checkbox' } },
   }),
-  table: { fields: ['code', 'name', 'active'] },
-  form: { fields: ['code', 'name', 'description', 'active'] },
+  table: { fields: ['name', 'code', 'description', 'active'] },
+  detail: { fields: ['name', 'code', 'description', 'active'] },
+  form: { fields: ['name', 'code', 'description', 'active'] },
   schemas: {
     create: fromZod<z.input<typeof businessCategory.schemas.create>>(businessCategory.schemas.create),
     update: fromZod<z.input<typeof businessCategory.schemas.update>>(businessCategory.schemas.update),
@@ -240,12 +242,14 @@ export const projectVendors = defineResource<typeof projectVendorCapabilities, P
 export const ptsWorkCategories = defineResource({
   key: 'pts-work-categories',
   fields: defineFields<PtsWorkCategory, z.input<typeof ptsWorkCategory.schemas.create>>()({
-    code: { label: 'PTS Work Category', table: { sortable: true }, form: { renderer: 'text' } },
     name: { label: 'Name', form: { renderer: 'text' } },
+    code: { label: 'Code', table: { sortable: true }, form: { renderer: 'text' } },
+    description: { label: 'Description', form: { renderer: 'textarea' } },
     active: { label: 'Active', form: { renderer: 'checkbox' } },
   }),
-  table: { fields: ['code', 'name', 'active'] },
-  form: { fields: ['code', 'name', 'description', 'active'] },
+  table: { fields: ['name', 'code', 'description', 'active'] },
+  detail: { fields: ['name', 'code', 'description', 'active'] },
+  form: { fields: ['name', 'code', 'description', 'active'] },
   schemas: { create: fromZod(ptsWorkCategory.schemas.create), update: fromZod(ptsWorkCategory.schemas.update) },
   capabilities: {
     list: { handler: ptsWorkCategoryOperations.list, permission: 'view-pts-work-categories', to: targets.ptsWorkCategories.list },
@@ -258,12 +262,14 @@ export const ptsWorkCategories = defineResource({
 export const rootCauses = defineResource({
   key: 'root-causes',
   fields: defineFields<RootCause, z.input<typeof rootCause.schemas.create>>()({
-    code: { label: 'Root Cause', table: { sortable: true }, form: { renderer: 'text' } },
     name: { label: 'Name', form: { renderer: 'text' } },
+    code: { label: 'Code', table: { sortable: true }, form: { renderer: 'text' } },
+    description: { label: 'Description', form: { renderer: 'textarea' } },
     active: { label: 'Active', form: { renderer: 'checkbox' } },
   }),
-  table: { fields: ['code', 'name', 'active'] },
-  form: { fields: ['code', 'name', 'description', 'active'] },
+  table: { fields: ['name', 'code', 'description', 'active'] },
+  detail: { fields: ['name', 'code', 'description', 'active'] },
+  form: { fields: ['name', 'code', 'description', 'active'] },
   schemas: { create: fromZod(rootCause.schemas.create), update: fromZod(rootCause.schemas.update) },
   capabilities: {
     list: { handler: rootCauseOperations.list, permission: 'view-root-causes', to: targets.rootCauses.list },
