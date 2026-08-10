@@ -7,19 +7,16 @@ import { useColorPreference } from './stores/colorpreference'
 import { Toaster } from 'vue-sonner'
 import config from './config'
 import Spinner from '@southneuhof/is-vue-framework/components/base/Spinner.vue'
+import { reloadPage } from './reload'
 
 const error = ref<Error | null>(null)
 onErrorCaptured((err, instance, info) => {
   console.error('App error:', err, instance, info)
   error.value = err
-  return true
+  return false
 })
 
 const handleResize = debounce(useScreenStore().handleResize, 300)
-
-function reload() {
-  window.location.reload()
-}
 
 onMounted(() => {
   window.addEventListener('resize', handleResize)
@@ -38,7 +35,7 @@ onBeforeUnmount(() => {
     <div class="min-h-screen w-full">
       <div v-if="error" class="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center" role="alert" aria-live="assertive">
         <h1 class="text-xl font-semibold">Something went wrong.</h1>
-        <button type="button" class="rounded border px-4 py-2" @click="reload">Reload</button>
+        <button type="button" class="rounded border px-4 py-2" @click="reloadPage">Reload</button>
       </div>
       <Suspense v-else :timeout="0">
         <RouterView />

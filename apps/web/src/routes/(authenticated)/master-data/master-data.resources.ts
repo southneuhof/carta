@@ -1,4 +1,4 @@
-import { defineFields, defineResource, fromZod as frameworkFromZod } from '@southneuhof/is-vue-framework'
+import { defineFields, defineResource, defineResourceOperations, fromZod as frameworkFromZod } from '@southneuhof/is-vue-framework'
 import { createHonoResourceOperations } from '@southneuhof/is-vue-framework/hono'
 import type { z } from 'zod/v4'
 import { businessCategory, division, numberConfig, numberVariable, project, projectVendor, ptsWorkCategory, rootCause, uom, workItem } from '@southneuhof/api/routes/master-data/master-data.entity'
@@ -7,6 +7,12 @@ import { dataAdapter } from '@/framework/adapters/data/normalize'
 
 function fromZod<T extends object>(schema: z.ZodType<T>) {
   return frameworkFromZod<T>(schema)
+}
+
+function relationName(record: unknown, key: string) {
+  if (!record || typeof record !== 'object') return undefined
+  const relation = (record as Record<string, unknown>)[key]
+  return relation && typeof relation === 'object' ? (relation as { name?: unknown }).name : undefined
 }
 
 const targets = {
@@ -73,26 +79,26 @@ const targets = {
 } as const
 
 const businessCategoryOperations = createHonoResourceOperations(rpc['business-categories'], dataAdapter)
-const divisionOperations = createHonoResourceOperations(rpc.divisions, dataAdapter)
-const projectOperations = createHonoResourceOperations(rpc.projects, dataAdapter)
+const divisionOperations = defineResourceOperations<Division, Record<string, never>, z.input<typeof division.schemas.create>, z.input<typeof division.schemas.update>>()(createHonoResourceOperations(rpc.divisions, dataAdapter))
+const projectOperations = defineResourceOperations<Project, Record<string, never>, z.input<typeof project.schemas.create>, z.input<typeof project.schemas.update>>()(createHonoResourceOperations(rpc.projects, dataAdapter))
 const uomOperations = createHonoResourceOperations(rpc.uoms, dataAdapter)
-const workItemOperations = createHonoResourceOperations(rpc['work-items'], dataAdapter)
-const projectVendorOperations = createHonoResourceOperations(rpc['project-vendors'], dataAdapter)
+const workItemOperations = defineResourceOperations<WorkItem, Record<string, never>, z.input<typeof workItem.schemas.create>, z.input<typeof workItem.schemas.update>>()(createHonoResourceOperations(rpc['work-items'], dataAdapter))
+const projectVendorOperations = defineResourceOperations<ProjectVendor, Record<string, never>, z.input<typeof projectVendor.schemas.create>, z.input<typeof projectVendor.schemas.update>>()(createHonoResourceOperations(rpc['project-vendors'], dataAdapter))
 const ptsWorkCategoryOperations = createHonoResourceOperations(rpc['pts-work-categories'], dataAdapter)
 const rootCauseOperations = createHonoResourceOperations(rpc['root-causes'], dataAdapter)
 const numberVariableOperations = createHonoResourceOperations(rpc['number-variables'], dataAdapter)
-const numberConfigOperations = createHonoResourceOperations(rpc['number-configs'], dataAdapter)
+const numberConfigOperations = defineResourceOperations<NumberConfig, Record<string, never>, z.input<typeof numberConfig.schemas.create>, z.input<typeof numberConfig.schemas.update>>()(createHonoResourceOperations(rpc['number-configs'], dataAdapter))
 
 export type BusinessCategory = z.output<typeof businessCategory.schemas.select>
-export type Division = z.output<typeof division.schemas.select>
-export type Project = z.output<typeof project.schemas.select>
+export type Division = z.output<typeof division.schemas.select> & Record<string, unknown>
+export type Project = z.output<typeof project.schemas.select> & Record<string, unknown>
 export type Uom = z.output<typeof uom.schemas.select>
-export type WorkItem = z.output<typeof workItem.schemas.select>
-export type ProjectVendor = z.output<typeof projectVendor.schemas.select>
+export type WorkItem = z.output<typeof workItem.schemas.select> & Record<string, unknown>
+export type ProjectVendor = z.output<typeof projectVendor.schemas.select> & Record<string, unknown>
 export type PtsWorkCategory = z.output<typeof ptsWorkCategory.schemas.select>
 export type RootCause = z.output<typeof rootCause.schemas.select>
 export type NumberVariable = z.output<typeof numberVariable.schemas.select>
-export type NumberConfig = z.output<typeof numberConfig.schemas.select>
+export type NumberConfig = z.output<typeof numberConfig.schemas.select> & Record<string, unknown>
 
 export const businessCategories = defineResource({
   key: 'business-categories',
@@ -115,48 +121,53 @@ export const businessCategories = defineResource({
     delete: { handler: businessCategoryOperations.delete, permission: 'manage-business-categories' },
   },
 })
-export const divisions = defineResource({
+const divisionCapabilities = {
+  list: { handler: divisionOperations.list, permission: 'view-divisions', to: targets.divisions.list },
+  create: { handler: divisionOperations.create, permission: 'manage-divisions', to: targets.divisions.create },
+  detail: { handler: divisionOperations.detail, permission: 'view-divisions', to: targets.divisions.detail },
+  update: { handler: divisionOperations.update, permission: 'manage-divisions', to: targets.divisions.update },
+  delete: { handler: divisionOperations.delete, permission: 'manage-divisions' },
+} as const
+
+export const divisions = defineResource<typeof divisionCapabilities, Division, Record<string, never>, z.input<typeof division.schemas.create>, z.input<typeof division.schemas.update>>({
   key: 'divisions',
   fields: defineFields<Division, z.input<typeof division.schemas.create>>()({
     code: { label: 'Division', table: { sortable: true }, form: { renderer: 'text' } },
     name: { label: 'Name', form: { renderer: 'text' } },
     businessCategoryId: { label: 'Business Category', form: { renderer: 'lookup', source: businessCategories, props: { pick: 'id', view: 'name', required: true } } },
-    businessCategory: { label: 'Business Category', read: (record) => record.businessCategory?.name },
+    businessCategory: { label: 'Business Category', read: (record: unknown) => relationName(record, 'businessCategory') },
     active: { label: 'Active', form: { renderer: 'checkbox' } },
   }),
   table: { fields: ['code', 'name', 'businessCategory', 'active'] },
   detail: { fields: ['businessCategory', 'code', 'name', 'description', 'active'] },
   form: { fields: ['businessCategoryId', 'code', 'name', 'description', 'active'] },
   schemas: { create: fromZod(division.schemas.create), update: fromZod(division.schemas.update) },
-  capabilities: {
-    list: { handler: divisionOperations.list, permission: 'view-divisions', to: targets.divisions.list },
-    create: { handler: divisionOperations.create, permission: 'manage-divisions', to: targets.divisions.create },
-    detail: { handler: divisionOperations.detail, permission: 'view-divisions', to: targets.divisions.detail },
-    update: { handler: divisionOperations.update, permission: 'manage-divisions', to: targets.divisions.update },
-    delete: { handler: divisionOperations.delete, permission: 'manage-divisions' },
-  },
+  capabilities: divisionCapabilities,
 })
-export const projects = defineResource({
+const projectCapabilities = {
+  list: { handler: projectOperations.list, permission: 'view-projects', to: targets.projects.list },
+  create: { handler: projectOperations.create, permission: 'manage-projects', to: targets.projects.create },
+  detail: { handler: projectOperations.detail, permission: 'view-projects', to: targets.projects.detail },
+  update: { handler: projectOperations.update, permission: 'manage-projects', to: targets.projects.update },
+  delete: { handler: projectOperations.delete, permission: 'manage-projects' },
+} as const
+
+export const projects = defineResource<typeof projectCapabilities, Project, Record<string, never>, z.input<typeof project.schemas.create>, z.input<typeof project.schemas.update>>({
   key: 'projects',
   fields: defineFields<Project, z.input<typeof project.schemas.create>>()({
     number: { label: 'Project Number', table: { sortable: true }, form: { renderer: 'text' } },
     name: { label: 'Project', table: { sortable: true }, form: { renderer: 'text' } },
     divisionId: { label: 'Division', form: { renderer: 'lookup', source: divisions, props: { pick: 'id', view: 'name', required: true } } },
-    division: { label: 'Division', read: (record) => record.division?.name },
+    division: { label: 'Division', read: (record: unknown) => relationName(record, 'division') },
     integrationCode: { label: 'Integration Code', form: { renderer: 'text', props: { required: true } } },
     active: { label: 'Active', form: { renderer: 'checkbox' } },
+    location: { label: 'Location', form: { renderer: 'text' } },
   }),
   table: { fields: ['number', 'name', 'division', 'active'] },
   detail: { fields: ['division', 'number', 'integrationCode', 'name', 'location', 'startDate', 'endDate', 'description', 'active'] },
   form: { fields: ['divisionId', 'number', 'integrationCode', 'name', 'location', 'startDate', 'endDate', 'description', 'active'] },
   schemas: { create: fromZod(project.schemas.create), update: fromZod(project.schemas.update) },
-  capabilities: {
-    list: { handler: projectOperations.list, permission: 'view-projects', to: targets.projects.list },
-    create: { handler: projectOperations.create, permission: 'manage-projects', to: targets.projects.create },
-    detail: { handler: projectOperations.detail, permission: 'view-projects', to: targets.projects.detail },
-    update: { handler: projectOperations.update, permission: 'manage-projects', to: targets.projects.update },
-    delete: { handler: projectOperations.delete, permission: 'manage-projects' },
-  },
+  capabilities: projectCapabilities,
 })
 export const uoms = defineResource({
   key: 'uoms',
@@ -177,57 +188,54 @@ export const uoms = defineResource({
   },
 })
 
-const workItemLookup = {
-  key: 'work-items',
-  fields: {} as Record<string, unknown>,
-  capabilities: {} as Record<string, unknown>,
-}
+const workItemCapabilities = {
+  list: { handler: workItemOperations.list, permission: 'view-work-items', to: targets.workItems.list },
+  create: { handler: workItemOperations.create, permission: 'manage-work-items', to: targets.workItems.create },
+  detail: { handler: workItemOperations.detail, permission: 'view-work-items', to: targets.workItems.detail },
+  update: { handler: workItemOperations.update, permission: 'manage-work-items', to: targets.workItems.update },
+  delete: { handler: workItemOperations.delete, permission: 'manage-work-items' },
+} as const
 
-export const workItems = defineResource({
+export const workItems = defineResource<typeof workItemCapabilities, WorkItem, Record<string, never>, z.input<typeof workItem.schemas.create>, z.input<typeof workItem.schemas.update>>({
   key: 'work-items',
   fields: defineFields<WorkItem, z.input<typeof workItem.schemas.create>>()({
     code: { label: 'Work Item', table: { sortable: true }, form: { renderer: 'text' } },
     name: { label: 'Name', form: { renderer: 'text' } },
     projectId: { label: 'Project', form: { renderer: 'lookup', source: projects, props: { pick: 'id', view: 'name', required: true } } },
-    project: { label: 'Project', read: (record) => record.project?.name },
-    parentId: { label: 'Parent Work Item', form: { renderer: 'lookup', source: workItemLookup, props: { pick: 'id', view: 'name' }, behavior: { visible: ({ draft }: { draft: z.input<typeof workItem.schemas.create> }) => draft.projectId != null, props: ({ draft }: { draft: z.input<typeof workItem.schemas.create> }) => ({ searchParameters: { projectId: draft.projectId } }), resetWhen: ({ draft }: { draft: z.input<typeof workItem.schemas.create> }) => draft.projectId } } },
+    project: { label: 'Project', read: (record: unknown) => relationName(record, 'project') },
+    parentId: { label: 'Parent Work Item', form: { renderer: 'lookup', get source() { return workItems }, props: { pick: 'id', view: 'name' }, behavior: { visible: ({ draft }: { draft: z.input<typeof workItem.schemas.create> }) => draft.projectId != null, props: ({ draft }: { draft: z.input<typeof workItem.schemas.create> }) => ({ searchParameters: { projectId: draft.projectId } }), resetWhen: ({ draft }: { draft: z.input<typeof workItem.schemas.create> }) => draft.projectId } } },
     level: { label: 'Level', form: { renderer: 'number' } },
     uomId: { label: 'UOM', form: { renderer: 'lookup', source: uoms, props: { pick: 'id', view: 'name' } } },
-    uom: { label: 'UOM', read: (record) => record.uom?.name },
+    uom: { label: 'UOM', read: (record: unknown) => relationName(record, 'uom') },
     active: { label: 'Active', form: { renderer: 'checkbox' } },
   }),
   table: { fields: ['code', 'name', 'project', 'uom', 'active'] },
   detail: { fields: ['project', 'code', 'name', 'level', 'uom', 'active'] },
   form: { fields: ['projectId', 'parentId', 'code', 'name', 'level', 'uomId', 'active'] },
   schemas: { create: fromZod(workItem.schemas.create), update: fromZod(workItem.schemas.update) },
-  capabilities: {
-    list: { handler: workItemOperations.list, permission: 'view-work-items', to: targets.workItems.list },
-    create: { handler: workItemOperations.create, permission: 'manage-work-items', to: targets.workItems.create },
-    detail: { handler: workItemOperations.detail, permission: 'view-work-items', to: targets.workItems.detail },
-    update: { handler: workItemOperations.update, permission: 'manage-work-items', to: targets.workItems.update },
-    delete: { handler: workItemOperations.delete, permission: 'manage-work-items' },
-  },
+  capabilities: workItemCapabilities,
 })
-Object.assign(workItemLookup, workItems)
-export const projectVendors = defineResource({
+const projectVendorCapabilities = {
+  list: { handler: projectVendorOperations.list, permission: 'view-project-vendors', to: targets.projectVendors.list },
+  create: { handler: projectVendorOperations.create, permission: 'manage-project-vendors', to: targets.projectVendors.create },
+  detail: { handler: projectVendorOperations.detail, permission: 'view-project-vendors', to: targets.projectVendors.detail },
+  update: { handler: projectVendorOperations.update, permission: 'manage-project-vendors', to: targets.projectVendors.update },
+  delete: { handler: projectVendorOperations.delete, permission: 'manage-project-vendors' },
+} as const
+
+export const projectVendors = defineResource<typeof projectVendorCapabilities, ProjectVendor, Record<string, never>, z.input<typeof projectVendor.schemas.create>, z.input<typeof projectVendor.schemas.update>>({
   key: 'project-vendors',
   fields: defineFields<ProjectVendor, z.input<typeof projectVendor.schemas.create>>()({
     name: { label: 'Project Vendor', table: { sortable: true }, form: { renderer: 'text' } },
     projectId: { label: 'Project', form: { renderer: 'lookup', source: projects, props: { pick: 'id', view: 'name', required: true } } },
-    project: { label: 'Project', read: (record) => record.project?.name },
+    project: { label: 'Project', read: (record: unknown) => relationName(record, 'project') },
     active: { label: 'Active', form: { renderer: 'checkbox' } },
   }),
   table: { fields: ['name', 'project', 'active'] },
   detail: { fields: ['project', 'name', 'description', 'active'] },
   form: { fields: ['projectId', 'name', 'description', 'active'] },
   schemas: { create: fromZod(projectVendor.schemas.create), update: fromZod(projectVendor.schemas.update) },
-  capabilities: {
-    list: { handler: projectVendorOperations.list, permission: 'view-project-vendors', to: targets.projectVendors.list },
-    create: { handler: projectVendorOperations.create, permission: 'manage-project-vendors', to: targets.projectVendors.create },
-    detail: { handler: projectVendorOperations.detail, permission: 'view-project-vendors', to: targets.projectVendors.detail },
-    update: { handler: projectVendorOperations.update, permission: 'manage-project-vendors', to: targets.projectVendors.update },
-    delete: { handler: projectVendorOperations.delete, permission: 'manage-project-vendors' },
-  },
+  capabilities: projectVendorCapabilities,
 })
 export const ptsWorkCategories = defineResource({
   key: 'pts-work-categories',
@@ -283,11 +291,19 @@ export const numberVariables = defineResource({
     delete: { handler: numberVariableOperations.delete, permission: 'manage-number-variables' },
   },
 })
-export const numberConfigs = defineResource({
+const numberConfigCapabilities = {
+  list: { handler: numberConfigOperations.list, permission: 'view-number-configs', to: targets.numberConfigs.list },
+  create: { handler: numberConfigOperations.create, permission: 'manage-number-configs', to: targets.numberConfigs.create },
+  detail: { handler: numberConfigOperations.detail, permission: 'view-number-configs', to: targets.numberConfigs.detail },
+  update: { handler: numberConfigOperations.update, permission: 'manage-number-configs', to: targets.numberConfigs.update },
+  delete: { handler: numberConfigOperations.delete, permission: 'manage-number-configs' },
+} as const
+
+export const numberConfigs = defineResource<typeof numberConfigCapabilities, NumberConfig, Record<string, never>, z.input<typeof numberConfig.schemas.create>, z.input<typeof numberConfig.schemas.update>>({
   key: 'number-configs',
   fields: defineFields<NumberConfig, z.input<typeof numberConfig.schemas.create>>()({
-    numberVariableCode: { label: 'Number Variable', table: { sortable: true }, form: { renderer: 'lookup', source: numberVariables, props: { pick: 'code', view: 'name', required: true } } },
-    numberVariable: { label: 'Number Variable', read: (record) => record.numberVariable?.name },
+    numberVariableCode: { label: 'Number Variable', table: { sortable: true }, form: { renderer: 'lookup', source: numberVariables, props: { pick: 'code', view: 'name', required: true, loadDetail: async ({ id }: { id?: string | number }) => (await numberVariableOperations.list({ query: {}, searchParameters: { code: String(id) } })).data[0] } } },
+    numberVariable: { label: 'Number Variable', read: (record: unknown) => relationName(record, 'numberVariable') },
     displayOrder: { label: 'Display Order', table: { sortable: true }, form: { renderer: 'number' } },
     numberOfDigits: { label: 'Digits', form: { renderer: 'number' } },
     customCode: { label: 'Custom Code', form: { renderer: 'text' } },
@@ -297,13 +313,7 @@ export const numberConfigs = defineResource({
   detail: { fields: ['numberVariable', 'displayOrder', 'numberOfDigits', 'customCode', 'description', 'active'] },
   form: { fields: ['numberVariableCode', 'displayOrder', 'numberOfDigits', 'customCode', 'description', 'active'] },
   schemas: { create: fromZod(numberConfig.schemas.create), update: fromZod(numberConfig.schemas.update) },
-  capabilities: {
-    list: { handler: numberConfigOperations.list, permission: 'view-number-configs', to: targets.numberConfigs.list },
-    create: { handler: numberConfigOperations.create, permission: 'manage-number-configs', to: targets.numberConfigs.create },
-    detail: { handler: numberConfigOperations.detail, permission: 'view-number-configs', to: targets.numberConfigs.detail },
-    update: { handler: numberConfigOperations.update, permission: 'manage-number-configs', to: targets.numberConfigs.update },
-    delete: { handler: numberConfigOperations.delete, permission: 'manage-number-configs' },
-  },
+  capabilities: numberConfigCapabilities,
 })
 
 export const masterResources = { businessCategories, divisions, projects, uoms, workItems, projectVendors, ptsWorkCategories, rootCauses, numberVariables, numberConfigs } as const

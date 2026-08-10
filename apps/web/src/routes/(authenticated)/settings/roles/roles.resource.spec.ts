@@ -18,6 +18,13 @@ const ok = (payload: unknown) => ({ ok: true, json: async () => payload })
 
 vi.mock('@/framework/rpc', () => ({
   rpc: {
+    'role-groups': {
+      list: { $get: vi.fn(async () => ok({ data: [{ id: 'group-admin', name: 'Administration' }], total: 1 })) },
+      detail: { ':id': { $get: vi.fn(async () => ok({ data: { id: 'group-admin', name: 'Administration' } })) } },
+      create: { $post: vi.fn(async () => ok({ data: { id: 'group-2' } })) },
+      update: { ':id': { $patch: vi.fn(async () => ok({ data: { id: 'group-admin' } })) } },
+      delete: { ':id': { $delete: vi.fn(async () => ok({ ok: true })) } },
+    },
     roles: {
       list: { $get: vi.fn(async () => ok({ data: [{ id: '1', name: 'Admin' }], total: 1, limit: 10 })) },
       detail: { ':id': { $get: vi.fn(async () => ok({ data: { id: '1', name: 'Admin' } })) } },
@@ -61,7 +68,7 @@ describe('roles resource', () => {
     expect(detail.id).toBe('1')
     expect(create.load).toBeUndefined()
     expect(typeof update.load).toBe('function')
-    expect(Object.keys(create.fields as Record<string, unknown>)).toEqual(['roleCode', 'name', 'assignmentScope', 'active'])
+    expect(Object.keys(create.fields as Record<string, unknown>)).toEqual(['roleCode', 'name', 'roleGroupId', 'assignmentScope', 'active'])
   })
 
   it('renders all current form fields through the application runtime', async () => {
@@ -72,9 +79,10 @@ describe('roles resource', () => {
     app.mount(host)
     await Promise.resolve()
     await nextTick()
+    await vi.dynamicImportSettled()
 
-    expect(host.querySelectorAll('.is-form-field')).toHaveLength(4)
-    for (const key of ['roleCode', 'name', 'assignmentScope', 'active']) {
+    expect(host.querySelectorAll('.is-form-field')).toHaveLength(5)
+    for (const key of ['roleCode', 'name', 'roleGroupId', 'assignmentScope', 'active']) {
       expect(host.querySelector(`label[for="field-${key}"]`)).not.toBeNull()
     }
     app.unmount()
@@ -95,7 +103,7 @@ describe('roles resource', () => {
 
   it('validates create and update through the shared schemas', () => {
     expect(roles.form().schema?.validate({}).success).toBe(false)
-    expect(roles.form().schema?.validate({ roleCode: 'editor', name: 'Editor', roleGroupId: 'group-admin' }).success).toBe(true)
+    expect(roles.form().schema?.validate({ roleCode: 'editor', name: 'Editor', roleGroupId: 'group-admin', assignmentScope: 'global' }).success).toBe(true)
     expect(roles.form({ id: '1' }).schema?.validate({}).success).toBe(true)
   })
 

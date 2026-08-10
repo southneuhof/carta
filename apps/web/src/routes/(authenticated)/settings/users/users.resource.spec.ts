@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createFrameworkQueryClient, registerResourceRuntime, resetResourceRuntimeForTests, resolveFrameworkAdapters, resolveFrameworkFieldDefaults } from '@southneuhof/is-vue-framework'
+import { createBehaviorRuntime, createFrameworkQueryClient, registerResourceRuntime, resetResourceRuntimeForTests, resolveFields, resolveFrameworkAdapters, resolveFrameworkFieldDefaults } from '@southneuhof/is-vue-framework'
+import { reactive } from 'vue'
 import { appFieldDefaults } from '@/configs/defaults'
 
 const ok = (payload: unknown) => ({ ok: true, json: async () => payload })
@@ -21,6 +22,7 @@ vi.mock('@/framework/rpc', () => ({
     users: {
       list: { $get: vi.fn(async () => ok({ data: [{ id: 'u1', name: 'Admin' }], total: 1, limit: 10 })) },
       detail: { ':id': { $get: vi.fn(async () => ok({ data: { id: 'u1', name: 'Admin' } })) } },
+      create: { $post: vi.fn(async () => ok({ data: { id: 'u2', name: 'New user' } })) },
       update: { ':id': { $patch: vi.fn(async () => ok({ data: { id: 'u1' } })) } },
       ':userId': {
         roles: Object.assign({ $get: listUserRoles }, { ':roleId': { $put: assignRole, $delete: revokeRole } }),
@@ -86,7 +88,7 @@ describe('users resource', () => {
   it('binds native props straight to the cores', () => {
     expect(users.table().table.namespace).toBe('users')
     expect(users.detail({ id: 'u1' }).detail.id).toBe('u1')
-    expect(Object.keys(users.form({ id: 'u1' }).fields as Record<string, unknown>)).toEqual(['name', 'username', 'statusCode'])
+    expect(Object.keys(users.form({ id: 'u1', context: { operation: 'update' } }).fields as Record<string, unknown>)).toEqual(['name', 'username', 'email', 'password', 'imgPhotoUser', 'statusCode'])
   })
 
   it('links a row to its detail screen through the identity extractor', () => {
@@ -115,12 +117,25 @@ describe('users resource', () => {
 
   it('declares standard targets and permissions in its capabilities', () => {
     expect(users.capabilities.list).toMatchObject({ permission: 'view-users', to: { name: 'settings-users' } })
+    expect(users.capabilities.create).toMatchObject({ permission: 'create-users', to: { name: 'settings-users-create' } })
     expect(users.capabilities.update).toMatchObject({ permission: 'update-users', to: { name: 'settings-users-edit' } })
+  })
+
+  it('normalizes credential creation through the custom endpoint', async () => {
+    await expect(users.capabilities.create!.handler({ name: 'New user', username: 'new-user', email: 'new@example.test', password: 'password-123' })).resolves.toEqual({ id: 'u2', name: 'New user' })
+  })
+
+  it('hides create-only fields from the update form', () => {
+    const surface = users.form({ id: 'u1', context: { operation: 'update' } })
+    const resolved = resolveFields({ fields: surface.fields, surface: 'form', defaultFields: resolveFrameworkFieldDefaults(appFieldDefaults).fields })
+    const runtime = createBehaviorRuntime({ fields: resolved as never, draft: reactive({}) as never, context: { operation: 'update' } })
+
+    expect(runtime.visibleKeys.value).toEqual(['name', 'username', 'statusCode'])
   })
 
   it('carries no single-role field, because roles are a many-to-many assignment', () => {
     expect(users.table().table.fields).not.toHaveProperty('roleId')
-    expect(Object.keys(users.form({ id: 'u1' }).fields as Record<string, unknown>)).not.toContain('roleId')
+    expect(Object.keys(users.form({ id: 'u1', context: { operation: 'update' } }).fields as Record<string, unknown>)).not.toContain('roleId')
   })
 })
 

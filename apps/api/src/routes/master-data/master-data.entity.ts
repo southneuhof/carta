@@ -191,7 +191,7 @@ export const businessCategory = createEntity({
     select: createSelectSchema(businessCategories),
   },
 })
-const businessCategorySelect = createSelectSchema(businessCategories)
+const businessCategorySelect = businessCategory.schemas.select
 export const division = createEntity({
   table: divisions,
   schemas: {
@@ -223,7 +223,7 @@ export const workItem = createEntity({
   schemas: {
     create: createInsertSchema(workItems).omit(write),
     update: createUpdateSchema(workItems).omit(write),
-    select: createSelectSchema(workItems).extend({ project: projectSelect.nullable().optional(), uom: createSelectSchema(uoms).nullable().optional() }),
+    select: createSelectSchema(workItems).extend({ project: projectSelect.nullable().optional(), uom: uom.schemas.select.nullable().optional() }),
   },
 })
 export const projectVendor = createEntity({

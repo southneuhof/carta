@@ -24,7 +24,8 @@ Resource: `apps/web/src/routes/(authenticated)/settings/roles/roles.resource.ts`
 API: `apps/api/src/routes/roles/roles.entity.ts`, `apps/api/src/routes/roles/roles.ts`  
 Routes: `settings/roles/{index,create,[roleId]/detail,[roleId]/edit}.route.vue`  
 Mode: standard CRUD. The permission child screen is a separate assignment
-workflow and is not a Role form.
+workflow and is not a Role form. The current seed grants Role creators both
+`manage-roles` and `view-role-groups`, so the Role Group lookup is available.
 
 | Field | API create | API update | List | Detail | Form renderer | Source | Server supplied |
 |---|---|---|---|---|---|---|---|
@@ -231,4 +232,3 @@ the variable code.
 | `customCode` | optional | optional | no | no | text | — | no |
 | `description` | optional | optional | no | no | textarea | — | no |
 | `active` | optional, default true | optional | yes | yes | checkbox | — | default only |
-
