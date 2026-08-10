@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { FormView } from '@southneuhof/is-vue-framework'
-import { rootCauses } from '../master-data.resources'
+import { rootCauses } from './root-causes.resource'
 </script>
 
-<template><FormView title="Create Root Causes" :resource="rootCauses" /></template>
+<template><FormView title="Create Penyebab QHSSE" :resource="rootCauses" /></template>

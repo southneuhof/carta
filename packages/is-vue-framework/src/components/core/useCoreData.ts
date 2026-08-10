@@ -7,7 +7,7 @@
  */
 import { getCurrentInstance } from 'vue'
 import type { QueryKey, QueryNamespace, QueryValues, RecordIdentity } from '../../contracts'
-import { stableValue } from '../../query'
+import { collectionKey, recordKey } from '../../query'
 
 export function assertSingleDataSource(component: string, data: unknown, load: unknown): void {
   if (data !== undefined && load !== undefined) {
@@ -22,11 +22,11 @@ export function instanceIdentity(fallback: string): string {
 }
 
 export function collectionCacheKey(owner: string, query: QueryValues, searchParameters: QueryValues): QueryKey {
-  return ['core', owner, 'list', stableValue({ ...searchParameters, ...query })]
+  return collectionKey({ resource: owner, query, searchParameters })
 }
 
 export function recordCacheKey(owner: string, id: RecordIdentity | undefined, searchParameters: QueryValues): QueryKey {
-  return ['core', owner, 'record', stableValue(id ?? null), stableValue(searchParameters)]
+  return recordKey({ resource: owner, id: id ?? null, searchParameters })
 }
 
 export function ownerOf(namespace: QueryNamespace | undefined, fallback: string): string {

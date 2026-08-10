@@ -1,7 +1,12 @@
 import { createEntity } from '@southneuhof/sprindle/entity'
 import { decimal, integer, pgTable, primaryKey, text, timestamp, uniqueIndex, index } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
-import { divisions, projects, projectVendors, rootCauses, ptsWorkCategories, workItems } from '../master-data/master-data.entity'
+import { divisions } from '../divisions/divisions.entity'
+import { projects } from '../projects/projects.entity'
+import { projectVendors } from '../project-vendors/project-vendors.entity'
+import { ptsWorkCategories } from '../pts-work-categories/pts-work-categories.entity'
+import { rootCauses } from '../root-causes/root-causes.entity'
+import { workItems } from '../work-items/work-items.entity'
 import { users } from '../users/users.entity'
 
 const auditFields = {

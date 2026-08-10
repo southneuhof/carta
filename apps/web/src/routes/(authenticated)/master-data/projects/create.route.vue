@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { FormView } from '@southneuhof/is-vue-framework'
-import { projects } from '../master-data.resources'
+import { projects } from './projects.resource'
 </script>
 
-<template><FormView title="Create Projects" :resource="projects" /></template>
+<template><FormView title="Create Proyek" :resource="projects" /></template>

@@ -143,32 +143,11 @@ declare module 'vue-router/auto-routes' {
       { numberVariableId: ParamValue<false> },
       | never
     >,
-    'master-data-number-variables-edit': RouteRecordInfo<
-      'master-data-number-variables-edit',
-      '/master-data/number-variables/:numberVariableId/edit',
-      { numberVariableId: ParamValue<true> },
-      { numberVariableId: ParamValue<false> },
-      | never
-    >,
-    'master-data-number-variables-create': RouteRecordInfo<
-      'master-data-number-variables-create',
-      '/master-data/number-variables/create',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
     'master-data-project-vendors': RouteRecordInfo<
       'master-data-project-vendors',
       '/master-data/project-vendors',
       Record<never, never>,
       Record<never, never>,
-      | never
-    >,
-    'master-data-project-vendors-detail': RouteRecordInfo<
-      'master-data-project-vendors-detail',
-      '/master-data/project-vendors/:projectVendorId/detail',
-      { projectVendorId: ParamValue<true> },
-      { projectVendorId: ParamValue<false> },
       | never
     >,
     'master-data-project-vendors-edit': RouteRecordInfo<
@@ -202,6 +181,13 @@ declare module 'vue-router/auto-routes' {
     'master-data-projects-edit': RouteRecordInfo<
       'master-data-projects-edit',
       '/master-data/projects/:projectId/edit',
+      { projectId: ParamValue<true> },
+      { projectId: ParamValue<false> },
+      | never
+    >,
+    'master-data-projects-vendors': RouteRecordInfo<
+      'master-data-projects-vendors',
+      '/master-data/projects/:projectId/vendors',
       { projectId: ParamValue<true> },
       { projectId: ParamValue<false> },
       | never
@@ -300,27 +286,6 @@ declare module 'vue-router/auto-routes' {
     'master-data-work-items': RouteRecordInfo<
       'master-data-work-items',
       '/master-data/work-items',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    'master-data-work-items-detail': RouteRecordInfo<
-      'master-data-work-items-detail',
-      '/master-data/work-items/:workItemId/detail',
-      { workItemId: ParamValue<true> },
-      { workItemId: ParamValue<false> },
-      | never
-    >,
-    'master-data-work-items-edit': RouteRecordInfo<
-      'master-data-work-items-edit',
-      '/master-data/work-items/:workItemId/edit',
-      { workItemId: ParamValue<true> },
-      { workItemId: ParamValue<false> },
-      | never
-    >,
-    'master-data-work-items-create': RouteRecordInfo<
-      'master-data-work-items-create',
-      '/master-data/work-items/create',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -551,17 +516,15 @@ declare module 'vue-router/auto-routes' {
         | 'master-data-number-configs-detail'
         | 'master-data-number-configs-edit'
         | 'master-data-number-variables'
-        | 'master-data-number-variables-create'
         | 'master-data-number-variables-detail'
-        | 'master-data-number-variables-edit'
         | 'master-data-project-vendors'
         | 'master-data-project-vendors-create'
-        | 'master-data-project-vendors-detail'
         | 'master-data-project-vendors-edit'
         | 'master-data-projects'
         | 'master-data-projects-create'
         | 'master-data-projects-detail'
         | 'master-data-projects-edit'
+        | 'master-data-projects-vendors'
         | 'master-data-pts-work-categories'
         | 'master-data-pts-work-categories-create'
         | 'master-data-pts-work-categories-detail'
@@ -575,9 +538,6 @@ declare module 'vue-router/auto-routes' {
         | 'master-data-uoms-detail'
         | 'master-data-uoms-edit'
         | 'master-data-work-items'
-        | 'master-data-work-items-create'
-        | 'master-data-work-items-detail'
-        | 'master-data-work-items-edit'
         | 'notifications'
         | 'quality-pts'
         | 'quality-pts-create'
@@ -735,33 +695,9 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/routes/(authenticated)/master-data/number-variables/[numberVariableId]/edit.route.vue': {
-      routes:
-        | 'master-data-number-variables-edit'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/routes/(authenticated)/master-data/number-variables/create.route.vue': {
-      routes:
-        | 'master-data-number-variables-create'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
     'src/routes/(authenticated)/master-data/project-vendors/index.route.vue': {
       routes:
         | 'master-data-project-vendors'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/routes/(authenticated)/master-data/project-vendors/[projectVendorId]/detail.route.vue': {
-      routes:
-        | 'master-data-project-vendors-detail'
       views:
         | never
       pathParamNames:
@@ -802,6 +738,14 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/master-data/projects/[projectId]/edit.route.vue': {
       routes:
         | 'master-data-projects-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/projects/[projectId]/vendors/index.route.vue': {
+      routes:
+        | 'master-data-projects-vendors'
       views:
         | never
       pathParamNames:
@@ -914,30 +858,6 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/master-data/work-items/index.route.vue': {
       routes:
         | 'master-data-work-items'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/routes/(authenticated)/master-data/work-items/[workItemId]/detail.route.vue': {
-      routes:
-        | 'master-data-work-items-detail'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/routes/(authenticated)/master-data/work-items/[workItemId]/edit.route.vue': {
-      routes:
-        | 'master-data-work-items-edit'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/routes/(authenticated)/master-data/work-items/create.route.vue': {
-      routes:
-        | 'master-data-work-items-create'
       views:
         | never
       pathParamNames:

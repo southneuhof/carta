@@ -13,7 +13,7 @@ import {
   createUpdateSchema,
 } from "drizzle-zod";
 import { z } from "zod/v4";
-import { projects } from "../master-data/master-data.entity";
+import { projects } from "../projects/projects.entity";
 import { users } from "../users/users.entity";
 
 export const assignmentScopes = ["global", "project"] as const;

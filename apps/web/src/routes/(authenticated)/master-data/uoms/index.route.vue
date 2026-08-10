@@ -1,5 +1,5 @@
 <script setup lang="ts">
 import { ListView } from '@southneuhof/is-vue-framework'
-import { uoms } from '../master-data.resources'
+import { uoms } from './uoms.resource'
 </script>
-<template><ListView title="UOMs" :resource="uoms" /></template>
+<template><ListView title="Satuan" :resource="uoms" /></template>

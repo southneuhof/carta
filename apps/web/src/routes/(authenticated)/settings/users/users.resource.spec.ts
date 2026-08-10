@@ -88,7 +88,7 @@ describe('users resource', () => {
   it('binds native props straight to the cores', () => {
     expect(users.table().table.namespace).toBe('users')
     expect(users.detail({ id: 'u1' }).detail.id).toBe('u1')
-    expect(Object.keys(users.form({ id: 'u1', context: { operation: 'update' } }).fields as Record<string, unknown>)).toEqual(['name', 'username', 'email', 'password', 'imgPhotoUser', 'statusCode'])
+    expect(Object.keys(users.form({ id: 'u1', context: { operation: 'update' } }).fields as Record<string, unknown>)).toEqual(['name', 'username', 'email', 'password', 'imgPhotoUser'])
   })
 
   it('links a row to its detail screen through the identity extractor', () => {
@@ -130,7 +130,7 @@ describe('users resource', () => {
     const resolved = resolveFields({ fields: surface.fields, surface: 'form', defaultFields: resolveFrameworkFieldDefaults(appFieldDefaults).fields })
     const runtime = createBehaviorRuntime({ fields: resolved as never, draft: reactive({}) as never, context: { operation: 'update' } })
 
-    expect(runtime.visibleKeys.value).toEqual(['name', 'username', 'statusCode'])
+    expect(runtime.visibleKeys.value).toEqual(['name', 'username'])
   })
 
   it('carries no single-role field, because roles are a many-to-many assignment', () => {

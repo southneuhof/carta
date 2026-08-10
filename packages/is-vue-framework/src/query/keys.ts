@@ -37,7 +37,7 @@ export interface CollectionKeyInput {
 
 export interface RecordKeyInput {
   resource: string
-  id: RecordIdentity
+  id: RecordIdentity | null
   searchParameters?: QueryValues
 }
 

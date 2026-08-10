@@ -2,15 +2,14 @@
 import { RouterLink } from 'vue-router'
 
 const entries = [
-  ['business-categories', 'Business Categories'],
-  ['divisions', 'Divisions'],
-  ['projects', 'Projects'],
-  ['uoms', 'UOMs'],
-  ['work-items', 'Work Items'],
-  ['project-vendors', 'Project Vendors'],
-  ['pts-work-categories', 'PTS Work Categories'],
-  ['root-causes', 'Root Causes'],
-  ['number-variables', 'Number Variables'],
+  ['business-categories', 'Kategori Bisnis'],
+  ['divisions', 'Divisi'],
+  ['projects', 'Proyek'],
+  ['uoms', 'Satuan'],
+  ['work-items', 'Jenis Pekerjaan'],
+  ['project-vendors', 'Vendor/Subkon/Mandor'],
+  ['pts-work-categories', 'Kategori Pekerjaan'],
+  ['root-causes', 'Penyebab QHSSE'],
   ['number-configs', 'Number Configurations'],
 ] as const
 </script>

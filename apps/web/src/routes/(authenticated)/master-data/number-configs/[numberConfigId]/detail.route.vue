@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { DetailView } from '@southneuhof/is-vue-framework'
-import { numberConfigs } from '../../master-data.resources'
+import { numberConfigs } from '../number-configs.resource'
 
 const route = useRoute('master-data-number-configs-detail')
 </script>

@@ -1,17 +1,15 @@
 import { eq } from "drizzle-orm";
 import { closeDb, getDb } from "../src/db";
 import { createAuth } from "../src/routes/auth/auth";
-import {
-  businessCategories,
-  divisions,
-  numberConfigs,
-  numberVariables,
-  projects,
-  ptsWorkCategories,
-  rootCauses,
-  uoms,
-  workItems,
-} from "../src/routes/master-data/master-data.entity";
+import { businessCategories } from "../src/routes/business-categories/business-categories.entity";
+import { divisions } from "../src/routes/divisions/divisions.entity";
+import { numberConfigs } from "../src/routes/number-configs/number-configs.entity";
+import { numberVariables } from "../src/routes/number-variables/number-variables.entity";
+import { projects } from "../src/routes/projects/projects.entity";
+import { ptsWorkCategories } from "../src/routes/pts-work-categories/pts-work-categories.entity";
+import { rootCauses } from "../src/routes/root-causes/root-causes.entity";
+import { uoms } from "../src/routes/uoms/uoms.entity";
+import { workItems } from "../src/routes/work-items/work-items.entity";
 import {
   permissions,
   roleGroups,
@@ -50,8 +48,6 @@ const permissionCodes = [
   "view-project-users",
   "manage-project-users",
   ...masterCodes.flatMap((code) => [`view-${code}`, `manage-${code}`]),
-  "view-master-data",
-  "manage-master-data",
   "view-qhsse-pts",
   "show-qhsse-pts",
   "create-qhsse-pts",

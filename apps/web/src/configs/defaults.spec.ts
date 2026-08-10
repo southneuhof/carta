@@ -4,7 +4,8 @@ import { appFieldDefaults } from './defaults'
 
 describe('app field defaults', () => {
   it('owns normalized keyed defaults using the framework field schema', () => {
-    expect(appFieldDefaults.fields.name.label).toBe('Nama')
+    expect(appFieldDefaults.fields.name.label).toBe('Name')
+    expect(appFieldDefaults.fields.code.label).toBe('Code')
     expect(appFieldDefaults.fields.createdAt.display?.format).toBe('datetime')
     expect(appFieldDefaults.fields.description.table?.class).toContain('line-clamp-3')
     expect(appFieldDefaults.fields.statusCode.table?.align).toBe('center')

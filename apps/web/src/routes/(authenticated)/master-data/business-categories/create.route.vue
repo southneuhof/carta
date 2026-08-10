@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { FormView } from '@southneuhof/is-vue-framework'
-import { businessCategories } from '../master-data.resources'
+import { businessCategories } from './business-categories.resource'
 </script>
 
-<template><FormView title="Create Business Categories" :resource="businessCategories" /></template>
+<template><FormView title="Create Kategori Bisnis" :resource="businessCategories" /></template>

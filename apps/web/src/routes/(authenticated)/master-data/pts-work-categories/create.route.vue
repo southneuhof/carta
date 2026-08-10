@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { FormView } from '@southneuhof/is-vue-framework'
-import { ptsWorkCategories } from '../master-data.resources'
+import { ptsWorkCategories } from './pts-work-categories.resource'
 </script>
 
-<template><FormView title="Create PTS Work Categories" :resource="ptsWorkCategories" /></template>
+<template><FormView title="Create Kategori Pekerjaan" :resource="ptsWorkCategories" /></template>

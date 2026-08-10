@@ -1,5 +1,5 @@
 <script setup lang="ts">
 import { ListView } from '@southneuhof/is-vue-framework'
-import { businessCategories } from '../master-data.resources'
+import { businessCategories } from './business-categories.resource'
 </script>
-<template><ListView title="Business Categories" :resource="businessCategories" /></template>
+<template><ListView title="Kategori Bisnis" :resource="businessCategories" /></template>

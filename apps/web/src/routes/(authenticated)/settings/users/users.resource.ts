@@ -9,7 +9,7 @@ export const userFields = defineFields<User, CreateUserInput>()({
   name: { label: 'Name', table: { sortable: true }, form: { renderer: 'text' } },
   email: { label: 'Email', table: { sortable: true }, form: { renderer: 'text', props: { type: 'email', required: true }, behavior: createOnly } },
   username: { label: 'Username', table: { sortable: true }, form: { renderer: 'text' } },
-  statusCode: { label: 'Status', form: { renderer: 'text', behavior: { visible: ({ context }) => context.operation === 'update' } } },
+  statusCode: { label: 'Status' },
   password: { label: 'Password', form: { renderer: 'text', props: { type: 'password', required: true }, behavior: createOnly } },
   imgPhotoUser: { label: 'Photo Key', form: { renderer: 'text', behavior: createOnly } },
 })
@@ -26,7 +26,7 @@ export const users = defineResource<typeof userCapabilities, User, Record<string
   fields: userFields,
   table: { fields: ['name', 'username', 'email', 'statusCode', 'createdAt'] },
   detail: { fields: ['name', 'username', 'email', 'statusCode', 'createdAt', 'updatedAt'] },
-  form: { fields: ['name', 'username', 'email', 'password', 'imgPhotoUser', 'statusCode'] },
+  form: { fields: ['name', 'username', 'email', 'password', 'imgPhotoUser'] },
   schemas: { create: fromZod<CreateUserInput>(createUserSchema), update: fromZod<UserUpdate>(user.schemas.update) },
   capabilities: userCapabilities,
 })

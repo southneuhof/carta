@@ -5,7 +5,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import { projects } from "../master-data/master-data.entity";
+import { projects } from "../projects/projects.entity";
 import { users } from "../users/users.entity";
 
 export const notifications = pgTable("notifications", {

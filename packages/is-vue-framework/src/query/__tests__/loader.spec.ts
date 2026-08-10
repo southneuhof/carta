@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useLoader } from '../loader'
 import { collectionKey } from '../keys'
 import { createFrameworkQueryClient, invalidateResourceData } from '../client'
+import { collectionCacheKey, recordCacheKey } from '../../components/core/useCoreData'
 import type { CollectionLoadContext, CollectionResult } from '../../contracts'
 import { deferred, flush, withApp } from './harness'
 
@@ -188,6 +189,44 @@ describe('internal loader', () => {
 
     expect(load).toHaveBeenCalledTimes(2)
     expect(unrelated).toHaveBeenCalledTimes(1)
+    app.unmount()
+  })
+
+  it('invalidates the keys used by table and detail cores', async () => {
+    const listLoad = vi.fn(async () => ({ data: [{ id: 1, name: 'Admin' }] }))
+    const detailLoad = vi.fn(async () => ({ id: 1, name: 'Admin' }))
+    const queryClient = createFrameworkQueryClient({ staleTime: 0 })
+
+    const { app } = withApp(
+      () => ({
+        list: useLoader<CollectionLoadContext, CollectionResult<Role>>({
+          key: collectionCacheKey('roles', {}, {}),
+          context,
+          load: listLoad,
+        }),
+        detail: useLoader({
+          key: recordCacheKey('roles', 1, {}),
+          context: { id: 1, searchParameters: {} },
+          load: detailLoad,
+        }),
+      }),
+      { queryClient },
+    )
+    await flush(8)
+    expect(listLoad).toHaveBeenCalledTimes(1)
+    expect(detailLoad).toHaveBeenCalledTimes(1)
+
+    await invalidateResourceData(queryClient, { resource: 'roles' })
+    await flush(8)
+
+    expect(listLoad).toHaveBeenCalledTimes(2)
+    expect(detailLoad).toHaveBeenCalledTimes(2)
+
+    await invalidateResourceData(queryClient, { resource: 'roles', id: 1 })
+    await flush(8)
+
+    expect(listLoad).toHaveBeenCalledTimes(3)
+    expect(detailLoad).toHaveBeenCalledTimes(3)
     app.unmount()
   })
 })

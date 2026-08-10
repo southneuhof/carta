@@ -14,16 +14,18 @@ only after implementation and review.
 
 | Plan | Title | Priority | Effort | Depends on | Status |
 |---|---|---|---|---|---|
-| 001 | Put each current resource in its own module | P1 | L | — | TODO |
-| 002 | Align Business Category CRUD surfaces | P1 | S | 001, shared form baseline | TODO |
-| 003 | Align PTS Work Category and Root Cause CRUD surfaces | P1 | S | 001, 002 | TODO |
+| 001 | Put each current resource in its own module | P1 | L | — | DONE |
+| 002 | Align Business Category CRUD surfaces | P1 | S | 001, shared form baseline | DONE |
+| 003 | Align PTS Work Category and Root Cause CRUD surfaces | P1 | S | 001, 002 | DONE |
 
 ## Scope boundary
 
-Plans 002 and 003 include only the standard list, detail, create, update, and
-delete operations. Their business fields are `name`, `code`, `description`,
-and `active`. Plan 001 moves all ten current resources because a partial move
-would leave the invalid API group in place. It does not change their behavior.
+Plans 002 and 003 cover the ordinary catalog screens only. Their visible
+fields come from the module matrices in
+`../master-data-visual-parity/002-align-basic-catalog-visual-surfaces.md`.
+The old four-field rule is not valid. Plan 001 moves all ten current resources
+because a partial move would leave the invalid API group in place. It does not
+change module behavior.
 
 Do not add client ID inputs or legacy Laravel audit fields. The database must
 generate UUIDs and the server must set audit data.
@@ -44,10 +46,11 @@ in a later plan. Do not treat it as isolated CRUD.
 
 ## Legacy surface rule
 
-For every included module, show `name`, `code`, `description`, and `active` in
-the table, detail, create, and edit resource surfaces. The current approved
-contract makes `code` required and unique even where the legacy Laravel
-validation allowed an empty code. This is a deliberate current improvement.
+This folder is complete. A current stored field does not automatically become
+a table, detail, or form field. The legacy module field matrix decides the
+visual surface. Catalog codes remain visible business identifiers; only
+technical system fields are hidden by default. The complete classification and
+matrices are in `../master-data-visual-parity/`.
 
 ## Findings considered and rejected
 

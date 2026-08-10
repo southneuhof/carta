@@ -2,7 +2,7 @@ import { authenticated, defineRoute } from '@southneuhof/sprindle/routes'
 import { and, eq } from 'drizzle-orm'
 import { getDb } from '../../db'
 import { requirePermission } from '../../identity'
-import { projects } from '../master-data/master-data.entity'
+import { projects } from '../projects/projects.entity'
 import { users } from '../users/users.entity'
 import { role, roles, projectUsers } from './roles.entity'
 

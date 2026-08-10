@@ -120,18 +120,9 @@ export function mergeFieldLayers(layers: readonly (FieldLayer | undefined)[]): F
   let props: Record<string, unknown> | null | undefined
   let source: unknown
   let hasSource = false
-  let renderer: string | undefined
 
   for (const layer of layers) {
     if (!layer) continue
-    if (layer.renderer !== undefined) {
-      const nextRenderer = layer.renderer === null ? undefined : layer.renderer
-      if (nextRenderer !== undefined && nextRenderer !== renderer && layer.source === undefined) {
-        hasSource = false
-        source = undefined
-      }
-      renderer = nextRenderer
-    }
     for (const key of layerKeys) {
       const value = layer[key]
       if (value === undefined) continue
