@@ -26,9 +26,7 @@ describe('app input props registry', () => {
 
   it('keeps the runtime registry out of production field declarations', () => {
     const defaults = readFileSync(resolve(process.cwd(), 'src/configs/defaults.ts'), 'utf8')
-    const overtimes = readFileSync(resolve(process.cwd(), 'src/routes/(authenticated)/hr/overtimes/overtimes.resource.ts'), 'utf8')
 
     expect(defaults).not.toContain('appInputProps')
-    expect(overtimes).not.toContain('appInputProps')
   })
 })

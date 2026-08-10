@@ -14,8 +14,6 @@ import TextInput from '@southneuhof/is-vue-framework/components/inputs/TextInput
 import PasswordInput from '@southneuhof/is-vue-framework/components/inputs/PasswordInput.vue'
 import { rpc } from '@/framework/rpc'
 
-
-const BYPASS_ALL_PERMISSIONS = import.meta.env.VITE_APP_BYPASS_ALL_PERMISSIONS === 'true'
 const loginMessage = ref<{ message: string; type: 'error' | 'warning' | 'info' | 'success' | undefined }>({ message: '', type: undefined })
 const router = useRouter()
 const loading = ref(false)
@@ -77,10 +75,10 @@ async function login() {
       return
     }
 
-    const profile = { ...user, role_id: identity.roleIds[0] ?? '', fullname: user.name, username: user.email }
+    const profile = { ...user, role_id: identity.roleCodes[0] ?? '', fullname: user.name, username: identity.user.username ?? user.email }
     const tasks = identity.permissions
 
-    if (tasks.length === 0 && !BYPASS_ALL_PERMISSIONS) {
+    if (tasks.length === 0) {
       await rejectLogin(NO_ACCESS_MESSAGE, sessionEstablished, true)
       return
     }
@@ -101,13 +99,15 @@ async function login() {
     loading.value = false
   }
 }
-
 </script>
 
 <template>
   <Card class="flex flex-col gap-16 p-8">
     <div class="flex flex-row items-center gap-8"><Logo class="w-16" /></div>
-    <div class="flex flex-col gap-4"><div class="text-lg">Welcome to</div><div class="text-4xl font-bold">Demo App</div></div>
+    <div class="flex flex-col gap-4">
+      <div class="text-lg">Welcome to</div>
+      <div class="text-4xl font-bold">Demo App</div>
+    </div>
     <form class="flex flex-col items-center gap-4" @submit.prevent="login">
       <TextInput class="w-full" :model-value="formData.email" @update:model-value="(value) => (formData.email = String(value))" label="Email" enableHelperMessage required />
       <PasswordInput class="w-full" :model-value="formData.password" @update:model-value="(value) => (formData.password = String(value))" label="Password" enableHelperMessage required />
@@ -116,7 +116,9 @@ async function login() {
       </div>
       <Button v-else disabled variant="tonal" class="mt-6 w-full"><Spinner /></Button>
     </form>
-    <div class="flex w-full items-center justify-center"><Toast v-if="loginMessage.message" :type="loginMessage.type">{{ loginMessage.message }}</Toast></div>
+    <div class="flex w-full items-center justify-center">
+      <Toast v-if="loginMessage.message" :type="loginMessage.type">{{ loginMessage.message }}</Toast>
+    </div>
     <div class="text-center text-muted">Company Ltd.</div>
   </Card>
 </template>

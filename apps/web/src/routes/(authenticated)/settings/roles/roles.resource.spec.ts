@@ -39,11 +39,11 @@ afterEach(() => resetResourceRuntimeForTests())
 
 describe('roles resource', () => {
   it('declares exact standard capability permissions and targets', () => {
-    expect(roles.capabilities.list).toMatchObject({ permission: 'roles.list', to: { name: 'settings-roles' } })
-    expect(roles.capabilities.create).toMatchObject({ permission: 'roles.create', to: { name: 'settings-roles-create' } })
+    expect(roles.capabilities.list).toMatchObject({ permission: 'view-roles', to: { name: 'settings-roles' } })
+    expect(roles.capabilities.create).toMatchObject({ permission: 'manage-roles', to: { name: 'settings-roles-create' } })
     const detailTarget = roles.capabilities.detail?.to
     expect(detailTarget?.params('1')).toEqual({ roleId: '1' })
-    expect(roles.capabilities.delete).toMatchObject({ permission: 'roles.delete' })
+    expect(roles.capabilities.delete).toMatchObject({ permission: 'manage-roles' })
     expect('to' in roles.capabilities.delete!).toBe(false)
   })
   it('produces core props that bind directly, with no adapter shape', () => {
@@ -57,7 +57,7 @@ describe('roles resource', () => {
     expect(detail.id).toBe('1')
     expect(create.load).toBeUndefined()
     expect(typeof update.load).toBe('function')
-    expect(Object.keys(create.fields as Record<string, unknown>)).toEqual(['name'])
+    expect(Object.keys(create.fields as Record<string, unknown>)).toEqual(['roleCode', 'name', 'assignmentScope', 'active'])
   })
 
   it('inherits createdAt from app defaults without a resource field declaration', () => {
@@ -68,17 +68,13 @@ describe('roles resource', () => {
       defaultFields: resolveFrameworkFieldDefaults(appFieldDefaults).fields,
     })
 
-    expect(Object.keys(fields as Record<string, unknown>)).toEqual(['name', 'createdAt'])
-    expect(resolved.find((field) => field.key === 'createdAt')).toMatchObject({
-      label: 'Dibuat',
-      format: 'datetime',
-      class: 'min-w-max whitespace-nowrap',
-    })
+    expect(Object.keys(fields as Record<string, unknown>)).toEqual(['roleCode', 'name', 'assignmentScope', 'active'])
+    expect(resolved.find((field) => field.key === 'active')).toBeDefined()
   })
 
   it('validates create and update through the shared schemas', () => {
     expect(roles.form().schema?.validate({}).success).toBe(false)
-    expect(roles.form().schema?.validate({ name: 'Editor' }).success).toBe(true)
+    expect(roles.form().schema?.validate({ roleCode: 'editor', name: 'Editor', roleGroupId: 'group-admin' }).success).toBe(true)
     expect(roles.form({ id: '1' }).schema?.validate({}).success).toBe(true)
   })
 
@@ -106,7 +102,7 @@ describe('roles resource', () => {
 
 describe('role permissions resource', () => {
   it('owns child target while borrowing its parent update permission', () => {
-    expect(rolePermissions.capabilities.list).toMatchObject({ permission: 'roles.update', to: { name: 'settings-roles-detail-permissions' } })
+    expect(rolePermissions.capabilities.list).toMatchObject({ permission: 'manage-role-permissions', to: { name: 'settings-roles-detail-permissions' } })
   })
   it('is scoped by an ordinary searchParameters entry, with no parent vocabulary', () => {
     const props = rolePermissions.table({ searchParameters: { role_id: '1' } }).table

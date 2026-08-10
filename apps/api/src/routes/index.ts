@@ -1,44 +1,57 @@
-import { openapiRoute } from '@southneuhof/sprindle/openapi'
-import { meRoute } from '../identity'
-import { healthRoute } from './health/health'
-import { authRoutes, domain as authDomain } from './auth/auth'
-import { domain as employeesDomain, employeeModel } from './employees/employees'
-import { domain as notificationsDomain, markSeen, notificationDetail, notificationModel, unreadCount } from './notifications/notifications'
-import { domain as overtimesDomain, overtimeModel } from './overtimes/overtimes'
-import { domain as verificationDomain } from './verification/verification'
+import { openapiRoute } from "@southneuhof/sprindle/openapi";
+import { meRoute } from "../identity";
+import { healthRoute } from "./health/health";
+import { authRoutes, domain as authDomain } from "./auth/auth";
 import {
-  domain as organizationDomain,
-  jobPositionModel,
-  sectionTypeModel,
-  tollSectionModel,
-} from './organization/organization'
-import { domain as productVariantsDomain } from './product-variants/product-variants'
-import { domain as productsDomain, productModel } from './products/products'
+  businessCategoryModel,
+  divisionModel,
+  domain as masterDataDomain,
+  numberConfigModel,
+  numberVariableModel,
+  projectModel,
+  projectVendorModel,
+  ptsWorkCategoryModel,
+  rootCauseModel,
+  uomModel,
+  workItemModel,
+} from "./master-data/master-data";
+import {
+  domain as notificationsDomain,
+  notificationModel,
+} from "./notifications/notifications";
 import {
   assignRolePermission,
   assignUserRole,
   domain as rolesDomain,
   listRolePermissions,
   listUserRoles,
+  listProjectUsers,
   revokeRolePermission,
   revokeUserRole,
+  assignProjectUser,
+  revokeProjectUser,
+  permissionModel,
+  roleGroupModel,
   roleModel,
-} from './roles/roles'
-import { domain as usersDomain, userModel } from './users/users'
-import { deleteFileRoute, fileObjectRoute, listFilesRoute, presignedUploadRoute } from './files/files'
+} from "./roles/roles";
+import { createUser, domain as usersDomain, userModel } from "./users/users";
+import {
+  deleteFileRoute,
+  fileObjectRoute,
+  listFilesRoute,
+  presignedUploadRoute,
+} from "./files/files";
+import { domain as qhssePtsDomain, qhssePtsModel } from "./qhsse-pts/qhsse-pts";
+import { listPtsLookups } from "./qhsse-pts/qhsse-pts.routes";
 
 export const domainParts = [
   authDomain,
-  organizationDomain,
-  employeesDomain,
-  productVariantsDomain,
-  productsDomain,
+  masterDataDomain,
   rolesDomain,
   usersDomain,
-  verificationDomain,
   notificationsDomain,
-  overtimesDomain,
-] as const
+  qhssePtsDomain,
+] as const;
 
 const installedRoutes = [
   healthRoute,
@@ -56,19 +69,31 @@ const installedRoutes = [
   listUserRoles,
   assignUserRole,
   revokeUserRole,
-  productModel,
-  roleModel,
-  userModel,
-  employeeModel,
-  unreadCount,
-  markSeen,
-  notificationDetail,
+  listProjectUsers,
+  assignProjectUser,
+  revokeProjectUser,
+  businessCategoryModel,
+  divisionModel,
+  projectModel,
+  uomModel,
+  workItemModel,
+  projectVendorModel,
+  ptsWorkCategoryModel,
+  rootCauseModel,
+  numberVariableModel,
+  numberConfigModel,
   notificationModel,
-  overtimeModel,
-  sectionTypeModel,
-  tollSectionModel,
-  jobPositionModel,
-] as const
+  roleGroupModel,
+  roleModel,
+  permissionModel,
+  userModel,
+  createUser,
+  listPtsLookups,
+  qhssePtsModel,
+] as const;
 
 // Public like /health; attach authenticated() here if the document should require a session.
-export const routes = [...installedRoutes, openapiRoute(installedRoutes, { title: 'Carta API', version: '0.0.0' })] as const
+export const routes = [
+  ...installedRoutes,
+  openapiRoute(installedRoutes, { title: "Carta API", version: "0.0.0" }),
+] as const;

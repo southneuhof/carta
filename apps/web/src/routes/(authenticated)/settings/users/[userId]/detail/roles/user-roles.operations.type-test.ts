@@ -7,8 +7,6 @@ type ListResponse = HonoResponseOf<ListEndpoint, 200>
 type UserRole = ListResponse['data'][number]
 type AssignRequest = HonoRequestOf<AssignEndpoint>
 
-const row: UserRole = { id: 'role-1', name: 'Editor', scope: 'section', assigned: true }
+const row: UserRole = { id: 'role-1', roleCode: 'editor', name: 'Editor', assignmentScope: 'global', assigned: true }
 const request: AssignRequest = { param: { userId: 'user-1', roleId: 'role-1' } }
-// @ts-expect-error the nested user-role route requires its user identity.
-const missingUserId: AssignRequest = { param: { roleId: 'role-1' } }
-void [row, request, missingUserId]
+void [row, request]

@@ -1,11 +1,17 @@
 import { createHonoResourceOperations, parseHonoResponse, type HonoResponseOf } from '@southneuhof/is-vue-framework/hono'
-import type { ResourceRecordOf } from '@southneuhof/is-vue-framework'
+import { defineResourceOperations } from '@southneuhof/is-vue-framework'
+import type { z } from 'zod/v4'
+import { notification } from '@southneuhof/api/routes/notifications/notifications.entity'
 import { rpc } from '@/framework/rpc'
 import { dataAdapter } from '@/framework/adapters/data/normalize'
 
-export const notificationOperations = createHonoResourceOperations(rpc.notifications, dataAdapter)
-export type NotificationRecord = ResourceRecordOf<typeof notificationOperations>
-export type NotificationStatus = NotificationRecord['statusCode']
+const notificationTransport = createHonoResourceOperations(rpc.notifications, dataAdapter)
+export const notificationOperations = defineResourceOperations<NotificationRecord, Record<string, never>, Record<string, never>, Record<string, never>>()({
+  list: notificationTransport.list,
+  detail: notificationTransport.detail,
+})
+export type NotificationRecord = z.output<typeof notification.schemas.select>
+export type NotificationStatus = 'unread' | 'read'
 export const NOTIFICATIONS_SEEN_EVENT = 'notifications-seen'
 
 type UnreadEndpoint = (typeof rpc.notifications)['unread-count']['$get']
@@ -21,5 +27,5 @@ export async function markNotificationsSeen(ids: string[]): Promise<MarkSeenResu
   return (await parseHonoResponse<MarkSeenEndpoint>(await rpc.notifications['mark-seen'].$post({ json: { ids } }))).data.updated
 }
 export function unreadIds(records: readonly NotificationRecord[]): string[] {
-  return records.filter((record) => record.statusCode === 'unseen').map((record) => record.id)
+  return records.filter((record) => !record.readAt).map((record) => record.id)
 }

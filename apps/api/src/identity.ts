@@ -1,137 +1,223 @@
-import { forbidden, unauthorized } from '@southneuhof/sprindle'
-import { authenticated, defineRoute } from '@southneuhof/sprindle/routes'
-import type { RouteAuthorize, RouteHandlerArgs } from '@southneuhof/sprindle/model'
-import { and, eq } from 'drizzle-orm'
-import { getDb } from './db'
-import { employees } from './routes/organization/organization.entity'
-import { permissions, rolePermissions, roles, roleScopes, userRoles, type RoleScope } from './routes/roles/roles.entity'
+import { forbidden, unauthorized } from "@southneuhof/sprindle";
+import { authenticated, defineRoute } from "@southneuhof/sprindle/routes";
+import type {
+  RouteAuthorize,
+  RouteHandlerArgs,
+} from "@southneuhof/sprindle/model";
+import { and, eq } from "drizzle-orm";
+import { getDb } from "./db";
+import {
+  permissions,
+  projectUsers,
+  rolePermissions,
+  roles,
+  userRoles,
+} from "./routes/roles/roles.entity";
+import { users } from "./routes/users/users.entity";
 
-/**
- * Everything a request needs to know about who is calling. Resolved once per
- * request; nothing else should read roles or sections from the database directly.
- */
 export type OrgIdentity = {
-  userId: string
-  employeeId: string | null
-  sectionId: string | null
-  jobPositionId: string | null
-  roleIds: string[]
-  /** Widest scope among the caller's active roles. */
-  scope: RoleScope
-  /** Active permission codes, from active roles through active mappings. */
-  permissions: ReadonlySet<string>
-}
+  userId: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    username: string | null;
+    statusCode: string;
+  };
+  roleCodes: string[];
+  permissions: ReadonlySet<string>;
+};
 
-/** No roles means the narrowest scope, never the widest. */
-const narrowestScope = roleScopes[roleScopes.length - 1] as RoleScope
-
-const CACHE_KEY = 'sprindle:orgIdentity'
-
-type SessionLike = { user?: { id?: unknown } }
+type SessionLike = { user?: { id?: unknown } };
+const CACHE_KEY = "adsHk:orgIdentity";
 
 function sessionUserId(session: unknown): string | null {
-  const id = (session as SessionLike | null)?.user?.id
-  return typeof id === 'string' && id ? id : null
+  const id = (session as SessionLike | null)?.user?.id;
+  return typeof id === "string" && id ? id : null;
 }
 
-async function resolve(userId: string): Promise<OrgIdentity> {
-  const db = getDb()
+async function resolve(userId: string): Promise<OrgIdentity | null> {
+  const db = getDb();
+  const profile = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      username: users.username,
+      statusCode: users.statusCode,
+    })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+  const user = profile[0];
+  if (!user || user.statusCode !== "active") return null;
 
-  // Active at every hop, matching the reference: an inactive mapping or an
-  // inactive role both remove the grant.
   const activeRoles = await db
-    .select({ id: roles.id, scope: roles.scope })
+    .select({ id: roles.id, code: roles.roleCode })
     .from(userRoles)
     .innerJoin(roles, eq(roles.id, userRoles.roleId))
-    .where(and(eq(userRoles.userId, userId), eq(userRoles.active, true), eq(roles.active, true)))
+    .where(
+      and(
+        eq(userRoles.userId, userId),
+        eq(userRoles.active, true),
+        eq(roles.active, true),
+        eq(roles.assignmentScope, "global"),
+      ),
+    );
 
-  const roleIds = activeRoles.map((row) => row.id)
-
-  const scope = activeRoles.reduce<RoleScope>((widest, row) => {
-    const candidate = row.scope
-    const candidateRank = roleScopes.indexOf(candidate)
-    if (candidateRank < 0) return widest
-    return candidateRank < roleScopes.indexOf(widest) ? candidate : widest
-  }, narrowestScope)
-
-  const grantedCodes = roleIds.length
+  const roleIds = activeRoles.map((row) => row.id);
+  const granted = roleIds.length
     ? await db
-        .select({ code: permissions.code })
+        .select({ code: permissions.permissionCode })
         .from(userRoles)
         .innerJoin(roles, eq(roles.id, userRoles.roleId))
         .innerJoin(rolePermissions, eq(rolePermissions.roleId, roles.id))
-        .innerJoin(permissions, eq(permissions.id, rolePermissions.permissionId))
+        .innerJoin(
+          permissions,
+          eq(permissions.id, rolePermissions.permissionId),
+        )
         .where(
           and(
             eq(userRoles.userId, userId),
             eq(userRoles.active, true),
             eq(roles.active, true),
+            eq(roles.assignmentScope, "global"),
             eq(rolePermissions.active, true),
             eq(permissions.active, true),
           ),
         )
-    : []
-
-  const employee = await db
-    .select({ id: employees.id, sectionId: employees.sectionId, jobPositionId: employees.jobPositionId })
-    .from(employees)
-    .where(eq(employees.userId, userId))
-    .limit(1)
-
-  // No employee row is a normal state: a login can exist before the person is
-  // placed in the org chart.
-  const placement = employee[0]
+    : [];
 
   return {
     userId,
-    employeeId: placement?.id ?? null,
-    sectionId: placement?.sectionId ?? null,
-    jobPositionId: placement?.jobPositionId ?? null,
-    roleIds,
-    scope,
-    permissions: new Set(grantedCodes.map((row) => row.code)),
-  }
+    user,
+    roleCodes: activeRoles.map((row) => row.code),
+    permissions: new Set(granted.map((row) => row.code)),
+  };
 }
 
-/**
- * Resolves the caller's organizational context, or null when unauthenticated.
- * Memoized on the Hono context so several hooks in one pipeline share one resolution.
- */
-export async function orgIdentity(args: RouteHandlerArgs): Promise<OrgIdentity | null> {
-  const cached = args.c.get(CACHE_KEY as never) as Promise<OrgIdentity | null> | undefined
-  if (cached) return cached
-
+export async function orgIdentity(
+  args: RouteHandlerArgs,
+): Promise<OrgIdentity | null> {
+  const cached = args.c.get(CACHE_KEY as never) as
+    Promise<OrgIdentity | null> | undefined;
+  if (cached) return cached;
   const pending = (async () => {
-    const userId = sessionUserId(await args.identity())
-    return userId ? resolve(userId) : null
-  })()
-
-  args.c.set(CACHE_KEY as never, pending as never)
-  return pending
+    const userId = sessionUserId(await args.identity());
+    return userId ? resolve(userId) : null;
+  })();
+  args.c.set(CACHE_KEY as never, pending as never);
+  return pending;
 }
 
-/** Authorize hook: 403 unless the caller holds `code`. */
 export function requirePermission(code: string): RouteAuthorize {
   return async (args) => {
-    const identity = await orgIdentity(args)
-    if (!identity?.permissions.has(code)) throw forbidden(`Missing permission "${code}".`)
-  }
+    const identity = await orgIdentity(args);
+    if (!identity) throw unauthorized();
+    if (!identity.permissions.has(code))
+      throw forbidden(`Missing permission "${code}".`);
+  };
 }
 
-/**
- * The caller's own organizational context.
- *
- * A client cannot assemble this itself: permissions union across every active role,
- * and the roles are a many-to-many assignment. Resolving it per-role in the browser
- * would be one request per role and would still miss the employee placement.
- */
+export async function hasProjectPermission(
+  userId: string,
+  projectId: string,
+  code: string,
+): Promise<boolean> {
+  const db = getDb();
+  const projectGrant = await db
+    .select({ id: projectUsers.userId })
+    .from(projectUsers)
+    .innerJoin(users, eq(users.id, projectUsers.userId))
+    .innerJoin(roles, eq(roles.id, projectUsers.roleId))
+    .innerJoin(rolePermissions, eq(rolePermissions.roleId, roles.id))
+    .innerJoin(permissions, eq(permissions.id, rolePermissions.permissionId))
+    .where(
+      and(
+        eq(projectUsers.userId, userId),
+        eq(projectUsers.projectId, projectId),
+        eq(projectUsers.active, true),
+        eq(users.statusCode, "active"),
+        eq(roles.active, true),
+        eq(roles.assignmentScope, "project"),
+        eq(rolePermissions.active, true),
+        eq(permissions.active, true),
+        eq(permissions.permissionCode, code),
+      ),
+    )
+    .limit(1);
+  if (projectGrant[0]) return true;
+
+  const globalGrant = await db
+    .select({ id: userRoles.userId })
+    .from(userRoles)
+    .innerJoin(users, eq(users.id, userRoles.userId))
+    .innerJoin(roles, eq(roles.id, userRoles.roleId))
+    .innerJoin(rolePermissions, eq(rolePermissions.roleId, roles.id))
+    .innerJoin(permissions, eq(permissions.id, rolePermissions.permissionId))
+    .where(
+      and(
+        eq(userRoles.userId, userId),
+        eq(userRoles.active, true),
+        eq(users.statusCode, "active"),
+        eq(roles.active, true),
+        eq(roles.assignmentScope, "global"),
+        eq(rolePermissions.active, true),
+        eq(permissions.active, true),
+        eq(permissions.permissionCode, code),
+      ),
+    )
+    .limit(1);
+  if (!globalGrant[0]) return false;
+
+  const allProjectGrant = await db
+    .select({ id: userRoles.userId })
+    .from(userRoles)
+    .innerJoin(users, eq(users.id, userRoles.userId))
+    .innerJoin(roles, eq(roles.id, userRoles.roleId))
+    .innerJoin(rolePermissions, eq(rolePermissions.roleId, roles.id))
+    .innerJoin(permissions, eq(permissions.id, rolePermissions.permissionId))
+    .where(
+      and(
+        eq(userRoles.userId, userId),
+        eq(userRoles.active, true),
+        eq(users.statusCode, "active"),
+        eq(roles.active, true),
+        eq(roles.assignmentScope, "global"),
+        eq(rolePermissions.active, true),
+        eq(permissions.active, true),
+        eq(permissions.permissionCode, "access-all-projects"),
+      ),
+    )
+    .limit(1);
+  return Boolean(allProjectGrant[0]);
+}
+
+export function requireProjectPermission(
+  projectParameter: string,
+  code: string,
+): RouteAuthorize {
+  return async (args) => {
+    const identity = await orgIdentity(args);
+    if (!identity) throw unauthorized();
+    const projectId = args.c.req.param(projectParameter);
+    if (
+      !projectId ||
+      !(await hasProjectPermission(identity.userId, projectId, code))
+    )
+      throw forbidden(`Missing project permission "${code}".`);
+  };
+}
+
 export const meRoute = defineRoute({
-  path: '/me',
-  method: 'get',
+  path: "/me",
+  method: "get",
   authorize: [authenticated()],
   action: async (args) => {
-    const identity = await orgIdentity(args)
-    if (!identity) throw unauthorized()
-    return args.c.json({ data: { ...identity, permissions: [...identity.permissions] } })
+    const identity = await orgIdentity(args);
+    if (!identity) throw unauthorized();
+    return args.c.json({
+      data: { ...identity, permissions: [...identity.permissions] },
+    });
   },
-})
+});

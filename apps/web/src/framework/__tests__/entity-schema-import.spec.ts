@@ -3,10 +3,6 @@ import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { fromZod, requiredSchemaKeys } from '@southneuhof/is-vue-framework'
-import { employee } from '@southneuhof/api/routes/employees/employees.entity'
-import { jobPosition, sectionType, tollSection } from '@southneuhof/api/routes/organization/organization.entity'
-import { productVariant } from '@southneuhof/api/routes/product-variants/product-variants.entity'
-import { product } from '@southneuhof/api/routes/products/products.entity'
 import { role } from '@southneuhof/api/routes/roles/roles.entity'
 import { user } from '@southneuhof/api/routes/users/users.entity'
 
@@ -31,7 +27,7 @@ import { user } from '@southneuhof/api/routes/users/users.entity'
  */
 const entityDirectory = join(dirname(fileURLToPath(import.meta.url)), '../../../../api/src/routes')
 
-const allEntities = { employee, jobPosition, product, productVariant, role, sectionType, tollSection, user }
+const allEntities = { role, user }
 
 function collectEntityModules(directory: string): string[] {
   return readdirSync(directory).flatMap((entry) => {
@@ -43,9 +39,9 @@ function collectEntityModules(directory: string): string[] {
 
 describe('entity schemas are importable in the browser', () => {
   it('exposes the authoritative role schemas as usable validators', () => {
-    const create = fromZod<{ name: string }>(role.schemas.create)
+    const create = fromZod(role.schemas.create)
 
-    expect(create.validate({ name: 'Admin' })).toEqual({ success: true, data: { name: 'Admin' } })
+    expect(create.validate({ roleCode: 'admin', name: 'Admin', roleGroupId: 'group-admin' })).toMatchObject({ success: true })
   })
 
   it('rejects an empty draft with an issue on the required field', () => {
@@ -53,11 +49,11 @@ describe('entity schemas are importable in the browser', () => {
 
     expect(result.success).toBe(false)
     if (result.success) return
-    expect(result.issues.map((issue) => issue.path.join('.'))).toContain('name')
+    expect(result.issues.map((issue) => issue.path.join('.'))).toContain('roleCode')
   })
 
   it('reports required keys for the hidden-but-required diagnostic', () => {
-    expect(requiredSchemaKeys(role.schemas.create)).toContain('name')
+    expect(requiredSchemaKeys(role.schemas.create)).toContain('roleCode')
   })
 
   it('treats every update field as optional, matching the server schema', () => {

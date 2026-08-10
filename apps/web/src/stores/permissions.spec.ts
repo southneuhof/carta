@@ -25,9 +25,9 @@ describe('permissions store', () => {
     expect(store.has('stale-permission')).toBe(false)
   })
 
-  it('allows every permission for administrator roles', () => {
+  it('does not grant permissions without an explicit code', () => {
     storageGet.mockImplementation((key: string) => (key === 'permissions' ? [] : { role_id: 1 }))
 
-    expect(permissions().has('view-unlisted-route')).toBe(true)
+    expect(permissions().has('view-unlisted-route')).toBe(false)
   })
 })

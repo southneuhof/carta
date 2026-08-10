@@ -2,48 +2,27 @@ import { describe, expect, it } from 'vitest'
 import { notificationRoute, notificationRoutes } from './moduleRoutes'
 import type { NotificationRecord } from '@/routes/(authenticated)/to-do/notifications.operations'
 
-function notification(overrides: Partial<NotificationRecord> = {}): NotificationRecord {
-  return {
+const notification = (overrides: Partial<NotificationRecord> = {}): NotificationRecord =>
+  ({
     id: 'n1',
-    recipientEmployeeId: null,
-    jobPositionId: null,
-    roleId: null,
-    sectionId: null,
-    title: 'Judul',
-    content: 'Isi',
-    statusCode: 'unseen',
-    notificationType: 'verification',
-    moduleName: 'overtimes',
-    moduleId: 'o1',
-    payload: null,
-    createdByUserId: null,
-    createdAt: '2026-07-20T00:00:00.000Z',
-    updatedAt: '2026-07-20T00:00:00.000Z',
-    jobPosition: null,
-    role: null,
-    section: null,
+    title: 'Title',
+    body: 'Content',
+    moduleCode: 'unknown',
+    referenceTable: null,
+    referenceId: 'id',
+    projectId: null,
+    readAt: null,
+    createdAt: '',
+    updatedAt: '',
     ...overrides,
-  }
-}
+  }) as NotificationRecord
 
 describe('notification deep links', () => {
-  it('resolves a registered module to its screen', () => {
-    expect(notificationRoute(notification())).toEqual({ name: 'hr-overtimes-detail', params: { overtimeId: 'o1' } })
+  it('returns no route for an unregistered module', () => {
+    expect(notificationRoute(notification())).toBeNull()
   })
 
-  it('returns null for a module this app has no screen for', () => {
-    // Normal, not an error: the server emits for modules the web app may not
-    // have caught up with. The row renders as a plain, non-navigating card.
-    expect(notificationRoute(notification({ moduleName: 'presences' }))).toBeNull()
-  })
-
-  it('returns null when a registered module carries no moduleId', () => {
-    // Otherwise this builds a route with `undefined` params, which resolves to a
-    // broken link rather than failing loudly.
-    expect(notificationRoute(notification({ moduleId: null }))).toBeNull()
-  })
-
-  it('keeps the registry as data, so adding a module is one entry', () => {
-    expect(Object.keys(notificationRoutes)).toEqual(['overtimes'])
+  it('keeps the registry limited to known module routes', () => {
+    expect(Object.keys(notificationRoutes)).toEqual(['qhsse-pts'])
   })
 })

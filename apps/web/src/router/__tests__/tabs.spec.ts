@@ -29,14 +29,19 @@ type MountOptions = {
 
 async function mountTabs({ path = '/roles/7', items = defaultItems, componentless = false, mixedOwner = false }: MountOptions = {}) {
   const tabChildren: RouteRecordRaw[] = componentless
-    ? [{ path: 'group', children: [
-      { path: 'permissions', name: 'roles-permissions', component: Page, meta: { permission: 'roles.update' } },
-      { path: 'members', name: 'users-roles', component: Page, meta: { permission: 'roles.members' } },
-    ] }]
+    ? [
+        {
+          path: 'group',
+          children: [
+            { path: 'permissions', name: 'roles-permissions', component: Page, meta: { permission: 'roles.update' } },
+            { path: 'members', name: 'users-roles', component: Page, meta: { permission: 'roles.members' } },
+          ],
+        },
+      ]
     : [
-      { path: 'permissions', name: 'roles-permissions', component: Page, meta: { permission: 'roles.update' } },
-      { path: 'members', name: 'users-roles', component: Page, meta: { permission: 'roles.members' } },
-    ]
+        { path: 'permissions', name: 'roles-permissions', component: Page, meta: { permission: 'roles.update' } },
+        { path: 'members', name: 'users-roles', component: Page, meta: { permission: 'roles.members' } },
+      ]
   const routes: RouteRecordRaw[] = [
     {
       path: '/roles/:roleId',
@@ -58,7 +63,16 @@ async function mountTabs({ path = '/roles/7', items = defaultItems, componentles
   app.use(router)
   app.mount(host)
   await nextTick()
-  return { host, router, replace, push, unmount: () => { app.unmount(); host.remove() } }
+  return {
+    host,
+    router,
+    replace,
+    push,
+    unmount: () => {
+      app.unmount()
+      host.remove()
+    },
+  }
 }
 
 beforeEach(() => allowed.mockReset())
@@ -111,10 +125,14 @@ describe('route tabs', () => {
 
   it('uses component-bearing owner through componentless records', async () => {
     allowed.mockReturnValue(true)
-    const view = await mountTabs({ path: '/roles/7', componentless: true, items: [
-      { action: action('roles-permissions', 'roles.update'), label: 'Permissions' },
-      { action: action('users-roles', 'roles.members'), label: 'Members' },
-    ] })
+    const view = await mountTabs({
+      path: '/roles/7',
+      componentless: true,
+      items: [
+        { action: action('roles-permissions', 'roles.update'), label: 'Permissions' },
+        { action: action('users-roles', 'roles.members'), label: 'Members' },
+      ],
+    })
     await vi.waitFor(() => expect(view.router.currentRoute.value.name).toBe('roles-permissions'))
     expect(view.replace).toHaveBeenCalledOnce()
     view.unmount()
@@ -122,10 +140,13 @@ describe('route tabs', () => {
 
   it('fails safe when valid targets do not share one owner', async () => {
     allowed.mockReturnValue(true)
-    const view = await mountTabs({ mixedOwner: true, items: [
-      { action: action('roles-permissions', 'roles.update'), label: 'Permissions' },
-      { action: action('overtime-edit', 'overtimes.update'), label: 'Other' },
-    ] })
+    const view = await mountTabs({
+      mixedOwner: true,
+      items: [
+        { action: action('roles-permissions', 'roles.update'), label: 'Permissions' },
+        { action: action('overtime-edit', 'roles.update'), label: 'Other' },
+      ],
+    })
     await nextTick()
     expect(view.router.currentRoute.value.name).toBe('roles-detail')
     expect(view.replace).not.toHaveBeenCalled()

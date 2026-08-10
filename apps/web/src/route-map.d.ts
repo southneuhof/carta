@@ -38,30 +38,289 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
-    'hr-overtimes': RouteRecordInfo<
-      'hr-overtimes',
-      '/hr/overtimes',
+    'master-data': RouteRecordInfo<
+      'master-data',
+      '/master-data',
       Record<never, never>,
       Record<never, never>,
       | never
     >,
-    'hr-overtimes-detail': RouteRecordInfo<
-      'hr-overtimes-detail',
-      '/hr/overtimes/:overtimeId/detail',
-      { overtimeId: ParamValue<true> },
-      { overtimeId: ParamValue<false> },
+    'master-data-business-categories': RouteRecordInfo<
+      'master-data-business-categories',
+      '/master-data/business-categories',
+      Record<never, never>,
+      Record<never, never>,
       | never
     >,
-    'hr-overtimes-edit': RouteRecordInfo<
-      'hr-overtimes-edit',
-      '/hr/overtimes/:overtimeId/edit',
-      { overtimeId: ParamValue<true> },
-      { overtimeId: ParamValue<false> },
+    'master-data-business-categories-detail': RouteRecordInfo<
+      'master-data-business-categories-detail',
+      '/master-data/business-categories/:businessCategoryId/detail',
+      { businessCategoryId: ParamValue<true> },
+      { businessCategoryId: ParamValue<false> },
       | never
     >,
-    'hr-overtimes-create': RouteRecordInfo<
-      'hr-overtimes-create',
-      '/hr/overtimes/create',
+    'master-data-business-categories-edit': RouteRecordInfo<
+      'master-data-business-categories-edit',
+      '/master-data/business-categories/:businessCategoryId/edit',
+      { businessCategoryId: ParamValue<true> },
+      { businessCategoryId: ParamValue<false> },
+      | never
+    >,
+    'master-data-business-categories-create': RouteRecordInfo<
+      'master-data-business-categories-create',
+      '/master-data/business-categories/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-divisions': RouteRecordInfo<
+      'master-data-divisions',
+      '/master-data/divisions',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-divisions-detail': RouteRecordInfo<
+      'master-data-divisions-detail',
+      '/master-data/divisions/:divisionId/detail',
+      { divisionId: ParamValue<true> },
+      { divisionId: ParamValue<false> },
+      | never
+    >,
+    'master-data-divisions-edit': RouteRecordInfo<
+      'master-data-divisions-edit',
+      '/master-data/divisions/:divisionId/edit',
+      { divisionId: ParamValue<true> },
+      { divisionId: ParamValue<false> },
+      | never
+    >,
+    'master-data-divisions-create': RouteRecordInfo<
+      'master-data-divisions-create',
+      '/master-data/divisions/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-number-configs': RouteRecordInfo<
+      'master-data-number-configs',
+      '/master-data/number-configs',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-number-configs-detail': RouteRecordInfo<
+      'master-data-number-configs-detail',
+      '/master-data/number-configs/:numberConfigId/detail',
+      { numberConfigId: ParamValue<true> },
+      { numberConfigId: ParamValue<false> },
+      | never
+    >,
+    'master-data-number-configs-edit': RouteRecordInfo<
+      'master-data-number-configs-edit',
+      '/master-data/number-configs/:numberConfigId/edit',
+      { numberConfigId: ParamValue<true> },
+      { numberConfigId: ParamValue<false> },
+      | never
+    >,
+    'master-data-number-configs-create': RouteRecordInfo<
+      'master-data-number-configs-create',
+      '/master-data/number-configs/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-number-variables': RouteRecordInfo<
+      'master-data-number-variables',
+      '/master-data/number-variables',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-number-variables-detail': RouteRecordInfo<
+      'master-data-number-variables-detail',
+      '/master-data/number-variables/:numberVariableId/detail',
+      { numberVariableId: ParamValue<true> },
+      { numberVariableId: ParamValue<false> },
+      | never
+    >,
+    'master-data-number-variables-edit': RouteRecordInfo<
+      'master-data-number-variables-edit',
+      '/master-data/number-variables/:numberVariableId/edit',
+      { numberVariableId: ParamValue<true> },
+      { numberVariableId: ParamValue<false> },
+      | never
+    >,
+    'master-data-number-variables-create': RouteRecordInfo<
+      'master-data-number-variables-create',
+      '/master-data/number-variables/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-project-vendors': RouteRecordInfo<
+      'master-data-project-vendors',
+      '/master-data/project-vendors',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-project-vendors-detail': RouteRecordInfo<
+      'master-data-project-vendors-detail',
+      '/master-data/project-vendors/:projectVendorId/detail',
+      { projectVendorId: ParamValue<true> },
+      { projectVendorId: ParamValue<false> },
+      | never
+    >,
+    'master-data-project-vendors-edit': RouteRecordInfo<
+      'master-data-project-vendors-edit',
+      '/master-data/project-vendors/:projectVendorId/edit',
+      { projectVendorId: ParamValue<true> },
+      { projectVendorId: ParamValue<false> },
+      | never
+    >,
+    'master-data-project-vendors-create': RouteRecordInfo<
+      'master-data-project-vendors-create',
+      '/master-data/project-vendors/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-projects': RouteRecordInfo<
+      'master-data-projects',
+      '/master-data/projects',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-projects-detail': RouteRecordInfo<
+      'master-data-projects-detail',
+      '/master-data/projects/:projectId/detail',
+      { projectId: ParamValue<true> },
+      { projectId: ParamValue<false> },
+      | never
+    >,
+    'master-data-projects-edit': RouteRecordInfo<
+      'master-data-projects-edit',
+      '/master-data/projects/:projectId/edit',
+      { projectId: ParamValue<true> },
+      { projectId: ParamValue<false> },
+      | never
+    >,
+    'master-data-projects-create': RouteRecordInfo<
+      'master-data-projects-create',
+      '/master-data/projects/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-pts-work-categories': RouteRecordInfo<
+      'master-data-pts-work-categories',
+      '/master-data/pts-work-categories',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-pts-work-categories-detail': RouteRecordInfo<
+      'master-data-pts-work-categories-detail',
+      '/master-data/pts-work-categories/:ptsWorkCategoryId/detail',
+      { ptsWorkCategoryId: ParamValue<true> },
+      { ptsWorkCategoryId: ParamValue<false> },
+      | never
+    >,
+    'master-data-pts-work-categories-edit': RouteRecordInfo<
+      'master-data-pts-work-categories-edit',
+      '/master-data/pts-work-categories/:ptsWorkCategoryId/edit',
+      { ptsWorkCategoryId: ParamValue<true> },
+      { ptsWorkCategoryId: ParamValue<false> },
+      | never
+    >,
+    'master-data-pts-work-categories-create': RouteRecordInfo<
+      'master-data-pts-work-categories-create',
+      '/master-data/pts-work-categories/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-root-causes': RouteRecordInfo<
+      'master-data-root-causes',
+      '/master-data/root-causes',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-root-causes-detail': RouteRecordInfo<
+      'master-data-root-causes-detail',
+      '/master-data/root-causes/:rootCauseId/detail',
+      { rootCauseId: ParamValue<true> },
+      { rootCauseId: ParamValue<false> },
+      | never
+    >,
+    'master-data-root-causes-edit': RouteRecordInfo<
+      'master-data-root-causes-edit',
+      '/master-data/root-causes/:rootCauseId/edit',
+      { rootCauseId: ParamValue<true> },
+      { rootCauseId: ParamValue<false> },
+      | never
+    >,
+    'master-data-root-causes-create': RouteRecordInfo<
+      'master-data-root-causes-create',
+      '/master-data/root-causes/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-uoms': RouteRecordInfo<
+      'master-data-uoms',
+      '/master-data/uoms',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-uoms-detail': RouteRecordInfo<
+      'master-data-uoms-detail',
+      '/master-data/uoms/:uomId/detail',
+      { uomId: ParamValue<true> },
+      { uomId: ParamValue<false> },
+      | never
+    >,
+    'master-data-uoms-edit': RouteRecordInfo<
+      'master-data-uoms-edit',
+      '/master-data/uoms/:uomId/edit',
+      { uomId: ParamValue<true> },
+      { uomId: ParamValue<false> },
+      | never
+    >,
+    'master-data-uoms-create': RouteRecordInfo<
+      'master-data-uoms-create',
+      '/master-data/uoms/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-work-items': RouteRecordInfo<
+      'master-data-work-items',
+      '/master-data/work-items',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-work-items-detail': RouteRecordInfo<
+      'master-data-work-items-detail',
+      '/master-data/work-items/:workItemId/detail',
+      { workItemId: ParamValue<true> },
+      { workItemId: ParamValue<false> },
+      | never
+    >,
+    'master-data-work-items-edit': RouteRecordInfo<
+      'master-data-work-items-edit',
+      '/master-data/work-items/:workItemId/edit',
+      { workItemId: ParamValue<true> },
+      { workItemId: ParamValue<false> },
+      | never
+    >,
+    'master-data-work-items-create': RouteRecordInfo<
+      'master-data-work-items-create',
+      '/master-data/work-items/create',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -69,6 +328,90 @@ declare module 'vue-router/auto-routes' {
     'notifications': RouteRecordInfo<
       'notifications',
       '/notifications',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'quality-pts': RouteRecordInfo<
+      'quality-pts',
+      '/quality/pts',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'quality-pts-detail': RouteRecordInfo<
+      'quality-pts-detail',
+      '/quality/pts/:ptsId/detail',
+      { ptsId: ParamValue<true> },
+      { ptsId: ParamValue<false> },
+      | never
+    >,
+    'quality-pts-edit': RouteRecordInfo<
+      'quality-pts-edit',
+      '/quality/pts/:ptsId/edit',
+      { ptsId: ParamValue<true> },
+      { ptsId: ParamValue<false> },
+      | never
+    >,
+    'quality-pts-create': RouteRecordInfo<
+      'quality-pts-create',
+      '/quality/pts/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'settings-permissions': RouteRecordInfo<
+      'settings-permissions',
+      '/settings/permissions',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'settings-permissions-detail': RouteRecordInfo<
+      'settings-permissions-detail',
+      '/settings/permissions/:permissionId/detail',
+      { permissionId: ParamValue<true> },
+      { permissionId: ParamValue<false> },
+      | never
+    >,
+    'settings-permissions-edit': RouteRecordInfo<
+      'settings-permissions-edit',
+      '/settings/permissions/:permissionId/edit',
+      { permissionId: ParamValue<true> },
+      { permissionId: ParamValue<false> },
+      | never
+    >,
+    'settings-permissions-create': RouteRecordInfo<
+      'settings-permissions-create',
+      '/settings/permissions/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'settings-role-groups': RouteRecordInfo<
+      'settings-role-groups',
+      '/settings/role-groups',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'settings-role-groups-detail': RouteRecordInfo<
+      'settings-role-groups-detail',
+      '/settings/role-groups/:roleGroupId/detail',
+      { roleGroupId: ParamValue<true> },
+      { roleGroupId: ParamValue<false> },
+      | never
+    >,
+    'settings-role-groups-edit': RouteRecordInfo<
+      'settings-role-groups-edit',
+      '/settings/role-groups/:roleGroupId/edit',
+      { roleGroupId: ParamValue<true> },
+      { roleGroupId: ParamValue<false> },
+      | never
+    >,
+    'settings-role-groups-create': RouteRecordInfo<
+      'settings-role-groups-create',
+      '/settings/role-groups/create',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -136,6 +479,13 @@ declare module 'vue-router/auto-routes' {
       { userId: ParamValue<false> },
       | never
     >,
+    'settings-users-create': RouteRecordInfo<
+      'settings-users-create',
+      '/settings/users/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     'to-do': RouteRecordInfo<
       'to-do',
       '/to-do',
@@ -187,17 +537,67 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/authenticated.layout.vue': {
       routes:
         | 'dashboard'
-        | 'hr-overtimes'
-        | 'hr-overtimes-create'
-        | 'hr-overtimes-detail'
-        | 'hr-overtimes-edit'
+        | 'master-data'
+        | 'master-data-business-categories'
+        | 'master-data-business-categories-create'
+        | 'master-data-business-categories-detail'
+        | 'master-data-business-categories-edit'
+        | 'master-data-divisions'
+        | 'master-data-divisions-create'
+        | 'master-data-divisions-detail'
+        | 'master-data-divisions-edit'
+        | 'master-data-number-configs'
+        | 'master-data-number-configs-create'
+        | 'master-data-number-configs-detail'
+        | 'master-data-number-configs-edit'
+        | 'master-data-number-variables'
+        | 'master-data-number-variables-create'
+        | 'master-data-number-variables-detail'
+        | 'master-data-number-variables-edit'
+        | 'master-data-project-vendors'
+        | 'master-data-project-vendors-create'
+        | 'master-data-project-vendors-detail'
+        | 'master-data-project-vendors-edit'
+        | 'master-data-projects'
+        | 'master-data-projects-create'
+        | 'master-data-projects-detail'
+        | 'master-data-projects-edit'
+        | 'master-data-pts-work-categories'
+        | 'master-data-pts-work-categories-create'
+        | 'master-data-pts-work-categories-detail'
+        | 'master-data-pts-work-categories-edit'
+        | 'master-data-root-causes'
+        | 'master-data-root-causes-create'
+        | 'master-data-root-causes-detail'
+        | 'master-data-root-causes-edit'
+        | 'master-data-uoms'
+        | 'master-data-uoms-create'
+        | 'master-data-uoms-detail'
+        | 'master-data-uoms-edit'
+        | 'master-data-work-items'
+        | 'master-data-work-items-create'
+        | 'master-data-work-items-detail'
+        | 'master-data-work-items-edit'
         | 'notifications'
+        | 'quality-pts'
+        | 'quality-pts-create'
+        | 'quality-pts-detail'
+        | 'quality-pts-edit'
+        | 'settings-permissions'
+        | 'settings-permissions-create'
+        | 'settings-permissions-detail'
+        | 'settings-permissions-edit'
+        | 'settings-role-groups'
+        | 'settings-role-groups-create'
+        | 'settings-role-groups-detail'
+        | 'settings-role-groups-edit'
         | 'settings-roles'
         | 'settings-roles-create'
         | 'settings-roles-detail'
         | 'settings-roles-detail-permissions'
         | 'settings-roles-edit'
         | 'settings-users'
+        | 'settings-users-create'
         | 'settings-users-detail'
         | 'settings-users-detail-roles'
         | 'settings-users-edit'
@@ -215,33 +615,329 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/routes/(authenticated)/hr/overtimes/index.route.vue': {
+    'src/routes/(authenticated)/master-data/index.route.vue': {
       routes:
-        | 'hr-overtimes'
+        | 'master-data'
       views:
         | never
       pathParamNames:
         | never
     }
-    'src/routes/(authenticated)/hr/overtimes/[overtimeId]/detail.route.vue': {
+    'src/routes/(authenticated)/master-data/business-categories/index.route.vue': {
       routes:
-        | 'hr-overtimes-detail'
+        | 'master-data-business-categories'
       views:
         | never
       pathParamNames:
         | never
     }
-    'src/routes/(authenticated)/hr/overtimes/[overtimeId]/edit.route.vue': {
+    'src/routes/(authenticated)/master-data/business-categories/[businessCategoryId]/detail.route.vue': {
       routes:
-        | 'hr-overtimes-edit'
+        | 'master-data-business-categories-detail'
       views:
         | never
       pathParamNames:
         | never
     }
-    'src/routes/(authenticated)/hr/overtimes/create.route.vue': {
+    'src/routes/(authenticated)/master-data/business-categories/[businessCategoryId]/edit.route.vue': {
       routes:
-        | 'hr-overtimes-create'
+        | 'master-data-business-categories-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/business-categories/create.route.vue': {
+      routes:
+        | 'master-data-business-categories-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/divisions/index.route.vue': {
+      routes:
+        | 'master-data-divisions'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/divisions/[divisionId]/detail.route.vue': {
+      routes:
+        | 'master-data-divisions-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/divisions/[divisionId]/edit.route.vue': {
+      routes:
+        | 'master-data-divisions-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/divisions/create.route.vue': {
+      routes:
+        | 'master-data-divisions-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/number-configs/index.route.vue': {
+      routes:
+        | 'master-data-number-configs'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/number-configs/[numberConfigId]/detail.route.vue': {
+      routes:
+        | 'master-data-number-configs-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/number-configs/[numberConfigId]/edit.route.vue': {
+      routes:
+        | 'master-data-number-configs-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/number-configs/create.route.vue': {
+      routes:
+        | 'master-data-number-configs-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/number-variables/index.route.vue': {
+      routes:
+        | 'master-data-number-variables'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/number-variables/[numberVariableId]/detail.route.vue': {
+      routes:
+        | 'master-data-number-variables-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/number-variables/[numberVariableId]/edit.route.vue': {
+      routes:
+        | 'master-data-number-variables-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/number-variables/create.route.vue': {
+      routes:
+        | 'master-data-number-variables-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/project-vendors/index.route.vue': {
+      routes:
+        | 'master-data-project-vendors'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/project-vendors/[projectVendorId]/detail.route.vue': {
+      routes:
+        | 'master-data-project-vendors-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/project-vendors/[projectVendorId]/edit.route.vue': {
+      routes:
+        | 'master-data-project-vendors-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/project-vendors/create.route.vue': {
+      routes:
+        | 'master-data-project-vendors-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/projects/index.route.vue': {
+      routes:
+        | 'master-data-projects'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/projects/[projectId]/detail.route.vue': {
+      routes:
+        | 'master-data-projects-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/projects/[projectId]/edit.route.vue': {
+      routes:
+        | 'master-data-projects-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/projects/create.route.vue': {
+      routes:
+        | 'master-data-projects-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/pts-work-categories/index.route.vue': {
+      routes:
+        | 'master-data-pts-work-categories'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/pts-work-categories/[ptsWorkCategoryId]/detail.route.vue': {
+      routes:
+        | 'master-data-pts-work-categories-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/pts-work-categories/[ptsWorkCategoryId]/edit.route.vue': {
+      routes:
+        | 'master-data-pts-work-categories-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/pts-work-categories/create.route.vue': {
+      routes:
+        | 'master-data-pts-work-categories-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/root-causes/index.route.vue': {
+      routes:
+        | 'master-data-root-causes'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/root-causes/[rootCauseId]/detail.route.vue': {
+      routes:
+        | 'master-data-root-causes-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/root-causes/[rootCauseId]/edit.route.vue': {
+      routes:
+        | 'master-data-root-causes-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/root-causes/create.route.vue': {
+      routes:
+        | 'master-data-root-causes-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/uoms/index.route.vue': {
+      routes:
+        | 'master-data-uoms'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/uoms/[uomId]/detail.route.vue': {
+      routes:
+        | 'master-data-uoms-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/uoms/[uomId]/edit.route.vue': {
+      routes:
+        | 'master-data-uoms-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/uoms/create.route.vue': {
+      routes:
+        | 'master-data-uoms-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/work-items/index.route.vue': {
+      routes:
+        | 'master-data-work-items'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/work-items/[workItemId]/detail.route.vue': {
+      routes:
+        | 'master-data-work-items-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/work-items/[workItemId]/edit.route.vue': {
+      routes:
+        | 'master-data-work-items-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/work-items/create.route.vue': {
+      routes:
+        | 'master-data-work-items-create'
       views:
         | never
       pathParamNames:
@@ -250,6 +946,102 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/notifications/index.route.vue': {
       routes:
         | 'notifications'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/quality/pts/index.route.vue': {
+      routes:
+        | 'quality-pts'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/quality/pts/[ptsId]/detail.route.vue': {
+      routes:
+        | 'quality-pts-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/quality/pts/[ptsId]/edit.route.vue': {
+      routes:
+        | 'quality-pts-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/quality/pts/create.route.vue': {
+      routes:
+        | 'quality-pts-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/settings/permissions/index.route.vue': {
+      routes:
+        | 'settings-permissions'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/settings/permissions/[permissionId]/detail.route.vue': {
+      routes:
+        | 'settings-permissions-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/settings/permissions/[permissionId]/edit.route.vue': {
+      routes:
+        | 'settings-permissions-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/settings/permissions/create.route.vue': {
+      routes:
+        | 'settings-permissions-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/settings/role-groups/index.route.vue': {
+      routes:
+        | 'settings-role-groups'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/settings/role-groups/[roleGroupId]/detail.route.vue': {
+      routes:
+        | 'settings-role-groups-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/settings/role-groups/[roleGroupId]/edit.route.vue': {
+      routes:
+        | 'settings-role-groups-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/settings/role-groups/create.route.vue': {
+      routes:
+        | 'settings-role-groups-create'
       views:
         | never
       pathParamNames:
@@ -324,6 +1116,14 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/settings/users/[userId]/edit.route.vue': {
       routes:
         | 'settings-users-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/settings/users/create.route.vue': {
+      routes:
+        | 'settings-users-create'
       views:
         | never
       pathParamNames:

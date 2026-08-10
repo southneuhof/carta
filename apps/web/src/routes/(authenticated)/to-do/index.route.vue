@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * Verification tasks waiting on the caller.
+ * Tasks waiting on the caller.
  *
  * This is the same `notifications` resource the inbox drawer renders, in a second
  * query namespace. Two independent namespaces over one resource is a stated
@@ -18,7 +18,7 @@ import { notificationRoute } from '@/framework/notifications/moduleRoutes'
 const router = useRouter()
 
 const table = computed(() =>
-  notifications.table({ namespace: 'to-do', searchParameters: { notificationType: 'verification' } }).table,
+  notifications.table({ namespace: 'to-do' }).table,
 )
 
 function open(record: NotificationRecord) {

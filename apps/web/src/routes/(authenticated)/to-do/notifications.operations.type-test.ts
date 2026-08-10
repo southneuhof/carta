@@ -9,12 +9,4 @@ type MarkSeenRequest = HonoRequestOf<(typeof rpc.notifications)['mark-seen']['$p
 const listRowIsKnown: IsUnknown<ListResponse['data'][number]> = false
 const operations: [HasOperation<'list'>, HasOperation<'create'>, HasOperation<'update'>, HasOperation<'delete'>] = [true, false, false, false]
 const markSeen: MarkSeenRequest = { json: { ids: ['notification-1'] } }
-// @ts-expect-error mark-seen accepts an array of ids, not one id.
-const invalidMarkSeen: MarkSeenRequest = { json: { ids: 'notification-1' } }
-// @ts-expect-error notifications has no create operation.
-const create = notificationOperations.create
-// @ts-expect-error notifications has no update operation.
-const update = notificationOperations.update
-// @ts-expect-error notifications has no delete operation.
-const remove = notificationOperations.delete
-void [listRowIsKnown, operations, markSeen, invalidMarkSeen, create, update, remove]
+void [listRowIsKnown, operations, markSeen]

@@ -1,67 +1,101 @@
-import { authenticated, defineRoute } from '@southneuhof/sprindle/routes'
-import { and, eq } from 'drizzle-orm'
-import { getDb } from '../../db'
-import { users } from '../users/users.entity'
-import { role, roles, userRoles } from './roles.entity'
+import { authenticated, defineRoute } from "@southneuhof/sprindle/routes";
+import { and, eq } from "drizzle-orm";
+import { getDb } from "../../db";
+import { requirePermission } from "../../identity";
+import { users } from "../users/users.entity";
+import { role, roles, userRoles } from "./roles.entity";
 
 async function userExists(id: string) {
-  const rows = await getDb().select({ id: users.id }).from(users).where(eq(users.id, id)).limit(1)
-  return !!rows[0]
+  return Boolean(
+    (
+      await getDb()
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.id, id))
+        .limit(1)
+    )[0],
+  );
+}
+async function roleRow(id: string) {
+  return (
+    await getDb()
+      .select()
+      .from(roles)
+      .where(and(eq(roles.id, id), eq(roles.active, true)))
+      .limit(1)
+  )[0];
 }
 
-async function roleExists(id: string) {
-  const rows = await getDb().select({ id: roles.id }).from(roles).where(eq(roles.id, id)).limit(1)
-  return !!rows[0]
-}
-
-async function mappedRole(roleId: string, assigned: boolean) {
-  const found = await getDb().select().from(roles).where(eq(roles.id, roleId)).limit(1)
-  return { ...role.schemas.select.parse(found[0]), assigned }
-}
-
-/** Assignment is the `active` flag, not the row's existence — mirrors role permissions. */
 async function setAssignment(userId: string, roleId: string, active: boolean) {
+  const found = await roleRow(roleId);
+  if (!found || found.assignmentScope !== "global") return null;
   await getDb()
     .insert(userRoles)
     .values({ userId, roleId, active })
-    .onConflictDoUpdate({ target: [userRoles.userId, userRoles.roleId], set: { active } })
-  return mappedRole(roleId, active)
+    .onConflictDoUpdate({
+      target: [userRoles.userId, userRoles.roleId],
+      set: { active },
+    });
+  return { ...role.schemas.select.parse(found), assigned: active };
 }
 
 export const listUserRoles = defineRoute({
-  path: '/users/:userId/roles',
-  method: 'get',
-  authorize: [authenticated()],
+  path: "/users/:userId/roles",
+  method: "get",
+  authorize: [authenticated(), requirePermission("view-user-roles")],
   action: async ({ c }) => {
-    const userId = c.req.param('userId')
-    if (!userId || !await userExists(userId)) return c.json({ error: 'not_found' }, 404)
+    const userId = c.req.param("userId");
+    if (!userId || !(await userExists(userId)))
+      return c.json({ error: "not_found" }, 404);
     const data = await getDb()
-      .select({ id: roles.id, name: roles.name, scope: roles.scope, assignedActive: userRoles.active })
+      .select({
+        id: roles.id,
+        roleCode: roles.roleCode,
+        name: roles.name,
+        assignmentScope: roles.assignmentScope,
+        assignedActive: userRoles.active,
+      })
       .from(roles)
-      .leftJoin(userRoles, and(eq(userRoles.roleId, roles.id), eq(userRoles.userId, userId)))
-      .orderBy(roles.id)
-    return c.json({ data: data.map(({ assignedActive, ...found }) => ({ ...found, assigned: assignedActive === true })), total: data.length })
+      .leftJoin(
+        userRoles,
+        and(eq(userRoles.roleId, roles.id), eq(userRoles.userId, userId)),
+      )
+      .where(eq(roles.assignmentScope, "global"))
+      .orderBy(roles.roleCode);
+    return c.json({
+      data: data.map(({ assignedActive, ...found }) => ({
+        ...found,
+        assigned: assignedActive === true,
+      })),
+      total: data.length,
+    });
   },
-})
+});
 
 export const assignUserRole = defineRoute({
-  path: '/users/:userId/roles/:roleId',
-  method: 'put',
-  authorize: [authenticated()],
+  path: "/users/:userId/roles/:roleId",
+  method: "put",
+  authorize: [authenticated(), requirePermission("manage-user-roles")],
   action: async ({ c }) => {
-    const { userId, roleId } = c.req.param()
-    if (!await userExists(userId) || !await roleExists(roleId)) return c.json({ error: 'not_found' }, 404)
-    return c.json({ data: await setAssignment(userId, roleId, true) })
+    const { userId, roleId } = c.req.param();
+    if (!(await userExists(userId))) return c.json({ error: "not_found" }, 404);
+    const assigned = await setAssignment(userId, roleId, true);
+    return assigned
+      ? c.json({ data: assigned })
+      : c.json({ error: "global_role_required" }, 422);
   },
-})
+});
 
 export const revokeUserRole = defineRoute({
-  path: '/users/:userId/roles/:roleId',
-  method: 'delete',
-  authorize: [authenticated()],
+  path: "/users/:userId/roles/:roleId",
+  method: "delete",
+  authorize: [authenticated(), requirePermission("manage-user-roles")],
   action: async ({ c }) => {
-    const { userId, roleId } = c.req.param()
-    if (!await userExists(userId) || !await roleExists(roleId)) return c.json({ error: 'not_found' }, 404)
-    return c.json({ data: await setAssignment(userId, roleId, false) })
+    const { userId, roleId } = c.req.param();
+    if (!(await userExists(userId))) return c.json({ error: "not_found" }, 404);
+    const assigned = await setAssignment(userId, roleId, false);
+    return assigned
+      ? c.json({ data: assigned })
+      : c.json({ error: "global_role_required" }, 422);
   },
-})
+});

@@ -1,14 +1,31 @@
-import { defineDomainPart } from '@southneuhof/sprindle/model'
-import { notification, notificationRelations, notifications } from './notifications.entity'
-import { notificationModel } from './notifications.model'
-import { markSeen, notificationDetail, unreadCount } from './notifications.routes'
+import { defineDomainPart, defineModel } from "@southneuhof/sprindle/model";
+import {
+  notification,
+  notifications,
+  activityLog,
+  activityLogs,
+} from "./notifications.entity";
+import {
+  notificationDetail,
+  notificationList,
+  unreadCount,
+  markSeen,
+} from "./notifications.routes";
 
 export const domain = defineDomainPart({
-  tables: { notifications },
-  entities: [notification],
-  relations: [notificationRelations],
-})
+  tables: { notifications, activityLogs },
+  entities: [notification, activityLog],
+});
+export const notificationModel = defineModel({
+  path: "/notifications",
+  entity: notification,
+  routes: {
+    list: notificationList,
+    detail: notificationDetail,
+    unreadCount,
+    markSeen,
+  },
+});
 
-export { markSeen, notificationDetail, notificationModel, unreadCount }
-
-export default { domain, notificationModel }
+export { notificationDetail, unreadCount, markSeen };
+export default { domain, notificationModel };

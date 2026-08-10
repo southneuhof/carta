@@ -1,11 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import {
-  createFrameworkQueryClient,
-  registerResourceRuntime,
-  resetResourceRuntimeForTests,
-  resolveFrameworkAdapters,
-  resolveFrameworkFieldDefaults,
-} from '@southneuhof/is-vue-framework'
+import { createFrameworkQueryClient, registerResourceRuntime, resetResourceRuntimeForTests, resolveFrameworkAdapters, resolveFrameworkFieldDefaults } from '@southneuhof/is-vue-framework'
 import { appFieldDefaults } from '@/configs/defaults'
 
 const ok = (payload: unknown) => ({ ok: true, json: async () => payload })
@@ -69,7 +63,22 @@ afterEach(() => resetResourceRuntimeForTests())
 
 describe('users resource', () => {
   it('provides only row actions resource can derive', () => {
-    const record = { id: 'u1', name: 'Admin', email: 'a@b.c', emailVerified: false, image: null, createdAt: '', updatedAt: '' }
+    const record = {
+      id: 'u1',
+      name: 'Admin',
+      email: 'a@b.c',
+      username: 'admin',
+      emailVerified: false,
+      image: null,
+      imgPhotoUser: null,
+      statusCode: 'active',
+      employeeId: null,
+      failedAttemptCount: 0,
+      lastLoginAt: null,
+      passwordChangedAt: null,
+      createdAt: '',
+      updatedAt: '',
+    }
     expect(users.table().detailRoute?.(record)).toEqual({ name: 'settings-users-detail', params: { userId: 'u1' } })
     expect(users.table().updateRoute?.(record)).toEqual({ name: 'settings-users-edit', params: { userId: 'u1' } })
   })
@@ -77,19 +86,36 @@ describe('users resource', () => {
   it('binds native props straight to the cores', () => {
     expect(users.table().table.namespace).toBe('users')
     expect(users.detail({ id: 'u1' }).detail.id).toBe('u1')
-    expect(Object.keys(users.form({ id: 'u1' }).fields as Record<string, unknown>)).toEqual(['name'])
+    expect(Object.keys(users.form({ id: 'u1' }).fields as Record<string, unknown>)).toEqual(['name', 'username', 'statusCode'])
   })
 
   it('links a row to its detail screen through the identity extractor', () => {
-    expect(users.detailRoute!({ id: 'u1', name: 'Admin', email: 'a@b.c', emailVerified: false, image: null, createdAt: '', updatedAt: '' })).toEqual({
+    expect(
+      users.detailRoute!({
+        id: 'u1',
+        name: 'Admin',
+        email: 'a@b.c',
+        username: 'admin',
+        emailVerified: false,
+        image: null,
+        imgPhotoUser: null,
+        statusCode: 'active',
+        employeeId: null,
+        failedAttemptCount: 0,
+        lastLoginAt: null,
+        passwordChangedAt: null,
+        createdAt: '',
+        updatedAt: '',
+      })
+    ).toEqual({
       name: 'settings-users-detail',
       params: { userId: 'u1' },
     })
   })
 
   it('declares standard targets and permissions in its capabilities', () => {
-    expect(users.capabilities.list).toMatchObject({ permission: 'users.list', to: { name: 'settings-users' } })
-    expect(users.capabilities.update).toMatchObject({ permission: 'users.update', to: { name: 'settings-users-edit' } })
+    expect(users.capabilities.list).toMatchObject({ permission: 'view-users', to: { name: 'settings-users' } })
+    expect(users.capabilities.update).toMatchObject({ permission: 'update-users', to: { name: 'settings-users-edit' } })
   })
 
   it('carries no single-role field, because roles are a many-to-many assignment', () => {
@@ -100,7 +126,7 @@ describe('users resource', () => {
 
 describe('user role mapping', () => {
   it('owns its child collection target and borrowed parent permission', () => {
-    expect(userRoles.capabilities.list).toMatchObject({ permission: 'users.update', to: { name: 'settings-users-detail-roles' } })
+    expect(userRoles.capabilities.list).toMatchObject({ permission: 'manage-user-roles', to: { name: 'settings-users-detail-roles' } })
   })
   it('marks every role the user actively holds, not one single assignment', async () => {
     const result = await loadUserRoles('u1')

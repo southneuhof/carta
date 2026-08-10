@@ -30,13 +30,6 @@ describe('route-owned resource boundaries', () => {
       'settings/users/users.operations.ts',
       'settings/users/[userId]/detail/roles/user-roles.resource.ts',
       'settings/users/[userId]/detail/roles/user-roles.operations.ts',
-      'hr/overtimes/overtimes.resource.ts',
-      'hr/overtimes/overtimes.operations.ts',
-      'hr/overtimes/overtime-lookups.resource.ts',
-      'hr/overtimes/overtime-lookups.operations.ts',
-      'hr/overtimes/[overtimeId]/verification-steps.resource.ts',
-      'hr/overtimes/[overtimeId]/verification-steps.operations.ts',
-      'hr/overtimes/[overtimeId]/overtime-workflow.operations.ts',
       'to-do/notifications.resource.ts',
       'to-do/notifications.operations.ts',
     ]
@@ -83,15 +76,26 @@ describe('route-owned resource boundaries', () => {
         .join('|')
     )
 
-    expect(honoCalls.sort()).toEqual([
-      'rpc.overtimes, dataAdapter',
-      "rpc['toll-sections'], dataAdapter",
-      'rpc.overtimes.applicants, dataAdapter',
-      "rpc['job-positions'], dataAdapter",
-      'rpc.roles, dataAdapter',
-      'rpc.users, dataAdapter',
-      'rpc.notifications, dataAdapter',
-    ].sort())
+    expect(honoCalls.sort()).toEqual(
+      [
+        "rpc['business-categories'], dataAdapter",
+        "rpc['number-configs'], dataAdapter",
+        "rpc['number-variables'], dataAdapter",
+        "rpc['project-vendors'], dataAdapter",
+        "rpc['pts-work-categories'], dataAdapter",
+        "rpc['role-groups'], dataAdapter",
+        "rpc['root-causes'], dataAdapter",
+        "rpc['work-items'], dataAdapter",
+        'rpc.divisions, dataAdapter',
+        'rpc.permissions, dataAdapter',
+        'rpc.projects, dataAdapter',
+        "rpc['qhsse-pts'], dataAdapter",
+        'rpc.roles, dataAdapter',
+        'rpc.uoms, dataAdapter',
+        'rpc.users, dataAdapter',
+        'rpc.notifications, dataAdapter',
+      ].sort()
+    )
     expect(source.match(forbidden)).toBeNull()
   })
 

@@ -3,15 +3,18 @@ import { activeNavigationModule, navigation, visibleNavigation } from '../naviga
 
 describe('navigation entrypoints', () => {
   it('keeps ordered resource and direct entrypoints only', () => {
-    expect(navigation.map((module) => module.name)).toEqual(['dashboard', 'to-do', 'hr', 'settings'])
-    expect(visibleNavigation(() => true).flatMap((module) => module.routes).some((entry) => 'to' in entry)).toBe(true)
+    expect(navigation.map((module) => module.name)).toEqual(['dashboard', 'to-do', 'settings', 'quality', 'master-data'])
+    expect(
+      visibleNavigation(() => true)
+        .flatMap((module) => module.routes)
+        .some((entry) => 'to' in entry)
+    ).toBe(true)
   })
 
   it('matches entrypoint subtrees at segment boundaries and prefers longest target', () => {
     const paths: Record<string, string> = {
       dashboard: '/dashboard',
       'to-do': '/to-do',
-      'hr-overtimes': '/hr/overtimes',
       'settings-users': '/settings/users',
       'settings-roles': '/settings/roles',
     }
@@ -19,6 +22,5 @@ describe('navigation entrypoints', () => {
 
     expect(activeNavigationModule('/settings/roles/7/detail', resolve, () => true)).toBe('settings')
     expect(activeNavigationModule('/settings/role', resolve, () => true)).toBeUndefined()
-    expect(activeNavigationModule('/hr/overtimes/7/detail', resolve, () => true)).toBe('hr')
   })
 })

@@ -48,15 +48,6 @@ const legacyFeatures: { name: string; base: string; views: ViewPaths }[] = [
       update: (id) => `/settings/users/${id}/edit`,
     },
   },
-  {
-    name: 'overtimes',
-    base: '/hr/overtimes',
-    views: {
-      list: () => '/hr/overtimes',
-      detail: (id) => `/hr/overtimes/${id}`,
-      update: (id) => `/hr/overtimes/${id}/edit`,
-    },
-  },
 ]
 
 function single(value: unknown): string | undefined {

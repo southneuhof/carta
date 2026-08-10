@@ -13,7 +13,6 @@ import { toast } from 'vue-sonner'
 import { ListView } from '@southneuhof/is-vue-framework'
 import { rolePermissions } from './role-permissions.resource'
 import { setRolePermission, type RolePermission } from './role-permissions.operations'
-import CopyPermissionsDialog from './CopyPermissionsDialog.vue'
 import { Button } from '@southneuhof/is-vue-framework/components/base'
 
 

@@ -50,12 +50,13 @@ vi.mock('@/framework/rpc', () => ({
 }))
 
 const visualStub = (name: string) => defineComponent({ name, template: '<div><slot /></div>' })
-const inputStub = (name: string) => defineComponent({
-  name,
-  props: { modelValue: { type: String, default: '' } },
-  emits: ['update:modelValue'],
-  template: '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
-})
+const inputStub = (name: string) =>
+  defineComponent({
+    name,
+    props: { modelValue: { type: String, default: '' } },
+    emits: ['update:modelValue'],
+    template: '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
+  })
 const buttonStub = defineComponent({
   name: 'Button',
   props: { disabled: { type: Boolean, default: false } },
@@ -97,7 +98,11 @@ describe('login route', () => {
 
   it('sends credentials, persists assigned permissions, and navigates once', async () => {
     mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', name: 'Alice', email: 'alice@example.com' } }))
-    mocks.meGet.mockResolvedValue(response(true, { data: { userId: 'user-1', roleIds: ['role-1'], scope: 'all', permissions: ['view-users'] } }))
+    mocks.meGet.mockResolvedValue(
+      response(true, {
+        data: { userId: 'user-1', user: { id: 'user-1', name: 'Alice', email: 'alice@example.com', username: null, statusCode: 'active' }, roleCodes: ['role-1'], permissions: ['view-users'] },
+      })
+    )
 
     const wrapper = mountLogin()
     const inputs = wrapper.findAll('input')
@@ -179,7 +184,9 @@ describe('login route', () => {
 
   it('rejects accounts with no assigned permissions without persisting or navigating', async () => {
     mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', name: 'Alice', email: 'alice@example.com' } }))
-    mocks.meGet.mockResolvedValue(response(true, { data: { userId: 'user-1', roleIds: [], scope: 'owner', permissions: [] } }))
+    mocks.meGet.mockResolvedValue(
+      response(true, { data: { userId: 'user-1', user: { id: 'user-1', name: 'Alice', email: 'alice@example.com', username: null, statusCode: 'active' }, roleCodes: [], permissions: [] } })
+    )
 
     const wrapper = mountLogin()
     await wrapper.find('form').trigger('submit')
@@ -198,7 +205,11 @@ describe('login route', () => {
 
   it('rejects a missing destination without persisting or navigating', async () => {
     mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', name: 'Alice', email: 'alice@example.com' } }))
-    mocks.meGet.mockResolvedValue(response(true, { data: { userId: 'user-1', roleIds: ['role-1'], scope: 'all', permissions: ['view-users'] } }))
+    mocks.meGet.mockResolvedValue(
+      response(true, {
+        data: { userId: 'user-1', user: { id: 'user-1', name: 'Alice', email: 'alice@example.com', username: null, statusCode: 'active' }, roleCodes: ['role-1'], permissions: ['view-users'] },
+      })
+    )
     mocks.resolvePostLoginRoute.mockReturnValue(null)
 
     const wrapper = mountLogin()
@@ -218,7 +229,9 @@ describe('login route', () => {
 
   it('keeps the primary error when session cleanup fails', async () => {
     mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', name: 'Alice', email: 'alice@example.com' } }))
-    mocks.meGet.mockResolvedValue(response(true, { data: { userId: 'user-1', roleIds: [], scope: 'owner', permissions: [] } }))
+    mocks.meGet.mockResolvedValue(
+      response(true, { data: { userId: 'user-1', user: { id: 'user-1', name: 'Alice', email: 'alice@example.com', username: null, statusCode: 'active' }, roleCodes: [], permissions: [] } })
+    )
     mocks.signOut.mockRejectedValue(new Error('cleanup details must stay hidden'))
 
     const wrapper = mountLogin()

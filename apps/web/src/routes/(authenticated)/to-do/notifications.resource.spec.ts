@@ -21,10 +21,10 @@ const { notifications } = await import('./notifications.resource')
 const { unreadNotificationCount, markNotificationsSeen, unreadIds } = await import('./notifications.operations')
 
 const rows = [
-  { id: 'n1', statusCode: 'unseen' },
-  { id: 'n2', statusCode: 'seen' },
-  { id: 'n3', statusCode: 'unset' },
-  { id: 'n4', statusCode: 'unseen' },
+  { id: 'n1', readAt: null },
+  { id: 'n2', readAt: '2026-08-10T00:00:00.000Z' },
+  { id: 'n3', readAt: null },
+  { id: 'n4', readAt: null },
 ] as never
 
 describe('notifications resource', () => {
@@ -47,11 +47,8 @@ describe('notifications resource', () => {
 })
 
 describe('unread accounting', () => {
-  it('counts unseen only, never unset', () => {
-    // `unset` is a chain step whose turn has not come, not an unread message.
-    // Counting it inflates every badge in the system.
-    expect(unreadIds(rows)).toEqual(['n1', 'n4'])
-    expect(unreadIds(rows)).not.toContain('n3')
+  it('counts rows without a read timestamp', () => {
+    expect(unreadIds(rows)).toEqual(['n1', 'n3', 'n4'])
   })
 
   it('reads the badge total from the server', async () => {
