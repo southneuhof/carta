@@ -14,7 +14,11 @@
 - **Risk**: LOW
 - **Depends on**: none
 - **Category**: bug
-- **Planned at**: commit `abb232f`, 2026-08-10
+- **Planned at**: commit `7945196`, 2026-08-10
+- **Implementation**: COMPLETE
+- **Verification**: type-check, focused Role test, full web test, and `git diff --check` pass
+- **Files changed**: `apps/web/src/configs/defaults.ts`; `apps/web/src/routes/(authenticated)/settings/roles/roles.resource.spec.ts`
+- **Deviations**: reconciled newer Role assertions before implementation; no framework changes
 
 ## Why this matters
 
@@ -39,6 +43,10 @@ inherit the default. It does not change framework code.
   `select`, and lookup inputs. It intentionally has no adapter for `switch`.
 - `apps/web/src/routes/(authenticated)/settings/roles/roles.resource.spec.ts`
   is the existing resource test pattern.
+
+The Role spec has newer permission and field-contract assertions at the
+reconciled baseline. Keep those assertions unchanged when adding the render
+regression test.
 
 Current shared configuration in `apps/web/src/configs/defaults.ts:41-53`:
 
@@ -78,7 +86,7 @@ pattern. Do not add a new renderer, adapter, or compatibility layer.
 
 **Out of scope**:
 
-- `packages/is-vue-framework/**` — Plan 009 owns the optional framework fix.
+- `packages/is-vue-framework/**` — Plan 007 owns the optional framework fix.
 - Individual master-data resources — the shared default must repair them.
 - PTS fields, API schemas, database migrations, and form redesign.
 
@@ -129,12 +137,12 @@ package source changed.
 
 ## Done criteria
 
-- [ ] The shared `active` form default is `switch` with no source.
-- [ ] The unused `activeOptions` declaration is removed.
-- [ ] The Role Form regression test renders all four current fields.
-- [ ] Web type check and all web tests pass.
-- [ ] Only in-scope files changed.
-- [ ] `plans/README.md` marks Plan 001 as DONE.
+- [x] The shared `active` form default is `switch` with no source.
+- [x] The unused `activeOptions` declaration is removed.
+- [x] The Role Form regression test renders all four current fields.
+- [x] Web type check and all web tests pass.
+- [x] Only in-scope files changed.
+- [x] `plans/README.md` marks Plan 001 as DONE.
 
 ## STOP conditions
 

@@ -25,6 +25,7 @@ import {
   numberVariable,
   numberConfigs,
   numberConfig,
+  masterDataRelations,
 } from './master-data.entity'
 import { qhssePtsRootCauses } from '../qhsse-pts/qhsse-pts.entity'
 
@@ -160,6 +161,7 @@ export const domain = defineDomainPart({
     numberConfigs,
   },
   entities: [businessCategory, division, project, uom, workItem, projectVendor, ptsWorkCategory, rootCause, numberVariable, numberConfig],
+  relations: [masterDataRelations],
 })
 
 export const businessCategoryModel = model('/business-categories', 'business-categories', businessCategory)

@@ -1,5 +1,5 @@
 import { createEntity } from '@southneuhof/sprindle/entity'
-import { sql } from 'drizzle-orm'
+import { defineRelationsPart, sql } from 'drizzle-orm'
 import { boolean, decimal, index, integer, pgTable, text, timestamp, uniqueIndex, type AnyPgColumn } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
 import { users } from '../users/users.entity'
@@ -191,22 +191,25 @@ export const businessCategory = createEntity({
     select: createSelectSchema(businessCategories),
   },
 })
+const businessCategorySelect = createSelectSchema(businessCategories)
 export const division = createEntity({
   table: divisions,
   schemas: {
     create: createInsertSchema(divisions).omit(write),
     update: createUpdateSchema(divisions).omit(write),
-    select: createSelectSchema(divisions),
+    select: createSelectSchema(divisions).extend({ businessCategory: businessCategorySelect.nullable().optional() }),
   },
 })
+const divisionSelect = division.schemas.select
 export const project = createEntity({
   table: projects,
   schemas: {
     create: createInsertSchema(projects).omit(write),
     update: createUpdateSchema(projects).omit(write),
-    select: createSelectSchema(projects),
+    select: createSelectSchema(projects).extend({ division: divisionSelect.nullable().optional() }),
   },
 })
+const projectSelect = project.schemas.select
 export const uom = createEntity({
   table: uoms,
   schemas: {
@@ -220,7 +223,7 @@ export const workItem = createEntity({
   schemas: {
     create: createInsertSchema(workItems).omit(write),
     update: createUpdateSchema(workItems).omit(write),
-    select: createSelectSchema(workItems),
+    select: createSelectSchema(workItems).extend({ project: projectSelect.nullable().optional(), uom: createSelectSchema(uoms).nullable().optional() }),
   },
 })
 export const projectVendor = createEntity({
@@ -228,7 +231,7 @@ export const projectVendor = createEntity({
   schemas: {
     create: createInsertSchema(projectVendors).omit(write),
     update: createUpdateSchema(projectVendors).omit(write),
-    select: createSelectSchema(projectVendors),
+    select: createSelectSchema(projectVendors).extend({ project: projectSelect.nullable().optional() }),
   },
 })
 export const ptsWorkCategory = createEntity({
@@ -255,11 +258,26 @@ export const numberVariable = createEntity({
     select: createSelectSchema(numberVariables),
   },
 })
+const numberVariableSelect = numberVariable.schemas.select
 export const numberConfig = createEntity({
   table: numberConfigs,
   schemas: {
     create: createInsertSchema(numberConfigs).omit(write),
     update: createUpdateSchema(numberConfigs).omit(write),
-    select: createSelectSchema(numberConfigs),
+    select: createSelectSchema(numberConfigs).extend({ numberVariable: numberVariableSelect.nullable().optional() }),
   },
 })
+
+export const masterDataRelations = defineRelationsPart(
+  { businessCategories, divisions, projects, uoms, workItems, projectVendors, numberVariables, numberConfigs },
+  (r) => ({
+    divisions: { businessCategory: r.one.businessCategories({ from: r.divisions.businessCategoryId, to: r.businessCategories.id }) },
+    projects: { division: r.one.divisions({ from: r.projects.divisionId, to: r.divisions.id }) },
+    workItems: {
+      project: r.one.projects({ from: r.workItems.projectId, to: r.projects.id }),
+      uom: r.one.uoms({ from: r.workItems.uomId, to: r.uoms.id }),
+    },
+    projectVendors: { project: r.one.projects({ from: r.projectVendors.projectId, to: r.projects.id }) },
+    numberConfigs: { numberVariable: r.one.numberVariables({ from: r.numberConfigs.numberVariableCode, to: r.numberVariables.code }) },
+  }),
+)

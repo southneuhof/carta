@@ -1,10 +1,5 @@
 import type { FrameworkFieldDefaultsInput } from '@southneuhof/is-vue-framework'
 
-const activeOptions = [
-  { name: 'Aktif', id: true },
-  { name: 'Nonaktif', id: false },
-] as const
-
 const statusOptions = [
   { name: 'Aktif', id: 'active' },
   { name: 'Nonaktif', id: 'non_active' },
@@ -49,7 +44,7 @@ export const appFieldDefaults = {
           },
         },
       },
-      form: { renderer: 'radio', source: activeOptions, props: { required: true } },
+      form: { renderer: 'switch', props: { required: true } },
     },
     statusCode: {
       label: 'Status',

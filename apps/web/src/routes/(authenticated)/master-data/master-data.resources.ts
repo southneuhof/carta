@@ -120,10 +120,12 @@ export const divisions = defineResource({
   fields: defineFields<Division, z.input<typeof division.schemas.create>>()({
     code: { label: 'Division', table: { sortable: true }, form: { renderer: 'text' } },
     name: { label: 'Name', form: { renderer: 'text' } },
-    businessCategoryId: { label: 'Business Category', form: { renderer: 'text' } },
+    businessCategoryId: { label: 'Business Category', form: { renderer: 'lookup', source: businessCategories, props: { pick: 'id', view: 'name', required: true } } },
+    businessCategory: { label: 'Business Category', read: (record) => record.businessCategory?.name },
     active: { label: 'Active', form: { renderer: 'checkbox' } },
   }),
-  table: { fields: ['code', 'name', 'businessCategoryId', 'active'] },
+  table: { fields: ['code', 'name', 'businessCategory', 'active'] },
+  detail: { fields: ['businessCategory', 'code', 'name', 'description', 'active'] },
   form: { fields: ['businessCategoryId', 'code', 'name', 'description', 'active'] },
   schemas: { create: fromZod(division.schemas.create), update: fromZod(division.schemas.update) },
   capabilities: {
@@ -139,10 +141,13 @@ export const projects = defineResource({
   fields: defineFields<Project, z.input<typeof project.schemas.create>>()({
     number: { label: 'Project Number', table: { sortable: true }, form: { renderer: 'text' } },
     name: { label: 'Project', table: { sortable: true }, form: { renderer: 'text' } },
-    divisionId: { label: 'Division', form: { renderer: 'text' } },
+    divisionId: { label: 'Division', form: { renderer: 'lookup', source: divisions, props: { pick: 'id', view: 'name', required: true } } },
+    division: { label: 'Division', read: (record) => record.division?.name },
+    integrationCode: { label: 'Integration Code', form: { renderer: 'text', props: { required: true } } },
     active: { label: 'Active', form: { renderer: 'checkbox' } },
   }),
-  table: { fields: ['number', 'name', 'divisionId', 'active'] },
+  table: { fields: ['number', 'name', 'division', 'active'] },
+  detail: { fields: ['division', 'number', 'integrationCode', 'name', 'location', 'startDate', 'endDate', 'description', 'active'] },
   form: { fields: ['divisionId', 'number', 'integrationCode', 'name', 'location', 'startDate', 'endDate', 'description', 'active'] },
   schemas: { create: fromZod(project.schemas.create), update: fromZod(project.schemas.update) },
   capabilities: {
@@ -171,16 +176,28 @@ export const uoms = defineResource({
     delete: { handler: uomOperations.delete, permission: 'manage-uoms' },
   },
 })
+
+const workItemLookup = {
+  key: 'work-items',
+  fields: {} as Record<string, unknown>,
+  capabilities: {} as Record<string, unknown>,
+}
+
 export const workItems = defineResource({
   key: 'work-items',
   fields: defineFields<WorkItem, z.input<typeof workItem.schemas.create>>()({
     code: { label: 'Work Item', table: { sortable: true }, form: { renderer: 'text' } },
     name: { label: 'Name', form: { renderer: 'text' } },
-    projectId: { label: 'Project', form: { renderer: 'text' } },
-    parentId: { label: 'Parent Work Item', form: { renderer: 'text' } },
+    projectId: { label: 'Project', form: { renderer: 'lookup', source: projects, props: { pick: 'id', view: 'name', required: true } } },
+    project: { label: 'Project', read: (record) => record.project?.name },
+    parentId: { label: 'Parent Work Item', form: { renderer: 'lookup', source: workItemLookup, props: { pick: 'id', view: 'name' }, behavior: { visible: ({ draft }: { draft: z.input<typeof workItem.schemas.create> }) => draft.projectId != null, props: ({ draft }: { draft: z.input<typeof workItem.schemas.create> }) => ({ searchParameters: { projectId: draft.projectId } }), resetWhen: ({ draft }: { draft: z.input<typeof workItem.schemas.create> }) => draft.projectId } } },
+    level: { label: 'Level', form: { renderer: 'number' } },
+    uomId: { label: 'UOM', form: { renderer: 'lookup', source: uoms, props: { pick: 'id', view: 'name' } } },
+    uom: { label: 'UOM', read: (record) => record.uom?.name },
     active: { label: 'Active', form: { renderer: 'checkbox' } },
   }),
-  table: { fields: ['code', 'name', 'projectId', 'parentId', 'active'] },
+  table: { fields: ['code', 'name', 'project', 'uom', 'active'] },
+  detail: { fields: ['project', 'code', 'name', 'level', 'uom', 'active'] },
   form: { fields: ['projectId', 'parentId', 'code', 'name', 'level', 'uomId', 'active'] },
   schemas: { create: fromZod(workItem.schemas.create), update: fromZod(workItem.schemas.update) },
   capabilities: {
@@ -191,14 +208,17 @@ export const workItems = defineResource({
     delete: { handler: workItemOperations.delete, permission: 'manage-work-items' },
   },
 })
+Object.assign(workItemLookup, workItems)
 export const projectVendors = defineResource({
   key: 'project-vendors',
   fields: defineFields<ProjectVendor, z.input<typeof projectVendor.schemas.create>>()({
     name: { label: 'Project Vendor', table: { sortable: true }, form: { renderer: 'text' } },
-    projectId: { label: 'Project', form: { renderer: 'text' } },
+    projectId: { label: 'Project', form: { renderer: 'lookup', source: projects, props: { pick: 'id', view: 'name', required: true } } },
+    project: { label: 'Project', read: (record) => record.project?.name },
     active: { label: 'Active', form: { renderer: 'checkbox' } },
   }),
-  table: { fields: ['name', 'projectId', 'active'] },
+  table: { fields: ['name', 'project', 'active'] },
+  detail: { fields: ['project', 'name', 'description', 'active'] },
   form: { fields: ['projectId', 'name', 'description', 'active'] },
   schemas: { create: fromZod(projectVendor.schemas.create), update: fromZod(projectVendor.schemas.update) },
   capabilities: {
@@ -266,12 +286,15 @@ export const numberVariables = defineResource({
 export const numberConfigs = defineResource({
   key: 'number-configs',
   fields: defineFields<NumberConfig, z.input<typeof numberConfig.schemas.create>>()({
-    numberVariableCode: { label: 'Number Variable', table: { sortable: true }, form: { renderer: 'text' } },
+    numberVariableCode: { label: 'Number Variable', table: { sortable: true }, form: { renderer: 'lookup', source: numberVariables, props: { pick: 'code', view: 'name', required: true } } },
+    numberVariable: { label: 'Number Variable', read: (record) => record.numberVariable?.name },
     displayOrder: { label: 'Display Order', table: { sortable: true }, form: { renderer: 'number' } },
     numberOfDigits: { label: 'Digits', form: { renderer: 'number' } },
+    customCode: { label: 'Custom Code', form: { renderer: 'text' } },
     active: { label: 'Active', form: { renderer: 'checkbox' } },
   }),
-  table: { fields: ['numberVariableCode', 'displayOrder', 'numberOfDigits', 'active'] },
+  table: { fields: ['numberVariable', 'displayOrder', 'numberOfDigits', 'active'] },
+  detail: { fields: ['numberVariable', 'displayOrder', 'numberOfDigits', 'customCode', 'description', 'active'] },
   form: { fields: ['numberVariableCode', 'displayOrder', 'numberOfDigits', 'customCode', 'description', 'active'] },
   schemas: { create: fromZod(numberConfig.schemas.create), update: fromZod(numberConfig.schemas.update) },
   capabilities: {

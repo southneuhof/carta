@@ -1,11 +1,18 @@
 import { defineFields, defineResource, fromZod } from '@southneuhof/is-vue-framework'
 import { role } from '@southneuhof/api/routes/roles/roles.entity'
+import { roleGroups } from '../role-groups/role-groups.resource'
 import { roleOperations, type Role, type RoleCreate, type RoleUpdate } from './roles.operations'
+
+const assignmentScopeOptions = [
+  { id: 'global', name: 'Global' },
+  { id: 'project', name: 'Project' },
+] as const
 
 export const roleFields = defineFields<Role, RoleCreate>()({
   roleCode: { label: 'Role Code', table: { sortable: true }, form: { renderer: 'text' } },
   name: { label: 'Role Name', table: { sortable: true }, form: { renderer: 'text' } },
-  assignmentScope: { label: 'Assignment Scope', form: { renderer: 'text' } },
+  roleGroupId: { label: 'Role Group', form: { renderer: 'lookup', source: roleGroups, props: { pick: 'id', view: 'name', required: true } } },
+  assignmentScope: { label: 'Assignment Scope', form: { renderer: 'radio', source: assignmentScopeOptions, props: { required: true } } },
 })
 
 const roleCapabilities = {
@@ -21,7 +28,7 @@ export const roles = defineResource<typeof roleCapabilities, Role, Record<string
   fields: roleFields,
   table: { fields: ['roleCode', 'name', 'assignmentScope', 'active'] },
   detail: { fields: ['roleCode', 'name', 'assignmentScope', 'active', 'createdAt'] },
-  form: { fields: ['roleCode', 'name', 'assignmentScope', 'active'] },
+  form: { fields: ['roleCode', 'name', 'roleGroupId', 'assignmentScope', 'active'] },
   schemas: { create: fromZod<RoleCreate>(role.schemas.create), update: fromZod<RoleUpdate>(role.schemas.update) },
   capabilities: roleCapabilities,
 })

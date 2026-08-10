@@ -1,25 +1,17 @@
 import { authenticated, defineRoute } from '@southneuhof/sprindle/routes'
 import { eq } from 'drizzle-orm'
-import { z } from 'zod/v4'
 import { getDb } from '../../db'
 import { requirePermission } from '../../identity'
 import { createAuth } from '../auth/auth'
 import { users } from './users.entity'
-
-const inputSchema = z.object({
-  name: z.string().trim().min(1).max(160),
-  username: z.string().trim().min(1).max(80),
-  email: z.string().trim().email(),
-  password: z.string().min(8).max(200),
-  imgPhotoUser: z.string().trim().max(500).nullable().optional(),
-})
+import { createUserSchema } from './users.create.contract'
 
 export const createUser = defineRoute({
   path: '/users/create',
   method: 'post',
   authorize: [authenticated(), requirePermission('create-users')],
   action: async (args) => {
-    const input = inputSchema.parse(await args.c.req.json().catch(() => ({})))
+    const input = createUserSchema.parse(await args.c.req.json().catch(() => ({})))
     const existing = await getDb().select({ id: users.id }).from(users).where(eq(users.username, input.username)).limit(1)
     if (existing[0]) return args.c.json({ error: 'username_exists' }, 409)
     try {

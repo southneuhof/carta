@@ -1,6 +1,7 @@
-# Plan 006: Align manual PTS prerequisite master data
+# Plan 004: Align manual PTS prerequisite master data
 
-> **Implementation instructions**: Follow this plan after Plan 005. Use one
+> **Implementation instructions**: Use `$ads-hk-module-slice` for each module
+> group. Follow this plan after Plan 003. Use one
 > new Drizzle migration. Do not edit an applied migration or import legacy
 > rows.
 >
@@ -12,7 +13,7 @@
 - **Priority**: P1
 - **Effort**: L
 - **Risk**: MED
-- **Depends on**: `plans/005-establish-legacy-parity-ledger.md`
+- **Depends on**: `plans/003-establish-legacy-parity-ledger.md`
 - **Category**: migration
 - **Planned at**: commit `abb232f`, 2026-08-10
 
@@ -39,7 +40,7 @@ plan gives the first PTS slice one agreed database and API contract.
   displays only a small part of the current Division and Project contracts.
 - Legacy fields are in `/Users/gamer/Documents/projects/ads-hk-legacy/backend-ads-laravel/app/Models/Projects.php`,
   `Uoms.php`, `WorkItems.php`, `PtsWorkCategories.php`, and `RootCauses.php`.
-  The ledger from Plan 005 is the authority for their new mappings.
+  The ledger from Plan 003 is the authority for their new mappings.
 
 ## Commands you will need
 
@@ -104,7 +105,7 @@ set in details, and edit-safe fields in forms. Use current renderers:
 `file` for retained upload keys, `location` for locations, and `textarea` for
 descriptions. Audit timestamps stay in details only.
 
-The resource catalog must contain the fields before Plan 007 connects lookup
+The resource catalog must contain the fields before Plan 005 connects lookup
 sources. Do not hide a stored PTS prerequisite field only because PTS does not
 read it today.
 

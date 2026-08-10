@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { createApp, defineComponent, h, nextTick, type Component } from 'vue'
 import {
   createFrameworkQueryClient,
+  Form,
+  FrameworkPlugin,
   registerResourceRuntime,
   resetResourceRuntimeForTests,
   resolveFrameworkAdapters,
@@ -9,6 +12,7 @@ import {
 } from '@southneuhof/is-vue-framework'
 import type { AccessAdapter } from '@southneuhof/is-vue-framework'
 import { appFieldDefaults } from '@/configs/defaults'
+import { appInputProps } from '@/framework/inputs/registry'
 
 const ok = (payload: unknown) => ({ ok: true, json: async () => payload })
 
@@ -58,6 +62,23 @@ describe('roles resource', () => {
     expect(create.load).toBeUndefined()
     expect(typeof update.load).toBe('function')
     expect(Object.keys(create.fields as Record<string, unknown>)).toEqual(['roleCode', 'name', 'assignmentScope', 'active'])
+  })
+
+  it('renders all current form fields through the application runtime', async () => {
+    const host = document.createElement('div')
+    document.body.appendChild(host)
+    const app = createApp(defineComponent(() => () => h(Form as Component, roles.form())))
+    app.use(FrameworkPlugin, { fieldDefaults: appFieldDefaults, inputProps: appInputProps })
+    app.mount(host)
+    await Promise.resolve()
+    await nextTick()
+
+    expect(host.querySelectorAll('.is-form-field')).toHaveLength(4)
+    for (const key of ['roleCode', 'name', 'assignmentScope', 'active']) {
+      expect(host.querySelector(`label[for="field-${key}"]`)).not.toBeNull()
+    }
+    app.unmount()
+    host.remove()
   })
 
   it('inherits createdAt from app defaults without a resource field declaration', () => {

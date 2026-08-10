@@ -1,4 +1,4 @@
-# Plan 009: Harden framework renderer and source merging
+# Plan 007: Harden framework renderer and source merging
 
 > **Implementation instructions**: This plan changes a framework package.
 > Execute it only after the user gives explicit approval for changes under
@@ -90,7 +90,7 @@ framework-level invariant and can affect every framework consumer.
 
 ## Git workflow
 
-- Branch: `codex/009-harden-field-source-merge`
+- Branch: `codex/007-harden-field-source-merge`
 - Commit message: `fix(framework): clear source on renderer change`
 - Do not begin until explicit user approval is recorded. Do not push or create
   a pull request unless instructed.
@@ -156,7 +156,7 @@ field source precedence is a framework contract.
 - [ ] Existing source precedence and null-clear behavior remain covered.
 - [ ] Framework type check and full framework tests pass.
 - [ ] No application files change in this plan.
-- [ ] `plans/README.md` marks Plan 009 as DONE.
+- [ ] `plans/README.md` marks Plan 007 as DONE.
 
 ## STOP conditions
 

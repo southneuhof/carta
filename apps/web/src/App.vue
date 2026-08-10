@@ -17,6 +17,10 @@ onErrorCaptured((err, instance, info) => {
 
 const handleResize = debounce(useScreenStore().handleResize, 300)
 
+function reload() {
+  window.location.reload()
+}
+
 onMounted(() => {
   window.addEventListener('resize', handleResize)
   useScreenStore().handleResize()
@@ -32,7 +36,11 @@ onBeforeUnmount(() => {
   <div class="text-black-text transition-colors">
     <Toaster position="bottom-center" richColors :theme="useColorPreference().value" />
     <div class="min-h-screen w-full">
-      <Suspense :timeout="0">
+      <div v-if="error" class="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center" role="alert" aria-live="assertive">
+        <h1 class="text-xl font-semibold">Something went wrong.</h1>
+        <button type="button" class="rounded border px-4 py-2" @click="reload">Reload</button>
+      </div>
+      <Suspense v-else :timeout="0">
         <RouterView />
         <template #fallback>
           <div class="flex min-h-screen items-center justify-center">

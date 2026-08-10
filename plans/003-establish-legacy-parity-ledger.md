@@ -1,6 +1,7 @@
-# Plan 005: Establish the manual PTS parity ledger
+# Plan 003: Establish the manual PTS parity ledger
 
-> **Implementation instructions**: Follow this plan step by step. Do not
+> **Implementation instructions**: Use `$ads-hk-module-slice` for this PTS
+> inventory. Follow this plan step by step. Do not
 > change application source, database migrations, or framework packages. This
 > plan creates the contract for later plans.
 >
@@ -13,7 +14,7 @@
 - **Priority**: P1
 - **Effort**: S
 - **Risk**: LOW
-- **Depends on**: `plans/001-repair-shared-active-form-fields.md`, `plans/002-complete-role-creation-form-contract.md`, `plans/003-make-user-creation-resource-driven.md`, `plans/004-display-page-render-errors.md`
+- **Depends on**: `plans/002-make-current-administration-forms-functional.md`
 - **Category**: docs
 - **Planned at**: commit `abb232f`, 2026-08-10
 
@@ -105,7 +106,7 @@ new fields.
 Under **PTS direct master data**, list only Business Categories, Divisions,
 Projects, UOMs, Work Items, Project Vendors, PTS Work Categories, Root Causes,
 Number Variables, and Number Configurations. For each, list its legacy fields,
-current table/route, and its owner plan (007 or 008).
+current table/route, and its owner plan (004 or 005).
 
 Under **Explicit exceptions**, name these legacy items with their reason:
 QI-created PTS, PTS dashboards and exports, legacy numeric IDs, Laravel audit
@@ -115,9 +116,9 @@ columns, legacy soft delete, and `role_id`. Do not list unrelated legacy menus.
 
 ### Step 4: Update the plan index
 
-Keep plans 001–005 as DONE. Keep only plans 006–009 in the active manual PTS
-execution order. Leave the two broad later-slice plan files unmodified, but
-state that they are not scheduled for manual PTS.
+Mark Plans 001 and 002 as DONE. Keep Plans 003–006 in the active manual PTS
+execution order. Keep Plan 007 blocked until framework approval. Do not add
+later feature slices to this plan index.
 
 **Verify**: `git diff --check` exits 0.
 

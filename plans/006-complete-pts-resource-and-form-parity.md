@@ -1,6 +1,7 @@
-# Plan 008: Complete manual PTS field and screen parity
+# Plan 006: Complete manual PTS field and screen parity
 
-> **Implementation instructions**: Follow this plan after Plans 005 and 007.
+> **Implementation instructions**: Use `$ads-hk-module-slice` for the PTS
+> resource path. Follow this plan after Plans 003 and 005.
 > Keep all workflow authority on the server. Use resource-owned field
 > declarations for ordinary report fields; keep route-local action forms for
 > the branching workflow.
@@ -14,7 +15,7 @@
 - **Priority**: P1
 - **Effort**: L
 - **Risk**: MED
-- **Depends on**: `plans/005-establish-legacy-parity-ledger.md`, `plans/007-make-core-master-data-forms-usable.md`
+- **Depends on**: `plans/003-establish-legacy-parity-ledger.md`, `plans/005-make-core-master-data-forms-usable.md`
 - **Category**: migration
 - **Planned at**: commit `abb232f`, 2026-08-10
 
@@ -67,7 +68,7 @@ database, API, list, detail, and forms agree.
 **In scope:** `apps/api/src/routes/qhsse-pts/`, one generated API migration,
 `apps/api/src/__tests__/qhsse-pts.spec.ts`,
 `apps/web/src/routes/(authenticated)/quality/pts/`, PTS lookup resources from
-Plan 007, and `docs/manual-pts-parity.md`.
+Plan 005, and `docs/manual-pts-parity.md`.
 
 **Out of scope:** Quality Inspection PTS, generic workflows, dashboards,
 exports, notification redesign, framework packages, legacy URLs, and legacy
@@ -85,7 +86,7 @@ data import.
 
 ### Step 1: Add the retained PTS contract as one migration
 
-Use the Plan 005 ledger to add current-name fields to `qhssePts`:
+Use the Plan 003 ledger to add current-name fields to `qhssePts`:
 `locationZone`, `implementationUserId`, `workMethod`, `followUpPlan`,
 `estimatedCost`, `jobImplementorType`, `estimatedVendorId`,
 `actualJobImplementorType`, and `rejectedNotes`. Keep the existing `vendorId`
@@ -128,7 +129,7 @@ notification behavior.
 Define every report field in `pts.resource.ts`: date, division, project, PTS
 work category, work-item category, leaf work item, criteria, root causes,
 before image, location zone, location, and description. Use the typed lookup
-resources from Plan 007 and dependent `behavior.resetWhen`. Use `radio` for
+resources from Plan 005 and dependent `behavior.resetWhen`. Use `radio` for
 the three criteria, `checkbox-group` for root causes, `location` for location,
 and the existing retained-upload flow for images.
 

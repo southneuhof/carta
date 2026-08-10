@@ -1,6 +1,7 @@
-# Plan 007: Make manual PTS master-data forms usable
+# Plan 005: Make manual PTS master-data forms usable
 
-> **Implementation instructions**: Follow this plan after Plan 006. Use the
+> **Implementation instructions**: Use `$ads-hk-module-slice` for each module
+> group. Follow this plan after Plan 004. Use the
 > existing route-local resource pattern. Do not add a CRUD builder, a UI
 > dependency, or a new framework renderer.
 >
@@ -13,7 +14,7 @@
 - **Priority**: P1
 - **Effort**: M
 - **Risk**: MED
-- **Depends on**: `plans/006-align-core-master-data-structure.md`
+- **Depends on**: `plans/004-align-core-master-data-structure.md`
 - **Category**: bug
 - **Planned at**: commit `abb232f`, 2026-08-10
 
@@ -92,7 +93,7 @@ many-to-many field; no prerequisite master form needs it.
 ### Step 3: Complete visible projections
 
 Use `read` functions to show relationship labels in tables and details. Keep
-`active` visible. Put Plan 006 fields in their correct forms/details but do
+`active` visible. Put Plan 004 fields in their correct forms/details but do
 not put thumbnails or long descriptions in list tables. Keep the existing
 single Master Data navigation group.
 
