@@ -8,7 +8,6 @@ const canCreate = useResourceRuntime().adapters.access.allows({ operation: 'crea
 
 <template>
   <div>
-    <RouterLink v-if="canCreate" :to="{ name: 'settings-users-create' }">Create User</RouterLink>
     <ListView title="Users" :resource="users" />
   </div>
 </template>

@@ -185,6 +185,7 @@ export type AnyHandler = (...arguments_: never[]) => unknown
 export type ResourceCapabilityKey = ResourceOperationKey
 export type ResourceCapabilityTarget<TIdentity extends RecordIdentity = RecordIdentityValue> =
   | { name: string }
+  | { name: string; params: Record<string, string | number> }
   | { name: string; params: (id: TIdentity) => Record<string, string | number> }
 
 export interface ResourceCapability<THandler extends AnyHandler = AnyHandler, TIdentity extends RecordIdentity = RecordIdentityValue> {
@@ -374,7 +375,9 @@ function normalizeCapabilities<TIdentity extends RecordIdentity>(
   for (const [key, declaration] of Object.entries(declarations)) {
     const target = declaration.to
     const to = target && ('params' in target
-      ? ((id: TIdentity) => ({ name: target.name, params: target.params(id) } as unknown as RouteLocationRaw))
+      ? (typeof target.params === 'function'
+        ? ((id: TIdentity) => ({ name: target.name, params: (target.params as (value: TIdentity) => Record<string, string | number>)(id) } as unknown as RouteLocationRaw))
+        : ({ name: target.name, params: target.params } as unknown as RouteLocationRaw))
       : ({ name: target.name } as unknown as RouteLocationRaw))
     const capability: NormalizedResourceCapability<TIdentity> = { key, permission: declaration.permission, visible: declaration.visible, ...(target ? { routeName: target.name, to } : {}) }
     capabilities[key] = capability

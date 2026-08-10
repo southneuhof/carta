@@ -23,7 +23,7 @@ async function signOut() {
     v-model="open"
     side="top"
     :side-offset="8"
-    content-class="w-64 rounded-xl p-3 shadow-xl"
+    content-class="w-64 rounded-xl p-3 shadow-xl gap-2"
   >
     <template #trigger>
       <button type="button" class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left hover:bg-surface-variant focus-visible:ring-2 focus-visible:ring-primary">
@@ -36,18 +36,20 @@ async function signOut() {
       </button>
     </template>
     <template #content>
-      <div class="border-b border-outline-variant px-2 pb-3">
+      <div class="border-b border-outline-variant px-2 pb-2">
         <p class="font-semibold">{{ profileData.fullname || 'Account' }}</p>
         <p class="text-sm text-on-surface">{{ profileData.username || '' }}</p>
       </div>
-      <button type="button" class="mt-2 flex w-full items-center justify-between rounded-lg px-2 py-2 text-left hover:bg-surface-variant focus-visible:ring-2 focus-visible:ring-primary" @click="useColorPreference().toggle()">
-        <span>Mode Tampilan</span>
-        <Icon :name="useColorPreference().value === 'dark' ? 'sun' : 'moon'" />
-      </button>
-      <button type="button" class="mt-1 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-error hover:bg-error-container focus-visible:ring-2 focus-visible:ring-error" :disabled="signingOut" @click="signOut">
-        <Icon name="logout-box" />
-        {{ signingOut ? 'Keluar…' : 'Keluar' }}
-      </button>
+      <div class="flex flex-col gap-1">
+        <button type="button" class="flex w-full items-center justify-between rounded-lg px-2 py-2 text-left hover:bg-surface-variant focus-visible:ring-2 focus-visible:ring-primary" @click="useColorPreference().toggle()">
+          <span>Mode Tampilan</span>
+          <Icon :name="useColorPreference().value === 'dark' ? 'sun' : 'moon'" />
+        </button>
+        <button type="button" class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-error hover:bg-error-container focus-visible:ring-2 focus-visible:ring-error" :disabled="signingOut" @click="signOut">
+          <Icon name="logout-box" />
+          {{ signingOut ? 'Keluar…' : 'Keluar' }}
+        </button>
+      </div>
     </template>
   </Popover>
 </template>

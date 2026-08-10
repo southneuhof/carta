@@ -31,7 +31,6 @@ export const navigation = defineNavigation([
       { to: { name: 'master-data-projects' }, permission: 'view-projects', title: 'Proyek', icon: 'folder' },
       { to: { name: 'master-data-uoms' }, permission: 'view-uoms', title: 'Satuan', icon: 'folder' },
       { to: { name: 'master-data-work-items' }, permission: 'view-work-items', title: 'Jenis Pekerjaan', icon: 'folder' },
-      { to: { name: 'master-data-project-vendors' }, permission: 'view-project-vendors', title: 'Vendor/Subkon/Mandor', icon: 'folder' },
       { to: { name: 'master-data-pts-work-categories' }, permission: 'view-pts-work-categories', title: 'Kategori Pekerjaan', icon: 'folder' },
       { to: { name: 'master-data-root-causes' }, permission: 'view-root-causes', title: 'Penyebab QHSSE', icon: 'folder' },
       { to: { name: 'master-data-number-configs' }, permission: 'view-number-configs', title: 'Number Configurations', icon: 'folder' },

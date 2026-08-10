@@ -65,7 +65,7 @@ defineExpose({ refresh: loaded.refresh })
       <table class="w-full border-collapse">
         <tbody>
           <tr v-for="entry in entries" :key="entry.field.key">
-            <th scope="row" class="w-px whitespace-nowrap py-1 pe-3 text-left align-top text-sm font-medium text-on-surface">
+            <th scope="row" class="w-px whitespace-nowrap py-1 pe-3 text-left align-center text-sm font-normal text-on-surface">
               {{ entry.field.label }}
             </th>
             <td aria-hidden="true" class="w-px whitespace-nowrap py-1 pe-3 align-top text-on-surface-variant">:</td>

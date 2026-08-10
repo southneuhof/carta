@@ -60,6 +60,24 @@ describe('Form core', () => {
     view.unmount()
   })
 
+  it('keeps initial data for fields outside the rendered form projection', async () => {
+    const submit = vi.fn(async () => ({ id: '1' }))
+    const view = mountCore(Form, {
+      fields: { name: { label: 'Nama' } },
+      initialData: { projectId: 'project-1', name: 'Vendor A' },
+      schema: fromZod(z.object({ projectId: z.string(), name: z.string().min(1) })),
+      submit,
+    })
+    await flush()
+
+    expect(inputs(view)).toHaveLength(1)
+    view.find('form')!.dispatchEvent(new Event('submit'))
+    await flush()
+
+    expect(submit).toHaveBeenCalledWith({ projectId: 'project-1', name: 'Vendor A' })
+    view.unmount()
+  })
+
   it('keeps fallback inputs transparent with the secondary focus treatment', async () => {
     const view = mountCore(Form, { fields: { name: { label: 'Name' } }, submit: async () => undefined })
     await flush()

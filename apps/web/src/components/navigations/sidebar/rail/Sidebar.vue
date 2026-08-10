@@ -32,6 +32,8 @@ const activeModule = computed(() => activeNavigationModule(route.path, (to) => r
       </section>
     </nav>
 
-    <div class="border-t border-outline-variant p-3"><ProfileSegment /></div>
+    <div class="border-t border-outline-variant p-3">
+      <ProfileSegment />
+    </div>
   </aside>
 </template>

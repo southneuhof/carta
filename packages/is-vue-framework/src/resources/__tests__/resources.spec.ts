@@ -20,7 +20,7 @@ function resource(access = { allows: () => true }) {
     key: 'records', fields,
     capabilities: {
       list: { handler: async () => ({ data: [{ id: '1', name: 'One' }] }), permission: 'records.list', to: { name: 'records' } },
-      create: { handler: async (input: { name: string }) => ({ id: '2', ...input }), permission: 'records.create', to: { name: 'records-create' } },
+      create: { handler: async (input: { name: string }) => ({ id: '2', ...input }), permission: 'records.create', to: { name: 'records-create', params: { sectionId: 'section-1' } } },
       detail: { handler: async ({ id }) => ({ id: String(id), name: 'One' }), permission: 'records.detail', to: { name: 'records-detail', params: (id) => ({ id }) } },
       update: { handler: async (id, input: { name?: string }) => ({ id: String(id), name: input.name ?? 'One' }), permission: 'records.update', to: { name: 'records-edit', params: (id) => ({ id }) } },
       delete: { handler: async () => undefined, permission: 'records.delete' },
@@ -126,7 +126,7 @@ describe('resource capabilities', () => {
   it('keeps exact custom capability handler and standard surfaces', () => {
     const value = resource()
     expect(value.capabilities.verify.handler('1', 'approved')).resolves.toBeUndefined()
-    expect(value.table().createRoute).toEqual({ name: 'records-create' })
+    expect(value.table().createRoute).toEqual({ name: 'records-create', params: { sectionId: 'section-1' } })
     const surface = value.table()
     expect(surface.detailRoute?.({ id: '1', name: 'One' })).toEqual({ name: 'records-detail', params: { id: '1' } })
     expect(surface.updateRoute?.({ id: '1', name: 'One' })).toEqual({ name: 'records-edit', params: { id: '1' } })

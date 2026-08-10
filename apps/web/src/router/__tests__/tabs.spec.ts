@@ -105,11 +105,11 @@ describe('route tabs', () => {
     view.unmount()
   })
 
-  it('redirects one valid child while keeping nav hidden', async () => {
+  it('redirects to and displays one valid child', async () => {
     allowed.mockReturnValue(true)
     const view = await mountTabs({ items: [defaultItems[0]] })
     await vi.waitFor(() => expect(view.router.currentRoute.value.name).toBe('roles-permissions'))
-    expect(view.host.querySelector('[data-tab]')).toBeNull()
+    expect(view.host.querySelector('[data-tab]')).not.toBeNull()
     view.unmount()
   })
 
@@ -140,6 +140,7 @@ describe('route tabs', () => {
 
   it('fails safe when valid targets do not share one owner', async () => {
     allowed.mockReturnValue(true)
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
     const view = await mountTabs({
       mixedOwner: true,
       items: [
@@ -150,6 +151,7 @@ describe('route tabs', () => {
     await nextTick()
     expect(view.router.currentRoute.value.name).toBe('roles-detail')
     expect(view.replace).not.toHaveBeenCalled()
+    expect(warning).toHaveBeenCalledWith(expect.stringContaining('[Tabs]'))
     view.unmount()
   })
 

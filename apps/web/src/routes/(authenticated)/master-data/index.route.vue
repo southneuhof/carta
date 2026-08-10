@@ -7,7 +7,6 @@ const entries = [
   ['projects', 'Proyek'],
   ['uoms', 'Satuan'],
   ['work-items', 'Jenis Pekerjaan'],
-  ['project-vendors', 'Vendor/Subkon/Mandor'],
   ['pts-work-categories', 'Kategori Pekerjaan'],
   ['root-causes', 'Penyebab QHSSE'],
   ['number-configs', 'Number Configurations'],

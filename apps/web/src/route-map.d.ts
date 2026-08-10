@@ -143,27 +143,6 @@ declare module 'vue-router/auto-routes' {
       { numberVariableId: ParamValue<false> },
       | never
     >,
-    'master-data-project-vendors': RouteRecordInfo<
-      'master-data-project-vendors',
-      '/master-data/project-vendors',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    'master-data-project-vendors-edit': RouteRecordInfo<
-      'master-data-project-vendors-edit',
-      '/master-data/project-vendors/:projectVendorId/edit',
-      { projectVendorId: ParamValue<true> },
-      { projectVendorId: ParamValue<false> },
-      | never
-    >,
-    'master-data-project-vendors-create': RouteRecordInfo<
-      'master-data-project-vendors-create',
-      '/master-data/project-vendors/create',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
     'master-data-projects': RouteRecordInfo<
       'master-data-projects',
       '/master-data/projects',
@@ -176,18 +155,42 @@ declare module 'vue-router/auto-routes' {
       '/master-data/projects/:projectId/detail',
       { projectId: ParamValue<true> },
       { projectId: ParamValue<false> },
+      | 'master-data-projects-detail-vendors'
+      | 'master-data-projects-detail-vendors-create'
+      | 'master-data-projects-detail-vendors-detail'
+      | 'master-data-projects-detail-vendors-edit'
+    >,
+    'master-data-projects-detail-vendors': RouteRecordInfo<
+      'master-data-projects-detail-vendors',
+      '/master-data/projects/:projectId/detail/vendors',
+      { projectId: ParamValue<true> },
+      { projectId: ParamValue<false> },
+      | never
+    >,
+    'master-data-projects-detail-vendors-detail': RouteRecordInfo<
+      'master-data-projects-detail-vendors-detail',
+      '/master-data/projects/:projectId/detail/vendors/:projectVendorId/detail',
+      { projectId: ParamValue<true>, projectVendorId: ParamValue<true> },
+      { projectId: ParamValue<false>, projectVendorId: ParamValue<false> },
+      | never
+    >,
+    'master-data-projects-detail-vendors-edit': RouteRecordInfo<
+      'master-data-projects-detail-vendors-edit',
+      '/master-data/projects/:projectId/detail/vendors/:projectVendorId/edit',
+      { projectId: ParamValue<true>, projectVendorId: ParamValue<true> },
+      { projectId: ParamValue<false>, projectVendorId: ParamValue<false> },
+      | never
+    >,
+    'master-data-projects-detail-vendors-create': RouteRecordInfo<
+      'master-data-projects-detail-vendors-create',
+      '/master-data/projects/:projectId/detail/vendors/create',
+      { projectId: ParamValue<true> },
+      { projectId: ParamValue<false> },
       | never
     >,
     'master-data-projects-edit': RouteRecordInfo<
       'master-data-projects-edit',
       '/master-data/projects/:projectId/edit',
-      { projectId: ParamValue<true> },
-      { projectId: ParamValue<false> },
-      | never
-    >,
-    'master-data-projects-vendors': RouteRecordInfo<
-      'master-data-projects-vendors',
-      '/master-data/projects/:projectId/vendors',
       { projectId: ParamValue<true> },
       { projectId: ParamValue<false> },
       | never
@@ -517,14 +520,14 @@ declare module 'vue-router/auto-routes' {
         | 'master-data-number-configs-edit'
         | 'master-data-number-variables'
         | 'master-data-number-variables-detail'
-        | 'master-data-project-vendors'
-        | 'master-data-project-vendors-create'
-        | 'master-data-project-vendors-edit'
         | 'master-data-projects'
         | 'master-data-projects-create'
         | 'master-data-projects-detail'
+        | 'master-data-projects-detail-vendors'
+        | 'master-data-projects-detail-vendors-create'
+        | 'master-data-projects-detail-vendors-detail'
+        | 'master-data-projects-detail-vendors-edit'
         | 'master-data-projects-edit'
-        | 'master-data-projects-vendors'
         | 'master-data-pts-work-categories'
         | 'master-data-pts-work-categories-create'
         | 'master-data-pts-work-categories-detail'
@@ -695,30 +698,6 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/routes/(authenticated)/master-data/project-vendors/index.route.vue': {
-      routes:
-        | 'master-data-project-vendors'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/routes/(authenticated)/master-data/project-vendors/[projectVendorId]/edit.route.vue': {
-      routes:
-        | 'master-data-project-vendors-edit'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/routes/(authenticated)/master-data/project-vendors/create.route.vue': {
-      routes:
-        | 'master-data-project-vendors-create'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
     'src/routes/(authenticated)/master-data/projects/index.route.vue': {
       routes:
         | 'master-data-projects'
@@ -730,6 +709,42 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/master-data/projects/[projectId]/detail.route.vue': {
       routes:
         | 'master-data-projects-detail'
+        | 'master-data-projects-detail-vendors'
+        | 'master-data-projects-detail-vendors-create'
+        | 'master-data-projects-detail-vendors-detail'
+        | 'master-data-projects-detail-vendors-edit'
+      views:
+        | 'default'
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/projects/[projectId]/detail/vendors/index.route.vue': {
+      routes:
+        | 'master-data-projects-detail-vendors'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/projects/[projectId]/detail/vendors/[projectVendorId]/detail.route.vue': {
+      routes:
+        | 'master-data-projects-detail-vendors-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/projects/[projectId]/detail/vendors/[projectVendorId]/edit.route.vue': {
+      routes:
+        | 'master-data-projects-detail-vendors-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/projects/[projectId]/detail/vendors/create.route.vue': {
+      routes:
+        | 'master-data-projects-detail-vendors-create'
       views:
         | never
       pathParamNames:
@@ -738,14 +753,6 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/master-data/projects/[projectId]/edit.route.vue': {
       routes:
         | 'master-data-projects-edit'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/routes/(authenticated)/master-data/projects/[projectId]/vendors/index.route.vue': {
-      routes:
-        | 'master-data-projects-vendors'
       views:
         | never
       pathParamNames:

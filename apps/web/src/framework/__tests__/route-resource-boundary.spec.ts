@@ -32,6 +32,8 @@ describe('route-owned resource boundaries', () => {
       'settings/users/[userId]/detail/roles/user-roles.operations.ts',
       'to-do/notifications.resource.ts',
       'to-do/notifications.operations.ts',
+      'master-data/projects/[projectId]/detail/vendors/project-vendors.resource.ts',
+      'master-data/projects/[projectId]/detail/vendors/project-vendors.operations.ts',
     ]
 
     expect(required.filter((path) => !existsSync(join(routesRoot, path)))).toEqual([])
