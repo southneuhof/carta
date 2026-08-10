@@ -1,5 +1,6 @@
 import { authenticated, create, deleteRoute, detail, list, update } from '@southneuhof/sprindle/routes'
 import { defineDomainPart, defineModel } from '@southneuhof/sprindle/model'
+import { validationError } from '@southneuhof/sprindle'
 import { eq } from 'drizzle-orm'
 import { getDb } from '../../db'
 import { requirePermission } from '../../identity'
@@ -9,6 +10,29 @@ import { projectRelations, projects, project } from './projects.entity'
 
 const read = [authenticated(), requirePermission('view-projects')]
 const write = [authenticated(), requirePermission('manage-projects')]
+
+export function normalizeProjectListQuery(query: Record<string, unknown>) {
+  const implementationStatusCode = query.implementationStatusCode
+  if (implementationStatusCode !== undefined) {
+    if (!['on-progress', 'finished', 'draft'].includes(String(implementationStatusCode))) {
+      throw validationError('Unsupported implementationStatusCode.')
+    }
+    // ponytail: map legacy derived status to active; use date/status SQL when the completion workflow exists.
+    delete query.implementationStatusCode
+    if (query.statusCode === 'completed') delete query.statusCode
+    if (implementationStatusCode === 'on-progress') query.active = true
+    else if (implementationStatusCode === 'finished') query.active = false
+    else query.statusCode = 'draft'
+  }
+
+  if (query.active !== undefined) {
+    if (query.active === 'true') query.active = true
+    else if (query.active === 'false') query.active = false
+    else if (typeof query.active !== 'boolean') throw validationError('active must be true or false.')
+  }
+
+  return query
+}
 
 async function validateProject(route: string, state: { input?: unknown; id?: string }) {
   const input = state.input && typeof state.input === 'object' ? (state.input as Record<string, unknown>) : {}
@@ -36,7 +60,7 @@ export const projectModel = defineModel({
   path: '/projects',
   entity: project,
   routes: {
-    list: list({ authorize: read }),
+    list: list({ authorize: read, before: ({ state }) => { normalizeProjectListQuery(state.query as Record<string, unknown>) } }),
     detail: detail({ authorize: read }),
     create: create({ authorize: write }),
     update: update({ authorize: write }),

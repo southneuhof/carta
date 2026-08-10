@@ -8,39 +8,12 @@
  * paging or searching here must not move the drawer, and vice versa.
  */
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { ListView } from '@southneuhof/is-vue-framework'
 import { notifications } from './notifications.resource'
-import type { NotificationRecord } from './notifications.operations'
-import { notificationRoute } from '@/framework/notifications/moduleRoutes'
 
-
-const router = useRouter()
-
-const table = computed(() =>
-  notifications.table({ namespace: 'to-do' }).table,
-)
-
-function open(record: NotificationRecord) {
-  const target = notificationRoute(record)
-  // A module this app has no screen for is a normal state, not an error: the row
-  // simply does not navigate.
-  if (target) void router.push(target)
-}
+const table = computed(() => notifications.table({ namespace: 'to-do' }).table)
 </script>
 
 <template>
-  <ListView title="To Do" :table="table">
-    <template #cell:title="{ value, record }">
-      <a
-        v-if="notificationRoute(record as NotificationRecord)"
-        href="#"
-        :data-notification="record.id"
-        @click.prevent="open(record as NotificationRecord)"
-      >
-        {{ value }}
-      </a>
-      <span v-else :data-notification="record.id">{{ value }}</span>
-    </template>
-  </ListView>
+  <ListView title="To Do" :table="table" />
 </template>

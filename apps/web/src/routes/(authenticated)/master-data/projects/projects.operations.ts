@@ -7,6 +7,17 @@ import { dataAdapter } from '@/framework/adapters/data/normalize'
 import { locationOperations } from '@/framework/adapters/location'
 import type { Coordinate } from '@southneuhof/is-vue-framework'
 
+export type ProjectQuery = {
+  page?: number | string
+  limit?: number | string
+  search?: string
+  sort?: string
+  order?: 'asc' | 'desc'
+  active?: 'true' | 'false'
+  statusCode?: string
+  implementationStatusCode?: 'on-progress' | 'finished' | 'draft'
+}
+
 const transport = createHonoResourceOperations(rpc.projects, dataAdapter)
 function location(value: unknown): Coordinate | unknown {
   if (!value || typeof value !== 'object') return value
@@ -23,7 +34,7 @@ function storedLocation(value: unknown) {
 }
 
 export { locationOperations }
-export const projectOperations = defineResourceOperations<Project, Record<string, never>, ProjectCreate, ProjectUpdate>()({
+export const projectOperations = defineResourceOperations<Project, ProjectQuery, ProjectCreate, ProjectUpdate>()({
   list: transport.list,
   detail: async (context) => {
     const record = await transport.detail(context)
