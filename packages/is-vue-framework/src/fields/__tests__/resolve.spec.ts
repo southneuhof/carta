@@ -128,6 +128,48 @@ describe('field resolution', () => {
     expect(cleared.source).toBeUndefined()
   })
 
+  it('clears inherited source when a later layer changes renderer', () => {
+    const [field] = resolveFields({
+      fields: { status: { form: { renderer: 'radio', source: 'radio-options' } } },
+      surface: 'form',
+      overrides: { status: { renderer: 'switch' } },
+    })
+
+    expect(field.renderer).toBe('switch')
+    expect(field.source).toBeUndefined()
+  })
+
+  it('keeps an explicit source when a later layer changes renderer', () => {
+    const [field] = resolveFields({
+      fields: { status: { form: { renderer: 'radio', source: 'radio-options' } } },
+      surface: 'form',
+      overrides: { status: { renderer: 'switch', source: 'switch-options' } },
+    })
+
+    expect(field).toMatchObject({ renderer: 'switch', source: 'switch-options' })
+  })
+
+  it('keeps source null clearing when a later layer changes renderer', () => {
+    const [field] = resolveFields({
+      fields: { status: { form: { renderer: 'radio', source: 'radio-options' } } },
+      surface: 'form',
+      overrides: { status: { renderer: 'switch', source: null } },
+    })
+
+    expect(field).toMatchObject({ renderer: 'switch' })
+    expect(field.source).toBeUndefined()
+  })
+
+  it('keeps source when a later layer changes only props or label', () => {
+    const [field] = resolveFields({
+      fields: { status: { form: { renderer: 'radio', source: 'radio-options' } } },
+      surface: 'form',
+      overrides: { status: { label: 'Current status', props: { dense: true } } },
+    })
+
+    expect(field).toMatchObject({ label: 'Current status', renderer: 'radio', source: 'radio-options' })
+  })
+
   it('carries behavior only on the form surface', () => {
     const fields = { name: { form: { behavior: { visible: () => true } } } }
 

@@ -16,7 +16,7 @@ an optional framework repair.
 | 004 | Align manual PTS prerequisite master data | P1 | L | 003 | TODO |
 | 005 | Make manual PTS prerequisite forms usable | P1 | M | 004 | TODO |
 | 006 | Complete manual PTS field and screen parity | P1 | L | 003, 005 | TODO |
-| 007 | Harden framework renderer and source merging | P2 | M | 001 | BLOCKED — requires explicit framework approval |
+| 007 | Harden framework renderer and source merging | P2 | M | 001 | DONE |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with a one-line reason) |
 REJECTED (with a one-line reason).
@@ -40,8 +40,7 @@ REJECTED (with a one-line reason).
   resource forms and lookups.
 - Plan 006 uses the ledger and stable master-data lookups. It owns only manual
   PTS report and actions, not Quality Inspection PTS.
-- Plan 007 remains blocked until the user explicitly approves edits to
-  `packages/is-vue-framework`. It is not required for Plans 002–006.
+- Plan 007 is complete. It is not required for Plans 002–006.
 
 ## Findings considered and rejected
 

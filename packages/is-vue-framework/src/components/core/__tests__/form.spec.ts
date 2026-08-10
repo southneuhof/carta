@@ -24,6 +24,21 @@ function type(view: ReturnType<typeof mountCore>, index: number, value: string) 
 }
 
 describe('Form core', () => {
+  it('does not inherit a source when schema inference changes the renderer', async () => {
+    const view = mountCore(Form, {
+      fields: { active: { label: 'Active' } },
+      schema: fromZod(z.object({ active: z.boolean() })),
+      initialData: { active: false },
+      submit: async () => undefined,
+    }, {
+      fieldDefaults: { fields: { active: { form: { renderer: 'radio', source: 'radio-options' } } } },
+    })
+    await flush()
+
+    expect(view.text()).toContain('Active')
+    view.unmount()
+  })
+
   it('applies default renderer while explicit form projection wins', async () => {
     const DefaultRenderer = defineComponent({ props: { value: null }, setup: () => () => h('i', 'default') })
     const ExplicitRenderer = defineComponent({ props: { value: null }, setup: () => () => h('b', 'explicit') })
