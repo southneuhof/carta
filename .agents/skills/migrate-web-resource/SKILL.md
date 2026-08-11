@@ -1,12 +1,14 @@
 ---
 name: migrate-web-resource
-description: Migrate one ADS-HK `apps/web` module from the old `*.operations.ts` plus `defineFields` resource API to the approved unified schema and per-action resource API. Use only for a module migration that has its own approved Improve plan, after the framework foundation and app adapters exist. Do not use for framework foundation work, multi-module migrations, or the removed web PTS module.
+description: Migrate one ADS-HK `apps/web` module per execution from the old `*.operations.ts` plus `defineFields` resource API to the approved unified schema and per-action resource API. Use for a module named by an approved dedicated or cohort Improve plan, after the framework foundation and app adapters exist. Do not use for framework foundation work, requests to migrate multiple modules in one execution, or the removed web PTS module.
 ---
 
 # Migrate One Web Resource Module
 
-Migrate one planned module to the approved schema and per-action resource
-architecture. Keep the change inside that module and remove its old resource API.
+Migrate one selected module to the approved schema and per-action resource
+architecture. The approved plan can cover a cohort of similar modules, but each
+execution must select and complete only one module. Keep the change inside that
+module and remove its old resource API.
 
 ## Required reads
 
@@ -26,8 +28,10 @@ framework surface.
 
 Stop and report the exact blocker when any gate fails:
 
-1. The task has no approved Improve plan for one module.
-2. The plan includes more than one application module.
+1. The selected module is not named by an approved dedicated or cohort Improve
+   plan.
+2. The execution request targets more than one application module. A cohort plan
+   is valid, but it must be executed once for each named module.
 3. The target is the web PTS module. PTS must be removed, not migrated.
 4. The required framework schema, action, resource, and View APIs do not exist.
 5. The migration needs a framework package change that has no separate approved
@@ -40,7 +44,7 @@ Do not add a compatibility wrapper or preserve the old module API.
 ## Preflight
 
 1. Check `git status --short`. Preserve unrelated work.
-2. Resolve the plan's exact module root.
+2. Select one incomplete module from the plan and resolve its exact module root.
 3. Find all imports and callers of its resource and operation files.
 4. List its standard actions: `list`, `detail`, `create`, `update`, and `delete`.
 5. List its custom actions and UI workflows separately.
@@ -50,6 +54,8 @@ Do not add a compatibility wrapper or preserve the old module API.
 7. Identify current validation in Zod, resource validators, field props, and
    route code.
 8. Record the focused tests and the plan's verification commands.
+9. Record the selected module's checkpoint in the cohort plan. Do not treat a
+   different module's completed checkpoint as evidence for this module.
 
 ## Migration workflow
 
@@ -156,7 +162,8 @@ Test contract and observable behavior. Do not copy every field list into a test.
 
 Before completion, verify:
 
-- exactly one module changed, apart from approved shared boundary fixtures;
+- exactly one selected module changed, apart from approved shared boundary
+  fixtures;
 - no web PTS source was migrated;
 - the schema is transport-neutral;
 - all standard frontend validation is in the schema;
@@ -168,6 +175,9 @@ Before completion, verify:
 - no framework code changed without its own approval;
 - old module resource patterns are absent;
 - all required checks pass.
+
+For a cohort plan, mark only the selected module checkpoint complete. Keep the
+plan in progress until every named module checkpoint is complete and reviewed.
 
 Report `Reused`, `Searched`, and `Gap` when `web-ui-surface-reuse` applies. Name
 the migrated module, deleted old files, checks run, and any remaining blocker.
