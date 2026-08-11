@@ -22,10 +22,10 @@ const statusDisplayOptions = {
 export const appFieldDefaults = {
   fields: {
     title: { label: 'Judul', form: { renderer: 'text', props: { required: true } } },
-    name: { label: 'Nama', form: { renderer: 'text', props: { required: true } } },
+    name: { label: 'Name', form: { renderer: 'text', props: { required: true } } },
     fullName: { form: { renderer: 'text', props: { required: true } } },
     username: { form: { renderer: 'text', props: { required: true } } },
-    code: { label: 'Kode', form: { renderer: 'text', props: { required: true } } },
+    code: { label: 'Code', form: { renderer: 'text', props: { required: true } } },
     email: { form: { renderer: 'text', props: { required: true, type: 'email' } } },
     telephone: { form: { renderer: 'text', props: { required: true, type: 'tel' } } },
     description: {
@@ -75,8 +75,8 @@ export const appFieldDefaults = {
       display: { format: 'date' },
       table: { class: 'w-max max-w-sm' },
     },
-    startDate: { label: 'Tanggal Mulai', form: { renderer: 'date' } },
-    endDate: { label: 'Tanggal Selesai', form: { renderer: 'date' } },
+    startDate: { label: 'Tanggal Mulai', display: { format: 'date' }, form: { renderer: 'date' } },
+    endDate: { label: 'Tanggal Selesai', display: { format: 'date' }, form: { renderer: 'date' } },
     year: { label: 'Tahun', form: { renderer: 'year' } },
     file: { label: 'File' },
     updatedBy: { label: 'Diperbarui Oleh', read: (record) => record.relUpdatedBy },

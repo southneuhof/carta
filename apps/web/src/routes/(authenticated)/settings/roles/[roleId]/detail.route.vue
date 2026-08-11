@@ -22,6 +22,16 @@ const tabs = rolePermissions.capabilities?.list
   ? [{ action: rolePermissions.capabilities.list, label: 'Permissions' }] as const satisfies readonly RouteTab[]
   : []
 
+function deleteErrorMessage(error: unknown) {
+  if (error && typeof error === 'object' && !Array.isArray(error) && 'error' in error && error.error === 'role_in_use') {
+    const details = error as { systemAssignmentCount?: unknown; projectAssignmentCount?: unknown }
+    const systemCount = typeof details.systemAssignmentCount === 'number' ? details.systemAssignmentCount : 0
+    const projectCount = typeof details.projectAssignmentCount === 'number' ? details.projectAssignmentCount : 0
+    return 'Role is in use. System assignments: ' + systemCount + '. Project assignments: ' + projectCount + '. Deactivate the role after review.'
+  }
+  return useResourceRuntime().adapters.data.normalizeError(error).message || 'Role could not be deleted.'
+}
+
 async function remove() {
   if (deleting.value) return
   deleting.value = true
@@ -30,7 +40,7 @@ async function remove() {
     toast.success('Data berhasil dihapus.')
     await router.replace({ name: roles.capabilities?.list?.to?.name })
   } catch (error) {
-    toast.error(useResourceRuntime().adapters.data.normalizeError(error).message || 'Gagal menghapus data.')
+    toast.error(deleteErrorMessage(error))
   } finally {
     deleting.value = false
   }
@@ -38,7 +48,7 @@ async function remove() {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
+  <div class="flex flex-col gap-2">
     <DetailView title="Detail Role" :back-to="{ name: roles.capabilities?.list?.to?.name }" :resource="roles" :id="roleId">
       <template #controls>
         <RouterLink v-if="updateTarget" :to="updateTarget"><Button>Ubah</Button></RouterLink>

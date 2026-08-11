@@ -11,8 +11,9 @@ export function applyFileRouteConventions(root: LayoutTreeNode, isRoutesRoot = t
   if (layouts.length) {
     if (isRoutesRoot) throw new Error(`Route layout must be below routes root: ${layouts[0].component}`)
     const layout = layouts.at(-1)!
+    const group = layout.component?.split('/').at(-2)
     root.components.set('default', layout.component!)
-    root.meta = { ...layout.meta }
+    root.meta = { ...layout.meta, ...(group === '(authenticated)' ? { requiresAuth: true } : {}) }
     for (const duplicate of layouts) duplicate.delete()
   }
 

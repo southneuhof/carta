@@ -29,10 +29,10 @@ export const workItems = defineResource({
   form: { fields: ['categoryId', 'name', 'volume', 'uomId', 'isHighRisk'] },
   schemas: { create: fromZod<WorkItemCreate>(workItem.schemas.create), update: fromZod<WorkItemUpdate>(workItem.schemas.update) },
   capabilities: {
-    list: { handler: workItemOperations.list, permission: 'view-work-items', to: { name: 'master-data-work-items' } },
-    create: { handler: workItemOperations.create, permission: 'manage-work-items' },
-    detail: { handler: workItemOperations.detail, permission: 'view-work-items' },
-    update: { handler: workItemOperations.update, permission: 'manage-work-items' },
-    delete: { handler: workItemOperations.delete, permission: 'manage-work-items' },
+    list: { handler: workItemOperations.list, permission: null, to: { name: 'master-data-work-items' } },
+    create: { handler: workItemOperations.create, permission: null },
+    detail: { handler: workItemOperations.detail, permission: null },
+    update: { handler: workItemOperations.update, permission: null },
+    delete: { handler: workItemOperations.delete, permission: null },
   },
 })

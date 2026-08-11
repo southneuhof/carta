@@ -1,109 +1,100 @@
-import { defineDomainPart, defineModel } from "@southneuhof/sprindle/model";
-import type { RouteAuthorize } from "@southneuhof/sprindle/model";
-import type { ModelRuntimeEntity } from "@southneuhof/sprindle/source";
+import { isHttpError, unauthorized } from '@southneuhof/sprindle'
+import { defineDomainPart, defineModel } from '@southneuhof/sprindle/model'
+import { authenticated, create, detail, defineRoute, list, update } from '@southneuhof/sprindle/routes'
+import { orgIdentity, requirePermission } from '../../identity'
 import {
-  authenticated,
-  create,
-  deleteRoute,
-  detail,
-  list,
-  update,
-} from "@southneuhof/sprindle/routes";
-import { requirePermission } from "../../identity";
-import {
+  authorizationAuditEvents,
+  authorizationModule,
+  authorizationModules,
   permissions,
   permission,
+  projectRoleAssignments,
   role,
-  roleGroups,
-  roleGroup,
-  roles,
   rolePermissions,
-  userRoles,
-  projectUsers,
-} from "./roles.entity";
-import {
-  assignRolePermission,
-  listRolePermissions,
-  revokeRolePermission,
-} from "./role-permissions.routes";
-import {
-  assignUserRole,
-  listUserRoles,
-  revokeUserRole,
-} from "./user-roles.routes";
-import {
-  assignProjectUser,
-  listProjectUsers,
-  revokeProjectUser,
-} from "./project-users.routes";
+  roles,
+  systemRoleAssignments,
+} from './roles.entity'
+import { assignProjectRole, listProjectRoleAssignments, listProjectRoleAssignmentOptions, revokeProjectRole } from './project-role-assignments.routes'
+import { assignRolePermission, listRolePermissions, revokeRolePermission } from './role-permissions.routes'
+import { assignSystemRole, listSystemRoleAssignments, revokeSystemRole } from './system-role-assignments.routes'
+import { deleteUnassignedRole } from '../../authorization'
 
-const readRoles = [authenticated(), requirePermission("view-roles")];
-const writeRoles = [authenticated(), requirePermission("manage-roles")];
-const readPermissions = [
-  authenticated(),
-  requirePermission("view-permissions"),
-];
-const writePermissions = [
-  authenticated(),
-  requirePermission("manage-permissions"),
-];
+const readRoles = [authenticated(), requirePermission('view-roles')]
+const writeRoles = [authenticated(), requirePermission('manage-roles')]
+const readPermissions = [authenticated(), requirePermission('view-permissions')]
 
-function crud<
-  const TPath extends `/${string}`,
-  TEntity extends ModelRuntimeEntity,
->(
-  path: TPath,
-  entity: TEntity,
-  read: RouteAuthorize[],
-  write: RouteAuthorize[],
-) {
-  return defineModel({
-    path,
-    entity,
-    routes: {
-      list: list({ authorize: read }),
-      detail: detail({ authorize: read }),
-      create: create({ authorize: write }),
-      update: update({ authorize: write }),
-      delete: deleteRoute({ authorize: write }),
-    },
-  });
-}
+const deleteRole = defineRoute({
+  path: '/:id',
+  method: 'delete',
+  kind: 'delete',
+  authorize: writeRoles,
+  action: async (args) => {
+    const id = args.c.req.param('id')
+    const identity = await orgIdentity(args)
+    if (!id) return args.c.json({ error: 'not_found' }, 404)
+    if (!identity) throw unauthorized()
+    try {
+      return args.c.json(await deleteUnassignedRole(id))
+    } catch (error) {
+      if (isHttpError(error) && error.code === 'role_in_use') {
+        const issue = (field: string) => Number(error.issues?.find((item) => item.field === field)?.message ?? 0)
+        return args.c.json({ error: error.code, systemAssignmentCount: issue('systemAssignmentCount'), projectAssignmentCount: issue('projectAssignmentCount') }, 409)
+      }
+      throw error
+    }
+  },
+})
 
 export const domain = defineDomainPart({
   tables: {
-    roleGroups,
-    roles,
+    authorizationModules,
     permissions,
+    roles,
     rolePermissions,
-    userRoles,
-    projectUsers,
+    systemRoleAssignments,
+    projectRoleAssignments,
+    authorizationAuditEvents,
   },
-  entities: [roleGroup, role, permission],
-});
-export const roleGroupModel = crud(
-  "/role-groups",
-  roleGroup,
-  [authenticated(), requirePermission("view-role-groups")],
-  [authenticated(), requirePermission("manage-role-groups")],
-);
-export const roleModel = crud("/roles", role, readRoles, writeRoles);
-export const permissionModel = crud(
-  "/permissions",
-  permission,
-  readPermissions,
-  writePermissions,
-);
+  entities: [authorizationModule, role, permission],
+})
+
+export const moduleModel = defineModel({
+  path: '/modules',
+  entity: authorizationModule,
+  authorize: readPermissions,
+  routes: { list: list(), detail: detail() },
+})
+
+export const roleModel = defineModel({
+  path: '/roles',
+  entity: role,
+  routes: {
+    list: list({ authorize: readRoles }),
+    detail: detail({ authorize: readRoles }),
+    create: create({ authorize: writeRoles }),
+    update: update({ authorize: writeRoles }),
+    delete: deleteRole,
+  },
+})
+
+export const permissionModel = defineModel({
+  path: '/permissions',
+  entity: permission,
+  authorize: readPermissions,
+  routes: { list: list(), detail: detail() },
+})
 
 export {
   assignRolePermission,
-  assignUserRole,
+  assignSystemRole,
+  listProjectRoleAssignmentOptions,
+  listProjectRoleAssignments,
   listRolePermissions,
-  listUserRoles,
+  listSystemRoleAssignments,
   revokeRolePermission,
-  revokeUserRole,
-  assignProjectUser,
-  listProjectUsers,
-  revokeProjectUser,
-};
-export default { domain, roleGroupModel, roleModel, permissionModel };
+  revokeSystemRole,
+  assignProjectRole,
+  revokeProjectRole,
+}
+
+export default { domain, moduleModel, roleModel, permissionModel }

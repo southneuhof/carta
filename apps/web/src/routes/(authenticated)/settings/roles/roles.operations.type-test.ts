@@ -11,10 +11,9 @@ type RoleCreate = ResourceCreateOf<typeof roleOperations>
 type RoleUpdate = ResourceUpdateOf<typeof roleOperations>
 const hasList: HasList = true
 const hasOperations: [HasOperation<'list'>, HasOperation<'detail'>, HasOperation<'create'>, HasOperation<'update'>, HasOperation<'delete'>] = [true, true, true, true, true]
-const list: ListResponse = { data: [{ id: 'r1', roleCode: 'admin', name: 'Admin', roleGroupId: 'g1', roleType: 'system', assignmentScope: 'global', description: null, allowRegister: false, active: true, createdByUserId: null, updatedByUserId: null, createdAt: '', updatedAt: '' }], page: 1, limit: 10, total: 1 }
+const list: ListResponse = { data: [{ id: 'r1', roleCode: 'admin', name: 'Admin', description: null, realm: 'system', active: true, createdByUserId: null, updatedByUserId: null, createdAt: '', updatedAt: '' }], page: 1, limit: 10, total: 1 }
 const role: Role = list.data[0]
-const create: RoleCreate = { roleCode: 'editor', name: 'Editor', roleGroupId: 'g1', assignmentScope: 'global' }
+const create: RoleCreate = { roleCode: 'editor', name: 'Editor', realm: 'system' }
 const update: RoleUpdate = { name: 'Editor' }
-const missingName: RoleCreate = {}
-const projectScope: RoleCreate = { roleCode: 'editor', name: 'Editor', roleGroupId: 'g1', assignmentScope: 'project' }
-void [hasList, hasOperations, list, role, create, update, missingName, projectScope]
+const projectRealm: RoleCreate = { roleCode: 'editor', name: 'Editor', realm: 'project' }
+void [hasList, hasOperations, list, role, create, update, projectRealm]

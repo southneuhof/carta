@@ -12,5 +12,5 @@ const roleId = computed(() => route.params.roleId)
 </script>
 
 <template>
-  <FormView title="Edit Role" :resource="roles" :id="roleId" />
+  <FormView title="Edit Role" :resource="roles" :id="roleId" :form-options="{ context: { operation: 'update' } }" />
 </template>

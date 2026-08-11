@@ -28,10 +28,10 @@ export const projects = defineResource({
   form: { fields: ['name', 'shortName', 'divisionId', 'number', 'integrationCode', 'location', 'startDate', 'endDate', 'description'] },
   schemas: { create: fromZod<ProjectCreate>(project.schemas.create), update: fromZod<ProjectUpdate>(project.schemas.update) },
   capabilities: {
-    list: { handler: projectOperations.list, permission: 'view-projects', to: { name: 'master-data-projects' } },
-    create: { handler: projectOperations.create, permission: 'manage-projects', to: { name: 'master-data-projects-create' } },
-    detail: { handler: projectOperations.detail, permission: 'view-projects', to: { name: 'master-data-projects-detail', params: (id: string) => ({ projectId: id }) } },
-    update: { handler: projectOperations.update, permission: 'manage-projects', to: { name: 'master-data-projects-edit', params: (id: string) => ({ projectId: id }) } },
-    delete: { handler: projectOperations.delete, permission: 'manage-projects' },
+    list: { handler: projectOperations.list, permission: null, to: { name: 'master-data-projects' } },
+    create: { handler: projectOperations.create, permission: 'create-projects', to: { name: 'master-data-projects-create' } },
+    detail: { handler: projectOperations.detail, permission: null, to: { name: 'master-data-projects-detail', params: (id: string) => ({ projectId: id }) } },
+    update: { handler: projectOperations.update, permission: null, to: { name: 'master-data-projects-edit', params: (id: string) => ({ projectId: id }) } },
+    delete: { handler: projectOperations.delete, permission: null },
   },
 })

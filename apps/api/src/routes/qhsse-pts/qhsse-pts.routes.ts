@@ -1,4 +1,5 @@
 import { authenticated, defineRoute } from '@southneuhof/sprindle/routes'
+import { listQuerySchema } from '@southneuhof/sprindle/validation'
 import { orgIdentity } from '../../identity'
 import { actionSchemas, createReportSchema, updateReportSchema, type ActionName } from './qhsse-pts.schemas'
 import { createReport, deleteReport, getReport, listLookups, listReports, performAction, updateReport } from './qhsse-pts.service'
@@ -29,9 +30,9 @@ export const listPts = defineRoute({
   action: async (args) => {
     const userId = await caller(args)
     if (!userId) return args.c.json({ error: 'unauthorized' }, 401)
-    const query = args.c.req.query()
-    const data = await listReports(userId, query)
-    return args.c.json({ data, page: 1, limit: 100, total: data.length })
+    const query = listQuerySchema.parse(args.c.req.query())
+    const result = await listReports(userId, query)
+    return args.c.json({ data: result.data, page: query.page, limit: query.limit, total: result.total })
   },
 })
 

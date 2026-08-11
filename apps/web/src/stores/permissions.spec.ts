@@ -1,22 +1,18 @@
 import { createPinia, setActivePinia } from 'pinia'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-
-const storageGet = vi.hoisted(() => vi.fn())
-
-vi.mock('@southneuhof/utilities/storage', () => ({
-  storage: { localStorage: { get: storageGet } },
-}))
+import { beforeEach, describe, expect, it } from 'vitest'
+import { computed } from 'vue'
 
 import { permissions } from './permissions'
 
 describe('permissions store', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
-    storageGet.mockImplementation((key: string) => (key === 'permissions' ? ['stale-permission'] : { role_id: 2 }))
+    permissions().clear()
   })
 
-  it('clears stale permissions when rebuilt with an empty array', () => {
+  it('builds only from an explicit permission array', () => {
     const store = permissions()
+    store.build(['stale-permission'])
 
     expect(store.has('stale-permission')).toBe(true)
 
@@ -26,8 +22,17 @@ describe('permissions store', () => {
   })
 
   it('does not grant permissions without an explicit code', () => {
-    storageGet.mockImplementation((key: string) => (key === 'permissions' ? [] : { role_id: 1 }))
-
     expect(permissions().has('view-unlisted-route')).toBe(false)
+  })
+
+  it('updates computed consumers when permissions are built or cleared', () => {
+    const store = permissions()
+    const canViewUsers = computed(() => store.has('view-users'))
+
+    expect(canViewUsers.value).toBe(false)
+    store.build(['view-users'])
+    expect(canViewUsers.value).toBe(true)
+    store.clear()
+    expect(canViewUsers.value).toBe(false)
   })
 })

@@ -342,48 +342,6 @@ declare module 'vue-router/auto-routes' {
       { permissionId: ParamValue<false> },
       | never
     >,
-    'settings-permissions-edit': RouteRecordInfo<
-      'settings-permissions-edit',
-      '/settings/permissions/:permissionId/edit',
-      { permissionId: ParamValue<true> },
-      { permissionId: ParamValue<false> },
-      | never
-    >,
-    'settings-permissions-create': RouteRecordInfo<
-      'settings-permissions-create',
-      '/settings/permissions/create',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    'settings-role-groups': RouteRecordInfo<
-      'settings-role-groups',
-      '/settings/role-groups',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    'settings-role-groups-detail': RouteRecordInfo<
-      'settings-role-groups-detail',
-      '/settings/role-groups/:roleGroupId/detail',
-      { roleGroupId: ParamValue<true> },
-      { roleGroupId: ParamValue<false> },
-      | never
-    >,
-    'settings-role-groups-edit': RouteRecordInfo<
-      'settings-role-groups-edit',
-      '/settings/role-groups/:roleGroupId/edit',
-      { roleGroupId: ParamValue<true> },
-      { roleGroupId: ParamValue<false> },
-      | never
-    >,
-    'settings-role-groups-create': RouteRecordInfo<
-      'settings-role-groups-create',
-      '/settings/role-groups/create',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
     'settings-roles': RouteRecordInfo<
       'settings-roles',
       '/settings/roles',
@@ -431,11 +389,19 @@ declare module 'vue-router/auto-routes' {
       '/settings/users/:userId/detail',
       { userId: ParamValue<true> },
       { userId: ParamValue<false> },
-      | 'settings-users-detail-roles'
+      | 'settings-users-detail-project-roles'
+      | 'settings-users-detail-system-roles'
     >,
-    'settings-users-detail-roles': RouteRecordInfo<
-      'settings-users-detail-roles',
-      '/settings/users/:userId/detail/roles',
+    'settings-users-detail-project-roles': RouteRecordInfo<
+      'settings-users-detail-project-roles',
+      '/settings/users/:userId/detail/project-roles',
+      { userId: ParamValue<true> },
+      { userId: ParamValue<false> },
+      | never
+    >,
+    'settings-users-detail-system-roles': RouteRecordInfo<
+      'settings-users-detail-system-roles',
+      '/settings/users/:userId/detail/system-roles',
       { userId: ParamValue<true> },
       { userId: ParamValue<false> },
       | never
@@ -547,13 +513,7 @@ declare module 'vue-router/auto-routes' {
         | 'quality-pts-detail'
         | 'quality-pts-edit'
         | 'settings-permissions'
-        | 'settings-permissions-create'
         | 'settings-permissions-detail'
-        | 'settings-permissions-edit'
-        | 'settings-role-groups'
-        | 'settings-role-groups-create'
-        | 'settings-role-groups-detail'
-        | 'settings-role-groups-edit'
         | 'settings-roles'
         | 'settings-roles-create'
         | 'settings-roles-detail'
@@ -562,7 +522,8 @@ declare module 'vue-router/auto-routes' {
         | 'settings-users'
         | 'settings-users-create'
         | 'settings-users-detail'
-        | 'settings-users-detail-roles'
+        | 'settings-users-detail-project-roles'
+        | 'settings-users-detail-system-roles'
         | 'settings-users-edit'
         | 'to-do'
       views:
@@ -926,54 +887,6 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/routes/(authenticated)/settings/permissions/[permissionId]/edit.route.vue': {
-      routes:
-        | 'settings-permissions-edit'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/routes/(authenticated)/settings/permissions/create.route.vue': {
-      routes:
-        | 'settings-permissions-create'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/routes/(authenticated)/settings/role-groups/index.route.vue': {
-      routes:
-        | 'settings-role-groups'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/routes/(authenticated)/settings/role-groups/[roleGroupId]/detail.route.vue': {
-      routes:
-        | 'settings-role-groups-detail'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/routes/(authenticated)/settings/role-groups/[roleGroupId]/edit.route.vue': {
-      routes:
-        | 'settings-role-groups-edit'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/routes/(authenticated)/settings/role-groups/create.route.vue': {
-      routes:
-        | 'settings-role-groups-create'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
     'src/routes/(authenticated)/settings/roles/index.route.vue': {
       routes:
         | 'settings-roles'
@@ -1026,15 +939,24 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/settings/users/[userId]/detail.route.vue': {
       routes:
         | 'settings-users-detail'
-        | 'settings-users-detail-roles'
+        | 'settings-users-detail-project-roles'
+        | 'settings-users-detail-system-roles'
       views:
         | 'default'
       pathParamNames:
         | never
     }
-    'src/routes/(authenticated)/settings/users/[userId]/detail/roles/index.route.vue': {
+    'src/routes/(authenticated)/settings/users/[userId]/detail/project-roles/index.route.vue': {
       routes:
-        | 'settings-users-detail-roles'
+        | 'settings-users-detail-project-roles'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/settings/users/[userId]/detail/system-roles/index.route.vue': {
+      routes:
+        | 'settings-users-detail-system-roles'
       views:
         | never
       pathParamNames:

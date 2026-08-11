@@ -12,12 +12,18 @@ const legacyPermissionPrefix: Record<ResourceOperation, string> = {
   delete: 'delete',
 }
 
-/** Bridges canonical resource permissions (`roles.detail`) to app grants. */
+/** Uses server operations for project records and memory permissions elsewhere. */
 export const accessAdapter: AccessAdapter = {
-  allows: ({ permission }) => allowsPermission(permission),
+  allows: ({ operation, permission, record }) => {
+    const allowedOperations = record?.allowedOperations
+    if (['detail', 'update', 'delete'].includes(operation) && Array.isArray(allowedOperations)) {
+      return allowedOperations.includes(operation)
+    }
+    return allowsPermission(permission)
+  },
 }
 
-/** Maps a canonical action permission to this app's legacy persisted grant. */
+/** Maps a canonical action permission to the server-provided system grant. */
 export function allowsPermission(permission: string | null | undefined): boolean {
   if (!permission) return true
   const match = permission.match(/^(.*)\.(list|detail|create|update|delete)$/)

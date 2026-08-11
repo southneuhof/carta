@@ -41,7 +41,7 @@ describe('entity schemas are importable in the browser', () => {
   it('exposes the authoritative role schemas as usable validators', () => {
     const create = fromZod(role.schemas.create)
 
-    expect(create.validate({ roleCode: 'admin', name: 'Admin', roleGroupId: 'group-admin' })).toMatchObject({ success: true })
+    expect(create.validate({ roleCode: 'admin', name: 'Admin', realm: 'system' })).toMatchObject({ success: true })
   })
 
   it('rejects an empty draft with an issue on the required field', () => {

@@ -1,4 +1,4 @@
-import { storage } from '@southneuhof/utilities/storage'
+import { loadIdentity } from '@/framework/identity'
 import { savePostLoginRedirect } from '@/utils/post-login-redirect'
 import { getDefaultAuthenticatedRouteLocation } from './navigation'
 import { resourceCapabilityForRoute, useResourceRuntime, type AccessAdapter } from '@southneuhof/is-vue-framework'
@@ -21,8 +21,18 @@ export function createPermissionGuard(access?: AccessAdapter): NavigationGuard {
 }
 
 export function createAuthGuard(): NavigationGuard {
-  return (to) => {
-    const authenticated = Boolean(storage.localStorage.get('profile')?.id)
+  return async (to) => {
+    const needsIdentity = to.path === '/' || to.name === 'auth-login' || Boolean(to.meta.requiresAuth)
+    if (!needsIdentity) return true
+
+    let authenticated = false
+    try {
+      authenticated = Boolean(await loadIdentity())
+    } catch (_) {
+      // Keep the current route when the server is unavailable. Do not turn a
+      // valid server session into an anonymous browser state.
+      return true
+    }
 
     if (to.path === '/') {
       if (!authenticated) return { name: 'auth-login' } as never

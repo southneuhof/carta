@@ -7,7 +7,7 @@ const Page = { template: '<div />' }
 const routes: RouteRecordRaw[] = [
   { path: '/dashboard', name: 'dashboard', component: Page },
   { path: '/settings/users', name: 'settings-users', component: Page },
-  { path: '/settings/users/:userId/detail/roles', name: 'settings-users-detail-roles', component: Page },
+  { path: '/settings/users/:userId/detail/system-roles', name: 'settings-users-detail-system-roles', component: Page },
   { path: '/notifications', name: 'notifications', component: Page },
   { path: '/unlisted-page', name: 'unlisted-page', component: Page },
 ]
@@ -40,10 +40,11 @@ describe('routeBreadcrumbs', () => {
   })
 
   it('builds full hierarchy without exposing dynamic record ids', async () => {
-    expect(await breadcrumbs('/settings/users/42/detail/roles')).toEqual([
+    expect(await breadcrumbs('/settings/users/42/detail/system-roles')).toEqual([
       { label: 'Pengaturan' },
       { label: 'Users', to: { name: 'settings-users' } },
       { label: 'Detail' },
+      { label: 'System' },
       { label: 'Roles' },
     ])
   })

@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { storage } from '@southneuhof/utilities/storage'
-import { permissions } from '@/stores/permissions'
+import { clearIdentity, refreshIdentity } from '@/framework/identity'
 import Logo from '@/assets/corporate/common/Logo.vue'
 import { resolvePostLoginRoute } from '@/router/navigation'
 import { consumePostLoginRedirect } from '@/utils/post-login-redirect'
@@ -22,11 +21,10 @@ const formData = ref({ email: '', password: '' })
 const INVALID_CREDENTIALS_MESSAGE = 'Email atau password tidak valid'
 const CONNECTION_ERROR_MESSAGE = 'Tidak dapat terhubung ke server. Silakan coba lagi'
 const PERMISSION_ERROR_MESSAGE = 'Gagal memuat akses aplikasi. Silakan coba lagi'
-const NO_ACCESS_MESSAGE = 'Anda tidak memiliki akses ke aplikasi ini'
 const NO_DESTINATION_MESSAGE = 'Tidak ada halaman yang dapat diakses oleh akun ini'
 
 function clearStagedAccess() {
-  permissions().clear()
+  clearIdentity()
 }
 
 async function rejectLogin(message: string, sessionEstablished: boolean, clearAccess = false) {
@@ -43,7 +41,7 @@ async function login() {
   loading.value = true
   loginMessage.value = { message: '', type: undefined }
   let sessionEstablished = false
-  let failureStage: 'sign-in' | 'permissions' = 'sign-in'
+  let failureStage: 'sign-in' | 'identity' = 'sign-in'
   try {
     const loginResponse = await rpc.api.auth['sign-in'].email.$post({ json: formData.value })
     if (!loginResponse.ok) {
@@ -58,43 +56,22 @@ async function login() {
     }
 
     sessionEstablished = true
-    failureStage = 'permissions'
-    const { user } = loginData
-    // Permissions union across every active role, so they come from the server's
-    // resolved identity rather than from one role's permission list.
-    const identityResponse = await rpc.me.$get()
-    if (!identityResponse.ok) {
-      await rejectLogin(PERMISSION_ERROR_MESSAGE, sessionEstablished)
+    failureStage = 'identity'
+    const identity = await refreshIdentity()
+    if (!identity) {
+      await rejectLogin(PERMISSION_ERROR_MESSAGE, sessionEstablished, true)
       return
     }
 
-    const identityData = await identityResponse.json()
-    const identity = identityData?.data
-    if (!identity || !Array.isArray(identity.permissions)) {
-      await rejectLogin(PERMISSION_ERROR_MESSAGE, sessionEstablished)
-      return
-    }
-
-    const profile = { ...user, role_id: identity.roleCodes[0] ?? '', fullname: user.name, username: identity.user.username ?? user.email }
-    const tasks = identity.permissions
-
-    if (tasks.length === 0) {
-      await rejectLogin(NO_ACCESS_MESSAGE, sessionEstablished, true)
-      return
-    }
-
-    permissions().build(tasks)
     const destination = resolvePostLoginRoute(router, consumePostLoginRedirect())
     if (!destination) {
       await rejectLogin(NO_DESTINATION_MESSAGE, sessionEstablished, true)
       return
     }
 
-    storage.localStorage.set('profile', profile)
-    storage.localStorage.set('permissions', tasks)
     await router.push(destination)
   } catch (_) {
-    await rejectLogin(failureStage === 'permissions' ? PERMISSION_ERROR_MESSAGE : CONNECTION_ERROR_MESSAGE, sessionEstablished, failureStage === 'permissions')
+    await rejectLogin(failureStage === 'identity' ? PERMISSION_ERROR_MESSAGE : CONNECTION_ERROR_MESSAGE, sessionEstablished, failureStage === 'identity')
   } finally {
     loading.value = false
   }

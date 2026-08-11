@@ -23,4 +23,11 @@ describe('navigation entrypoints', () => {
     expect(activeNavigationModule('/settings/roles/7/detail', resolve, () => true)).toBe('settings')
     expect(activeNavigationModule('/settings/role', resolve, () => true)).toBeUndefined()
   })
+
+  it('keeps project entrypoints visible without system project grants', () => {
+    const visible = visibleNavigation(() => false)
+    const routes = visible.flatMap((module) => module.routes).filter((entry) => !('separator' in entry)).map((entry) => entry.name)
+
+    expect(routes).toEqual(expect.arrayContaining(['quality-pts', 'master-data-projects', 'master-data-work-items']))
+  })
 })

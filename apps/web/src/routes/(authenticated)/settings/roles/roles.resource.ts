@@ -1,18 +1,35 @@
 import { defineFields, defineResource, fromZod } from '@southneuhof/is-vue-framework'
 import { role } from '@southneuhof/api/routes/roles/roles.entity'
-import { roleGroups } from '../role-groups/role-groups.resource'
+import { z } from 'zod/v4'
 import { roleOperations, type Role, type RoleCreate, type RoleUpdate } from './roles.operations'
 
-const assignmentScopeOptions = [
-  { id: 'global', name: 'Global' },
+const realmOptions = [
+  { id: 'system', name: 'System' },
   { id: 'project', name: 'Project' },
 ] as const
 
+const realmLabel = (value: unknown) => value === 'system' ? 'System' : value === 'project' ? 'Project' : value
+const roleUpdateSchema = z.preprocess((value) => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return value
+  return Object.fromEntries(Object.entries(value).filter(([key]) => key !== 'realm'))
+}, role.schemas.update)
+
 export const roleFields = defineFields<Role, RoleCreate>()({
-  roleCode: { label: 'Role Code', table: { sortable: true }, form: { renderer: 'text' } },
-  name: { label: 'Role Name', table: { sortable: true }, form: { renderer: 'text' } },
-  roleGroupId: { label: 'Role Group', form: { renderer: 'lookup', source: roleGroups, props: { pick: 'id', view: 'name', required: true } } },
-  assignmentScope: { label: 'Assignment Scope', form: { renderer: 'radio', source: assignmentScopeOptions, props: { required: true } } },
+  roleCode: { label: 'Role Code', form: { renderer: 'text' } },
+  name: { label: 'Role Name', form: { renderer: 'text' } },
+  description: { label: 'Description', form: { renderer: 'textarea' } },
+  realm: {
+    label: 'Realm',
+    read: (record) => realmLabel(record.realm),
+    form: {
+      renderer: 'radio',
+      source: realmOptions,
+      props: { required: true },
+      behavior: { disabled: ({ context }) => context.operation === 'update' },
+    },
+  },
+  active: { label: 'Active' },
+  createdAt: { label: 'Created At' },
 })
 
 const roleCapabilities = {
@@ -26,10 +43,10 @@ const roleCapabilities = {
 export const roles = defineResource<typeof roleCapabilities, Role, Record<string, never>, RoleCreate, RoleUpdate>({
   key: 'roles',
   fields: roleFields,
-  table: { fields: ['roleCode', 'name', 'assignmentScope', 'active'] },
-  detail: { fields: ['roleCode', 'name', 'assignmentScope', 'active', 'createdAt'] },
-  form: { fields: ['roleCode', 'name', 'roleGroupId', 'assignmentScope', 'active'] },
-  schemas: { create: fromZod<RoleCreate>(role.schemas.create), update: fromZod<RoleUpdate>(role.schemas.update) },
+  table: { fields: ['roleCode', 'name', 'realm', 'active'] },
+  detail: { fields: ['roleCode', 'name', 'description', 'realm', 'active', 'createdAt'] },
+  form: { fields: ['roleCode', 'name', 'description', 'realm', 'active'] },
+  schemas: { create: fromZod<RoleCreate>(role.schemas.create), update: fromZod<RoleUpdate>(roleUpdateSchema) },
   capabilities: roleCapabilities,
 })
 

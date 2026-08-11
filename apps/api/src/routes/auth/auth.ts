@@ -1,5 +1,6 @@
 import { drizzleAdapter } from '@better-auth/drizzle-adapter'
 import { betterAuth } from 'better-auth'
+import { eq } from 'drizzle-orm'
 import { defineDomainPart } from '@southneuhof/sprindle/model'
 import { getDb } from '../../db'
 import { users } from '../users/users.entity'
@@ -21,6 +22,16 @@ export function createAuth({ allowSignUp = false }: { allowSignUp?: boolean } = 
     trustedOrigins: [requiredEnv('APP_ORIGIN')],
     database: drizzleAdapter(getDb(), { provider: 'pg', schema, usePlural: true }),
     emailAndPassword: { enabled: true, disableSignUp: !allowSignUp },
+    databaseHooks: {
+      session: {
+        create: {
+          before: async (session) => {
+            const user = (await getDb().select({ statusCode: users.statusCode }).from(users).where(eq(users.id, session.userId)).limit(1))[0]
+            return user?.statusCode === 'active'
+          },
+        },
+      },
+    },
   })
 }
 

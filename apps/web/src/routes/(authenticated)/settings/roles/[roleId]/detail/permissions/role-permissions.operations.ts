@@ -12,9 +12,9 @@ export async function loadRolePermissions(roleId: string): Promise<CollectionRes
   return { data: payload.data, meta: { total: payload.total } }
 }
 
-export async function setRolePermission(roleId: string, permissionId: string, assigned: boolean): Promise<void> {
+export async function setRolePermission(roleId: string, permissionId: string, assigned: boolean): Promise<RolePermission> {
   const route = rpc.roles[':roleId'].permissions[':permissionId']
   const request = { param: { roleId, permissionId } }
-  if (assigned) await parseHonoResponse<typeof route.$put>(await route.$put(request))
-  else await parseHonoResponse<typeof route.$delete>(await route.$delete(request))
+  if (assigned) return (await parseHonoResponse<typeof route.$put>(await route.$put(request))).data
+  return (await parseHonoResponse<typeof route.$delete>(await route.$delete(request))).data
 }

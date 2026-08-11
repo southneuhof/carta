@@ -5,21 +5,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const mocks = vi.hoisted(() => ({
   router: { push: vi.fn(), resolve: vi.fn() },
   signIn: vi.fn(),
-  meGet: vi.fn(),
   signOut: vi.fn(),
-  storageSet: vi.fn(),
-  permissionsBuild: vi.fn(),
-  permissionsClear: vi.fn(),
+  refreshIdentity: vi.fn(),
+  clearIdentity: vi.fn(),
   consumeRedirect: vi.fn(),
   resolvePostLoginRoute: vi.fn(),
 }))
 
 vi.mock('vue-router', () => ({
   useRouter: () => mocks.router,
-}))
-
-vi.mock('@southneuhof/utilities/storage', () => ({
-  storage: { localStorage: { get: vi.fn(), set: mocks.storageSet } },
 }))
 
 vi.mock('@/assets/corporate/common/Logo.vue', () => ({ default: { name: 'Logo' } }))
@@ -30,8 +24,9 @@ vi.mock('@southneuhof/is-vue-framework/components/base/Spinner.vue', () => ({ de
 vi.mock('@southneuhof/is-vue-framework/components/inputs/TextInput.vue', () => ({ default: { name: 'TextInput' } }))
 vi.mock('@southneuhof/is-vue-framework/components/inputs/PasswordInput.vue', () => ({ default: { name: 'PasswordInput' } }))
 
-vi.mock('@/stores/permissions', () => ({
-  permissions: () => ({ build: mocks.permissionsBuild, clear: mocks.permissionsClear }),
+vi.mock('@/framework/identity', () => ({
+  refreshIdentity: mocks.refreshIdentity,
+  clearIdentity: mocks.clearIdentity,
 }))
 
 vi.mock('@/utils/post-login-redirect', () => ({
@@ -44,7 +39,6 @@ vi.mock('@/router/navigation', () => ({
 
 vi.mock('@/framework/rpc', () => ({
   rpc: {
-    me: { $get: mocks.meGet },
     api: { auth: { 'sign-in': { email: { $post: mocks.signIn } }, 'sign-out': { $post: mocks.signOut } } },
   },
 }))
@@ -96,13 +90,9 @@ describe('login route', () => {
     mocks.resolvePostLoginRoute.mockReturnValue({ name: 'users' })
   })
 
-  it('sends credentials, persists assigned permissions, and navigates once', async () => {
+  it('sends credentials, refreshes identity, and navigates once without storage', async () => {
     mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', name: 'Alice', email: 'alice@example.com' } }))
-    mocks.meGet.mockResolvedValue(
-      response(true, {
-        data: { userId: 'user-1', user: { id: 'user-1', name: 'Alice', email: 'alice@example.com', username: null, statusCode: 'active' }, roleCodes: ['role-1'], permissions: ['view-users'] },
-      })
-    )
+    mocks.refreshIdentity.mockResolvedValue({ userId: 'user-1', user: { id: 'user-1', name: 'Alice', email: 'alice@example.com', username: null, statusCode: 'active' }, roleCodes: ['role-1'], permissions: ['view-users'] })
 
     const wrapper = mountLogin()
     const inputs = wrapper.findAll('input')
@@ -112,17 +102,7 @@ describe('login route', () => {
     await flushPromises()
 
     expect(mocks.signIn).toHaveBeenCalledWith({ json: { email: 'alice@example.com', password: 'secret' } })
-    expect(mocks.meGet).toHaveBeenCalledOnce()
-    expect(mocks.storageSet).toHaveBeenCalledWith('profile', {
-      id: 'user-1',
-      name: 'Alice',
-      email: 'alice@example.com',
-      role_id: 'role-1',
-      fullname: 'Alice',
-      username: 'alice@example.com',
-    })
-    expect(mocks.storageSet).toHaveBeenCalledWith('permissions', ['view-users'])
-    expect(mocks.permissionsBuild).toHaveBeenCalledExactlyOnceWith(['view-users'])
+    expect(mocks.refreshIdentity).toHaveBeenCalledOnce()
     expect(mocks.resolvePostLoginRoute).toHaveBeenCalledWith(mocks.router, '/settings/users')
     expect(mocks.router.push).toHaveBeenCalledExactlyOnceWith({ name: 'users' })
     expect(mocks.signOut).not.toHaveBeenCalled()
@@ -138,8 +118,7 @@ describe('login route', () => {
     await wrapper.find('form').trigger('submit')
     await flushPromises()
 
-    expect(mocks.meGet).not.toHaveBeenCalled()
-    expect(mocks.storageSet).not.toHaveBeenCalled()
+    expect(mocks.refreshIdentity).not.toHaveBeenCalled()
     expect(mocks.router.push).not.toHaveBeenCalled()
     expect(mocks.signOut).not.toHaveBeenCalled()
     expect(wrapper.text()).toContain('Email atau password tidak valid')
@@ -150,14 +129,14 @@ describe('login route', () => {
 
   it('shows a controlled permission error and cleans up after a failed permission response', async () => {
     mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', name: 'Alice', email: 'alice@example.com' } }))
-    mocks.meGet.mockResolvedValue(response(false, { message: 'Identity lookup failed' }))
+    mocks.refreshIdentity.mockRejectedValue(new Error('Identity lookup failed'))
 
     const wrapper = mountLogin()
     await wrapper.find('form').trigger('submit')
     await flushPromises()
 
-    expect(mocks.meGet).toHaveBeenCalledOnce()
-    expect(mocks.storageSet).not.toHaveBeenCalled()
+    expect(mocks.refreshIdentity).toHaveBeenCalledOnce()
+    expect(mocks.clearIdentity).toHaveBeenCalledOnce()
     expect(mocks.router.push).not.toHaveBeenCalled()
     expect(mocks.signOut).toHaveBeenCalledOnce()
     expect(wrapper.text()).toContain('Gagal memuat akses aplikasi. Silakan coba lagi')
@@ -173,7 +152,7 @@ describe('login route', () => {
     await wrapper.find('form').trigger('submit')
     await flushPromises()
 
-    expect(mocks.storageSet).not.toHaveBeenCalled()
+    expect(mocks.refreshIdentity).not.toHaveBeenCalled()
     expect(mocks.router.push).not.toHaveBeenCalled()
     expect(wrapper.text()).toContain('Tidak dapat terhubung ke server. Silakan coba lagi')
     expect(wrapper.text()).not.toContain('network details must stay hidden')
@@ -182,22 +161,18 @@ describe('login route', () => {
     wrapper.unmount()
   })
 
-  it('rejects accounts with no assigned permissions without persisting or navigating', async () => {
+  it('allows an authenticated identity without system permissions', async () => {
     mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', name: 'Alice', email: 'alice@example.com' } }))
-    mocks.meGet.mockResolvedValue(
-      response(true, { data: { userId: 'user-1', user: { id: 'user-1', name: 'Alice', email: 'alice@example.com', username: null, statusCode: 'active' }, roleCodes: [], permissions: [] } })
-    )
+    mocks.refreshIdentity.mockResolvedValue({ userId: 'user-1', user: { id: 'user-1', name: 'Alice', email: 'alice@example.com', username: null, statusCode: 'active' }, roleCodes: [], permissions: [] })
 
     const wrapper = mountLogin()
     await wrapper.find('form').trigger('submit')
     await flushPromises()
 
-    expect(mocks.storageSet).not.toHaveBeenCalled()
-    expect(mocks.permissionsBuild).not.toHaveBeenCalled()
-    expect(mocks.permissionsClear).toHaveBeenCalledOnce()
-    expect(mocks.router.push).not.toHaveBeenCalled()
-    expect(mocks.signOut).toHaveBeenCalledOnce()
-    expect(wrapper.text()).toContain('Anda tidak memiliki akses ke aplikasi ini')
+    expect(mocks.refreshIdentity).toHaveBeenCalledOnce()
+    expect(mocks.clearIdentity).not.toHaveBeenCalled()
+    expect(mocks.router.push).toHaveBeenCalledOnce()
+    expect(mocks.signOut).not.toHaveBeenCalled()
     expect(wrapper.find('button').attributes('disabled')).toBeUndefined()
 
     wrapper.unmount()
@@ -205,20 +180,15 @@ describe('login route', () => {
 
   it('rejects a missing destination without persisting or navigating', async () => {
     mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', name: 'Alice', email: 'alice@example.com' } }))
-    mocks.meGet.mockResolvedValue(
-      response(true, {
-        data: { userId: 'user-1', user: { id: 'user-1', name: 'Alice', email: 'alice@example.com', username: null, statusCode: 'active' }, roleCodes: ['role-1'], permissions: ['view-users'] },
-      })
-    )
+    mocks.refreshIdentity.mockResolvedValue({ userId: 'user-1', user: { id: 'user-1', name: 'Alice', email: 'alice@example.com', username: null, statusCode: 'active' }, roleCodes: ['role-1'], permissions: ['view-users'] })
     mocks.resolvePostLoginRoute.mockReturnValue(null)
 
     const wrapper = mountLogin()
     await wrapper.find('form').trigger('submit')
     await flushPromises()
 
-    expect(mocks.permissionsBuild).toHaveBeenCalledExactlyOnceWith(['view-users'])
-    expect(mocks.storageSet).not.toHaveBeenCalled()
-    expect(mocks.permissionsClear).toHaveBeenCalledOnce()
+    expect(mocks.refreshIdentity).toHaveBeenCalledOnce()
+    expect(mocks.clearIdentity).toHaveBeenCalledOnce()
     expect(mocks.router.push).not.toHaveBeenCalled()
     expect(mocks.signOut).toHaveBeenCalledOnce()
     expect(wrapper.text()).toContain('Tidak ada halaman yang dapat diakses oleh akun ini')
@@ -229,17 +199,16 @@ describe('login route', () => {
 
   it('keeps the primary error when session cleanup fails', async () => {
     mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', name: 'Alice', email: 'alice@example.com' } }))
-    mocks.meGet.mockResolvedValue(
-      response(true, { data: { userId: 'user-1', user: { id: 'user-1', name: 'Alice', email: 'alice@example.com', username: null, statusCode: 'active' }, roleCodes: [], permissions: [] } })
-    )
+    mocks.refreshIdentity.mockRejectedValue(new Error('Identity lookup failed'))
     mocks.signOut.mockRejectedValue(new Error('cleanup details must stay hidden'))
 
     const wrapper = mountLogin()
     await wrapper.find('form').trigger('submit')
     await flushPromises()
 
+    expect(mocks.clearIdentity).toHaveBeenCalledOnce()
     expect(mocks.signOut).toHaveBeenCalledOnce()
-    expect(wrapper.text()).toContain('Anda tidak memiliki akses ke aplikasi ini')
+    expect(wrapper.text()).toContain('Gagal memuat akses aplikasi. Silakan coba lagi')
     expect(wrapper.text()).not.toContain('cleanup details must stay hidden')
     expect(wrapper.find('button').attributes('disabled')).toBeUndefined()
 

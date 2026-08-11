@@ -13,11 +13,11 @@ export function projectVendors(projectId: string) {
     form: { fields: ['name'] },
     schemas: { create: fromZod<ProjectVendorCreate>(projectVendor.schemas.create), update: fromZod<ProjectVendorUpdate>(projectVendor.schemas.update) },
     capabilities: {
-      list: { handler: projectVendorOperations.list, permission: 'view-project-vendors', to: { name: 'master-data-projects-detail-vendors', params: { projectId } } },
-      create: { handler: projectVendorOperations.create, permission: 'manage-project-vendors', to: { name: 'master-data-projects-detail-vendors-create', params: { projectId } } },
-      detail: { handler: projectVendorOperations.detail, permission: 'view-project-vendors', to: { name: 'master-data-projects-detail-vendors-detail', params: (id) => ({ projectId, projectVendorId: String(id) }) } },
-      update: { handler: projectVendorOperations.update, permission: 'manage-project-vendors', to: { name: 'master-data-projects-detail-vendors-edit', params: (id) => ({ projectId, projectVendorId: String(id) }) } },
-      delete: { handler: projectVendorOperations.delete, permission: 'manage-project-vendors' },
+      list: { handler: projectVendorOperations.list, permission: null, to: { name: 'master-data-projects-detail-vendors', params: { projectId } } },
+      create: { handler: projectVendorOperations.create, permission: null, to: { name: 'master-data-projects-detail-vendors-create', params: { projectId } } },
+      detail: { handler: projectVendorOperations.detail, permission: null, to: { name: 'master-data-projects-detail-vendors-detail', params: (id) => ({ projectId, projectVendorId: String(id) }) } },
+      update: { handler: projectVendorOperations.update, permission: null, to: { name: 'master-data-projects-detail-vendors-edit', params: (id) => ({ projectId, projectVendorId: String(id) }) } },
+      delete: { handler: projectVendorOperations.delete, permission: null },
     },
   })
 }

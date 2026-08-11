@@ -1,10 +1,10 @@
-import { forbidden, HttpError, notFound, validationError } from '@southneuhof/sprindle'
-import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm'
-import type { z } from 'zod/v4'
+import { HttpError, notFound, validationError } from '@southneuhof/sprindle'
+import { and, asc, count, desc, eq, ilike, inArray, or, sql, type SQL } from 'drizzle-orm'
+import type { PermissionCode } from '../../authorization/catalog'
 import { getDb } from '../../db'
-import { hasProjectPermission } from '../../identity'
+import { allowedProjectOperations, allowedProjectPermissions, accessibleProjectIds, requireProjectRecord } from '../../authorization'
 import { activityLogs, notifications } from '../notifications/notifications.entity'
-import { permissions, projectUsers, rolePermissions, roles } from '../roles/roles.entity'
+import { authorizationModules, permissions, projectRoleAssignments, rolePermissions, roles } from '../roles/roles.entity'
 import { users } from '../users/users.entity'
 import { divisions } from '../divisions/divisions.entity'
 import { numberConfigs } from '../number-configs/number-configs.entity'
@@ -18,7 +18,7 @@ import { actionSchemas, createReportSchema, updateReportSchema, type ActionName,
 export { actionSchemas, createReportSchema, updateReportSchema }
 export type { ActionName, ActionInput, CreateReportInput, UpdateReportInput }
 
-const actionPermissions: Record<ActionName, string> = {
+const actionPermissions: Record<ActionName, PermissionCode> = {
   disposition: 'disposition-qhsse-pts',
   'temporary-plan': 'temporary-plan-qhsse-pts',
   'management-notes': 'management-notes-qhsse-pts',
@@ -57,6 +57,11 @@ const actionOrder: ActionName[] = [
   'close',
 ]
 
+const qhsseOperations = { detail: 'show-qhsse-pts', update: 'update-qhsse-pts', delete: 'delete-qhsse-pts' } as const
+const projectLookupOperations = { detail: 'view-projects', update: 'manage-projects', delete: 'manage-projects' } as const
+const workItemLookupOperations = { detail: 'view-work-items', update: 'manage-work-items', delete: 'manage-work-items' } as const
+const vendorLookupOperations = { detail: 'view-project-vendors', update: 'manage-project-vendors', delete: 'manage-project-vendors' } as const
+
 function now() {
   return new Date().toISOString()
 }
@@ -65,11 +70,16 @@ async function rowById(id: string) {
   return (await getDb().select().from(qhssePts).where(eq(qhssePts.id, id)).limit(1))[0]
 }
 
-async function assertAccess(id: string, userId: string, permission = 'view-qhsse-pts') {
+async function assertAccess(id: string, userId: string, permission: PermissionCode = 'view-qhsse-pts') {
   const row = await rowById(id)
   if (!row) throw notFound()
-  if (!(await hasProjectPermission(userId, row.projectId, permission))) throw forbidden()
+  await requireProjectRecord(userId, row.projectId, permission)
   return row
+}
+
+async function withAllowedOperations<T extends { projectId: string }>(userId: string, row: T) {
+  const operations = await allowedProjectOperations(userId, [row.projectId], qhsseOperations)
+  return { ...row, allowedOperations: operations.get(row.projectId) ?? [] }
 }
 
 async function validateReferences(input: CreateReportInput) {
@@ -194,23 +204,31 @@ async function addActivity(
   })
 }
 
-async function notifyNext(tx: any, row: { id: string; projectId: string; number: string }, actorUserId: string, permissionCode: string, title: string) {
+async function notifyNext(tx: any, row: { id: string; projectId: string; number: string }, actorUserId: string, permissionCode: PermissionCode, title: string) {
   const recipients = await tx
-    .select({ userId: projectUsers.userId })
-    .from(projectUsers)
-    .innerJoin(users, eq(users.id, projectUsers.userId))
-    .innerJoin(roles, eq(roles.id, projectUsers.roleId))
+    .select({ userId: users.id })
+    .from(users)
+    .innerJoin(projectRoleAssignments, eq(projectRoleAssignments.userId, users.id))
+    .innerJoin(projects, eq(projects.id, row.projectId))
+    .innerJoin(roles, eq(roles.id, projectRoleAssignments.roleId))
     .innerJoin(rolePermissions, eq(rolePermissions.roleId, roles.id))
     .innerJoin(permissions, eq(permissions.id, rolePermissions.permissionId))
+    .innerJoin(authorizationModules, eq(authorizationModules.id, permissions.moduleId))
     .where(
       and(
-        eq(projectUsers.projectId, row.projectId),
-        eq(projectUsers.active, true),
+        or(
+          eq(projectRoleAssignments.coverageType, 'all_projects'),
+          and(eq(projectRoleAssignments.coverageType, 'division'), eq(projectRoleAssignments.divisionId, projects.divisionId)),
+          and(eq(projectRoleAssignments.coverageType, 'project'), eq(projectRoleAssignments.projectId, row.projectId)),
+        ),
+        eq(projectRoleAssignments.active, true),
         eq(users.statusCode, 'active'),
         eq(roles.active, true),
-        eq(roles.assignmentScope, 'project'),
+        eq(roles.realm, 'project'),
         eq(rolePermissions.active, true),
         eq(permissions.active, true),
+        eq(authorizationModules.active, true),
+        eq(authorizationModules.realm, 'project'),
         eq(permissions.permissionCode, permissionCode)
       )
     )
@@ -231,10 +249,10 @@ async function notifyNext(tx: any, row: { id: string; projectId: string; number:
 
 export async function createReport(userId: string, rawInput: unknown) {
   const input = createReportSchema.parse(rawInput)
-  if (!(await hasProjectPermission(userId, input.projectId, 'create-qhsse-pts'))) throw forbidden()
+  await requireProjectRecord(userId, input.projectId, 'create-qhsse-pts')
   await validateReferences(input)
   const db = getDb()
-  return db.transaction(async (tx) => {
+  const row = await db.transaction(async (tx) => {
     const project = (await tx.select({ number: projects.number, divisionId: projects.divisionId }).from(projects).where(eq(projects.id, input.projectId)).limit(1))[0]
     const division = (await tx.select({ code: divisions.code }).from(divisions).where(eq(divisions.id, input.divisionId)).limit(1))[0]
     if (!project || !division) throw validationError('Project or division not found.')
@@ -262,48 +280,63 @@ export async function createReport(userId: string, rawInput: unknown) {
     )
     await addActivity(tx, row, userId, 'PTS report created.')
     await notifyNext(tx, row, userId, 'disposition-qhsse-pts', 'PTS disposition required')
-    return qhssePtsEntity.schemas.select.parse(row)
+    return row
   })
+  return withAllowedOperations(userId, qhssePtsEntity.schemas.select.parse(row))
 }
 
-export async function listReports(userId: string, query: Record<string, string | undefined>) {
-  const rows = await getDb()
-    .select({
-      row: qhssePts,
-      projectName: projects.name,
-      divisionName: divisions.name,
-    })
-    .from(qhssePts)
-    .innerJoin(projects, eq(projects.id, qhssePts.projectId))
-    .innerJoin(divisions, eq(divisions.id, qhssePts.divisionId))
-    .orderBy(desc(qhssePts.createdAt))
-  // ponytail: one authorization query per row; replace with a scoped SQL view when list volume requires it.
-  const allowed: Array<
-    z.output<typeof qhssePtsEntity.schemas.select> & {
-      projectName: string
-      divisionName: string
-    }
-  > = []
-  for (const item of rows) {
-    const row = item.row
-    if (query.projectId && row.projectId !== query.projectId) continue
-    if (query.divisionId && row.divisionId !== query.divisionId) continue
-    if (query.statusCode && row.statusCode !== query.statusCode) continue
-    if (query.stepCode && row.stepCode !== query.stepCode) continue
-    if (query.criteriaCode && row.criteriaCode !== query.criteriaCode) continue
-    if (query.search && !`${row.number} ${row.description}`.toLowerCase().includes(query.search.toLowerCase())) continue
-    if (await hasProjectPermission(userId, row.projectId, 'view-qhsse-pts'))
-      allowed.push({
-        ...qhssePtsEntity.schemas.select.parse(row),
-        projectName: item.projectName,
-        divisionName: item.divisionName,
-      })
+export async function listReports(userId: string, query: Record<string, unknown>) {
+  const conditions: SQL[] = [inArray(qhssePts.projectId, accessibleProjectIds(userId, 'view-qhsse-pts'))]
+  const projectId = typeof query.projectId === 'string' ? query.projectId : undefined
+  const divisionId = typeof query.divisionId === 'string' ? query.divisionId : undefined
+  const statusCode = typeof query.statusCode === 'string' ? query.statusCode : undefined
+  const stepCode = typeof query.stepCode === 'string' ? query.stepCode : undefined
+  const criteriaCode = typeof query.criteriaCode === 'string' ? query.criteriaCode : undefined
+  const searchQuery = typeof query.search === 'string' ? query.search : undefined
+  const page = typeof query.page === 'number' ? query.page : 1
+  const limit = typeof query.limit === 'number' ? query.limit : 20
+  if (projectId) conditions.push(eq(qhssePts.projectId, projectId))
+  if (divisionId) conditions.push(eq(qhssePts.divisionId, divisionId))
+  if (statusCode) conditions.push(eq(qhssePts.statusCode, statusCode))
+  if (stepCode) conditions.push(eq(qhssePts.stepCode, stepCode))
+  if (criteriaCode) conditions.push(eq(qhssePts.criteriaCode, criteriaCode))
+  if (searchQuery) {
+    const search = `%${searchQuery}%`
+    conditions.push(or(ilike(qhssePts.number, search), ilike(qhssePts.description, search))!)
   }
-  return allowed
+  const where = and(...conditions)
+  const db = getDb()
+  const [rows, totalRows] = await Promise.all([
+    db
+      .select({
+        row: qhssePts,
+        projectName: projects.name,
+        divisionName: divisions.name,
+      })
+      .from(qhssePts)
+      .innerJoin(projects, eq(projects.id, qhssePts.projectId))
+      .innerJoin(divisions, eq(divisions.id, qhssePts.divisionId))
+      .where(where)
+      .orderBy(desc(qhssePts.createdAt))
+      .limit(limit)
+      .offset((page - 1) * limit),
+    db.select({ value: count() }).from(qhssePts).where(where),
+  ])
+  const operations = await allowedProjectOperations(userId, [...new Set(rows.map(({ row }) => row.projectId))], qhsseOperations)
+  return {
+    data: rows.map(({ row, projectName, divisionName }) => ({
+      ...qhssePtsEntity.schemas.select.parse(row),
+      projectName,
+      divisionName,
+      allowedOperations: operations.get(row.projectId) ?? [],
+    })),
+    total: Number(totalRows[0]?.value ?? 0),
+  }
 }
 
 export async function listLookups(userId: string, projectId?: string) {
   const db = getDb()
+  const projectScope = accessibleProjectIds(userId, 'create-qhsse-pts')
   const projectRows = await db
     .select({
       id: projects.id,
@@ -313,13 +346,12 @@ export async function listLookups(userId: string, projectId?: string) {
       active: projects.active,
     })
     .from(projects)
-    .where(eq(projects.active, true))
-  const allowedProjects = [] as typeof projectRows
-  for (const project of projectRows) {
-    if (projectId && project.id !== projectId) continue
-    if (await hasProjectPermission(userId, project.id, 'create-qhsse-pts')) allowedProjects.push(project)
-  }
-  if (projectId && !allowedProjects.length) throw forbidden()
+    .where(and(
+      eq(projects.active, true),
+      projectId ? and(eq(projects.id, projectId), inArray(projects.id, projectScope)) : inArray(projects.id, projectScope),
+    ))
+  const allowedProjects = projectRows
+  if (projectId && !allowedProjects.length) throw notFound()
   const projectIds = allowedProjects.map((project) => project.id)
   const [divisionRows, workItemRows, categoryRows, rootCauseRows, vendorRows] = await Promise.all([
     db
@@ -371,13 +403,18 @@ export async function listLookups(userId: string, projectId?: string) {
       : Promise.resolve([]),
   ])
   const allowedDivisionIds = new Set(allowedProjects.map((project) => project.divisionId))
+  const [projectOperations, workItemOperations, vendorOperations] = await Promise.all([
+    allowedProjectOperations(userId, projectIds, projectLookupOperations),
+    allowedProjectOperations(userId, projectIds, workItemLookupOperations),
+    allowedProjectOperations(userId, projectIds, vendorLookupOperations),
+  ])
   return {
     divisions: divisionRows.filter((division) => allowedDivisionIds.has(division.id)),
-    projects: allowedProjects,
-    workItems: workItemRows,
+    projects: allowedProjects.map((project) => ({ ...project, allowedOperations: projectOperations.get(project.id) ?? [] })),
+    workItems: workItemRows.map((item) => ({ ...item, allowedOperations: workItemOperations.get(item.projectId) ?? [] })),
     ptsWorkCategories: categoryRows,
     rootCauses: rootCauseRows,
-    projectVendors: vendorRows,
+    projectVendors: vendorRows.map((vendor) => ({ ...vendor, allowedOperations: vendorOperations.get(vendor.projectId) ?? [] })),
   }
 }
 
@@ -387,9 +424,9 @@ export async function availableActions(row: { id: string; projectId: string; sta
     .filter((action) => transitions[action] === row.stepCode)
     .filter((action) => action !== 'follow-up-implementation' || !('followUpImplementationDoneAt' in row) || !row.followUpImplementationDoneAt)
     .filter((action) => action !== 'follow-up-price' || !('followUpPriceDoneAt' in row) || !row.followUpPriceDoneAt)
-  const actions: ActionName[] = []
-  for (const action of candidates) if (await hasProjectPermission(userId, row.projectId, actionPermissions[action])) actions.push(action)
-  return actions
+  const granted = await allowedProjectPermissions(userId, [row.projectId], candidates.map((action) => actionPermissions[action]))
+  const permissionsForProject = granted.get(row.projectId) ?? new Set<PermissionCode>()
+  return candidates.filter((action) => permissionsForProject.has(actionPermissions[action]))
 }
 
 export async function getReport(userId: string, id: string) {
@@ -416,6 +453,7 @@ export async function getReport(userId: string, id: string) {
       .from(projectVendors)
       .where(and(eq(projectVendors.projectId, row.projectId), eq(projectVendors.active, true))),
   ])
+  const operations = await allowedProjectOperations(userId, [row.projectId], qhsseOperations)
   return {
     ...qhssePtsEntity.schemas.select.parse(row),
     project: project[0],
@@ -424,6 +462,7 @@ export async function getReport(userId: string, id: string) {
     activity,
     projectVendors: vendors,
     availableActions: await availableActions(row, userId),
+    allowedOperations: operations.get(row.projectId) ?? [],
   }
 }
 
@@ -431,6 +470,7 @@ export async function updateReport(userId: string, id: string, rawInput: unknown
   const row = await assertAccess(id, userId, 'update-qhsse-pts')
   if (row.stepCode !== 'report' || row.statusCode === 'closed') throw new HttpError(409, 'invalid_transition', 'Only report-stage PTS rows can be updated.')
   const input = updateReportSchema.parse(rawInput)
+  if (input.projectId && input.projectId !== row.projectId) await requireProjectRecord(userId, input.projectId, 'update-qhsse-pts')
   if (input.projectId || input.divisionId || input.workItemId || input.workItemCategoryId) {
     await validateReferences({
       ...row,
@@ -443,7 +483,7 @@ export async function updateReport(userId: string, id: string, rawInput: unknown
     .set({ ...input, updatedBy: userId, updatedAt: now() })
     .where(eq(qhssePts.id, id))
     .returning()
-  return updated[0] ? qhssePtsEntity.schemas.select.parse(updated[0]) : null
+  return updated[0] ? withAllowedOperations(userId, qhssePtsEntity.schemas.select.parse(updated[0])) : null
 }
 
 export function nextStep(

@@ -17,11 +17,11 @@ export const ptsFields = defineFields<Pts, PtsCreate>()({
 })
 
 const ptsCapabilities = {
-  list: { handler: ptsOperations.list, permission: 'view-qhsse-pts', to: { name: 'quality-pts' } },
-  create: { handler: ptsOperations.create, permission: 'create-qhsse-pts', to: { name: 'quality-pts-create' } },
-  detail: { handler: ptsOperations.detail, permission: 'show-qhsse-pts', to: { name: 'quality-pts-detail', params: (id: string) => ({ ptsId: id }) } },
-  update: { handler: ptsOperations.update, permission: 'update-qhsse-pts', to: { name: 'quality-pts-edit', params: (id: string) => ({ ptsId: id }) } },
-  delete: { handler: ptsOperations.delete, permission: 'delete-qhsse-pts' },
+  list: { handler: ptsOperations.list, permission: null, to: { name: 'quality-pts' } },
+  create: { handler: ptsOperations.create, permission: null, to: { name: 'quality-pts-create' } },
+  detail: { handler: ptsOperations.detail, permission: null, to: { name: 'quality-pts-detail', params: (id: string) => ({ ptsId: id }) } },
+  update: { handler: ptsOperations.update, permission: null, to: { name: 'quality-pts-edit', params: (id: string) => ({ ptsId: id }) } },
+  delete: { handler: ptsOperations.delete, permission: null },
 } as const
 
 export const pts = defineResource<typeof ptsCapabilities, Pts, PtsQuery, PtsCreate, PtsUpdate>({

@@ -21,8 +21,7 @@ const mocks = vi.hoisted(() => {
     state,
     storage,
     router: { push: vi.fn() },
-    permissions: { clear: vi.fn() },
-    colorPreference: { value: 'light', set: vi.fn() },
+    clearIdentity: vi.fn(),
     signOut: vi.fn(),
     toastError: vi.fn(),
   }
@@ -30,13 +29,8 @@ const mocks = vi.hoisted(() => {
 
 vi.mock('@/router', () => ({ default: mocks.router }))
 vi.mock('@southneuhof/utilities/storage', () => ({ storage: mocks.storage }))
-vi.mock('@/stores/permissions', () => ({ permissions: () => mocks.permissions }))
-vi.mock('@/stores/colorpreference', () => ({ useColorPreference: () => mocks.colorPreference }))
+vi.mock('@/framework/identity', () => ({ clearIdentity: mocks.clearIdentity }))
 vi.mock('vue-sonner', () => ({ toast: { error: mocks.toastError } }))
-vi.mock('@/utils/post-login-redirect', () => ({
-  getCurrentHashRouteForRedirect: vi.fn(),
-  savePostLoginRedirect: vi.fn(),
-}))
 vi.mock('@/framework/rpc', () => ({
   rpc: { api: { auth: { 'sign-out': { $post: mocks.signOut } } } },
 }))
@@ -62,7 +56,7 @@ describe('legacy app services', () => {
     vi.clearAllMocks()
     fetchMock.mockReset()
     mocks.state.clear()
-    mocks.colorPreference.value = 'light'
+    mocks.state.set('colorPreference', 'dark')
     window.location.hash = ''
     globalThis.fetch = fetchMock as typeof fetch
   })
@@ -110,14 +104,25 @@ describe('legacy app services', () => {
   })
 
   it('clears browser state and routes to login after a 401', async () => {
-    mocks.state.set('profile', { id: 'user-1' })
     fetchMock.mockResolvedValue(jsonResponse({ message: 'Session expired' }, 401))
 
     await expect(services.get('users')).rejects.toEqual({ message: 'Session expired' })
 
-    expect(mocks.storage.localStorage.clear).toHaveBeenCalledOnce()
+    expect(mocks.clearIdentity).toHaveBeenCalledOnce()
+    expect(mocks.storage.localStorage.clear).not.toHaveBeenCalled()
     expect(mocks.storage.cookie.clear).toHaveBeenCalledOnce()
-    expect(mocks.permissions.clear).toHaveBeenCalledOnce()
+    expect(mocks.state.get('colorPreference')).toBe('dark')
+    expect(mocks.router.push).toHaveBeenCalledExactlyOnceWith({ name: 'auth-login', force: true })
+  })
+
+  it('notifies the server and leaves non-auth local storage on sign-out', () => {
+    services.signOut()
+
+    expect(mocks.signOut).toHaveBeenCalledOnce()
+    expect(mocks.clearIdentity).toHaveBeenCalledOnce()
+    expect(mocks.storage.localStorage.clear).not.toHaveBeenCalled()
+    expect(mocks.state.get('colorPreference')).toBe('dark')
+    expect(mocks.storage.cookie.clear).toHaveBeenCalledOnce()
     expect(mocks.router.push).toHaveBeenCalledExactlyOnceWith({ name: 'auth-login', force: true })
   })
 

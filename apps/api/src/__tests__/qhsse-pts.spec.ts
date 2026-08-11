@@ -15,7 +15,7 @@ import { ptsWorkCategories } from '../routes/pts-work-categories/pts-work-catego
 import { rootCauses } from '../routes/root-causes/root-causes.entity'
 import { workItems } from '../routes/work-items/work-items.entity'
 import { notifications, activityLogs } from '../routes/notifications/notifications.entity'
-import { permissions, projectUsers, roleGroups, rolePermissions, roles } from '../routes/roles/roles.entity'
+import { authorizationModules, permissions, projectRoleAssignments, rolePermissions, roles } from '../routes/roles/roles.entity'
 import { users } from '../routes/users/users.entity'
 import { qhssePts, qhssePtsRootCauses } from '../routes/qhsse-pts/qhsse-pts.entity'
 import { createReport, performAction } from '../routes/qhsse-pts/qhsse-pts.service'
@@ -63,11 +63,16 @@ async function makeFixture() {
   const db = getDb()
   const userId = id('user')
   const recipientId = id('recipient')
-  const groupId = id('group')
+  const divisionRecipientId = id('division-recipient')
+  const allProjectsRecipientId = id('all-projects-recipient')
+  const unrelatedRecipientId = id('unrelated-recipient')
+  const moduleId = id('module')
   const roleId = id('role')
   const divisionId = id('division')
   const businessCategoryId = id('business-category')
   const projectId = id('project')
+  const otherDivisionId = id('other-division')
+  const otherProjectId = id('other-project')
   const categoryId = id('category')
   const leafId = id('leaf')
   const ptsCategoryId = id('pts-category')
@@ -94,11 +99,14 @@ async function makeFixture() {
     id: id(permissionCode),
     permissionCode,
     name: permissionCode,
-    permissionGroup: 'qhsse-pts',
+    moduleId,
   }))
   await db.insert(users).values([
     { id: userId, name: 'PTS Test User', email: `${userId}@example.invalid` },
     { id: recipientId, name: 'PTS Recipient', email: `${recipientId}@example.invalid` },
+    { id: divisionRecipientId, name: 'PTS Division Recipient', email: `${divisionRecipientId}@example.invalid` },
+    { id: allProjectsRecipientId, name: 'PTS All Projects Recipient', email: `${allProjectsRecipientId}@example.invalid` },
+    { id: unrelatedRecipientId, name: 'PTS Unrelated Recipient', email: `${unrelatedRecipientId}@example.invalid` },
   ])
   await db.insert(accounts).values({
     id: id('account'),
@@ -107,23 +115,31 @@ async function makeFixture() {
     userId,
     password: await hashPassword('test-password'),
   })
-  await db.insert(roleGroups).values({ id: groupId, roleGroupCode: id('group-code'), name: 'PTS Test Group' })
+  await db.insert(authorizationModules).values({ id: moduleId, code: id('module-code'), name: 'QHSSE PTS', realm: 'project' })
   await db.insert(roles).values({
     id: roleId,
     roleCode: id('role-code'),
     name: 'PTS Test Role',
-    roleGroupId: groupId,
-    assignmentScope: 'project',
+    realm: 'project',
   })
   await db.insert(permissions).values(permissionRows).onConflictDoNothing()
   const availablePermissions = await db.select({ id: permissions.id }).from(permissions).where(inArray(permissions.permissionCode, permissionCodes))
   await db.insert(rolePermissions).values(availablePermissions.map(({ id: permissionId }) => ({ roleId, permissionId })))
   await db.insert(businessCategories).values({ id: businessCategoryId, code: id('business-category-code'), name: 'PTS Business' })
-  await db.insert(divisions).values({ id: divisionId, businessCategoryId, code: id('division-code'), name: 'PTS Division' })
-  await db.insert(projects).values({ id: projectId, divisionId, number: id('project-number'), integrationCode: id('integration'), name: 'PTS Project' })
-  await db.insert(projectUsers).values([
-    { projectId, userId, roleId },
-    { projectId, userId: recipientId, roleId },
+  await db.insert(divisions).values([
+    { id: divisionId, businessCategoryId, code: id('division-code'), name: 'PTS Division' },
+    { id: otherDivisionId, businessCategoryId, code: id('other-division-code'), name: 'Other PTS Division' },
+  ])
+  await db.insert(projects).values([
+    { id: projectId, divisionId, number: id('project-number'), integrationCode: id('integration'), name: 'PTS Project' },
+    { id: otherProjectId, divisionId: otherDivisionId, number: id('other-project-number'), integrationCode: id('other-integration'), name: 'Other PTS Project' },
+  ])
+  await db.insert(projectRoleAssignments).values([
+    { id: id('assignment-user'), projectId, userId, roleId, coverageType: 'project' },
+    { id: id('assignment-recipient'), projectId, userId: recipientId, roleId, coverageType: 'project' },
+    { id: id('assignment-division-recipient'), userId: divisionRecipientId, roleId, coverageType: 'division', divisionId, projectId: null },
+    { id: id('assignment-all-projects-recipient'), userId: allProjectsRecipientId, roleId, coverageType: 'all_projects', divisionId: null, projectId: null },
+    { id: id('assignment-unrelated-recipient'), userId: unrelatedRecipientId, roleId, coverageType: 'project', divisionId: null, projectId: otherProjectId },
   ])
   await db.insert(workItems).values([
     { id: categoryId, projectId, code: id('work-category'), name: 'Work Category' },
@@ -148,6 +164,12 @@ async function makeFixture() {
     db,
     userId,
     recipientId,
+    notificationRecipients: {
+      exact: recipientId,
+      division: divisionRecipientId,
+      allProjects: allProjectsRecipientId,
+      unrelated: unrelatedRecipientId,
+    },
     divisionId,
     projectId,
     categoryId,
@@ -186,9 +208,9 @@ describe('manual PTS database boundaries', () => {
       })
     ).rejects.toThrow()
     await fixture.db
-      .update(projectUsers)
+      .update(projectRoleAssignments)
       .set({ active: false })
-      .where(and(eq(projectUsers.projectId, fixture.projectId), eq(projectUsers.userId, fixture.userId)))
+      .where(and(eq(projectRoleAssignments.projectId, fixture.projectId), eq(projectRoleAssignments.userId, fixture.userId)))
     await expect(createReport(fixture.userId, reportInput(fixture))).rejects.toThrow()
   })
 
@@ -233,12 +255,20 @@ describe('manual PTS database boundaries', () => {
     const response = await app.request(`/qhsse-pts/detail/${other[0]!.id}`, {
       headers: { Cookie: fixture.cookie },
     })
-    expect(response.status).toBe(403)
+    expect(response.status).toBe(404)
   })
 
   it('runs the low path, reject loop, activity, and recipient notification', async () => {
     const fixture = await makeFixture()
     const created = await createReport(fixture.userId, reportInput(fixture))
+    const dispositionInbox = await fixture.db
+      .select({ recipientUserId: notifications.recipientUserId })
+      .from(notifications)
+      .where(and(eq(notifications.referenceId, created.id), eq(notifications.title, 'PTS disposition required')))
+    for (const recipientId of [fixture.notificationRecipients.exact, fixture.notificationRecipients.division, fixture.notificationRecipients.allProjects]) {
+      expect(dispositionInbox.filter(({ recipientUserId }) => recipientUserId === recipientId)).toHaveLength(1)
+    }
+    expect(dispositionInbox.filter(({ recipientUserId }) => recipientUserId === fixture.notificationRecipients.unrelated)).toHaveLength(0)
     await expect(performAction(fixture.userId, created.id, 'close', { closeNotes: 'No', closeDate: '2026-08-10' })).rejects.toThrow()
     await performAction(fixture.userId, created.id, 'disposition', { dispositionStatusCode: 'low', notes: 'Accepted' })
     await performAction(fixture.userId, created.id, 'complete-analysis', { analysis: 'Analysed', targetDate: '2026-08-11' })

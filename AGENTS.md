@@ -14,3 +14,10 @@
 - Test observable behavior, review substantial changes, and validate user-facing work in the real interface when applicable
 - Preserve unrelated work and never take destructive, production, or external actions beyond what the user authorized
 - Report meaningful blockers, outcomes, and evidence without noisy progress
+
+# Web UI reuse
+- For `apps/web` UI work, use `.agents/skills/web-ui-surface-reuse/SKILL.md`; do not load it for backend or architecture-only work.
+- For `apps/web` UI work, read `docs/architecture/web-application-architecture.md`, `packages/is-vue-framework/README.md`, and the nearest route/resource first.
+- Use `defineResource` + `ListView`/`DetailView`/`FormView` for standard CRUD; use `Table`/`Detail`/`Form`, `defineFields`, and package components for custom surfaces.
+- Do not create generic local components or custom inputs, tables, forms, or dialogs when `@southneuhof/is-vue-framework` has an equivalent. Local components are for navigation, app shell, or domain workflows.
+- If no equivalent fits, record the exact gap, keep code route-local, and do not edit framework code without explicit approval. Summaries must state `Reused`, `Searched`, and `Gap`.

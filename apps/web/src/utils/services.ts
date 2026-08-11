@@ -1,9 +1,7 @@
 import router from '../router'
 import { storage } from '@southneuhof/utilities/storage'
-import { useColorPreference } from '@/stores/colorpreference'
-import { permissions } from '@/stores/permissions'
+import { clearIdentity } from '@/framework/identity'
 import { toast } from 'vue-sonner'
-import { getCurrentHashRouteForRedirect, savePostLoginRedirect } from './post-login-redirect'
 import { rpc } from '@/framework/rpc'
 
 type ServiceRequestOptions = {
@@ -50,11 +48,6 @@ async function notifyLogoutToServer() {
   }
 }
 
-function shouldRedirectToSintaOn401(): boolean {
-  const profile = storage.localStorage.get('profile') || {}
-  return profile?.is_sso === true || String(profile?.login_method || '').toLowerCase() === 'sso'
-}
-
 class AppServices {
   // ponytail: local bridge for legacy endpoints; delete as routes move to Hono RPC.
   private async request(method: string, path: string, body?: unknown, query?: Record<string, any>, options?: ServiceRequestOptions) {
@@ -75,7 +68,7 @@ class AppServices {
 
     if (!response.ok) {
       const error = await parseResponse(response).catch(() => ({ status: response.status, statusText: response.statusText }))
-      if (response.status === 401) this.signOut(false, { onUnauthorized: true })
+      if (response.status === 401) this.signOut(false)
       if (!options?.bypassErrorToast) toast.error(extractErrorMessage(error))
       throw error
     }
@@ -156,28 +149,11 @@ class AppServices {
     return this.request(method.toUpperCase(), path, payload, undefined, options)
   }
 
-  signOut(notifyServer: boolean = true, options?: { onUnauthorized?: boolean }) {
-    const isSsoUser = shouldRedirectToSintaOn401()
-
+  signOut(notifyServer: boolean = true) {
     if (notifyServer) void notifyLogoutToServer()
 
-    const redirectToSinta = isSsoUser && (Boolean(options?.onUnauthorized) || notifyServer)
-    if (redirectToSinta && options?.onUnauthorized) {
-      const currentRoute = getCurrentHashRouteForRedirect()
-      if (currentRoute) savePostLoginRedirect(currentRoute)
-    }
-
-    const colorPreference = useColorPreference().value
-    storage.localStorage.clear()
+    clearIdentity()
     storage.cookie.clear()
-    if (colorPreference) useColorPreference().set(colorPreference)
-    permissions().clear()
-
-    if (redirectToSinta) {
-      window.location.href = 'https://sinta.adhi.co.id'
-      return
-    }
-
     router.push({ name: 'auth-login', force: true })
   }
 

@@ -1,146 +1,41 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createApp, defineComponent, h, nextTick, type Component } from 'vue'
-import {
-  createFrameworkQueryClient,
-  Form,
-  FrameworkPlugin,
-  registerResourceRuntime,
-  resetResourceRuntimeForTests,
-  resolveFrameworkAdapters,
-  resolveFrameworkFieldDefaults,
-  resolveFields,
-} from '@southneuhof/is-vue-framework'
-import type { AccessAdapter } from '@southneuhof/is-vue-framework'
-import { appFieldDefaults } from '@/configs/defaults'
-import { appInputProps } from '@/framework/inputs/registry'
+import { describe, expect, it, vi } from 'vitest'
 
 const ok = (payload: unknown) => ({ ok: true, json: async () => payload })
 
 vi.mock('@/framework/rpc', () => ({
   rpc: {
-    'role-groups': {
-      list: { $get: vi.fn(async () => ok({ data: [{ id: 'group-admin', name: 'Administration' }], total: 1 })) },
-      detail: { ':id': { $get: vi.fn(async () => ok({ data: { id: 'group-admin', name: 'Administration' } })) } },
-      create: { $post: vi.fn(async () => ok({ data: { id: 'group-2' } })) },
-      update: { ':id': { $patch: vi.fn(async () => ok({ data: { id: 'group-admin' } })) } },
-      delete: { ':id': { $delete: vi.fn(async () => ok({ ok: true })) } },
-    },
     roles: {
-      list: { $get: vi.fn(async () => ok({ data: [{ id: '1', name: 'Admin' }], total: 1, limit: 10 })) },
-      detail: { ':id': { $get: vi.fn(async () => ok({ data: { id: '1', name: 'Admin' } })) } },
-      create: { $post: vi.fn(async () => ok({ data: { id: '2' } })) },
-      update: { ':id': { $patch: vi.fn(async () => ok({ data: { id: '1' } })) } },
+      list: { $get: vi.fn(async () => ok({ data: [], total: 0 })) },
+      detail: { ':id': { $get: vi.fn(async () => ok({ data: {} })) } },
+      create: { $post: vi.fn(async () => ok({ data: {} })) },
+      update: { ':id': { $patch: vi.fn(async () => ok({ data: {} })) } },
       delete: { ':id': { $delete: vi.fn(async () => ok({ ok: true })) } },
-      ':roleId': { permissions: { $get: vi.fn(async () => ok({ data: [], total: 0 })) } },
     },
   },
 }))
 
-const { roles } = await import('./roles.resource')
-const { rolePermissions } = await import('./[roleId]/detail/permissions/role-permissions.resource')
+const { roles, roleFields } = await import('./roles.resource')
 
-beforeEach(() => {
-  registerResourceRuntime({
-    adapters: resolveFrameworkAdapters(),
-    queryClient: createFrameworkQueryClient(),
-    fieldDefaults: resolveFrameworkFieldDefaults(appFieldDefaults),
-  })
-})
-afterEach(() => resetResourceRuntimeForTests())
-
-describe('roles resource', () => {
-  it('declares exact standard capability permissions and targets', () => {
+describe('role resource', () => {
+  it('declares the role catalog fields and standard capabilities', () => {
+    expect(Object.keys(roleFields)).toEqual(['roleCode', 'name', 'description', 'realm', 'active', 'createdAt'])
+    expect(Object.keys(roles.table().table.fields as Record<string, unknown>)).toEqual(['roleCode', 'name', 'realm', 'active'])
+    expect(Object.keys(roles.detail({ id: 'role-1' }).detail.fields as Record<string, unknown>)).toEqual(['roleCode', 'name', 'description', 'realm', 'active', 'createdAt'])
+    expect(roles.form().fields).toEqual(expect.objectContaining({ realm: expect.any(Object) }))
     expect(roles.capabilities.list).toMatchObject({ permission: 'view-roles', to: { name: 'settings-roles' } })
     expect(roles.capabilities.create).toMatchObject({ permission: 'manage-roles', to: { name: 'settings-roles-create' } })
-    const detailTarget = roles.capabilities.detail?.to
-    expect(detailTarget?.params('1')).toEqual({ roleId: '1' })
+    expect(roles.capabilities.update).toMatchObject({ permission: 'manage-roles', to: { name: 'settings-roles-edit' } })
     expect(roles.capabilities.delete).toMatchObject({ permission: 'manage-roles' })
-    expect('to' in roles.capabilities.delete!).toBe(false)
-  })
-  it('produces core props that bind directly, with no adapter shape', () => {
-    const { table } = roles.table()
-    const { detail } = roles.detail({ id: '1' })
-    const create = roles.form()
-    const update = roles.form({ id: '1' })
-
-    expect(table.namespace).toBe('roles')
-    expect(typeof table.load).toBe('function')
-    expect(detail.id).toBe('1')
-    expect(create.load).toBeUndefined()
-    expect(typeof update.load).toBe('function')
-    expect(Object.keys(create.fields as Record<string, unknown>)).toEqual(['roleCode', 'name', 'roleGroupId', 'assignmentScope', 'active'])
   })
 
-  it('renders all current form fields through the application runtime', async () => {
-    const host = document.createElement('div')
-    document.body.appendChild(host)
-    const app = createApp(defineComponent(() => () => h(Form as Component, roles.form())))
-    app.use(FrameworkPlugin, { fieldDefaults: appFieldDefaults, inputProps: appInputProps })
-    app.mount(host)
-    await Promise.resolve()
-    await nextTick()
-    await vi.dynamicImportSettled()
+  it('requires a realm on create and keeps it immutable on update', () => {
+    expect(roles.form().schema?.validate({ roleCode: 'editor', name: 'Editor', realm: 'system' }).success).toBe(true)
+    expect(roles.form().schema?.validate({ roleCode: 'editor', name: 'Editor' }).success).toBe(false)
+    expect(roles.form({ id: 'role-1' }).schema?.validate({ realm: 'system', name: 'Editor' }).success).toBe(true)
 
-    expect(host.querySelectorAll('.is-form-field')).toHaveLength(5)
-    for (const key of ['roleCode', 'name', 'roleGroupId', 'assignmentScope', 'active']) {
-      expect(host.querySelector(`label[for="field-${key}"]`)).not.toBeNull()
-    }
-    app.unmount()
-    host.remove()
-  })
-
-  it('inherits createdAt from app defaults without a resource field declaration', () => {
-    const { fields } = roles.table().table
-    const resolved = resolveFields({
-      fields,
-      surface: 'table',
-      defaultFields: resolveFrameworkFieldDefaults(appFieldDefaults).fields,
-    })
-
-    expect(Object.keys(fields as Record<string, unknown>)).toEqual(['roleCode', 'name', 'assignmentScope', 'active'])
-    expect(resolved.find((field) => field.key === 'active')).toBeDefined()
-  })
-
-  it('validates create and update through the shared schemas', () => {
-    expect(roles.form().schema?.validate({}).success).toBe(false)
-    expect(roles.form().schema?.validate({ roleCode: 'editor', name: 'Editor', roleGroupId: 'group-admin', assignmentScope: 'global' }).success).toBe(true)
-    expect(roles.form({ id: '1' }).schema?.validate({}).success).toBe(true)
-  })
-
-  it('projects standard routes and delete capability separately', () => {
-    const surface = roles.table()
-    expect(surface.detailRoute?.({ id: '1', name: 'Admin' } as never)).toEqual({ name: 'settings-roles-detail', params: { roleId: '1' } })
-    expect(surface.updateRoute?.({ id: '1', name: 'Admin' } as never)).toEqual({ name: 'settings-roles-edit', params: { roleId: '1' } })
-    expect(surface.canDelete?.({ id: '1', name: 'Admin' } as never)).toBe(true)
-  })
-
-  /** Access reaches the factories through the runtime adapter, not per call. */
-  it('hides denied row actions entirely', () => {
-    const access: AccessAdapter = { allows: ({ operation }) => operation === 'list' }
-    registerResourceRuntime({
-      adapters: resolveFrameworkAdapters({ access }),
-      queryClient: createFrameworkQueryClient(),
-      fieldDefaults: resolveFrameworkFieldDefaults(appFieldDefaults),
-    })
-
-    const surface = roles.table()
-    expect(surface.detailRoute?.({ id: '1', name: 'Admin' } as never)).toBeUndefined()
-    expect(surface.canDelete?.({ id: '1', name: 'Admin' } as never)).toBe(false)
-  })
-})
-
-describe('role permissions resource', () => {
-  it('owns child target while borrowing its parent update permission', () => {
-    expect(rolePermissions.capabilities.list).toMatchObject({ permission: 'manage-role-permissions', to: { name: 'settings-roles-detail-permissions' } })
-  })
-  it('is scoped by an ordinary searchParameters entry, with no parent vocabulary', () => {
-    const props = rolePermissions.table({ searchParameters: { role_id: '1' } }).table
-
-    expect(props.searchParameters).toEqual({ role_id: '1' })
-    expect(Object.keys(props)).not.toContain('parent')
-  })
-
-  it('returns an empty collection when no role is in scope', async () => {
-    expect(await rolePermissions.table().table.load!({ query: {}, searchParameters: {} })).toEqual({ data: [] })
+    const disabled = roleFields.realm.form?.behavior?.disabled
+    const draft = { roleCode: 'editor', name: 'Editor', realm: 'system' as const }
+    expect(disabled?.({ draft, value: 'system', context: { operation: 'update' } })).toBe(true)
+    expect(disabled?.({ draft, value: 'system', context: { operation: 'create' } })).toBe(false)
   })
 })

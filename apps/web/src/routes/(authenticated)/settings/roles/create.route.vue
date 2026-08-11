@@ -4,5 +4,5 @@ import { roles } from './roles.resource'
 </script>
 
 <template>
-  <FormView title="Create Role" :resource="roles" />
+  <FormView title="Create Role" :resource="roles" :form-options="{ context: { operation: 'create' } }" />
 </template>

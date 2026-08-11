@@ -9,11 +9,21 @@ import { createUser, type CreateUserInput } from './create.operations'
 export type { CreateUserInput } from './create.operations'
 
 const userTransport = createHonoResourceOperations(rpc.users, dataAdapter)
+
+async function updateUser(id: string, input: UserUpdate) {
+  const current = await userTransport.detail({ id, searchParameters: {} })
+  if (!current) throw new Error('User not found.')
+  if (current.statusCode === 'active' && input.statusCode && input.statusCode !== 'active' && !window.confirm('Disabling this user will end all active sessions. Continue?')) {
+    throw new Error('Status change cancelled.')
+  }
+  return userTransport.update(id, input)
+}
+
 export const userOperations = defineResourceOperations<User, Record<string, never>, CreateUserInput, UserUpdate>()({
   list: userTransport.list,
   detail: userTransport.detail,
   create: createUser,
-  update: userTransport.update,
+  update: updateUser,
 })
 export type User = z.output<typeof user.schemas.select>
 export type UserUpdate = z.input<typeof user.schemas.update>

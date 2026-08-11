@@ -7,6 +7,8 @@ describe('app field defaults', () => {
     expect(appFieldDefaults.fields.name.label).toBe('Name')
     expect(appFieldDefaults.fields.code.label).toBe('Code')
     expect(appFieldDefaults.fields.createdAt.display?.format).toBe('datetime')
+    expect(appFieldDefaults.fields.startDate.display?.format).toBe('date')
+    expect(appFieldDefaults.fields.endDate.display?.format).toBe('date')
     expect(appFieldDefaults.fields.description.table?.class).toContain('line-clamp-3')
     expect(appFieldDefaults.fields.statusCode.table?.align).toBe('center')
     expect(appFieldDefaults.fields.statusCode.form?.renderer).toBe('radio')

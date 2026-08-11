@@ -9,28 +9,30 @@ vi.mock('@southneuhof/is-vue-framework', () => ({
     setup: (props) => () => h('div', { 'data-detail': props.id }, 'Detail'),
   }),
 }))
-vi.mock('@/components/routing/Tabs.vue', () => ({ default: defineComponent({ setup: () => () => h('nav', { 'data-tabs': true }, 'Tabs') }) }))
+vi.mock('@/components/routing/Tabs.vue', () => ({ default: defineComponent({
+  props: { items: { type: Array, default: () => [] } },
+  setup: (props) => () => h('nav', { 'data-tabs': true }, props.items.map((item: { label: string }) => h('span', { 'data-tab-label': item.label }, item.label))),
+}) }))
 vi.mock('@/routes/(authenticated)/settings/roles/roles.resource', () => ({
-  roles: {
-    actions: {
-      list: { to: { name: 'settings-roles' } },
-      update: { to: (id: string) => ({ name: 'settings-roles-edit', params: { roleId: id } }) },
-    },
-  },
+  roles: { capabilities: {
+    list: { to: { name: 'settings-roles' } },
+    update: { to: { name: 'settings-roles-edit', params: (id: string) => ({ roleId: id }) } },
+  } },
 }))
 vi.mock('@/routes/(authenticated)/settings/roles/[roleId]/detail/permissions/role-permissions.resource', () => ({
   rolePermissions: { actions: { list: { key: 'list', permission: 'roles.update', routeName: 'settings-roles-detail-permissions', to: { name: 'settings-roles-detail-permissions' } } } },
 }))
 vi.mock('@/routes/(authenticated)/settings/users/users.resource', () => ({
-  users: {
-    actions: {
-      list: { to: { name: 'settings-users' } },
-      update: { to: (id: string) => ({ name: 'settings-users-edit', params: { userId: id } }) },
-    },
-  },
+  users: { capabilities: {
+    list: { to: { name: 'settings-users' } },
+    update: { to: { name: 'settings-users-edit', params: (id: string) => ({ userId: id }) } },
+  } },
 }))
-vi.mock('@/routes/(authenticated)/settings/users/[userId]/detail/roles/user-roles.resource', () => ({
-  userRoles: { actions: { list: { key: 'list', permission: 'users.update', routeName: 'settings-users-detail-roles', to: { name: 'settings-users-detail-roles' } } } },
+vi.mock('@/routes/(authenticated)/settings/users/[userId]/detail/system-roles/system-role-assignments.resource', () => ({
+  systemRoleAssignments: { capabilities: { list: { permission: 'view-system-role-assignments', to: { name: 'settings-users-detail-system-roles' } } } },
+}))
+vi.mock('@/routes/(authenticated)/settings/users/[userId]/detail/project-roles/project-role-assignments.resource', () => ({
+  projectRoleAssignments: { capabilities: { list: { permission: 'view-project-role-assignments', to: { name: 'settings-users-detail-project-roles' } } } },
 }))
 
 import RolesParent from '@/routes/(authenticated)/settings/roles/[roleId]/detail.route.vue'
@@ -44,7 +46,7 @@ afterEach(() => mounted.splice(0).forEach((unmount) => unmount()))
 async function mountParent(kind: 'roles' | 'users', child: boolean) {
   const idKey = kind === 'roles' ? 'roleId' : 'userId'
   const parentName = kind === 'roles' ? 'settings-roles-detail' : 'settings-users-detail'
-  const childName = kind === 'roles' ? 'settings-roles-detail-permissions' : 'settings-users-detail-roles'
+  const childName = kind === 'roles' ? 'settings-roles-detail-permissions' : 'settings-users-detail-system-roles'
   const parent = kind === 'roles' ? RolesParent : UsersParent
   const router = createRouter({
     history: createMemoryHistory(),
@@ -73,6 +75,7 @@ describe('marked detail parents', () => {
     const host = await mountParent(kind, false)
     expect(host.querySelector('[data-tabs]')).not.toBeNull()
     expect(host.querySelector('[data-detail="7"]')).not.toBeNull()
+    if (kind === 'users') expect([...host.querySelectorAll('[data-tab-label]')].map((tab) => tab.textContent)).toEqual(['System Roles', 'Project Roles'])
   })
 
   it.each(['roles', 'users'] as const)('renders detail-under child at %s child URL', async (kind) => {

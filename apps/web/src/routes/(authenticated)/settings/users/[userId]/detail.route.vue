@@ -5,7 +5,8 @@ import AppRouterView from '@/components/routing/AppRouterView.vue'
 import Tabs from '@/components/routing/Tabs.vue'
 import { users } from '../users.resource'
 import type { RouteTab } from '@/router/tabs'
-import { userRoles } from './detail/roles/user-roles.resource'
+import { systemRoleAssignments } from './detail/system-roles/system-role-assignments.resource'
+import { projectRoleAssignments } from './detail/project-roles/project-role-assignments.resource'
 
 const route = useRoute('settings-users-detail')
 const userId = route.params.userId
@@ -14,13 +15,14 @@ const updateTarget = (() => {
   return target && { name: target.name, params: target.params(userId) }
 })()
 
-const tabs = userRoles.capabilities?.list
-  ? [{ action: userRoles.capabilities.list, label: 'Role' }] as const satisfies readonly RouteTab[]
-  : []
+const tabs = [
+  ...(systemRoleAssignments.capabilities?.list ? [{ action: systemRoleAssignments.capabilities.list, label: 'System Roles' }] : []),
+  ...(projectRoleAssignments.capabilities?.list ? [{ action: projectRoleAssignments.capabilities.list, label: 'Project Roles' }] : []),
+] satisfies readonly RouteTab[]
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
+  <div class="flex flex-col gap-2">
     <DetailView title="Detail Pengguna" :back-to="{ name: users.capabilities?.list?.to?.name }" :resource="users" :id="userId">
       <template #controls>
         <RouterLink v-if="updateTarget" :to="updateTarget"><Button>Ubah</Button></RouterLink>

@@ -1,78 +1,55 @@
 <script setup lang="ts">
-/**
- * Permissions of one role.
- *
- * Placement comes from the filesystem, and the parent identity is an ordinary
- * `searchParameters` entry. Toggling a permission is extraordinary behavior, so
- * it stays explicit code with optimistic update, rollback, per-row concurrency
- * protection, and semantic cache invalidation.
- */
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { ListView } from '@southneuhof/is-vue-framework'
-import { rolePermissions } from './role-permissions.resource'
+import { ListView, useResourceRuntime } from '@southneuhof/is-vue-framework'
+import Switch from '@southneuhof/is-vue-framework/components/inputs/Switch.vue'
+import { permissions } from '@/stores/permissions'
 import { setRolePermission, type RolePermission } from './role-permissions.operations'
-import { Button } from '@southneuhof/is-vue-framework/components/base'
-
+import { rolePermissions } from './role-permissions.resource'
 
 const route = useRoute('settings-roles-detail-permissions')
-const roleId = computed(() => route.params.roleId)
-
-const table = computed(() => rolePermissions.table({ searchParameters: { role_id: roleId.value } }).table)
+const roleId = computed(() => String(route.params.roleId))
 const pending = ref(new Set<string>())
-const optimistic = ref<Record<string, boolean>>({})
+const canManage = permissions().has('manage-role-permissions')
 
 function isPending(id: string) {
   return pending.value.has(id)
 }
 
-function assignedOf(record: RolePermission) {
-  return optimistic.value[String(record.id)] ?? Boolean(record.assigned)
+function permissionRow(record: Record<string, unknown>) {
+  return record as unknown as RolePermission
 }
 
-async function toggle(record: RolePermission, next: boolean) {
-  const permissionId = String(record.id)
-  if (pending.value.has(permissionId)) return
-
-  const previous = assignedOf(record)
-  optimistic.value = { ...optimistic.value, [permissionId]: next }
+async function toggle(row: RolePermission) {
+  const permissionId = String(row.id)
+  if (isPending(permissionId)) return
+  const assigned = !row.assigned
   pending.value = new Set(pending.value).add(permissionId)
-
   try {
-    await setRolePermission(roleId.value, permissionId, next)
+    await setRolePermission(roleId.value, permissionId, assigned)
     await rolePermissions.invalidate()
-  } catch {
-    optimistic.value = { ...optimistic.value, [permissionId]: previous }
-    toast.error('Gagal memperbarui permission. Silakan coba lagi.')
+  } catch (error) {
+    toast.error(useResourceRuntime().adapters.data.normalizeError(error).message || 'Permission update failed.')
   } finally {
     const remaining = new Set(pending.value)
     remaining.delete(permissionId)
     pending.value = remaining
   }
 }
-
-async function onCopied() {
-  optimistic.value = {}
-  await rolePermissions.invalidate()
-}
 </script>
 
 <template>
-  <ListView title="Permissions" :table="table">
-    <template #filters>
-      <Button>Copy from Another Role</Button>
-    </template>
-
-    <template #cell:name="{ value, record }">
-      <span>{{ value }}</span>
-      <input
-        type="checkbox"
-        :data-permission="record.id"
-        :checked="assignedOf(record as RolePermission)"
-        :disabled="isPending(String(record.id))"
-        :aria-label="`Permission ${value}`"
-        @change="toggle(record as RolePermission, ($event.target as HTMLInputElement).checked)"
+  <ListView title="Permissions" :resource="rolePermissions" :table-options="{ searchParameters: { role_id: roleId } }">
+    <template #cell:assigned="{ record }">
+      <Switch
+        :model-value="permissionRow(record).assigned"
+        role="switch"
+        :aria-checked="permissionRow(record).assigned"
+        :aria-label="'Permission ' + permissionRow(record).name"
+        :data-permission="permissionRow(record).id"
+        :disabled="!canManage || isPending(String(permissionRow(record).id))"
+        @update:model-value="toggle(permissionRow(record))"
       />
     </template>
   </ListView>
