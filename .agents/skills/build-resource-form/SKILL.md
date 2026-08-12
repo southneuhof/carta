@@ -162,6 +162,23 @@ Use the backend rules in `references/backend-form-contract.md` whenever the
 form needs a new route, filter, source, permission, relationship check, or
 custom action.
 
+#### Query ownership
+
+A list endpoint owns the query contract for its resource. Before adding an
+endpoint-specific query schema:
+
+1. Read the shared parser used by the route, starting with
+   `packages/sprindle/src/validation/common-schemas.ts`.
+2. Check whether it already preserves custom filter keys.
+3. Reuse the source resource's query contract when a form passes
+   `searchParameters`.
+4. Add an endpoint-specific schema only for runtime validation, coercion, or a
+   typed guarantee that the shared parser does not provide.
+
+A parent form passes dependency values to a source resource; it does not
+redeclare that resource's filters. Do not create a query schema only because a
+service reads a value.
+
 At minimum, expose and test the actions used by the resource:
 
 - list: paginated rows and total;

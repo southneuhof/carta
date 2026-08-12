@@ -78,7 +78,15 @@ Extend the generated schemas when a form needs trimmed text, a nested object,
 an explicit enum, or a write-only relation array. Omit server-owned identity,
 audit, and derived columns from client write schemas.
 
-For list routes, parse the shared query values and extend them for domain
+A list endpoint owns the query contract for its resource. A parent form may
+pass dependency values to a source resource, but it does not declare the
+source resource's filters. Read the shared parser in
+`packages/sprindle/src/validation/common-schemas.ts` before adding a
+route-specific schema. Add one only when the endpoint needs runtime
+validation, coercion, or a typed guarantee that the shared parser does not
+provide.
+
+For list routes, parse the shared query values and apply the endpoint's domain
 filters:
 
 ```ts
