@@ -1,141 +1,223 @@
 ---
 name: build-resource-form
-description: Build or repair an ADS-HK `apps/web` resource form from the matching legacy form while keeping the frontend as a display and request client. Use for create or edit forms, `FormView`, `defineFields`, lookup fields, dependent lookups, lookup API design, or form parity work. Require server-side authorization, search, filtering, hierarchy rules, sorting, and pagination for every non-static lookup. Never use a combined unfiltered lookup payload or client-side domain filtering.
+description: Configure and repair ADS-HK resource forms in apps/web with schema-bound fields, standard CRUD views, resource-backed standard lists, dependent behavior, custom workflows, and matching apps/api contracts. Use when adding or reviewing a module or resource form, its API routes, field sources, child records, or form tests.
 ---
 
-# Build Resource Form
+# Build Resource Forms
 
-Build one complete form slice. Use the legacy repository for product behavior and the current repository for architecture.
+Use this skill for one ADS-HK resource form and its API contract. Build standard
+create and update forms first. Use the custom workflow section only when the
+screen has domain actions, child records, or several writes.
 
-## Read before editing
+## Read the current source first
 
-Read all of these sources:
+Read these files before editing:
 
 1. `AGENTS.md`.
 2. `docs/architecture/web-application-architecture.md`.
 3. `packages/is-vue-framework/README.md`.
-4. `.agents/skills/web-ui-surface-reuse/SKILL.md`.
-5. The current schema, resource, actions, route, API route, service, entity, and focused tests for the target module.
-6. The matching legacy frontend config and backend model or service under `/Users/gamer/Documents/projects/ads-hk-legacy`.
-7. [Legacy lookup pattern](references/legacy-lookup-pattern.md).
+4. `.agents/skills/web-ui-surface-reuse/SKILL.md` for web UI work.
+5. The nearest route, schema, resource, actions, API route, entity, and tests.
+6. `apps/web/src/routes/(demo)/input-catalog/inputCatalogDemo.ts` when choosing
+   a form renderer.
+7. `apps/web/src/framework/inputs/registry.ts` and a current resource with a
+   `source` when configuring a resource-backed standard list field.
 
-If the legacy path is not available, state this fact and infer only the missing product behavior from current domain evidence.
+Do not guess framework APIs from memory. Copy the shape of a nearby current
+module and change only the domain values. Do not edit
+`packages/is-vue-framework` without explicit user approval. If no framework
+surface fits, record the exact gap and keep the smallest route-local solution.
 
-## Record the form contract
+## Default workflow
 
-Before implementation, record one row for each field:
+### 1. Define the contract
 
-```text
-Field | create/edit | renderer | required | source | dependency | server query | reset rule
-```
-
-Preserve the legacy field order, labels, required rules, dependencies, and business meaning unless the user asks for a change. Do not preserve legacy framework code or obsolete wire shapes.
-
-For each UI surface, also record:
-
-```text
-Requirement: <screen need>
-Reused: <framework component, renderer, or resource>
-Searched: <framework and application paths>
-Gap: <None or exact missing capability>
-```
-
-## Enforce the lookup boundary
-
-Treat each non-static lookup as a server query.
-
-The frontend may:
-
-- send `page`, `limit`, `search`, sort values, and parent field values;
-- display returned rows and metadata;
-- send the selected ID or IDs;
-- reset or disable a dependent field when its parent changes.
-
-The frontend must not:
-
-- fetch a module-wide lookup bundle;
-- fetch all rows for several lookup fields from one endpoint;
-- filter lookup rows by search, parent, project, division, status, hierarchy, or permission;
-- build descendants or leaf sets from a full client dataset;
-- resolve one selected ID with a list request followed by `.find()`;
-- use a large static option array for database records.
-
-Allow a client-side source only for a small closed code list that is part of the form contract, such as a status radio list. Database records are not static options.
-
-## Implement lookup APIs first
-
-Reuse the target domain resource list and detail endpoints when they support the required contract. Extend the application API when a required query is missing. Do not add a form-specific combined lookup endpoint.
-
-For each lookup list endpoint:
-
-1. Authenticate and apply permission or project scope in the database query.
-2. Parse and allow only known query parameters.
-3. Apply active-state, dependency, hierarchy, and search conditions in SQL.
-4. Apply stable server sorting.
-5. Apply `limit` and `offset` in SQL.
-6. Count with the same conditions and return collection metadata.
-7. Return only fields needed by the lookup and its table.
-
-For each lookup detail endpoint:
-
-1. Read one row by ID.
-2. Apply the same access scope.
-3. Return the display fields needed to hydrate an existing form value.
-
-Keep submit validation authoritative. Recheck active state, access, and relationships even when the lookup list already limits valid choices.
-
-## Bind the current resource form
-
-Use `defineSchema`, `defineFields`, `defineResource`, and `FormView` for a standard form. Reuse an existing domain resource as the lookup `source`.
-
-`LookupInput` already sends its search value in `searchParameters`. Its table sends `page` and `limit` in `query`. `createHonoResourceActions` merges both objects into the API query. Pass dependency values only:
+Keep the API entity schemas as the write contract. Bind them to the web
+resource schema:
 
 ```ts
-projectId: {
-  label: 'Project',
-  form: {
-    renderer: 'lookup',
-    source: projects,
-    props: { pick: 'id', view: 'name', required: true },
-    behavior: {
-      disabled: ({ draft }) => !draft.divisionId,
-      props: ({ draft }) => ({ searchParameters: { divisionId: draft.divisionId } }),
-      resetWhen: ({ draft }) => draft.divisionId,
-    },
-  },
-}
+import { defineSchema, fromZod } from '@southneuhof/is-vue-framework'
+import { record } from '@southneuhof/api/routes/records/records.entity'
+import type { AppResourceContract } from '@/framework/hono'
+import { rpc } from '@/framework/rpc'
+
+export const recordsSchema = defineSchema<AppResourceContract<typeof rpc.records>>({
+  identity: 'id',
+  record: { schema: fromZod(record.schemas.select) },
+  create: { schema: fromZod(record.schemas.create) },
+  update: { schema: fromZod(record.schemas.update) },
+})
 ```
 
-Do not wrap an existing resource in a local lookup resource unless the server contract is different and cannot belong to that domain resource. Do not put domain filters in an app action after the response arrives.
+Use `fromZod(schema)` without a caller-supplied output type. Add a query schema
+only when the resource exposes typed query values.
 
-Use `Form` with `defineFields` only for a real custom workflow. Keep routes responsible for navigation, dialogs, toasts, and workflow state.
+### 2. Define one field catalog
 
-## Verify the boundary
+Use `defineFields(schema, definitions)` for shared labels, accessors, surface
+projections, sources, and pure form behavior:
 
-Add the smallest durable checks:
+```ts
+const statusOptions = [
+  { id: 'open', name: 'Open' },
+  { id: 'closed', name: 'Closed' },
+] as const
 
-- API domain tests prove access scope, parent filters, hierarchy filters, search, and pagination for non-trivial lookup rules.
-- A focused resource test proves dependency values, disable or visibility behavior, and reset rules.
-- Do not test framework markup or repeat framework tests.
+const fields = defineFields(recordsSchema, {
+  name: { label: 'Name', form: { renderer: 'text' } },
+  status: {
+    label: 'Status',
+    form: { renderer: 'radio', source: statusOptions, props: { required: true } },
+  },
+})
+```
 
-Run the focused API and web tests, web type-check, lint for changed files, and `git diff --check`.
+Keep a relation label in `read` and the submitted ID in the form field. Use
+`write` when the input value needs conversion before submit. See
+`references/form-field-types.md` for file, image, location, multi-value, table,
+and other renderer patterns.
 
-Use the real create or edit form when available. In the browser network log, verify:
+### 3. Bind fields to each action
 
-1. Opening one lookup calls only its domain endpoint.
-2. The request contains `page`, `limit`, and required dependency values.
-3. Search causes a server request.
-4. The response contains only authorized and matching rows.
-5. Editing hydrates selected values with detail requests, not full list requests.
+Field order belongs in each action. Bind only the fields that the action can
+read or write:
 
-Do not claim completion if any lookup still depends on client-side domain filtering.
+```ts
+export const records = defineResource(recordsSchema, {
+  key: 'records',
+  actions: {
+    create: { run: recordsActions.create, fields: [fields.name, fields.status] },
+    update: { run: recordsActions.update, fields: [fields.name, fields.status] },
+  },
+})
+```
 
-## Report
+Use the standard view shells in route files:
 
-Report:
+```vue
+<ListView v-bind="records.list()" />
+<DetailView v-bind="records.detail({ id })" />
+<FormView v-bind="records.create()" title="Create record" />
+<FormView v-bind="records.update({ id })" title="Edit record" />
+```
 
-- the legacy behavior preserved;
-- each lookup endpoint and its server filters;
-- `Reused`, `Searched`, and `Gap`;
-- checks run and browser network evidence;
-- any framework gap, without editing framework code.
+Set action permissions and named route targets in the resource. Keep route
+navigation, custom dialogs, toasts, and post-submit work in the route.
+
+### 4. Add dependent behavior
+
+Use pure, synchronous behavior functions:
+
+- `visible` controls presence and submitted visibility.
+- `disabled` prevents input while a dependency is missing or locked.
+- `props` supplies source values such as parent IDs through
+  `searchParameters`.
+- `resetWhen` clears a child value when its parent identity changes.
+- `derived` computes a value that the user does not edit.
+- `presentation` changes renderer presentation only when the current field
+  needs a reactive display change.
+
+Behavior functions must not write to the draft or perform I/O. Hidden fields
+are excluded from the submitted draft. The schema remains the source of truth
+for validity.
+
+For example, on an already configured resource-backed standard list field,
+disable the child until its parent exists, pass the parent to the source, and
+clear the child when the parent changes:
+
+```ts
+behavior: {
+  disabled: ({ draft }) => !draft.divisionId,
+  props: ({ draft }) => ({ searchParameters: { divisionId: draft.divisionId } }),
+  resetWhen: ({ draft }) => draft.divisionId,
+},
+```
+
+For a database-backed field, use the renderer registered for a resource-backed
+standard list. Read the exact renderer key from the app input registry and a
+nearby current resource. The source resource must expose both `list` and
+`detail` actions. Do not replace a server source with a full in-memory array.
+
+Use `initialData` for fixed parent values in a create or update action. Use
+`context` for stable screen information that affects behavior. Use
+`searchParameters` for values sent to a list or detail source.
+
+### 5. Use terminal overrides for local action changes
+
+Reuse the catalog and apply one terminal override when one action differs:
+
+```ts
+update: {
+  run: recordsActions.update,
+  fields: [fields.name, fields.status.override({ form: { behavior: { disabled: () => true } } })],
+},
+```
+
+An override is terminal. Do not chain overrides or create a second catalog for
+one action.
+
+### 6. Expose the API contract
+
+Use the backend rules in `references/backend-form-contract.md` whenever the
+form needs a new route, filter, source, permission, relationship check, or
+custom action.
+
+At minimum, expose and test the actions used by the resource:
+
+- list: paginated rows and total;
+- detail: one authorized record;
+- create: validated input and created record;
+- update: identity, validated input, and updated record; and
+- delete: authorized removal when the screen supports it.
+
+For a resource-backed standard list field, the source list must accept the
+field's search and dependency parameters. Its detail action must return the
+selected record so an edit form can display an existing value without loading
+the full collection.
+
+### 7. Verify the real flow
+
+Run focused checks for the changed module:
+
+- resource test: field order, renderer, source, behavior, and overrides;
+- action test: query forwarding, dependency parameters, and input mapping;
+- API test: authentication, scope, validation, filtering, sorting, paging,
+  detail access, and write rules;
+- web type check and focused lint;
+- `git diff --check`; and
+- browser create or edit verification when the route is available.
+
+In the browser, confirm that a standard list source sends page, limit, search,
+and dependency values; changing search sends a new server request; returned
+rows are already scoped; and edit forms load selected values through detail
+requests.
+
+Report web UI reuse as:
+
+- `Reused`: framework surfaces and nearby module patterns used;
+- `Searched`: relevant framework files and registered surfaces checked; and
+- `Gap`: exact missing surface, or `None`.
+
+## Custom workflows and child data
+
+Use standard resource actions for ordinary entity CRUD. For a domain workflow:
+
+- define a separate input schema and endpoint when permission, state, or
+  response differs from CRUD;
+- use a custom resource action or a route-local `Form`/`DialogForm` submit;
+- use `Table` and registered inputs for route-local child editing;
+- keep workflow controls and refresh behavior in the route;
+- use one database transaction when parent and child writes must succeed
+  together; and
+- give a persistent child collection its own resource when it has independent
+  screens or actions.
+
+Do not create a generic workflow engine for one module. Keep domain checks and
+state transitions on the server. Recheck every important relationship and
+permission during submit even when the form source already filtered its rows.
+
+## Stop conditions
+
+Stop and ask the user when the decision changes the API contract, permission
+model, transaction boundary, or required framework surface. Otherwise use the
+nearest current pattern and record the assumption in the final report.
