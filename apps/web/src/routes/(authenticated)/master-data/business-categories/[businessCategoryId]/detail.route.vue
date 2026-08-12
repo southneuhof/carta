@@ -6,4 +6,4 @@ import { businessCategories } from '../business-categories.resource'
 const route = useRoute('master-data-business-categories-detail')
 </script>
 
-<template><DetailView title="Kategori Bisnis" :back-to="{ name: 'master-data-business-categories' }" :resource="businessCategories" :id="String(route.params.businessCategoryId)" /></template>
+<template><DetailView v-bind="businessCategories.detail({ id: String(route.params.businessCategoryId) })" title="Kategori Bisnis" :back-to="{ name: 'master-data-business-categories' }" /></template>

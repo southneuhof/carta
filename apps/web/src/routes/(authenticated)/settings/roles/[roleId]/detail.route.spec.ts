@@ -24,17 +24,11 @@ vi.mock('@/components/routing/AppRouterView.vue', () => ({ default: { template: 
 vi.mock('@/components/routing/Tabs.vue', () => ({ default: { template: '<div />' } }))
 vi.mock('../roles.resource', () => ({
   roles: {
-    capabilities: {
-      list: { to: { name: 'settings-roles' } },
-      update: { to: { name: 'settings-roles-edit', params: (id: string) => ({ roleId: id }) } },
-    },
-    delete: mocks.remove,
+    detail: vi.fn(() => ({ run: vi.fn(), fields: [], id: 'role-1' })),
+    update: vi.fn(() => ({ defaultTo: { name: 'settings-roles-edit', params: { roleId: 'role-1' } } })),
+    delete: vi.fn(() => ({ run: mocks.remove })),
   },
 }))
-vi.mock('./detail/permissions/role-permissions.resource', () => ({
-  rolePermissions: { capabilities: { list: { to: { name: 'settings-roles-detail-permissions' } } } },
-}))
-
 const Route = (await import('./detail.route.vue')).default
 
 beforeEach(() => {
@@ -50,7 +44,7 @@ describe('role detail delete control', () => {
   it('deletes the role and returns to the role list', async () => {
     const wrapper = mount(Route, { global: { components: { Button: { template: '<button><slot /></button>' } } } })
     await wrapper.find('button[color="error"]').trigger('click')
-    expect(mocks.remove).toHaveBeenCalledWith('role-1')
+    expect(mocks.remove).toHaveBeenCalledWith()
     expect(mocks.toast.success).toHaveBeenCalled()
     expect(mocks.replace).toHaveBeenCalledWith({ name: 'settings-roles' })
     wrapper.unmount()

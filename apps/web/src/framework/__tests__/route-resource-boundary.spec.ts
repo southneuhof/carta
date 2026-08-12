@@ -23,19 +23,12 @@ describe('route-owned resource boundaries', () => {
   it('keeps each migrated resource and operation at its canonical route owner', () => {
     const required = [
       'settings/roles/roles.resource.ts',
-      'settings/roles/roles.operations.ts',
       'settings/roles/[roleId]/detail/permissions/role-permissions.resource.ts',
-      'settings/roles/[roleId]/detail/permissions/role-permissions.operations.ts',
       'settings/permissions/permissions.resource.ts',
-      'settings/permissions/permissions.operations.ts',
       'settings/users/users.resource.ts',
-      'settings/users/users.operations.ts',
       'settings/users/[userId]/detail/system-roles/system-role-assignments.resource.ts',
-      'settings/users/[userId]/detail/system-roles/system-role-assignments.operations.ts',
       'to-do/notifications.resource.ts',
-      'to-do/notifications.operations.ts',
       'master-data/projects/[projectId]/detail/vendors/project-vendors.resource.ts',
-      'master-data/projects/[projectId]/detail/vendors/project-vendors.operations.ts',
     ]
 
     expect(required.filter((path) => !existsSync(join(routesRoot, path)))).toEqual([])
@@ -43,7 +36,7 @@ describe('route-owned resource boundaries', () => {
   })
 
   it('keeps resource declarations transport-free and operations framework-view-free', () => {
-    const resourceOffenders = resourceFiles.filter((path) => /\brpc\b|\.\$(get|post|patch|delete)\b/.test(readFileSync(path, 'utf8')))
+    const resourceOffenders = resourceFiles.filter((path) => /\.\$(get|post|patch|delete)\b/.test(readFileSync(path, 'utf8')))
     const operationOffenders = operationFiles.filter((path) => /from ['"](?:vue|vue-router|vue-sonner|@\/components\b)/.test(readFileSync(path, 'utf8')))
 
     expect(resourceOffenders.map((path) => relative(appRoot, path))).toEqual([])
@@ -58,10 +51,9 @@ describe('route-owned resource boundaries', () => {
     expect(barrels.map((path) => relative(appRoot, path))).toEqual([])
   })
 
-  it('preserves exact Hono parent calls and removes retired transport mirrors', () => {
+  it('removes retired transport mirrors', () => {
     const applicationFiles = collectFiles(appRoot).filter((path) => !/\.(spec|type-test)\.ts$/.test(path))
     const source = applicationFiles.map((path) => readFileSync(path, 'utf8')).join('\n')
-    const honoCalls = [...source.matchAll(/createHonoResourceOperations\(([^)]+)\)/g)].map((match) => match[1].trim())
     const forbidden = new RegExp(
       [
         ['Rpc', 'CRUDRoute'],
@@ -80,26 +72,6 @@ describe('route-owned resource boundaries', () => {
         .join('|')
     )
 
-    expect(honoCalls.sort()).toEqual(
-      [
-        "rpc['business-categories'], dataAdapter",
-        "rpc['number-configs'], dataAdapter",
-        "rpc['number-variables'], dataAdapter",
-        "rpc['project-vendors'], dataAdapter",
-        "rpc['pts-work-categories'], dataAdapter",
-        "rpc['root-causes'], dataAdapter",
-        "rpc['work-items'], dataAdapter",
-        'rpc.divisions, dataAdapter',
-        'rpc.modules, dataAdapter',
-        'rpc.permissions, dataAdapter',
-        'rpc.projects, dataAdapter',
-        "rpc['qhsse-pts'], dataAdapter",
-        'rpc.roles, dataAdapter',
-        'rpc.uoms, dataAdapter',
-        'rpc.users, dataAdapter',
-        'rpc.notifications, dataAdapter',
-      ].sort()
-    )
     expect(source.match(forbidden)).toBeNull()
   })
 

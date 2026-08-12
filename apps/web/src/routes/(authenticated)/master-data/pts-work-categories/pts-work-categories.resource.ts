@@ -1,22 +1,42 @@
-import { defineFields, defineResource, fromZod } from '@southneuhof/is-vue-framework'
-import { ptsWorkCategory } from '@southneuhof/api/routes/pts-work-categories/pts-work-categories.entity'
-import { ptsWorkCategoryOperations, type PtsWorkCategory, type PtsWorkCategoryCreate, type PtsWorkCategoryUpdate } from './pts-work-categories.operations'
+import { defineFields, defineResource } from '@southneuhof/is-vue-framework'
+import { createHonoResourceActions } from '@/framework/hono'
+import { rpc } from '@/framework/rpc'
+import { dataAdapter } from '@/framework/adapters/data/normalize'
+import { ptsWorkCategoriesSchema } from './pts-work-categories.schema'
 
-export const ptsWorkCategories = defineResource({
+const api = createHonoResourceActions(rpc['pts-work-categories'], dataAdapter)
+const fields = defineFields(ptsWorkCategoriesSchema, {
+  name: { form: { renderer: 'text' } },
+  active: { form: { renderer: 'switch' } },
+})
+
+export const ptsWorkCategories = defineResource(ptsWorkCategoriesSchema, {
   key: 'pts-work-categories',
-  fields: defineFields<PtsWorkCategory, PtsWorkCategoryCreate>()({
-    name: {},
-    active: {},
-  }),
-  table: { fields: ['name', 'active'] },
-  detail: { fields: ['name', 'active'] },
-  form: { fields: ['name', 'active'] },
-  schemas: { create: fromZod<PtsWorkCategoryCreate>(ptsWorkCategory.schemas.create), update: fromZod<PtsWorkCategoryUpdate>(ptsWorkCategory.schemas.update) },
-  capabilities: {
-    list: { handler: ptsWorkCategoryOperations.list, permission: 'view-pts-work-categories', to: { name: 'master-data-pts-work-categories' } },
-    create: { handler: ptsWorkCategoryOperations.create, permission: 'manage-pts-work-categories', to: { name: 'master-data-pts-work-categories-create' } },
-    detail: { handler: ptsWorkCategoryOperations.detail, permission: 'view-pts-work-categories', to: { name: 'master-data-pts-work-categories-detail', params: (id: string) => ({ ptsWorkCategoryId: id }) } },
-    update: { handler: ptsWorkCategoryOperations.update, permission: 'manage-pts-work-categories', to: { name: 'master-data-pts-work-categories-edit', params: (id: string) => ({ ptsWorkCategoryId: id }) } },
-    delete: { handler: ptsWorkCategoryOperations.delete, permission: 'manage-pts-work-categories' },
+  actions: {
+    list: {
+      run: api.list,
+      fields: [fields.name, fields.active],
+      permission: 'view-pts-work-categories',
+      route: { name: 'master-data-pts-work-categories' },
+    },
+    detail: {
+      run: api.detail,
+      fields: [fields.name, fields.active],
+      permission: 'view-pts-work-categories',
+      route: { name: 'master-data-pts-work-categories-detail', params: (id) => ({ ptsWorkCategoryId: String(id) }) },
+    },
+    create: {
+      run: api.create,
+      fields: [fields.name, fields.active],
+      permission: 'manage-pts-work-categories',
+      route: { name: 'master-data-pts-work-categories-create' },
+    },
+    update: {
+      run: api.update,
+      fields: [fields.name, fields.active],
+      permission: 'manage-pts-work-categories',
+      route: { name: 'master-data-pts-work-categories-edit', params: (id) => ({ ptsWorkCategoryId: String(id) }) },
+    },
+    delete: { run: api.delete, permission: 'manage-pts-work-categories' },
   },
 })

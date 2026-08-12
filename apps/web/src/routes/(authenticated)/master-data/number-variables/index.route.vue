@@ -2,4 +2,4 @@
 import { ListView } from '@southneuhof/is-vue-framework'
 import { numberVariables } from './number-variables.resource'
 </script>
-<template><ListView title="Number Variables" :resource="numberVariables" /></template>
+<template><ListView v-bind="numberVariables.list()" title="Number Variables" /></template>

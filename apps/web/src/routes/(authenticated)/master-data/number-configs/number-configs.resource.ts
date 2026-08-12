@@ -1,8 +1,12 @@
-import { defineFields, defineResource, fromZod } from '@southneuhof/is-vue-framework'
-import { numberConfig } from '@southneuhof/api/routes/number-configs/number-configs.entity'
+import { defineFields, defineResource } from '@southneuhof/is-vue-framework'
+import { createHonoResourceActions } from '@/framework/hono'
+import { rpc } from '@/framework/rpc'
+import { dataAdapter } from '@/framework/adapters/data/normalize'
 import { numberVariables } from '../number-variables/number-variables.resource'
-import { numberVariableOperations } from '../number-variables/number-variables.operations'
-import { numberConfigOperations, type NumberConfig, type NumberConfigCreate, type NumberConfigUpdate } from './number-configs.operations'
+import { numberConfigsActions } from './number-configs.actions'
+import { numberConfigsSchema } from './number-configs.schema'
+
+const api = createHonoResourceActions(rpc['number-configs'], dataAdapter)
 
 function relationName(record: unknown, key: string) {
   if (!record || typeof record !== 'object') return undefined
@@ -10,28 +14,53 @@ function relationName(record: unknown, key: string) {
   return relation && typeof relation === 'object' ? (relation as { code?: unknown }).code : undefined
 }
 
-const numberConfigCapabilities = {
-  list: { handler: numberConfigOperations.list, permission: 'view-number-configs', to: { name: 'master-data-number-configs' } },
-  create: { handler: numberConfigOperations.create, permission: 'manage-number-configs', to: { name: 'master-data-number-configs-create' } },
-  detail: { handler: numberConfigOperations.detail, permission: 'view-number-configs', to: { name: 'master-data-number-configs-detail', params: (id: string) => ({ numberConfigId: id }) } },
-  update: { handler: numberConfigOperations.update, permission: 'manage-number-configs', to: { name: 'master-data-number-configs-edit', params: (id: string) => ({ numberConfigId: id }) } },
-  delete: { handler: numberConfigOperations.delete, permission: 'manage-number-configs' },
-} as const
+const numberVariableLookup = {
+  pick: 'code',
+  view: 'code',
+  required: true,
+  loadDetail: async ({ id }: { id?: string | number }) => (await numberVariables.list({ searchParameters: { code: String(id) } }).run({ query: {}, searchParameters: { code: String(id) } })).data[0],
+}
 
-export const numberConfigs = defineResource<typeof numberConfigCapabilities, NumberConfig, Record<string, never>, NumberConfigCreate, NumberConfigUpdate>({
+const fields = defineFields(numberConfigsSchema, {
+  numberVariable: { label: 'Number Variable', read: (record) => relationName(record, 'numberVariable') },
+  numberVariableCode: { label: 'Number Variable', form: { renderer: 'lookup', source: numberVariables, props: numberVariableLookup } },
+  displayOrder: { label: 'Display Order', table: { sortable: true } },
+  numberOfDigits: { label: 'Digits', form: { renderer: 'number' } },
+  customCode: { label: 'Custom Code', form: { renderer: 'text' } },
+  description: {},
+  active: { form: { renderer: 'switch' } },
+})
+
+export const numberConfigs = defineResource(numberConfigsSchema, {
   key: 'number-configs',
-  fields: defineFields<NumberConfig, NumberConfigCreate>()({
-    numberVariableCode: { label: 'Number Variable', table: { sortable: true }, form: { renderer: 'lookup', source: numberVariables, props: { pick: 'code', view: 'code', required: true, loadDetail: async ({ id }: { id?: string | number }) => (await numberVariableOperations.list({ query: {}, searchParameters: { code: String(id) } })).data[0] } } },
-    numberVariable: { label: 'Number Variable', read: (record: unknown) => relationName(record, 'numberVariable') },
-    displayOrder: { label: 'Display Order', table: { sortable: true }, form: { renderer: 'number' } },
-    numberOfDigits: { label: 'Digits', form: { renderer: 'number' } },
-    customCode: { label: 'Custom Code', form: { renderer: 'text' } },
-    description: {},
-    active: {},
-  }),
-  table: { fields: ['numberVariable', 'displayOrder', 'numberOfDigits', 'active'] },
-  detail: { fields: ['numberVariable', 'displayOrder', 'numberOfDigits', 'customCode', 'description', 'active'] },
-  form: { fields: ['numberVariableCode', 'numberOfDigits', 'customCode', 'description', 'active'] },
-  schemas: { create: fromZod<NumberConfigCreate>(numberConfig.schemas.create), update: fromZod<NumberConfigUpdate>(numberConfig.schemas.update) },
-  capabilities: numberConfigCapabilities,
+  actions: {
+    list: {
+      run: api.list,
+      fields: [fields.numberVariable, fields.displayOrder, fields.numberOfDigits, fields.active],
+      permission: 'view-number-configs',
+      route: { name: 'master-data-number-configs' },
+    },
+    detail: {
+      run: api.detail,
+      fields: [fields.numberVariable, fields.displayOrder, fields.numberOfDigits, fields.customCode, fields.description, fields.active],
+      permission: 'view-number-configs',
+      route: { name: 'master-data-number-configs-detail', params: (id) => ({ numberConfigId: String(id) }) },
+    },
+    create: {
+      run: api.create,
+      fields: [fields.numberVariableCode, fields.numberOfDigits, fields.customCode, fields.description, fields.active],
+      permission: 'manage-number-configs',
+      route: { name: 'master-data-number-configs-create' },
+    },
+    update: {
+      run: api.update,
+      fields: [fields.numberVariableCode, fields.numberOfDigits, fields.customCode, fields.description, fields.active],
+      permission: 'manage-number-configs',
+      route: { name: 'master-data-number-configs-edit', params: (id) => ({ numberConfigId: String(id) }) },
+    },
+    delete: { run: api.delete, permission: 'manage-number-configs' },
+    reorder: {
+      run: numberConfigsActions.reorder,
+    },
+  },
 })

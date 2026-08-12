@@ -1,8 +1,7 @@
 import type { RouteLocationRaw } from 'vue-router'
-import type { NotificationRecord } from '@/routes/(authenticated)/to-do/notifications.operations'
+import type { NotificationRecord } from '@/routes/(authenticated)/to-do/notifications.schema'
 
 export const notificationRoutes: Record<string, ((notification: NotificationRecord) => RouteLocationRaw) | undefined> = {
-  'qhsse-pts': (notification) => ({ name: 'quality-pts-detail', params: { ptsId: notification.referenceId! } }),
 }
 export type NotificationModule = keyof typeof notificationRoutes
 

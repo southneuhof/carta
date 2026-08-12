@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { defineFields } from '../defineFields'
 import { resolveFields, toCatalog } from '../resolve'
 import { readField, readFields, writeField } from '../access'
+import type { FieldDefinition } from '../../contracts'
 
 interface Role extends Record<string, unknown> {
   id: string
@@ -12,7 +12,7 @@ interface Role extends Record<string, unknown> {
   longitude: number
 }
 
-const roleFields = defineFields<Role>()({
+const roleFields = {
   name: {
     label: 'Nama',
     table: { sortable: true },
@@ -41,7 +41,7 @@ const roleFields = defineFields<Role>()({
       draft.longitude = location.longitude
     },
   },
-})
+} satisfies Record<string, FieldDefinition<Role>>
 
 describe('field resolution', () => {
   it('keeps the caller order and falls back to the key as a label', () => {

@@ -24,12 +24,14 @@ export type ZodIssueLike = { path: readonly PropertyKey[]; message: string }
 
 /**
  * Structural stand-in for a Zod schema of either dialect. The bridge only ever
- * reads `safeParse`, `shape`, `isOptional` and `_def`, so this is the honest
- * contract — a nominal `ZodTypeAny` would name one dialect and reject the other.
+ * reads `safeParse`, `shape`, `isOptional`, `_def`, and `_output`, so this is
+ * the honest contract — a nominal `ZodTypeAny` would name one dialect and
+ * reject the other.
  * `_def` stays `unknown` because each dialect's own definition type is a closed
  * interface with no index signature; every read below narrows it explicitly.
  */
 export type ZodSchemaLike = {
+  _output: unknown
   safeParse: (input: unknown) => { success: boolean; data?: unknown; error?: { issues: readonly ZodIssueLike[] } }
   isOptional?: () => boolean
   shape?: Record<string, unknown>
@@ -78,14 +80,16 @@ export function requiredSchemaKeys(schema: ZodSchemaLike): string[] {
     .map(([key]) => key)
 }
 
-export function fromZod<TOutput>(schema: ZodSchemaLike): ZodValidationSchema<TOutput> {
+type ZodOutput<TSchema extends ZodSchemaLike> = TSchema['_output']
+
+export function fromZod<TSchema extends ZodSchemaLike>(schema: TSchema): ZodValidationSchema<ZodOutput<TSchema>> {
   const requiredKeys = requiredSchemaKeys(schema)
   return {
     source: schema,
     requiredKeys,
-    validate: (input: unknown): ValidationResult<TOutput> => {
+    validate: (input: unknown): ValidationResult<ZodOutput<TSchema>> => {
       const result = schema.safeParse(input)
-      if (result.success) return { success: true, data: result.data as TOutput }
+      if (result.success) return { success: true, data: result.data as ZodOutput<TSchema> }
       return { success: false, issues: normalizeRequiredIssues(result.error?.issues ?? [], input, requiredKeys) }
     },
   }

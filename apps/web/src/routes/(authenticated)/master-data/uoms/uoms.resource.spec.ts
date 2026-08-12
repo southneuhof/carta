@@ -13,10 +13,15 @@ function fields(value: unknown, surface: 'form' | 'table' | 'detail') {
 describe('UOM resource', () => {
   it('uses name and active on every standard surface', () => {
     const keys = ['name', 'active']
-    expect(fields(uoms.table().table.fields, 'table').map((field) => field.key)).toEqual(keys)
-    expect(fields(uoms.detail({ id: '1' }).detail.fields, 'detail').map((field) => field.key)).toEqual(keys)
-    const formFields = fields(uoms.form().fields, 'form')
+    expect(fields(uoms.list().fields, 'table').map((field) => field.key)).toEqual(keys)
+    expect(fields(uoms.detail({ id: '1' }).fields, 'detail').map((field) => field.key)).toEqual(keys)
+    const formFields = fields(uoms.create().fields, 'form')
     expect(formFields.map((field) => field.key)).toEqual(keys)
     expect(formFields.map((field) => field.renderer)).toEqual(['text', 'switch'])
+  })
+
+  it('keeps standard mutation execution on the returned action object', async () => {
+    const action = uoms.delete({ id: '1' })
+    expect(action).toHaveProperty('run')
   })
 })

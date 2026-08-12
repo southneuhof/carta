@@ -6,4 +6,4 @@ import { ptsWorkCategories } from '../pts-work-categories.resource'
 const route = useRoute('master-data-pts-work-categories-edit')
 </script>
 
-<template><FormView title="Edit Kategori Pekerjaan" :resource="ptsWorkCategories" :id="String(route.params.ptsWorkCategoryId)" /></template>
+<template><FormView v-bind="ptsWorkCategories.update({ id: String(route.params.ptsWorkCategoryId) })" title="Edit Kategori Pekerjaan" /></template>

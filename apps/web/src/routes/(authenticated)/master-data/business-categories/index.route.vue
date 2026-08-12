@@ -2,4 +2,4 @@
 import { ListView } from '@southneuhof/is-vue-framework'
 import { businessCategories } from './business-categories.resource'
 </script>
-<template><ListView title="Kategori Bisnis" :resource="businessCategories" /></template>
+<template><ListView v-bind="businessCategories.list()" title="Kategori Bisnis" /></template>

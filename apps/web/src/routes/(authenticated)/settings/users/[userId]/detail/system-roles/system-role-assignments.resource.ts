@@ -1,7 +1,8 @@
 import { defineFields, defineResource } from '@southneuhof/is-vue-framework'
-import { loadSystemRoleAssignments, type SystemRoleAssignment } from './system-role-assignments.operations'
+import { systemRoleAssignmentsActions } from './system-role-assignments.actions'
+import { systemRoleAssignmentsSchema } from './system-role-assignments.schema'
 
-export const systemRoleAssignmentFields = defineFields<SystemRoleAssignment>()({
+const fields = defineFields(systemRoleAssignmentsSchema, {
   roleCode: { label: 'Code' },
   name: { label: 'Name' },
   description: { label: 'Description' },
@@ -9,14 +10,15 @@ export const systemRoleAssignmentFields = defineFields<SystemRoleAssignment>()({
   assigned: { label: 'Assigned' },
 })
 
-export const systemRoleAssignments = defineResource({
+export const systemRoleAssignments = defineResource(systemRoleAssignmentsSchema, {
   key: 'system-role-assignments',
-  fields: systemRoleAssignmentFields,
-  capabilities: {
+  actions: {
     list: {
-      handler: ({ searchParameters }) => loadSystemRoleAssignments(String(searchParameters.userId ?? '')),
+      run: systemRoleAssignmentsActions.list,
+      fields: [fields.roleCode, fields.name, fields.description, fields.active, fields.assigned],
       permission: 'view-system-role-assignments',
-      to: { name: 'settings-users-detail-system-roles' },
+      route: { name: 'settings-users-detail-system-roles' },
     },
+    set: { run: systemRoleAssignmentsActions.set },
   },
 })

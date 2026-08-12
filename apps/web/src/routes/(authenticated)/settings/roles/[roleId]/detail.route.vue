@@ -7,20 +7,15 @@ import AppRouterView from '@/components/routing/AppRouterView.vue'
 import Tabs from '@/components/routing/Tabs.vue'
 import { roles } from '../roles.resource'
 import type { RouteTab } from '@/router/tabs'
-import { rolePermissions } from './detail/permissions/role-permissions.resource'
 
 const route = useRoute('settings-roles-detail')
 const router = useRouter()
 const roleId = route.params.roleId
 const deleting = ref(false)
-const updateTarget = (() => {
-  const target = roles.capabilities?.update?.to
-  return target && { name: target.name, params: target.params(roleId) }
-})()
+const updateDefault = roles.update({ id: roleId }).defaultTo
+const updateTarget = typeof updateDefault === 'function' ? updateDefault({ id: roleId } as never) : updateDefault
 
-const tabs = rolePermissions.capabilities?.list
-  ? [{ action: rolePermissions.capabilities.list, label: 'Permissions' }] as const satisfies readonly RouteTab[]
-  : []
+const tabs = [{ action: { permission: 'view-role-permissions', to: { name: 'settings-roles-detail-permissions', params: { roleId: String(roleId) } } as never }, label: 'Permissions' }] as const satisfies readonly RouteTab[]
 
 function deleteErrorMessage(error: unknown) {
   if (error && typeof error === 'object' && !Array.isArray(error) && 'error' in error && error.error === 'role_in_use') {
@@ -36,9 +31,9 @@ async function remove() {
   if (deleting.value) return
   deleting.value = true
   try {
-    await roles.delete(roleId)
+    await roles.delete({ id: roleId }).run()
     toast.success('Data berhasil dihapus.')
-    await router.replace({ name: roles.capabilities?.list?.to?.name })
+    await router.replace({ name: 'settings-roles' })
   } catch (error) {
     toast.error(deleteErrorMessage(error))
   } finally {
@@ -49,7 +44,7 @@ async function remove() {
 
 <template>
   <div class="flex flex-col gap-2">
-    <DetailView title="Detail Role" :back-to="{ name: roles.capabilities?.list?.to?.name }" :resource="roles" :id="roleId">
+    <DetailView v-bind="roles.detail({ id: roleId })" title="Detail Role" :back-to="{ name: 'settings-roles' }">
       <template #controls>
         <RouterLink v-if="updateTarget" :to="updateTarget"><Button>Ubah</Button></RouterLink>
         <Button color="error" :disabled="deleting" @click="remove">Hapus</Button>

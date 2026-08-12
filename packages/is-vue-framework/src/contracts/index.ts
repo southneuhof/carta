@@ -37,6 +37,8 @@ export type {
   FieldDetailProjection,
   FieldFormProjection,
   FieldDefinition,
+  FieldReference,
+  FieldOverride,
   FieldCatalog,
   ResolvedField,
   FieldsInput,
@@ -44,6 +46,19 @@ export type {
 } from './fields'
 
 export type { ValidationIssue, ValidationResult, ValidationSchema, SubmitError, FormValidationTrigger, FormValidatorContext, FormValidatorResult, FormValidator, FormValidatorDefinition, FormValidatorInput } from './validation'
+
+export type {
+  SchemaIdentityDeclaration,
+  WebResourceSchemaPart,
+  WebResourceWriteSchemaPart,
+  WebResourceSchema,
+  WebResourceSchemaBoundary,
+  WebResourceRecordOf,
+  WebResourceQueryOf,
+  WebResourceCreateOf,
+  WebResourceUpdateOf,
+  WebResourceIdentityOf,
+} from './schema'
 
 export type { ResourceOperation, AccessRequest, AccessAdapter, AccessPolicy } from './access'
 
@@ -69,14 +84,3 @@ export type {
   DialogFormCloseContext,
   RowReorderPayload,
 } from './components'
-
-export type {
-  ResourceKey,
-  ResourceSchemas,
-  ResourceValidators,
-  IdentityDeclaration,
-  TableFactoryArguments,
-  DetailFactoryArguments,
-  CreateFormFactoryArguments,
-  UpdateFormFactoryArguments,
-} from './resource'

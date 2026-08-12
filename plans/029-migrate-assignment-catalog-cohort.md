@@ -6,6 +6,7 @@
 
 ## Status
 
+- **Status**: DONE
 - **Priority**: P2
 - **Effort**: L
 - **Risk**: MED
@@ -15,8 +16,8 @@
 
 ## Module checkpoints
 
-- [ ] `role-permissions`
-- [ ] `system-role-assignments`
+- [x] `role-permissions`
+- [x] `system-role-assignments`
 
 ## Why this matters
 

@@ -4,13 +4,13 @@ const mocks = vi.hoisted(() => ({ create: vi.fn() }))
 
 vi.mock('@/framework/rpc', () => ({ rpc: { users: { create: { $post: mocks.create } } } }))
 
-const { createUser } = await import('./create.operations')
+const { users } = await import('./users.resource')
 
 beforeEach(() => {
   mocks.create.mockResolvedValue({ ok: true, json: async () => ({ data: { id: 'u2', name: 'New user' } }) })
 })
 
-describe('user create route operation', () => {
+describe('user create action', () => {
   it('sends account fields and every selected system role in one request', async () => {
     const input = {
       name: 'New user',
@@ -21,7 +21,7 @@ describe('user create route operation', () => {
       systemRoleIds: ['role-admin', 'role-auditor'],
     }
 
-    await expect(createUser(input)).resolves.toEqual({ id: 'u2', name: 'New user' })
+    await expect(users.create().run(input)).resolves.toEqual({ id: 'u2', name: 'New user' })
     expect(mocks.create).toHaveBeenCalledOnce()
     expect(mocks.create).toHaveBeenCalledWith({ json: input })
   })

@@ -2,4 +2,4 @@
 import { ListView } from '@southneuhof/is-vue-framework'
 import { uoms } from './uoms.resource'
 </script>
-<template><ListView title="Satuan" :resource="uoms" /></template>
+<template><ListView v-bind="uoms.list()" title="Satuan" /></template>

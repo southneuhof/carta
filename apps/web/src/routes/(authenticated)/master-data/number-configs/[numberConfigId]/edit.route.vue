@@ -6,4 +6,4 @@ import { numberConfigs } from '../number-configs.resource'
 const route = useRoute('master-data-number-configs-edit')
 </script>
 
-<template><FormView title="Edit Number Configs" :resource="numberConfigs" :id="String(route.params.numberConfigId)" /></template>
+<template><FormView v-bind="numberConfigs.update({ id: String(route.params.numberConfigId) })" title="Edit Number Configs" /></template>

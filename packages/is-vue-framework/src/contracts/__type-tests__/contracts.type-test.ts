@@ -1,16 +1,16 @@
-import { defineFields, defineResource } from '../../index'
+import { defineFields, defineResource, defineSchema } from '../../index'
+import type { CollectionResult, WebResourceSchema } from '../index'
 
 type Role = { id: string; name: string }
-const fields = defineFields<Role>()({ name: { label: 'Name' } })
-const roles = defineResource({
+type Schema = WebResourceSchema<Role, Record<string, never>, Role, Role, string>
+const schema = defineSchema<Schema>({ identity: 'id' })
+const fields = defineFields(schema, { name: { label: 'Name' } })
+const roles = defineResource(schema, {
   key: 'roles',
-  fields,
-  capabilities: {
-    list: { handler: async () => ({ data: [{ id: '1', name: 'Admin' }] }), permission: 'roles.list' },
-    detail: { handler: async ({ id }) => ({ id: String(id), name: 'Admin' }), permission: 'roles.detail', to: { name: 'roles-detail', params: (id) => ({ id }) } },
+  actions: {
+    list: { run: async () => ({ data: [{ id: '1', name: 'Admin' }] } satisfies CollectionResult<Role>), fields: [fields.name] },
+    detail: { run: async ({ id }) => ({ id: String(id), name: 'Admin' }), fields: [fields.name] },
   },
 })
-void roles.table()
+void roles.list()
 void roles.detail({ id: '1' })
-// @ts-expect-error no create capability means no form surface.
-roles.form()

@@ -1,22 +1,42 @@
-import { defineFields, defineResource, fromZod } from '@southneuhof/is-vue-framework'
-import { uom } from '@southneuhof/api/routes/uoms/uoms.entity'
-import { uomOperations, type Uom, type UomCreate, type UomUpdate } from './uoms.operations'
+import { defineFields, defineResource } from '@southneuhof/is-vue-framework'
+import { createHonoResourceActions } from '@/framework/hono'
+import { rpc } from '@/framework/rpc'
+import { dataAdapter } from '@/framework/adapters/data/normalize'
+import { uomsSchema } from './uoms.schema'
 
-export const uoms = defineResource({
+const api = createHonoResourceActions(rpc.uoms, dataAdapter)
+const fields = defineFields(uomsSchema, {
+  name: { label: 'Name', form: { renderer: 'text' } },
+  active: { label: 'Active', form: { renderer: 'switch' } },
+})
+
+export const uoms = defineResource(uomsSchema, {
   key: 'uoms',
-  fields: defineFields<Uom, UomCreate>()({
-    name: {},
-    active: {},
-  }),
-  table: { fields: ['name', 'active'] },
-  detail: { fields: ['name', 'active'] },
-  form: { fields: ['name', 'active'] },
-  schemas: { create: fromZod<UomCreate>(uom.schemas.create), update: fromZod<UomUpdate>(uom.schemas.update) },
-  capabilities: {
-    list: { handler: uomOperations.list, permission: 'view-uoms', to: { name: 'master-data-uoms' } },
-    create: { handler: uomOperations.create, permission: 'manage-uoms', to: { name: 'master-data-uoms-create' } },
-    detail: { handler: uomOperations.detail, permission: 'view-uoms', to: { name: 'master-data-uoms-detail', params: (id: string) => ({ uomId: id }) } },
-    update: { handler: uomOperations.update, permission: 'manage-uoms', to: { name: 'master-data-uoms-edit', params: (id: string) => ({ uomId: id }) } },
-    delete: { handler: uomOperations.delete, permission: 'manage-uoms' },
+  actions: {
+    list: {
+      run: api.list,
+      fields: [fields.name, fields.active],
+      permission: 'view-uoms',
+      route: { name: 'master-data-uoms' },
+    },
+    detail: {
+      run: api.detail,
+      fields: [fields.name, fields.active],
+      permission: 'view-uoms',
+      route: { name: 'master-data-uoms-detail', params: (id) => ({ uomId: String(id) }) },
+    },
+    create: {
+      run: api.create,
+      fields: [fields.name, fields.active],
+      permission: 'manage-uoms',
+      route: { name: 'master-data-uoms-create' },
+    },
+    update: {
+      run: api.update,
+      fields: [fields.name, fields.active],
+      permission: 'manage-uoms',
+      route: { name: 'master-data-uoms-edit', params: (id) => ({ uomId: String(id) }) },
+    },
+    delete: { run: api.delete, permission: 'manage-uoms' },
   },
 })

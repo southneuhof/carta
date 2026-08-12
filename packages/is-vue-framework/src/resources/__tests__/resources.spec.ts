@@ -1,14 +1,22 @@
-import { describe, expect, it } from 'vitest'
-import { defineResource } from '../defineResource'
-import { defineFields } from '../../fields'
-import { registerResourceRuntime, resetResourceRuntimeForTests } from '../runtime'
+import { afterEach, describe, expect, it } from 'vitest'
+import type { CollectionResult, WebResourceSchema } from '../../contracts'
 import { createFrameworkQueryClient } from '../../query/client'
 import { resolveFrameworkAdapters } from '../../adapters/projectAdapters'
 import { resolveFrameworkFieldDefaults } from '../../fields/defaults'
-import { resolveFields } from '../../fields/resolve'
+import { defineFields } from '../../fields/defineFields'
+import { defineResource } from '../defineResource'
+import { defineSchema } from '../defineSchema'
+import { resetResourceActionRegistry } from '../routeAccess'
+import { registerResourceRuntime, resetResourceRuntimeForTests } from '../runtime'
 
-type Record = { id: string; name: string }
-const fields = defineFields<Record>()({ name: { label: 'Name' } })
+type Row = { id: string; name: string }
+type Draft = { name: string }
+type Schema = WebResourceSchema<Row, Record<string, never>, Draft, Draft, string>
+
+const schema = defineSchema<Schema>({ identity: 'id' })
+const fields = defineFields(schema, {
+  name: { label: 'Name', table: { sortable: true }, form: { renderer: 'text' } },
+})
 
 function resource(access = { allows: () => true }) {
   registerResourceRuntime({
@@ -16,158 +24,70 @@ function resource(access = { allows: () => true }) {
     adapters: resolveFrameworkAdapters({ access }),
     fieldDefaults: resolveFrameworkFieldDefaults(),
   })
-  return defineResource({
-    key: 'records', fields,
-    capabilities: {
-      list: { handler: async () => ({ data: [{ id: '1', name: 'One' }] }), permission: 'records.list', to: { name: 'records' } },
-      create: { handler: async (input: { name: string }) => ({ id: '2', ...input }), permission: 'records.create', to: { name: 'records-create', params: { sectionId: 'section-1' } } },
-      detail: { handler: async ({ id }) => ({ id: String(id), name: 'One' }), permission: 'records.detail', to: { name: 'records-detail', params: (id) => ({ id }) } },
-      update: { handler: async (id, input: { name?: string }) => ({ id: String(id), name: input.name ?? 'One' }), permission: 'records.update', to: { name: 'records-edit', params: (id) => ({ id }) } },
-      delete: { handler: async () => undefined, permission: 'records.delete' },
-      verify: { handler: async (_id: string, _result: 'approved' | 'rejected') => undefined, permission: 'records.verify' },
+  return defineResource(schema, {
+    key: 'records',
+    actions: {
+      list: {
+        run: async (): Promise<CollectionResult<Row>> => ({ data: [{ id: '1', name: 'One' }] }),
+        fields: [fields.name],
+        permission: 'records.list',
+        route: { name: 'records-list' },
+      },
+      detail: {
+        run: async ({ id }) => ({ id, name: 'One' }),
+        fields: [fields.name],
+        permission: 'records.detail',
+        route: { name: 'records-detail', params: (id) => ({ id }) },
+      },
+      create: {
+        run: async (input) => ({ id: '2', ...input }),
+        fields: [fields.name],
+        permission: 'records.create',
+        route: { name: 'records-create' },
+      },
+      update: {
+        run: async (id, input) => ({ id, name: input.name }),
+        fields: [fields.name],
+        permission: 'records.update',
+        route: { name: 'records-edit', params: (id) => ({ id }) },
+      },
+      delete: {
+        run: async () => undefined,
+        permission: 'records.delete',
+      },
+      verify: { run: async (id: string, result: 'approved' | 'rejected') => `${id}:${result}` },
     },
   })
 }
 
-describe('resource capabilities', () => {
-  it('uses app field defaults as base definitions on every resource surface', () => {
-    type DefaultRecord = { id: string; name: string; createdAt: string }
-    type DefaultCreate = { name: string }
-    const fieldDefaults = resolveFrameworkFieldDefaults({
-      fields: {
-        name: { label: 'Default name', form: { renderer: 'text' } },
-        createdAt: {
-          label: 'Created',
-          display: { format: 'datetime' },
-          table: { class: 'whitespace-nowrap' },
-        },
-      },
-    })
-    registerResourceRuntime({
-      queryClient: createFrameworkQueryClient(),
-      adapters: resolveFrameworkAdapters(),
-      fieldDefaults,
-    })
-    const value = defineResource({
-      key: 'defaulted-records',
-      fields: defineFields<DefaultRecord, DefaultCreate>()({}),
-      table: { fields: ['createdAt'] },
-      detail: { fields: ['createdAt'] },
-      form: { fields: ['name'] },
-      capabilities: {
-        list: { handler: async () => ({ data: [] as DefaultRecord[] }), permission: null },
-        detail: {
-          handler: async ({ id }) => ({ id: String(id), name: 'One', createdAt: '2026-01-01' }),
-          permission: null,
-        },
-        create: {
-          handler: async (input: DefaultCreate) => ({ id: '1', createdAt: '2026-01-01', ...input }),
-          permission: null,
-        },
-      },
-    })
+afterEach(() => {
+  resetResourceRuntimeForTests()
+  resetResourceActionRegistry()
+})
 
-    const tableFields = value.table().table.fields
-    const detailFields = value.detail({ id: '1' }).detail.fields
-    const formFields = value.form().fields
-    expect(Object.keys(tableFields as object)).toEqual(['createdAt'])
-    expect(Object.keys(detailFields as object)).toEqual(['createdAt'])
-    expect(Object.keys(formFields as object)).toEqual(['name'])
-    expect(resolveFields({
-      fields: tableFields,
-      surface: 'table',
-      defaultFields: fieldDefaults.fields,
-    })[0]).toMatchObject({
-      label: 'Created',
-      format: 'datetime',
-      class: 'whitespace-nowrap',
-    })
-    resetResourceRuntimeForTests()
-  })
-
-  it('keeps resource metadata above app defaults and rejects fields absent from both catalogs', () => {
-    type DefaultRecord = { id: string; createdAt: string; missing: string }
-    const fieldDefaults = resolveFrameworkFieldDefaults({
-      fields: { createdAt: { label: 'Default label' } },
-    })
-    registerResourceRuntime({
-      queryClient: createFrameworkQueryClient(),
-      adapters: resolveFrameworkAdapters(),
-      fieldDefaults,
-    })
-    const value = defineResource({
-      key: 'overridden-records',
-      fields: defineFields<DefaultRecord>()({
-        createdAt: { label: 'Resource label' },
-      }),
-      table: { fields: ['createdAt'] },
-      capabilities: {
-        list: { handler: async () => ({ data: [] as DefaultRecord[] }), permission: null },
-      },
-    })
-    expect(resolveFields({
-      fields: value.table().table.fields,
-      surface: 'table',
-      defaultFields: fieldDefaults.fields,
-    })[0].label).toBe('Resource label')
-
-    const invalid = defineResource({
-      key: 'invalid-defaulted-records',
-      fields: defineFields<DefaultRecord>()({}),
-      table: { fields: ['missing'] },
-      capabilities: {
-        list: { handler: async () => ({ data: [] as DefaultRecord[] }), permission: null },
-      },
-    })
-    expect(() => invalid.table()).toThrow('Unknown field "missing"')
-    resetResourceRuntimeForTests()
-  })
-
-  it('keeps exact custom capability handler and standard surfaces', () => {
+describe('action resources', () => {
+  it('builds standard surfaces and keeps custom actions explicit', async () => {
     const value = resource()
-    expect(value.capabilities.verify.handler('1', 'approved')).resolves.toBeUndefined()
-    expect(value.table().createRoute).toEqual({ name: 'records-create', params: { sectionId: 'section-1' } })
-    const surface = value.table()
-    expect(surface.detailRoute?.({ id: '1', name: 'One' })).toEqual({ name: 'records-detail', params: { id: '1' } })
-    expect(surface.updateRoute?.({ id: '1', name: 'One' })).toEqual({ name: 'records-edit', params: { id: '1' } })
-    expect(surface.canDelete?.({ id: '1', name: 'One' })).toBe(true)
-    resetResourceRuntimeForTests()
+    const list = value.list()
+    const record = { id: '1', name: 'One' }
+
+    expect(list.fields).toEqual([expect.objectContaining({ key: 'name', label: 'Name', table: { sortable: true }, form: { renderer: 'text' } })])
+    expect(list.createRoute).toEqual({ name: 'records-create' })
+    expect(list.detailRoute?.(record)).toEqual({ name: 'records-detail', params: { id: '1' } })
+    expect(list.updateRoute?.(record)).toEqual({ name: 'records-edit', params: { id: '1' } })
+    expect(list.canDelete?.(record)).toBe(true)
+    await expect(value.actions.verify.run('1', 'approved')).resolves.toBe('1:approved')
+    await expect(value.create().run({ name: 'Two' })).resolves.toEqual({ id: '2', name: 'Two' })
   })
 
-  it('filters create and row capabilities through access and visibility', () => {
+  it('filters standard routes and row actions through access', () => {
     const value = resource({ allows: ({ operation }: { operation: string }) => operation === 'list' })
-    expect(value.table().createRoute).toBeUndefined()
-    const surface = value.table()
-    expect(surface.detailRoute?.({ id: '1', name: 'One' })).toBeUndefined()
-    expect(surface.canDelete?.({ id: '1', name: 'One' })).toBe(false)
-    resetResourceRuntimeForTests()
-  })
+    const list = value.list()
+    const record = { id: '1', name: 'One' }
 
-  it('does not infer custom capabilities into table actions', () => {
-    const value = resource()
-    expect(value.table().canDelete?.({ id: '1', name: 'One' })).toBe(true)
-    resetResourceRuntimeForTests()
-  })
-
-  it('selects create/update validators and forwards factory context', () => {
-    registerResourceRuntime({
-      queryClient: createFrameworkQueryClient(),
-      adapters: resolveFrameworkAdapters(),
-      fieldDefaults: resolveFrameworkFieldDefaults(),
-    })
-    const create = () => undefined
-    const update = () => undefined
-    const value = defineResource({
-      key: 'validator-records', fields,
-      capabilities: {
-        create: { handler: async (input: { name: string }) => ({ id: '1', ...input }), permission: null },
-        update: { handler: async (id: string, input: { name?: string }) => ({ id, name: input.name ?? '' }), permission: null },
-      },
-      validators: { create: [create], update: [update] },
-    })
-    expect(value.form({ context: { source: 'create' } }).validators).toEqual([create])
-    expect(value.form({ id: '1', context: { source: 'update' } }).validators).toEqual([update])
-    expect(value.form({ id: '1', context: { source: 'update' } }).context).toEqual({ source: 'update' })
-    resetResourceRuntimeForTests()
+    expect(list.createRoute).toBeUndefined()
+    expect(list.detailRoute?.(record)).toBeUndefined()
+    expect(list.updateRoute?.(record)).toBeUndefined()
+    expect(list.canDelete).toBeUndefined()
   })
 })

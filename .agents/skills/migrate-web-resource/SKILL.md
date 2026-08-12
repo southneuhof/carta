@@ -1,14 +1,14 @@
 ---
 name: migrate-web-resource
-description: Migrate one ADS-HK `apps/web` module per execution from the old `*.operations.ts` plus `defineFields` resource API to the approved unified schema and per-action resource API. Use for a module named by an approved dedicated or cohort Improve plan, after the framework foundation and app adapters exist. Do not use for framework foundation work, requests to migrate multiple modules in one execution, or the removed web PTS module.
+description: Migrate one ADS-HK `apps/web` module per execution from the old `*.operations.ts` API to the approved schema-bound field-reference resource API. Use for a module named by an approved dedicated or cohort Improve plan, after the framework foundation and app adapters exist. Do not use for framework foundation work, requests to migrate multiple modules in one execution, or the removed web PTS module.
 ---
 
 # Migrate One Web Resource Module
 
-Migrate one selected module to the approved schema and per-action resource
-architecture. The approved plan can cover a cohort of similar modules, but each
-execution must select and complete only one module. Keep the change inside that
-module and remove its old resource API.
+Migrate one selected module to the approved schema and field-reference
+resource architecture. The approved plan can cover a cohort of similar
+modules, but each execution must select and complete only one module. Keep the
+change inside that module and remove its old resource API.
 
 ## Required reads
 
@@ -92,12 +92,13 @@ Move UI effects to the owning route. Keep a large custom function in a focused
 
 Call `defineResource(schema, definition)` with one `actions` object.
 
-- Put `run`, complete View fields, permission, route, and standard View options
-  in the same standard action block.
-- Put complete fields in each View. Do not create a top-level field catalog.
-- Put field properties directly on that View field. Do not add nested `table`,
-  `detail`, `form`, `display`, or `input` layers.
-- Reuse field objects with plain constants and object spread.
+- Define one adjacent field set with `defineFields(schema, definitions)`.
+- Put shared labels, accessors, and write functions at the field root.
+- Put surface behavior in `display`, `table`, `detail`, and `form` projections.
+- Put `run`, ordered field references, permission, route, and standard View
+  options in the same standard action block.
+- Use one terminal partial `.override({...})` only for a real local difference.
+- Omit a reference to remove a field from a View; preserve the current order.
 - Give custom action blocks only `run` unless the approved design changes.
 - Do not add custom action schemas, permission metadata, kinds, HTTP methods, or
   automatic invalidation.
@@ -134,7 +135,7 @@ factory-level `.run`.
 
 ### 5. Remove the old module API
 
-- Delete the migrated module's `defineFields` calls.
+- Delete the migrated module's old field-map declarations.
 - Delete its `schemas`, `validators`, `capabilities`, `table`, `detail`, and
   `form` resource properties.
 - Delete `*.operations.ts` after moving any needed application functions.

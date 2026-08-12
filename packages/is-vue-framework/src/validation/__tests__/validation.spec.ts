@@ -20,9 +20,18 @@ const passwordSchema = z
 
 describe('zod bridge', () => {
   it('returns parsed data on success', () => {
-    const schema = fromZod<{ name: string }>(z.object({ name: z.string() }))
+    const schema = fromZod(z.object({ name: z.string() }))
 
     expect(schema.validate({ name: 'Admin' })).toEqual({ success: true, data: { name: 'Admin' } })
+  })
+
+  it('returns transformed parsed data on success', () => {
+    const schema = fromZod(
+      z.object({ ids: z.array(z.object({ id: z.string() })) })
+        .transform(({ ids }) => ({ ids: ids.map(({ id }) => id) })),
+    )
+
+    expect(schema.validate({ ids: [{ id: 'role-1' }] })).toEqual({ success: true, data: { ids: ['role-1'] } })
   })
 
   it('normalizes scalar, nested, array, and root issues with their paths', () => {
@@ -130,7 +139,7 @@ describe('zod v4 dialect', () => {
   })
 
   it('returns parsed data on success', () => {
-    expect(fromZod<{ name: string }>(z4.object({ name: z4.string() })).validate({ name: 'Admin' })).toEqual({
+    expect(fromZod(z4.object({ name: z4.string() })).validate({ name: 'Admin' })).toEqual({
       success: true,
       data: { name: 'Admin' },
     })

@@ -7,6 +7,7 @@
 ## Status
 
 - **Priority**: P1
+- **Status**: DONE
 - **Effort**: M
 - **Risk**: MED
 - **Depends on**: plans 018-021
@@ -15,8 +16,8 @@
 
 ## Module checkpoints
 
-- [ ] `number-variables`
-- [ ] `permissions`
+- [x] `number-variables`
+- [x] `permissions`
 
 ## Why this matters
 

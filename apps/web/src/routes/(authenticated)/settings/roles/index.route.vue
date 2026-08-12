@@ -4,5 +4,5 @@ import { roles } from './roles.resource'
 </script>
 
 <template>
-  <ListView title="Roles" :resource="roles" />
+  <ListView v-bind="roles.list()" title="Roles" />
 </template>

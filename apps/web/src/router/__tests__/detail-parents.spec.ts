@@ -14,27 +14,20 @@ vi.mock('@/components/routing/Tabs.vue', () => ({ default: defineComponent({
   setup: (props) => () => h('nav', { 'data-tabs': true }, props.items.map((item: { label: string }) => h('span', { 'data-tab-label': item.label }, item.label))),
 }) }))
 vi.mock('@/routes/(authenticated)/settings/roles/roles.resource', () => ({
-  roles: { capabilities: {
-    list: { to: { name: 'settings-roles' } },
-    update: { to: { name: 'settings-roles-edit', params: (id: string) => ({ roleId: id }) } },
-  } },
+  roles: {
+    detail: ({ id }: { id: string }) => ({ id }),
+    update: () => ({ defaultTo: { name: 'settings-roles-edit', params: { roleId: '7' } } }),
+  },
 }))
 vi.mock('@/routes/(authenticated)/settings/roles/[roleId]/detail/permissions/role-permissions.resource', () => ({
   rolePermissions: { actions: { list: { key: 'list', permission: 'roles.update', routeName: 'settings-roles-detail-permissions', to: { name: 'settings-roles-detail-permissions' } } } },
 }))
 vi.mock('@/routes/(authenticated)/settings/users/users.resource', () => ({
-  users: { capabilities: {
-    list: { to: { name: 'settings-users' } },
-    update: { to: { name: 'settings-users-edit', params: (id: string) => ({ userId: id }) } },
-  } },
+  users: {
+    detail: ({ id }: { id: string }) => ({ id }),
+    update: () => ({ defaultTo: { name: 'settings-users-edit', params: { userId: '7' } } }),
+  },
 }))
-vi.mock('@/routes/(authenticated)/settings/users/[userId]/detail/system-roles/system-role-assignments.resource', () => ({
-  systemRoleAssignments: { capabilities: { list: { permission: 'view-system-role-assignments', to: { name: 'settings-users-detail-system-roles' } } } },
-}))
-vi.mock('@/routes/(authenticated)/settings/users/[userId]/detail/project-roles/project-role-assignments.resource', () => ({
-  projectRoleAssignments: { capabilities: { list: { permission: 'view-project-role-assignments', to: { name: 'settings-users-detail-project-roles' } } } },
-}))
-
 import RolesParent from '@/routes/(authenticated)/settings/roles/[roleId]/detail.route.vue'
 import UsersParent from '@/routes/(authenticated)/settings/users/[userId]/detail.route.vue'
 

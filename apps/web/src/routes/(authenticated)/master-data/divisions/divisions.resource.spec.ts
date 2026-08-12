@@ -13,21 +13,21 @@ function fields(value: unknown, surface: 'form' | 'table' | 'detail') {
 
 describe('divisions resource', () => {
   it('uses the business category resource for its parent lookup', () => {
-    expect(fields(divisions.form().fields, 'form').find((field) => field.key === 'businessCategoryId')).toMatchObject({ renderer: 'lookup', source: businessCategories })
+    expect(fields(divisions.create().fields, 'form').find((field) => field.key === 'businessCategoryId')).toMatchObject({ renderer: 'lookup', source: businessCategories })
   })
 
   it('renders the related business category name in the table', () => {
-    const field = fields(divisions.table().table.fields, 'table').find((candidate) => candidate.key === 'businessCategory')!
+    const field = fields(divisions.list().fields, 'table').find((candidate) => candidate.key === 'businessCategory')!
     expect(field.read?.({ businessCategory: { name: 'Business' } } as never, {})).toBe('Business')
-    expect(divisions.table().table.fields).not.toHaveProperty('businessCategoryId')
+    expect(fields(divisions.list().fields, 'table').map((candidate) => candidate.key)).not.toContain('businessCategoryId')
   })
 
   it('keeps the required parent field in the create form', () => {
-    expect(Object.keys(divisions.form().fields)).toContain('businessCategoryId')
+    expect(fields(divisions.create().fields, 'form').map((field) => field.key)).toContain('businessCategoryId')
   })
 
   it('uses the existing image input and file display renderer for the logo', () => {
-    expect(fields(divisions.form().fields, 'form').find((field) => field.key === 'imgThumbnail')).toMatchObject({ renderer: 'image' })
-    expect(fields(divisions.detail({ id: '1' }).detail.fields, 'detail').find((field) => field.key === 'imgThumbnail')).toMatchObject({ renderer: 'file' })
+    expect(fields(divisions.create().fields, 'form').find((field) => field.key === 'imgThumbnail')).toMatchObject({ renderer: 'image' })
+    expect(fields(divisions.detail({ id: '1' }).fields, 'detail').find((field) => field.key === 'imgThumbnail')).toMatchObject({ renderer: 'file' })
   })
 })

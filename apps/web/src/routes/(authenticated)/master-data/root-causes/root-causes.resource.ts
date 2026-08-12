@@ -1,24 +1,44 @@
-import { defineFields, defineResource, fromZod } from '@southneuhof/is-vue-framework'
-import { rootCause } from '@southneuhof/api/routes/root-causes/root-causes.entity'
-import { rootCauseOperations, type RootCause, type RootCauseCreate, type RootCauseUpdate } from './root-causes.operations'
+import { defineFields, defineResource } from '@southneuhof/is-vue-framework'
+import { createHonoResourceActions } from '@/framework/hono'
+import { rpc } from '@/framework/rpc'
+import { dataAdapter } from '@/framework/adapters/data/normalize'
+import { rootCausesSchema } from './root-causes.schema'
 
-export const rootCauses = defineResource({
+const api = createHonoResourceActions(rpc['root-causes'], dataAdapter)
+const fields = defineFields(rootCausesSchema, {
+  name: { form: { renderer: 'text' } },
+  code: { table: { sortable: true }, form: { renderer: 'text' } },
+  description: { form: { renderer: 'textarea' } },
+  active: { form: { renderer: 'switch' } },
+})
+
+export const rootCauses = defineResource(rootCausesSchema, {
   key: 'root-causes',
-  fields: defineFields<RootCause, RootCauseCreate>()({
-    name: {},
-    code: { table: { sortable: true } },
-    description: {},
-    active: {},
-  }),
-  table: { fields: ['name', 'code', 'description', 'active'] },
-  detail: { fields: ['name', 'code', 'description', 'active'] },
-  form: { fields: ['name', 'code', 'description', 'active'] },
-  schemas: { create: fromZod<RootCauseCreate>(rootCause.schemas.create), update: fromZod<RootCauseUpdate>(rootCause.schemas.update) },
-  capabilities: {
-    list: { handler: rootCauseOperations.list, permission: 'view-root-causes', to: { name: 'master-data-root-causes' } },
-    create: { handler: rootCauseOperations.create, permission: 'manage-root-causes', to: { name: 'master-data-root-causes-create' } },
-    detail: { handler: rootCauseOperations.detail, permission: 'view-root-causes', to: { name: 'master-data-root-causes-detail', params: (id: string) => ({ rootCauseId: id }) } },
-    update: { handler: rootCauseOperations.update, permission: 'manage-root-causes', to: { name: 'master-data-root-causes-edit', params: (id: string) => ({ rootCauseId: id }) } },
-    delete: { handler: rootCauseOperations.delete, permission: 'manage-root-causes' },
+  actions: {
+    list: {
+      run: api.list,
+      fields: [fields.name, fields.code, fields.description, fields.active],
+      permission: 'view-root-causes',
+      route: { name: 'master-data-root-causes' },
+    },
+    detail: {
+      run: api.detail,
+      fields: [fields.name, fields.code, fields.description, fields.active],
+      permission: 'view-root-causes',
+      route: { name: 'master-data-root-causes-detail', params: (id) => ({ rootCauseId: String(id) }) },
+    },
+    create: {
+      run: api.create,
+      fields: [fields.name, fields.code, fields.description, fields.active],
+      permission: 'manage-root-causes',
+      route: { name: 'master-data-root-causes-create' },
+    },
+    update: {
+      run: api.update,
+      fields: [fields.name, fields.code, fields.description, fields.active],
+      permission: 'manage-root-causes',
+      route: { name: 'master-data-root-causes-edit', params: (id) => ({ rootCauseId: String(id) }) },
+    },
+    delete: { run: api.delete, permission: 'manage-root-causes' },
   },
 })

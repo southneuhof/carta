@@ -7,6 +7,7 @@
 ## Status
 
 - **Priority**: P1
+- **Status**: DONE
 - **Effort**: S
 - **Risk**: MED
 - **Depends on**: none

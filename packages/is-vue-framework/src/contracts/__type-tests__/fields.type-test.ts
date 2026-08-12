@@ -2,7 +2,6 @@
  * Compile-time tests for the field catalog. Type-checked by the framework
  * `type-check`; excluded from vitest by filename.
  */
-import { defineFields } from '../../fields'
 import { resolveFields } from '../../fields'
 import type { FieldDefinition } from '../index'
 import type { FrameworkFieldDefaultsInput } from '../../fields'
@@ -19,7 +18,7 @@ interface IncidentDraft {
   is_accident: boolean
 }
 
-const incidentFields = defineFields<Incident, IncidentDraft>()({
+const incidentFields = {
   incident_name: {
     label: 'Nama Insiden',
     table: { sortable: true },
@@ -27,8 +26,8 @@ const incidentFields = defineFields<Incident, IncidentDraft>()({
   },
   section_id: {
     label: 'Ruas',
-    read: (record) => record.rel_section_id,
-    write: (draft, value) => {
+    read: (record: Incident) => record.rel_section_id,
+    write: (draft: IncidentDraft, value: unknown) => {
       draft.section_id = value as string
     },
   },
@@ -36,7 +35,7 @@ const incidentFields = defineFields<Incident, IncidentDraft>()({
     table: false,
     detail: false,
   },
-})
+} satisfies Record<string, FieldDefinition<Incident, IncidentDraft>>
 
 /* Catalog keys stay literal. */
 type IncidentFieldKey = keyof typeof incidentFields
@@ -49,51 +48,71 @@ void unknownKey
 /* `read` sees the record type, `write` sees the draft type. */
 const readsRecord: FieldDefinition<Incident, IncidentDraft>['read'] = (record) => record.rel_section_id
 void readsRecord
-defineFields<Incident, IncidentDraft>()({
+const invalidRead = {
   section_id: {
     // @ts-expect-error the record has no `section_id` property
-    read: (record) => record.section_id,
+    read: (record: Incident) => record.section_id,
   },
-})
+} satisfies Record<string, FieldDefinition<Incident, IncidentDraft>>
+void invalidRead
 
 /* Projections may be excluded with `false`, but not with an arbitrary value. */
-defineFields<Incident>()({
-  secret: { table: false },
-})
-defineFields<Incident>()({
-  // @ts-expect-error a projection is either config or false
-  secret: { table: 'hidden' },
-})
+const excluded = { secret: { table: false } } satisfies Record<string, FieldDefinition<Incident>>
+void excluded
+const invalidProjection = {
+  secret: {
+    // @ts-expect-error a projection is either config or false
+    table: 'hidden',
+  },
+} satisfies Record<string, FieldDefinition<Incident>>
+void invalidProjection
 
 /* Widget selection is `renderer` on every surface. */
-defineFields<Incident>()({
+const renderers = {
   incident_name: { table: { renderer: 'chip' }, detail: { renderer: 'chip' }, form: { renderer: 'text' } },
-})
-defineFields<Incident>()({
-  // @ts-expect-error `type` is not a field-config key
-  incident_name: { form: { type: 'text' } },
-})
+} satisfies Record<string, FieldDefinition<Incident>>
+void renderers
+const invalidRenderer = {
+  incident_name: {
+    // @ts-expect-error `type` is not a field-config key
+    form: { type: 'text' },
+  },
+} satisfies Record<string, FieldDefinition<Incident>>
+void invalidRenderer
 
-defineFields<Incident>()({
+const lookup = {
   incident_name: { form: { renderer: 'lookup', source: { resource: 'sections' } } },
-})
-defineFields<Incident>()({
-  // @ts-expect-error source is only authored for form projections
-  incident_name: { table: { source: { resource: 'sections' } } },
-})
+} satisfies Record<string, FieldDefinition<Incident>>
+void lookup
+const invalidSource = {
+  incident_name: {
+    // @ts-expect-error source is only authored for form projections
+    table: { source: { resource: 'sections' } },
+  },
+} satisfies Record<string, FieldDefinition<Incident>>
+void invalidSource
 
 /* Behavior lives on the form projection only and accepts functions only. */
-defineFields<Incident, IncidentDraft>()({
+const behavior = {
   incident_name: { form: { behavior: { visible: ({ draft }) => draft.is_accident } } },
-})
-defineFields<Incident, IncidentDraft>()({
-  // @ts-expect-error behavior is a form concept; table carries none
-  incident_name: { table: { behavior: { visible: () => true } } },
-})
-defineFields<Incident, IncidentDraft>()({
-  // @ts-expect-error constants belong in the static projection
-  incident_name: { form: { behavior: { visible: true } } },
-})
+} satisfies Record<string, FieldDefinition<Incident, IncidentDraft>>
+void behavior
+const invalidTableBehavior = {
+  incident_name: {
+    // @ts-expect-error behavior is a form concept; table carries none
+    table: { behavior: { visible: () => true } },
+  },
+} satisfies Record<string, FieldDefinition<Incident, IncidentDraft>>
+void invalidTableBehavior
+const invalidConstantBehavior = {
+  incident_name: {
+    form: {
+      // @ts-expect-error constants belong in the static projection
+      behavior: { visible: true },
+    },
+  },
+} satisfies Record<string, FieldDefinition<Incident, IncidentDraft>>
+void invalidConstantBehavior
 
 /* Resolution returns ordered surface fields. */
 const tableFields = resolveFields({ fields: incidentFields, surface: 'table', keys: ['incident_name'] })

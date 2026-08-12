@@ -68,6 +68,7 @@
     "@southneuhof/utilities": "workspace:*",
     "@southneuhof/sdk": "workspace:*",
     "@southneuhof/api": "workspace:*",
+    "hono": "4.12.27",
     "@repo/config-meta": "workspace:*"
   },
   "devDependencies": {

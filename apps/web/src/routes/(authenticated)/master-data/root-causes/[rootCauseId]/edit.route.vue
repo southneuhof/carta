@@ -6,4 +6,4 @@ import { rootCauses } from '../root-causes.resource'
 const route = useRoute('master-data-root-causes-edit')
 </script>
 
-<template><FormView title="Edit Penyebab QHSSE" :resource="rootCauses" :id="String(route.params.rootCauseId)" /></template>
+<template><FormView v-bind="rootCauses.update({ id: String(route.params.rootCauseId) })" title="Edit Penyebab QHSSE" /></template>

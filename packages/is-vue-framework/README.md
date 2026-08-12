@@ -5,11 +5,11 @@
 >
 > Please open issues and pull requests against the Carta monorepo.
 
-Vue application framework components and patterns for South Neuhof information systems.
+Vue components and contracts for South Neuhof web applications.
 
 ## Framework 2.0 configuration
 
-Framework 2.0 supports one canonical plugin options object:
+Use one plugin options object:
 
 ```ts
 app.use(FrameworkPlugin, {
@@ -20,37 +20,83 @@ app.use(FrameworkPlugin, {
 })
 ```
 
-`fieldDefaults` are uniform surface policy and apply to every field on that
-surface. Renderer-wide defaults and source translation belong in `inputProps`.
-Key-specific labels, formats, accessors, options, and renderer choices
-belong in an explicit `FieldCatalog` or named catalog preset.
+`fieldDefaults` define uniform surface policy. Renderer defaults and source
+translation belong in `inputProps`.
 
-`source` is opaque app authoring data. Form resolves it synchronously through
-the app registry before invoking an input; inputs receive only their native
-props. Resolution is shallow: registry defaults, normalized source, explicit
-field props, behavior props, presentation props, then Form-controlled props.
-Field catalogs author ordinary objects and do not import or call the registry:
+## Schema and resource API
+
+Schemas describe the standard web data contract and validation:
 
 ```ts
-form: {
-  renderer: 'lookup',
-  source: sections,
-  props: { searchParameters: { private: true } },
-}
+const schema = defineSchema({
+  identity: 'id',
+  record: { schema: recordSchema },
+  query: { schema: querySchema },
+  create: { schema: createSchema },
+  update: { schema: updateSchema },
+})
 ```
 
-This is a clean break. Runtime capability objects, legacy defaults,
-model-config, and config-driven composite Table/Detail/Form/Tree components
-were removed. The legacy config-driven `DialogForm` was replaced by a
-core-native, resource-agnostic composite; it has no compatibility props or
-converters. Schemas own validation; resources own initial data, accessors, and
-business options.
+When the runtime schema is Zod, use the schema-only bridge. It infers the
+parsed value, including a transform output:
 
-## Dialog forms
+```ts
+const createSchema = fromZod(
+  z.object({ name: z.string() }).transform(({ name }) => ({ name: name.trim() })),
+)
+```
 
-`DialogForm` composes base `Dialog` with core `Form`. Pass canonical Form props
-directly. Dialog visibility uses named `v-model:open`; default `v-model` remains
-available for Form draft data.
+Do not pass a second type argument to `fromZod`. A raw form type is local to a
+real function boundary. It is not a second type for the standard resource.
+
+Resources contain named action blocks:
+
+```ts
+const fields = defineFields(schema, {
+  name: { label: 'Name', form: { renderer: 'text' } },
+})
+
+const resource = defineResource(schema, {
+  key: 'records',
+  actions: {
+    list: { run: list, fields: [fields.name] },
+    detail: { run: detail, fields: [fields.name] },
+    create: { run: create, fields: [fields.name] },
+    update: { run: update, fields: [fields.name] },
+    delete: { run: remove },
+    verify: { run: verify },
+  },
+})
+```
+
+Standard action objects are the View props and the only standard execution
+path:
+
+```vue
+<ListView v-bind="resource.list()" />
+<DetailView v-bind="resource.detail({ id })" />
+<FormView v-bind="resource.create()" />
+<FormView v-bind="resource.update({ id })" />
+```
+
+```ts
+await resource.delete({ id }).run()
+await resource.actions.verify.run(input)
+```
+
+Standard fields are schema-bound references. Define shared behavior once with
+`defineFields(schema, definitions)`, use `display`, `table`, `detail`, and
+`form` projections for surfaces, and select references in action order. A
+terminal partial `.override({...})` handles one local difference. Custom
+actions contain only `run`.
+
+## Core components
+
+`Table`, `Detail`, and `Form` are resource-agnostic. They accept native props
+and can be used directly for custom screens. `ListView`, `DetailView`, and
+`FormView` add page chrome and forward the same native props.
+
+`DialogForm` composes `Dialog` with core `Form`:
 
 ```vue
 <DialogForm
@@ -66,13 +112,12 @@ available for Form draft data.
 </DialogForm>
 ```
 
-Successful submission closes by default; set `close-on-submitted="false"` to
-keep the dialog open. Default actions are `Cancel`, `Save`, and `Saving…`;
-override their label props or replace the `actions` slot. `loading`,
-`load-error`, and `input:<field>` slots pass through to Form, while `header` and
-`footer` surround it.
+Successful submission closes by default. Use `beforeClose` for Cancel and
+dismiss decisions. The route owns navigation, dialogs, confirmations, and
+toasts.
 
-Use `beforeClose` to approve or reject user Cancel/dismiss requests. It receives
-the close reason plus Form `dirty`, `submitting`, and `validating` state.
-Parent-written `v-model:open` changes remain authoritative and do not call this
-guard.
+## Transport boundary
+
+The framework package has no Hono source or Hono dependency. `apps/web` owns
+its typed Hono contract adapter, action helper, response normalization, and
+service or fetch functions.

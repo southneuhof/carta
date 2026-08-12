@@ -1,7 +1,6 @@
-import { defineFields, defineResource, fromZod } from '@southneuhof/is-vue-framework'
-import { role } from '@southneuhof/api/routes/roles/roles.entity'
-import { z } from 'zod/v4'
-import { roleOperations, type Role, type RoleCreate, type RoleUpdate } from './roles.operations'
+import { defineFields, defineResource } from '@southneuhof/is-vue-framework'
+import { rolesActions } from './roles.actions'
+import { rolesSchema } from './roles.schema'
 
 const realmOptions = [
   { id: 'system', name: 'System' },
@@ -9,45 +8,42 @@ const realmOptions = [
 ] as const
 
 const realmLabel = (value: unknown) => value === 'system' ? 'System' : value === 'project' ? 'Project' : value
-const roleUpdateSchema = z.preprocess((value) => {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return value
-  return Object.fromEntries(Object.entries(value).filter(([key]) => key !== 'realm'))
-}, role.schemas.update)
-
-export const roleFields = defineFields<Role, RoleCreate>()({
+const fields = defineFields(rolesSchema, {
   roleCode: { label: 'Role Code', form: { renderer: 'text' } },
   name: { label: 'Role Name', form: { renderer: 'text' } },
   description: { label: 'Description', form: { renderer: 'textarea' } },
-  realm: {
-    label: 'Realm',
-    read: (record) => realmLabel(record.realm),
-    form: {
-      renderer: 'radio',
-      source: realmOptions,
-      props: { required: true },
-      behavior: { disabled: ({ context }) => context.operation === 'update' },
-    },
-  },
+  realm: { label: 'Realm', read: (record) => realmLabel(record.realm), form: { renderer: 'radio', source: realmOptions, props: { required: true } } },
   active: { label: 'Active' },
   createdAt: { label: 'Created At' },
 })
 
-const roleCapabilities = {
-  list: { handler: roleOperations.list, permission: 'view-roles', to: { name: 'settings-roles' } },
-  create: { handler: roleOperations.create, permission: 'manage-roles', to: { name: 'settings-roles-create' } },
-  detail: { handler: roleOperations.detail, permission: 'view-roles', to: { name: 'settings-roles-detail', params: (id: string) => ({ roleId: id }) } },
-  update: { handler: roleOperations.update, permission: 'manage-roles', to: { name: 'settings-roles-edit', params: (id: string) => ({ roleId: id }) } },
-  delete: { handler: roleOperations.delete, permission: 'manage-roles' },
-} as const
-
-export const roles = defineResource<typeof roleCapabilities, Role, Record<string, never>, RoleCreate, RoleUpdate>({
+export const roles = defineResource(rolesSchema, {
   key: 'roles',
-  fields: roleFields,
-  table: { fields: ['roleCode', 'name', 'realm', 'active'] },
-  detail: { fields: ['roleCode', 'name', 'description', 'realm', 'active', 'createdAt'] },
-  form: { fields: ['roleCode', 'name', 'description', 'realm', 'active'] },
-  schemas: { create: fromZod<RoleCreate>(role.schemas.create), update: fromZod<RoleUpdate>(roleUpdateSchema) },
-  capabilities: roleCapabilities,
+  actions: {
+    list: {
+      run: rolesActions.list,
+      fields: [fields.roleCode, fields.name, fields.realm, fields.active],
+      permission: 'view-roles',
+      route: { name: 'settings-roles' },
+    },
+    detail: {
+      run: rolesActions.detail,
+      fields: [fields.roleCode, fields.name, fields.description, fields.realm, fields.active, fields.createdAt],
+      permission: 'view-roles',
+      route: { name: 'settings-roles-detail', params: (id) => ({ roleId: String(id) }) },
+    },
+    create: {
+      run: rolesActions.create,
+      fields: [fields.roleCode, fields.name, fields.description, fields.realm, fields.active],
+      permission: 'manage-roles',
+      route: { name: 'settings-roles-create' },
+    },
+    update: {
+      run: rolesActions.update,
+      fields: [fields.roleCode, fields.name, fields.description, fields.realm.override({ form: { behavior: { disabled: () => true } } }), fields.active],
+      permission: 'manage-roles',
+      route: { name: 'settings-roles-edit', params: (id) => ({ roleId: String(id) }) },
+    },
+    delete: { run: rolesActions.delete, permission: 'manage-roles' },
+  },
 })
-
-export type { Role, RoleCreate, RoleUpdate }

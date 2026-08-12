@@ -6,4 +6,4 @@ import { divisions } from '../divisions.resource'
 const route = useRoute('master-data-divisions-edit')
 </script>
 
-<template><FormView title="Edit Divisi" :resource="divisions" :id="String(route.params.divisionId)" /></template>
+<template><FormView v-bind="divisions.update({ id: String(route.params.divisionId) })" title="Edit Divisi" /></template>

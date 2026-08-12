@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { defineResource, resetResourceCapabilityRegistry } from '@southneuhof/is-vue-framework'
+import { defineResource, defineSchema, resetResourceActionRegistry } from '@southneuhof/is-vue-framework'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
 const authState = { identity: null as null | { userId: string } }
@@ -21,7 +21,7 @@ import { createAuthGuard, createPermissionGuard } from '../guards'
 
 const next = (() => {}) as any
 
-afterEach(() => resetResourceCapabilityRegistry())
+afterEach(() => resetResourceActionRegistry())
 
 describe('createAuthGuard', () => {
   beforeEach(() => {
@@ -135,10 +135,15 @@ describe('permission guard', () => {
           path: '/detail/:id',
           name: 'lazy-detail',
           component: async () => {
-            defineResource({
+            defineResource(defineSchema({ identity: 'id' }), {
               key: 'lazy-roles',
-              fields: { id: { label: 'ID' } },
-              capabilities: { detail: { handler: async () => undefined, permission: 'roles.detail', to: { name: 'lazy-detail', params: (id) => ({ id }) } } },
+              actions: {
+                detail: {
+                  run: async () => undefined,
+                  permission: 'roles.detail',
+                  route: { name: 'lazy-detail', params: (id) => ({ id: String(id) }) },
+                },
+              },
             })
             return { default: { template: '<main>detail</main>' } }
           },

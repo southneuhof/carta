@@ -6,4 +6,4 @@ import { uoms } from '../uoms.resource'
 const route = useRoute('master-data-uoms-edit')
 </script>
 
-<template><FormView title="Edit Satuan" :resource="uoms" :id="String(route.params.uomId)" /></template>
+<template><FormView v-bind="uoms.update({ id: String(route.params.uomId) })" title="Edit Satuan" /></template>

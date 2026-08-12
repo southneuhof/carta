@@ -7,6 +7,7 @@
 ## Status
 
 - **Priority**: P1
+- **Status**: DONE
 - **Effort**: L for cohort; M per module
 - **Risk**: MED
 - **Depends on**: plans 018-021; module dependencies below
@@ -15,10 +16,10 @@
 
 ## Module checkpoints and order
 
-- [ ] `divisions` — after `business-categories` in plan 023
-- [ ] `number-configs` — after `number-variables` in plan 024
-- [ ] `projects` — after `divisions`
-- [ ] `roles` — no module dependency; complete before plans 028-030
+- [x] `divisions` — after `business-categories` in plan 023
+- [x] `number-configs` — after `number-variables` in plan 024
+- [x] `projects` — after `divisions`
+- [x] `roles` — no module dependency; complete before plans 028-030
 
 ## Why this matters
 

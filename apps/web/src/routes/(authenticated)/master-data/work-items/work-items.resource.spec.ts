@@ -14,19 +14,23 @@ function fields(value: unknown, surface: 'form' | 'table') {
 
 describe('work items resource', () => {
   it('uses category and UOM lookups for the root form', () => {
-    const formFields = fields(workItems.form().fields, 'form')
+    const formFields = fields(workItems.create().fields, 'form')
     expect(formFields.find((field) => field.key === 'categoryId')).toMatchObject({ renderer: 'lookup', source: ptsWorkCategories })
     expect(formFields.find((field) => field.key === 'uomId')).toMatchObject({ renderer: 'lookup', source: uoms })
     expect(formFields.find((field) => field.key === 'isHighRisk')?.renderer).toBe('radio')
   })
 
   it('hides category for the child form variant', () => {
-    const category = fields(workItems.form({ context: { variant: 'child' } }).fields, 'form').find((field) => field.key === 'categoryId')!
+    const category = fields(workItems.create({ context: { variant: 'child' } }).fields, 'form').find((field) => field.key === 'categoryId')!
     expect(category.behavior?.visible?.({ draft: {}, value: undefined, context: { variant: 'child' } } as never)).toBe(false)
   })
 
   it('keeps the tree surface free of technical fields', () => {
-    expect(fields(workItems.table().table.fields, 'table').map((field) => field.key)).toEqual(['name', 'categoryId', 'volume', 'uomId', 'isHighRisk'])
-    expect(workItems.table().table.fields).not.toEqual(expect.arrayContaining(['id', 'projectId', 'parentId', 'level', 'code', 'active']))
+    expect(fields(workItems.list().fields, 'table').map((field) => field.key)).toEqual(['name', 'categoryId', 'volume', 'uomId', 'isHighRisk'])
+    expect(fields(workItems.list().fields, 'table').map((field) => field.key)).not.toEqual(expect.arrayContaining(['id', 'projectId', 'parentId', 'level', 'code', 'active']))
+  })
+
+  it('exposes tree loading as a custom action', () => {
+    expect(workItems.actions.loadTree.run).toEqual(expect.any(Function))
   })
 })

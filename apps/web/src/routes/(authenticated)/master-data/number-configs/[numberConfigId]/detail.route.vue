@@ -6,4 +6,4 @@ import { numberConfigs } from '../number-configs.resource'
 const route = useRoute('master-data-number-configs-detail')
 </script>
 
-<template><DetailView title="Number Configs" :back-to="{ name: 'master-data-number-configs' }" :resource="numberConfigs" :id="String(route.params.numberConfigId)" /></template>
+<template><DetailView v-bind="numberConfigs.detail({ id: String(route.params.numberConfigId) })" title="Number Configs" :back-to="{ name: 'master-data-number-configs' }" /></template>

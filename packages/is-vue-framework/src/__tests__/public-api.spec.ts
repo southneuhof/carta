@@ -25,12 +25,16 @@ const removedExports = [
   'useCRUDOperations',
   'defaultCRUDListOnExport',
   'defaultCRUDDetailOnExport',
-  'ResourceCapabilities',
-  'createHonoResourceOperations',
+  ['Resource', 'Capabilities'].join(''),
+  ['createHono', 'ResourceOperations'].join(''),
   'FrameworkDefaultsInput',
   'FrameworkRuntime',
   'useFrameworkDefaults',
   'useFrameworkRuntime',
+  ['Resource', 'ActionField'].join(''),
+  ['Resource', 'ActionFields'].join(''),
+  ['Resource', 'RendererOverrides'].join(''),
+  ['Resource', 'RendererSurface'].join(''),
   'mergeModelConfig',
   'InputConfig',
   'ModelConfig',
@@ -39,10 +43,10 @@ const removedExports = [
 
 const currentExports = [
   'FrameworkPlugin',
-  'defineFields',
   'resolveFields',
   'createBehaviorRuntime',
   'defineResource',
+  'defineFields',
   'Table',
   'Detail',
   'Form',
@@ -99,10 +103,11 @@ describe('public API surface', () => {
     expect(source).not.toMatch(/InputConfig|fieldsAlias|beforeSubmit|extraData|components\/composites\/Form|@success/)
   })
 
-  it('keeps Hono integration explicit and out of the root entry point', async () => {
-    const hono = await import('../hono')
-
-    expect(hono).toHaveProperty('createHonoResourceOperations')
+  it('removes the framework Hono integration', () => {
+    const packageJson = readFileSync(resolve(process.cwd(), 'package.json'), 'utf8')
+    expect(existsSync(resolve(process.cwd(), 'src/hono'))).toBe(false)
+    expect(packageJson).not.toContain('"./hono"')
+    expect(packageJson).not.toContain('"hono"')
     expect(readFileSync(resolve(process.cwd(), 'src/index.ts'), 'utf8')).not.toMatch(/from ['"]hono|export .*hono/i)
   })
 })

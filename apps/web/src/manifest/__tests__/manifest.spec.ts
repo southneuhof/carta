@@ -3,7 +3,7 @@ import { activeNavigationModule, navigation, visibleNavigation } from '../naviga
 
 describe('navigation entrypoints', () => {
   it('keeps ordered resource and direct entrypoints only', () => {
-    expect(navigation.map((module) => module.name)).toEqual(['dashboard', 'to-do', 'settings', 'quality', 'master-data'])
+    expect(navigation.map((module) => module.name)).toEqual(['dashboard', 'to-do', 'settings', 'master-data'])
     expect(
       visibleNavigation(() => true)
         .flatMap((module) => module.routes)
@@ -28,6 +28,6 @@ describe('navigation entrypoints', () => {
     const visible = visibleNavigation(() => false)
     const routes = visible.flatMap((module) => module.routes).filter((entry) => !('separator' in entry)).map((entry) => entry.name)
 
-    expect(routes).toEqual(expect.arrayContaining(['quality-pts', 'master-data-projects', 'master-data-work-items']))
+    expect(routes).toEqual(expect.arrayContaining(['master-data-projects', 'master-data-work-items']))
   })
 })

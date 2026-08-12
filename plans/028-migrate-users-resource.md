@@ -7,6 +7,7 @@
 ## Status
 
 - **Priority**: P1
+- **Status**: DONE
 - **Effort**: L
 - **Risk**: HIGH
 - **Depends on**: plans 018-021 and the `roles` checkpoint in plan 025

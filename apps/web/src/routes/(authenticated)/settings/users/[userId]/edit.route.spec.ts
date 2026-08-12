@@ -1,47 +1,66 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { flushPromises, mount } from '@vue/test-utils'
 
-const mocks = vi.hoisted(() => ({ detail: vi.fn(), update: vi.fn(), confirm: vi.fn() }))
-
-vi.stubGlobal('confirm', mocks.confirm)
-vi.mock('@/framework/rpc', () => ({
-  rpc: {
-    users: {
-      detail: { ':id': { $get: mocks.detail } },
-      update: { ':id': { $patch: mocks.update } },
-    },
-  },
+const mocks = vi.hoisted(() => ({
+  detail: vi.fn(),
+  update: vi.fn(),
+  confirm: vi.fn(),
+  input: { name: 'Updated user', username: 'updated-user', statusCode: 'non_active' as const },
 }))
 
-const { userOperations } = await import('../users.operations')
+vi.stubGlobal('confirm', mocks.confirm)
+vi.mock('vue-router', () => ({ useRoute: () => ({ params: { userId: 'u1' } }) }))
+vi.mock('../users.resource', () => ({
+  users: {
+    detail: vi.fn(() => ({ run: mocks.detail })),
+    update: vi.fn(() => ({ run: mocks.update, fields: [], id: 'u1' })),
+  },
+}))
+vi.mock('@southneuhof/is-vue-framework', async () => {
+  const { h } = await import('vue')
+  return {
+    FormView: {
+      props: { run: { type: Function, required: true } },
+      setup(props: { run: (input: unknown) => unknown }) {
+        return () => h('button', { onClick: () => { void Promise.resolve(props.run(mocks.input)).catch(() => undefined) } }, 'submit')
+      },
+    },
+  }
+})
 
-const updateInput = { name: 'Updated user', username: 'updated-user', statusCode: 'non_active' as const }
+const Route = (await import('./edit.route.vue')).default
 
 beforeEach(() => {
-  mocks.detail.mockResolvedValue({ ok: true, json: async () => ({ data: { id: 'u1', statusCode: 'active' } }) })
-  mocks.update.mockResolvedValue({ ok: true, json: async () => ({ data: { id: 'u1', ...updateInput } }) })
+  mocks.detail.mockResolvedValue({ id: 'u1', statusCode: 'active' })
+  mocks.update.mockResolvedValue({ id: 'u1', ...mocks.input })
   mocks.confirm.mockReset()
+  Object.assign(mocks.input, { statusCode: 'non_active' })
 })
 
 describe('user edit status confirmation', () => {
-  it('keeps the form operation cancelled when the administrator declines', async () => {
+  it('does not send a request when disabling is cancelled', async () => {
     mocks.confirm.mockReturnValue(false)
-
-    await expect(userOperations.update!('u1', updateInput)).rejects.toThrow('Status change cancelled.')
+    const wrapper = mount(Route)
+    await wrapper.find('button').trigger('click')
+    await flushPromises()
     expect(mocks.confirm).toHaveBeenCalledWith('Disabling this user will end all active sessions. Continue?')
     expect(mocks.update).not.toHaveBeenCalled()
   })
 
-  it('updates after the administrator confirms and lets the API own session cleanup', async () => {
+  it('sends the canonical update after confirmation', async () => {
     mocks.confirm.mockReturnValue(true)
-
-    await expect(userOperations.update!('u1', updateInput)).resolves.toEqual({ id: 'u1', ...updateInput })
-    expect(mocks.update).toHaveBeenCalledWith({ param: { id: 'u1' }, json: updateInput })
+    const wrapper = mount(Route)
+    await wrapper.find('button').trigger('click')
+    await flushPromises()
+    expect(mocks.update).toHaveBeenCalledWith(mocks.input)
   })
 
-  it('leaves the form operation failed when the update request fails', async () => {
-    mocks.confirm.mockReturnValue(true)
-    mocks.update.mockResolvedValue({ ok: false, json: async () => ({ error: 'forbidden', message: 'Update denied.' }) })
-
-    await expect(userOperations.update!('u1', updateInput)).rejects.toMatchObject({ error: 'forbidden', message: 'Update denied.' })
+  it('does not ask for confirmation for an ordinary update', async () => {
+    Object.assign(mocks.input, { statusCode: 'active' })
+    const wrapper = mount(Route)
+    await wrapper.find('button').trigger('click')
+    await flushPromises()
+    expect(mocks.confirm).not.toHaveBeenCalled()
+    expect(mocks.update).toHaveBeenCalledWith(mocks.input)
   })
 })

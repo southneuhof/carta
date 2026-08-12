@@ -7,13 +7,12 @@
  * release gate, and this is that proof in production code rather than a fixture:
  * paging or searching here must not move the drawer, and vice versa.
  */
-import { computed } from 'vue'
 import { ListView } from '@southneuhof/is-vue-framework'
 import { notifications } from './notifications.resource'
 
-const table = computed(() => notifications.table({ namespace: 'to-do' }).table)
+const list = notifications.list({ namespace: 'to-do' })
 </script>
 
 <template>
-  <ListView title="To Do" :table="table" />
+  <ListView title="To Do" v-bind="list" />
 </template>

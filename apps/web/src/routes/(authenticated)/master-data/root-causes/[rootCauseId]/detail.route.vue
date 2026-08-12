@@ -6,4 +6,4 @@ import { rootCauses } from '../root-causes.resource'
 const route = useRoute('master-data-root-causes-detail')
 </script>
 
-<template><DetailView title="Penyebab QHSSE" :back-to="{ name: 'master-data-root-causes' }" :resource="rootCauses" :id="String(route.params.rootCauseId)" /></template>
+<template><DetailView v-bind="rootCauses.detail({ id: String(route.params.rootCauseId) })" title="Penyebab QHSSE" :back-to="{ name: 'master-data-root-causes' }" /></template>

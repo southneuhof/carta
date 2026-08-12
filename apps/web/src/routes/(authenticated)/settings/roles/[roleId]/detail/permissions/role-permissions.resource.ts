@@ -1,8 +1,8 @@
 import { defineFields, defineResource } from '@southneuhof/is-vue-framework'
-import { roleOperations } from '../../../roles.operations'
-import { loadRolePermissions, type RolePermission } from './role-permissions.operations'
+import { rolePermissionsActions } from './role-permissions.actions'
+import { rolePermissionsSchema } from './role-permissions.schema'
 
-export const rolePermissionFields = defineFields<RolePermission>()({
+const fields = defineFields(rolePermissionsSchema, {
   permissionCode: { label: 'Permission code' },
   name: { label: 'Permission name' },
   module: { label: 'Module', read: (record) => record.module.name },
@@ -10,22 +10,15 @@ export const rolePermissionFields = defineFields<RolePermission>()({
   assigned: { label: 'Assigned' },
 })
 
-async function loadRolePermissionList(searchParameters: Record<string, unknown>) {
-  const roleId = String(searchParameters.role_id ?? '')
-  if (!roleId) return loadRolePermissions(roleId)
-
-  const [role, result] = await Promise.all([
-    roleOperations.detail({ id: roleId, searchParameters: {} }),
-    loadRolePermissions(roleId),
-  ])
-  if (!role) throw new Error('Role not found.')
-  if (result.data.some((row) => row.module.realm !== role.realm)) throw new Error('Permission catalog realm mismatch.')
-  return result
-}
-
-export const rolePermissions = defineResource({
+export const rolePermissions = defineResource(rolePermissionsSchema, {
   key: 'role-permissions',
-  fields: rolePermissionFields,
-  table: { fields: ['permissionCode', 'name', 'module', 'description', 'assigned'] },
-  capabilities: { list: { handler: ({ searchParameters }: { searchParameters: Record<string, unknown> }) => loadRolePermissionList(searchParameters), permission: 'view-role-permissions', to: { name: 'settings-roles-detail-permissions' } } },
+  actions: {
+    list: {
+      run: rolePermissionsActions.list,
+      fields: [fields.permissionCode, fields.name, fields.module, fields.description, fields.assigned],
+      permission: 'view-role-permissions',
+      route: { name: 'settings-roles-detail-permissions' },
+    },
+    set: { run: rolePermissionsActions.set },
+  },
 })

@@ -462,21 +462,17 @@ describe('FormView', () => {
     formActions.unmount()
   })
 
-  function resourceForm(options: {
+  function actionForm(options: {
     detail?: (id: string) => string
     list?: string
     afterSubmit?: (context: { navigate: (to: string) => Promise<void>; preventDefaultNavigation: () => void }) => Promise<void | string> | void | string
     submit?: () => Promise<{ id: string; name: string }>
   } = {}) {
     return {
-      __formCapabilities: 'create' as const,
-      capabilities: {
-        create: {},
-        ...(options.detail ? { detail: { to: options.detail } } : {}),
-        ...(options.list ? { list: { to: options.list } } : {}),
-      },
-      identity: (record: { id: string }) => record.id,
-      form: () => ({ fields: { name: { label: 'Nama' } }, initialData: { name: 'Admin' }, submit: options.submit ?? (async () => ({ id: '1', name: 'Admin' })) }),
+      fields: { name: { label: 'Nama' } },
+      initialData: { name: 'Admin' },
+      run: options.submit ?? (async () => ({ id: '1', name: 'Admin' })),
+      defaultTo: options.detail ? (record: Record<string, unknown>) => options.detail!(String(record.id)) : options.list,
       afterSubmit: options.afterSubmit,
     }
   }
@@ -543,21 +539,21 @@ describe('FormView', () => {
   })
 
   it('derives detail navigation, then list fallback, and stays without either target', async () => {
-    const detail = mountCore(FormView, { resource: resourceForm({ detail: (id) => `/records/${id}`, list: '/records' }) })
+    const detail = mountCore(FormView, { ...actionForm({ detail: (id) => `/records/${id}`, list: '/records' }) })
     const detailReplace = vi.spyOn(detail.router, 'replace')
     detail.find('form')!.dispatchEvent(new Event('submit'))
     await flush()
     expect(detailReplace).toHaveBeenCalledWith('/records/1')
     detail.unmount()
 
-    const list = mountCore(FormView, { resource: resourceForm({ list: '/records' }) })
+    const list = mountCore(FormView, { ...actionForm({ list: '/records' }) })
     const listReplace = vi.spyOn(list.router, 'replace')
     list.find('form')!.dispatchEvent(new Event('submit'))
     await flush()
     expect(listReplace).toHaveBeenCalledWith('/records')
     list.unmount()
 
-    const stay = mountCore(FormView, { resource: resourceForm() })
+    const stay = mountCore(FormView, { ...actionForm() })
     const stayReplace = vi.spyOn(stay.router, 'replace')
     stay.find('form')!.dispatchEvent(new Event('submit'))
     await flush()
@@ -568,7 +564,7 @@ describe('FormView', () => {
   it('runs effects before default navigation and only controller calls suppress it', async () => {
     const order: string[] = []
     const effect = mountCore(FormView, {
-      resource: resourceForm({
+      ...actionForm({
         detail: () => '/default',
         afterSubmit: async () => { order.push('effect') },
       }),
@@ -581,7 +577,7 @@ describe('FormView', () => {
     effect.unmount()
 
     const ignoredReturn = mountCore(FormView, {
-      resource: resourceForm({ detail: () => '/default', afterSubmit: () => '/ignored' }),
+      ...actionForm({ detail: () => '/default', afterSubmit: () => '/ignored' }),
     })
     const ignoredReplace = vi.spyOn(ignoredReturn.router, 'replace')
     ignoredReturn.find('form')!.dispatchEvent(new Event('submit'))
@@ -590,7 +586,7 @@ describe('FormView', () => {
     ignoredReturn.unmount()
 
     const controlled = mountCore(FormView, {
-      resource: resourceForm({ detail: () => '/default', afterSubmit: async ({ navigate }) => navigate('/custom') }),
+      ...actionForm({ detail: () => '/default', afterSubmit: async ({ navigate }) => navigate('/custom') }),
     })
     const controlledReplace = vi.spyOn(controlled.router, 'replace')
     controlled.find('form')!.dispatchEvent(new Event('submit'))
@@ -600,7 +596,7 @@ describe('FormView', () => {
     controlled.unmount()
 
     const prevented = mountCore(FormView, {
-      resource: resourceForm({ detail: () => '/default', afterSubmit: ({ preventDefaultNavigation }) => preventDefaultNavigation() }),
+      ...actionForm({ detail: () => '/default', afterSubmit: ({ preventDefaultNavigation }) => preventDefaultNavigation() }),
     })
     const preventedReplace = vi.spyOn(prevented.router, 'replace')
     prevented.find('form')!.dispatchEvent(new Event('submit'))
@@ -611,7 +607,7 @@ describe('FormView', () => {
 
   it('keeps persisted form mounted when follow-up effect fails', async () => {
     const view = mountCore(FormView, {
-      resource: resourceForm({ detail: () => '/default', afterSubmit: async () => { throw new Error('follow-up') } }),
+      ...actionForm({ detail: () => '/default', afterSubmit: async () => { throw new Error('follow-up') } }),
     })
     const replace = vi.spyOn(view.router, 'replace')
     view.find('form')!.dispatchEvent(new Event('submit'))

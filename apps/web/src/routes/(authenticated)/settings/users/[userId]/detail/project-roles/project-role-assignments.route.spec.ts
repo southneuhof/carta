@@ -19,10 +19,19 @@ const mocks = vi.hoisted(() => ({
   resolveSet: (() => undefined) as () => void,
 }))
 
-vi.mock('./project-role-assignments.operations', () => ({
-  loadProjectRoleAssignmentOptions: mocks.loadOptions,
-  loadProjectRoleAssignments: mocks.loadRows,
-  setProjectRoleAssignment: mocks.set,
+vi.mock('./project-role-assignments.actions', () => ({
+  projectRoleAssignmentsActions: {
+    options: (userId: string) => mocks.loadOptions(userId),
+    list: ({ searchParameters }: { searchParameters: Record<string, unknown> }) => {
+      const coverage = searchParameters.coverageType === 'division'
+        ? { coverageType: 'division', divisionId: searchParameters.divisionId }
+        : searchParameters.coverageType === 'project'
+          ? { coverageType: 'project', projectId: searchParameters.projectId }
+          : { coverageType: 'all_projects' }
+      return mocks.loadRows(String(searchParameters.userId ?? ''), coverage)
+    },
+    set: mocks.set,
+  },
 }))
 vi.mock('@/stores/permissions', () => ({ permissions: () => ({ has: () => true }) }))
 vi.mock('vue-sonner', () => ({ toast: { error: mocks.toastError } }))
@@ -85,9 +94,10 @@ async function mountRoute(path = '/settings/users/u1/detail/project-roles') {
     host,
     router,
     filter: (name: 'division' | 'project') => host.querySelector<HTMLElement>(`#field-${name === 'division' ? 'divisionId' : 'projectId'}`)!,
-    chooseFilter: (name: 'division' | 'project', label: string) => {
+    chooseFilter: async (name: 'division' | 'project', label: string) => {
       const field = host.querySelector<HTMLElement>(`#field-${name === 'division' ? 'divisionId' : 'projectId'}`)!
       field.querySelector<HTMLElement>('p')!.click()
+      await nextTick()
       exactText(host, label).click()
     },
     switchRoot: (id: string) => host.querySelector<HTMLElement>(`[data-role="${id}"]`)!,
@@ -129,17 +139,17 @@ describe('project role assignment screen', () => {
     expect(view.filter('project').textContent).toContain('All Projects')
     expect(mocks.loadRows.mock.calls.at(-1)?.[1]).toEqual({ coverageType: 'all_projects' })
 
-    view.chooseFilter('division', 'Division 1')
+    await view.chooseFilter('division', 'Division 1')
     await flush()
     expect(view.router.currentRoute.value.query).toMatchObject({ tab: 'profile', 'project-roles.divisionId': 'd1' })
     expect(view.router.currentRoute.value.query).not.toHaveProperty('project-roles.projectId')
     expect(mocks.loadRows.mock.calls.at(-1)?.[1]).toEqual({ coverageType: 'division', divisionId: 'd1' })
 
-    view.chooseFilter('project', 'P-1 — Project 1')
+    await view.chooseFilter('project', 'P-1 — Project 1')
     await flush()
     expect(mocks.loadRows.mock.calls.at(-1)?.[1]).toEqual({ coverageType: 'project', projectId: 'p1' })
 
-    view.chooseFilter('division', 'Division 2 (Inactive)')
+    await view.chooseFilter('division', 'Division 2 (Inactive)')
     await flush()
     expect(view.filter('project').textContent).toContain('All Projects')
     expect(view.router.currentRoute.value.query).toMatchObject({ 'project-roles.divisionId': 'd2' })

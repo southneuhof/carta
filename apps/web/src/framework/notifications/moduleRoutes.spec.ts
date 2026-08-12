@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { notificationRoute, notificationRoutes } from './moduleRoutes'
-import type { NotificationRecord } from '@/routes/(authenticated)/to-do/notifications.operations'
+import type { NotificationRecord } from '@/routes/(authenticated)/to-do/notifications.schema'
 
 const notification = (overrides: Partial<NotificationRecord> = {}): NotificationRecord =>
   ({
@@ -23,6 +23,6 @@ describe('notification deep links', () => {
   })
 
   it('keeps the registry limited to known module routes', () => {
-    expect(Object.keys(notificationRoutes)).toEqual(['qhsse-pts'])
+    expect(Object.keys(notificationRoutes)).toEqual([])
   })
 })

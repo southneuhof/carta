@@ -7,6 +7,7 @@
 ## Status
 
 - **Priority**: P1
+- **Status**: DONE
 - **Effort**: M per cohort; S per module
 - **Risk**: LOW
 - **Depends on**: `plans/018-add-unified-web-resource-schema.md`, `plans/019-replace-resource-with-per-action-api.md`, `plans/020-bind-views-to-action-prop-bags.md`, `plans/021-add-app-hono-resource-adapters.md`
@@ -15,10 +16,10 @@
 
 ## Module checkpoints
 
-- [ ] `uoms`
-- [ ] `business-categories`
-- [ ] `pts-work-categories`
-- [ ] `root-causes`
+- [x] `uoms`
+- [x] `business-categories`
+- [x] `pts-work-categories`
+- [x] `root-causes`
 
 ## Why this matters
 

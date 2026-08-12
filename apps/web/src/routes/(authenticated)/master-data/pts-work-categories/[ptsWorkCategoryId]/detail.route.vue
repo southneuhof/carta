@@ -6,4 +6,4 @@ import { ptsWorkCategories } from '../pts-work-categories.resource'
 const route = useRoute('master-data-pts-work-categories-detail')
 </script>
 
-<template><DetailView title="Kategori Pekerjaan" :back-to="{ name: 'master-data-pts-work-categories' }" :resource="ptsWorkCategories" :id="String(route.params.ptsWorkCategoryId)" /></template>
+<template><DetailView v-bind="ptsWorkCategories.detail({ id: String(route.params.ptsWorkCategoryId) })" title="Kategori Pekerjaan" :back-to="{ name: 'master-data-pts-work-categories' }" /></template>

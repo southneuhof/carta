@@ -8,4 +8,4 @@ const projectId = String(route.params.projectId)
 const resource = projectVendors(projectId)
 </script>
 
-<template><FormView title="Add Vendor" :resource="resource" :form-options="{ initialData: { projectId } }" /></template>
+<template><FormView v-bind="resource.create()" title="Add Vendor" /></template>

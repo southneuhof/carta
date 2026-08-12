@@ -300,34 +300,6 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
-    'quality-pts': RouteRecordInfo<
-      'quality-pts',
-      '/quality/pts',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    'quality-pts-detail': RouteRecordInfo<
-      'quality-pts-detail',
-      '/quality/pts/:ptsId/detail',
-      { ptsId: ParamValue<true> },
-      { ptsId: ParamValue<false> },
-      | never
-    >,
-    'quality-pts-edit': RouteRecordInfo<
-      'quality-pts-edit',
-      '/quality/pts/:ptsId/edit',
-      { ptsId: ParamValue<true> },
-      { ptsId: ParamValue<false> },
-      | never
-    >,
-    'quality-pts-create': RouteRecordInfo<
-      'quality-pts-create',
-      '/quality/pts/create',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
     'settings-permissions': RouteRecordInfo<
       'settings-permissions',
       '/settings/permissions',
@@ -508,10 +480,6 @@ declare module 'vue-router/auto-routes' {
         | 'master-data-uoms-edit'
         | 'master-data-work-items'
         | 'notifications'
-        | 'quality-pts'
-        | 'quality-pts-create'
-        | 'quality-pts-detail'
-        | 'quality-pts-edit'
         | 'settings-permissions'
         | 'settings-permissions-detail'
         | 'settings-roles'
@@ -834,38 +802,6 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/notifications/index.route.vue': {
       routes:
         | 'notifications'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/routes/(authenticated)/quality/pts/index.route.vue': {
-      routes:
-        | 'quality-pts'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/routes/(authenticated)/quality/pts/[ptsId]/detail.route.vue': {
-      routes:
-        | 'quality-pts-detail'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/routes/(authenticated)/quality/pts/[ptsId]/edit.route.vue': {
-      routes:
-        | 'quality-pts-edit'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/routes/(authenticated)/quality/pts/create.route.vue': {
-      routes:
-        | 'quality-pts-create'
       views:
         | never
       pathParamNames:

@@ -1,6 +1,3 @@
-import { roles } from '@/routes/(authenticated)/settings/roles/roles.resource'
-import { users } from '@/routes/(authenticated)/settings/users/users.resource'
-import { pts } from '@/routes/(authenticated)/quality/pts/pts.resource'
 import { defineNavigation, type NavigationIcon, type NavigationModule } from './contract'
 
 export const navigation = defineNavigation([
@@ -13,12 +10,11 @@ export const navigation = defineNavigation([
     description: 'Pengaturan',
     routes: [
       { separator: 'System' },
-      { action: users.capabilities.list!, title: 'Users', icon: 'folder' },
-      { action: roles.capabilities.list!, title: 'Roles', icon: 'folder' },
+      { to: { name: 'settings-users' }, permission: 'view-users', title: 'Users', icon: 'folder' },
+      { to: { name: 'settings-roles' }, permission: 'view-roles', title: 'Roles', icon: 'folder' },
       { to: { name: 'settings-permissions' }, permission: 'view-permissions', title: 'Permissions', icon: 'folder' },
     ],
   },
-  { name: 'quality', title: 'Quality', icon: 'folder', description: 'Quality work', routes: [{ action: pts.capabilities.list!, title: 'PTS', icon: 'folder' }] },
   {
     name: 'master-data',
     title: 'Master Data',
@@ -49,9 +45,9 @@ export function visibleNavigation(allows: (permission: string) => boolean): Visi
         if (routes.length && !('separator' in routes.at(-1)!)) routes.push({ separator: true, name: entry.separator })
         continue
       }
-      const permission = 'action' in entry ? entry.action.permission : entry.permission
+      const permission = entry.permission
       if (permission !== null && !allows(permission)) continue
-      const to = 'action' in entry ? entry.action.to : entry.to
+      const to = entry.to
       if (!to || typeof to === 'function') continue
       routes.push({ name: (to as { name: string }).name, to, title: entry.title, icon: entry.icon })
     }

@@ -7,8 +7,8 @@ import { Alert, Button, Spinner } from '@southneuhof/is-vue-framework/components
 import Switch from '@southneuhof/is-vue-framework/components/inputs/Switch.vue'
 import { identity, refreshIdentity } from '@/framework/identity'
 import { permissions } from '@/stores/permissions'
-import { loadSystemRoleAssignments, setSystemRoleAssignment, type SystemRoleAssignment } from './system-role-assignments.operations'
 import { systemRoleAssignments } from './system-role-assignments.resource'
+import type { SystemRoleAssignment } from './system-role-assignments.schema'
 
 const route = useRoute('settings-users-detail-system-roles')
 const userId = computed(() => String(route.params.userId))
@@ -18,6 +18,8 @@ const loading = ref(false)
 const errorMessage = ref('')
 const canManage = computed(() => permissions().has('manage-system-role-assignments'))
 const listQuery = ref<Record<string, unknown>>({})
+const rowsVersion = ref(0)
+const list = computed(() => systemRoleAssignments.list({ namespace: `system-role-assignments-${userId.value}`, searchParameters: { userId: userId.value } }))
 
 const visibleRows = computed(() => {
   const search = String(listQuery.value.search ?? '').trim().toLowerCase()
@@ -25,9 +27,14 @@ const visibleRows = computed(() => {
   return rows.value.filter((row) => [row.roleCode, row.name, row.description].some((value) => String(value ?? '').toLowerCase().includes(search)))
 })
 
-const table = computed(() => {
-  const source = systemRoleAssignments.table({ namespace: `system-role-assignments-${userId.value}` }).table
-  return { ...source, data: visibleRows.value, load: undefined, pagination: false as const }
+const listSurface = computed(() => {
+  const data = [...visibleRows.value]
+  return {
+    ...list.value,
+    searchParameters: { ...list.value.searchParameters, _version: rowsVersion.value },
+    run: async () => ({ data, meta: { total: data.length } }),
+    pagination: false as const,
+  }
 })
 
 function messageFor(error: unknown) {
@@ -39,7 +46,8 @@ async function reload() {
   errorMessage.value = ''
   rows.value = []
   try {
-    rows.value = (await loadSystemRoleAssignments(userId.value)).data
+    rows.value = (await list.value.run({ query: {}, searchParameters: list.value.searchParameters })).data
+    rowsVersion.value += 1
   } catch (error) {
     errorMessage.value = messageFor(error)
   } finally {
@@ -61,8 +69,9 @@ async function toggle(row: SystemRoleAssignment) {
   const assigned = !row.assigned
   pending.value = new Set(pending.value).add(roleId)
   try {
-    const updated = await setSystemRoleAssignment(userId.value, roleId, assigned)
+    const updated = await systemRoleAssignments.actions.set.run(userId.value, roleId, assigned)
     rows.value = rows.value.map((item) => item.id === row.id ? updated : item)
+    rowsVersion.value += 1
     if (identity.value?.user.id === userId.value) await refreshIdentity()
   } catch (error) {
     toast.error(messageFor(error))
@@ -85,7 +94,7 @@ watch(userId, () => void reload(), { immediate: true })
     <p>{{ errorMessage }}</p>
     <Button type="button" @click="reload">Retry</Button>
   </Alert>
-  <ListView v-else title="System Roles" :table="table" :query="listQuery" @update:query="listQuery = $event">
+  <ListView v-else title="System Roles" v-bind="listSurface" :query="listQuery" @update:query="listQuery = $event">
     <template #cell:assigned="{ record }">
       <Switch
         :model-value="roleRow(record).assigned"

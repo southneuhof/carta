@@ -8,4 +8,4 @@ const projectId = String(route.params.projectId)
 const resource = projectVendors(projectId)
 </script>
 
-<template><DetailView title="Vendor/Subkon/Mandor" :back-to="{ name: 'master-data-projects-detail-vendors', params: { projectId } }" :resource="resource" :id="String(route.params.projectVendorId)" /></template>
+<template><DetailView v-bind="resource.detail({ id: String(route.params.projectVendorId) })" title="Vendor/Subkon/Mandor" :back-to="{ name: 'master-data-projects-detail-vendors', params: { projectId } }" /></template>

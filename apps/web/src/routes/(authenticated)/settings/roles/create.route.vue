@@ -4,5 +4,5 @@ import { roles } from './roles.resource'
 </script>
 
 <template>
-  <FormView title="Create Role" :resource="roles" :form-options="{ context: { operation: 'create' } }" />
+  <FormView v-bind="roles.create()" title="Create Role" />
 </template>

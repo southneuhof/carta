@@ -1,18 +1,31 @@
 import { defineFields, defineResource } from '@southneuhof/is-vue-framework'
-import { numberVariableOperations, type NumberVariable } from './number-variables.operations'
+import { createHonoResourceActions } from '@/framework/hono'
+import { rpc } from '@/framework/rpc'
+import { dataAdapter } from '@/framework/adapters/data/normalize'
+import { numberVariablesSchema } from './number-variables.schema'
 
-export const numberVariables = defineResource({
+const api = createHonoResourceActions(rpc['number-variables'], dataAdapter)
+const fields = defineFields(numberVariablesSchema, {
+  code: { table: { sortable: true } },
+  name: {},
+  active: {},
+  description: {},
+})
+
+export const numberVariables = defineResource(numberVariablesSchema, {
   key: 'number-variables',
-  fields: defineFields<NumberVariable>()({
-    code: { table: { sortable: true } },
-    name: {},
-    description: {},
-    active: {},
-  }),
-  table: { fields: ['code', 'name', 'active'] },
-  detail: { fields: ['code', 'name', 'description', 'active'] },
-  capabilities: {
-    list: { handler: numberVariableOperations.list, permission: 'view-number-variables', to: { name: 'master-data-number-variables' } },
-    detail: { handler: numberVariableOperations.detail, permission: 'view-number-variables', to: { name: 'master-data-number-variables-detail', params: (id: string) => ({ numberVariableId: id }) } },
+  actions: {
+    list: {
+      run: api.list,
+      fields: [fields.code, fields.name, fields.active],
+      permission: 'view-number-variables',
+      route: { name: 'master-data-number-variables' },
+    },
+    detail: {
+      run: api.detail,
+      fields: [fields.code, fields.name, fields.description, fields.active],
+      permission: 'view-number-variables',
+      route: { name: 'master-data-number-variables-detail', params: (id) => ({ numberVariableId: String(id) }) },
+    },
   },
 })

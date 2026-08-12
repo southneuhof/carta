@@ -1,21 +1,30 @@
 import { defineFields, defineResource } from '@southneuhof/is-vue-framework'
-import { notificationOperations, type NotificationRecord } from './notifications.operations'
+import { notificationsActions } from './notifications.actions'
+import { notificationsSchema } from './notifications.schema'
 
-export const notificationFields = defineFields<NotificationRecord>()({
+const fields = defineFields(notificationsSchema, {
   title: { label: 'Judul' },
   body: { label: 'Isi' },
   moduleCode: { label: 'Modul' },
   createdAt: { label: 'Waktu', display: { format: 'datetime' } },
 })
-export const notifications = defineResource({
+
+export const notifications = defineResource(notificationsSchema, {
   key: 'notifications',
-  fields: notificationFields,
-  capabilities: {
-    list: { handler: notificationOperations.list, permission: 'notifications.list' },
-    detail: { handler: notificationOperations.detail, permission: 'notifications.detail' },
+  actions: {
+    list: {
+      run: notificationsActions.list,
+      fields: [fields.title, fields.body, fields.createdAt],
+      permission: 'notifications.list',
+    },
+    detail: {
+      run: notificationsActions.detail,
+      fields: [fields.title, fields.body, fields.moduleCode, fields.createdAt],
+      permission: 'notifications.detail',
+    },
+    unreadCount: { run: notificationsActions.unreadCount },
+    markSeen: { run: notificationsActions.markSeen },
   },
-  table: { fields: ['title', 'body', 'createdAt'] },
-  detail: { fields: ['title', 'body', 'moduleCode', 'createdAt'] },
 })
 
-export type { NotificationRecord }
+export type { NotificationRecord } from './notifications.schema'

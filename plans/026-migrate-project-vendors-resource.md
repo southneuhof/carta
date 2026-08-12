@@ -7,6 +7,7 @@
 ## Status
 
 - **Priority**: P2
+- **Status**: DONE
 - **Effort**: M
 - **Risk**: MED
 - **Depends on**: plans 018-021 and the `projects` checkpoint in plan 025

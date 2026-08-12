@@ -172,6 +172,21 @@ The schema owns:
 Zod or another runtime schema owns shape and data rules. Custom JavaScript
 validators own rules that need application context or asynchronous work.
 
+The framework Zod bridge is schema-first:
+
+```ts
+const createUserFormSchema = createUserSchema.extend({
+  systemRoleIds: z.array(systemRoleSelection).min(1),
+})
+
+const create = { schema: fromZod(createUserFormSchema) }
+```
+
+`fromZod(schema)` infers the parsed output for classic Zod and `zod/v4`.
+Callers do not provide an output type. A local form schema may accept a UI
+shape and transform it into the transport shape. A raw input type is local to a
+real function boundary and is not a generic on the resource schema.
+
 If create and update have the same definition, use a plain constant:
 
 ```ts
@@ -197,11 +212,16 @@ function. A standard schema for all of these would be a false abstraction.
 
 ## Per-Action Resource
 
-The resource receives the schema value. It does not receive schema generic
-arguments or use `defineFields`.
+The resource receives the schema value. Define one adjacent field set with
+`defineFields(schema, definitions)`, then pass ordered references to actions.
 
 ```ts
 const api = appHonoTransport(rpc.users)
+const fields = defineFields(usersSchema, {
+  name: { label: 'Name', form: { renderer: 'text' } },
+  email: { label: 'Email', form: { renderer: 'text', props: { type: 'email' } } },
+  statusCode: { label: 'Status', form: { renderer: 'radio' } },
+})
 
 export const users = defineResource(usersSchema, {
   key: 'users',
@@ -209,22 +229,14 @@ export const users = defineResource(usersSchema, {
   actions: {
     list: {
       run: api.list,
-      fields: {
-        name: { label: 'Name', sortable: true },
-        email: { label: 'Email' },
-        statusCode: { label: 'Status' },
-      },
+      fields: [fields.name, fields.email, fields.statusCode],
       permission: 'view-users',
       route: { name: 'settings-users' },
     },
 
     detail: {
       run: api.detail,
-      fields: {
-        name: { label: 'Name' },
-        email: { label: 'Email' },
-        statusCode: { label: 'Status' },
-      },
+      fields: [fields.name, fields.email, fields.statusCode],
       permission: 'view-users',
       route: {
         name: 'settings-users-detail',
@@ -234,24 +246,14 @@ export const users = defineResource(usersSchema, {
 
     create: {
       run: api.create,
-      fields: {
-        name: { label: 'Name', renderer: 'text' },
-        email: {
-          label: 'Email',
-          renderer: 'text',
-          props: { type: 'email' },
-        },
-      },
+      fields: [fields.name, fields.email],
       permission: 'create-users',
       route: { name: 'settings-users-create' },
     },
 
     update: {
       run: api.update,
-      fields: {
-        name: { label: 'Name', renderer: 'text' },
-        statusCode: { label: 'Status', renderer: 'radio' },
-      },
+      fields: [fields.name, fields.statusCode],
       permission: 'update-users',
       route: {
         name: 'settings-users-edit',
@@ -300,35 +302,29 @@ The action block is the only location for:
 There is no root `transport` object because it would split one operation between
 `transport.list` and `list` view config.
 
-### View-owned fields
+### Schema-bound field references
 
-Each standard View block owns complete field definitions:
-
-- `list.fields` contains list columns;
-- `detail.fields` contains detail values;
-- `create.fields` contains create inputs;
-- `update.fields` contains update inputs.
-
-Field properties such as `label`, `renderer`, `props`, `source`, `read`, `write`,
-`sortable`, and `behavior` sit directly on the view field. There is no nested
-`table`, `detail`, `form`, `display`, or `input` field layer.
-
-There is no hidden merge with a top-level catalog. Reuse uses plain constants:
+`defineFields(schema, definitions)` returns immutable references. A definition
+keeps shared `label`, `read`, and `write` values at its root and puts surface
+behavior in `display`, `table`, `detail`, and `form` projections.
 
 ```ts
-const displayFields = {
-  name: { label: 'Name' },
-  email: { label: 'Email' },
-} as const
+const roleFields = defineFields(rolesSchema, {
+  name: { label: 'Role name', form: { renderer: 'text' } },
+  realm: { label: 'Realm', form: { renderer: 'radio', source: realmOptions } },
+})
 
-const writeFields = {
-  name: { label: 'Name', renderer: 'text' },
-  email: { label: 'Email', renderer: 'text' },
-} as const
+const createFields = [roleFields.name, roleFields.realm]
+const updateFields = [
+  roleFields.name,
+  roleFields.realm.override({ form: { behavior: { disabled: () => true } } }),
+]
 ```
 
-Inline fields receive contextual types from the schema. Extracted constants can
-use `as const` or an exported `satisfies` type when TypeScript needs help.
+Each standard action selects its fields with an ordered array. Omission removes
+a field from that View. The override is one terminal partial patch; its result
+has no second override method. Raw field catalogs remain valid for direct
+`Table`, `Detail`, and `Form` screens, not for standard resource actions.
 
 ### Custom actions
 
@@ -487,10 +483,11 @@ Rejected because custom actions are not one kind of operation. They can be
 mutations, alternate lists, exports, or other functions. A common action schema
 would create a second language that must match application functions.
 
-### Shared field catalog plus View selectors
+### Global field catalog plus View selectors
 
-Rejected because a field definition and its View membership would live in two
-places. Empty selector entries were hard to explain and hard to read.
+Rejected because a global catalog would separate module ownership from schema
+identity. Each module owns one adjacent field set, and each action selects
+references in its own order.
 
 ### Fields that declare all View membership
 
@@ -513,11 +510,11 @@ The architecture is complete when:
 
 1. A Hono-backed feature and a services or fetch feature both use
    `defineSchema` and `defineResource`.
-2. Normal resource code has no `defineFields` call and no explicit resource
-   generic list.
+2. Normal resource code uses one `defineFields(schema, definitions)` call and
+   no explicit resource generic list.
 3. Validation exists only in `*.schema.ts` for standard resource data.
 4. Each standard action can be read from one resource block.
-5. Each standard View can be read from its own complete field map.
+5. Each standard View can be read from its action's ordered field references.
 6. Every standard action has one execution path through the returned action
    object's `run`.
 7. Custom actions remain plain functions exposed as `{ run }`.

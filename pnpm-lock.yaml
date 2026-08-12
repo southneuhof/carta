@@ -304,6 +304,9 @@ importers:
       dotenv:
         specifier: ^16.1.4
         version: 16.6.1
+      hono:
+        specifier: 4.12.27
+        version: 4.12.27
       html2pdf.js:
         specifier: ^0.10.3
         version: 0.10.3
@@ -572,9 +575,6 @@ importers:
       '@vitest/browser-playwright':
         specifier: 4.1.10
         version: 4.1.10(playwright@1.62.0)(vite@8.1.4(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(vitest@4.1.10)
-      hono:
-        specifier: ^4.12.27
-        version: 4.12.27
       jsdom:
         specifier: ^20.0.3
         version: 20.0.3

@@ -2,7 +2,8 @@
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useDocumentVisibility } from '@vueuse/core'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
-import { NOTIFICATIONS_SEEN_EVENT, unreadNotificationCount } from '@/routes/(authenticated)/to-do/notifications.operations'
+import { NOTIFICATIONS_SEEN_EVENT } from '@/routes/(authenticated)/to-do/notifications.actions'
+import { notifications } from '@/routes/(authenticated)/to-do/notifications.resource'
 
 const POLL_INTERVAL_MS = 30_000
 const visibility = useDocumentVisibility()
@@ -10,7 +11,7 @@ const unread = ref(0)
 
 async function refresh() {
   try {
-    unread.value = await unreadNotificationCount()
+    unread.value = await notifications.actions.unreadCount.run()
   } catch {
     // Badge polling is best effort; the next visible tick retries.
   }

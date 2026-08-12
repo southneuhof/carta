@@ -2,17 +2,17 @@
 import { computed } from 'vue'
 import { ListView } from '@southneuhof/is-vue-framework'
 import { notifications } from '../to-do/notifications.resource'
-import { markNotificationsSeen, NOTIFICATIONS_SEEN_EVENT, unreadIds, type NotificationRecord } from '../to-do/notifications.operations'
+import { NOTIFICATIONS_SEEN_EVENT, unreadIds } from '../to-do/notifications.actions'
 
-const table = computed(() => {
-  const base = notifications.table({ namespace: 'notifications' }).table
+const list = computed(() => {
+  const base = notifications.list({ namespace: 'notifications' })
   return {
     ...base,
-    load: async (...args: Parameters<NonNullable<typeof base.load>>) => {
-      const loaded = await base.load!(...args)
-      const ids = unreadIds((loaded as { data: NotificationRecord[] }).data)
+    run: async (context: Parameters<typeof base.run>[0]) => {
+      const loaded = await base.run(context)
+      const ids = unreadIds(loaded.data)
       if (ids.length > 0) {
-        await markNotificationsSeen(ids)
+        await notifications.actions.markSeen.run(ids)
         await notifications.invalidate()
         window.dispatchEvent(new Event(NOTIFICATIONS_SEEN_EVENT))
       }
@@ -23,5 +23,5 @@ const table = computed(() => {
 </script>
 
 <template>
-  <ListView title="Notifications" :table="table" />
+  <ListView title="Notifications" v-bind="list" />
 </template>

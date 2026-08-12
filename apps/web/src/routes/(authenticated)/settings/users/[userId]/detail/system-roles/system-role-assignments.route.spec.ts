@@ -11,9 +11,11 @@ const mocks = vi.hoisted(() => ({
   identity: { value: { user: { id: 'u1' } } },
 }))
 
-vi.mock('./system-role-assignments.operations', () => ({
-  loadSystemRoleAssignments: mocks.load,
-  setSystemRoleAssignment: mocks.set,
+vi.mock('./system-role-assignments.actions', () => ({
+  systemRoleAssignmentsActions: {
+    list: ({ searchParameters }: { searchParameters: Record<string, unknown> }) => mocks.load(String(searchParameters.userId ?? '')),
+    set: mocks.set,
+  },
 }))
 vi.mock('@/framework/identity', () => ({ identity: mocks.identity, refreshIdentity: mocks.refreshIdentity }))
 vi.mock('@/stores/permissions', () => ({ permissions: () => ({ has: () => true }) }))

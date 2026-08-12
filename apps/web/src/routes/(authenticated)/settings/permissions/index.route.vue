@@ -2,4 +2,4 @@
 import { ListView } from '@southneuhof/is-vue-framework'
 import { permissionResource } from './permissions.resource'
 </script>
-<template><ListView title="Permissions" :resource="permissionResource" /></template>
+<template><ListView v-bind="permissionResource.list()" title="Permissions" /></template>

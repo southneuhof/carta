@@ -2,19 +2,16 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { defineFields, Form, ListView, useNamespacedQuery, useResourceRuntime } from '@southneuhof/is-vue-framework'
+import { Form, ListView, useNamespacedQuery, useResourceRuntime } from '@southneuhof/is-vue-framework'
 import { Alert, Button, Spinner } from '@southneuhof/is-vue-framework/components/base'
 import Switch from '@southneuhof/is-vue-framework/components/inputs/Switch.vue'
 import { permissions } from '@/stores/permissions'
-import {
-  loadProjectRoleAssignmentOptions,
-  loadProjectRoleAssignments,
-  setProjectRoleAssignment,
-  type ProjectRoleAssignment,
-  type ProjectRoleAssignmentOptions,
-  type ProjectRoleCoverage,
-} from './project-role-assignments.operations'
 import { projectRoleAssignments } from './project-role-assignments.resource'
+import type {
+  ProjectRoleAssignment,
+  ProjectRoleAssignmentOptions,
+  ProjectRoleCoverage,
+} from './project-role-assignments.schema'
 
 const route = useRoute('settings-users-detail-project-roles')
 const userId = computed(() => String(route.params.userId))
@@ -22,6 +19,7 @@ const query = useNamespacedQuery({ namespace: 'project-roles', defaults: { divis
 const options = ref<ProjectRoleAssignmentOptions>({ divisions: [], projects: [] })
 const optionsReady = ref(false)
 const rows = ref<ProjectRoleAssignment[]>([])
+const rowsVersion = ref(0)
 const pending = ref(new Set<string>())
 const loading = ref(false)
 const errorMessage = ref('')
@@ -30,19 +28,12 @@ const canManage = computed(() => permissions().has('manage-project-role-assignme
 const listQuery = ref<Record<string, unknown>>({})
 type ProjectRoleFilters = { divisionId: string; projectId: string }
 type FilterOption = { id: string; name: string }
-const divisionFilterOptions = ref<FilterOption[]>([{ id: '', name: 'All Divisions' }])
-const projectFilterOptions = ref<FilterOption[]>([{ id: '', name: 'All Projects' }])
 
 const visibleRows = computed(() => {
   const search = String(listQuery.value.search ?? '').trim().toLowerCase()
   if (!search) return rows.value
   // ponytail: role catalogs are small; keep ListView search local until the API accepts it.
   return rows.value.filter((row) => [row.roleCode, row.name, row.description].some((value) => String(value ?? '').toLowerCase().includes(search)))
-})
-
-const table = computed(() => {
-  const source = projectRoleAssignments.table({ namespace: `project-role-assignments-${userId.value}`, searchParameters: { userId: userId.value } }).table
-  return { ...source, data: visibleRows.value, load: undefined, pagination: false as const }
 })
 
 function queryValue(key: 'divisionId' | 'projectId') {
@@ -64,6 +55,27 @@ const selectedProjectId = computed(() => {
   return projectOptions.value.some((project) => project.id === value) ? value : ''
 })
 
+const coverage = computed<ProjectRoleCoverage>(() => {
+  if (selectedProjectId.value) return { coverageType: 'project', projectId: selectedProjectId.value }
+  if (selectedDivisionId.value) return { coverageType: 'division', divisionId: selectedDivisionId.value }
+  return { coverageType: 'all_projects' }
+})
+
+const list = computed(() => projectRoleAssignments.list({
+  namespace: `project-role-assignments-${userId.value}`,
+  searchParameters: { userId: userId.value, ...coverage.value },
+}))
+
+const listSurface = computed(() => {
+  const data = [...visibleRows.value]
+  return {
+    ...list.value,
+    searchParameters: { ...list.value.searchParameters, _version: rowsVersion.value },
+    run: async () => ({ data, meta: { total: data.length } }),
+    pagination: false as const,
+  }
+})
+
 function setFilters(value: Record<string, unknown>) {
   const requestedDivision = typeof value.divisionId === 'string' ? value.divisionId : ''
   const nextDivision = options.value.divisions.some((division) => division.id === requestedDivision) ? requestedDivision : ''
@@ -80,7 +92,17 @@ const filterModel = computed<ProjectRoleFilters>({
   set: setFilters,
 })
 
-const filterFields = defineFields<ProjectRoleFilters>()({
+const divisionFilterOptions = computed<FilterOption[]>(() => [
+  { id: '', name: 'All Divisions' },
+  ...options.value.divisions.map((division) => ({ id: division.id, name: `${division.name}${division.active ? '' : ' (Inactive)'}` })),
+])
+
+const projectFilterOptions = computed<FilterOption[]>(() => [
+  { id: '', name: 'All Projects' },
+  ...projectOptions.value.map((project) => ({ id: project.id, name: `${project.number} — ${project.name}${project.active ? '' : ' (Inactive)'}` })),
+])
+
+const filterFields = computed(() => ({
   divisionId: {
     label: 'Division',
     form: {
@@ -94,18 +116,13 @@ const filterFields = defineFields<ProjectRoleFilters>()({
     label: 'Project',
     form: {
       renderer: 'select',
-      span: 6,
       source: projectFilterOptions.value,
+      span: 6,
       props: { pick: 'id', view: 'name', searchable: false, clearable: false, placeholder: 'All Projects' },
     },
   },
-})
-
-const coverage = computed<ProjectRoleCoverage>(() => {
-  if (selectedProjectId.value) return { coverageType: 'project', projectId: selectedProjectId.value }
-  if (selectedDivisionId.value) return { coverageType: 'division', divisionId: selectedDivisionId.value }
-  return { coverageType: 'all_projects' }
-})
+}))
+const filterKey = computed(() => `${options.value.divisions.length}:${options.value.projects.length}:${selectedDivisionId.value}`)
 
 const coverageKey = computed(() => {
   const selected = coverage.value
@@ -129,7 +146,7 @@ async function reloadOptions() {
   optionsError.value = ''
   rows.value = []
   try {
-    options.value = await loadProjectRoleAssignmentOptions(userId.value)
+    options.value = await projectRoleAssignments.actions.options.run(userId.value)
     optionsReady.value = true
   } catch (error) {
     optionsError.value = messageFor(error)
@@ -141,7 +158,8 @@ async function reloadRows() {
   loading.value = true
   errorMessage.value = ''
   try {
-    rows.value = (await loadProjectRoleAssignments(userId.value, coverage.value)).data
+    rows.value = (await list.value.run({ query: {}, searchParameters: list.value.searchParameters })).data
+    rowsVersion.value += 1
   } catch (error) {
     errorMessage.value = messageFor(error)
   } finally {
@@ -161,6 +179,10 @@ function sourceId(row: ProjectRoleAssignment) {
   return `project-role-source-${row.id}`
 }
 
+function sourceTooltip(row: ProjectRoleAssignment) {
+  return isLocked(row) && row.source ? { content: row.source.label, allowHTML: false } : undefined
+}
+
 function roleRow(record: Record<string, unknown>) {
   return record as unknown as ProjectRoleAssignment
 }
@@ -171,7 +193,7 @@ async function toggle(row: ProjectRoleAssignment) {
   const assigned = !row.direct
   pending.value = new Set(pending.value).add(roleId)
   try {
-    await setProjectRoleAssignment(userId.value, roleId, coverage.value, assigned)
+    await projectRoleAssignments.actions.set.run(userId.value, roleId, coverage.value, assigned)
     await reloadRows()
   } catch (error) {
     if (errorCode(error) === 'assignment_already_covered') await reloadRows()
@@ -183,16 +205,6 @@ async function toggle(row: ProjectRoleAssignment) {
   }
 }
 
-watch([options, selectedDivisionId], () => {
-  divisionFilterOptions.value.splice(0, divisionFilterOptions.value.length, { id: '', name: 'All Divisions' }, ...options.value.divisions.map((division) => ({
-    id: division.id,
-    name: `${division.name}${division.active ? '' : ' (Inactive)'}`,
-  })))
-  projectFilterOptions.value.splice(0, projectFilterOptions.value.length, { id: '', name: 'All Projects' }, ...projectOptions.value.map((project) => ({
-    id: project.id,
-    name: `${project.number} — ${project.name}${project.active ? '' : ' (Inactive)'}`,
-  })))
-}, { immediate: true })
 watch(userId, () => void reloadOptions(), { immediate: true })
 watch([optionsReady, coverageKey], () => void reloadRows(), { immediate: true })
 </script>
@@ -210,14 +222,14 @@ watch([optionsReady, coverageKey], () => void reloadRows(), { immediate: true })
     <Spinner aria-hidden="true" />
     <span class="sr-only" role="status">Loading project roles...</span>
   </div>
-  <ListView v-else title="Project Roles" :table="table" :query="listQuery" @update:query="listQuery = $event">
+  <ListView v-else title="Project Roles" v-bind="listSurface" :query="listQuery" @update:query="listQuery = $event">
     <template #filters>
-      <Form v-model="filterModel" :fields="filterFields" />
+      <Form :key="filterKey" v-model="filterModel" :fields="filterFields" />
     </template>
     <template #cell:effective="{ record }">
       <span v-if="isLocked(roleRow(record))" :id="sourceId(roleRow(record))" class="sr-only">{{ roleRow(record).source?.label }}</span>
       <Switch
-        v-tippy="isLocked(roleRow(record)) && roleRow(record).source ? { content: roleRow(record).source.label, allowHTML: false } : undefined"
+        v-tippy="sourceTooltip(roleRow(record))"
         :model-value="roleRow(record).effective"
         role="switch"
         :data-role="roleRow(record).id"

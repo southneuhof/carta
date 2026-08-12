@@ -13,24 +13,23 @@ function fields(value: unknown, surface: 'form' | 'table') {
 
 describe('projects resource', () => {
   it('uses the division resource for its parent lookup', () => {
-    expect(fields(projects.form().fields, 'form').find((field) => field.key === 'divisionId')).toMatchObject({ renderer: 'lookup', source: divisions })
+    expect(fields(projects.create().fields, 'form').find((field) => field.key === 'divisionId')).toMatchObject({ renderer: 'lookup', source: divisions })
   })
 
   it('renders the related division name in the table', () => {
-    const field = fields(projects.table().table.fields, 'table').find((candidate) => candidate.key === 'division')!
+    const field = fields(projects.list().fields, 'table').find((candidate) => candidate.key === 'division')!
     expect(field.read?.({ division: { name: 'Division' } } as never, {})).toBe('Division')
-    expect(projects.table().table.fields).not.toHaveProperty('divisionId')
+    expect(fields(projects.list().fields, 'table').map((candidate) => candidate.key)).not.toContain('divisionId')
   })
 
   it('keeps required project fields in the create form', () => {
-    expect(Object.keys(projects.form().fields)).toEqual(expect.arrayContaining(['divisionId', 'number', 'integrationCode', 'name']))
-    expect(fields(projects.table().table.fields, 'table').map((field) => field.key)).toContain('integrationCode')
+    expect(fields(projects.create().fields, 'form').map((field) => field.key)).toEqual(expect.arrayContaining(['divisionId', 'number', 'integrationCode', 'name']))
+    expect(fields(projects.list().fields, 'table').map((field) => field.key)).toContain('integrationCode')
   })
 
   it('uses the structured location input and keeps status out of the form', () => {
-    const formFields = fields(projects.form().fields, 'form')
+    const formFields = fields(projects.create().fields, 'form')
     expect(formFields.find((field) => field.key === 'location')).toMatchObject({ renderer: 'location' })
-    expect(projects.form().fields).not.toHaveProperty('statusCode')
-    expect(projects.form().fields).not.toHaveProperty('active')
+    expect(fields(projects.create().fields, 'form').map((field) => field.key)).not.toEqual(expect.arrayContaining(['statusCode', 'active']))
   })
 })

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { toast } from 'vue-sonner'
-import { DialogForm, Form, Table, defineFields } from '@southneuhof/is-vue-framework'
+import { DialogForm, Form, Table, type FormProps } from '@southneuhof/is-vue-framework'
 import { Button, Card, Chip, Icon } from '@southneuhof/is-vue-framework/components/base'
 import { divisions } from '../divisions/divisions.resource'
 import { projects } from '../projects/projects.resource'
 import { workItems } from './work-items.resource'
-import { loadWorkItemTree, workItemOperations, type WorkItemTreeNode } from './work-items.operations'
+import type { WorkItemTreeNode } from './work-items.actions'
 
 type WorkItemContext = { divisionId: string; projectId: string }
 type TreeRow = WorkItemTreeNode & { depth: number }
@@ -19,17 +19,17 @@ const formMode = ref<'root' | 'child' | 'edit'>('root')
 const parentId = ref<string>()
 const editId = ref<string>()
 
-const contextFields = defineFields<WorkItemContext>()({
+const contextFields = {
   divisionId: { label: 'Division', form: { renderer: 'lookup', source: divisions, props: { pick: 'id', view: 'name', required: true } } },
   projectId: { label: 'Project', form: { renderer: 'lookup', source: projects, props: { pick: 'id', view: 'name', required: true }, behavior: { disabled: ({ draft }) => !draft.divisionId, props: ({ draft }) => ({ searchParameters: { divisionId: draft.divisionId } }), resetWhen: ({ draft }) => draft.divisionId } } },
-})
+}
 
 const rows = computed<TreeRow[]>(() => {
   const flatten = (items: WorkItemTreeNode[], depth: number): TreeRow[] => items.flatMap((item) => [{ ...item, depth }, ...flatten(item.children, depth + 1)])
   return flatten(nodes.value, 0)
 })
 
-const treeFields = defineFields<TreeRow>()({
+const treeFields = {
   name: {},
   categoryName: { label: 'Category' },
   volume: { label: 'Volume' },
@@ -38,7 +38,7 @@ const treeFields = defineFields<TreeRow>()({
   haveMaterialItp: { label: 'Material ITP' },
   haveProcessItp: { label: 'Process ITP' },
   haveProductsItp: { label: 'Products ITP' },
-})
+}
 
 function treeRow(record: Record<string, unknown>) {
   return record as unknown as TreeRow
@@ -48,15 +48,19 @@ function volume(value: unknown) {
   return value == null ? '—' : Number(value).toFixed(2)
 }
 
-const form = computed(() => {
+const form = computed<FormProps>(() => {
   if (formMode.value === 'edit' && editId.value) {
     const record = rows.value.find((row) => row.id === editId.value)
-    return workItems.form({ id: editId.value, context: { variant: record?.parentId ? 'child' : 'root' } })
+    const action = workItems.update({ id: editId.value, context: { variant: record?.parentId ? 'child' : 'root' } })
+    const { run, ...props } = action
+    return { ...props, submit: run } as unknown as FormProps
   }
-  return workItems.form({
+  const action = workItems.create({
     initialData: { projectId: context.projectId, ...(formMode.value === 'child' ? { parentId: parentId.value } : {}) },
     context: { variant: formMode.value },
   })
+  const { run, ...props } = action
+  return { ...props, submit: run } as unknown as FormProps
 })
 
 async function loadTree() {
@@ -64,7 +68,7 @@ async function loadTree() {
   if (!context.projectId) return
   loading.value = true
   try {
-    nodes.value = await loadWorkItemTree(context.projectId)
+    nodes.value = await workItems.actions.loadTree.run(context.projectId)
   } catch (error) {
     toast.error(error instanceof Error ? error.message : 'Jenis Pekerjaan could not be loaded.')
   } finally {
@@ -98,7 +102,7 @@ function edit(row: TreeRow) {
 async function remove(row: TreeRow) {
   if (!window.confirm('Delete this Jenis Pekerjaan?')) return
   try {
-    await workItems.delete(row.id)
+    await workItems.delete({ id: row.id }).run()
     await loadTree()
   } catch (error) {
     toast.error(error instanceof Error ? error.message : 'Jenis Pekerjaan could not be deleted.')

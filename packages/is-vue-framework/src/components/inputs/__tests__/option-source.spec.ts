@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
 import CheckboxGroupInput from '../CheckboxGroupInput.vue'
-import { defineFields, defineResource, type CollectionLoadContext, type CollectionResult } from '../../..'
+import { defineFields, defineResource, defineSchema, type CollectionLoadContext, type CollectionResult } from '../../..'
 import { mountInput } from './harness'
 
 const input = (name: string) => readFileSync(resolve(process.cwd(), 'src/components/inputs', name), 'utf8')
@@ -14,7 +14,7 @@ describe('explicit option sources', () => {
     expect(source).not.toMatch(/getAPI|defaultSelectGetData|useFrameworkRuntime/)
   })
 
-  it('passes standard collection context to a resource list capability', async () => {
+  it('passes standard collection context to a resource list action', async () => {
     type Option = { id: number; name: string }
     const load = vi.fn(async (
       context: CollectionLoadContext<Record<string, never>>,
@@ -22,18 +22,18 @@ describe('explicit option sources', () => {
       data: [{ id: 1, name: 'A' }],
       meta: { total: 1, totalPage: 1 },
     }))
-    const resource = defineResource({
+    const schema = defineSchema({ identity: 'id' })
+    const fields = defineFields(schema, { name: {} })
+    const resource = defineResource(schema, {
       key: 'test-options',
-      fields: defineFields<Option>()({ name: {} }),
-      capabilities: {
-        list: { handler: load, permission: null },
-      },
+      actions: { list: { run: load, fields: [fields.name] } },
     })
+    const list = resource.list()
     const searchParameters = { active: true }
     const mounted = mountInput(CheckboxGroupInput, {
       model: [],
       props: {
-        load: resource.capabilities.list.handler,
+        load: list.run,
         searchParameters,
       },
     })

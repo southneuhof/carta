@@ -1,5 +1,5 @@
 import { ref, shallowRef } from 'vue'
-import { parseHonoResponse, type HonoResponseOf } from '@southneuhof/is-vue-framework/hono'
+import { parseHonoResponse, type HonoResponseOf } from '@/framework/hono'
 import { permissions } from '@/stores/permissions'
 import { rpc } from '@/framework/rpc'
 

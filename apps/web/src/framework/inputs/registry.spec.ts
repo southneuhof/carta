@@ -5,14 +5,21 @@ import { appInputProps } from './registry'
 
 const list = () => Promise.resolve({ data: [] })
 const detail = () => Promise.resolve({ id: 'x' })
-const resource = { key: 'sections', fields: { name: {} }, capabilities: { list: { handler: list }, detail: { handler: detail } } }
+const resource = {
+  key: 'sections',
+  list: () => ({ run: list, fields: { name: {} } }),
+  detail: () => ({ run: detail }),
+}
 
 describe('app input props registry', () => {
-  it('resolves lookup capabilities and keeps explicit overrides', () => {
-    expect(appInputProps.resolve('lookup', {
+  it('resolves lookup actions and keeps explicit overrides', async () => {
+    const resolved = appInputProps.resolve('lookup', {
       source: resource,
       props: { searchParameters: { private: true } },
-    })).toEqual({ fields: resource.fields, load: list, loadDetail: detail, namespace: 'sections', searchParameters: { private: true } })
+    })
+    expect(resolved).toMatchObject({ fields: resource.list().fields, load: list, namespace: 'sections', searchParameters: { private: true } })
+    const loadDetail = resolved.loadDetail as (context: { id: string }) => Promise<unknown>
+    await expect(loadDetail({ id: 'x' })).resolves.toEqual({ id: 'x' })
   })
 
   it('maps arrays to data and never emits source', () => {

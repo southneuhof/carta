@@ -8,37 +8,48 @@
  */
 import { computed, useSlots } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
-import type { DetailProps, RecordIdentity } from '../../contracts'
-import type { DetailCapableResource, DetailSurfaceArguments } from '../../resources/defineResource'
+import type { DetailProps, FieldsInput, LoadSignalContext, MaybePromise, RecordIdentity } from '../../contracts'
 import Detail from '../core/Detail.vue'
 import Card from '../base/Card.vue'
 import NavigationHeader from './NavigationHeader.vue'
 
 type DetailViewProps = {
-  title: string
-  backTo: RouteLocationRaw
+  title?: string
+  backTo?: RouteLocationRaw
 } & (
   | {
-      resource: DetailCapableResource<Record<string, unknown>, RecordIdentity>
+      run: (context?: LoadSignalContext) => MaybePromise<Record<string, unknown> | undefined>
+      fields: FieldsInput<Record<string, unknown>>
       id: RecordIdentity
+      namespace?: string
+      searchParameters?: Record<string, unknown>
       detail?: never
-      detailOptions?: Omit<DetailSurfaceArguments, 'id'>
     }
-  | { detail: DetailProps; resource?: never; id?: never; detailOptions?: never }
+  | { detail: DetailProps; id?: never }
 )
 
 const props = defineProps<DetailViewProps>()
 const detailSlots = computed(() => Object.entries(useSlots()).filter(([name]) => name.startsWith('value:')))
 
 const surface = computed(() => {
-  if (!props.resource) return { detail: props.detail! }
-  return props.resource.detail({ ...props.detailOptions, id: props.id })
+  if ('run' in props && props.run) {
+    return {
+      detail: {
+        fields: props.fields,
+        id: props.id,
+        namespace: props.namespace,
+        searchParameters: props.searchParameters,
+        load: (context: import('../../contracts').RecordLoadContext) => props.run(context),
+      } as DetailProps,
+    }
+  }
+  return { detail: props.detail! }
 })
 </script>
 
 <template>
   <section class="is-detail-view flex flex-col gap-2">
-    <NavigationHeader :title="title" :back-to="backTo" back-label="Kembali">
+    <NavigationHeader :title="title ?? ''" :back-to="backTo ?? { name: 'dashboard' }" back-label="Kembali">
       <template v-if="$slots.controls" #controls><slot name="controls" /></template>
     </NavigationHeader>
 

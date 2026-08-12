@@ -7,6 +7,7 @@
 ## Status
 
 - **Priority**: P2
+- **Status**: DONE
 - **Effort**: L
 - **Risk**: HIGH
 - **Depends on**: plans 018-021; `uoms` and `pts-work-categories` checkpoints in plan 023; `projects` and `divisions` checkpoints in plan 025

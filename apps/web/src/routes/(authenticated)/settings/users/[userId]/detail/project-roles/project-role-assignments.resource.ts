@@ -1,11 +1,8 @@
 import { defineFields, defineResource } from '@southneuhof/is-vue-framework'
-import {
-  loadProjectRoleAssignments,
-  type ProjectRoleAssignment,
-  type ProjectRoleCoverage,
-} from './project-role-assignments.operations'
+import { projectRoleAssignmentsActions } from './project-role-assignments.actions'
+import { projectRoleAssignmentsSchema } from './project-role-assignments.schema'
 
-export const projectRoleAssignmentFields = defineFields<ProjectRoleAssignment>()({
+const fields = defineFields(projectRoleAssignmentsSchema, {
   roleCode: { label: 'Code' },
   name: { label: 'Name' },
   description: { label: 'Description' },
@@ -16,28 +13,16 @@ export const projectRoleAssignmentFields = defineFields<ProjectRoleAssignment>()
   source: { label: 'Source' },
 })
 
-function coverageFromSearchParameters(searchParameters: Record<string, unknown>): ProjectRoleCoverage {
-  if (searchParameters.coverageType === 'division' && typeof searchParameters.divisionId === 'string') {
-    return { coverageType: 'division', divisionId: searchParameters.divisionId }
-  }
-  if (searchParameters.coverageType === 'project' && typeof searchParameters.projectId === 'string') {
-    return { coverageType: 'project', projectId: searchParameters.projectId }
-  }
-  return { coverageType: 'all_projects' }
-}
-
-export const projectRoleAssignments = defineResource({
+export const projectRoleAssignments = defineResource(projectRoleAssignmentsSchema, {
   key: 'project-role-assignments',
-  fields: projectRoleAssignmentFields,
-  table: { fields: ['roleCode', 'name', 'description', 'active', 'effective'] },
-  capabilities: {
+  actions: {
     list: {
-      handler: ({ searchParameters }) => loadProjectRoleAssignments(
-        String(searchParameters.userId ?? ''),
-        coverageFromSearchParameters(searchParameters),
-      ),
+      run: projectRoleAssignmentsActions.list,
+      fields: [fields.roleCode, fields.name, fields.description, fields.active, fields.direct, fields.effective, fields.locked, fields.source],
       permission: 'view-project-role-assignments',
-      to: { name: 'settings-users-detail-project-roles' },
+      route: { name: 'settings-users-detail-project-roles' },
     },
+    options: { run: projectRoleAssignmentsActions.options },
+    set: { run: projectRoleAssignmentsActions.set },
   },
 })

@@ -129,6 +129,29 @@ export interface FieldDefinition<
   form?: FieldFormProjection<TDraft, TValue> | false
 }
 
+declare const fieldReferenceSchema: unique symbol
+
+/** A reusable, schema-bound field definition selected by a resource action. */
+export interface FieldReference<
+  TSchema = unknown,
+  TKey extends string = string,
+  TDefinition = FieldDefinition<any, any, any>,
+> {
+  readonly key: TKey
+  readonly [fieldReferenceSchema]: TSchema
+  override(partialDefinition: TDefinition): FieldOverride<TSchema, TKey, TDefinition>
+}
+
+/** The terminal result of a field override. */
+export interface FieldOverride<
+  TSchema = unknown,
+  TKey extends string = string,
+  _TDefinition = FieldDefinition<any, any, any>,
+> {
+  readonly key: TKey
+  readonly [fieldReferenceSchema]: TSchema
+}
+
 export type FieldCatalog<TRecord = Record<string, unknown>, TDraft = TRecord> = Record<
   string,
   FieldDefinition<TRecord, TDraft>

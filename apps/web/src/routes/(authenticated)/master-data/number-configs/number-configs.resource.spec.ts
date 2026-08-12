@@ -13,15 +13,19 @@ function fields(value: unknown, surface: 'form' | 'table' | 'detail') {
 
 describe('number configurations resource', () => {
   it('uses number variables as the lookup source by code', () => {
-    const field = fields(numberConfigs.form().fields, 'form').find((candidate) => candidate.key === 'numberVariableCode')!
+    const field = fields(numberConfigs.create().fields, 'form').find((candidate) => candidate.key === 'numberVariableCode')!
     expect(field).toMatchObject({ renderer: 'lookup', source: numberVariables })
     expect(field.props.pick).toBe('code')
     expect(field.props.loadDetail).toEqual(expect.any(Function))
   })
 
   it('keeps display order out of the form while showing it on read surfaces', () => {
-    expect(Object.keys(numberConfigs.form().fields)).toEqual(['numberVariableCode', 'numberOfDigits', 'customCode', 'description', 'active'])
-    expect(fields(numberConfigs.table().table.fields, 'table').map((field) => field.key)).toContain('displayOrder')
-    expect(fields(numberConfigs.detail({ id: '1' }).detail.fields, 'detail').map((field) => field.key)).toContain('displayOrder')
+    expect(fields(numberConfigs.create().fields, 'form').map((field) => field.key)).toEqual(['numberVariableCode', 'numberOfDigits', 'customCode', 'description', 'active'])
+    expect(fields(numberConfigs.list().fields, 'table').map((field) => field.key)).toContain('displayOrder')
+    expect(fields(numberConfigs.detail({ id: '1' }).fields, 'detail').map((field) => field.key)).toContain('displayOrder')
+  })
+
+  it('exposes reorder as a custom action', () => {
+    expect(numberConfigs.actions.reorder.run).toEqual(expect.any(Function))
   })
 })

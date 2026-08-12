@@ -6,4 +6,4 @@ import { divisions } from '../divisions.resource'
 const route = useRoute('master-data-divisions-detail')
 </script>
 
-<template><DetailView title="Divisi" :back-to="{ name: 'master-data-divisions' }" :resource="divisions" :id="String(route.params.divisionId)" /></template>
+<template><DetailView v-bind="divisions.detail({ id: String(route.params.divisionId) })" title="Divisi" :back-to="{ name: 'master-data-divisions' }" /></template>

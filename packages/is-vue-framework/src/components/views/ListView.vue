@@ -3,23 +3,21 @@
  * Collection surface shell.
  *
  * Owns Card, page title, toolbar, and filter region; `Table` still owns every
- * piece of data state. `table` prop is
- * forwarded with `v-bind` and never translated, so a resource prop factory
- * result binds directly.
+ * piece of data state. `table` prop is forwarded with `v-bind` and never
+ * translated.
  */
 import { computed, getCurrentInstance, ref, useSlots, watch } from "vue";
 import { toast } from "vue-sonner";
 import type {
+  CollectionLoadContext,
+  CollectionResult,
   FieldsInput,
+  MaybePromise,
   QueryValues,
   RecordIdentity,
   TableProps,
   ValidationSchema,
 } from "../../contracts";
-import type {
-  ListCapableResource,
-  TableSurfaceArguments,
-} from "../../resources/defineResource";
 import { resolveFields } from "../../fields";
 import { useNamespacedQuery } from "../../query";
 import Table from "../core/Table.vue";
@@ -56,11 +54,24 @@ type ListViewProps = {
   export?: ListExportOptions<TRecord, TQuery> | false;
 } & (
   | {
-      resource: ListCapableResource<TRecord, TQuery>;
+      run: (context: CollectionLoadContext<TQuery>) => MaybePromise<CollectionResult<TRecord>>;
+      fields: FieldsInput<TRecord>;
+      namespace?: string;
+      searchParameters?: Record<string, unknown>;
+      schema?: ValidationSchema<TQuery>;
+      pagination?: TableProps<TRecord, TQuery>["pagination"];
+      pageSizeOptions?: readonly number[];
+      defaultPageSize?: number;
+      minColumnWidth?: number;
+      reorderable?: boolean;
+      createRoute?: import("vue-router").RouteLocationRaw;
+      detailRoute?: (record: TRecord) => import("vue-router").RouteLocationRaw | undefined;
+      updateRoute?: (record: TRecord) => import("vue-router").RouteLocationRaw | undefined;
+      canDelete?: (record: TRecord) => boolean;
+      deleteRecord?: (record: TRecord) => Promise<unknown>;
       table?: never;
-      tableOptions?: TableSurfaceArguments<TQuery>;
     }
-  | { table: TableProps; resource?: never; tableOptions?: never }
+  | { table: TableProps }
 );
 
 const props = defineProps<ListViewProps>();
@@ -83,18 +94,37 @@ type ListViewSurface = {
   deleteRecord: ((record: Record<string, unknown>) => Promise<unknown>) | undefined;
 };
 
-const surface = computed<ListViewSurface>(() =>
-  props.resource
-    ? props.resource.table(props.tableOptions) as unknown as ListViewSurface
-    : {
-        table: props.table!,
-        createRoute: undefined,
-        detailRoute: undefined,
-        updateRoute: undefined,
-        canDelete: undefined,
-        deleteRecord: undefined,
-      },
-);
+const surface = computed<ListViewSurface>(() => {
+  if ("run" in props && props.run) {
+    return {
+      table: {
+        fields: props.fields,
+        load: props.run,
+        namespace: props.namespace,
+        searchParameters: props.searchParameters,
+        schema: props.schema,
+        pagination: props.pagination,
+        pageSizeOptions: props.pageSizeOptions,
+        defaultPageSize: props.defaultPageSize,
+        minColumnWidth: props.minColumnWidth,
+        reorderable: props.reorderable,
+      } as unknown as TableProps,
+      createRoute: props.createRoute,
+      detailRoute: props.detailRoute,
+      updateRoute: props.updateRoute,
+      canDelete: props.canDelete,
+      deleteRecord: props.deleteRecord as ((record: Record<string, unknown>) => Promise<unknown>) | undefined,
+    } as ListViewSurface;
+  }
+  return {
+    table: props.table!,
+    createRoute: undefined,
+    detailRoute: undefined,
+    updateRoute: undefined,
+    canDelete: undefined,
+    deleteRecord: undefined,
+  };
+});
 
 const hasQueryBinding = "query" in (getCurrentInstance()?.vnode.props ?? {});
 const queryDefaults = computed<QueryValues>(() => ({

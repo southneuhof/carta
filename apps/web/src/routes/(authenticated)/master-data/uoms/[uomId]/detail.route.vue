@@ -6,4 +6,4 @@ import { uoms } from '../uoms.resource'
 const route = useRoute('master-data-uoms-detail')
 </script>
 
-<template><DetailView title="Satuan" :back-to="{ name: 'master-data-uoms' }" :resource="uoms" :id="String(route.params.uomId)" /></template>
+<template><DetailView v-bind="uoms.detail({ id: String(route.params.uomId) })" title="Satuan" :back-to="{ name: 'master-data-uoms' }" /></template>

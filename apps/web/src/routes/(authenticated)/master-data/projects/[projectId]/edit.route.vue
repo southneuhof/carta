@@ -6,4 +6,4 @@ import { projects } from '../projects.resource'
 const route = useRoute('master-data-projects-edit')
 </script>
 
-<template><FormView title="Edit Proyek" :resource="projects" :id="String(route.params.projectId)" /></template>
+<template><FormView v-bind="projects.update({ id: String(route.params.projectId) })" title="Edit Proyek" /></template>
