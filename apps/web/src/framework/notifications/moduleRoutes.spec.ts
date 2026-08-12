@@ -22,7 +22,8 @@ describe('notification deep links', () => {
     expect(notificationRoute(notification())).toBeNull()
   })
 
-  it('keeps the registry limited to known module routes', () => {
-    expect(Object.keys(notificationRoutes)).toEqual([])
+  it('resolves manual PTS notifications to the detail route', () => {
+    expect(notificationRoute(notification({ moduleCode: 'qhsse-pts' }))).toEqual({ name: 'quality-pts-detail', params: { ptsId: 'id' } })
+    expect(Object.keys(notificationRoutes)).toEqual(['qhsse-pts'])
   })
 })

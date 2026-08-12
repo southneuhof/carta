@@ -201,6 +201,46 @@ describe('ListView', () => {
     view.unmount()
   })
 
+  it('passes the loaded collection to the custom presentation without a second loader', async () => {
+    let calls = 0
+    let slotState: Record<string, unknown> | undefined
+    const view = mountCore(
+      ListView,
+      {
+        presentation: 'custom',
+        table: {
+          namespace: 'custom-list',
+          fields: { name: { label: 'Name' } },
+          load: () => {
+            calls += 1
+            return { data: [{ name: 'Admin' }], meta: { total: 1, totalPage: 1 } }
+          },
+        },
+      },
+      {
+        slots: {
+          custom: (state) => {
+            slotState = state
+            return h('p', { class: 'custom-record' }, String((state.records as Array<{ name: string }>)[0]?.name))
+          },
+        },
+      },
+    )
+    await flush()
+
+    expect(calls).toBe(1)
+    expect(view.find('.custom-record')?.textContent).toBe('Admin')
+    expect(slotState).not.toHaveProperty('load')
+    expect(slotState).not.toHaveProperty('data')
+    view.unmount()
+  })
+
+  it('rejects custom presentation without its slot', () => {
+    expect(() => mountCore(ListView, { presentation: 'custom', table: tableProps })).toThrow(
+      'ListView custom presentation requires a #custom slot.',
+    )
+  })
+
   it('sends debounced search through the table query and resets page', async () => {
     vi.useFakeTimers()
     const contexts: Record<string, unknown>[] = []
@@ -634,7 +674,6 @@ describe('shell boundaries', () => {
 
   it('forwards core props with v-bind instead of translating them', () => {
     for (const [file, binding] of [
-      ['ListView.vue', 'v-bind="surface.table"'],
       ['DetailView.vue', 'v-bind="surface.detail"'],
       ['FormView.vue', 'v-bind="surface"'],
     ]) {

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Build Resource Form"
+  short_description: "Build server-filtered ADS-HK resource forms"
+  default_prompt: "Use $build-resource-form to build or repair this ADS-HK resource form."

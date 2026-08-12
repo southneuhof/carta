@@ -117,7 +117,6 @@ async function makeFixture(coverageType: CoverageCase = 'project') {
     await db.insert(projectVendors).values({ id: vendorId, projectId, name: `${userId} Vendor ${index}` })
     await db.insert(qhssePts).values({
       id: reportId,
-      date: '2026-08-11',
       divisionId: projectId === projectCId ? divisionBId : divisionAId,
       projectId,
       number: id(`report-number-${index}`),

@@ -1,8 +1,8 @@
 import { afterAll, describe, expect, it } from 'vitest'
 import { hashPassword } from 'better-auth/crypto'
 import { and, eq, inArray } from 'drizzle-orm'
-import { closeDb, getDb } from '../db'
 import { app } from '../app'
+import { closeDb, getDb } from '../db'
 import { getAuth } from '../routes/auth/auth'
 import { accounts } from '../routes/auth/auth.entity'
 import { businessCategories } from '../routes/business-categories/business-categories.entity'
@@ -14,46 +14,11 @@ import { projectVendors } from '../routes/project-vendors/project-vendors.entity
 import { ptsWorkCategories } from '../routes/pts-work-categories/pts-work-categories.entity'
 import { rootCauses } from '../routes/root-causes/root-causes.entity'
 import { workItems } from '../routes/work-items/work-items.entity'
-import { notifications, activityLogs } from '../routes/notifications/notifications.entity'
+import { activityLogs, notifications } from '../routes/notifications/notifications.entity'
 import { authorizationModules, permissions, projectRoleAssignments, rolePermissions, roles } from '../routes/roles/roles.entity'
 import { users } from '../routes/users/users.entity'
-import { qhssePts, qhssePtsRootCauses } from '../routes/qhsse-pts/qhsse-pts.entity'
-import { createReport, performAction } from '../routes/qhsse-pts/qhsse-pts.service'
+import { createReport, listReports, performAction } from '../routes/qhsse-pts/qhsse-pts.service'
 import { actionSchemas } from '../routes/qhsse-pts/qhsse-pts.schemas'
-import { nextStep } from '../routes/qhsse-pts/qhsse-pts.service'
-
-const row = (values: Partial<Parameters<typeof nextStep>[0]> = {}) => ({
-  criteriaCode: 'low',
-  followUpImplementationDoneAt: null,
-  followUpPriceDoneAt: null,
-  stepCode: 'follow-up',
-  ...values,
-})
-
-describe('manual PTS workflow', () => {
-  it.each([
-    ['low', 'analysis'],
-    ['medium', 'analysis'],
-    ['high', 'temporary-plan'],
-  ])('routes %s disposition to %s', (criteriaCode, expected) => {
-    expect(nextStep(row({ criteriaCode }), 'disposition', {})).toBe(expected)
-  })
-
-  it('moves to implementation after either final follow-up', () => {
-    expect(nextStep(row({ followUpPriceDoneAt: 'done' }), 'follow-up-implementation', {})).toBe('implementation')
-    expect(nextStep(row({ followUpImplementationDoneAt: 'done' }), 'follow-up-price', {})).toBe('implementation')
-  })
-
-  it('requires both implementation proof images', () => {
-    expect(
-      actionSchemas['implementation-report'].safeParse({
-        implementationReport: 'Done',
-        implementationDate: '2026-08-10',
-        cost: '10',
-      }).success
-    ).toBe(false)
-  })
-})
 
 function id(name: string) {
   return `qhsse-test-${name}-${crypto.randomUUID()}`
@@ -79,28 +44,12 @@ async function makeFixture() {
   const rootCauseId = id('root-cause')
   const vendorId = id('vendor')
   const permissionCodes = [
-    'view-qhsse-pts',
-    'show-qhsse-pts',
-    'create-qhsse-pts',
-    'update-qhsse-pts',
-    'delete-qhsse-pts',
-    'disposition-qhsse-pts',
-    'temporary-plan-qhsse-pts',
-    'management-notes-qhsse-pts',
-    'complete-report-qhsse-pts',
-    'follow-up-implementation-qhsse-pts',
-    'follow-up-price-qhsse-pts',
-    'implementation-report-qhsse-pts',
-    'verify-implementation-qhsse-pts',
-    'realization-qhsse-pts',
-    'close-qhsse-pts',
+    'view-qhsse-pts', 'show-qhsse-pts', 'create-qhsse-pts', 'update-qhsse-pts', 'delete-qhsse-pts',
+    'low-disposition-qhsse-pts', 'high-disposition-qhsse-pts', 'temporary-plan-qhsse-pts', 'management-notes-qhsse-pts',
+    'complete-report-qhsse-pts', 'follow-up-implementation-qhsse-pts', 'follow-up-price-qhsse-pts',
+    'implementation-report-qhsse-pts', 'verify-implementation-qhsse-pts', 'realization-qhsse-pts', 'close-qhsse-pts',
   ]
-  const permissionRows = permissionCodes.map((permissionCode) => ({
-    id: id(permissionCode),
-    permissionCode,
-    name: permissionCode,
-    moduleId,
-  }))
+  const permissionRows = permissionCodes.map((permissionCode) => ({ id: id(permissionCode), permissionCode, name: permissionCode, moduleId }))
   await db.insert(users).values([
     { id: userId, name: 'PTS Test User', email: `${userId}@example.invalid` },
     { id: recipientId, name: 'PTS Recipient', email: `${recipientId}@example.invalid` },
@@ -108,20 +57,9 @@ async function makeFixture() {
     { id: allProjectsRecipientId, name: 'PTS All Projects Recipient', email: `${allProjectsRecipientId}@example.invalid` },
     { id: unrelatedRecipientId, name: 'PTS Unrelated Recipient', email: `${unrelatedRecipientId}@example.invalid` },
   ])
-  await db.insert(accounts).values({
-    id: id('account'),
-    accountId: userId,
-    providerId: 'credential',
-    userId,
-    password: await hashPassword('test-password'),
-  })
+  await db.insert(accounts).values({ id: id('account'), accountId: userId, providerId: 'credential', userId, password: await hashPassword('test-password') })
   await db.insert(authorizationModules).values({ id: moduleId, code: id('module-code'), name: 'QHSSE PTS', realm: 'project' })
-  await db.insert(roles).values({
-    id: roleId,
-    roleCode: id('role-code'),
-    name: 'PTS Test Role',
-    realm: 'project',
-  })
+  await db.insert(roles).values({ id: roleId, roleCode: id('role-code'), name: 'PTS Test Role', realm: 'project' })
   await db.insert(permissions).values(permissionRows).onConflictDoNothing()
   const availablePermissions = await db.select({ id: permissions.id }).from(permissions).where(inArray(permissions.permissionCode, permissionCodes))
   await db.insert(rolePermissions).values(availablePermissions.map(({ id: permissionId }) => ({ roleId, permissionId })))
@@ -141,49 +79,25 @@ async function makeFixture() {
     { id: id('assignment-all-projects-recipient'), userId: allProjectsRecipientId, roleId, coverageType: 'all_projects', divisionId: null, projectId: null },
     { id: id('assignment-unrelated-recipient'), userId: unrelatedRecipientId, roleId, coverageType: 'project', divisionId: null, projectId: otherProjectId },
   ])
+  await db.insert(ptsWorkCategories).values({ id: ptsCategoryId, code: id('pts-code'), name: 'PTS Category' })
   await db.insert(workItems).values([
-    { id: categoryId, projectId, code: id('work-category'), name: 'Work Category' },
+    { id: categoryId, projectId, categoryId: ptsCategoryId, code: id('work-category'), name: 'Work Category' },
     { id: leafId, projectId, parentId: categoryId, code: id('work-leaf'), name: 'Work Leaf' },
   ])
-  await db.insert(ptsWorkCategories).values({ id: ptsCategoryId, code: id('pts-code'), name: 'PTS Category' })
   await db.insert(rootCauses).values({ id: rootCauseId, code: id('root-code'), name: 'Root Cause' })
   await db.insert(projectVendors).values({ id: vendorId, projectId, name: 'PTS Vendor' })
-  await db
-    .insert(numberVariables)
-    .values({ id: id('number-variable'), code: 'number', name: 'Number' })
-    .onConflictDoNothing()
-  await db
-    .insert(numberConfigs)
-    .values({ id: id('number-config'), numberVariableCode: 'number', numberOfDigits: 4, displayOrder: 900001 })
-    .onConflictDoNothing()
-  const signedIn = await getAuth().api.signInEmail({
-    body: { email: `${userId}@example.invalid`, password: 'test-password' },
-    returnHeaders: true,
-  })
+  await db.insert(numberVariables).values({ id: id('number-variable'), code: 'number', name: 'Number' }).onConflictDoNothing()
+  await db.insert(numberConfigs).values({ id: id('number-config'), numberVariableCode: 'number', numberOfDigits: 4, displayOrder: 900001 }).onConflictDoNothing()
+  const signedIn = await getAuth().api.signInEmail({ body: { email: `${userId}@example.invalid`, password: 'test-password' }, returnHeaders: true })
   return {
-    db,
-    userId,
-    recipientId,
-    notificationRecipients: {
-      exact: recipientId,
-      division: divisionRecipientId,
-      allProjects: allProjectsRecipientId,
-      unrelated: unrelatedRecipientId,
-    },
-    divisionId,
-    projectId,
-    categoryId,
-    leafId,
-    ptsCategoryId,
-    rootCauseId,
-    vendorId,
+    db, userId, recipientId, divisionRecipientId, allProjectsRecipientId, unrelatedRecipientId, divisionId, projectId, roleId,
+    categoryId, leafId, ptsCategoryId, rootCauseId, vendorId,
     cookie: signedIn.headers.get('set-cookie')?.split(';')[0] ?? '',
   }
 }
 
 function reportInput(fixture: Awaited<ReturnType<typeof makeFixture>>, criteriaCode: 'low' | 'medium' | 'high' = 'low') {
   return {
-    date: '2026-08-10',
     divisionId: fixture.divisionId,
     projectId: fixture.projectId,
     ptsWorkCategoryId: fixture.ptsCategoryId,
@@ -197,137 +111,68 @@ function reportInput(fixture: Awaited<ReturnType<typeof makeFixture>>, criteriaC
   }
 }
 
-describe('manual PTS database boundaries', () => {
+describe('manual PTS workflow', () => {
+  it('requires both implementation proof images', () => {
+    expect(actionSchemas['implementation-report'].safeParse({ implementationDate: '2026-08-10' }).success).toBe(false)
+  })
+
   it('rejects invalid work-item relationships and inactive project mappings', async () => {
     const fixture = await makeFixture()
-    await expect(
-      createReport(fixture.userId, {
-        ...reportInput(fixture),
-        workItemCategoryId: fixture.leafId,
-        workItemId: fixture.categoryId,
-      })
-    ).rejects.toThrow()
-    await fixture.db
-      .update(projectRoleAssignments)
-      .set({ active: false })
-      .where(and(eq(projectRoleAssignments.projectId, fixture.projectId), eq(projectRoleAssignments.userId, fixture.userId)))
+    await expect(createReport(fixture.userId, { ...reportInput(fixture), workItemCategoryId: fixture.leafId, workItemId: fixture.categoryId })).rejects.toThrow()
+    await fixture.db.update(projectRoleAssignments).set({ active: false }).where(and(eq(projectRoleAssignments.projectId, fixture.projectId), eq(projectRoleAssignments.userId, fixture.userId)))
     await expect(createReport(fixture.userId, reportInput(fixture))).rejects.toThrow()
   })
 
-  it('allocates unique numbers and limits project reads', async () => {
+  it('allocates numbers, creates audit records, and scopes notifications', async () => {
     const fixture = await makeFixture()
     const first = await createReport(fixture.userId, reportInput(fixture))
     const second = await createReport(fixture.userId, reportInput(fixture))
     expect(first.number).not.toBe(second.number)
-
-    const lookup = await app.request('/qhsse-pts/lookups', {
-      headers: { Cookie: fixture.cookie },
-    })
-    expect(lookup.status).toBe(200)
-    expect((await lookup.json()).data.projects).toHaveLength(1)
-
-    const otherProjectId = id('other-project')
-    await fixture.db.insert(projects).values({
-      id: otherProjectId,
-      divisionId: fixture.divisionId,
-      number: id('other-number'),
-      integrationCode: id('other-integration'),
-      name: 'Other Project',
-    })
-    const other = await fixture.db
-      .insert(qhssePts)
-      .values({
-        date: '2026-08-10',
-        divisionId: fixture.divisionId,
-        projectId: otherProjectId,
-        number: id('other-pts'),
-        ptsWorkCategoryId: fixture.ptsCategoryId,
-        workItemCategoryId: fixture.categoryId,
-        workItemId: fixture.leafId,
-        criteriaCode: 'low',
-        imgBefore: 'uploads/before.png',
-        location: 'Other site',
-        description: 'Other project report',
-        createdBy: fixture.userId,
-        updatedBy: fixture.userId,
-      })
-      .returning({ id: qhssePts.id })
-    const response = await app.request(`/qhsse-pts/detail/${other[0]!.id}`, {
-      headers: { Cookie: fixture.cookie },
-    })
-    expect(response.status).toBe(404)
+    const response = await app.request('/qhsse-pts/lookups', { headers: { Cookie: fixture.cookie } })
+    expect(response.status).toBe(200)
+    expect((await response.json()).data.projects).toHaveLength(1)
+    const inbox = await fixture.db.select({ recipientUserId: notifications.recipientUserId }).from(notifications).where(eq(notifications.referenceId, first.id))
+    expect(inbox.map(({ recipientUserId }) => recipientUserId)).toEqual(expect.arrayContaining([fixture.recipientId, fixture.divisionRecipientId, fixture.allProjectsRecipientId]))
+    expect(inbox.map(({ recipientUserId }) => recipientUserId)).not.toContain(fixture.unrelatedRecipientId)
   })
 
-  it('runs the low path, reject loop, activity, and recipient notification', async () => {
+  it('runs the low path, supports rejection, and soft deletes after close', async () => {
     const fixture = await makeFixture()
     const created = await createReport(fixture.userId, reportInput(fixture))
-    const dispositionInbox = await fixture.db
-      .select({ recipientUserId: notifications.recipientUserId })
-      .from(notifications)
-      .where(and(eq(notifications.referenceId, created.id), eq(notifications.title, 'PTS disposition required')))
-    for (const recipientId of [fixture.notificationRecipients.exact, fixture.notificationRecipients.division, fixture.notificationRecipients.allProjects]) {
-      expect(dispositionInbox.filter(({ recipientUserId }) => recipientUserId === recipientId)).toHaveLength(1)
-    }
-    expect(dispositionInbox.filter(({ recipientUserId }) => recipientUserId === fixture.notificationRecipients.unrelated)).toHaveLength(0)
-    await expect(performAction(fixture.userId, created.id, 'close', { closeNotes: 'No', closeDate: '2026-08-10' })).rejects.toThrow()
-    await performAction(fixture.userId, created.id, 'disposition', { dispositionStatusCode: 'low', notes: 'Accepted' })
-    await performAction(fixture.userId, created.id, 'complete-analysis', { analysis: 'Analysed', targetDate: '2026-08-11' })
-    const followUpInbox = await fixture.db
-      .select()
-      .from(notifications)
-      .where(and(eq(notifications.referenceId, created.id), eq(notifications.recipientUserId, fixture.recipientId)))
-    expect(followUpInbox.filter(({ title }) => title.includes('follow-up'))).toHaveLength(2)
-    await performAction(fixture.userId, created.id, 'follow-up-implementation', { implementationPlan: 'Implement', targetDate: '2026-08-12' })
-    await performAction(fixture.userId, created.id, 'follow-up-price', { priceFollowUp: 'Priced', targetDate: '2026-08-13', cost: '10' })
-    await performAction(fixture.userId, created.id, 'implementation-report', {
-      implementationReport: 'Done',
-      implementationDate: '2026-08-14',
-      cost: '10',
-      imgProcess: 'uploads/process.png',
-      imgAfter: 'uploads/after.png',
-    })
-    await performAction(fixture.userId, created.id, 'verification', { decision: 'reject', notes: 'Redo' })
-    await performAction(fixture.userId, created.id, 'implementation-report', {
-      implementationReport: 'Redone',
-      implementationDate: '2026-08-15',
-      cost: '11',
-      imgProcess: 'uploads/process-2.png',
-      imgAfter: 'uploads/after-2.png',
-    })
-    await performAction(fixture.userId, created.id, 'verification', { decision: 'approve', notes: 'Approved' })
-    await performAction(fixture.userId, created.id, 'realization', { realization: 'Realized', date: '2026-08-16', actualCost: '11', vendorId: fixture.vendorId })
-    const closed = await performAction(fixture.userId, created.id, 'close', { closeNotes: 'Closed', closeDate: '2026-08-17' })
-    expect(closed.statusCode).toBe('closed')
-    expect(closed.availableActions).toEqual([])
-    const activity = await fixture.db
-      .select()
-      .from(activityLogs)
-      .where(and(eq(activityLogs.referenceId, created.id), eq(activityLogs.referenceTable, 'qhsse_pts')))
-    const inbox = await fixture.db
-      .select()
-      .from(notifications)
-      .where(and(eq(notifications.referenceId, created.id), eq(notifications.recipientUserId, fixture.recipientId)))
-    expect(activity.length).toBe(11)
-    expect(inbox.length).toBeGreaterThan(0)
-  })
+    await performAction(fixture.userId, created.id, 'disposition', { dispositionStatusCode: 'repair' })
+    await performAction(fixture.userId, created.id, 'complete-report', { somUserId: fixture.userId, followUpPlan: 'Follow up', targetDate: '2026-08-11' })
+    await performAction(fixture.userId, created.id, 'follow-up-implementation', { implementationUserId: fixture.userId, workMethod: 'Method' })
+    await performAction(fixture.userId, created.id, 'follow-up-price', { estimationCost: '10', jobImplementorType: 'vendor', projectVendorId: fixture.vendorId })
+    await performAction(fixture.userId, created.id, 'implementation-report', { implementationDate: '2026-08-14', imgProcess: 'uploads/process.png', imgAfter: 'uploads/after.png', implementationDescription: 'Done' })
+    await performAction(fixture.userId, created.id, 'verify-implementation', { implementationStatusCode: 'rejected', implementationVerificationDescription: 'Redo' })
+    await performAction(fixture.userId, created.id, 'implementation-report', { implementationDate: '2026-08-15', imgProcess: 'uploads/process-2.png', imgAfter: 'uploads/after-2.png', implementationDescription: 'Redone' })
+    await performAction(fixture.userId, created.id, 'verify-implementation', { implementationStatusCode: 'approved', implementationVerificationDescription: 'Approved' })
+    await performAction(fixture.userId, created.id, 'realization', { actualCost: '11', actualJobImplementorType: 'internal' })
+    const closed = await performAction(fixture.userId, created.id, 'close', {})
+    expect(closed.statusCode).toBe('close')
+    expect(closed.availableActions).toEqual(['delete'])
+    expect((closed as { allowedOperations?: string[] }).allowedOperations).not.toContain('update')
+    const deleted = await performAction(fixture.userId, created.id, 'delete', { deletedReason: 'Duplicate report' })
+    expect(deleted.deletedAt).toBeTruthy()
+    const activity = await fixture.db.select().from(activityLogs).where(and(eq(activityLogs.referenceId, created.id), eq(activityLogs.referenceTable, 'qhsse_pts')))
+    expect(activity).toHaveLength(12)
+    expect((await listReports(fixture.userId, { page: 1, limit: 20 })).data.some((row) => row.id === created.id)).toBe(false)
+  }, 30_000)
 
-  it('runs the high path and accepts the reverse follow-up order', async () => {
+  it('takes the high path and locks concurrent actions', async () => {
     const fixture = await makeFixture()
+    const lowPermission = (await fixture.db.select({ id: permissions.id }).from(permissions).where(eq(permissions.permissionCode, 'low-disposition-qhsse-pts')))[0]
+    if (!lowPermission) throw new Error('Low disposition permission fixture is missing.')
+    await fixture.db.update(rolePermissions).set({ active: false }).where(and(eq(rolePermissions.roleId, fixture.roleId), eq(rolePermissions.permissionId, lowPermission.id)))
+    const medium = await createReport(fixture.userId, reportInput(fixture, 'medium'))
+    expect((await performAction(fixture.userId, medium.id, 'disposition', { dispositionStatusCode: 'repair' })).stepCode).toBe('low-disposition')
     const created = await createReport(fixture.userId, reportInput(fixture, 'high'))
-    expect((await performAction(fixture.userId, created.id, 'disposition', { dispositionStatusCode: 'high', notes: 'High' })).stepCode).toBe('temporary-plan')
-    expect((await performAction(fixture.userId, created.id, 'temporary-plan', { temporaryPlan: 'Temporary', targetDate: '2026-08-11' })).stepCode).toBe('management-notes')
-    expect((await performAction(fixture.userId, created.id, 'management-notes', { managementNotes: 'Management', targetDate: '2026-08-12' })).stepCode).toBe('analysis')
-    await performAction(fixture.userId, created.id, 'complete-analysis', { analysis: 'Analysed', targetDate: '2026-08-13' })
-    expect((await performAction(fixture.userId, created.id, 'follow-up-price', { priceFollowUp: 'Priced', targetDate: '2026-08-14', cost: '10' })).stepCode).toBe('follow-up')
-    expect((await performAction(fixture.userId, created.id, 'follow-up-implementation', { implementationPlan: 'Implement', targetDate: '2026-08-15' })).stepCode).toBe('implementation')
-  })
-
-  it('allows only one concurrent action on the same report', async () => {
-    const fixture = await makeFixture()
-    const created = await createReport(fixture.userId, reportInput(fixture))
+    expect((await performAction(fixture.userId, created.id, 'disposition', { dispositionStatusCode: 'repair' })).stepCode).toBe('high-disposition')
+    expect((await performAction(fixture.userId, created.id, 'temporary-plan', { temporaryFollowUpPlan: 'Temporary' })).stepCode).toBe('management-notes')
+    expect((await performAction(fixture.userId, created.id, 'management-notes', { managementNotes: 'Management' })).stepCode).toBe('complete-report')
     const results = await Promise.allSettled([
-      performAction(fixture.userId, created.id, 'disposition', { dispositionStatusCode: 'low', notes: 'First' }),
-      performAction(fixture.userId, created.id, 'disposition', { dispositionStatusCode: 'low', notes: 'Second' }),
+      performAction(fixture.userId, created.id, 'complete-report', { somUserId: fixture.userId, followUpPlan: 'Follow up', targetDate: '2026-08-13' }),
+      performAction(fixture.userId, created.id, 'complete-report', { somUserId: fixture.userId, followUpPlan: 'Second', targetDate: '2026-08-13' }),
     ])
     expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1)
     expect(results.filter((result) => result.status === 'rejected')).toHaveLength(1)

@@ -1,6 +1,6 @@
 import { defineDomainPart, defineModel } from '@southneuhof/sprindle/model'
 import { qhssePts, qhssePtsEntity, qhssePtsNumberCounters, qhssePtsRootCauses } from './qhsse-pts.entity'
-import { actionPts, createPts, deletePts, detailPts, listPts, updatePts } from './qhsse-pts.routes'
+import { actionPts, createPts, detailPts, listPts, updatePts } from './qhsse-pts.routes'
 
 export const domain = defineDomainPart({
   tables: { qhssePts, qhssePtsRootCauses, qhssePtsNumberCounters },
@@ -15,10 +15,9 @@ export const qhssePtsModel = defineModel({
     detail: detailPts,
     create: createPts,
     update: updatePts,
-    delete: deletePts,
     action: actionPts,
   },
 })
 
-export { actionPts, createPts, deletePts, detailPts, listPts, updatePts }
+export { actionPts, createPts, detailPts, listPts, updatePts }
 export default { domain, qhssePtsModel }

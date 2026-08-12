@@ -15,39 +15,64 @@
 
 import type { CollectionLoadContext, Load, RecordIdentity, RecordLoadContext, MaybePromise } from './load'
 import type { FieldContext, FieldsInput } from './fields'
-import type { CollectionResult, RecordResult } from './results'
+import type { CollectionMeta, CollectionResult, RecordResult } from './results'
 import type { QueryNamespace, QueryValues } from './query'
 import type { FormValidatorInput, SubmitError, ValidationSchema } from './validation'
+
+export interface CollectionProps<
+  TRecord extends object = Record<string, unknown>,
+  TQuery extends object = Record<string, unknown>,
+> {
+  data?: TRecord[]
+  load?: Load<CollectionLoadContext<TQuery>, CollectionResult<TRecord>>
+  searchParameters?: Record<string, unknown>
+  namespace?: QueryNamespace
+  query?: TQuery
+  pagination?: 'auto' | 'always' | false
+  pageSizeOptions?: readonly number[]
+  defaultPageSize?: number
+  reorderable?: boolean
+}
+
+export interface CollectionSlotProps<
+  TRecord extends object = Record<string, unknown>,
+  TQuery extends object = Record<string, unknown>,
+> {
+  records: TRecord[]
+  meta?: CollectionMeta
+  loading: boolean
+  error?: SubmitError
+  empty: boolean
+  query: TQuery
+  refresh: () => Promise<void>
+  updateQuery: (patch: QueryValues) => void
+}
 
 export interface TableProps<
   TRecord extends object = Record<string, unknown>,
   TQuery extends object = Record<string, unknown>,
-> {
+> extends CollectionProps<TRecord, TQuery> {
   fields: FieldsInput<TRecord>
-  data?: TRecord[]
-  load?: Load<CollectionLoadContext<TQuery>, CollectionResult<TRecord>>
-  /** Extra loader arguments, including parent scoping supplied by the route. */
-  searchParameters?: Record<string, unknown>
-  /** URL namespace for this table's query; required when a resource appears twice in one view. */
-  namespace?: QueryNamespace
-  /** URL/user collection controls. When supplied, replaces namespaced URL ownership. */
-  query?: TQuery
-  /** `always` keeps disabled controls visible for a single known page. */
-  pagination?: 'auto' | 'always' | false
-  /** Allowed page sizes; invalid values are ignored and the active size stays available. */
-  pageSizeOptions?: readonly number[]
-  /** Default limit when query does not supply one. */
-  defaultPageSize?: number
   /** Minimum resizable width in pixels. */
   minColumnWidth?: number
   /** Controlled visible data-column keys. */
   visibleColumns?: readonly string[]
   /** Controlled data-column widths in pixels. */
   columnSizing?: Readonly<Record<string, number>>
-  /** Enables manual ordering; requires `rowKey` and disables paging/sorting. */
-  reorderable?: boolean
   rowKey?: string | ((record: TRecord) => string | number)
   schema?: ValidationSchema<TQuery>
+}
+
+export interface TableContentProps<
+  TRecord extends object = Record<string, unknown>,
+  TQuery extends object = Record<string, unknown>,
+> extends Omit<TableProps<TRecord, TQuery>, 'data' | 'load' | 'query'> {
+  records: TRecord[]
+  meta?: CollectionMeta
+  loading: boolean
+  error?: SubmitError
+  empty: boolean
+  query: TQuery
 }
 
 export interface RowReorderPayload<TRecord extends object = Record<string, unknown>> {

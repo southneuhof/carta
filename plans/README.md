@@ -32,12 +32,12 @@ before it is DONE.
 | 037 | Establish schema-first Zod inference | P1 | M | 036 | DONE |
 | 038 | Migrate generic app Zod schemas | P1 | S | 037 | DONE |
 | 039 | Migrate special app Zod schemas | P1 | M | 037, 038 edit gate | DONE |
-| 040 | Add one-loader collection presentation | P1 | M | — | TODO |
-| 041 | Rebuild manual PTS report foundation | P1 | L | 040 | TODO |
-| 042 | Implement complete manual PTS workflow API | P1 | L | 041 | TODO |
-| 043 | Build manual PTS list and report editor | P1 | L | 040, 041, 042 | TODO |
-| 044 | Build manual PTS detail and action screens | P1 | L | 042, 043 | TODO |
-| 045 | Verify manual PTS parity and remove draft residue | P1 | M | 040-044 | TODO |
+| 040 | Add one-loader collection presentation | P1 | M | — | DONE |
+| 041 | Rebuild manual PTS report foundation | P1 | L | 040 | DONE |
+| 042 | Implement complete manual PTS workflow API | P1 | L | 041 | DONE |
+| 043 | Build manual PTS list and report editor | P1 | L | 040, 041, 042 | DONE |
+| 044 | Build manual PTS detail and action screens | P1 | L | 042, 043 | DONE |
+| 045 | Verify manual PTS parity and remove draft residue | P1 | M | 040-044 | DONE |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with reason) | REJECTED (with rationale).
 

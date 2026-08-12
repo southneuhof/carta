@@ -29,7 +29,8 @@ type DetailViewProps = {
 )
 
 const props = defineProps<DetailViewProps>()
-const detailSlots = computed(() => Object.entries(useSlots()).filter(([name]) => name.startsWith('value:')))
+const slots = useSlots()
+const detailSlots = computed(() => Object.entries(slots).filter(([name]) => name.startsWith('value:')))
 
 const surface = computed(() => {
   if ('run' in props && props.run) {

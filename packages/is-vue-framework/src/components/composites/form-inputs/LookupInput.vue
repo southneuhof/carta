@@ -64,7 +64,11 @@ function clone<T>(value: T): T {
 
 function normalize(value: any): RecordData[] {
   if (value == null) return []
-  if (props.multi) return Array.isArray(value) ? clone(value) : []
+  if (props.multi) {
+    return Array.isArray(value)
+      ? value.map((item) => item && typeof item === 'object' ? clone(item) : { [props.pick]: item })
+      : []
+  }
   return typeof value === 'object' ? [clone(value)] : [{ [props.pick]: value }]
 }
 
@@ -94,19 +98,29 @@ async function hydrate() {
   ) {
     fallback = [clone(current)]
   }
+  if (props.multi) {
+    const currentById = new Map(committed.value.map((record) => [record[props.pick], record]))
+    fallback = fallback.map((record) => {
+      const current = record[props.pick] == null ? undefined : currentById.get(record[props.pick])
+      return current?.[viewKey.value] != null && record[viewKey.value] == null ? clone(current) : record
+    })
+  }
   committed.value = fallback
   staged.value = clone(fallback)
   hydrationError.value = undefined
-  if (props.multi || !props.loadDetail || !fallback[0]) return
-  if (fallback[0][viewKey.value] != null) return
-  const id = fallback[0][props.pick]
-  if (id == null || id === '') return
+
+  const loadDetail = props.loadDetail
+  if (!loadDetail || !fallback.some((record) => record[viewKey.value] == null && record[props.pick] != null && record[props.pick] !== '')) return
   try {
-    const record = await props.loadDetail({ id, searchParameters: props.searchParameters })
-    if (record) {
-      committed.value = [clone(record)]
-      staged.value = [clone(record)]
-    }
+    const records = await Promise.all(fallback.map(async (record) => {
+      if (record[viewKey.value] != null) return record
+      const id = record[props.pick]
+      if (id == null || id === '') return record
+      const detail = await loadDetail({ id, searchParameters: props.searchParameters })
+      return detail ? clone(detail) : record
+    }))
+    committed.value = records
+    staged.value = clone(records)
   } catch (error) {
     hydrationError.value = error instanceof Error ? error.message : String(error)
   }

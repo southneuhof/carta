@@ -1,0 +1,210 @@
+import { defineFields, defineResource, defineSchema, fromZod } from '@southneuhof/is-vue-framework'
+import type { WebResourceSchema } from '@southneuhof/is-vue-framework'
+import { qhssePtsEntity } from '@southneuhof/api/routes/qhsse-pts/qhsse-pts.entity'
+import { z } from 'zod/v4'
+import { divisions } from '../../master-data/divisions/divisions.resource'
+import { ptsWorkCategories } from '../../master-data/pts-work-categories/pts-work-categories.resource'
+import { rootCauses } from '../../master-data/root-causes/root-causes.resource'
+import { ptsActions, lookupDetail, lookupOptions } from './pts.actions'
+import { criteriaOptions, dispositionOptions, jobImplementorOptions, type LookupOption, ptsSchema } from './pts.schema'
+
+type LookupSchema = WebResourceSchema<LookupOption, Record<string, unknown>, LookupOption, LookupOption, string>
+const lookupSchema = defineSchema<LookupSchema>({
+  identity: 'id',
+  record: { schema: fromZod(z.object({ id: z.string(), name: z.string(), code: z.string().optional(), projectId: z.string().optional(), divisionId: z.string().optional(), parentId: z.string().nullable().optional(), categoryId: z.string().nullable().optional() })) },
+})
+const lookupFields = defineFields(lookupSchema, { code: {}, name: {} })
+
+function lookupResource(key: string, kind: Parameters<typeof lookupOptions>[0]) {
+  return defineResource(lookupSchema, {
+    key,
+    actions: {
+      list: { run: (context) => lookupOptions(kind, context), fields: [lookupFields.code, lookupFields.name], permission: null },
+      detail: { run: (context) => lookupDetail(kind, context), fields: [lookupFields.code, lookupFields.name], permission: null },
+    },
+  })
+}
+
+const projectLookup = lookupResource('qhsse-pts.projects', 'projects')
+const ptsWorkCategoryLookup = lookupResource('qhsse-pts.pts-work-categories', 'ptsWorkCategories')
+const workItemCategoryLookup = lookupResource('qhsse-pts.work-item-categories', 'workItems')
+const workItemLookup = lookupResource('qhsse-pts.work-items', 'workItems')
+const rootCauseLookup = lookupResource('qhsse-pts.root-causes', 'rootCauses')
+const projectVendorLookup = lookupResource('qhsse-pts.project-vendors', 'projectVendors')
+const projectUserLookup = lookupResource('qhsse-pts.project-users', 'projectUsers')
+
+function relationName(record: unknown, key: string, fallback?: string) {
+  if (!record || typeof record !== 'object') return fallback
+  const relation = (record as Record<string, unknown>)[key]
+  return relation && typeof relation === 'object' ? (relation as { name?: unknown }).name : fallback
+}
+
+function writeRootCauseIds(draft: Record<string, unknown>, value: unknown) {
+  draft.rootCauseIds = (Array.isArray(value) ? value : [])
+    .map((item) => typeof item === 'string' ? item : item && typeof item === 'object' && typeof (item as { id?: unknown }).id === 'string' ? (item as { id: string }).id : undefined)
+    .filter((item): item is string => Boolean(item))
+}
+
+function writeImagePath(draft: Record<string, unknown>, value: unknown) {
+  const file = value && typeof value === 'object' ? value as { path?: unknown } : undefined
+  draft.imgBefore = typeof file?.path === 'string' ? file.path : typeof value === 'string' ? value : undefined
+}
+
+const criteriaDisplay = {
+  low: { color: 'success', label: 'Low' },
+  medium: { color: 'warning', label: 'Medium' },
+  high: { color: 'error', label: 'High' },
+} as const
+const statusDisplay = {
+  open: { color: 'info', label: 'Open' },
+  'on-progress': { color: 'warning', label: 'On progress' },
+  close: { color: 'success', label: 'Close' },
+} as const
+
+const fields = defineFields(ptsSchema, {
+  number: { label: 'PTS Number', table: { sortable: true } },
+  divisionId: { label: 'Division', read: (record) => relationName(record, 'division', record.divisionName as string), form: { renderer: 'lookup', source: divisions, props: { pick: 'id', view: 'name', required: true } } },
+  projectId: {
+    label: 'Project',
+    read: (record) => relationName(record, 'project', record.projectName as string),
+    form: { renderer: 'lookup', source: projectLookup, props: { pick: 'id', view: 'name', required: true }, behavior: {
+      disabled: ({ draft }) => !draft.divisionId,
+      props: ({ draft }) => ({ searchParameters: { divisionId: draft.divisionId } }),
+      resetWhen: ({ draft }) => draft.divisionId,
+    } },
+  },
+  ptsWorkCategoryId: {
+    label: 'PTS Work Category',
+    read: (record) => relationName(record, 'ptsWorkCategory'),
+    form: { renderer: 'lookup', source: ptsWorkCategoryLookup, props: { pick: 'id', view: 'name', required: true } },
+  },
+  workItemCategoryId: {
+    label: 'Work-item Category',
+    read: (record) => relationName(record, 'workItemCategory'),
+    form: { renderer: 'lookup', source: workItemCategoryLookup, props: { pick: 'id', view: 'name', required: true }, behavior: {
+      disabled: ({ draft }) => !draft.projectId,
+      props: ({ draft }) => ({ searchParameters: { projectId: draft.projectId, rootOnly: true } }),
+      resetWhen: ({ draft }) => draft.projectId,
+    } },
+  },
+  workItemId: {
+    label: 'Work Item',
+    read: (record) => relationName(record, 'workItem'),
+    form: { renderer: 'lookup', source: workItemLookup, props: { pick: 'id', view: 'name', required: true }, behavior: {
+      disabled: ({ draft }) => !draft.workItemCategoryId,
+      props: ({ draft }) => ({ searchParameters: { projectId: draft.projectId, workItemCategoryId: draft.workItemCategoryId, leafOnly: true } }),
+      resetWhen: ({ draft }) => draft.workItemCategoryId,
+    } },
+  },
+  locationZone: { label: 'Location Zone', form: { renderer: 'text' } },
+  criteriaCode: { label: 'Criteria', display: { renderer: 'chip', props: { options: criteriaDisplay } }, form: { renderer: 'radio', source: criteriaOptions, props: { required: true } } },
+  rootCauseIds: { label: 'Root Causes', read: (record) => Array.isArray(record.rootCauses) ? record.rootCauses.map((cause) => (cause as { name?: string }).name).filter(Boolean).join(', ') : '', form: { renderer: 'lookup', source: rootCauseLookup, props: { pick: 'id', view: 'name', multi: true, required: true } }, write: writeRootCauseIds },
+  location: { label: 'Location', form: { renderer: 'text', props: { required: true } } },
+  description: { label: 'Description', form: { renderer: 'textarea' } },
+  imgBefore: { label: 'Before Image', form: { renderer: 'image', props: { required: true } }, write: writeImagePath },
+  statusCode: { label: 'Status', display: { renderer: 'chip', props: { options: statusDisplay } }, table: { align: 'center' } },
+  stepCode: { label: 'Step', table: { sortable: true } },
+  somUserId: { label: 'SOM User' },
+  temporaryFollowUpPlan: { label: 'Temporary Follow-up Plan' },
+  managementNotes: { label: 'Management Notes' },
+  followUpPlan: { label: 'Follow-up Plan' },
+  targetDate: { label: 'Target Date', display: { format: 'date' } },
+  implementationUserId: { label: 'Implementation User' },
+  workMethod: { label: 'Work Method' },
+  estimationCost: { label: 'Estimated Cost' },
+  jobImplementorType: { label: 'Job Implementor' },
+  projectVendorId: { label: 'Project Vendor' },
+  implementationDate: { label: 'Implementation Date', display: { format: 'date' } },
+  imgProcess: { label: 'Process Image' },
+  imgAfter: { label: 'After Image' },
+  implementationDescription: { label: 'Implementation Description' },
+  implementationStatusCode: { label: 'Implementation Status' },
+  implementationVerificationDescription: { label: 'Verification Description' },
+  actualCost: { label: 'Actual Cost' },
+  actualJobImplementorType: { label: 'Actual Job Implementor' },
+  actualProjectVendorId: { label: 'Actual Project Vendor' },
+  createdAt: { label: 'Created', display: { format: 'datetime' } },
+  updatedAt: { label: 'Updated', display: { format: 'datetime' } },
+})
+
+export const pts = defineResource(ptsSchema, {
+  key: 'qhsse-pts',
+  actions: {
+    list: {
+      run: ptsActions.list,
+      fields: [fields.number, fields.projectId, fields.divisionId, fields.criteriaCode, fields.statusCode, fields.stepCode, fields.createdAt],
+      permission: null,
+      route: { name: 'quality-pts' },
+    },
+    detail: {
+      run: ptsActions.detail,
+      fields: [fields.number, fields.projectId, fields.divisionId, fields.ptsWorkCategoryId, fields.workItemCategoryId, fields.workItemId, fields.criteriaCode, fields.statusCode, fields.stepCode, fields.createdAt, fields.updatedAt],
+      permission: null,
+      route: { name: 'quality-pts-detail', params: (id) => ({ ptsId: String(id) }) },
+    },
+    create: {
+      run: ptsActions.create,
+      fields: [fields.divisionId, fields.projectId, fields.ptsWorkCategoryId, fields.workItemCategoryId, fields.workItemId, fields.locationZone, fields.criteriaCode, fields.rootCauseIds, fields.location, fields.imgBefore, fields.description],
+      permission: null,
+      route: { name: 'quality-pts-create' },
+    },
+    update: {
+      run: ptsActions.update,
+      fields: [fields.divisionId, fields.projectId, fields.ptsWorkCategoryId, fields.workItemCategoryId, fields.workItemId, fields.locationZone, fields.criteriaCode, fields.rootCauseIds, fields.location, fields.imgBefore, fields.description],
+      permission: null,
+      route: { name: 'quality-pts-edit', params: (id) => ({ ptsId: String(id) }) },
+    },
+    disposition: { run: (id: string, input: object) => ptsActions.action(id, 'disposition', input) },
+    temporaryPlan: { run: (id: string, input: object) => ptsActions.action(id, 'temporary-plan', input) },
+    managementNotes: { run: (id: string, input: object) => ptsActions.action(id, 'management-notes', input) },
+    completeReport: { run: (id: string, input: object) => ptsActions.action(id, 'complete-report', input) },
+    followUpImplementation: { run: (id: string, input: object) => ptsActions.action(id, 'follow-up-implementation', input) },
+    followUpPrice: { run: (id: string, input: object) => ptsActions.action(id, 'follow-up-price', input) },
+    implementationReport: { run: (id: string, input: object) => ptsActions.action(id, 'implementation-report', input) },
+    verifyImplementation: { run: (id: string, input: object) => ptsActions.action(id, 'verify-implementation', input) },
+    realization: { run: (id: string, input: object) => ptsActions.action(id, 'realization', input) },
+    close: { run: (id: string) => ptsActions.action(id, 'close', {}) },
+    deleteReport: { run: (id: string, deletedReason: string) => ptsActions.deleteReport(id, deletedReason) },
+  },
+})
+
+export const ptsLookupResources = {
+  projectLookup,
+  ptsWorkCategoryLookup,
+  workItemCategoryLookup,
+  workItemLookup,
+  rootCauseLookup,
+  projectVendorLookup,
+  projectUserLookup,
+}
+
+export const ptsActionFields = {
+  dispositionStatusCode: { label: 'Disposition', form: { renderer: 'radio', source: dispositionOptions, props: { required: true } } },
+  temporaryFollowUpPlan: { label: 'Temporary Follow-up Plan', form: { renderer: 'textarea', props: { required: true } } },
+  managementNotes: { label: 'Management Notes', form: { renderer: 'textarea', props: { required: true } } },
+  somUserId: { label: 'SOM User', form: { renderer: 'lookup', source: projectUserLookup, props: { pick: 'id', view: 'name', required: true }, behavior: { props: ({ draft }) => ({ searchParameters: { projectId: draft.projectId } }) } } },
+  followUpPlan: { label: 'Follow-up Plan', form: { renderer: 'textarea', props: { required: true } } },
+  targetDate: { label: 'Target Date', form: { renderer: 'date', props: { required: true } } },
+  implementationUserId: { label: 'Implementation User', form: { renderer: 'lookup', source: projectUserLookup, props: { pick: 'id', view: 'name', required: true }, behavior: { props: ({ draft }) => ({ searchParameters: { projectId: draft.projectId } }) } } },
+  workMethod: { label: 'Work Method', form: { renderer: 'textarea', props: { required: true } } },
+  estimationCost: { label: 'Estimated Cost', form: { renderer: 'text', props: { required: true, inputmode: 'decimal' } } },
+  jobImplementorType: { label: 'Job Implementor', form: { renderer: 'radio', source: jobImplementorOptions, props: { required: true } } },
+  projectVendorId: { label: 'Project Vendor', form: { renderer: 'lookup', source: projectVendorLookup, props: { pick: 'id', view: 'name' }, behavior: {
+    visible: ({ draft }) => draft.jobImplementorType === 'vendor',
+    props: ({ draft }) => ({ searchParameters: { projectId: draft.projectId }, required: draft.jobImplementorType === 'vendor' }),
+  } } },
+  implementationDate: { label: 'Implementation Date', form: { renderer: 'date', props: { required: true } } },
+  imgProcess: { label: 'Process Image', form: { renderer: 'image', props: { required: true } } },
+  imgAfter: { label: 'After Image', form: { renderer: 'image', props: { required: true } } },
+  implementationDescription: { label: 'Implementation Description', form: { renderer: 'textarea' } },
+  implementationStatusCode: { label: 'Verification', form: { renderer: 'radio', source: [{ id: 'approved', name: 'Approved' }, { id: 'rejected', name: 'Rejected' }], props: { required: true } } },
+  implementationVerificationDescription: { label: 'Verification Description', form: { renderer: 'textarea' } },
+  actualCost: { label: 'Actual Cost', form: { renderer: 'text', props: { required: true, inputmode: 'decimal' } } },
+  actualJobImplementorType: { label: 'Actual Job Implementor', form: { renderer: 'radio', source: jobImplementorOptions, props: { required: true } } },
+  actualProjectVendorId: { label: 'Actual Project Vendor', form: { renderer: 'lookup', source: projectVendorLookup, props: { pick: 'id', view: 'name' }, behavior: {
+    visible: ({ draft }) => draft.actualJobImplementorType === 'vendor',
+    props: ({ draft }) => ({ searchParameters: { projectId: draft.projectId }, required: draft.actualJobImplementorType === 'vendor' }),
+  } } },
+}
+
+export { dispositionOptions, jobImplementorOptions }

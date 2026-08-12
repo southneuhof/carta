@@ -75,7 +75,10 @@ export type {
 } from './query'
 
 export type {
+  CollectionProps,
+  CollectionSlotProps,
   TableProps,
+  TableContentProps,
   DetailProps,
   FormProps,
   FormSubmitHandler,

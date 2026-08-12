@@ -2,7 +2,7 @@ import { authenticated, defineRoute } from '@southneuhof/sprindle/routes'
 import { listQuerySchema } from '@southneuhof/sprindle/validation'
 import { orgIdentity } from '../../identity'
 import { actionSchemas, createReportSchema, updateReportSchema, type ActionName } from './qhsse-pts.schemas'
-import { createReport, deleteReport, getReport, listLookups, listReports, performAction, updateReport } from './qhsse-pts.service'
+import { createReport, getReport, listLookups, listReports, performAction, updateReport } from './qhsse-pts.service'
 
 export const listPtsLookups = defineRoute({
   path: '/qhsse-pts/lookups',
@@ -76,18 +76,6 @@ export const updatePts = defineRoute({
     return args.c.json({
       data: await updateReport(userId, id, args.state.input),
     })
-  },
-})
-
-export const deletePts = defineRoute({
-  path: '/:id',
-  method: 'delete',
-  authorize: [authenticated()],
-  action: async (args) => {
-    const userId = await caller(args)
-    const id = args.c.req.param('id')
-    if (!userId || !id) return args.c.json({ error: 'not_found' }, 404)
-    return args.c.json({ ok: await deleteReport(userId, id) })
   },
 })
 

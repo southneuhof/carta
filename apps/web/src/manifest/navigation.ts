@@ -3,6 +3,7 @@ import { defineNavigation, type NavigationIcon, type NavigationModule } from './
 export const navigation = defineNavigation([
   { name: 'dashboard', title: 'Dashboard', icon: 'home', description: 'Dashboard', routes: [{ to: { name: 'dashboard' }, permission: null, title: 'Dashboard', icon: 'home' }] },
   { name: 'to-do', title: 'To Do', icon: 'inbox', description: 'Task inbox', routes: [{ to: { name: 'to-do' }, permission: null, title: 'To Do', icon: 'inbox' }] },
+  { name: 'quality', title: 'Quality', icon: 'folder', description: 'Quality workflows', routes: [{ to: { name: 'quality-pts' }, permission: null, title: 'Manual PTS', icon: 'folder' }] },
   {
     name: 'settings',
     title: 'Pengaturan',
@@ -45,6 +46,7 @@ export function visibleNavigation(allows: (permission: string) => boolean): Visi
         if (routes.length && !('separator' in routes.at(-1)!)) routes.push({ separator: true, name: entry.separator })
         continue
       }
+      if (!('to' in entry)) continue
       const permission = entry.permission
       if (permission !== null && !allows(permission)) continue
       const to = entry.to

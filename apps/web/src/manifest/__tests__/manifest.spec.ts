@@ -3,7 +3,7 @@ import { activeNavigationModule, navigation, visibleNavigation } from '../naviga
 
 describe('navigation entrypoints', () => {
   it('keeps ordered resource and direct entrypoints only', () => {
-    expect(navigation.map((module) => module.name)).toEqual(['dashboard', 'to-do', 'settings', 'master-data'])
+    expect(navigation.map((module) => module.name)).toEqual(['dashboard', 'to-do', 'quality', 'settings', 'master-data'])
     expect(
       visibleNavigation(() => true)
         .flatMap((module) => module.routes)

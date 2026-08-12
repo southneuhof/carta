@@ -96,6 +96,29 @@ actions contain only `run`.
 and can be used directly for custom screens. `ListView`, `DetailView`, and
 `FormView` add page chrome and forward the same native props.
 
+`Collection` owns one collection loader, query, cache identity, metadata,
+loading, error, empty, and refresh state. `Table` composes `Collection` with
+the table presentation. `ListView` also uses one `Collection`; its default
+presentation is `table`, and its `custom` presentation receives loaded rows:
+
+```vue
+<ListView
+  v-bind="resource.list()"
+  :query="query"
+  :presentation="view === 'grid' ? 'custom' : 'table'"
+  @update:query="query = $event"
+>
+  <template #custom="{ records, query, refresh, updateQuery }">
+    <RouteOwnedGrid :records="records" />
+  </template>
+</ListView>
+```
+
+The custom slot receives presentation-safe state and query actions. It does
+not receive a loader or a query client. Switching presentation keeps the same
+collection. Custom actions remain plain application functions; the route
+awaits its resource invalidation after a successful action.
+
 `DialogForm` composes `Dialog` with core `Form`:
 
 ```vue

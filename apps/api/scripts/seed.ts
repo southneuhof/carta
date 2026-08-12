@@ -1,4 +1,4 @@
-import { eq, sql } from 'drizzle-orm'
+import { eq, inArray, sql } from 'drizzle-orm'
 import { closeDb, getDb } from '../src/db'
 import { authorizationModules as moduleCatalog } from '../src/authorization/catalog'
 import { createAuth } from '../src/routes/auth/auth'
@@ -57,12 +57,16 @@ async function seedAuthorization() {
     target: roles.roleCode,
     set: { name: sql`excluded.name`, description: sql`excluded.description`, realm: sql`excluded.realm`, active: true },
   })
+  const catalogPermissionCodes = new Set(catalogPermissions.map((permission) => permission.code))
   const permissionRows = await db.select({ id: permissions.id, code: permissions.permissionCode }).from(permissions)
+  const stalePermissionIds = permissionRows.filter((permission) => !catalogPermissionCodes.has(permission.code)).map((permission) => permission.id)
+  if (stalePermissionIds.length) await db.update(permissions).set({ active: false }).where(inArray(permissions.id, stalePermissionIds))
   const rolePermissionsByRealm = new Map([
     ['system', 'role-super-administrator'],
     ['project', 'role-project-administrator'],
   ] as const)
-  const rolePermissionRows = permissionRows.map((permission) => {
+  await db.update(rolePermissions).set({ active: false }).where(inArray(rolePermissions.roleId, [...rolePermissionsByRealm.values()]))
+  const rolePermissionRows = permissionRows.filter((permission) => catalogPermissionCodes.has(permission.code)).map((permission) => {
     const module = moduleCatalog.find((item) => item.permissions.some((entry) => entry.code === permission.code))!
     return { roleId: rolePermissionsByRealm.get(module.realm)!, permissionId: permission.id, active: true }
   })
@@ -100,15 +104,31 @@ async function main() {
     divisionId: null,
     projectId: null,
     active: true,
-  }).onConflictDoUpdate({ target: projectRoleAssignments.id, set: { active: true } })
+  }).onConflictDoUpdate({
+    target: projectRoleAssignments.id,
+    set: {
+      userId: admin.id,
+      roleId: 'role-project-administrator',
+      coverageType: 'all_projects',
+      divisionId: null,
+      projectId: null,
+      active: true,
+    },
+  })
 
   await db.insert(businessCategories).values({ id: 'business-category-default', code: 'DEFAULT', name: 'Default', active: true }).onConflictDoNothing()
   await db.insert(divisions).values({ id: 'division-default', businessCategoryId: 'business-category-default', code: 'DEFAULT', name: 'Default', active: true }).onConflictDoNothing()
   await db.insert(projects).values({ id: 'project-default', divisionId: 'division-default', number: 'DEFAULT', integrationCode: 'DEFAULT', name: 'Default Project', active: true }).onConflictDoNothing()
   await db.insert(uoms).values({ id: 'uom-each', code: 'EA', name: 'Each', active: true }).onConflictDoNothing()
-  await db.insert(workItems).values({ id: 'work-item-category-default', projectId: 'project-default', code: 'CATEGORY', name: 'Default Category', level: 0, active: true }).onConflictDoNothing()
-  await db.insert(workItems).values({ id: 'work-item-default', projectId: 'project-default', parentId: 'work-item-category-default', code: 'ITEM', name: 'Default Item', level: 1, uomId: 'uom-each', active: true }).onConflictDoNothing()
   await db.insert(ptsWorkCategories).values({ id: 'pts-category-default', code: 'DEFAULT', name: 'Default', active: true }).onConflictDoNothing()
+  await db.insert(workItems).values({ id: 'work-item-category-default', projectId: 'project-default', categoryId: 'pts-category-default', code: 'CATEGORY', name: 'Default Category', level: 0, active: true }).onConflictDoUpdate({
+    target: workItems.id,
+    set: { projectId: 'project-default', parentId: null, categoryId: 'pts-category-default', code: 'CATEGORY', name: 'Default Category', level: 0, active: true },
+  })
+  await db.insert(workItems).values({ id: 'work-item-default', projectId: 'project-default', parentId: 'work-item-category-default', categoryId: 'pts-category-default', code: 'ITEM', name: 'Default Item', level: 1, uomId: 'uom-each', active: true }).onConflictDoUpdate({
+    target: workItems.id,
+    set: { projectId: 'project-default', parentId: 'work-item-category-default', categoryId: 'pts-category-default', code: 'ITEM', name: 'Default Item', level: 1, uomId: 'uom-each', active: true },
+  })
   await db.insert(rootCauses).values({ id: 'root-cause-default', code: 'DEFAULT', name: 'Default', active: true }).onConflictDoNothing()
   for (const [id, code] of [
     ['number-variable-number', 'number'],

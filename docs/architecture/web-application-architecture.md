@@ -210,14 +210,49 @@ The core components remain useful without a resource:
 
 ## Core components and shells
 
-- `Table` owns collection loading, query state, pagination, sorting, and row
-  rendering.
+- `Collection` owns collection loading, cache identity, controlled or
+  namespaced query state, metadata, loading, empty and error states, and
+  refresh.
+- `TableContent` is the internal loaded-row table presentation.
+- `Table` composes one `Collection` with `TableContent`.
 - `Detail` owns record loading and field rendering.
 - `Form` owns draft state, field rendering, validation, initial loading, and
   submission.
-- `ListView` adds page chrome around `Table`.
+- `ListView` adds page chrome around one `Collection`. Its default presentation
+  is `table`; its `custom` slot receives loaded records and presentation-safe
+  collection state.
 - `DetailView` adds page chrome around `Detail`.
 - `FormView` adds page chrome around `Form`.
+
+The collection dependency direction is:
+
+```mermaid
+flowchart BT
+  Collection[Collection] --> Table[Table]
+  Collection --> ListView[ListView]
+  TableContent[TableContent] --> Table
+  TableContent --> ListView
+```
+
+Use one collection for table and custom presentations:
+
+```vue
+<ListView
+  v-bind="resource.list()"
+  :query="query"
+  :presentation="view === 'grid' ? 'custom' : 'table'"
+  @update:query="query = $event"
+>
+  <template #custom="{ records }">
+    <RouteOwnedGrid :records="records" />
+  </template>
+</ListView>
+```
+
+The custom slot does not receive `load`, `data`, cache keys, or a query
+client. A presentation switch keeps query state and does not start a second
+load. Custom actions remain plain functions. The route must await
+`resource.invalidate({ id })` after a successful custom action.
 
 The shells forward native props. They do not discover APIs or choose a CRUD
 mode. Page-level controls and effects stay in the route.

@@ -21,10 +21,10 @@ vi.mock('../../core/Table.vue', async () => {
   const { defineComponent, h } = await import('vue')
   return {
     default: defineComponent({
-      props: { data: Array },
+      props: { data: Array, pagination: [Boolean, String] },
       emits: ['row-click'],
       setup(props, { emit }) {
-        return () => h('div', (props.data ?? []).map((record: any) =>
+        return () => h('div', { class: props.pagination === false ? 'lookup-preview' : 'lookup-options' }, (props.data ?? []).map((record: any) =>
           h('button', {
             class: 'lookup-row',
             onClick: () => emit('row-click', record),
@@ -70,6 +70,8 @@ function mountLookup(mountOptions: {
   model: unknown
   loadDetail?: (context: any) => Promise<any>
   placeholder?: string
+  multi?: boolean
+  transformModel?: (value: unknown) => unknown
 }) {
   const model = ref(mountOptions.model)
   const host = document.createElement('div')
@@ -80,10 +82,11 @@ function mountLookup(mountOptions: {
       data: options,
       pick: 'id',
       view: 'name',
+      multi: mountOptions.multi,
       placeholder: mountOptions.placeholder,
       loadDetail: mountOptions.loadDetail,
       modelValue: model.value,
-      'onUpdate:modelValue': (value: unknown) => { model.value = value },
+      'onUpdate:modelValue': (value: unknown) => { model.value = mountOptions.transformModel?.(value) ?? value },
     }),
   }))
   app.mount(host)
@@ -110,6 +113,32 @@ afterEach(() => {
 })
 
 describe('LookupInput selection labels', () => {
+  it('keeps multi labels when the form stores selected IDs', async () => {
+    const view = mountLookup({
+      model: null,
+      multi: true,
+      transformModel: (value) => Array.isArray(value) ? value.map((item: any) => item.id) : value,
+    })
+
+    view.row(0).click()
+    view.save().click()
+    await flush()
+
+    expect(view.model.value).toEqual(['one'])
+    expect(view.display()).toBe('Option one')
+    expect(view.host.querySelector('.lookup-preview .lookup-row')?.textContent).toBe('Option one')
+  })
+
+  it('hydrates initial multi IDs through loadDetail', async () => {
+    const loadDetail = vi.fn(async ({ id }) => options.find((item) => item.id === id))
+    const view = mountLookup({ model: ['one'], multi: true, loadDetail })
+    await flush()
+
+    expect(loadDetail).toHaveBeenCalledWith({ id: 'one', searchParameters: {} })
+    expect(view.display()).toBe('Option one')
+    expect(view.host.querySelector('.lookup-preview .lookup-row')?.textContent).toBe('Option one')
+  })
+
   it('keeps locally selected label without calling loadDetail', async () => {
     const loadDetail = vi.fn(async () => options[0])
     const view = mountLookup({ model: null, loadDetail })
