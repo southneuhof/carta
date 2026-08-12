@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { appFieldDefaults } from '@/configs/defaults'
 import { createFrameworkQueryClient, registerResourceRuntime, resetResourceRuntimeForTests, resolveFields, resolveFrameworkAdapters, resolveFrameworkFieldDefaults } from '@southneuhof/is-vue-framework'
-import { pts, ptsLookupResources } from './pts.resource'
+import { pts, ptsCreateOptionResources } from './pts.resource'
 
 beforeEach(() => registerResourceRuntime({ adapters: resolveFrameworkAdapters(), queryClient: createFrameworkQueryClient(), fieldDefaults: resolveFrameworkFieldDefaults(appFieldDefaults) }))
 afterEach(() => resetResourceRuntimeForTests())
@@ -22,7 +22,10 @@ describe('manual PTS resource', () => {
     const project = formFields.find((field) => field.key === 'projectId')!
     const category = formFields.find((field) => field.key === 'workItemCategoryId')!
     const item = formFields.find((field) => field.key === 'workItemId')!
-    expect(project.source).toBe(ptsLookupResources.projectLookup)
+    expect(formFields.find((field) => field.key === 'divisionId')?.source).toBe(ptsCreateOptionResources.divisionCreateOptions)
+    expect(project.source).toBe(ptsCreateOptionResources.projectCreateOptions)
+    expect(formFields.find((field) => field.key === 'ptsWorkCategoryId')?.source).toBe(ptsCreateOptionResources.categoryCreateOptions)
+    expect(formFields.find((field) => field.key === 'rootCauseIds')?.source).toBe(ptsCreateOptionResources.rootCauseCreateOptions)
     expect(project.behavior?.props?.({ draft: { divisionId: 'division-1' } } as never)).toEqual({ searchParameters: { divisionId: 'division-1' } })
     expect(category.behavior?.props?.({ draft: { projectId: 'project-1' } } as never)).toEqual({ searchParameters: { projectId: 'project-1', rootOnly: true } })
     expect(item.behavior?.props?.({ draft: { projectId: 'project-1', workItemCategoryId: 'category-1' } } as never)).toEqual({ searchParameters: { projectId: 'project-1', workItemCategoryId: 'category-1', leafOnly: true } })

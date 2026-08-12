@@ -1,37 +1,34 @@
 import { defineFields, defineResource, defineSchema, fromZod } from '@southneuhof/is-vue-framework'
 import type { WebResourceSchema } from '@southneuhof/is-vue-framework'
-import { qhssePtsEntity } from '@southneuhof/api/routes/qhsse-pts/qhsse-pts.entity'
 import { z } from 'zod/v4'
-import { divisions } from '../../master-data/divisions/divisions.resource'
-import { ptsWorkCategories } from '../../master-data/pts-work-categories/pts-work-categories.resource'
-import { rootCauses } from '../../master-data/root-causes/root-causes.resource'
-import { ptsActions, lookupDetail, lookupOptions } from './pts.actions'
-import { criteriaOptions, dispositionOptions, jobImplementorOptions, type LookupOption, ptsSchema } from './pts.schema'
+import { ptsActions, ptsCreateOptionActions } from './pts.actions'
+import { criteriaOptions, dispositionOptions, jobImplementorOptions, ptsSchema } from './pts.schema'
 
-type LookupSchema = WebResourceSchema<LookupOption, Record<string, unknown>, LookupOption, LookupOption, string>
-const lookupSchema = defineSchema<LookupSchema>({
+type PtsCreateOption = { id: string; name: string; code?: string }
+type PtsCreateOptionSchema = WebResourceSchema<PtsCreateOption, Record<string, unknown>, PtsCreateOption, PtsCreateOption, string>
+const ptsCreateOptionSchema = defineSchema<PtsCreateOptionSchema>({
   identity: 'id',
-  record: { schema: fromZod(z.object({ id: z.string(), name: z.string(), code: z.string().optional(), projectId: z.string().optional(), divisionId: z.string().optional(), parentId: z.string().nullable().optional(), categoryId: z.string().nullable().optional() })) },
+  record: { schema: fromZod(z.object({ id: z.string(), name: z.string(), code: z.string().optional() })) },
 })
-const lookupFields = defineFields(lookupSchema, { code: {}, name: {} })
+const ptsCreateOptionFields = defineFields(ptsCreateOptionSchema, { code: {}, name: {} })
 
-function lookupResource(key: string, kind: Parameters<typeof lookupOptions>[0]) {
-  return defineResource(lookupSchema, {
+function ptsCreateOptionResource(key: string, actions: { list: typeof ptsCreateOptionActions.divisions.list; detail: typeof ptsCreateOptionActions.divisions.detail }) {
+  return defineResource(ptsCreateOptionSchema, {
     key,
     actions: {
-      list: { run: (context) => lookupOptions(kind, context), fields: [lookupFields.code, lookupFields.name], permission: null },
-      detail: { run: (context) => lookupDetail(kind, context), fields: [lookupFields.code, lookupFields.name], permission: null },
+      list: { run: actions.list, fields: [ptsCreateOptionFields.code, ptsCreateOptionFields.name], permission: null },
+      detail: { run: actions.detail, fields: [ptsCreateOptionFields.code, ptsCreateOptionFields.name], permission: null },
     },
   })
 }
 
-const projectLookup = lookupResource('qhsse-pts.projects', 'projects')
-const ptsWorkCategoryLookup = lookupResource('qhsse-pts.pts-work-categories', 'ptsWorkCategories')
-const workItemCategoryLookup = lookupResource('qhsse-pts.work-item-categories', 'workItems')
-const workItemLookup = lookupResource('qhsse-pts.work-items', 'workItems')
-const rootCauseLookup = lookupResource('qhsse-pts.root-causes', 'rootCauses')
-const projectVendorLookup = lookupResource('qhsse-pts.project-vendors', 'projectVendors')
-const projectUserLookup = lookupResource('qhsse-pts.project-users', 'projectUsers')
+const divisionCreateOptions = ptsCreateOptionResource('qhsse-pts.create-options.divisions', ptsCreateOptionActions.divisions)
+const categoryCreateOptions = ptsCreateOptionResource('qhsse-pts.create-options.pts-work-categories', ptsCreateOptionActions.categories)
+const projectCreateOptions = ptsCreateOptionResource('qhsse-pts.create-options.projects', ptsCreateOptionActions.projects)
+const rootCauseCreateOptions = ptsCreateOptionResource('qhsse-pts.create-options.root-causes', ptsCreateOptionActions.rootCauses)
+const workItemCreateOptions = ptsCreateOptionResource('qhsse-pts.create-options.work-items', ptsCreateOptionActions.workItems)
+const projectVendorCreateOptions = ptsCreateOptionResource('qhsse-pts.create-options.project-vendors', ptsCreateOptionActions.projectVendors)
+const projectUserCreateOptions = ptsCreateOptionResource('qhsse-pts.create-options.project-users', ptsCreateOptionActions.projectUsers)
 
 function relationName(record: unknown, key: string, fallback?: string) {
   if (!record || typeof record !== 'object') return fallback
@@ -63,11 +60,11 @@ const statusDisplay = {
 
 const fields = defineFields(ptsSchema, {
   number: { label: 'PTS Number', table: { sortable: true } },
-  divisionId: { label: 'Division', read: (record) => relationName(record, 'division', record.divisionName as string), form: { renderer: 'lookup', source: divisions, props: { pick: 'id', view: 'name', required: true } } },
+  divisionId: { label: 'Division', read: (record) => relationName(record, 'division', record.divisionName as string), form: { renderer: 'lookup', source: divisionCreateOptions, props: { pick: 'id', view: 'name', required: true } } },
   projectId: {
     label: 'Project',
     read: (record) => relationName(record, 'project', record.projectName as string),
-    form: { renderer: 'lookup', source: projectLookup, props: { pick: 'id', view: 'name', required: true }, behavior: {
+    form: { renderer: 'lookup', source: projectCreateOptions, props: { pick: 'id', view: 'name', required: true }, behavior: {
       disabled: ({ draft }) => !draft.divisionId,
       props: ({ draft }) => ({ searchParameters: { divisionId: draft.divisionId } }),
       resetWhen: ({ draft }) => draft.divisionId,
@@ -76,12 +73,12 @@ const fields = defineFields(ptsSchema, {
   ptsWorkCategoryId: {
     label: 'PTS Work Category',
     read: (record) => relationName(record, 'ptsWorkCategory'),
-    form: { renderer: 'lookup', source: ptsWorkCategoryLookup, props: { pick: 'id', view: 'name', required: true } },
+    form: { renderer: 'lookup', source: categoryCreateOptions, props: { pick: 'id', view: 'name', required: true } },
   },
   workItemCategoryId: {
     label: 'Work-item Category',
     read: (record) => relationName(record, 'workItemCategory'),
-    form: { renderer: 'lookup', source: workItemCategoryLookup, props: { pick: 'id', view: 'name', required: true }, behavior: {
+    form: { renderer: 'lookup', source: workItemCreateOptions, props: { pick: 'id', view: 'name', required: true }, behavior: {
       disabled: ({ draft }) => !draft.projectId,
       props: ({ draft }) => ({ searchParameters: { projectId: draft.projectId, rootOnly: true } }),
       resetWhen: ({ draft }) => draft.projectId,
@@ -90,7 +87,7 @@ const fields = defineFields(ptsSchema, {
   workItemId: {
     label: 'Work Item',
     read: (record) => relationName(record, 'workItem'),
-    form: { renderer: 'lookup', source: workItemLookup, props: { pick: 'id', view: 'name', required: true }, behavior: {
+    form: { renderer: 'lookup', source: workItemCreateOptions, props: { pick: 'id', view: 'name', required: true }, behavior: {
       disabled: ({ draft }) => !draft.workItemCategoryId,
       props: ({ draft }) => ({ searchParameters: { projectId: draft.projectId, workItemCategoryId: draft.workItemCategoryId, leafOnly: true } }),
       resetWhen: ({ draft }) => draft.workItemCategoryId,
@@ -98,7 +95,7 @@ const fields = defineFields(ptsSchema, {
   },
   locationZone: { label: 'Location Zone', form: { renderer: 'text' } },
   criteriaCode: { label: 'Criteria', display: { renderer: 'chip', props: { options: criteriaDisplay } }, form: { renderer: 'radio', source: criteriaOptions, props: { required: true } } },
-  rootCauseIds: { label: 'Root Causes', read: (record) => Array.isArray(record.rootCauses) ? record.rootCauses.map((cause) => (cause as { name?: string }).name).filter(Boolean).join(', ') : '', form: { renderer: 'lookup', source: rootCauseLookup, props: { pick: 'id', view: 'name', multi: true, required: true } }, write: writeRootCauseIds },
+  rootCauseIds: { label: 'Root Causes', read: (record) => Array.isArray(record.rootCauses) ? record.rootCauses.map((cause) => (cause as { name?: string }).name).filter(Boolean).join(', ') : '', form: { renderer: 'lookup', source: rootCauseCreateOptions, props: { pick: 'id', view: 'name', multi: true, required: true } }, write: writeRootCauseIds },
   location: { label: 'Location', form: { renderer: 'text', props: { required: true } } },
   description: { label: 'Description', form: { renderer: 'textarea' } },
   imgBefore: { label: 'Before Image', form: { renderer: 'image', props: { required: true } }, write: writeImagePath },
@@ -168,28 +165,28 @@ export const pts = defineResource(ptsSchema, {
   },
 })
 
-export const ptsLookupResources = {
-  projectLookup,
-  ptsWorkCategoryLookup,
-  workItemCategoryLookup,
-  workItemLookup,
-  rootCauseLookup,
-  projectVendorLookup,
-  projectUserLookup,
+export const ptsCreateOptionResources = {
+  divisionCreateOptions,
+  categoryCreateOptions,
+  projectCreateOptions,
+  rootCauseCreateOptions,
+  workItemCreateOptions,
+  projectVendorCreateOptions,
+  projectUserCreateOptions,
 }
 
 export const ptsActionFields = {
   dispositionStatusCode: { label: 'Disposition', form: { renderer: 'radio', source: dispositionOptions, props: { required: true } } },
   temporaryFollowUpPlan: { label: 'Temporary Follow-up Plan', form: { renderer: 'textarea', props: { required: true } } },
   managementNotes: { label: 'Management Notes', form: { renderer: 'textarea', props: { required: true } } },
-  somUserId: { label: 'SOM User', form: { renderer: 'lookup', source: projectUserLookup, props: { pick: 'id', view: 'name', required: true }, behavior: { props: ({ draft }) => ({ searchParameters: { projectId: draft.projectId } }) } } },
+  somUserId: { label: 'SOM User', form: { renderer: 'lookup', source: projectUserCreateOptions, props: { pick: 'id', view: 'name', required: true }, behavior: { props: ({ draft }) => ({ searchParameters: { projectId: draft.projectId } }) } } },
   followUpPlan: { label: 'Follow-up Plan', form: { renderer: 'textarea', props: { required: true } } },
   targetDate: { label: 'Target Date', form: { renderer: 'date', props: { required: true } } },
-  implementationUserId: { label: 'Implementation User', form: { renderer: 'lookup', source: projectUserLookup, props: { pick: 'id', view: 'name', required: true }, behavior: { props: ({ draft }) => ({ searchParameters: { projectId: draft.projectId } }) } } },
+  implementationUserId: { label: 'Implementation User', form: { renderer: 'lookup', source: projectUserCreateOptions, props: { pick: 'id', view: 'name', required: true }, behavior: { props: ({ draft }) => ({ searchParameters: { projectId: draft.projectId } }) } } },
   workMethod: { label: 'Work Method', form: { renderer: 'textarea', props: { required: true } } },
   estimationCost: { label: 'Estimated Cost', form: { renderer: 'text', props: { required: true, inputmode: 'decimal' } } },
   jobImplementorType: { label: 'Job Implementor', form: { renderer: 'radio', source: jobImplementorOptions, props: { required: true } } },
-  projectVendorId: { label: 'Project Vendor', form: { renderer: 'lookup', source: projectVendorLookup, props: { pick: 'id', view: 'name' }, behavior: {
+  projectVendorId: { label: 'Project Vendor', form: { renderer: 'lookup', source: projectVendorCreateOptions, props: { pick: 'id', view: 'name' }, behavior: {
     visible: ({ draft }) => draft.jobImplementorType === 'vendor',
     props: ({ draft }) => ({ searchParameters: { projectId: draft.projectId }, required: draft.jobImplementorType === 'vendor' }),
   } } },
@@ -201,7 +198,7 @@ export const ptsActionFields = {
   implementationVerificationDescription: { label: 'Verification Description', form: { renderer: 'textarea' } },
   actualCost: { label: 'Actual Cost', form: { renderer: 'text', props: { required: true, inputmode: 'decimal' } } },
   actualJobImplementorType: { label: 'Actual Job Implementor', form: { renderer: 'radio', source: jobImplementorOptions, props: { required: true } } },
-  actualProjectVendorId: { label: 'Actual Project Vendor', form: { renderer: 'lookup', source: projectVendorLookup, props: { pick: 'id', view: 'name' }, behavior: {
+  actualProjectVendorId: { label: 'Actual Project Vendor', form: { renderer: 'lookup', source: projectVendorCreateOptions, props: { pick: 'id', view: 'name' }, behavior: {
     visible: ({ draft }) => draft.actualJobImplementorType === 'vendor',
     props: ({ draft }) => ({ searchParameters: { projectId: draft.projectId }, required: draft.actualJobImplementorType === 'vendor' }),
   } } },

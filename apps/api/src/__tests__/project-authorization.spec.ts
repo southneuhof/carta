@@ -242,7 +242,7 @@ describe('project-owned authorization surfaces', () => {
     expect(data.data[0].projectId).toBe(fixture.projectAId)
   })
 
-  it('uses one project scope for lists, details, trees, lookups, writes, and operations', async () => {
+  it('uses one project scope for lists, details, trees, create options, writes, and operations', async () => {
     const fixture = await makeFixture()
     const a = fixture.records[0]!
     const b = fixture.records[1]!
@@ -286,14 +286,18 @@ describe('project-owned authorization surfaces', () => {
     expect((await app.request(`/qhsse-pts/detail/${b.reportId}`, { headers: { Cookie: fixture.cookie } })).status).toBe(403)
     expect((await app.request(`/qhsse-pts/detail/${c.reportId}`, { headers: { Cookie: fixture.cookie } })).status).toBe(404)
 
-    const lookups = await app.request('/qhsse-pts/lookups', { headers: { Cookie: fixture.cookie } })
-    expect(lookups.status).toBe(200)
-    const lookupData = (await lookups.json()).data
-    expect(lookupData.projects.map((row: { id: string }) => row.id)).toEqual([fixture.projectAId])
-    expect(lookupData.projects[0].allowedOperations).toEqual(['detail', 'update', 'delete'])
-    expect(lookupData.workItems.every((row: { allowedOperations: string[] }) => row.allowedOperations.join(',') === 'detail,update,delete')).toBe(true)
-    expect(lookupData.projectVendors[0].allowedOperations).toEqual(['detail', 'update', 'delete'])
-    expect((await app.request(`/qhsse-pts/lookups?projectId=${fixture.projectBId}`, { headers: { Cookie: fixture.cookie } })).status).toBe(404)
+    const projectOptions = await app.request('/qhsse-pts/create-options/projects/list?page=1&limit=20', { headers: { Cookie: fixture.cookie } })
+    expect(projectOptions.status).toBe(200)
+    const projectOptionData = (await projectOptions.json()).data
+    expect(projectOptionData.map((row: { id: string }) => row.id)).toEqual([fixture.projectAId])
+    const workItemOptions = await app.request(`/qhsse-pts/create-options/work-items/list?page=1&limit=20&projectId=${fixture.projectAId}`, { headers: { Cookie: fixture.cookie } })
+    expect(workItemOptions.status).toBe(200)
+    expect((await workItemOptions.json()).data.map((row: { id: string }) => row.id)).toEqual(expect.arrayContaining([a.rootId, a.leafId]))
+    const vendorOptions = await app.request(`/qhsse-pts/create-options/project-vendors/list?page=1&limit=20&projectId=${fixture.projectAId}`, { headers: { Cookie: fixture.cookie } })
+    expect(vendorOptions.status).toBe(200)
+    expect((await vendorOptions.json()).data).toHaveLength(1)
+    const inaccessibleProject = await app.request(`/qhsse-pts/create-options/projects/detail/${fixture.projectBId}`, { headers: { Cookie: fixture.cookie } })
+    expect(inaccessibleProject.status).toBe(404)
 
     const workMove = await app.request(`/work-items/update/${a.leafId}`, {
       method: 'PATCH',

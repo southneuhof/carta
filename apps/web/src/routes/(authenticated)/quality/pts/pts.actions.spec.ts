@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
-  lookups: vi.fn(),
+  optionList: vi.fn(),
+  optionDetail: vi.fn(),
   action: vi.fn(),
   list: vi.fn(),
   detail: vi.fn(),
@@ -18,13 +19,21 @@ vi.mock('@/framework/rpc', () => ({
       create: { $post: mocks.create },
       update: { ':id': { $patch: mocks.update } },
       delete: { ':id': { $delete: mocks.remove } },
-      lookups: { $get: mocks.lookups },
+      'create-options': {
+        divisions: { list: { $get: mocks.optionList }, detail: { ':id': { $get: mocks.optionDetail } } },
+        'pts-work-categories': { list: { $get: mocks.optionList }, detail: { ':id': { $get: mocks.optionDetail } } },
+        projects: { list: { $get: mocks.optionList }, detail: { ':id': { $get: mocks.optionDetail } } },
+        'root-causes': { list: { $get: mocks.optionList }, detail: { ':id': { $get: mocks.optionDetail } } },
+        'work-items': { list: { $get: mocks.optionList }, detail: { ':id': { $get: mocks.optionDetail } } },
+        'project-vendors': { list: { $get: mocks.optionList }, detail: { ':id': { $get: mocks.optionDetail } } },
+        'project-users': { list: { $get: mocks.optionList }, detail: { ':id': { $get: mocks.optionDetail } } },
+      },
       action: { ':id': { actions: { ':action': { $post: mocks.action } } } },
     },
   },
 }))
 
-const { loadLookups, lookupOptions, runAction } = await import('./pts.actions')
+const { ptsCreateOptionActions, runAction } = await import('./pts.actions')
 
 function response(data: unknown) {
   return new Response(JSON.stringify({ data }), { status: 200, headers: { 'content-type': 'application/json' } })
@@ -35,19 +44,22 @@ beforeEach(() => {
 })
 
 describe('manual PTS actions', () => {
-  it('filters dependent lookup options without a second transport contract', async () => {
-    mocks.lookups.mockImplementation(() => response({
-      divisions: [], projects: [{ id: 'p1', name: 'Project', divisionId: 'd1' }, { id: 'p2', name: 'Other', divisionId: 'd2' }],
-      ptsWorkCategories: [], rootCauses: [], projectVendors: [], projectUsers: [],
-      workItems: [
-        { id: 'category', name: 'Category', projectId: 'p1', parentId: null },
-        { id: 'leaf', name: 'Leaf', projectId: 'p1', parentId: 'category' },
-        { id: 'other', name: 'Other', projectId: 'p1', parentId: null },
-      ],
-    }))
-    await expect(lookupOptions('projects', { query: {}, searchParameters: { divisionId: 'd1' } })).resolves.toMatchObject({ data: [{ id: 'p1' }] })
-    await expect(lookupOptions('workItems', { query: {}, searchParameters: { projectId: 'p1', leafOnly: true, workItemCategoryId: 'category' } })).resolves.toMatchObject({ data: [{ id: 'leaf' }] })
-    expect(mocks.lookups).toHaveBeenCalledWith({ query: { projectId: 'p1' } })
+  it('sends option dependencies and pagination to the server', async () => {
+    mocks.optionList.mockResolvedValue(new Response(JSON.stringify({ data: [{ id: 'p1', name: 'Project' }], page: 2, limit: 10, total: 1 }), { status: 200, headers: { 'content-type': 'application/json' } }))
+    await expect(ptsCreateOptionActions.projects.list({ query: { page: 2, limit: 10 }, searchParameters: { divisionId: 'd1' } } as never)).resolves.toMatchObject({ data: [{ id: 'p1' }], meta: { page: 2, pageSize: 10, total: 1 } })
+    expect(mocks.optionList).toHaveBeenCalledWith(
+      { query: { divisionId: 'd1', page: '2', limit: '10' } },
+      expect.anything(),
+    )
+  })
+
+  it('hydrates one selected option through its detail endpoint', async () => {
+    mocks.optionDetail.mockResolvedValue(response({ id: 'leaf', name: 'Leaf' }))
+    await expect(ptsCreateOptionActions.workItems.detail({ id: 'leaf', searchParameters: { projectId: 'p1', workItemCategoryId: 'category', leafOnly: true } })).resolves.toEqual({ id: 'leaf', name: 'Leaf' })
+    expect(mocks.optionDetail).toHaveBeenCalledWith(
+      { param: { id: 'leaf' }, query: { projectId: 'p1', workItemCategoryId: 'category', leafOnly: 'true' } },
+      expect.anything(),
+    )
   })
 
   it('posts the typed action endpoint and preserves the action name', async () => {
