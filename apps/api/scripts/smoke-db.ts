@@ -32,7 +32,7 @@ async function main() {
       throw new Error('Database smoke check failed: seed records are missing.')
     }
     const identity = await resolveSystemIdentity(row.admin_id)
-    if (!identity?.permissions.has('manage-roles')) {
+    if (!identity?.permissions.has('list-roles')) {
       throw new Error('Database smoke check failed: system permission resolution is missing.')
     }
     if (!(await hasProjectPermission(row.admin_id, row.project_id, 'view-projects'))) {

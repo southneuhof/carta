@@ -3,7 +3,8 @@ import { defineDomainPart, defineModel } from '@southneuhof/sprindle/model'
 import { requirePermission } from '../../identity'
 import { numberVariables, numberVariable } from './number-variables.entity'
 
-const read = [authenticated(), requirePermission('view-number-variables')]
+const listNumberVariables = [authenticated(), requirePermission('list-number-variables')]
+const detailNumberVariables = [authenticated(), requirePermission('detail-number-variables')]
 
 export const domain = defineDomainPart({ tables: { numberVariables }, entities: [numberVariable] })
 
@@ -11,7 +12,7 @@ export const numberVariableModel = defineModel({
   path: '/number-variables',
   entity: numberVariable,
   routes: {
-    list: list({ authorize: read }),
-    detail: detail({ authorize: read }),
+    list: list({ authorize: listNumberVariables }),
+    detail: detail({ authorize: detailNumberVariables }),
   },
 })

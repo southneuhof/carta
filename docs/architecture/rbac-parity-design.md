@@ -224,15 +224,17 @@ System roles never take part in this check. There is no `access-all-projects` br
 
 ### Resource Scope
 
-Every server path that returns or changes project-owned data uses the same project scope:
+Every server path that returns or changes project-owned data uses the same project scope: lists, details, actions, counts, searches, and exports.
 
-- list
-- detail
-- action
-- lookup
-- count
-- search
-- export
+| Code | Realm | Meaning |
+| --- | --- | --- |
+| `view-*` | system | Menu and typed admin URL |
+| `list-*` | system | `GET …/list` |
+| `detail-*` | system | `GET …/:id` |
+| `create-*`, `update-*`, `delete-*` | system | Owner writes |
+| Workflow actions | project | Per assigned project |
+
+Default coverage is any active assignment. There is no `access-all-projects` bridge.
 
 The database query applies the scope. The browser does not filter unauthorized records after retrieval.
 
@@ -326,7 +328,7 @@ The implementation must test observable authorization behavior:
 - An inactive user, assignment, role, mapping, permission, or module grants no permission.
 - A broader assignment removes covered narrower duplicates.
 - A narrower assignment cannot be added under active broader coverage.
-- Lists, details, actions, lookups, counts, searches, and exports use the same scope.
+- Lists, details, actions, counts, searches, and exports use the same scope.
 - The API returns `401`, `403`, and `404` as specified.
 - Assigned role deletion is blocked.
 - User disablement removes active sessions.

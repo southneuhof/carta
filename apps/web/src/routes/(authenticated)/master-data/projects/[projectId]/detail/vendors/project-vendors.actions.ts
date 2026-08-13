@@ -6,6 +6,7 @@ import type { ProjectVendorCreate, ProjectVendorUpdate } from './project-vendors
 const api = createHonoResourceActions(rpc['project-vendors'], dataAdapter)
 
 export const projectVendorActions = {
+  lookupList: api.list,
   list: (projectId: string) => (context: Parameters<typeof api.list>[0]) => api.list({ ...context, searchParameters: { ...context.searchParameters, projectId } }),
   detail: api.detail,
   create: (projectId: string) => (input: ProjectVendorCreate) => api.create({ ...input, projectId } as ProjectVendorCreate),

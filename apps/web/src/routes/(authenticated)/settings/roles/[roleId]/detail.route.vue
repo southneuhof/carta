@@ -12,8 +12,7 @@ const route = useRoute('settings-roles-detail')
 const router = useRouter()
 const roleId = route.params.roleId
 const deleting = ref(false)
-const updateDefault = roles.update({ id: roleId }).defaultTo
-const updateTarget = typeof updateDefault === 'function' ? updateDefault({ id: roleId } as never) : updateDefault
+const updateTarget = roles.list().updateRoute?.({ id: roleId } as never)
 
 const tabs = [{ action: { permission: 'view-role-permissions', to: { name: 'settings-roles-detail-permissions', params: { roleId: String(roleId) } } as never }, label: 'Permissions' }] as const satisfies readonly RouteTab[]
 

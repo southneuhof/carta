@@ -11,7 +11,7 @@ import { rolePermissions } from './role-permissions.resource'
 const route = useRoute('settings-roles-detail-permissions')
 const roleId = computed(() => String(route.params.roleId))
 const pending = ref(new Set<string>())
-const canManage = permissions().has('manage-role-permissions')
+const canManage = permissions().has('create-role-permissions') && permissions().has('delete-role-permissions')
 const list = computed(() => rolePermissions.list({ searchParameters: { role_id: roleId.value } }))
 
 function isPending(id: string) {

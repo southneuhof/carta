@@ -106,6 +106,17 @@ pages.
 
 ## List and detail sources
 
+Import the owner resource as the field `source`. The owner `list` and
+`detail` actions are the only allowed option sources. Pass
+`searchParameters`. Do not redeclare the owner query. Do not add
+`/<consumer>/create-options/*`. Do not add `/lookup`. Do not add a second
+list on the consumer. API list and detail use `list-*` / `detail-*`.
+Resource `permission` stays `view-*` for the admin screen.
+
+If the owner list or detail cannot serve the field, stop. Tell the user
+the missing owner filter or contract. Use the brainstorming skill with the
+user before you add or change a route. Do not invent a custom endpoint.
+
 Use a standard list and detail pair for every database-backed form source.
 
 The list action should:
@@ -160,9 +171,17 @@ security pattern. Do not reveal records through validation messages.
 
 ## Custom actions and child writes
 
-Use a custom endpoint when the operation is a state transition, has a distinct
-permission, accepts a different input shape, returns a different projection,
-or must execute several writes atomically.
+Do not add a custom endpoint for options, search, or a filtered list. Those
+stay on the owner `list` and `detail`.
+
+A custom write is only for a domain state transition that create, update, or
+delete cannot express. If you think you need one, stop. Ask the user. Use
+the brainstorming skill. Do not invent the route, permission, or payload.
+
+After the user approves a custom write, use it when the operation is a
+state transition, has a distinct permission, accepts a different input
+shape, returns a different projection, or must execute several writes
+atomically.
 
 ```ts
 const actionInput = z.object({ reason: z.string().trim().min(1) })

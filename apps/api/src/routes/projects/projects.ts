@@ -3,16 +3,17 @@ import { notFound, unauthorized, validationError } from '@southneuhof/sprindle'
 import { defineDomainPart, defineModel } from '@southneuhof/sprindle/model'
 import { listQuerySchema } from '@southneuhof/sprindle/validation'
 import { and, asc, count, desc, eq, getTableColumns, ilike, inArray, or, type SQL } from 'drizzle-orm'
-import { getDb } from '../../db'
-import { allowedProjectOperations, accessibleProjectIds, requireProjectRecord } from '../../authorization'
+import { requireProjectCoverage } from '../../authorization'
 import { orgIdentity, requirePermission } from '../../identity'
+import { ownerAllowedOperations, ownerListProjectScope } from '../../owner-list'
+import { getDb } from '../../db'
 import { divisions } from '../divisions/divisions.entity'
 import { workItems } from '../work-items/work-items.entity'
 import { projectRelations, projects, project } from './projects.entity'
 
 const projectColumns = getTableColumns(projects) as Record<string, unknown>
-const reservedQueryKeys = new Set(['page', 'limit', 'search', 'sort', 'order'])
-const projectOperations = { detail: 'view-projects', update: 'manage-projects', delete: 'manage-projects' } as const
+const reservedQueryKeys = new Set(['page', 'limit', 'search', 'sort', 'order', 'permission'])
+const projectOperations = { detail: 'detail-projects', update: 'update-projects', delete: 'delete-projects' } as const
 
 export function normalizeProjectListQuery(query: Record<string, unknown>) {
   const implementationStatusCode = query.implementationStatusCode
@@ -20,7 +21,6 @@ export function normalizeProjectListQuery(query: Record<string, unknown>) {
     if (!['on-progress', 'finished', 'draft'].includes(String(implementationStatusCode))) {
       throw validationError('Unsupported implementationStatusCode.')
     }
-    // ponytail: map legacy derived status to active; use date/status SQL when the completion workflow exists.
     delete query.implementationStatusCode
     if (query.statusCode === 'completed') delete query.statusCode
     if (implementationStatusCode === 'on-progress') query.active = true
@@ -63,7 +63,7 @@ async function actor(args: Parameters<typeof orgIdentity>[0]) {
   return identity
 }
 
-function listWhere(query: Record<string, unknown>, scope: ReturnType<typeof accessibleProjectIds>) {
+function listWhere(query: Record<string, unknown>, scope: ReturnType<typeof ownerListProjectScope>) {
   const filters: SQL[] = []
   for (const [key, value] of Object.entries(query)) {
     if (reservedQueryKeys.has(key) || value === undefined) continue
@@ -100,23 +100,25 @@ function requiredId(args: Parameters<typeof actor>[0]) {
   return id
 }
 
-async function readProject(userId: string, projectId: string, permissionCode: 'view-projects' | 'manage-projects' = 'view-projects') {
-  await requireProjectRecord(userId, projectId, permissionCode)
+async function readProject(identity: Awaited<ReturnType<typeof actor>>, projectId: string) {
+  await requireProjectCoverage(identity.userId, projectId)
   const row = (await getDb().select({ project: projects, division: divisions }).from(projects).leftJoin(divisions, eq(divisions.id, projects.divisionId)).where(eq(projects.id, projectId)).limit(1))[0]
   if (!row) throw notFound()
-  const operations = await allowedProjectOperations(userId, [projectId], projectOperations)
-  return { ...project.schemas.select.parse({ ...row.project, division: row.division }), allowedOperations: operations.get(projectId) ?? [] }
+  return {
+    ...project.schemas.select.parse({ ...row.project, division: row.division }),
+    allowedOperations: ownerAllowedOperations(identity.permissions, true, projectOperations),
+  }
 }
 
 export const projectList = defineRoute({
   kind: 'list',
   method: 'get',
-  authorize: [authenticated()],
+  authorize: [authenticated(), requirePermission('list-projects')],
   action: async (args) => {
     const identity = await actor(args)
     const { c } = args
     const query = normalizeProjectListQuery(listQuerySchema.parse(c.req.query()) as Record<string, unknown>)
-    const where = listWhere(query, accessibleProjectIds(identity.userId, 'view-projects'))
+    const where = listWhere(query, ownerListProjectScope(identity.userId, query))
     const db = getDb()
     const page = Number(query.page)
     const limit = Number(query.limit)
@@ -124,10 +126,10 @@ export const projectList = defineRoute({
       db.select({ project: projects, division: divisions }).from(projects).leftJoin(divisions, eq(divisions.id, projects.divisionId)).where(where).orderBy(...orderBy(query)).limit(limit).offset((page - 1) * limit),
       db.select({ value: count() }).from(projects).where(where),
     ])
-    const operations = await allowedProjectOperations(identity.userId, rows.map(({ project: row }) => row.id), projectOperations)
+    const allowedOperations = ownerAllowedOperations(identity.permissions, true, projectOperations)
     const data = rows.map(({ project: row, division }) => ({
       ...project.schemas.select.parse({ ...row, division }),
-      allowedOperations: operations.get(row.id) ?? [],
+      allowedOperations,
     }))
     return c.json({ data, page, limit, total: Number(totalRows[0]?.value ?? 0) })
   },
@@ -137,14 +139,9 @@ export const projectDetail = defineRoute({
   kind: 'detail',
   path: '/:id',
   method: 'get',
-  authorize: [authenticated()],
-  action: async (args) => cJsonProject(args),
+  authorize: [authenticated(), requirePermission('detail-projects')],
+  action: async (args) => args.c.json({ data: await readProject(await actor(args), requiredId(args)) }),
 })
-
-async function cJsonProject(args: Parameters<typeof actor>[0]) {
-  const identity = await actor(args)
-  return args.c.json({ data: await readProject(identity.userId, requiredId(args)) })
-}
 
 export const projectCreate = defineRoute({
   kind: 'create',
@@ -159,8 +156,7 @@ export const projectCreate = defineRoute({
     const inserted = await getDb().insert(projects).values({ ...input, createdByUserId: identity.userId, updatedByUserId: identity.userId }).returning()
     const row = inserted[0]
     if (!row) throw validationError('Project was not created.')
-    const operations = await allowedProjectOperations(identity.userId, [row.id], projectOperations)
-    return c.json({ data: { ...project.schemas.select.parse(row), allowedOperations: operations.get(row.id) ?? [] } }, 201)
+    return c.json({ data: { ...project.schemas.select.parse(row), allowedOperations: ownerAllowedOperations(identity.permissions, false, projectOperations) } }, 201)
   },
 })
 
@@ -168,19 +164,18 @@ export const projectUpdate = defineRoute({
   kind: 'update',
   path: '/:id',
   method: 'patch',
-  authorize: [authenticated()],
+  authorize: [authenticated(), requirePermission('update-projects')],
   action: async (args) => {
     const identity = await actor(args)
     const { c } = args
     const id = requiredId(args)
-    await requireProjectRecord(identity.userId, id, 'manage-projects')
+    await requireProjectCoverage(identity.userId, id)
     const input = project.schemas.update.parse(await c.req.json().catch(() => ({})))
     const message = await validateProject('update', { id, input })
     if (message) throw validationError(message)
     const updated = await getDb().update(projects).set({ ...input, updatedByUserId: identity.userId }).where(eq(projects.id, id)).returning()
     if (!updated[0]) throw notFound()
-    const operations = await allowedProjectOperations(identity.userId, [id], projectOperations)
-    return c.json({ data: { ...project.schemas.select.parse(updated[0]), allowedOperations: operations.get(id) ?? [] } })
+    return c.json({ data: { ...project.schemas.select.parse(updated[0]), allowedOperations: ownerAllowedOperations(identity.permissions, true, projectOperations) } })
   },
 })
 
@@ -188,12 +183,12 @@ export const projectDelete = defineRoute({
   kind: 'delete',
   path: '/:id',
   method: 'delete',
-  authorize: [authenticated()],
+  authorize: [authenticated(), requirePermission('delete-projects')],
   action: async (args) => {
     const identity = await actor(args)
     const { c } = args
     const id = requiredId(args)
-    await requireProjectRecord(identity.userId, id, 'manage-projects')
+    await requireProjectCoverage(identity.userId, id)
     const message = await validateProject('delete', { id })
     if (message) throw validationError(message)
     const deleted = await getDb().delete(projects).where(eq(projects.id, id)).returning({ id: projects.id })

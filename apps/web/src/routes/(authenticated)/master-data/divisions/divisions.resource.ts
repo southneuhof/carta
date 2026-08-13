@@ -44,15 +44,15 @@ export const divisions = defineResource(divisionsSchema, {
     create: {
       run: divisionsActions.create,
       fields: [fields.businessCategoryId, fields.code, fields.name, fields.imgThumbnail],
-      permission: 'manage-divisions',
+      permission: 'create-divisions',
       route: { name: 'master-data-divisions-create' },
     },
     update: {
       run: divisionsActions.update,
       fields: [fields.businessCategoryId, fields.code, fields.name, fields.imgThumbnail],
-      permission: 'manage-divisions',
+      permission: 'update-divisions',
       route: { name: 'master-data-divisions-edit', params: (id) => ({ divisionId: String(id) }) },
     },
-    delete: { run: divisionsActions.delete, permission: 'manage-divisions' },
+    delete: { run: divisionsActions.delete, permission: 'delete-divisions' },
   },
 })

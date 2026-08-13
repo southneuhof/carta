@@ -6,8 +6,11 @@ import { requirePermission } from '../../identity'
 import { workItems } from '../work-items/work-items.entity'
 import { uoms, uom } from './uoms.entity'
 
-const read = [authenticated(), requirePermission('view-uoms')]
-const write = [authenticated(), requirePermission('manage-uoms')]
+const listUoms = [authenticated(), requirePermission('list-uoms')]
+const detailUoms = [authenticated(), requirePermission('detail-uoms')]
+const createUoms = [authenticated(), requirePermission('create-uoms')]
+const updateUoms = [authenticated(), requirePermission('update-uoms')]
+const deleteUoms = [authenticated(), requirePermission('delete-uoms')]
 
 async function validateUom(route: string, state: { input?: unknown; id?: string }) {
   const input = state.input && typeof state.input === 'object' ? (state.input as Record<string, unknown>) : {}
@@ -28,11 +31,11 @@ export const uomModel = defineModel({
   path: '/uoms',
   entity: uom,
   routes: {
-    list: list({ authorize: read }),
-    detail: detail({ authorize: read }),
-    create: create({ authorize: write }),
-    update: update({ authorize: write }),
-    delete: deleteRoute({ authorize: write }),
+    list: list({ authorize: listUoms }),
+    detail: detail({ authorize: detailUoms }),
+    create: create({ authorize: createUoms }),
+    update: update({ authorize: updateUoms }),
+    delete: deleteRoute({ authorize: deleteUoms }),
   },
   before: ({ route, state }) => route.kind === 'list'
     ? { query: { ...(state.query as Record<string, unknown>), uomType: 'work-items' } }

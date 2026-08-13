@@ -30,15 +30,15 @@ export const rootCauses = defineResource(rootCausesSchema, {
     create: {
       run: api.create,
       fields: [fields.name, fields.code, fields.description, fields.active],
-      permission: 'manage-root-causes',
+      permission: 'create-root-causes',
       route: { name: 'master-data-root-causes-create' },
     },
     update: {
       run: api.update,
       fields: [fields.name, fields.code, fields.description, fields.active],
-      permission: 'manage-root-causes',
+      permission: 'update-root-causes',
       route: { name: 'master-data-root-causes-edit', params: (id) => ({ rootCauseId: String(id) }) },
     },
-    delete: { run: api.delete, permission: 'manage-root-causes' },
+    delete: { run: api.delete, permission: 'delete-root-causes' },
   },
 })

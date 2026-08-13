@@ -28,15 +28,15 @@ export const uoms = defineResource(uomsSchema, {
     create: {
       run: api.create,
       fields: [fields.name, fields.active],
-      permission: 'manage-uoms',
+      permission: 'create-uoms',
       route: { name: 'master-data-uoms-create' },
     },
     update: {
       run: api.update,
       fields: [fields.name, fields.active],
-      permission: 'manage-uoms',
+      permission: 'update-uoms',
       route: { name: 'master-data-uoms-edit', params: (id) => ({ uomId: String(id) }) },
     },
-    delete: { run: api.delete, permission: 'manage-uoms' },
+    delete: { run: api.delete, permission: 'delete-uoms' },
   },
 })

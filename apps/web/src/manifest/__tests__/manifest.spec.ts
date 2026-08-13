@@ -24,10 +24,10 @@ describe('navigation entrypoints', () => {
     expect(activeNavigationModule('/settings/role', resolve, () => true)).toBeUndefined()
   })
 
-  it('keeps project entrypoints visible without system project grants', () => {
+  it('keeps only open menus visible without grants', () => {
     const visible = visibleNavigation(() => false)
     const routes = visible.flatMap((module) => module.routes).filter((entry) => !('separator' in entry)).map((entry) => entry.name)
 
-    expect(routes).toEqual(expect.arrayContaining(['master-data-projects', 'master-data-work-items']))
+    expect(routes).toEqual(['dashboard', 'to-do'])
   })
 })

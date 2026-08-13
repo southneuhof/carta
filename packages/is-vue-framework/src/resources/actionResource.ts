@@ -40,6 +40,11 @@ export type ResourceActionRoute<TIdentity extends RecordIdentity = RecordIdentit
   params?: ActionParams | ((id: TIdentity) => ActionParams)
 }
 
+export type ResourceFormDefaultTo<TRecord extends object> =
+  | RouteLocationRaw
+  | ((record: TRecord) => RouteLocationRaw | undefined)
+  | false
+
 type FieldReferenceList<
   TSchema extends WebResourceSchemaBoundary,
   TDraft extends object,
@@ -107,6 +112,7 @@ export interface CreateResourceAction<
   permission?: string | null
   route?: ResourceActionRoute<TIdentity>
   initialData?: Partial<TCreate>
+  defaultTo?: ResourceFormDefaultTo<TRecord>
 }
 
 export interface UpdateResourceAction<
@@ -119,6 +125,7 @@ export interface UpdateResourceAction<
   fields?: FieldReferenceList<TSchema, TUpdate, 'form'>
   permission?: string | null
   route?: ResourceActionRoute<TIdentity>
+  defaultTo?: ResourceFormDefaultTo<TRecord>
 }
 
 export interface DeleteResourceAction<TIdentity extends RecordIdentity> extends ActionVisibility {
@@ -290,6 +297,16 @@ function toRoute<TIdentity extends RecordIdentity>(route: ResourceActionRoute<TI
   return (route.params ? { name: route.name, params: route.params } : { name: route.name }) as RouteLocationRaw
 }
 
+function formDefaultTo<TRecord extends object, TIdentity extends RecordIdentity>(
+  declared: ResourceFormDefaultTo<TRecord> | undefined,
+  detailRoute: ResourceActionRoute<TIdentity> | undefined,
+  identityOf: (record: TRecord) => TIdentity,
+): ((record: TRecord) => RouteLocationRaw | undefined) | undefined {
+  if (declared === false) return undefined
+  if (declared !== undefined) return typeof declared === 'function' ? declared : () => declared
+  return detailRoute ? (record) => toRoute(detailRoute, identityOf(record)) : undefined
+}
+
 function identityToken(id: RecordIdentity): string {
   return typeof id === 'object' ? JSON.stringify(stableValue(id)) : String(id)
 }
@@ -432,6 +449,8 @@ export function defineActionResource<
     }) : undefined,
     create: 'create' in actions ? memoize((args: CreateResourceActionArguments<TCreate> | undefined) => {
       const declaration = actions.create as CreateResourceAction<TRecord, TCreate, TIdentity>
+      const detailDeclaration = actions.detail as DetailResourceAction<TRecord, TIdentity> | undefined
+      const defaultTo = formDefaultTo(declaration.defaultTo, detailDeclaration?.route, identity)
       const run = async (input: TCreate) => {
         const result = await declaration.run(input)
         await invalidate()
@@ -446,6 +465,7 @@ export function defineActionResource<
         searchParameters: args?.searchParameters ?? {},
         namespace: `${definition.key}.create`,
         ...(args?.context ? { context: args.context } : {}),
+        ...(defaultTo ? { defaultTo } : {}),
       } as CreateResourceActionProps<TRecord, TCreate, TIdentity>
     }) : undefined,
     update: 'update' in actions ? memoize((args: { id: TIdentity; initialData?: Partial<TUpdate>; searchParameters?: Record<string, unknown>; context?: FieldContext }) => {
@@ -461,7 +481,7 @@ export function defineActionResource<
         const result = await detailDeclaration.run({ ...context, id: args.id, searchParameters })
         return result as Partial<TUpdate> | undefined
       } : undefined
-      const defaultTo = detailDeclaration?.route ? (record: TRecord) => toRoute(detailDeclaration.route, identity(record)) : undefined
+      const defaultTo = formDefaultTo(declaration.defaultTo, detailDeclaration?.route, identity)
       return {
         run,
         ...(load ? { load } : {}),

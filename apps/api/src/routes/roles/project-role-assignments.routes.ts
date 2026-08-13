@@ -34,7 +34,7 @@ function coverageFromQuery(query: Record<string, string | undefined>) {
 export const listProjectRoleAssignmentOptions = defineRoute({
   path: '/users/:userId/project-role-assignment-options',
   method: 'get',
-  authorize: [authenticated(), requirePermission('view-project-role-assignments')],
+  authorize: [authenticated(), requirePermission('list-project-role-assignments')],
   action: async (args) => {
     const userId = args.c.req.param('userId')
     if (!userId || !(await userExists(userId))) return args.c.json({ error: 'not_found' }, 404)
@@ -45,7 +45,7 @@ export const listProjectRoleAssignmentOptions = defineRoute({
 export const listProjectRoleAssignments = defineRoute({
   path: '/users/:userId/project-role-assignments',
   method: 'get',
-  authorize: [authenticated(), requirePermission('view-project-role-assignments')],
+  authorize: [authenticated(), requirePermission('list-project-role-assignments')],
   action: async (args) => {
     const userId = args.c.req.param('userId')
     if (!userId || !(await userExists(userId))) return args.c.json({ error: 'not_found' }, 404)
@@ -57,7 +57,7 @@ export const listProjectRoleAssignments = defineRoute({
 export const assignProjectRole = defineRoute({
   path: '/users/:userId/project-role-assignments/:roleId',
   method: 'put',
-  authorize: [authenticated(), requirePermission('manage-project-role-assignments')],
+  authorize: [authenticated(), requirePermission('create-project-role-assignments')],
   action: async (args) => {
     const userId = args.c.req.param('userId')
     const roleId = args.c.req.param('roleId')
@@ -70,7 +70,7 @@ export const assignProjectRole = defineRoute({
 export const revokeProjectRole = defineRoute({
   path: '/users/:userId/project-role-assignments/:roleId',
   method: 'delete',
-  authorize: [authenticated(), requirePermission('manage-project-role-assignments')],
+  authorize: [authenticated(), requirePermission('delete-project-role-assignments')],
   action: async (args) => {
     const userId = args.c.req.param('userId')
     const roleId = args.c.req.param('roleId')

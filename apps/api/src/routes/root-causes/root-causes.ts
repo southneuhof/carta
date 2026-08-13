@@ -6,8 +6,11 @@ import { requirePermission } from '../../identity'
 import { qhssePtsRootCauses } from '../qhsse-pts/qhsse-pts.entity'
 import { rootCauses, rootCause } from './root-causes.entity'
 
-const read = [authenticated(), requirePermission('view-root-causes')]
-const write = [authenticated(), requirePermission('manage-root-causes')]
+const listAccess = [authenticated(), requirePermission('list-root-causes')]
+const detailAccess = [authenticated(), requirePermission('detail-root-causes')]
+const createAccess = [authenticated(), requirePermission('create-root-causes')]
+const updateAccess = [authenticated(), requirePermission('update-root-causes')]
+const deleteAccess = [authenticated(), requirePermission('delete-root-causes')]
 
 async function validateRootCause(route: string, state: { input?: unknown; id?: string }) {
   const input = state.input && typeof state.input === 'object' ? (state.input as Record<string, unknown>) : {}
@@ -28,11 +31,11 @@ export const rootCauseModel = defineModel({
   path: '/root-causes',
   entity: rootCause,
   routes: {
-    list: list({ authorize: read }),
-    detail: detail({ authorize: read }),
-    create: create({ authorize: write }),
-    update: update({ authorize: write }),
-    delete: deleteRoute({ authorize: write }),
+    list: list({ authorize: listAccess }),
+    detail: detail({ authorize: detailAccess }),
+    create: create({ authorize: createAccess }),
+    update: update({ authorize: updateAccess }),
+    delete: deleteRoute({ authorize: deleteAccess }),
   },
   validate: async ({ route, state }) => validateRootCause(route.kind, state as { input?: unknown; id?: string }),
 })

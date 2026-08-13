@@ -3,7 +3,7 @@ import { hashPassword } from 'better-auth/crypto'
 import { eq } from 'drizzle-orm'
 import { app } from '../app'
 import { closeDb, getDb } from '../db'
-import { accessibleProjectIds } from '../authorization'
+import { accessibleProjectIds, coveredProjectIds } from '../authorization'
 import { accounts } from '../routes/auth/auth.entity'
 import { getAuth } from '../routes/auth/auth'
 import { businessCategories } from '../routes/business-categories/business-categories.entity'
@@ -56,20 +56,35 @@ async function makeFixture(coverageType: CoverageCase = 'project') {
   const systemRoleId = id('system-role')
   const categoryId = id('pts-category')
   const projectCodes = [
-    'view-projects',
-    'manage-projects',
-    'view-work-items',
-    'manage-work-items',
-    'view-project-vendors',
-    'manage-project-vendors',
-    'view-qhsse-pts',
-    'show-qhsse-pts',
     'create-qhsse-pts',
     'update-qhsse-pts',
     'delete-qhsse-pts',
   ]
+  const systemCodes = [
+    'create-projects',
+    'list-projects',
+    'detail-projects',
+    'update-projects',
+    'delete-projects',
+    'list-work-items',
+    'detail-work-items',
+    'create-work-items',
+    'update-work-items',
+    'delete-work-items',
+    'list-project-vendors',
+    'detail-project-vendors',
+    'create-project-vendors',
+    'update-project-vendors',
+    'delete-project-vendors',
+    'list-qhsse-pts',
+    'detail-qhsse-pts',
+    'list-divisions',
+    'detail-divisions',
+    'list-users',
+    'detail-users',
+  ]
   const projectPermissionIds = await ensurePermissionIds(projectCodes, 'project')
-  const createProjectId = (await ensurePermissionIds(['create-projects'], 'system')).get('create-projects')!
+  const systemPermissionIds = await ensurePermissionIds(systemCodes, 'system')
 
   await db.insert(users).values({ id: userId, name: 'Project Scope User', email })
   await db.insert(accounts).values({ id: id('account'), accountId: userId, providerId: 'credential', userId, password: await hashPassword('test-password') })
@@ -90,7 +105,7 @@ async function makeFixture(coverageType: CoverageCase = 'project') {
     { id: systemRoleId, roleCode: id('system-role-code'), name: 'Project Creator Role', realm: 'system' },
   ])
   await db.insert(rolePermissions).values(projectCodes.map((code) => ({ roleId: projectRoleId, permissionId: projectPermissionIds.get(code)! })))
-  await db.insert(rolePermissions).values({ roleId: systemRoleId, permissionId: createProjectId })
+  await db.insert(rolePermissions).values(systemCodes.map((code) => ({ roleId: systemRoleId, permissionId: systemPermissionIds.get(code)! })))
   await db.insert(systemRoleAssignments).values({ userId, roleId: systemRoleId })
   await db.insert(projectRoleAssignments).values({
     id: id('project-assignment-scope'),
@@ -155,7 +170,7 @@ function jsonHeaders(cookie: string) {
 }
 
 const scopeCases = [
-  { name: 'exact project', coverageType: 'project', projectIds: ['projectAId'] as const, projectTotal: 1, recordTotal: 1, inaccessibleProject: 'projectBId' as const },
+  { name: 'exact project', coverageType: 'project', projectIds: ['projectAId', 'projectBId'] as const, projectTotal: 2, recordTotal: 2, inaccessibleProject: 'projectCId' as const },
   { name: 'current division', coverageType: 'division', projectIds: ['projectAId', 'projectBId', 'projectDId'] as const, projectTotal: 3, recordTotal: 2, inaccessibleProject: 'projectCId' as const },
   { name: 'all projects', coverageType: 'all_projects', projectIds: ['projectAId', 'projectBId', 'projectCId', 'projectDId'] as const, projectTotal: 3, recordTotal: 3, inaccessibleProject: undefined },
 ] as const
@@ -168,7 +183,7 @@ describe('project-owned authorization surfaces', () => {
   it.each(scopeCases)('$name coverage scopes every collection', async ({ coverageType, projectIds, projectTotal, recordTotal, inaccessibleProject }) => {
     const fixture = await makeFixture(coverageType)
     const expectedProjectIds = projectIds.map((key) => fixture[key])
-    const scopedProjectIds = (await accessibleProjectIds(fixture.userId, 'view-projects')).map(({ id }) => id)
+    const scopedProjectIds = (await coveredProjectIds(fixture.userId)).map(({ id }) => id)
     const projectListIds = expectedProjectIds.filter((projectId) => projectId !== fixture.projectCId)
     const recordProjectIds = expectedProjectIds.filter((projectId) => projectId !== fixture.projectDId)
 
@@ -196,7 +211,7 @@ describe('project-owned authorization surfaces', () => {
     expect(new Set(ptsData.data.map((row: { projectId: string }) => row.projectId))).toEqual(new Set(recordProjectIds))
 
     if (inaccessibleProject) {
-      const inaccessibleIndex = inaccessibleProject === 'projectBId' ? 1 : 2
+      const inaccessibleIndex = inaccessibleProject === 'projectCId' ? 2 : 1
       expect((await (await app.request(`/projects/list?search=${encodeURIComponent(`${fixture.userId} Project ${String.fromCharCode(65 + inaccessibleIndex)}`)}`, { headers: { Cookie: fixture.cookie } })).json()).total).toBe(0)
       expect((await (await app.request(`/project-vendors/list?search=${encodeURIComponent(`${fixture.userId} Vendor ${inaccessibleIndex}`)}`, { headers: { Cookie: fixture.cookie } })).json()).total).toBe(0)
       expect((await (await app.request(`/work-items/list?search=${encodeURIComponent(`${fixture.userId} Leaf ${inaccessibleIndex}`)}`, { headers: { Cookie: fixture.cookie } })).json()).total).toBe(0)
@@ -204,12 +219,22 @@ describe('project-owned authorization surfaces', () => {
     }
   })
 
-  it.each(scopeCases)('$name coverage is returned by accessibleProjectIds', async ({ coverageType, projectIds }) => {
+  it.each(scopeCases)('$name coverage is returned by coveredProjectIds', async ({ coverageType, projectIds }) => {
     const fixture = await makeFixture(coverageType)
-    const rows = await accessibleProjectIds(fixture.userId, 'view-projects')
+    const rows = await coveredProjectIds(fixture.userId)
     const actual = new Set(rows.map(({ id }) => id))
     for (const key of projectIds) expect(actual).toContain(fixture[key])
-    if (coverageType !== 'all_projects') expect(actual).toEqual(new Set(projectIds.map((key) => fixture[key])))
+    if (coverageType === 'project') expect(actual).toEqual(new Set([fixture.projectAId, fixture.projectBId]))
+    else if (coverageType !== 'all_projects') expect(actual).toEqual(new Set(projectIds.map((key) => fixture[key])))
+  })
+
+  it('returns assigned projects from coveredProjectIds without a workflow permission', async () => {
+    const fixture = await makeFixture()
+    const createPermission = (await fixture.db.select({ id: permissions.id }).from(permissions).where(eq(permissions.permissionCode, 'create-qhsse-pts')))[0]
+    if (!createPermission) throw new Error('create-qhsse-pts fixture is missing.')
+    await fixture.db.update(rolePermissions).set({ active: false }).where(eq(rolePermissions.permissionId, createPermission.id))
+    expect((await coveredProjectIds(fixture.userId)).map(({ id }) => id)).toEqual(expect.arrayContaining([fixture.projectAId]))
+    expect((await accessibleProjectIds(fixture.userId, 'create-qhsse-pts')).map(({ id }) => id)).toEqual([])
   })
 
   it('paginates QHSSE rows and counts only the scoped rows', async () => {
@@ -232,7 +257,7 @@ describe('project-owned authorization surfaces', () => {
       updatedBy: fixture.userId,
     })))
 
-    const page = await app.request('/qhsse-pts/list?page=2&limit=1', { headers: { Cookie: fixture.cookie } })
+    const page = await app.request(`/qhsse-pts/list?page=2&limit=1&projectId=${fixture.projectAId}`, { headers: { Cookie: fixture.cookie } })
     expect(page.status).toBe(200)
     const data = await page.json()
     expect(data.page).toBe(2)
@@ -251,66 +276,56 @@ describe('project-owned authorization surfaces', () => {
     const projectsResponse = await app.request('/projects/list', { headers: { Cookie: fixture.cookie } })
     expect(projectsResponse.status).toBe(200)
     const projectsData = await projectsResponse.json()
-    expect(projectsData.total).toBe(1)
-    expect(projectsData.data.map((row: { id: string }) => row.id)).toEqual([fixture.projectAId])
+    expect(projectsData.total).toBe(2)
+    expect(new Set(projectsData.data.map((row: { id: string }) => row.id))).toEqual(new Set([fixture.projectAId, fixture.projectBId]))
     expect(projectsData.data[0].allowedOperations).toEqual(['detail', 'update', 'delete'])
     expect((await app.request(`/projects/detail/${fixture.projectAId}`, { headers: { Cookie: fixture.cookie } })).status).toBe(200)
-    expect((await app.request(`/projects/detail/${fixture.projectBId}`, { headers: { Cookie: fixture.cookie } })).status).toBe(403)
+    expect((await app.request(`/projects/detail/${fixture.projectBId}`, { headers: { Cookie: fixture.cookie } })).status).toBe(200)
     expect((await app.request(`/projects/detail/${fixture.projectCId}`, { headers: { Cookie: fixture.cookie } })).status).toBe(404)
 
     const vendorsResponse = await app.request('/project-vendors/list', { headers: { Cookie: fixture.cookie } })
     expect(vendorsResponse.status).toBe(200)
     const vendorsData = await vendorsResponse.json()
-    expect(vendorsData.total).toBe(1)
-    expect(vendorsData.data.map((row: { projectId: string }) => row.projectId)).toEqual([fixture.projectAId])
+    expect(vendorsData.total).toBe(2)
+    expect(new Set(vendorsData.data.map((row: { projectId: string }) => row.projectId))).toEqual(new Set([fixture.projectAId, fixture.projectBId]))
     expect(vendorsData.data[0].allowedOperations).toEqual(['detail', 'update', 'delete'])
-    expect((await app.request(`/project-vendors/detail/${b.vendorId}`, { headers: { Cookie: fixture.cookie } })).status).toBe(403)
+    expect((await app.request(`/project-vendors/detail/${b.vendorId}`, { headers: { Cookie: fixture.cookie } })).status).toBe(200)
+    expect((await app.request(`/project-vendors/detail/${c.vendorId}`, { headers: { Cookie: fixture.cookie } })).status).toBe(404)
 
     const workItemsResponse = await app.request('/work-items/list', { headers: { Cookie: fixture.cookie } })
     expect(workItemsResponse.status).toBe(200)
     const workItemsData = await workItemsResponse.json()
-    expect(workItemsData.total).toBe(2)
-    expect(new Set(workItemsData.data.map((row: { projectId: string }) => row.projectId))).toEqual(new Set([fixture.projectAId]))
+    expect(workItemsData.total).toBe(4)
+    expect(new Set(workItemsData.data.map((row: { projectId: string }) => row.projectId))).toEqual(new Set([fixture.projectAId, fixture.projectBId]))
     expect(workItemsData.data.every((row: { allowedOperations: string[] }) => row.allowedOperations.join(',') === 'detail,update,delete')).toBe(true)
     const treeResponse = await app.request(`/work-items/tree/tree?projectId=${fixture.projectAId}`, { headers: { Cookie: fixture.cookie } })
     expect(treeResponse.status).toBe(200)
     expect(await treeResponse.json()).toMatchObject({ data: [{ id: a.rootId, allowedOperations: ['detail', 'update', 'delete'] }] })
-    expect((await app.request(`/work-items/detail/${b.leafId}`, { headers: { Cookie: fixture.cookie } })).status).toBe(403)
+    expect((await app.request(`/work-items/detail/${b.leafId}`, { headers: { Cookie: fixture.cookie } })).status).toBe(200)
+    expect((await app.request(`/work-items/detail/${c.leafId}`, { headers: { Cookie: fixture.cookie } })).status).toBe(404)
 
     const ptsListResponse = await app.request('/qhsse-pts/list', { headers: { Cookie: fixture.cookie } })
     expect(ptsListResponse.status).toBe(200)
     const ptsList = await ptsListResponse.json()
-    expect(ptsList.total).toBe(1)
-    expect(ptsList.data.map((row: { projectId: string }) => row.projectId)).toEqual([fixture.projectAId])
-    expect(ptsList.data[0].allowedOperations).toEqual(['detail', 'update', 'delete'])
-    expect((await app.request(`/qhsse-pts/detail/${b.reportId}`, { headers: { Cookie: fixture.cookie } })).status).toBe(403)
+    expect(ptsList.total).toBe(2)
+    expect(new Set(ptsList.data.map((row: { projectId: string }) => row.projectId))).toEqual(new Set([fixture.projectAId, fixture.projectBId]))
+    expect(ptsList.data.find((row: { projectId: string }) => row.projectId === fixture.projectAId)?.allowedOperations).toEqual(['detail', 'update', 'delete'])
+    expect(ptsList.data.find((row: { projectId: string }) => row.projectId === fixture.projectBId)?.allowedOperations).toEqual(['detail'])
+    expect((await app.request(`/qhsse-pts/detail/${b.reportId}`, { headers: { Cookie: fixture.cookie } })).status).toBe(200)
     expect((await app.request(`/qhsse-pts/detail/${c.reportId}`, { headers: { Cookie: fixture.cookie } })).status).toBe(404)
-
-    const projectOptions = await app.request('/qhsse-pts/create-options/projects/list?page=1&limit=20', { headers: { Cookie: fixture.cookie } })
-    expect(projectOptions.status).toBe(200)
-    const projectOptionData = (await projectOptions.json()).data
-    expect(projectOptionData.map((row: { id: string }) => row.id)).toEqual([fixture.projectAId])
-    const workItemOptions = await app.request(`/qhsse-pts/create-options/work-items/list?page=1&limit=20&projectId=${fixture.projectAId}`, { headers: { Cookie: fixture.cookie } })
-    expect(workItemOptions.status).toBe(200)
-    expect((await workItemOptions.json()).data.map((row: { id: string }) => row.id)).toEqual(expect.arrayContaining([a.rootId, a.leafId]))
-    const vendorOptions = await app.request(`/qhsse-pts/create-options/project-vendors/list?page=1&limit=20&projectId=${fixture.projectAId}`, { headers: { Cookie: fixture.cookie } })
-    expect(vendorOptions.status).toBe(200)
-    expect((await vendorOptions.json()).data).toHaveLength(1)
-    const inaccessibleProject = await app.request(`/qhsse-pts/create-options/projects/detail/${fixture.projectBId}`, { headers: { Cookie: fixture.cookie } })
-    expect(inaccessibleProject.status).toBe(404)
 
     const workMove = await app.request(`/work-items/update/${a.leafId}`, {
       method: 'PATCH',
       headers: jsonHeaders(fixture.cookie),
-      body: JSON.stringify({ projectId: fixture.projectBId }),
+      body: JSON.stringify({ projectId: fixture.projectCId }),
     })
-    expect(workMove.status).toBe(403)
+    expect(workMove.status).toBe(404)
     const vendorMove = await app.request(`/project-vendors/update/${a.vendorId}`, {
       method: 'PATCH',
       headers: jsonHeaders(fixture.cookie),
-      body: JSON.stringify({ projectId: fixture.projectBId }),
+      body: JSON.stringify({ projectId: fixture.projectCId }),
     })
-    expect(vendorMove.status).toBe(403)
+    expect(vendorMove.status).toBe(404)
   })
 
   it('keeps project creation system-owned and scopes project writes', async () => {
@@ -343,6 +358,54 @@ describe('project-owned authorization surfaces', () => {
     const deleted = await app.request(`/projects/delete/${fixture.projectDId}`, { method: 'DELETE', headers: { Cookie: fixture.cookie } })
     expect(deleted.status).toBe(200)
   })
+
+  it('gates owner lists with list verbs and approved filters', async () => {
+    const fixture = await makeFixture()
+    const emptyDivisionId = id('empty-division')
+    const businessCategoryId = (await fixture.db.select({ businessCategoryId: divisions.businessCategoryId }).from(divisions).where(eq(divisions.id, fixture.divisionAId)).limit(1))[0]!.businessCategoryId
+    await fixture.db.insert(divisions).values({
+      id: emptyDivisionId,
+      businessCategoryId,
+      code: id('empty-division-code'),
+      name: `${fixture.userId} Empty Division`,
+    })
+
+    expect((await app.request('/divisions/list')).status).toBe(401)
+    const limited = await makeLimitedSession()
+    expect((await app.request('/divisions/list', { headers: { Cookie: limited.cookie } })).status).toBe(403)
+    expect((await app.request('/projects/list', { headers: { Cookie: limited.cookie } })).status).toBe(403)
+
+    const adminDivisions = await (await app.request(`/divisions/list?search=${encodeURIComponent(fixture.userId)}`, { headers: { Cookie: fixture.cookie } })).json()
+    expect(adminDivisions.data.map((row: { id: string }) => row.id)).toEqual(expect.arrayContaining([emptyDivisionId]))
+
+    const scopedDivisions = await (await app.request('/divisions/list?permission=create-qhsse-pts', { headers: { Cookie: fixture.cookie } })).json()
+    expect(scopedDivisions.data.map((row: { id: string }) => row.id)).toEqual([fixture.divisionAId])
+
+    const scopedProjects = await (await app.request('/projects/list?permission=create-qhsse-pts', { headers: { Cookie: fixture.cookie } })).json()
+    expect(scopedProjects.data.map((row: { id: string }) => row.id)).toEqual([fixture.projectAId])
+
+    expect((await app.request('/divisions/list?permission=view-divisions', { headers: { Cookie: fixture.cookie } })).status).toBe(400)
+    expect((await app.request('/projects/list?permission=unknown-code', { headers: { Cookie: fixture.cookie } })).status).toBe(400)
+
+    const a = fixture.records[0]!
+    const roots = await (await app.request(`/work-items/list?projectId=${fixture.projectAId}&rootOnly=true`, { headers: { Cookie: fixture.cookie } })).json()
+    expect(roots.data.map((row: { id: string }) => row.id)).toEqual([a.rootId])
+    const leaves = await (await app.request(`/work-items/list?projectId=${fixture.projectAId}&workItemCategoryId=${a.rootId}&leafOnly=true`, { headers: { Cookie: fixture.cookie } })).json()
+    expect(leaves.data.map((row: { id: string }) => row.id)).toEqual([a.leafId])
+
+    const projectUsers = await (await app.request(`/users/list?projectId=${fixture.projectAId}&statusCode=active&search=${encodeURIComponent(fixture.userId)}`, { headers: { Cookie: fixture.cookie } })).json()
+    expect(projectUsers.data.map((row: { id: string }) => row.id)).toEqual([fixture.userId])
+  })
 })
+
+async function makeLimitedSession() {
+  const db = getDb()
+  const userId = id('limited-user')
+  const email = `${userId}@example.invalid`
+  await db.insert(users).values({ id: userId, name: 'Limited User', email })
+  await db.insert(accounts).values({ id: id('limited-account'), accountId: userId, providerId: 'credential', userId, password: await hashPassword('test-password') })
+  const signedIn = await getAuth().api.signInEmail({ body: { email, password: 'test-password' }, returnHeaders: true })
+  return { cookie: signedIn.headers.get('set-cookie')?.split(';')[0] ?? '' }
+}
 
 afterAll(() => closeDb())

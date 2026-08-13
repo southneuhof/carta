@@ -3,7 +3,7 @@ import { defineNavigation, type NavigationIcon, type NavigationModule } from './
 export const navigation = defineNavigation([
   { name: 'dashboard', title: 'Dashboard', icon: 'home', description: 'Dashboard', routes: [{ to: { name: 'dashboard' }, permission: null, title: 'Dashboard', icon: 'home' }] },
   { name: 'to-do', title: 'To Do', icon: 'inbox', description: 'Task inbox', routes: [{ to: { name: 'to-do' }, permission: null, title: 'To Do', icon: 'inbox' }] },
-  { name: 'quality', title: 'Quality', icon: 'folder', description: 'Quality workflows', routes: [{ to: { name: 'quality-pts' }, permission: null, title: 'Manual PTS', icon: 'folder' }] },
+  { name: 'quality', title: 'Quality', icon: 'folder', description: 'Quality workflows', routes: [{ to: { name: 'quality-pts' }, permission: 'view-qhsse-pts', title: 'Manual PTS', icon: 'folder' }] },
   {
     name: 'settings',
     title: 'Pengaturan',
@@ -24,9 +24,9 @@ export const navigation = defineNavigation([
     routes: [
       { to: { name: 'master-data-business-categories' }, permission: 'view-business-categories', title: 'Kategori Bisnis', icon: 'folder' },
       { to: { name: 'master-data-divisions' }, permission: 'view-divisions', title: 'Divisi', icon: 'folder' },
-      { to: { name: 'master-data-projects' }, permission: null, title: 'Proyek', icon: 'folder' },
+      { to: { name: 'master-data-projects' }, permission: 'view-projects', title: 'Proyek', icon: 'folder' },
       { to: { name: 'master-data-uoms' }, permission: 'view-uoms', title: 'Satuan', icon: 'folder' },
-      { to: { name: 'master-data-work-items' }, permission: null, title: 'Jenis Pekerjaan', icon: 'folder' },
+      { to: { name: 'master-data-work-items' }, permission: 'view-work-items', title: 'Jenis Pekerjaan', icon: 'folder' },
       { to: { name: 'master-data-pts-work-categories' }, permission: 'view-pts-work-categories', title: 'Kategori Pekerjaan', icon: 'folder' },
       { to: { name: 'master-data-root-causes' }, permission: 'view-root-causes', title: 'Penyebab QHSSE', icon: 'folder' },
       { to: { name: 'master-data-number-configs' }, permission: 'view-number-configs', title: 'Number Configurations', icon: 'folder' },

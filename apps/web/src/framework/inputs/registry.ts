@@ -1,4 +1,5 @@
 import { createInputPropsRegistry, type InputPropsAdapter } from '@southneuhof/is-vue-framework'
+import { fileUrl } from '../adapters/storage'
 import { inputUpload, toInputAssetModel } from '../adapters/upload'
 
 type ResourceSource = {
@@ -31,11 +32,18 @@ const lookup: InputPropsAdapter<ResourceSource, LookupProps> = {
 }
 const options: InputPropsAdapter<OptionSource, Record<string, unknown>> = { normalize: optionSource }
 
+export function resolveImagePreviewURLs(payload: { path?: string; url?: string } | string | null | undefined) {
+  const path = typeof payload === 'string' ? payload : payload?.path
+  const url = typeof payload === 'string' ? payload : payload?.url
+  const imageURL = path ? fileUrl(path) : url ?? ''
+  return { imageURL, thumbnailURL: imageURL }
+}
+
 export const appInputProps = createInputPropsRegistry({
   lookup,
   select: options,
   radio: options,
   'checkbox-group': options,
   file: { defaults: { upload: inputUpload, toModel: toInputAssetModel } },
-  image: { defaults: { upload: inputUpload, toModel: toInputAssetModel } },
+  image: { defaults: { upload: inputUpload, toModel: toInputAssetModel, imageURLResolver: resolveImagePreviewURLs } },
 })

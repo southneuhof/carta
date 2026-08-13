@@ -49,16 +49,16 @@ export const numberConfigs = defineResource(numberConfigsSchema, {
     create: {
       run: api.create,
       fields: [fields.numberVariableCode, fields.numberOfDigits, fields.customCode, fields.description, fields.active],
-      permission: 'manage-number-configs',
+      permission: 'create-number-configs',
       route: { name: 'master-data-number-configs-create' },
     },
     update: {
       run: api.update,
       fields: [fields.numberVariableCode, fields.numberOfDigits, fields.customCode, fields.description, fields.active],
-      permission: 'manage-number-configs',
+      permission: 'update-number-configs',
       route: { name: 'master-data-number-configs-edit', params: (id) => ({ numberConfigId: String(id) }) },
     },
-    delete: { run: api.delete, permission: 'manage-number-configs' },
+    delete: { run: api.delete, permission: 'delete-number-configs' },
     reorder: {
       run: numberConfigsActions.reorder,
     },

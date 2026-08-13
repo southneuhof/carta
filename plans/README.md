@@ -39,11 +39,11 @@ gate; no owner-route or PTS web work starts before it is DONE.
 | 043 | Build manual PTS list and report editor | P1 | L | 040, 041, 042 | DONE |
 | 044 | Build manual PTS detail and action screens | P1 | L | 042, 043 | DONE |
 | 045 | Verify manual PTS parity and remove draft residue | P1 | M | 040-044 | DONE |
-| 046 | Split the PTS owner permission catalog | P1 | M | — | TODO |
-| 047 | Add owner list filters and gates | P1 | L | 046 | TODO |
-| 048 | Bind PTS forms to owner lists | P1 | M | 047 | TODO |
-| 049 | Align docs with owner list sources | P1 | S | 048 | TODO |
-| 050 | Apply the remaining permission verb convention | P2 | M | 049 | TODO |
+| 046 | Split the PTS owner permission catalog | P1 | M | — | DONE |
+| 047 | Add owner list filters and gates | P1 | L | 046 | DONE |
+| 048 | Bind PTS forms to owner lists | P1 | M | 047 | DONE |
+| 049 | Align docs with owner list sources | P1 | S | 048 | DONE |
+| 050 | Apply the remaining permission verb convention | P2 | M | 049 | DONE |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with reason) | REJECTED (with rationale).
 

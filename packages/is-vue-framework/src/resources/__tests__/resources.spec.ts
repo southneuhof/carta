@@ -78,6 +78,37 @@ describe('action resources', () => {
     expect(list.canDelete?.(record)).toBe(true)
     await expect(value.actions.verify.run('1', 'approved')).resolves.toBe('1:approved')
     await expect(value.create().run({ name: 'Two' })).resolves.toEqual({ id: '2', name: 'Two' })
+    expect(value.create().defaultTo?.({ id: '2', name: 'Two' })).toEqual({ name: 'records-detail', params: { id: '2' } })
+    expect(value.update({ id: '1' }).defaultTo?.({ id: '1', name: 'One' })).toEqual({ name: 'records-detail', params: { id: '1' } })
+  })
+
+  it('lets create and update replace or clear the detail defaultTo', () => {
+    registerResourceRuntime({
+      queryClient: createFrameworkQueryClient(),
+      adapters: resolveFrameworkAdapters(),
+      fieldDefaults: resolveFrameworkFieldDefaults(),
+    })
+    const list = { name: 'records-list' }
+    const value = defineResource(schema, {
+      key: 'records-override',
+      actions: {
+        detail: {
+          run: async ({ id }) => ({ id, name: 'One' }),
+          route: { name: 'records-detail', params: (id) => ({ id }) },
+        },
+        create: {
+          run: async (input) => ({ id: '2', ...input }),
+          defaultTo: list,
+        },
+        update: {
+          run: async (id, input) => ({ id, name: input.name }),
+          defaultTo: false,
+        },
+      },
+    })
+
+    expect(value.create().defaultTo?.({ id: '2', name: 'Two' })).toEqual(list)
+    expect(value.update({ id: '1' }).defaultTo).toBeUndefined()
   })
 
   it('filters standard routes and row actions through access', () => {

@@ -1,210 +1,14 @@
 import { authenticated, defineRoute } from '@southneuhof/sprindle/routes'
 import { listQuerySchema } from '@southneuhof/sprindle/validation'
-import { orgIdentity } from '../../identity'
+import { orgIdentity, requirePermission } from '../../identity'
 import { actionSchemas, createReportSchema, updateReportSchema, type ActionName } from './qhsse-pts.schemas'
 import {
   createReport,
-  getPtsCreateDivision,
-  getPtsCreateCategory,
-  getPtsCreateProject,
-  getPtsCreateRootCause,
-  getPtsCreateUser,
-  getPtsCreateVendor,
-  getPtsCreateWorkItem,
   getReport,
-  listPtsCreateDivisions as readPtsCreateDivisions,
-  listPtsCreateCategories as readPtsCreateCategories,
-  listPtsCreateProjects as readPtsCreateProjects,
-  listPtsCreateRootCauses as readPtsCreateRootCauses,
-  listPtsCreateUsers as readPtsCreateUsers,
-  listPtsCreateVendors as readPtsCreateVendors,
-  listPtsCreateWorkItems as readPtsCreateWorkItems,
   listReports,
   performAction,
   updateReport,
 } from './qhsse-pts.service'
-
-export const listPtsCreateDivisions = defineRoute({
-  path: '/qhsse-pts/create-options/divisions/list',
-  method: 'get',
-  authorize: [authenticated()],
-  state: ({ c }) => ({ query: listQuerySchema.parse(c.req.query()) }),
-  action: async (args) => {
-    const userId = await caller(args)
-    if (!userId) return args.c.json({ error: 'unauthorized' }, 401)
-    const result = await readPtsCreateDivisions(userId, args.state.query)
-    return args.c.json({ data: result.data, page: args.state.query.page, limit: args.state.query.limit, total: result.total })
-  },
-})
-
-export const detailPtsCreateDivision = defineRoute({
-  path: '/qhsse-pts/create-options/divisions/detail/:id',
-  method: 'get',
-  authorize: [authenticated()],
-  state: ({ c }) => ({ query: listQuerySchema.parse(c.req.query()) }),
-  action: async (args) => {
-    const userId = await caller(args)
-    const id = args.c.req.param('id')
-    if (!userId || !id) return args.c.json({ error: 'not_found' }, 404)
-    return args.c.json({ data: await getPtsCreateDivision(userId, id, args.state.query) })
-  },
-})
-
-export const listPtsCreateCategories = defineRoute({
-  path: '/qhsse-pts/create-options/pts-work-categories/list',
-  method: 'get',
-  authorize: [authenticated()],
-  state: ({ c }) => ({ query: listQuerySchema.parse(c.req.query()) }),
-  action: async (args) => {
-    const userId = await caller(args)
-    if (!userId) return args.c.json({ error: 'unauthorized' }, 401)
-    const result = await readPtsCreateCategories(userId, args.state.query)
-    return args.c.json({ data: result.data, page: args.state.query.page, limit: args.state.query.limit, total: result.total })
-  },
-})
-
-export const detailPtsCreateCategory = defineRoute({
-  path: '/qhsse-pts/create-options/pts-work-categories/detail/:id',
-  method: 'get',
-  authorize: [authenticated()],
-  state: ({ c }) => ({ query: listQuerySchema.parse(c.req.query()) }),
-  action: async (args) => {
-    const userId = await caller(args)
-    const id = args.c.req.param('id')
-    if (!userId || !id) return args.c.json({ error: 'not_found' }, 404)
-    return args.c.json({ data: await getPtsCreateCategory(userId, id, args.state.query) })
-  },
-})
-
-export const listPtsCreateProjects = defineRoute({
-  path: '/qhsse-pts/create-options/projects/list',
-  method: 'get',
-  authorize: [authenticated()],
-  state: ({ c }) => ({ query: listQuerySchema.parse(c.req.query()) }),
-  action: async (args) => {
-    const userId = await caller(args)
-    if (!userId) return args.c.json({ error: 'unauthorized' }, 401)
-    const result = await readPtsCreateProjects(userId, args.state.query)
-    return args.c.json({ data: result.data, page: args.state.query.page, limit: args.state.query.limit, total: result.total })
-  },
-})
-
-export const detailPtsCreateProject = defineRoute({
-  path: '/qhsse-pts/create-options/projects/detail/:id',
-  method: 'get',
-  authorize: [authenticated()],
-  state: ({ c }) => ({ query: listQuerySchema.parse(c.req.query()) }),
-  action: async (args) => {
-    const userId = await caller(args)
-    const id = args.c.req.param('id')
-    if (!userId || !id) return args.c.json({ error: 'not_found' }, 404)
-    return args.c.json({ data: await getPtsCreateProject(userId, id, args.state.query) })
-  },
-})
-
-export const listPtsCreateRootCauses = defineRoute({
-  path: '/qhsse-pts/create-options/root-causes/list',
-  method: 'get',
-  authorize: [authenticated()],
-  state: ({ c }) => ({ query: listQuerySchema.parse(c.req.query()) }),
-  action: async (args) => {
-    const userId = await caller(args)
-    if (!userId) return args.c.json({ error: 'unauthorized' }, 401)
-    const result = await readPtsCreateRootCauses(userId, args.state.query)
-    return args.c.json({ data: result.data, page: args.state.query.page, limit: args.state.query.limit, total: result.total })
-  },
-})
-
-export const detailPtsCreateRootCause = defineRoute({
-  path: '/qhsse-pts/create-options/root-causes/detail/:id',
-  method: 'get',
-  authorize: [authenticated()],
-  state: ({ c }) => ({ query: listQuerySchema.parse(c.req.query()) }),
-  action: async (args) => {
-    const userId = await caller(args)
-    const id = args.c.req.param('id')
-    if (!userId || !id) return args.c.json({ error: 'not_found' }, 404)
-    return args.c.json({ data: await getPtsCreateRootCause(userId, id, args.state.query) })
-  },
-})
-
-export const listPtsCreateWorkItems = defineRoute({
-  path: '/qhsse-pts/create-options/work-items/list',
-  method: 'get',
-  authorize: [authenticated()],
-  state: ({ c }) => ({ query: listQuerySchema.parse(c.req.query()) }),
-  action: async (args) => {
-    const userId = await caller(args)
-    if (!userId) return args.c.json({ error: 'unauthorized' }, 401)
-    const result = await readPtsCreateWorkItems(userId, args.state.query)
-    return args.c.json({ data: result.data, page: args.state.query.page, limit: args.state.query.limit, total: result.total })
-  },
-})
-
-export const detailPtsCreateWorkItem = defineRoute({
-  path: '/qhsse-pts/create-options/work-items/detail/:id',
-  method: 'get',
-  authorize: [authenticated()],
-  state: ({ c }) => ({ query: listQuerySchema.parse(c.req.query()) }),
-  action: async (args) => {
-    const userId = await caller(args)
-    const id = args.c.req.param('id')
-    if (!userId || !id) return args.c.json({ error: 'not_found' }, 404)
-    return args.c.json({ data: await getPtsCreateWorkItem(userId, id, args.state.query) })
-  },
-})
-
-export const listPtsCreateVendors = defineRoute({
-  path: '/qhsse-pts/create-options/project-vendors/list',
-  method: 'get',
-  authorize: [authenticated()],
-  state: ({ c }) => ({ query: listQuerySchema.parse(c.req.query()) }),
-  action: async (args) => {
-    const userId = await caller(args)
-    if (!userId) return args.c.json({ error: 'unauthorized' }, 401)
-    const result = await readPtsCreateVendors(userId, args.state.query)
-    return args.c.json({ data: result.data, page: args.state.query.page, limit: args.state.query.limit, total: result.total })
-  },
-})
-
-export const detailPtsCreateVendor = defineRoute({
-  path: '/qhsse-pts/create-options/project-vendors/detail/:id',
-  method: 'get',
-  authorize: [authenticated()],
-  state: ({ c }) => ({ query: listQuerySchema.parse(c.req.query()) }),
-  action: async (args) => {
-    const userId = await caller(args)
-    const id = args.c.req.param('id')
-    if (!userId || !id) return args.c.json({ error: 'not_found' }, 404)
-    return args.c.json({ data: await getPtsCreateVendor(userId, id, args.state.query) })
-  },
-})
-
-export const listPtsCreateUsers = defineRoute({
-  path: '/qhsse-pts/create-options/project-users/list',
-  method: 'get',
-  authorize: [authenticated()],
-  state: ({ c }) => ({ query: listQuerySchema.parse(c.req.query()) }),
-  action: async (args) => {
-    const userId = await caller(args)
-    if (!userId) return args.c.json({ error: 'unauthorized' }, 401)
-    const result = await readPtsCreateUsers(userId, args.state.query)
-    return args.c.json({ data: result.data, page: args.state.query.page, limit: args.state.query.limit, total: result.total })
-  },
-})
-
-export const detailPtsCreateUser = defineRoute({
-  path: '/qhsse-pts/create-options/project-users/detail/:id',
-  method: 'get',
-  authorize: [authenticated()],
-  state: ({ c }) => ({ query: listQuerySchema.parse(c.req.query()) }),
-  action: async (args) => {
-    const userId = await caller(args)
-    const id = args.c.req.param('id')
-    if (!userId || !id) return args.c.json({ error: 'not_found' }, 404)
-    return args.c.json({ data: await getPtsCreateUser(userId, id, args.state.query) })
-  },
-})
 
 async function caller(args: Parameters<typeof orgIdentity>[0]) {
   const identity = await orgIdentity(args)
@@ -215,7 +19,7 @@ async function caller(args: Parameters<typeof orgIdentity>[0]) {
 export const listPts = defineRoute({
   path: '',
   method: 'get',
-  authorize: [authenticated()],
+  authorize: [authenticated(), requirePermission('list-qhsse-pts')],
   action: async (args) => {
     const userId = await caller(args)
     if (!userId) return args.c.json({ error: 'unauthorized' }, 401)
@@ -242,7 +46,7 @@ export const createPts = defineRoute({
 export const detailPts = defineRoute({
   path: '/:id',
   method: 'get',
-  authorize: [authenticated()],
+  authorize: [authenticated(), requirePermission('detail-qhsse-pts')],
   action: async (args) => {
     const userId = await caller(args)
     const id = args.c.req.param('id')

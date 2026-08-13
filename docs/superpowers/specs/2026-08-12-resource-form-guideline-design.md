@@ -119,10 +119,13 @@ const updateFields = [
 
 Do not chain overrides or create a second catalog for one action.
 
-Use a resource-backed standard list as the source for database records. The
-source must provide a paginated list and a detail action. Pass parent values,
-search values, and other source parameters through the field behavior or static
-field props. Keep filtering and relationship rules on the server.
+Import the owner resource as the field `source`. Do not add
+`/<consumer>/create-options/*`. Do not use `/lookup`. Pass parent values,
+search values, and other source parameters through `searchParameters`. Do
+not redeclare the owner query. The source must provide a paginated list and
+a detail action. Keep filtering and relationship rules on the server. API
+list and detail use `list-*` / `detail-*`. Resource `permission` stays
+`view-*` for the admin screen.
 
 Use a small static array only for a closed value set that belongs to the form
 contract, such as a status or category code.

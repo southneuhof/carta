@@ -35,15 +35,15 @@ export const roles = defineResource(rolesSchema, {
     create: {
       run: rolesActions.create,
       fields: [fields.roleCode, fields.name, fields.description, fields.realm, fields.active],
-      permission: 'manage-roles',
+      permission: 'create-roles',
       route: { name: 'settings-roles-create' },
     },
     update: {
       run: rolesActions.update,
       fields: [fields.roleCode, fields.name, fields.description, fields.realm.override({ form: { behavior: { disabled: () => true } } }), fields.active],
-      permission: 'manage-roles',
+      permission: 'update-roles',
       route: { name: 'settings-roles-edit', params: (id) => ({ roleId: String(id) }) },
     },
-    delete: { run: rolesActions.delete, permission: 'manage-roles' },
+    delete: { run: rolesActions.delete, permission: 'delete-roles' },
   },
 })

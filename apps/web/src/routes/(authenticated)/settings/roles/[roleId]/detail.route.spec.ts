@@ -25,7 +25,7 @@ vi.mock('@/components/routing/Tabs.vue', () => ({ default: { template: '<div />'
 vi.mock('../roles.resource', () => ({
   roles: {
     detail: vi.fn(() => ({ run: vi.fn(), fields: [], id: 'role-1' })),
-    update: vi.fn(() => ({ defaultTo: { name: 'settings-roles-edit', params: { roleId: 'role-1' } } })),
+    list: () => ({ updateRoute: () => ({ name: 'settings-roles-edit', params: { roleId: 'role-1' } }) }),
     delete: vi.fn(() => ({ run: mocks.remove })),
   },
 }))

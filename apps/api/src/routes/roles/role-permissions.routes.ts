@@ -12,7 +12,7 @@ async function actor(args: Parameters<typeof orgIdentity>[0]) {
 export const listRolePermissions = defineRoute({
   path: '/roles/:roleId/permissions',
   method: 'get',
-  authorize: [authenticated(), requirePermission('view-role-permissions')],
+  authorize: [authenticated(), requirePermission('list-role-permissions')],
   action: async (args) => {
     const roleId = args.c.req.param('roleId')
     if (!roleId) return args.c.json({ error: 'not_found' }, 404)
@@ -24,7 +24,7 @@ export const listRolePermissions = defineRoute({
 export const assignRolePermission = defineRoute({
   path: '/roles/:roleId/permissions/:permissionId',
   method: 'put',
-  authorize: [authenticated(), requirePermission('manage-role-permissions')],
+  authorize: [authenticated(), requirePermission('create-role-permissions')],
   action: async (args) => {
     const roleId = args.c.req.param('roleId')
     const permissionId = args.c.req.param('permissionId')
@@ -36,7 +36,7 @@ export const assignRolePermission = defineRoute({
 export const revokeRolePermission = defineRoute({
   path: '/roles/:roleId/permissions/:permissionId',
   method: 'delete',
-  authorize: [authenticated(), requirePermission('manage-role-permissions')],
+  authorize: [authenticated(), requirePermission('delete-role-permissions')],
   action: async (args) => {
     const roleId = args.c.req.param('roleId')
     const permissionId = args.c.req.param('permissionId')

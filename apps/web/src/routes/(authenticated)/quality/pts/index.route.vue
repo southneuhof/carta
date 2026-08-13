@@ -6,7 +6,8 @@ import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
 import ChipFilter from '@southneuhof/is-vue-framework/components/composites/ChipFilter.vue'
 import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue'
 import PtsCardGrid from './PtsCardGrid.vue'
-import { pts, ptsCreateOptionResources } from './pts.resource'
+import { rootCauses } from '@/routes/(authenticated)/master-data/root-causes/root-causes.resource'
+import { pts } from './pts.resource'
 
 type View = 'table' | 'grid'
 type Status = 'all' | 'open' | 'on-progress' | 'close'
@@ -26,7 +27,7 @@ const filters = {
   fields: {
     startMonth: { label: 'Start month', form: { renderer: 'month' } },
     endMonth: { label: 'End month', form: { renderer: 'month' } },
-    rootCauseId: { label: 'Root cause', form: { renderer: 'lookup', source: ptsCreateOptionResources.rootCauseCreateOptions, props: { pick: 'id', view: 'name' } } },
+    rootCauseId: { label: 'Root cause', form: { renderer: 'lookup', source: rootCauses, props: { pick: 'id', view: 'name' } } },
   },
 }
 const deleteFields = {

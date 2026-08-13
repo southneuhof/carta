@@ -151,6 +151,10 @@ with a `run` function. A non-standard action exposes only `{ run }`; the
 framework does not add permission metadata, transport rules, validation, or
 automatic invalidation to it.
 
+Resource action `permission` is the admin route guard (`view-*`). A lookup
+`source` is another resource's `list` / `detail`. The API gates those calls
+with `list-*` / `detail-*`.
+
 ## Field references
 
 `defineFields(schema, definitions)` keeps shared labels, accessors, and write

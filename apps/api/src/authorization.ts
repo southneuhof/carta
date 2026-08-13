@@ -122,6 +122,10 @@ export async function resolveSystemIdentity(userId: string): Promise<SystemIdent
   }
 }
 
+export async function requireProjectCoverage(userId: string, projectId: string) {
+  if (!(await hasProjectCoverage(userId, projectId))) throw notFound()
+}
+
 export async function hasProjectCoverage(userId: string, projectId: string) {
   const rows = await getDb()
     .select({ id: projectRoleAssignments.id })
@@ -143,6 +147,22 @@ export async function hasProjectCoverage(userId: string, projectId: string) {
     ))
     .limit(1)
   return Boolean(rows[0])
+}
+
+export function coveredProjectIds(userId: string) {
+  return getDb()
+    .selectDistinct({ id: projects.id })
+    .from(projects)
+    .innerJoin(projectRoleAssignments, projectCoverageCondition())
+    .innerJoin(users, eq(users.id, projectRoleAssignments.userId))
+    .innerJoin(roles, eq(roles.id, projectRoleAssignments.roleId))
+    .where(and(
+      eq(projectRoleAssignments.userId, userId),
+      eq(projectRoleAssignments.active, true),
+      eq(users.statusCode, 'active'),
+      eq(roles.active, true),
+      eq(roles.realm, 'project'),
+    ))
 }
 
 async function projectPermissionRows(userId: string, permissionCodes: PermissionCode[], projectIds?: string[]) {

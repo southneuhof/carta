@@ -134,8 +134,15 @@ Also:
 - Remove `show-qhsse-pts`. PTS detail uses `detail-qhsse-pts`.
 - Keep PTS workflow codes in the project realm.
 
+One module has one realm. Split PTS reads from PTS writes:
+
+| Module | Realm | Codes |
+| --- | --- | --- |
+| `qhsse-pts` | system | `view-qhsse-pts`, `list-qhsse-pts`, `detail-qhsse-pts` |
+| `qhsse-pts-workflow` | project | `create-qhsse-pts`, `update-qhsse-pts`, `delete-qhsse-pts`, and the remaining disposition / close codes |
+
 After this change, the project realm on the owner modules is empty. Only
-`qhsse-pts` stays in the project realm.
+`qhsse-pts-workflow` stays in the project realm.
 
 ### Seed
 

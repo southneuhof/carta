@@ -8,8 +8,6 @@ import type { RouteTab } from '@/router/tabs'
 
 const route = useRoute('settings-users-detail')
 const userId = route.params.userId
-const updateDefault = users.update({ id: userId }).defaultTo
-const updateTarget = typeof updateDefault === 'function' ? updateDefault({ id: userId } as never) : updateDefault
 
 const tabs = [
   { action: { permission: 'view-system-role-assignments', to: { name: 'settings-users-detail-system-roles', params: { userId: String(userId) } } as never }, label: 'System Roles' },

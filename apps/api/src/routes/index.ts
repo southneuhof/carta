@@ -40,22 +40,6 @@ import {
   presignedUploadRoute,
 } from "./files/files";
 import { domain as qhssePtsDomain, qhssePtsModel } from "./qhsse-pts/qhsse-pts";
-import {
-  detailPtsCreateDivision,
-  detailPtsCreateCategory,
-  detailPtsCreateProject,
-  detailPtsCreateRootCause,
-  detailPtsCreateUser,
-  detailPtsCreateVendor,
-  detailPtsCreateWorkItem,
-  listPtsCreateDivisions,
-  listPtsCreateCategories,
-  listPtsCreateProjects,
-  listPtsCreateRootCauses,
-  listPtsCreateUsers,
-  listPtsCreateVendors,
-  listPtsCreateWorkItems,
-} from "./qhsse-pts/qhsse-pts.routes";
 
 export const domainParts = [
   authDomain,
@@ -111,20 +95,6 @@ const installedRoutes = [
   permissionModel,
   userModel,
   createUser,
-  listPtsCreateDivisions,
-  detailPtsCreateDivision,
-  listPtsCreateCategories,
-  detailPtsCreateCategory,
-  listPtsCreateProjects,
-  detailPtsCreateProject,
-  listPtsCreateRootCauses,
-  detailPtsCreateRootCause,
-  listPtsCreateWorkItems,
-  detailPtsCreateWorkItem,
-  listPtsCreateVendors,
-  detailPtsCreateVendor,
-  listPtsCreateUsers,
-  detailPtsCreateUser,
   qhssePtsModel,
 ] as const;
 

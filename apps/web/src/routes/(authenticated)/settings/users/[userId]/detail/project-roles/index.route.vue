@@ -24,7 +24,7 @@ const pending = ref(new Set<string>())
 const loading = ref(false)
 const errorMessage = ref('')
 const optionsError = ref('')
-const canManage = computed(() => permissions().has('manage-project-role-assignments'))
+const canManage = computed(() => permissions().has('create-project-role-assignments') && permissions().has('delete-project-role-assignments'))
 const listQuery = ref<Record<string, unknown>>({})
 type ProjectRoleFilters = { divisionId: string; projectId: string }
 type FilterOption = { id: string; name: string }

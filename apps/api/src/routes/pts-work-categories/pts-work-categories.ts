@@ -3,8 +3,11 @@ import { defineDomainPart, defineModel } from '@southneuhof/sprindle/model'
 import { requirePermission } from '../../identity'
 import { ptsWorkCategories, ptsWorkCategory } from './pts-work-categories.entity'
 
-const read = [authenticated(), requirePermission('view-pts-work-categories')]
-const write = [authenticated(), requirePermission('manage-pts-work-categories')]
+const listAccess = [authenticated(), requirePermission('list-pts-work-categories')]
+const detailAccess = [authenticated(), requirePermission('detail-pts-work-categories')]
+const createAccess = [authenticated(), requirePermission('create-pts-work-categories')]
+const updateAccess = [authenticated(), requirePermission('update-pts-work-categories')]
+const deleteAccess = [authenticated(), requirePermission('delete-pts-work-categories')]
 
 async function validatePtsWorkCategory(route: string, state: { input?: unknown }) {
   const input = state.input && typeof state.input === 'object' ? (state.input as Record<string, unknown>) : {}
@@ -21,11 +24,11 @@ export const ptsWorkCategoryModel = defineModel({
   path: '/pts-work-categories',
   entity: ptsWorkCategory,
   routes: {
-    list: list({ authorize: read }),
-    detail: detail({ authorize: read }),
-    create: create({ authorize: write }),
-    update: update({ authorize: write }),
-    delete: deleteRoute({ authorize: write }),
+    list: list({ authorize: listAccess }),
+    detail: detail({ authorize: detailAccess }),
+    create: create({ authorize: createAccess }),
+    update: update({ authorize: updateAccess }),
+    delete: deleteRoute({ authorize: deleteAccess }),
   },
   validate: async ({ route, state }) => validatePtsWorkCategory(route.kind, state as { input?: unknown }),
 })

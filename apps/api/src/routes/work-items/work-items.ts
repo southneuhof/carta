@@ -2,18 +2,20 @@ import { authenticated, defineRoute } from '@southneuhof/sprindle/routes'
 import { notFound, unauthorized, validationError } from '@southneuhof/sprindle'
 import { defineDomainPart, defineModel } from '@southneuhof/sprindle/model'
 import { listQuerySchema } from '@southneuhof/sprindle/validation'
-import { and, asc, count, desc, eq, getTableColumns, ilike, inArray, or, type SQL } from 'drizzle-orm'
+import { and, asc, count, desc, eq, getTableColumns, ilike, inArray, isNotNull, isNull, notExists, or, sql, type SQL } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/pg-core'
+import { requireProjectCoverage } from '../../authorization'
+import { orgIdentity, requirePermission } from '../../identity'
+import { coerceBooleanQuery, ownerAllowedOperations, ownerListProjectScope } from '../../owner-list'
 import { getDb } from '../../db'
-import { allowedProjectOperations, accessibleProjectIds, requireProjectRecord } from '../../authorization'
-import { orgIdentity } from '../../identity'
 import { ptsWorkCategories } from '../pts-work-categories/pts-work-categories.entity'
 import { projects } from '../projects/projects.entity'
 import { uoms } from '../uoms/uoms.entity'
 import { workItemRelations, workItems, workItem } from './work-items.entity'
 
 const workItemColumns = getTableColumns(workItems) as Record<string, unknown>
-const reservedQueryKeys = new Set(['page', 'limit', 'search', 'sort', 'order'])
-const workItemOperations = { detail: 'view-work-items', update: 'manage-work-items', delete: 'manage-work-items' } as const
+const reservedQueryKeys = new Set(['page', 'limit', 'search', 'sort', 'order', 'permission', 'rootOnly', 'leafOnly', 'workItemCategoryId'])
+const workItemOperations = { detail: 'detail-work-items', update: 'update-work-items', delete: 'delete-work-items' } as const
 
 async function actor(args: Parameters<typeof orgIdentity>[0]) {
   const identity = await orgIdentity(args)
@@ -70,7 +72,25 @@ async function validateWorkItem(route: string, state: { input?: unknown; id?: st
   return undefined
 }
 
-function listWhere(query: Record<string, unknown>, scope: ReturnType<typeof accessibleProjectIds>) {
+function descendantsOf(categoryId: string, projectId: string) {
+  return sql`${workItems.id} in (
+    with recursive descendants(id) as (
+      select root.id
+      from ${workItems} as root
+      where root.id = ${categoryId}
+        and root.project_id = ${projectId}
+        and root.active = true
+      union all
+      select child.id
+      from ${workItems} as child
+      inner join descendants as parent on parent.id = child.parent_id
+      where child.project_id = ${projectId} and child.active = true
+    )
+    select id from descendants where id <> ${categoryId}
+  )`
+}
+
+async function listWhere(query: Record<string, unknown>, scope: ReturnType<typeof ownerListProjectScope>) {
   const filters: SQL[] = []
   for (const [key, value] of Object.entries(query)) {
     if (reservedQueryKeys.has(key) || value === undefined) continue
@@ -79,11 +99,29 @@ function listWhere(query: Record<string, unknown>, scope: ReturnType<typeof acce
     filters.push(eq(column as never, value as never))
   }
   const search = typeof query.search === 'string' && query.search ? `%${query.search}%` : undefined
-  return and(
+  const conditions: SQL[] = [
     inArray(workItems.projectId, scope),
     ...filters,
-    ...(search ? [or(ilike(workItems.code, search), ilike(workItems.name, search))] : []),
-  )
+    ...(search ? [or(ilike(workItems.code, search), ilike(workItems.name, search))!] : []),
+  ]
+  if (query.rootOnly === true) conditions.push(isNull(workItems.parentId))
+  if (query.leafOnly === true) {
+    const child = alias(workItems, 'work_item_list_child')
+    conditions.push(isNotNull(workItems.parentId), notExists(getDb().select({ id: child.id }).from(child).where(and(
+      eq(child.projectId, workItems.projectId),
+      eq(child.parentId, workItems.id),
+      eq(child.active, true),
+    ))))
+  }
+  const categoryId = typeof query.workItemCategoryId === 'string' && query.workItemCategoryId ? query.workItemCategoryId : undefined
+  if (categoryId) {
+    const projectId = typeof query.projectId === 'string' && query.projectId
+      ? query.projectId
+      : (await getDb().select({ projectId: workItems.projectId }).from(workItems).where(eq(workItems.id, categoryId)).limit(1))[0]?.projectId
+    if (projectId) conditions.push(descendantsOf(categoryId, projectId))
+    else conditions.push(eq(workItems.id, ''))
+  }
+  return and(...conditions)
 }
 
 function requiredId(args: Parameters<typeof actor>[0]) {
@@ -99,7 +137,7 @@ function orderBy(query: Record<string, unknown>) {
   return [query.order === 'desc' ? desc(column as never) : asc(column as never)]
 }
 
-async function readWorkItem(userId: string, id: string, permission: 'view-work-items' | 'manage-work-items' = 'view-work-items') {
+async function readWorkItem(identity: Awaited<ReturnType<typeof actor>>, id: string) {
   const row = (await getDb()
     .select({ item: workItems, project: projects, category: ptsWorkCategories, uom: uoms })
     .from(workItems)
@@ -109,19 +147,24 @@ async function readWorkItem(userId: string, id: string, permission: 'view-work-i
     .where(eq(workItems.id, id))
     .limit(1))[0]
   if (!row) throw notFound()
-  await requireProjectRecord(userId, row.item.projectId, permission)
-  const operations = await allowedProjectOperations(userId, [row.item.projectId], workItemOperations)
-  return { ...workItem.schemas.select.parse({ ...row.item, project: row.project, category: row.category, uom: row.uom }), allowedOperations: operations.get(row.item.projectId) ?? [] }
+  await requireProjectCoverage(identity.userId, row.item.projectId)
+  return {
+    ...workItem.schemas.select.parse({ ...row.item, project: row.project, category: row.category, uom: row.uom }),
+    allowedOperations: ownerAllowedOperations(identity.permissions, true, workItemOperations),
+  }
 }
 
 export const workItemList = defineRoute({
   kind: 'list',
   method: 'get',
-  authorize: [authenticated()],
+  authorize: [authenticated(), requirePermission('list-work-items')],
   action: async (args) => {
     const identity = await actor(args)
     const query = listQuerySchema.parse(args.c.req.query()) as Record<string, unknown>
-    const where = listWhere(query, accessibleProjectIds(identity.userId, 'view-work-items'))
+    coerceBooleanQuery(query, 'active')
+    coerceBooleanQuery(query, 'rootOnly')
+    coerceBooleanQuery(query, 'leafOnly')
+    const where = await listWhere(query, ownerListProjectScope(identity.userId, query))
     const page = Number(query.page)
     const limit = Number(query.limit)
     const db = getDb()
@@ -129,10 +172,10 @@ export const workItemList = defineRoute({
       db.select({ item: workItems, project: projects, category: ptsWorkCategories, uom: uoms }).from(workItems).innerJoin(projects, eq(projects.id, workItems.projectId)).leftJoin(ptsWorkCategories, eq(ptsWorkCategories.id, workItems.categoryId)).leftJoin(uoms, eq(uoms.id, workItems.uomId)).where(where).orderBy(...orderBy(query)).limit(limit).offset((page - 1) * limit),
       db.select({ value: count() }).from(workItems).where(where),
     ])
-    const operations = await allowedProjectOperations(identity.userId, rows.map(({ item }) => item.projectId), workItemOperations)
+    const allowedOperations = ownerAllowedOperations(identity.permissions, true, workItemOperations)
     const data = rows.map(({ item, project: parent, category, uom }) => ({
       ...workItem.schemas.select.parse({ ...item, project: parent, category, uom }),
-      allowedOperations: operations.get(item.projectId) ?? [],
+      allowedOperations,
     }))
     return args.c.json({ data, page, limit, total: Number(totalRows[0]?.value ?? 0) })
   },
@@ -142,12 +185,12 @@ export const workItemTree = defineRoute({
   kind: 'custom',
   path: '/tree',
   method: 'get',
-  authorize: [authenticated()],
+  authorize: [authenticated(), requirePermission('list-work-items')],
   action: async (args) => {
     const identity = await actor(args)
     const projectId = args.c.req.query('projectId')
     if (!projectId) throw validationError('Project is required.')
-    await requireProjectRecord(identity.userId, projectId, 'view-work-items')
+    await requireProjectCoverage(identity.userId, projectId)
     const rows = await getDb()
       .select({
         id: workItems.id,
@@ -165,8 +208,8 @@ export const workItemTree = defineRoute({
       .leftJoin(uoms, eq(uoms.id, workItems.uomId))
       .where(and(eq(workItems.projectId, projectId), eq(workItems.active, true)))
       .orderBy(asc(workItems.level), asc(workItems.name))
-    const operations = await allowedProjectOperations(identity.userId, [projectId], workItemOperations)
-    const nodes = rows.map((row) => ({ ...row, allowedOperations: operations.get(projectId) ?? [], children: [] as unknown[], haveMaterialItp: null, haveProcessItp: null, haveProductsItp: null }))
+    const allowedOperations = ownerAllowedOperations(identity.permissions, true, workItemOperations)
+    const nodes = rows.map((row) => ({ ...row, allowedOperations, children: [] as unknown[], haveMaterialItp: null, haveProcessItp: null, haveProductsItp: null }))
     const byId = new Map(nodes.map((node) => [node.id, node]))
     const roots: typeof nodes = []
     for (const node of nodes) {
@@ -182,27 +225,27 @@ export const workItemDetail = defineRoute({
   kind: 'detail',
   path: '/:id',
   method: 'get',
-  authorize: [authenticated()],
-  action: async (args) => args.c.json({ data: await readWorkItem((await actor(args)).userId, requiredId(args)) }),
+  authorize: [authenticated(), requirePermission('detail-work-items')],
+  action: async (args) => args.c.json({ data: await readWorkItem(await actor(args), requiredId(args)) }),
 })
 
 export const workItemCreate = defineRoute({
   kind: 'create',
   method: 'post',
-  authorize: [authenticated()],
+  authorize: [authenticated(), requirePermission('create-work-items')],
   action: async (args) => {
     const identity = await actor(args)
     const input = workItem.schemas.create.parse(await args.c.req.json().catch(() => ({})))
     const projectId = input.projectId
     if (!projectId) throw validationError('Project is required.')
-    await requireProjectRecord(identity.userId, projectId, 'manage-work-items')
+    await requireProjectCoverage(identity.userId, projectId)
     const message = await validateWorkItem('create', { input })
     if (message) throw validationError(message)
     const code = typeof input.code === 'string' ? input.code : `WI-${crypto.randomUUID()}`
     const inserted = await getDb().insert(workItems).values({ ...input, code, createdByUserId: identity.userId, updatedByUserId: identity.userId }).returning()
     const row = inserted[0]
     if (!row) throw validationError('Work item was not created.')
-    return args.c.json({ data: await readWorkItem(identity.userId, row.id, 'manage-work-items') }, 201)
+    return args.c.json({ data: await readWorkItem(identity, row.id) }, 201)
   },
 })
 
@@ -210,20 +253,20 @@ export const workItemUpdate = defineRoute({
   kind: 'update',
   path: '/:id',
   method: 'patch',
-  authorize: [authenticated()],
+  authorize: [authenticated(), requirePermission('update-work-items')],
   action: async (args) => {
     const identity = await actor(args)
     const id = requiredId(args)
     const current = (await getDb().select({ projectId: workItems.projectId }).from(workItems).where(eq(workItems.id, id)).limit(1))[0]
     if (!current) throw notFound()
-    await requireProjectRecord(identity.userId, current.projectId, 'manage-work-items')
+    await requireProjectCoverage(identity.userId, current.projectId)
     const input = workItem.schemas.update.parse(await args.c.req.json().catch(() => ({})))
-    if (input.projectId && input.projectId !== current.projectId) await requireProjectRecord(identity.userId, input.projectId, 'manage-work-items')
+    if (input.projectId && input.projectId !== current.projectId) await requireProjectCoverage(identity.userId, input.projectId)
     const message = await validateWorkItem('update', { id, input })
     if (message) throw validationError(message)
     const updated = await getDb().update(workItems).set({ ...input, updatedByUserId: identity.userId }).where(eq(workItems.id, id)).returning()
     if (!updated[0]) throw notFound()
-    return args.c.json({ data: await readWorkItem(identity.userId, updated[0].id, 'manage-work-items') })
+    return args.c.json({ data: await readWorkItem(identity, updated[0].id) })
   },
 })
 
@@ -231,13 +274,13 @@ export const workItemDelete = defineRoute({
   kind: 'delete',
   path: '/:id',
   method: 'delete',
-  authorize: [authenticated()],
+  authorize: [authenticated(), requirePermission('delete-work-items')],
   action: async (args) => {
     const identity = await actor(args)
     const id = requiredId(args)
     const current = (await getDb().select({ projectId: workItems.projectId }).from(workItems).where(eq(workItems.id, id)).limit(1))[0]
     if (!current) throw notFound()
-    await requireProjectRecord(identity.userId, current.projectId, 'manage-work-items')
+    await requireProjectCoverage(identity.userId, current.projectId)
     const message = await validateWorkItem('delete', { id })
     if (message) throw validationError(message)
     const deleted = await getDb().delete(workItems).where(eq(workItems.id, id)).returning({ id: workItems.id })

@@ -65,37 +65,37 @@ describe('authorization resolver', () => {
 
   it('keeps exact, division, all-project, future-project, and moved-division coverage server-side', async () => {
     const state = await fixture()
-    const exact = await roleWithPermission(state.userId, 'view-projects', 'project')
+    const exact = await roleWithPermission(state.userId, 'create-qhsse-pts', 'project')
     await dbInsertProjectAssignment(state, exact.roleId, { coverageType: 'project', projectId: state.projectA })
-    expect(await hasProjectPermission(state.userId, state.projectA, 'view-projects')).toBe(true)
-    expect(await hasProjectPermission(state.userId, state.projectB, 'view-projects')).toBe(false)
+    expect(await hasProjectPermission(state.userId, state.projectA, 'create-qhsse-pts')).toBe(true)
+    expect(await hasProjectPermission(state.userId, state.projectB, 'create-qhsse-pts')).toBe(false)
 
-    const division = await roleWithPermission(state.userId, 'view-projects', 'project')
+    const division = await roleWithPermission(state.userId, 'create-qhsse-pts', 'project')
     await dbInsertProjectAssignment(state, division.roleId, { coverageType: 'division', divisionId: state.divisionA })
-    expect(await hasProjectPermission(state.userId, state.projectA, 'view-projects')).toBe(true)
-    expect(await hasProjectPermission(state.userId, state.projectB, 'view-projects')).toBe(false)
+    expect(await hasProjectPermission(state.userId, state.projectA, 'create-qhsse-pts')).toBe(true)
+    expect(await hasProjectPermission(state.userId, state.projectB, 'create-qhsse-pts')).toBe(false)
     const projectC = id('project-c')
     await state.db.insert(projects).values({ id: projectC, divisionId: state.divisionA, number: id('number-c'), integrationCode: id('integration-c'), name: 'Project C' })
-    expect(await hasProjectPermission(state.userId, projectC, 'view-projects')).toBe(true)
+    expect(await hasProjectPermission(state.userId, projectC, 'create-qhsse-pts')).toBe(true)
     await state.db.update(projects).set({ divisionId: state.divisionB }).where(eq(projects.id, projectC))
-    expect(await hasProjectPermission(state.userId, projectC, 'view-projects')).toBe(false)
+    expect(await hasProjectPermission(state.userId, projectC, 'create-qhsse-pts')).toBe(false)
 
-    const all = await roleWithPermission(state.userId, 'view-projects', 'project')
+    const all = await roleWithPermission(state.userId, 'create-qhsse-pts', 'project')
     await dbInsertProjectAssignment(state, all.roleId, { coverageType: 'all_projects' })
-    expect(await hasProjectPermission(state.userId, state.projectB, 'view-projects')).toBe(true)
+    expect(await hasProjectPermission(state.userId, state.projectB, 'create-qhsse-pts')).toBe(true)
     expect(await hasProjectCoverage(state.userId, state.projectB)).toBe(true)
   })
 
   it('keeps system and project realms isolated and removes inactive links', async () => {
     const state = await fixture()
     await roleWithPermission(state.userId, 'view-users', 'system')
-    const project = await roleWithPermission(state.userId, 'view-projects', 'project')
+    const project = await roleWithPermission(state.userId, 'create-qhsse-pts', 'project')
     await dbInsertProjectAssignment(state, project.roleId, { coverageType: 'project', projectId: state.projectA })
     const identity = await resolveSystemIdentity(state.userId)
     expect(identity?.permissions.has('view-users')).toBe(true)
-    expect(identity?.permissions.has('view-projects')).toBe(false)
+    expect(identity?.permissions.has('create-qhsse-pts')).toBe(false)
     await state.db.update(roles).set({ active: false }).where(eq(roles.id, project.roleId))
-    expect(await hasProjectPermission(state.userId, state.projectA, 'view-projects')).toBe(false)
+    expect(await hasProjectPermission(state.userId, state.projectA, 'create-qhsse-pts')).toBe(false)
     await state.db.update(roles).set({ active: false }).where(eq(roles.id, (await dbRoleForUser(state.userId))!))
     expect(await resolveSystemIdentity(state.userId)).toBeTruthy()
     await state.db.update(users).set({ statusCode: 'inactive' }).where(eq(users.id, state.userId))
@@ -140,10 +140,10 @@ describe('authorization resolver', () => {
 
   it('removes project access when each grant-chain link is inactive', async () => {
     const state = await fixture()
-    const grant = await roleWithPermission(state.userId, 'view-projects', 'project')
+    const grant = await roleWithPermission(state.userId, 'create-qhsse-pts', 'project')
     await dbInsertProjectAssignment(state, grant.roleId, { coverageType: 'project', projectId: state.projectA })
     const moduleId = (await state.db.select({ moduleId: permissions.moduleId }).from(permissions).where(eq(permissions.id, grant.permissionId)).limit(1))[0]!.moduleId
-    const expectGranted = async (granted: boolean) => expect(await hasProjectPermission(state.userId, state.projectA, 'view-projects')).toBe(granted)
+    const expectGranted = async (granted: boolean) => expect(await hasProjectPermission(state.userId, state.projectA, 'create-qhsse-pts')).toBe(granted)
 
     await expectGranted(true)
     await state.db.update(users).set({ statusCode: 'inactive' }).where(eq(users.id, state.userId))
@@ -168,18 +168,18 @@ describe('authorization resolver', () => {
 
   it('batches allowed operations by project', async () => {
     const state = await fixture()
-    const role = await roleWithPermission(state.userId, 'view-projects', 'project')
-    const manage = await roleWithPermission(state.userId, 'manage-projects', 'project')
+    const role = await roleWithPermission(state.userId, 'create-qhsse-pts', 'project')
+    const manage = await roleWithPermission(state.userId, 'update-qhsse-pts', 'project')
     await dbInsertProjectAssignment(state, role.roleId, { coverageType: 'project', projectId: state.projectA })
     await dbInsertProjectAssignment(state, manage.roleId, { coverageType: 'project', projectId: state.projectA })
-    const allowed = await allowedProjectOperations(state.userId, [state.projectA, state.projectB], { detail: 'view-projects', update: 'manage-projects', delete: 'manage-projects' })
+    const allowed = await allowedProjectOperations(state.userId, [state.projectA, state.projectB], { detail: 'create-qhsse-pts', update: 'update-qhsse-pts', delete: 'update-qhsse-pts' })
     expect(allowed.get(state.projectA)).toEqual(['detail', 'update', 'delete'])
     expect(allowed.get(state.projectB)).toEqual([])
   })
 
   it('normalizes broader assignments and rejects covered narrower rows', async () => {
     const state = await fixture()
-    const role = await roleWithPermission(state.userId, 'view-projects', 'project')
+    const role = await roleWithPermission(state.userId, 'create-qhsse-pts', 'project')
     await setProjectRoleAssignment(state.userId, state.userId, role.roleId, { coverageType: 'project', projectId: state.projectA }, true)
     await setProjectRoleAssignment(state.userId, state.userId, role.roleId, { coverageType: 'division', divisionId: state.divisionA }, true)
     const rows = await state.db.select({ coverageType: projectRoleAssignments.coverageType, active: projectRoleAssignments.active }).from(projectRoleAssignments).where(eq(projectRoleAssignments.roleId, role.roleId))
@@ -210,7 +210,7 @@ describe('authorization resolver', () => {
     const systemRoleId = id('retry-system-role')
     await state.db.insert(roles).values({ id: systemRoleId, roleCode: id('retry-system-code'), name: 'Retry System Role', realm: 'system' })
     await state.db.insert(rolePermissions).values({ roleId: systemRoleId, permissionId: systemPermissionId })
-    const projectRole = await roleWithPermission(state.userId, 'view-projects', 'project')
+    const projectRole = await roleWithPermission(state.userId, 'create-qhsse-pts', 'project')
     const before = (await state.db.select({ id: authorizationAuditEvents.id }).from(authorizationAuditEvents)).length
     await setSystemRoleAssignment(state.userId, state.userId, systemRoleId, true)
     await setSystemRoleAssignment(state.userId, state.userId, systemRoleId, true)

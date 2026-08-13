@@ -1,7 +1,8 @@
 # Permission Verb Convention Addendum
 
-- **Status:** Approved addendum
+- **Status:** Shipped
 - **Date:** 2026-08-13
+- **Implemented:** 2026-08-13
 - **Scope:** Remaining authorization catalog modules after the PTS owner-list
   change
 - **Depends on:** [Owner List Sources](./2026-08-13-owner-list-sources-design.md)

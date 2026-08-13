@@ -30,16 +30,16 @@ export const businessCategories = defineResource(businessCategoriesSchema, {
     create: {
       run: api.create,
       fields: [fields.name, fields.code, fields.description, fields.active],
-      permission: 'manage-business-categories',
+      permission: 'create-business-categories',
       route: { name: 'master-data-business-categories-create' },
     },
     update: {
       run: api.update,
       fields: [fields.name, fields.code, fields.description, fields.active],
-      permission: 'manage-business-categories',
+      permission: 'update-business-categories',
       route: { name: 'master-data-business-categories-edit', params: (id) => ({ businessCategoryId: String(id) }) },
     },
-    delete: { run: api.delete, permission: 'manage-business-categories' },
+    delete: { run: api.delete, permission: 'delete-business-categories' },
   },
 })
 

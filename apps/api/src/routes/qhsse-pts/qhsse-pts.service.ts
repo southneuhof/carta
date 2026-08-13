@@ -1,8 +1,8 @@
 import { forbidden, HttpError, notFound, validationError } from '@southneuhof/sprindle'
-import { and, asc, count, countDistinct, desc, eq, exists, gte, ilike, inArray, isNotNull, isNull, lt, notExists, or, sql, type SQL } from 'drizzle-orm'
+import { and, asc, count, desc, eq, gte, ilike, inArray, isNull, lt, or, sql, type SQL } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import type { PermissionCode } from '../../authorization/catalog'
-import { allowedProjectOperations, allowedProjectPermissions, accessibleProjectIds, requireProjectRecord } from '../../authorization'
+import { allowedProjectOperations, allowedProjectPermissions, coveredProjectIds, hasProjectCoverage, requireProjectRecord } from '../../authorization'
 import { getDb } from '../../db'
 import { activityLogs, notifications } from '../notifications/notifications.entity'
 import { authorizationModules, permissions, projectRoleAssignments, rolePermissions, roles } from '../roles/roles.entity'
@@ -69,7 +69,7 @@ const actionCatalog: Record<ActionName, ActionDefinition> = {
 }
 
 const actionOrder = Object.keys(actionCatalog) as ActionName[]
-const qhsseOperations = { detail: 'show-qhsse-pts', update: 'update-qhsse-pts', delete: 'delete-qhsse-pts' } as const
+const qhsseOperations = { update: 'update-qhsse-pts', delete: 'delete-qhsse-pts' } as const
 
 function now() {
   return new Date().toISOString()
@@ -81,16 +81,27 @@ async function rowById(id: string, includeDeleted = false) {
   return (await getDb().select().from(qhssePts).where(and(...conditions)).limit(1))[0]
 }
 
-async function assertAccess(id: string, userId: string, permission: PermissionCode = 'view-qhsse-pts') {
+async function assertCoverage(id: string, userId: string) {
+  const row = await rowById(id)
+  if (!row) throw notFound()
+  if (!(await hasProjectCoverage(userId, row.projectId))) throw notFound()
+  return row
+}
+
+async function assertAccess(id: string, userId: string, permission: PermissionCode) {
   const row = await rowById(id)
   if (!row) throw notFound()
   await requireProjectRecord(userId, row.projectId, permission)
   return row
 }
 
+function withDetailOperation(allowed: Array<'detail' | 'update' | 'delete'>) {
+  return ['detail', ...allowed.filter((operation) => operation !== 'detail')]
+}
+
 async function withAllowedOperations<T extends { projectId: string; statusCode: string; stepCode: string }>(userId: string, row: T) {
   const operations = await allowedProjectOperations(userId, [row.projectId], qhsseOperations)
-  const allowed = operations.get(row.projectId) ?? []
+  const allowed = withDetailOperation(operations.get(row.projectId) ?? [])
   return { ...row, allowedOperations: row.statusCode === 'open' && row.stepCode === 'report' ? allowed : allowed.filter((operation) => operation !== 'update') }
 }
 
@@ -285,7 +296,7 @@ export async function createReport(userId: string, rawInput: unknown) {
 }
 
 export async function listReports(userId: string, query: Record<string, unknown>) {
-  const conditions: SQL[] = [inArray(qhssePts.projectId, accessibleProjectIds(userId, 'view-qhsse-pts')), isNull(qhssePts.deletedAt)]
+  const conditions: SQL[] = [inArray(qhssePts.projectId, coveredProjectIds(userId)), isNull(qhssePts.deletedAt)]
   const projectId = typeof query.projectId === 'string' ? query.projectId : undefined
   const divisionId = typeof query.divisionId === 'string' ? query.divisionId : undefined
   const statusCode = typeof query.statusCode === 'string' ? query.statusCode : undefined
@@ -333,301 +344,10 @@ export async function listReports(userId: string, query: Record<string, unknown>
       workItemCategoryName,
       workItemName,
       rootCauses: causesByReport.get(row.id) ?? [],
-      allowedOperations: row.statusCode === 'open' && row.stepCode === 'report' ? operations.get(row.projectId) ?? [] : (operations.get(row.projectId) ?? []).filter((operation) => operation !== 'update'),
+      allowedOperations: row.statusCode === 'open' && row.stepCode === 'report' ? withDetailOperation(operations.get(row.projectId) ?? []) : withDetailOperation(operations.get(row.projectId) ?? []).filter((operation) => operation !== 'update'),
     })),
     total: Number(totalRows[0]?.value ?? 0),
   }
-}
-
-export type PtsCreateOption = { id: string; name: string; code?: string }
-type PtsCreateOptionPage = { data: PtsCreateOption[]; total?: number }
-type PtsCreateOptionQuery = Record<string, unknown>
-
-function activeCreateProjects(userId: string) {
-  const db = getDb()
-  return db.select({ id: projects.id }).from(projects).where(and(
-    eq(projects.active, true),
-    inArray(projects.id, accessibleProjectIds(userId, 'create-qhsse-pts')),
-  ))
-}
-
-function hasActiveCreateProject(userId: string) {
-  const db = getDb()
-  return exists(db.select({ id: projects.id }).from(projects).where(and(
-    eq(projects.active, true),
-    inArray(projects.id, accessibleProjectIds(userId, 'create-qhsse-pts')),
-  )))
-}
-
-function sourceValue(query: PtsCreateOptionQuery, key: string) {
-  const value = query[key]
-  return typeof value === 'string' && value.trim() ? value.trim() : undefined
-}
-
-function requiredSourceValue(query: PtsCreateOptionQuery, key: string, label: string) {
-  const value = sourceValue(query, key)
-  if (!value) throw validationError(`${label} is required.`)
-  return value
-}
-
-function sourceBoolean(query: PtsCreateOptionQuery, key: string) {
-  const value = query[key]
-  if (value === undefined) return false
-  if (value === 'true') return true
-  if (value === 'false') return false
-  throw validationError(`${key} must be true or false.`)
-}
-
-function addSourceSearch(conditions: SQL[], query: PtsCreateOptionQuery, columns: any[]) {
-  const search = sourceValue(query, 'search')
-  if (search) conditions.push(or(...columns.map((column) => ilike(column, `%${search}%`)))!)
-}
-
-function sourceOrder(query: PtsCreateOptionQuery, columns: { id: any; name: any; code?: any }) {
-  if (query.sort && query.sort !== 'name' && query.sort !== 'code') throw validationError(`Unsupported option sort "${query.sort}".`)
-  if (query.sort === 'code' && !columns.code) throw validationError('This option source does not support code sorting.')
-  const column = query.sort === 'code' ? columns.code : columns.name
-  return query.order === 'desc' ? [desc(column), desc(columns.id)] : [asc(column), asc(columns.id)]
-}
-
-function descendantsOf(categoryId: string, projectId: string) {
-  return sql`${workItems.id} in (
-    with recursive descendants(id) as (
-      select root.id
-      from ${workItems} as root
-      where root.id = ${categoryId}
-        and root.project_id = ${projectId}
-        and root.active = true
-      union all
-      select child.id
-      from ${workItems} as child
-      inner join descendants as parent on parent.id = child.parent_id
-      where child.project_id = ${projectId} and child.active = true
-    )
-    select id from descendants where id <> ${categoryId}
-  )`
-}
-
-function sourcePage<T extends PtsCreateOption>(rows: PromiseLike<T[]>, totalRows: PromiseLike<Array<{ value: unknown }>>, id?: string): Promise<PtsCreateOptionPage> {
-  return Promise.all([rows, id ? Promise.resolve([]) : totalRows]).then(([data, totals]) => ({
-    data,
-    ...(id ? {} : { total: Number(totals[0]?.value ?? 0) }),
-  }))
-}
-
-function sourcePageArguments(query: PtsCreateOptionQuery, id?: string) {
-  const page = Number(query.page)
-  const limit = Number(query.limit)
-  return { limit: id ? 1 : limit, offset: id ? 0 : (page - 1) * limit }
-}
-
-function optionOrNotFound(result: PtsCreateOptionPage) {
-  if (!result.data[0]) throw notFound()
-  return result.data[0]
-}
-
-async function readPtsCreateDivisions(userId: string, query: PtsCreateOptionQuery, id?: string) {
-  const db = getDb()
-  const { limit, offset } = sourcePageArguments(query, id)
-  const conditions: SQL[] = [
-    eq(divisions.active, true),
-    exists(db.select({ id: projects.id }).from(projects).where(and(
-      eq(projects.active, true),
-      eq(projects.divisionId, divisions.id),
-      inArray(projects.id, accessibleProjectIds(userId, 'create-qhsse-pts')),
-    ))),
-  ]
-  if (id) conditions.push(eq(divisions.id, id))
-  addSourceSearch(conditions, query, [divisions.code, divisions.name])
-  const where = and(...conditions)
-  return sourcePage(
-    db.select({ id: divisions.id, code: divisions.code, name: divisions.name }).from(divisions).where(where).orderBy(...sourceOrder(query, { id: divisions.id, code: divisions.code, name: divisions.name })).limit(limit).offset(offset),
-    db.select({ value: count() }).from(divisions).where(where),
-    id,
-  )
-}
-
-export async function listPtsCreateDivisions(userId: string, query: PtsCreateOptionQuery) {
-  return readPtsCreateDivisions(userId, query)
-}
-
-export async function getPtsCreateDivision(userId: string, id: string, query: PtsCreateOptionQuery) {
-  return optionOrNotFound(await readPtsCreateDivisions(userId, query, id))
-}
-
-async function readPtsCreateProjects(userId: string, query: PtsCreateOptionQuery, id?: string) {
-  const db = getDb()
-  const { limit, offset } = sourcePageArguments(query, id)
-  const conditions: SQL[] = [eq(projects.active, true), inArray(projects.id, accessibleProjectIds(userId, 'create-qhsse-pts'))]
-  const divisionId = sourceValue(query, 'divisionId')
-  if (divisionId) conditions.push(eq(projects.divisionId, divisionId))
-  if (id) conditions.push(eq(projects.id, id))
-  addSourceSearch(conditions, query, [projects.number, projects.name])
-  const where = and(...conditions)
-  return sourcePage(
-    db.select({ id: projects.id, code: projects.number, name: projects.name }).from(projects).where(where).orderBy(...sourceOrder(query, { id: projects.id, code: projects.number, name: projects.name })).limit(limit).offset(offset),
-    db.select({ value: count() }).from(projects).where(where),
-    id,
-  )
-}
-
-export async function listPtsCreateProjects(userId: string, query: PtsCreateOptionQuery) {
-  return readPtsCreateProjects(userId, query)
-}
-
-export async function getPtsCreateProject(userId: string, id: string, query: PtsCreateOptionQuery) {
-  return optionOrNotFound(await readPtsCreateProjects(userId, query, id))
-}
-
-async function readPtsCreateCategories(userId: string, query: PtsCreateOptionQuery, id?: string) {
-  const db = getDb()
-  const { limit, offset } = sourcePageArguments(query, id)
-  const conditions: SQL[] = [eq(ptsWorkCategories.active, true), hasActiveCreateProject(userId)]
-  if (id) conditions.push(eq(ptsWorkCategories.id, id))
-  addSourceSearch(conditions, query, [ptsWorkCategories.code, ptsWorkCategories.name])
-  const where = and(...conditions)
-  return sourcePage(
-    db.select({ id: ptsWorkCategories.id, code: ptsWorkCategories.code, name: ptsWorkCategories.name }).from(ptsWorkCategories).where(where).orderBy(...sourceOrder(query, { id: ptsWorkCategories.id, code: ptsWorkCategories.code, name: ptsWorkCategories.name })).limit(limit).offset(offset),
-    db.select({ value: count() }).from(ptsWorkCategories).where(where),
-    id,
-  )
-}
-
-export async function listPtsCreateCategories(userId: string, query: PtsCreateOptionQuery) {
-  return readPtsCreateCategories(userId, query)
-}
-
-export async function getPtsCreateCategory(userId: string, id: string, query: PtsCreateOptionQuery) {
-  return optionOrNotFound(await readPtsCreateCategories(userId, query, id))
-}
-
-async function readPtsCreateRootCauses(userId: string, query: PtsCreateOptionQuery, id?: string) {
-  const db = getDb()
-  const { limit, offset } = sourcePageArguments(query, id)
-  const conditions: SQL[] = [eq(rootCauses.active, true), hasActiveCreateProject(userId)]
-  if (id) conditions.push(eq(rootCauses.id, id))
-  addSourceSearch(conditions, query, [rootCauses.code, rootCauses.name])
-  const where = and(...conditions)
-  return sourcePage(
-    db.select({ id: rootCauses.id, code: rootCauses.code, name: rootCauses.name }).from(rootCauses).where(where).orderBy(...sourceOrder(query, { id: rootCauses.id, code: rootCauses.code, name: rootCauses.name })).limit(limit).offset(offset),
-    db.select({ value: count() }).from(rootCauses).where(where),
-    id,
-  )
-}
-
-export async function listPtsCreateRootCauses(userId: string, query: PtsCreateOptionQuery) {
-  return readPtsCreateRootCauses(userId, query)
-}
-
-export async function getPtsCreateRootCause(userId: string, id: string, query: PtsCreateOptionQuery) {
-  return optionOrNotFound(await readPtsCreateRootCauses(userId, query, id))
-}
-
-async function readPtsCreateWorkItems(userId: string, query: PtsCreateOptionQuery, id?: string) {
-  const db = getDb()
-  const projectId = requiredSourceValue(query, 'projectId', 'Project')
-  const categoryId = sourceValue(query, 'workItemCategoryId')
-  const rootOnly = sourceBoolean(query, 'rootOnly')
-  const leafOnly = sourceBoolean(query, 'leafOnly')
-  const { limit, offset } = sourcePageArguments(query, id)
-  const conditions: SQL[] = [eq(workItems.active, true), eq(workItems.projectId, projectId), inArray(workItems.projectId, activeCreateProjects(userId))]
-  if (rootOnly) conditions.push(isNull(workItems.parentId))
-  if (categoryId) conditions.push(descendantsOf(categoryId, projectId))
-  if (leafOnly) {
-    const child = alias(workItems, 'pts_create_work_item_child')
-    conditions.push(isNotNull(workItems.parentId), notExists(db.select({ id: child.id }).from(child).where(and(
-      eq(child.projectId, workItems.projectId),
-      eq(child.parentId, workItems.id),
-      eq(child.active, true),
-    ))))
-  }
-  if (id) conditions.push(eq(workItems.id, id))
-  addSourceSearch(conditions, query, [workItems.code, workItems.name])
-  const where = and(...conditions)
-  return sourcePage(
-    db.select({ id: workItems.id, code: workItems.code, name: workItems.name }).from(workItems).where(where).orderBy(...sourceOrder(query, { id: workItems.id, code: workItems.code, name: workItems.name })).limit(limit).offset(offset),
-    db.select({ value: count() }).from(workItems).where(where),
-    id,
-  )
-}
-
-export async function listPtsCreateWorkItems(userId: string, query: PtsCreateOptionQuery) {
-  return readPtsCreateWorkItems(userId, query)
-}
-
-export async function getPtsCreateWorkItem(userId: string, id: string, query: PtsCreateOptionQuery) {
-  return optionOrNotFound(await readPtsCreateWorkItems(userId, query, id))
-}
-
-async function readPtsCreateVendors(userId: string, query: PtsCreateOptionQuery, id?: string) {
-  const db = getDb()
-  const projectId = requiredSourceValue(query, 'projectId', 'Project')
-  const { limit, offset } = sourcePageArguments(query, id)
-  const conditions: SQL[] = [
-    eq(projectVendors.active, true),
-    eq(projectVendors.projectId, projectId),
-    inArray(projectVendors.projectId, activeCreateProjects(userId)),
-  ]
-  if (id) conditions.push(eq(projectVendors.id, id))
-  addSourceSearch(conditions, query, [projectVendors.name])
-  const where = and(...conditions)
-  return sourcePage(
-    db.select({ id: projectVendors.id, name: projectVendors.name }).from(projectVendors).where(where).orderBy(...sourceOrder(query, { id: projectVendors.id, name: projectVendors.name })).limit(limit).offset(offset),
-    db.select({ value: count() }).from(projectVendors).where(where),
-    id,
-  )
-}
-
-export async function listPtsCreateVendors(userId: string, query: PtsCreateOptionQuery) {
-  return readPtsCreateVendors(userId, query)
-}
-
-export async function getPtsCreateVendor(userId: string, id: string, query: PtsCreateOptionQuery) {
-  return optionOrNotFound(await readPtsCreateVendors(userId, query, id))
-}
-
-async function readPtsCreateUsers(userId: string, query: PtsCreateOptionQuery, id?: string) {
-  const db = getDb()
-  const projectId = requiredSourceValue(query, 'projectId', 'Project')
-  const { limit, offset } = sourcePageArguments(query, id)
-  const conditions: SQL[] = [
-    eq(projects.id, projectId),
-    eq(projects.active, true),
-    inArray(projects.id, activeCreateProjects(userId)),
-    eq(projectRoleAssignments.active, true),
-    eq(users.statusCode, 'active'),
-    eq(roles.active, true),
-    eq(roles.realm, 'project'),
-    or(
-      eq(projectRoleAssignments.coverageType, 'all_projects'),
-      and(eq(projectRoleAssignments.coverageType, 'division'), eq(projectRoleAssignments.divisionId, projects.divisionId)),
-      and(eq(projectRoleAssignments.coverageType, 'project'), eq(projectRoleAssignments.projectId, projectId)),
-    )!,
-  ]
-  if (id) conditions.push(eq(users.id, id))
-  addSourceSearch(conditions, query, [users.name])
-  const where = and(...conditions)
-  return sourcePage(
-    db.selectDistinct({ id: users.id, name: users.name }).from(users)
-      .innerJoin(projectRoleAssignments, eq(projectRoleAssignments.userId, users.id))
-      .innerJoin(projects, eq(projects.id, projectId))
-      .innerJoin(roles, eq(roles.id, projectRoleAssignments.roleId))
-      .where(where).orderBy(...sourceOrder(query, { id: users.id, name: users.name })).limit(limit).offset(offset),
-    db.select({ value: countDistinct(users.id) }).from(users)
-      .innerJoin(projectRoleAssignments, eq(projectRoleAssignments.userId, users.id))
-      .innerJoin(projects, eq(projects.id, projectId))
-      .innerJoin(roles, eq(roles.id, projectRoleAssignments.roleId))
-      .where(where),
-    id,
-  )
-}
-
-export async function listPtsCreateUsers(userId: string, query: PtsCreateOptionQuery) {
-  return readPtsCreateUsers(userId, query)
-}
-
-export async function getPtsCreateUser(userId: string, id: string, query: PtsCreateOptionQuery) {
-  return optionOrNotFound(await readPtsCreateUsers(userId, query, id))
 }
 
 export async function availableActions(row: ActionRow, userId: string): Promise<ActionName[]> {
@@ -643,7 +363,7 @@ export async function availableActions(row: ActionRow, userId: string): Promise<
 }
 
 export async function getReport(userId: string, id: string) {
-  const row = await assertAccess(id, userId, 'show-qhsse-pts')
+  const row = await assertCoverage(id, userId)
   const workItemCategory = alias(workItems, 'qhsse_pts_work_item_category')
   const workItem = alias(workItems, 'qhsse_pts_work_item')
   const [joined, rootCauseRows, activity, vendors] = await Promise.all([
@@ -666,7 +386,7 @@ export async function getReport(userId: string, id: string) {
     activity,
     projectVendors: vendors,
     availableActions: await availableActions(row, userId),
-    allowedOperations: row.statusCode === 'open' && row.stepCode === 'report' ? operations.get(row.projectId) ?? [] : (operations.get(row.projectId) ?? []).filter((operation) => operation !== 'update'),
+    allowedOperations: row.statusCode === 'open' && row.stepCode === 'report' ? withDetailOperation(operations.get(row.projectId) ?? []) : withDetailOperation(operations.get(row.projectId) ?? []).filter((operation) => operation !== 'update'),
   }
 }
 
@@ -736,7 +456,7 @@ async function notifyAfterAction(tx: any, row: PtsRow, previousStep: string, act
 }
 
 export async function performAction(userId: string, id: string, action: ActionName, rawInput: unknown) {
-  const current = await assertAccess(id, userId, 'show-qhsse-pts')
+  const current = await assertCoverage(id, userId)
   const permission = actionCatalog[action].permission(current)
   await requireProjectRecord(userId, current.projectId, permission)
   const input = actionSchemas[action].parse(rawInput) as Record<string, unknown>

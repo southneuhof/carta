@@ -345,8 +345,9 @@ union of all active role grants that cover the project through `all_projects`,
 
 Use these PTS permissions:
 
-- `view-qhsse-pts`
-- `show-qhsse-pts`
+- `view-qhsse-pts` — menu and typed admin URL only
+- `list-qhsse-pts`
+- `detail-qhsse-pts`
 - `create-qhsse-pts`
 - `update-qhsse-pts`
 - `delete-qhsse-pts`
@@ -367,10 +368,9 @@ criteria requires the high-disposition permission. Use the same rule in the
 web and API. Remove the generic disposition permission from the PTS action
 contract.
 
-List access returns only reports in projects for which the caller has view
-permission. Detail access outside project coverage returns not found. A caller
-with project coverage but without the required action permission receives
-forbidden.
+List returns reports on any assigned project (`coveredProjectIds`). Detail
+outside that assignment returns not found. A caller with project coverage
+but without the required action permission receives forbidden.
 
 No numeric role ID or role code controls a transition in this slice.
 
@@ -403,9 +403,9 @@ presentations. The detail response includes all report fields, relation display
 values, root causes, ordered activity, and `availableActions` after all API
 checks.
 
-The lookup response must apply project scope and active-state rules. It can
-return divisions, projects, work items, PTS work categories, root causes,
-project users, and project vendors needed by the active form.
+PTS does not own a lookup endpoint. Form fields call the owner module
+`list` and `detail` with the searchParameters in
+[Owner List Sources](./2026-08-13-owner-list-sources-design.md).
 
 ## Notifications and activity
 

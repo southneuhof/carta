@@ -15,7 +15,7 @@ import { ptsWorkCategories } from '../routes/pts-work-categories/pts-work-catego
 import { rootCauses } from '../routes/root-causes/root-causes.entity'
 import { workItems } from '../routes/work-items/work-items.entity'
 import { activityLogs, notifications } from '../routes/notifications/notifications.entity'
-import { authorizationModules, permissions, projectRoleAssignments, rolePermissions, roles } from '../routes/roles/roles.entity'
+import { authorizationModules, permissions, projectRoleAssignments, rolePermissions, roles, systemRoleAssignments } from '../routes/roles/roles.entity'
 import { users } from '../routes/users/users.entity'
 import { createReport, listReports, performAction } from '../routes/qhsse-pts/qhsse-pts.service'
 import { actionSchemas } from '../routes/qhsse-pts/qhsse-pts.schemas'
@@ -44,11 +44,12 @@ async function makeFixture() {
   const rootCauseId = id('root-cause')
   const vendorId = id('vendor')
   const permissionCodes = [
-    'view-qhsse-pts', 'show-qhsse-pts', 'create-qhsse-pts', 'update-qhsse-pts', 'delete-qhsse-pts',
+    'create-qhsse-pts', 'update-qhsse-pts', 'delete-qhsse-pts',
     'low-disposition-qhsse-pts', 'high-disposition-qhsse-pts', 'temporary-plan-qhsse-pts', 'management-notes-qhsse-pts',
     'complete-report-qhsse-pts', 'follow-up-implementation-qhsse-pts', 'follow-up-price-qhsse-pts',
     'implementation-report-qhsse-pts', 'verify-implementation-qhsse-pts', 'realization-qhsse-pts', 'close-qhsse-pts',
   ]
+  const systemCodes = ['list-qhsse-pts', 'detail-qhsse-pts']
   const permissionRows = permissionCodes.map((permissionCode) => ({ id: id(permissionCode), permissionCode, name: permissionCode, moduleId }))
   await db.insert(users).values([
     { id: userId, name: 'PTS Test User', email: `${userId}@example.invalid` },
@@ -58,11 +59,25 @@ async function makeFixture() {
     { id: unrelatedRecipientId, name: 'PTS Unrelated Recipient', email: `${unrelatedRecipientId}@example.invalid` },
   ])
   await db.insert(accounts).values({ id: id('account'), accountId: userId, providerId: 'credential', userId, password: await hashPassword('test-password') })
-  await db.insert(authorizationModules).values({ id: moduleId, code: id('module-code'), name: 'QHSSE PTS', realm: 'project' })
-  await db.insert(roles).values({ id: roleId, roleCode: id('role-code'), name: 'PTS Test Role', realm: 'project' })
-  await db.insert(permissions).values(permissionRows).onConflictDoNothing()
+  const systemModuleId = id('system-module')
+  const systemRoleId = id('system-role')
+  await db.insert(authorizationModules).values([
+    { id: moduleId, code: id('module-code'), name: 'QHSSE PTS', realm: 'project' },
+    { id: systemModuleId, code: id('system-module-code'), name: 'QHSSE PTS Reads', realm: 'system' },
+  ])
+  await db.insert(roles).values([
+    { id: roleId, roleCode: id('role-code'), name: 'PTS Test Role', realm: 'project' },
+    { id: systemRoleId, roleCode: id('system-role-code'), name: 'PTS Read Role', realm: 'system' },
+  ])
+  await db.insert(permissions).values([
+    ...permissionRows,
+    ...systemCodes.map((permissionCode) => ({ id: id(permissionCode), permissionCode, name: permissionCode, moduleId: systemModuleId })),
+  ]).onConflictDoNothing()
   const availablePermissions = await db.select({ id: permissions.id }).from(permissions).where(inArray(permissions.permissionCode, permissionCodes))
+  const systemPermissions = await db.select({ id: permissions.id }).from(permissions).where(inArray(permissions.permissionCode, systemCodes))
   await db.insert(rolePermissions).values(availablePermissions.map(({ id: permissionId }) => ({ roleId, permissionId })))
+  await db.insert(rolePermissions).values(systemPermissions.map(({ id: permissionId }) => ({ roleId: systemRoleId, permissionId })))
+  await db.insert(systemRoleAssignments).values({ userId, roleId: systemRoleId })
   await db.insert(businessCategories).values({ id: businessCategoryId, code: id('business-category-code'), name: 'PTS Business' })
   await db.insert(divisions).values([
     { id: divisionId, businessCategoryId, code: id('division-code'), name: 'PTS Division' },
@@ -128,27 +143,6 @@ describe('manual PTS workflow', () => {
     const first = await createReport(fixture.userId, reportInput(fixture))
     const second = await createReport(fixture.userId, reportInput(fixture))
     expect(first.number).not.toBe(second.number)
-    const response = await app.request(`/qhsse-pts/create-options/projects/list?page=1&limit=20&divisionId=${fixture.divisionId}`, { headers: { Cookie: fixture.cookie } })
-    expect(response.status).toBe(200)
-    expect((await response.json()).data).toHaveLength(1)
-    const divisionsResponse = await app.request('/qhsse-pts/create-options/divisions/list?page=1&limit=20', { headers: { Cookie: fixture.cookie } })
-    expect(divisionsResponse.status).toBe(200)
-    expect((await divisionsResponse.json()).data.map((row: { id: string }) => row.id)).toEqual([fixture.divisionId])
-    const categoriesResponse = await app.request('/qhsse-pts/create-options/pts-work-categories/list?page=1&limit=20', { headers: { Cookie: fixture.cookie } })
-    expect(categoriesResponse.status).toBe(200)
-    expect((await categoriesResponse.json()).data.length).toBeGreaterThan(0)
-    const rootCausesResponse = await app.request('/qhsse-pts/create-options/root-causes/list?page=1&limit=20', { headers: { Cookie: fixture.cookie } })
-    expect(rootCausesResponse.status).toBe(200)
-    expect((await rootCausesResponse.json()).data.length).toBeGreaterThan(0)
-    const leaves = await app.request(`/qhsse-pts/create-options/work-items/list?page=1&limit=20&projectId=${fixture.projectId}&workItemCategoryId=${fixture.categoryId}&leafOnly=true`, { headers: { Cookie: fixture.cookie } })
-    expect(leaves.status).toBe(200)
-    expect((await leaves.json()).data.map((row: { id: string }) => row.id)).toEqual([fixture.leafId])
-    const usersResponse = await app.request(`/qhsse-pts/create-options/project-users/list?page=1&limit=20&projectId=${fixture.projectId}`, { headers: { Cookie: fixture.cookie } })
-    expect(usersResponse.status).toBe(200)
-    expect((await usersResponse.json()).data.length).toBeGreaterThan(0)
-    const userDetail = await app.request(`/qhsse-pts/create-options/project-users/detail/${fixture.userId}?projectId=${fixture.projectId}`, { headers: { Cookie: fixture.cookie } })
-    expect(userDetail.status).toBe(200)
-    expect((await userDetail.json()).data.id).toBe(fixture.userId)
     const inbox = await fixture.db.select({ recipientUserId: notifications.recipientUserId }).from(notifications).where(eq(notifications.referenceId, first.id))
     expect(inbox.map(({ recipientUserId }) => recipientUserId)).toEqual(expect.arrayContaining([fixture.recipientId, fixture.divisionRecipientId, fixture.allProjectsRecipientId]))
     expect(inbox.map(({ recipientUserId }) => recipientUserId)).not.toContain(fixture.unrelatedRecipientId)

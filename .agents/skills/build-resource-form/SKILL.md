@@ -133,10 +133,20 @@ behavior: {
 },
 ```
 
-For a database-backed field, use the renderer registered for a resource-backed
-standard list. Read the exact renderer key from the app input registry and a
-nearby current resource. The source resource must expose both `list` and
-`detail` actions. Do not replace a server source with a full in-memory array.
+For a database-backed field, import the owner resource as `source`. The owner
+`list` and `detail` actions are the only allowed option sources. Pass
+`searchParameters`. Do not redeclare the owner query. Do not add
+`/<consumer>/create-options/*`. Do not add `/lookup`. Do not add a second list
+on the consumer. Do not replace a server source with a full in-memory array.
+Read the exact renderer key from the app input registry and a nearby current
+resource.
+
+If the owner list or detail cannot serve the field, stop. Tell the user the
+missing owner filter or contract. Use the brainstorming skill with the user
+before you add or change a route. Do not invent a custom endpoint.
+
+API list and detail use `list-*` / `detail-*`. Resource `permission` stays
+`view-*` for the admin screen.
 
 Use `initialData` for fixed parent values in a create or update action. Use
 `context` for stable screen information that affects behavior. Use
@@ -158,9 +168,9 @@ one action.
 
 ### 6. Expose the API contract
 
-Use the backend rules in `references/backend-form-contract.md` whenever the
-form needs a new route, filter, source, permission, relationship check, or
-custom action.
+Use the backend rules in `references/backend-form-contract.md` when the owner
+list already has the needed filter, or after the user approves a new owner
+filter or a custom write. Do not add a route first and document it later.
 
 #### Query ownership
 
@@ -217,7 +227,15 @@ Report web UI reuse as:
 
 ## Custom workflows and child data
 
-Use standard resource actions for ordinary entity CRUD. For a domain workflow:
+Use standard resource actions for ordinary entity CRUD. Do not add a custom
+endpoint for options, search, or a filtered list. Those stay on the owner
+`list` and `detail`.
+
+A custom write is only for a domain state transition that create, update, or
+delete cannot express. If you think you need one, stop. Ask the user. Use the
+brainstorming skill. Do not invent the route, permission, or payload.
+
+After the user approves a custom write:
 
 - define a separate input schema and endpoint when permission, state, or
   response differs from CRUD;
@@ -236,5 +254,7 @@ permission during submit even when the form source already filtered its rows.
 ## Stop conditions
 
 Stop and ask the user when the decision changes the API contract, permission
-model, transaction boundary, or required framework surface. Otherwise use the
-nearest current pattern and record the assumption in the final report.
+model, transaction boundary, or required framework surface. Stop and use the
+brainstorming skill when a form seems to need a new endpoint, a consumer-owned
+list, or a lookup route. Otherwise use the nearest current pattern and record
+the assumption in the final report.

@@ -16,7 +16,7 @@ vi.mock('@/components/routing/Tabs.vue', () => ({ default: defineComponent({
 vi.mock('@/routes/(authenticated)/settings/roles/roles.resource', () => ({
   roles: {
     detail: ({ id }: { id: string }) => ({ id }),
-    update: () => ({ defaultTo: { name: 'settings-roles-edit', params: { roleId: '7' } } }),
+    list: () => ({ updateRoute: () => ({ name: 'settings-roles-edit', params: { roleId: '7' } }) }),
   },
 }))
 vi.mock('@/routes/(authenticated)/settings/roles/[roleId]/detail/permissions/role-permissions.resource', () => ({
@@ -25,7 +25,6 @@ vi.mock('@/routes/(authenticated)/settings/roles/[roleId]/detail/permissions/rol
 vi.mock('@/routes/(authenticated)/settings/users/users.resource', () => ({
   users: {
     detail: ({ id }: { id: string }) => ({ id }),
-    update: () => ({ defaultTo: { name: 'settings-users-edit', params: { userId: '7' } } }),
   },
 }))
 import RolesParent from '@/routes/(authenticated)/settings/roles/[roleId]/detail.route.vue'

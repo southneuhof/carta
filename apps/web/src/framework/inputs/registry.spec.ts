@@ -31,6 +31,14 @@ describe('app input props registry', () => {
     expect(appInputProps.resolve('file', {}).upload).toBe(appInputProps.resolve('image', {}).upload)
   })
 
+  it('resolves image preview URLs from storage keys', () => {
+    const resolve = appInputProps.resolve('image', {}).imageURLResolver as (payload: unknown) => { imageURL: string; thumbnailURL: string }
+    expect(resolve({ path: 'uploads/a.png' })).toEqual({
+      imageURL: 'https://api.test/files/object?key=uploads%2Fa.png',
+      thumbnailURL: 'https://api.test/files/object?key=uploads%2Fa.png',
+    })
+  })
+
   it('keeps the runtime registry out of production field declarations', () => {
     const defaults = readFileSync(resolve(process.cwd(), 'src/configs/defaults.ts'), 'utf8')
 

@@ -6,13 +6,16 @@ import { requirePermission } from '../../identity'
 import { numberVariables } from '../number-variables/number-variables.entity'
 import { numberConfigs, numberConfig, numberConfigRelations } from './number-configs.entity'
 
-const read = [authenticated(), requirePermission('view-number-configs')]
-const write = [authenticated(), requirePermission('manage-number-configs')]
+const listNumberConfigs = [authenticated(), requirePermission('list-number-configs')]
+const detailNumberConfigs = [authenticated(), requirePermission('detail-number-configs')]
+const createNumberConfigs = [authenticated(), requirePermission('create-number-configs')]
+const updateNumberConfigs = [authenticated(), requirePermission('update-number-configs')]
+const deleteNumberConfigs = [authenticated(), requirePermission('delete-number-configs')]
 
 export const reorderNumberConfig = defineRoute({
   method: 'post',
   state: async ({ c }) => ({ input: await c.req.json().catch(() => ({})) }),
-  authorize: write,
+  authorize: updateNumberConfigs,
   action: async ({ c, state }) => {
     const id = c.req.param('id')
     const direction = state.input && typeof state.input === 'object' ? (state.input as { direction?: unknown }).direction : undefined
@@ -57,11 +60,11 @@ export const numberConfigModel = defineModel({
   path: '/number-configs',
   entity: numberConfig,
   routes: {
-    list: list({ authorize: read }),
-    detail: detail({ authorize: read }),
-    create: create({ authorize: write }),
-    update: update({ authorize: write }),
-    delete: deleteRoute({ authorize: write }),
+    list: list({ authorize: listNumberConfigs }),
+    detail: detail({ authorize: detailNumberConfigs }),
+    create: create({ authorize: createNumberConfigs }),
+    update: update({ authorize: updateNumberConfigs }),
+    delete: deleteRoute({ authorize: deleteNumberConfigs }),
     ':id': { reorder: reorderNumberConfig },
   },
   validate: async ({ route, state }) => validateNumberConfig(route.kind, state as { input?: unknown }),

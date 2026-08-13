@@ -19,7 +19,7 @@ async function userExists(userId: string) {
 export const listSystemRoleAssignments = defineRoute({
   path: '/users/:userId/system-role-assignments',
   method: 'get',
-  authorize: [authenticated(), requirePermission('view-system-role-assignments')],
+  authorize: [authenticated(), requirePermission('list-system-role-assignments')],
   action: async (args) => {
     const userId = args.c.req.param('userId')
     if (!userId || !(await userExists(userId))) return args.c.json({ error: 'not_found' }, 404)
@@ -31,7 +31,7 @@ export const listSystemRoleAssignments = defineRoute({
 export const assignSystemRole = defineRoute({
   path: '/users/:userId/system-role-assignments/:roleId',
   method: 'put',
-  authorize: [authenticated(), requirePermission('manage-system-role-assignments')],
+  authorize: [authenticated(), requirePermission('create-system-role-assignments')],
   action: async (args) => {
     const userId = args.c.req.param('userId')
     const roleId = args.c.req.param('roleId')
@@ -43,7 +43,7 @@ export const assignSystemRole = defineRoute({
 export const revokeSystemRole = defineRoute({
   path: '/users/:userId/system-role-assignments/:roleId',
   method: 'delete',
-  authorize: [authenticated(), requirePermission('manage-system-role-assignments')],
+  authorize: [authenticated(), requirePermission('delete-system-role-assignments')],
   action: async (args) => {
     const userId = args.c.req.param('userId')
     const roleId = args.c.req.param('roleId')

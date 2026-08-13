@@ -39,13 +39,13 @@ export const projects = defineResource(projectsSchema, {
     list: {
       run: projectsActions.list,
       fields: [fields.name, fields.shortName, fields.division, fields.number, fields.integrationCode, fields.location, fields.startDate, fields.endDate, fields.description],
-      permission: null,
+      permission: 'view-projects',
       route: { name: 'master-data-projects' },
     },
     detail: {
       run: projectsActions.detail,
       fields: [fields.name, fields.division, fields.number, fields.integrationCode, fields.location, fields.description],
-      permission: null,
+      permission: 'view-projects',
       route: { name: 'master-data-projects-detail', params: (id) => ({ projectId: String(id) }) },
     },
     create: {
@@ -57,9 +57,9 @@ export const projects = defineResource(projectsSchema, {
     update: {
       run: projectsActions.update,
       fields: [fields.name, fields.shortName, fields.divisionId, fields.number, fields.integrationCode, fields.location, fields.startDate, fields.endDate, fields.description],
-      permission: null,
+      permission: 'update-projects',
       route: { name: 'master-data-projects-edit', params: (id) => ({ projectId: String(id) }) },
     },
-    delete: { run: projectsActions.delete, permission: null },
+    delete: { run: projectsActions.delete, permission: 'delete-projects' },
   },
 })

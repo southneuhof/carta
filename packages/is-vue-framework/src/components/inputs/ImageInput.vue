@@ -205,6 +205,14 @@ function resolveDragKey(item: ImageAssetValue, index: number): string {
 }
 
 function normalizeImageAsset(payload: unknown): ImageAssetValue | null {
+  if (typeof payload === 'string') {
+    return {
+      kind: 'file',
+      path: payload,
+      url: payload,
+      name: payload.split('/').pop() || 'image'
+    } as ImageAssetValue
+  }
   const normalized = toInputAssetValue(payload)
   if (!normalized) return null
 

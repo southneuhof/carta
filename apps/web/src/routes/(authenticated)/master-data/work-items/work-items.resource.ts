@@ -41,25 +41,25 @@ export const workItems = defineResource(workItemsSchema, {
     list: {
       run: workItemsActions.list,
       fields: [fields.name, fields.categoryId, fields.volume, fields.uomId, fields.isHighRisk],
-      permission: null,
+      permission: 'view-work-items',
       route: { name: 'master-data-work-items' },
     },
     detail: {
       run: workItemsActions.detail,
       fields: [fields.name, fields.categoryId, fields.volume, fields.uomId, fields.isHighRisk],
-      permission: null,
+      permission: 'view-work-items',
     },
     create: {
       run: workItemsActions.create,
       fields: [fields.categoryId, fields.name, fields.volume, fields.uomId, fields.isHighRisk],
-      permission: null,
+      permission: 'create-work-items',
     },
     update: {
       run: workItemsActions.update,
       fields: [fields.categoryId, fields.name, fields.volume, fields.uomId, fields.isHighRisk],
-      permission: null,
+      permission: 'update-work-items',
     },
-    delete: { run: workItemsActions.delete, permission: null },
+    delete: { run: workItemsActions.delete, permission: 'delete-work-items' },
     loadTree: { run: workItemsActions.loadTree },
   },
 })

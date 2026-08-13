@@ -29,16 +29,19 @@ async function adminSession(grantAssignmentView = true) {
   ])
   const permissionIds = new Map<string, string>()
   for (const [code, module] of [
-    ['manage-roles', moduleId],
-    ['view-role-permissions', moduleId],
-    ['manage-role-permissions', moduleId],
-    ['view-system-role-assignments', moduleId],
-    ['manage-system-role-assignments', moduleId],
-    ['view-project-role-assignments', moduleId],
-    ['manage-project-role-assignments', moduleId],
+    ['delete-roles', moduleId],
+    ['list-role-permissions', moduleId],
+    ['create-role-permissions', moduleId],
+    ['delete-role-permissions', moduleId],
+    ['list-system-role-assignments', moduleId],
+    ['create-system-role-assignments', moduleId],
+    ['delete-system-role-assignments', moduleId],
+    ['list-project-role-assignments', moduleId],
+    ['create-project-role-assignments', moduleId],
+    ['delete-project-role-assignments', moduleId],
     ['view-projects', projectModuleId],
   ] as const) {
-    if (!grantAssignmentView && code === 'view-project-role-assignments') continue
+    if (!grantAssignmentView && code === 'list-project-role-assignments') continue
     const permissionId = id(code)
     await db.insert(permissions).values({ id: permissionId, permissionCode: code, name: code, moduleId: module }).onConflictDoNothing()
     permissionIds.set(code, (await db.select({ id: permissions.id }).from(permissions).where(eq(permissions.permissionCode, code)).limit(1))[0]!.id)

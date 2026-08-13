@@ -6,8 +6,11 @@ import { requirePermission } from '../../identity'
 import { divisions } from '../divisions/divisions.entity'
 import { businessCategories, businessCategory } from './business-categories.entity'
 
-const read = [authenticated(), requirePermission('view-business-categories')]
-const write = [authenticated(), requirePermission('manage-business-categories')]
+const listBusinessCategories = [authenticated(), requirePermission('list-business-categories')]
+const detailBusinessCategories = [authenticated(), requirePermission('detail-business-categories')]
+const createBusinessCategories = [authenticated(), requirePermission('create-business-categories')]
+const updateBusinessCategories = [authenticated(), requirePermission('update-business-categories')]
+const deleteBusinessCategories = [authenticated(), requirePermission('delete-business-categories')]
 
 async function validateBusinessCategory(route: string, state: { input?: unknown; id?: string }) {
   const input = state.input && typeof state.input === 'object' ? (state.input as Record<string, unknown>) : {}
@@ -28,11 +31,11 @@ export const businessCategoryModel = defineModel({
   path: '/business-categories',
   entity: businessCategory,
   routes: {
-    list: list({ authorize: read }),
-    detail: detail({ authorize: read }),
-    create: create({ authorize: write }),
-    update: update({ authorize: write }),
-    delete: deleteRoute({ authorize: write }),
+    list: list({ authorize: listBusinessCategories }),
+    detail: detail({ authorize: detailBusinessCategories }),
+    create: create({ authorize: createBusinessCategories }),
+    update: update({ authorize: updateBusinessCategories }),
+    delete: deleteRoute({ authorize: deleteBusinessCategories }),
   },
   validate: async ({ route, state }) => validateBusinessCategory(route.kind, state as { input?: unknown; id?: string }),
 })

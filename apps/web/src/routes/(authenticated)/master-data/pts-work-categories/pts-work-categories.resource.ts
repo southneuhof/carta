@@ -28,15 +28,15 @@ export const ptsWorkCategories = defineResource(ptsWorkCategoriesSchema, {
     create: {
       run: api.create,
       fields: [fields.name, fields.active],
-      permission: 'manage-pts-work-categories',
+      permission: 'create-pts-work-categories',
       route: { name: 'master-data-pts-work-categories-create' },
     },
     update: {
       run: api.update,
       fields: [fields.name, fields.active],
-      permission: 'manage-pts-work-categories',
+      permission: 'update-pts-work-categories',
       route: { name: 'master-data-pts-work-categories-edit', params: (id) => ({ ptsWorkCategoryId: String(id) }) },
     },
-    delete: { run: api.delete, permission: 'manage-pts-work-categories' },
+    delete: { run: api.delete, permission: 'delete-pts-work-categories' },
   },
 })

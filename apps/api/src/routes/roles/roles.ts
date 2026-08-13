@@ -19,15 +19,19 @@ import { assignRolePermission, listRolePermissions, revokeRolePermission } from 
 import { assignSystemRole, listSystemRoleAssignments, revokeSystemRole } from './system-role-assignments.routes'
 import { deleteUnassignedRole } from '../../authorization'
 
-const readRoles = [authenticated(), requirePermission('view-roles')]
-const writeRoles = [authenticated(), requirePermission('manage-roles')]
-const readPermissions = [authenticated(), requirePermission('view-permissions')]
+const listRoles = [authenticated(), requirePermission('list-roles')]
+const detailRoles = [authenticated(), requirePermission('detail-roles')]
+const createRoles = [authenticated(), requirePermission('create-roles')]
+const updateRoles = [authenticated(), requirePermission('update-roles')]
+const deleteRoles = [authenticated(), requirePermission('delete-roles')]
+const listPermissions = [authenticated(), requirePermission('list-permissions')]
+const detailPermissions = [authenticated(), requirePermission('detail-permissions')]
 
 const deleteRole = defineRoute({
   path: '/:id',
   method: 'delete',
   kind: 'delete',
-  authorize: writeRoles,
+  authorize: deleteRoles,
   action: async (args) => {
     const id = args.c.req.param('id')
     const identity = await orgIdentity(args)
@@ -61,18 +65,20 @@ export const domain = defineDomainPart({
 export const moduleModel = defineModel({
   path: '/modules',
   entity: authorizationModule,
-  authorize: readPermissions,
-  routes: { list: list(), detail: detail() },
+  routes: {
+    list: list({ authorize: listPermissions }),
+    detail: detail({ authorize: detailPermissions }),
+  },
 })
 
 export const roleModel = defineModel({
   path: '/roles',
   entity: role,
   routes: {
-    list: list({ authorize: readRoles }),
-    detail: detail({ authorize: readRoles }),
-    create: create({ authorize: writeRoles }),
-    update: update({ authorize: writeRoles }),
+    list: list({ authorize: listRoles }),
+    detail: detail({ authorize: detailRoles }),
+    create: create({ authorize: createRoles }),
+    update: update({ authorize: updateRoles }),
     delete: deleteRole,
   },
 })
@@ -80,8 +86,10 @@ export const roleModel = defineModel({
 export const permissionModel = defineModel({
   path: '/permissions',
   entity: permission,
-  authorize: readPermissions,
-  routes: { list: list(), detail: detail() },
+  routes: {
+    list: list({ authorize: listPermissions }),
+    detail: detail({ authorize: detailPermissions }),
+  },
 })
 
 export {
