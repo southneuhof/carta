@@ -346,7 +346,7 @@ function rendererFor(renderer: string | undefined) {
           @end="reorder"
         >
           <template #item="{ element: record, index }">
-            <tr class="group transition-colors hover:bg-primary/[6%] focus-within:bg-primary/[6%]" @click="emit('row-click', record, index)">
+            <tr class="group hover:bg-primary/[6%] focus-within:bg-primary/[6%]" @click="emit('row-click', record, index)">
               <td v-if="$slots['row-prefix']" class="w-px whitespace-nowrap px-3 py-2" style="width: 1%" @click.stop>
                 <slot name="row-prefix" :record="record" :index="index" />
               </td>
@@ -364,7 +364,7 @@ function rendererFor(renderer: string | undefined) {
           <tr
             v-for="(row, index) in table.getRowModel().rows"
             :key="row.id"
-            class="group transition-colors hover:bg-primary/[6%] focus-within:bg-primary/[6%]"
+            class="group hover:bg-primary/[6%] focus-within:bg-primary/[6%]"
             @click="emit('row-click', row.original, index)"
           >
             <td v-if="$slots['row-prefix']" class="w-px whitespace-nowrap pr-0 pl-3 py-2" style="width: 1%" @click.stop>

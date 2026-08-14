@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Button, Card, Chip, Icon, ImagePreview } from '@southneuhof/is-vue-framework/components/base'
 import { fileUrl } from '@/framework/adapters/storage'
+import { codeLabel, criteriaLabels, stepLabels } from './pts.schema'
 
 defineProps<{ records: readonly Record<string, unknown>[] }>()
 const emit = defineEmits<{ delete: [id: string] }>()
@@ -9,7 +10,7 @@ type ChipColor = 'info' | 'warning' | 'success'
 
 const statusLabels: Record<string, string> = {
   open: 'Open',
-  'on-progress': 'On progress',
+  'on-progress': 'In progress',
   close: 'Closed',
 }
 
@@ -58,6 +59,14 @@ function statusLabel(value: unknown) {
 function statusColor(value: unknown) {
   return statusColors[String(value)] ?? 'info'
 }
+
+function criteriaLabel(value: unknown) {
+  return codeLabel(value, criteriaLabels)
+}
+
+function stepLabel(value: unknown) {
+  return codeLabel(value, stepLabels)
+}
 </script>
 
 <template>
@@ -73,26 +82,25 @@ function statusColor(value: unknown) {
       :key="String(record.id)"
       variant="outlined"
       color="surfaceContainer"
-      class="h-full p-0 transition-[transform,box-shadow] hover:-translate-y-0.5 hover:shadow-elevation-1"
+      class="group overlay relative h-full overflow-hidden p-0 after:pointer-events-none after:z-10 after:bg-on-surface/[4%]"
     >
       <RouterLink
         :to="{ name: 'quality-pts-detail', params: { ptsId: String(record.id) } }"
-        class="group flex h-full flex-col outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+        class="relative flex h-full flex-col outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
       >
         <div class="grid grid-cols-3 gap-px bg-outline-variant">
           <div v-for="item in imageItems" :key="item.key" class="min-w-0 bg-surface-container-high p-2">
-            <div class="mb-2 flex items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-on-surface-variant">
-              <span>{{ item.label }}</span>
-              <Icon name="image" size="xs" />
-            </div>
-            <ImagePreview v-if="image(record[item.key])" :image-u-r-l="image(record[item.key])" :disable-controls="true" class="aspect-[4/3] h-36 w-full rounded-lg" />
-            <div v-else class="flex aspect-[4/3] min-h-0 w-full items-center justify-center rounded-lg bg-surface-container-highest text-on-surface-variant">
-              <Icon name="image" size="lg" />
+            <div class="relative aspect-[4/3] w-full overflow-hidden rounded-lg">
+              <ImagePreview v-if="image(record[item.key])" :image-u-r-l="image(record[item.key])" :disable-controls="true" class="h-full w-full rounded-lg" />
+              <div v-else class="flex h-full w-full items-center justify-center bg-surface-container-highest text-on-surface-variant">
+                <Icon name="image" size="lg" />
+              </div>
+              <span class="pointer-events-none absolute left-2 top-2 z-10 rounded-md bg-surface/[88%] px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-on-surface-variant">{{ item.label }}</span>
             </div>
           </div>
         </div>
 
-        <div class="flex flex-1 flex-col gap-4 p-5">
+        <div class="flex flex-1 flex-col gap-4 p-5 pb-16">
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
               <h2 class="truncate text-lg font-semibold tracking-tight group-hover:text-primary">{{ value(record, 'number') }}</h2>
@@ -112,11 +120,11 @@ function statusColor(value: unknown) {
           <dl class="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-outline-variant pt-4 text-sm">
             <div class="min-w-0">
               <dt class="text-on-surface-variant">Criteria</dt>
-              <dd class="mt-0.5 font-medium">{{ value(record, 'criteriaCode') }}</dd>
+              <dd class="mt-0.5 font-medium">{{ criteriaLabel(record.criteriaCode) }}</dd>
             </div>
             <div class="min-w-0">
               <dt class="text-on-surface-variant">Step</dt>
-              <dd class="mt-0.5 font-medium">{{ value(record, 'stepCode') }}</dd>
+              <dd class="mt-0.5 font-medium">{{ stepLabel(record.stepCode) }}</dd>
             </div>
             <div class="min-w-0">
               <dt class="text-on-surface-variant">Division</dt>
@@ -132,20 +140,22 @@ function statusColor(value: unknown) {
             <p class="text-on-surface-variant">Root causes</p>
             <p class="mt-1 line-clamp-2 font-medium">{{ rootCauseNames(record) }}</p>
             <p class="mt-3 line-clamp-2 text-on-surface-variant">{{ value(record, 'description') }}</p>
-            <span class="mt-4 inline-flex items-center gap-1.5 font-medium text-primary">
-              Open report
-              <Icon name="arrow-right" size="sm" class="transition-transform group-hover:translate-x-0.5" />
-            </span>
           </div>
         </div>
       </RouterLink>
 
-      <div v-if="Array.isArray(record.allowedOperations) && record.allowedOperations.includes('delete')" class="flex justify-end border-t border-outline-variant px-5 py-2">
-        <Button type="button" variant="text" color="error" @click.stop="emit('delete', String(record.id))">
-          <template #icon><Icon name="delete-bin" size="base" /></template>
-          Delete
-        </Button>
-      </div>
+      <Button
+        v-if="Array.isArray(record.allowedOperations) && record.allowedOperations.includes('delete')"
+        type="button"
+        kind="icon"
+        variant="standard"
+        color="error"
+        aria-label="Delete"
+        class="absolute bottom-3 right-3 z-20"
+        @click.stop="emit('delete', String(record.id))"
+      >
+        <template #icon><Icon name="delete-bin" size="base" /></template>
+      </Button>
     </Card>
   </div>
 </template>

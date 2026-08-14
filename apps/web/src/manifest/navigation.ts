@@ -3,7 +3,7 @@ import { defineNavigation, type NavigationIcon, type NavigationModule } from './
 export const navigation = defineNavigation([
   { name: 'dashboard', title: 'Dashboard', icon: 'home', description: 'Dashboard', routes: [{ to: { name: 'dashboard' }, permission: null, title: 'Dashboard', icon: 'home' }] },
   { name: 'to-do', title: 'To Do', icon: 'inbox', description: 'Task inbox', routes: [{ to: { name: 'to-do' }, permission: null, title: 'To Do', icon: 'inbox' }] },
-  { name: 'quality', title: 'Quality', icon: 'folder', description: 'Quality workflows', routes: [{ to: { name: 'quality-pts' }, permission: 'view-qhsse-pts', title: 'Manual PTS', icon: 'folder' }] },
+  { name: 'quality', title: 'Quality', icon: 'folder', description: 'Quality workflows', routes: [{ to: { name: 'quality-pts' }, permission: 'view-qhsse-pts', title: 'PTS', icon: 'folder' }] },
   {
     name: 'settings',
     title: 'Pengaturan',

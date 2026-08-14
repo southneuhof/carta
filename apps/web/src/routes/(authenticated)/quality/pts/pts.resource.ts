@@ -7,7 +7,7 @@ import { rootCauses } from '@/routes/(authenticated)/master-data/root-causes/roo
 import { workItems } from '@/routes/(authenticated)/master-data/work-items/work-items.resource'
 import { users } from '@/routes/(authenticated)/settings/users/users.resource'
 import { ptsActions } from './pts.actions'
-import { criteriaOptions, dispositionOptions, jobImplementorOptions, ptsSchema } from './pts.schema'
+import { codeLabel, criteriaOptions, dispositionOptions, jobImplementorOptions, ptsSchema, stepLabels } from './pts.schema'
 
 function relationName(record: unknown, key: string, fallback?: string) {
   if (!record || typeof record !== 'object') return fallback
@@ -33,8 +33,8 @@ const criteriaDisplay = {
 } as const
 const statusDisplay = {
   open: { color: 'info', label: 'Open' },
-  'on-progress': { color: 'warning', label: 'On progress' },
-  close: { color: 'success', label: 'Close' },
+  'on-progress': { color: 'warning', label: 'In progress' },
+  close: { color: 'success', label: 'Closed' },
 } as const
 
 const fields = defineFields(ptsSchema, {
@@ -79,7 +79,7 @@ const fields = defineFields(ptsSchema, {
   description: { label: 'Description', form: { renderer: 'textarea' } },
   imgBefore: { label: 'Before Image', form: { renderer: 'image', props: { required: true } }, write: writeImagePath },
   statusCode: { label: 'Status', display: { renderer: 'chip', props: { options: statusDisplay } }, table: { align: 'center' } },
-  stepCode: { label: 'Step', table: { sortable: true } },
+  stepCode: { label: 'Step', read: (record) => codeLabel(record.stepCode, stepLabels), table: { sortable: true } },
   somUserId: { label: 'SOM User' },
   temporaryFollowUpPlan: { label: 'Temporary Follow-up Plan' },
   managementNotes: { label: 'Management Notes' },

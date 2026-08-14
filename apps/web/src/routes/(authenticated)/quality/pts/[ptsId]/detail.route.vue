@@ -7,6 +7,7 @@ import { Button, Card, Chip, Icon, ImagePreview, Timeline } from '@southneuhof/i
 import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composites/ConfirmationDialog.vue'
 import { fileUrl } from '@/framework/adapters/storage'
 import { pts, ptsActionFields } from '../pts.resource'
+import { codeLabel, dispositionLabels, jobImplementorLabels, stepLabels } from '../pts.schema'
 
 const route = useRoute('quality-pts-detail')
 const router = useRouter()
@@ -36,11 +37,11 @@ const actionLabels: Record<string, string> = {
   delete: 'Delete',
 }
 
-type ActionIcon = 'flow-chart' | 'sticky-note' | 'task' | 'tools' | 'money-dollar-box' | 'image-edit' | 'shield-check' | 'checkbox-circle' | 'close-circle' | 'delete-bin' | 'arrow-right-circle'
+type ActionIcon = 'git-merge' | 'sticky-note' | 'task' | 'tools' | 'money-dollar-box' | 'image-edit' | 'shield-check' | 'checkbox-circle' | 'close-circle' | 'delete-bin' | 'arrow-right-circle'
 
 const statusLabels: Record<string, string> = {
   open: 'Open',
-  'on-progress': 'On progress',
+  'on-progress': 'In progress',
   close: 'Closed',
 }
 
@@ -51,7 +52,7 @@ const statusColors: Record<string, 'info' | 'warning' | 'success'> = {
 }
 
 const actionIcons: Record<string, ActionIcon> = {
-  disposition: 'flow-chart',
+  disposition: 'git-merge',
   'temporary-plan': 'sticky-note',
   'management-notes': 'task',
   'complete-report': 'checkbox-circle',
@@ -84,7 +85,8 @@ const actionFields: Record<string, Record<string, unknown>> = {
 
 const dialogFields = computed(() => actionFields[activeAction.value ?? ''] ?? {})
 const availableActions = computed(() => (Array.isArray(record.value?.availableActions) ? (record.value.availableActions as string[]) : []))
-type DetailSection = { title: string; fields: Record<string, { label: string }> }
+type DetailSection = { title: string; fields: Record<string, { label: string; read?: (record: Record<string, any>) => unknown }> }
+const implementationStatusLabels = { waiting: 'Waiting', approved: 'Approved', rejected: 'Rejected' }
 
 function hasValue(row: Record<string, any>, ...keys: string[]) {
   return keys.some((key) => row[key] !== undefined && row[key] !== null && row[key] !== '')
@@ -109,6 +111,10 @@ function statusColor(value: unknown) {
   return statusColors[String(value)] ?? 'info'
 }
 
+function stepLabel(value: unknown) {
+  return codeLabel(value, stepLabels)
+}
+
 function actionIcon(action: string): ActionIcon {
   return actionIcons[action] ?? 'arrow-right-circle'
 }
@@ -122,7 +128,7 @@ const completedSections = computed<DetailSection[]>(() => {
   const row = record.value
   if (!row) return []
   const sections: Array<DetailSection & { visible: boolean }> = [
-    { title: 'Disposition', fields: { dispositionStatusCode: { label: 'Disposition' } }, visible: hasValue(row, 'dispositionStatusCode') },
+    { title: 'Disposition', fields: { dispositionStatusCode: { label: 'Disposition', read: (value) => codeLabel(value.dispositionStatusCode, dispositionLabels) } }, visible: hasValue(row, 'dispositionStatusCode') },
     { title: 'Temporary plan', fields: { temporaryFollowUpPlan: { label: 'Temporary Follow-up Plan' } }, visible: hasValue(row, 'temporaryFollowUpPlan') },
     { title: 'Management notes', fields: { managementNotes: { label: 'Management Notes' } }, visible: hasValue(row, 'managementNotes') },
     {
@@ -137,7 +143,11 @@ const completedSections = computed<DetailSection[]>(() => {
     },
     {
       title: 'Price follow-up',
-      fields: { estimationCost: { label: 'Estimated Cost' }, jobImplementorType: { label: 'Job Implementor' }, projectVendorId: { label: 'Project Vendor' } },
+      fields: {
+        estimationCost: { label: 'Estimated Cost' },
+        jobImplementorType: { label: 'Job Implementor', read: (value) => codeLabel(value.jobImplementorType, jobImplementorLabels) },
+        projectVendorId: { label: 'Project Vendor' },
+      },
       visible: hasValue(row, 'estimationCost', 'jobImplementorType', 'projectVendorId'),
     },
     {
@@ -147,15 +157,19 @@ const completedSections = computed<DetailSection[]>(() => {
     },
     {
       title: 'Verification',
-      fields: { implementationStatusCode: { label: 'Verification' }, implementationVerificationDescription: { label: 'Verification Description' } },
+      fields: { implementationStatusCode: { label: 'Verification', read: (value) => codeLabel(value.implementationStatusCode, implementationStatusLabels) }, implementationVerificationDescription: { label: 'Verification Description' } },
       visible: hasValue(row, 'implementationStatusCode', 'implementationVerificationDescription'),
     },
     {
       title: 'Realization',
-      fields: { actualCost: { label: 'Actual Cost' }, actualJobImplementorType: { label: 'Actual Job Implementor' }, actualProjectVendorId: { label: 'Actual Project Vendor' } },
+      fields: {
+        actualCost: { label: 'Actual Cost' },
+        actualJobImplementorType: { label: 'Actual Job Implementor', read: (value) => codeLabel(value.actualJobImplementorType, jobImplementorLabels) },
+        actualProjectVendorId: { label: 'Actual Project Vendor' },
+      },
       visible: hasValue(row, 'actualCost', 'actualJobImplementorType', 'actualProjectVendorId'),
     },
-    { title: 'Close', fields: { statusCode: { label: 'Status' }, updatedAt: { label: 'Closed at' } }, visible: row.statusCode === 'close' },
+    { title: 'Close', fields: { statusCode: { label: 'Status', read: (value) => statusLabel(value.statusCode) }, updatedAt: { label: 'Closed at' } }, visible: row.statusCode === 'close' },
   ]
   return sections.filter((section) => section.visible).map(({ title, fields }) => ({ title, fields }))
 })
@@ -227,12 +241,12 @@ async function closeAction(setOpen: (value: boolean) => void) {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
-    <NavigationHeader title="Manual PTS" :back-to="{ name: 'quality-pts' }" back-label="Kembali">
+  <div class="flex flex-col gap-2">
+    <NavigationHeader title="PTS" :back-to="{ name: 'quality-pts' }" back-label="Kembali">
       <template #header>
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-2">
-            <h1 class="text-lg font-semibold leading-6 tracking-tight text-on-surface">Manual PTS</h1>
+            <h1 class="text-lg font-semibold leading-6 tracking-tight text-on-surface">PTS</h1>
             <Chip v-if="record" variant="tonal" :color="statusColor(record.statusCode)">{{ statusLabel(record.statusCode) }}</Chip>
           </div>
           <p class="mt-1 truncate text-sm leading-5 text-on-surface-variant">{{ value(record, 'number') }} · {{ relation(record, 'project', 'projectName') }}</p>
@@ -254,10 +268,10 @@ async function closeAction(setOpen: (value: boolean) => void) {
     >
 
     <template v-else-if="record">
-      <div class="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
-        <main class="flex min-w-0 flex-col gap-4">
+      <div class="grid items-start gap-2 xl:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
+        <main class="flex min-w-0 flex-col gap-2">
           <Card variant="outlined" color="surfaceContainer" class="gap-0 p-0">
-            <header class="flex items-center justify-between gap-4 border-b border-outline-variant px-5 py-4 sm:px-6">
+            <header class="flex items-center justify-between gap-2 border-b border-outline-variant px-5 py-4 sm:px-6">
               <div>
                 <h2 class="font-semibold">Evidence</h2>
                 <p class="mt-1 text-sm text-on-surface-variant">Before, during, and after the corrective work.</p>
@@ -274,20 +288,19 @@ async function closeAction(setOpen: (value: boolean) => void) {
                 :key="item.label"
                 class="bg-surface-container-low p-3"
               >
-                <div class="mb-2 flex items-center justify-between gap-2 text-sm font-medium">
-                  <span>{{ item.label }}</span>
-                  <Icon name="image" size="sm" class="text-on-surface-variant" />
-                </div>
-                <ImagePreview v-if="image(item.value)" :image-u-r-l="image(item.value)" :disable-controls="true" class="aspect-[4/3] h-48 w-full rounded-lg" />
-                <div v-else class="flex aspect-[4/3] h-48 w-full items-center justify-center rounded-lg bg-surface-container-high text-on-surface-variant">
-                  <Icon name="image" size="2xl" />
+                <div class="relative aspect-[4/3] w-full overflow-hidden rounded-lg">
+                  <ImagePreview v-if="image(item.value)" :image-u-r-l="image(item.value)" :disable-controls="true" class="h-full w-full rounded-lg" />
+                  <div v-else class="flex h-full w-full items-center justify-center bg-surface-container-high text-on-surface-variant">
+                    <Icon name="image" size="2xl" />
+                  </div>
+                  <span class="pointer-events-none absolute left-3 top-3 z-10 rounded-md bg-surface/[88%] px-2 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-on-surface-variant">{{ item.label }}</span>
                 </div>
               </div>
             </div>
           </Card>
 
           <Card variant="outlined" color="surfaceContainer" class="gap-0 p-0">
-            <header class="flex items-center justify-between gap-4 border-b border-outline-variant px-5 py-4 sm:px-6">
+            <header class="flex items-center justify-between gap-2 border-b border-outline-variant px-5 py-4 sm:px-6">
               <div>
                 <h2 class="font-semibold">Report overview</h2>
                 <p class="mt-1 text-sm text-on-surface-variant">The finding and its original context.</p>
@@ -336,14 +349,14 @@ async function closeAction(setOpen: (value: boolean) => void) {
           </Card>
         </main>
 
-        <aside class="xl:sticky xl:top-4">
-          <Card variant="outlined" color="surfaceContainerLow" class="gap-0 p-0">
+        <aside class="xl:sticky xl:-top-6">
+          <Card variant="outlined" color="surfaceContainer" class="gap-0 p-0">
             <header class="border-b border-outline-variant px-5 py-4">
               <div class="flex items-center justify-between gap-3">
                 <h2 class="font-semibold">Next actions</h2>
-                <Icon name="flow-chart" size="xl" class="text-primary" />
+                <Icon name="git-merge" size="xl" class="text-primary" />
               </div>
-              <p class="mt-1 text-sm text-on-surface-variant">Step: {{ value(record, 'stepCode') }}</p>
+              <p class="mt-1 text-sm text-on-surface-variant">Step: {{ stepLabel(record.stepCode) }}</p>
             </header>
             <div class="flex flex-col gap-2 p-4">
               <template v-for="action in availableActions" :key="action">
@@ -375,7 +388,7 @@ async function closeAction(setOpen: (value: boolean) => void) {
                   <Icon name="shield-check" size="lg" class="text-warning" />
                   <h3 class="font-medium">Verification required</h3>
                 </div>
-                <Detail class="mt-3" :fields="{ implementationStatusCode: { label: 'Implementation status' } } as never" :data="record" />
+                <Detail class="mt-3" :fields="{ implementationStatusCode: { label: 'Implementation status', read: (value: Record<string, any>) => codeLabel(value.implementationStatusCode, implementationStatusLabels) } } as never" :data="record" />
               </div>
             </div>
           </Card>

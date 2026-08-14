@@ -26,42 +26,42 @@ const colorMap = {
   primary: {
     fill: 'bg-primary  text-on-primary ',
     tonal: 'bg-primary-container text-on-primary-container  ',
-    outline: 'outline outline-1 outline-primary ',
+    outline: 'outline outline-1 outline-primary/[24%] ',
   },
   secondary: {
     fill: 'bg-secondary  text-on-secondary ',
     tonal: 'bg-secondary-container text-on-secondary-container  ',
-    outline: 'outline outline-1 outline-secondary ',
+    outline: 'outline outline-1 outline-secondary/[24%] ',
   },
   tertiary: {
     fill: 'bg-tertiary  text-on-tertiary ',
     tonal: 'bg-tertiary-container text-on-tertiary-container  ',
-    outline: 'outline outline-1 outline-tertiary ',
+    outline: 'outline outline-1 outline-tertiary/[24%] ',
   },
   success: {
     fill: 'bg-success  text-on-success ',
     tonal: 'bg-success-container text-on-success-container  ',
-    outline: 'outline outline-1 outline-success ',
+    outline: 'outline outline-1 outline-success/[24%] ',
   },
   error: {
     fill: 'bg-error  text-on-error ',
     tonal: 'bg-error-container text-on-error-container  ',
-    outline: 'outline outline-1 outline-error ',
+    outline: 'outline outline-1 outline-error/[24%] ',
   },
   warning: {
     fill: 'bg-warning  text-on-warning ',
     tonal: 'bg-warning-container text-on-warning-container  ',
-    outline: 'outline outline-1 outline-warning ',
+    outline: 'outline outline-1 outline-warning/[24%] ',
   },
   info: {
     fill: 'bg-info  text-on-info ',
     tonal: 'bg-info-container text-on-info-container  ',
-    outline: 'outline outline-1 outline-info ',
+    outline: 'outline outline-1 outline-info/[24%] ',
   },
   neutral: {
     fill: 'bg-surface-variant text-on-surface-variant ',
     tonal: 'bg-surface-container-high  text-on-surface ',
-    outline: 'outline outline-1 outline-surface-variant ',
+    outline: 'outline outline-1 outline-outline/[24%] ',
   },
 }
 </script>

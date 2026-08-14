@@ -7,6 +7,34 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  background: rgb(var(--md-sys-color-surface-container-low));
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  font-family: 'Geist Sans', ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgb(var(--md-sys-color-primary));
+  color: rgb(var(--md-sys-color-on-primary));
+}
+
+* {
+  scrollbar-color: rgb(var(--md-sys-color-outline) / 0.4) transparent;
+  scrollbar-width: thin;
+}
+
 .vfade-enter-active,
 .vfade-leave-active {
   transition: all 0.2s ease;
@@ -56,7 +84,6 @@ span a,
   opacity: 1;
   transform: translateX(0%);
 }
-
 
 @layer components {
   .overlay {
@@ -145,66 +172,66 @@ body:has(.tox-dialog-wrap) [data-radix-dialog-overlay] {
 /* #tinymce */
 @layer base {
   @font-face {
-    font-family: "Geist Sans";
+    font-family: 'Geist Sans';
     font-style: normal;
     font-weight: 100;
-    src: url("/src/assets/fonts/Geist-Thin.otf") format("opentype");
+    src: url('/src/assets/fonts/Geist-Thin.otf') format('opentype');
   }
 
   @font-face {
-    font-family: "Geist Sans";
+    font-family: 'Geist Sans';
     font-style: normal;
     font-weight: 200;
-    src: url("/src/assets/fonts/Geist-UltraLight.otf") format("opentype");
+    src: url('/src/assets/fonts/Geist-UltraLight.otf') format('opentype');
   }
 
   @font-face {
-    font-family: "Geist Sans";
+    font-family: 'Geist Sans';
     font-style: normal;
     font-weight: 300;
-    src: url("/src/assets/fonts/Geist-Light.otf") format("opentype");
+    src: url('/src/assets/fonts/Geist-Light.otf') format('opentype');
   }
 
   @font-face {
-    font-family: "Geist Sans";
+    font-family: 'Geist Sans';
     font-style: normal;
     font-weight: 400;
-    src: url("/src/assets/fonts/Geist-Regular.otf") format("opentype");
+    src: url('/src/assets/fonts/Geist-Regular.otf') format('opentype');
   }
 
   @font-face {
-    font-family: "Geist Sans";
+    font-family: 'Geist Sans';
     font-style: normal;
     font-weight: 500;
-    src: url("/src/assets/fonts/Geist-Medium.otf") format("opentype");
+    src: url('/src/assets/fonts/Geist-Medium.otf') format('opentype');
   }
 
   @font-face {
-    font-family: "Geist Sans";
+    font-family: 'Geist Sans';
     font-style: normal;
     font-weight: 600;
-    src: url("/src/assets/fonts/Geist-SemiBold.otf") format("opentype");
+    src: url('/src/assets/fonts/Geist-SemiBold.otf') format('opentype');
   }
 
   @font-face {
-    font-family: "Geist Sans";
+    font-family: 'Geist Sans';
     font-style: normal;
     font-weight: 700;
-    src: url("/src/assets/fonts/Geist-Bold.otf") format("opentype");
+    src: url('/src/assets/fonts/Geist-Bold.otf') format('opentype');
   }
 
   @font-face {
-    font-family: "Geist Sans";
+    font-family: 'Geist Sans';
     font-style: normal;
     font-weight: 800;
-    src: url("/src/assets/fonts/Geist-Black.otf") format("opentype");
+    src: url('/src/assets/fonts/Geist-Black.otf') format('opentype');
   }
 
   @font-face {
-    font-family: "Geist Sans";
+    font-family: 'Geist Sans';
     font-style: normal;
     font-weight: 900;
-    src: url("/src/assets/fonts/Geist-UltraBlack.otf") format("opentype");
+    src: url('/src/assets/fonts/Geist-UltraBlack.otf') format('opentype');
   }
 }
 

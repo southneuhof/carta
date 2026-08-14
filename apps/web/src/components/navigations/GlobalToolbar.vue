@@ -15,7 +15,9 @@ const breadcrumbs = computed(() => routeBreadcrumbs(route, router, visibleNaviga
 </script>
 
 <template>
-  <header class="sticky top-0 z-10 grid h-16 grid-cols-[minmax(0,1fr)_auto] items-center border-b border-outline-variant bg-surface-container px-4 text-on-surface lg:static lg:h-full lg:px-8">
+  <header
+    class="sticky top-0 z-10 grid h-16 grid-cols-[minmax(0,1fr)_auto] items-center border-b border-outline-variant bg-surface-container-low px-4 text-on-surface lg:static lg:h-full lg:border-b-0 lg:pl-8 lg:pr-11"
+  >
     <div class="flex min-w-0 items-center gap-3">
       <button data-mobile-menu-trigger type="button" aria-label="Open menu" class="flex size-11 shrink-0 items-center justify-center lg:hidden" @click="$emit('openNavigation')">
         <Icon name="menu" />
@@ -26,7 +28,7 @@ const breadcrumbs = computed(() => routeBreadcrumbs(route, router, visibleNaviga
           <li v-for="(item, index) in breadcrumbs" :key="`${item.label}-${index}`" class="flex min-w-0 items-center gap-2">
             <span v-if="index" aria-hidden="true" class="text-on-surface-variant">/</span>
             <RouterLink v-if="item.to" :to="item.to" class="truncate text-on-surface-variant hover:text-on-surface">{{ item.label }}</RouterLink>
-            <span v-else class="truncate font-medium" :aria-current="index === breadcrumbs.length - 1 ? 'page' : undefined">{{ item.label }}</span>
+            <span v-else class="truncate font-semibold tracking-[-0.01em]" :aria-current="index === breadcrumbs.length - 1 ? 'page' : undefined">{{ item.label }}</span>
           </li>
         </ol>
       </nav>

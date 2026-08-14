@@ -32,3 +32,29 @@ export const jobImplementorOptions = [
   { id: 'internal', name: 'Internal' },
   { id: 'vendor', name: 'Vendor/Subkon' },
 ] as const
+
+export const stepLabels: Record<string, string> = {
+  report: 'Report',
+  'high-disposition': 'High disposition',
+  'low-disposition': 'Low disposition',
+  'temporary-plan': 'Temporary plan',
+  'management-notes': 'Management notes',
+  'complete-report': 'Complete report',
+  'follow-up-implementation': 'Implementation follow-up',
+  'follow-up-price': 'Price follow-up',
+  'follow-up': 'Follow-up',
+  'implementation-report': 'Implementation report',
+  'approved-implementation': 'Approved implementation',
+  realization: 'Realization',
+  close: 'Closed',
+}
+
+export const dispositionLabels = Object.fromEntries(dispositionOptions.map(({ id, name }) => [id, name])) as Record<string, string>
+export const criteriaLabels = Object.fromEntries(criteriaOptions.map(({ id, name }) => [id, name])) as Record<string, string>
+export const jobImplementorLabels = Object.fromEntries(jobImplementorOptions.map(({ id, name }) => [id, name])) as Record<string, string>
+
+export function codeLabel(value: unknown, labels: Record<string, string> = {}) {
+  const code = String(value ?? '')
+  if (!code) return '—'
+  return labels[code] ?? code.replace(/[-_]+/g, ' ').replace(/^\w/, (character) => character.toUpperCase())
+}

@@ -113,9 +113,7 @@ module.exports = {
   plugins: [
     require('tailwindcss-animate'),
     plugin(function ({ addBase }) {
-      addBase({
-        html: { fontSize: '14px' },
-      })
+      addBase({ html: { fontSize: '16px' } })
     }),
     plugin(function ({ matchUtilities, theme }) {
       matchUtilities(
