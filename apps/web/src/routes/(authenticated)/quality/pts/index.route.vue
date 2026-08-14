@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { ListView } from '@southneuhof/is-vue-framework'
-import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
+import { Button, Icon } from '@southneuhof/is-vue-framework/components/base'
 import ChipFilter from '@southneuhof/is-vue-framework/components/composites/ChipFilter.vue'
 import DialogForm from '@southneuhof/is-vue-framework/components/composites/DialogForm.vue'
 import PtsCardGrid from './PtsCardGrid.vue'
@@ -69,14 +69,28 @@ async function submitDelete(input: Record<string, unknown>) {
 </script>
 
 <template>
-  <ListView v-bind="pts.list()" title="Manual PTS" :query="query" :filters="filters" :presentation="view === 'grid' ? 'custom' : 'table'" @update:query="query = $event">
+  <ListView
+    v-bind="pts.list()"
+    title="Manual PTS"
+    description="Review findings, assign follow-up work, and close reports."
+    :query="query"
+    :filters="filters"
+    :presentation="view === 'grid' ? 'custom' : 'table'"
+    @update:query="query = $event"
+  >
     <template #filters>
       <ChipFilter v-model="status" :items="statusItems" @update:model-value="setStatus" />
     </template>
     <template #controls>
-      <div class="flex gap-1">
-        <Button type="button" :variant="view === 'table' ? 'tonal' : 'standard'" aria-label="Table view" @click="view = 'table'">Table</Button>
-        <Button type="button" :variant="view === 'grid' ? 'tonal' : 'standard'" aria-label="Grid view" @click="view = 'grid'">Cards</Button>
+      <div class="flex items-center gap-1 rounded-full bg-surface-container-low p-1">
+        <Button type="button" :variant="view === 'table' ? 'tonal' : 'text'" aria-label="Table view" @click="view = 'table'">
+          <template #icon><Icon name="table-view" /></template>
+          Table
+        </Button>
+        <Button type="button" :variant="view === 'grid' ? 'tonal' : 'text'" aria-label="Grid view" @click="view = 'grid'">
+          <template #icon><Icon name="layout-grid" /></template>
+          Cards
+        </Button>
       </div>
     </template>
     <template #custom="collection">
@@ -85,7 +99,9 @@ async function submitDelete(input: Record<string, unknown>) {
       <p v-else-if="collection.error" class="p-4 text-center text-error" role="alert">{{ collection.error.message }}</p>
     </template>
     <template #row-actions="{ record }">
-      <Button v-if="canDelete(record)" type="button" kind="icon" variant="standard" color="error" aria-label="Delete" @click.stop="openDelete(String(record.id))">Delete</Button>
+      <Button v-if="canDelete(record)" type="button" kind="icon" variant="standard" color="error" aria-label="Delete" @click.stop="openDelete(String(record.id))">
+        <template #icon><Icon name="delete-bin" size="base" /></template>
+      </Button>
     </template>
   </ListView>
   <DialogForm
@@ -94,6 +110,11 @@ async function submitDelete(input: Record<string, unknown>) {
     :fields="deleteFields as never"
     :initial-data="{ deletedReason: '' }"
     :submit="submitDelete"
-    @update:open="(open) => { deleteOpen = open; if (!open) deleteId = undefined }"
+    @update:open="
+      (open) => {
+        deleteOpen = open
+        if (!open) deleteId = undefined
+      }
+    "
   />
 </template>

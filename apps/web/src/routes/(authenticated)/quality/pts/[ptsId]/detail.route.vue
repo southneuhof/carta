@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { Detail, DialogForm, NavigationHeader, useLoader, recordKey } from '@southneuhof/is-vue-framework'
-import { Button, Card, ImagePreview, Timeline } from '@southneuhof/is-vue-framework/components/base'
+import { Button, Card, Chip, Icon, ImagePreview, Timeline } from '@southneuhof/is-vue-framework/components/base'
 import ConfirmationDialog from '@southneuhof/is-vue-framework/components/composites/ConfirmationDialog.vue'
 import { fileUrl } from '@/framework/adapters/storage'
 import { pts, ptsActionFields } from '../pts.resource'
@@ -17,7 +17,7 @@ const loaded = useLoader({
   context: { id: detail.id, searchParameters: detail.searchParameters },
   load: detail.run,
 })
-const record = computed(() => loaded.data.value as (Record<string, any> | undefined))
+const record = computed(() => loaded.data.value as Record<string, any> | undefined)
 const activeAction = ref<string>()
 const dialogOpen = ref(false)
 const submitting = ref(false)
@@ -36,6 +36,34 @@ const actionLabels: Record<string, string> = {
   delete: 'Delete',
 }
 
+type ActionIcon = 'flow-chart' | 'sticky-note' | 'task' | 'tools' | 'money-dollar-box' | 'image-edit' | 'shield-check' | 'checkbox-circle' | 'close-circle' | 'delete-bin' | 'arrow-right-circle'
+
+const statusLabels: Record<string, string> = {
+  open: 'Open',
+  'on-progress': 'On progress',
+  close: 'Closed',
+}
+
+const statusColors: Record<string, 'info' | 'warning' | 'success'> = {
+  open: 'info',
+  'on-progress': 'warning',
+  close: 'success',
+}
+
+const actionIcons: Record<string, ActionIcon> = {
+  disposition: 'flow-chart',
+  'temporary-plan': 'sticky-note',
+  'management-notes': 'task',
+  'complete-report': 'checkbox-circle',
+  'follow-up-implementation': 'tools',
+  'follow-up-price': 'money-dollar-box',
+  'implementation-report': 'image-edit',
+  'verify-implementation': 'shield-check',
+  realization: 'checkbox-circle',
+  close: 'close-circle',
+  delete: 'delete-bin',
+}
+
 const actionFields: Record<string, Record<string, unknown>> = {
   disposition: { dispositionStatusCode: ptsActionFields.dispositionStatusCode },
   'temporary-plan': { temporaryFollowUpPlan: ptsActionFields.temporaryFollowUpPlan },
@@ -43,18 +71,51 @@ const actionFields: Record<string, Record<string, unknown>> = {
   'complete-report': { somUserId: ptsActionFields.somUserId, followUpPlan: ptsActionFields.followUpPlan, targetDate: ptsActionFields.targetDate },
   'follow-up-implementation': { implementationUserId: ptsActionFields.implementationUserId, workMethod: ptsActionFields.workMethod },
   'follow-up-price': { estimationCost: ptsActionFields.estimationCost, jobImplementorType: ptsActionFields.jobImplementorType, projectVendorId: ptsActionFields.projectVendorId },
-  'implementation-report': { implementationDate: ptsActionFields.implementationDate, imgProcess: ptsActionFields.imgProcess, imgAfter: ptsActionFields.imgAfter, implementationDescription: ptsActionFields.implementationDescription },
+  'implementation-report': {
+    implementationDate: ptsActionFields.implementationDate,
+    imgProcess: ptsActionFields.imgProcess,
+    imgAfter: ptsActionFields.imgAfter,
+    implementationDescription: ptsActionFields.implementationDescription,
+  },
   'verify-implementation': { implementationStatusCode: ptsActionFields.implementationStatusCode, implementationVerificationDescription: ptsActionFields.implementationVerificationDescription },
   realization: { actualCost: ptsActionFields.actualCost, actualJobImplementorType: ptsActionFields.actualJobImplementorType, actualProjectVendorId: ptsActionFields.actualProjectVendorId },
   delete: { deletedReason: { label: 'Delete reason', form: { renderer: 'textarea', props: { required: true } } } },
 }
 
 const dialogFields = computed(() => actionFields[activeAction.value ?? ''] ?? {})
-const availableActions = computed(() => Array.isArray(record.value?.availableActions) ? record.value.availableActions as string[] : [])
+const availableActions = computed(() => (Array.isArray(record.value?.availableActions) ? (record.value.availableActions as string[]) : []))
 type DetailSection = { title: string; fields: Record<string, { label: string }> }
 
 function hasValue(row: Record<string, any>, ...keys: string[]) {
   return keys.some((key) => row[key] !== undefined && row[key] !== null && row[key] !== '')
+}
+
+function value(record: Record<string, unknown> | undefined, key: string) {
+  const current = record?.[key]
+  return current == null || current === '' ? '—' : String(current)
+}
+
+function relation(record: Record<string, unknown> | undefined, key: string, fallbackKey: string) {
+  const related = record?.[key]
+  if (related && typeof related === 'object' && typeof (related as { name?: unknown }).name === 'string') return (related as { name: string }).name
+  return value(record, fallbackKey)
+}
+
+function statusLabel(value: unknown) {
+  return statusLabels[String(value)] ?? String(value || 'Unknown')
+}
+
+function statusColor(value: unknown) {
+  return statusColors[String(value)] ?? 'info'
+}
+
+function actionIcon(action: string): ActionIcon {
+  return actionIcons[action] ?? 'arrow-right-circle'
+}
+
+function openAction(action: string) {
+  activeAction.value = action
+  dialogOpen.value = true
 }
 
 const completedSections = computed<DetailSection[]>(() => {
@@ -64,15 +125,39 @@ const completedSections = computed<DetailSection[]>(() => {
     { title: 'Disposition', fields: { dispositionStatusCode: { label: 'Disposition' } }, visible: hasValue(row, 'dispositionStatusCode') },
     { title: 'Temporary plan', fields: { temporaryFollowUpPlan: { label: 'Temporary Follow-up Plan' } }, visible: hasValue(row, 'temporaryFollowUpPlan') },
     { title: 'Management notes', fields: { managementNotes: { label: 'Management Notes' } }, visible: hasValue(row, 'managementNotes') },
-    { title: 'Complete report', fields: { somUserId: { label: 'SOM User' }, followUpPlan: { label: 'Follow-up Plan' }, targetDate: { label: 'Target Date' } }, visible: hasValue(row, 'somUserId', 'followUpPlan', 'targetDate') },
-    { title: 'Implementation follow-up', fields: { implementationUserId: { label: 'Implementation User' }, workMethod: { label: 'Work Method' } }, visible: hasValue(row, 'implementationUserId', 'workMethod') },
-    { title: 'Price follow-up', fields: { estimationCost: { label: 'Estimated Cost' }, jobImplementorType: { label: 'Job Implementor' }, projectVendorId: { label: 'Project Vendor' } }, visible: hasValue(row, 'estimationCost', 'jobImplementorType', 'projectVendorId') },
-    { title: 'Implementation report', fields: { implementationDate: { label: 'Implementation Date' }, implementationDescription: { label: 'Description' } }, visible: hasValue(row, 'implementationDate', 'imgProcess', 'imgAfter', 'implementationDescription') },
-    { title: 'Verification', fields: { implementationStatusCode: { label: 'Verification' }, implementationVerificationDescription: { label: 'Verification Description' } }, visible: hasValue(row, 'implementationStatusCode', 'implementationVerificationDescription') },
-    { title: 'Realization', fields: { actualCost: { label: 'Actual Cost' }, actualJobImplementorType: { label: 'Actual Job Implementor' }, actualProjectVendorId: { label: 'Actual Project Vendor' } }, visible: hasValue(row, 'actualCost', 'actualJobImplementorType', 'actualProjectVendorId') },
+    {
+      title: 'Complete report',
+      fields: { somUserId: { label: 'SOM User' }, followUpPlan: { label: 'Follow-up Plan' }, targetDate: { label: 'Target Date' } },
+      visible: hasValue(row, 'somUserId', 'followUpPlan', 'targetDate'),
+    },
+    {
+      title: 'Implementation follow-up',
+      fields: { implementationUserId: { label: 'Implementation User' }, workMethod: { label: 'Work Method' } },
+      visible: hasValue(row, 'implementationUserId', 'workMethod'),
+    },
+    {
+      title: 'Price follow-up',
+      fields: { estimationCost: { label: 'Estimated Cost' }, jobImplementorType: { label: 'Job Implementor' }, projectVendorId: { label: 'Project Vendor' } },
+      visible: hasValue(row, 'estimationCost', 'jobImplementorType', 'projectVendorId'),
+    },
+    {
+      title: 'Implementation report',
+      fields: { implementationDate: { label: 'Implementation Date' }, implementationDescription: { label: 'Description' } },
+      visible: hasValue(row, 'implementationDate', 'imgProcess', 'imgAfter', 'implementationDescription'),
+    },
+    {
+      title: 'Verification',
+      fields: { implementationStatusCode: { label: 'Verification' }, implementationVerificationDescription: { label: 'Verification Description' } },
+      visible: hasValue(row, 'implementationStatusCode', 'implementationVerificationDescription'),
+    },
+    {
+      title: 'Realization',
+      fields: { actualCost: { label: 'Actual Cost' }, actualJobImplementorType: { label: 'Actual Job Implementor' }, actualProjectVendorId: { label: 'Actual Project Vendor' } },
+      visible: hasValue(row, 'actualCost', 'actualJobImplementorType', 'actualProjectVendorId'),
+    },
     { title: 'Close', fields: { statusCode: { label: 'Status' }, updatedAt: { label: 'Closed at' } }, visible: row.statusCode === 'close' },
   ]
-  return sections.filter((section) => section.visible).map(({ visible: _visible, ...section }) => section)
+  return sections.filter((section) => section.visible).map(({ title, fields }) => ({ title, fields }))
 })
 
 function image(value: unknown) {
@@ -86,21 +171,34 @@ function canUpdate() {
 }
 
 function filePath(value: unknown) {
-  return value && typeof value === 'object' && typeof (value as { path?: unknown }).path === 'string'
-    ? (value as { path: string }).path
-    : value
+  return value && typeof value === 'object' && typeof (value as { path?: unknown }).path === 'string' ? (value as { path: string }).path : value
 }
 
 async function runAction(action: string, input: Record<string, unknown> = {}) {
   if (submitting.value) return
   submitting.value = true
   try {
-    const actionName = action === 'delete' ? 'deleteReport' : action === 'verify-implementation' ? 'verifyImplementation' : action === 'temporary-plan' ? 'temporaryPlan' : action === 'management-notes' ? 'managementNotes' : action === 'complete-report' ? 'completeReport' : action === 'follow-up-implementation' ? 'followUpImplementation' : action === 'follow-up-price' ? 'followUpPrice' : action === 'implementation-report' ? 'implementationReport' : action
+    const actionName =
+      action === 'delete'
+        ? 'deleteReport'
+        : action === 'verify-implementation'
+        ? 'verifyImplementation'
+        : action === 'temporary-plan'
+        ? 'temporaryPlan'
+        : action === 'management-notes'
+        ? 'managementNotes'
+        : action === 'complete-report'
+        ? 'completeReport'
+        : action === 'follow-up-implementation'
+        ? 'followUpImplementation'
+        : action === 'follow-up-price'
+        ? 'followUpPrice'
+        : action === 'implementation-report'
+        ? 'implementationReport'
+        : action
     if (action === 'delete') await pts.actions.deleteReport.run(ptsId, String(input.deletedReason ?? ''))
     else {
-      const payload = action === 'implementation-report'
-        ? { ...input, imgProcess: filePath(input.imgProcess), imgAfter: filePath(input.imgAfter) }
-        : input
+      const payload = action === 'implementation-report' ? { ...input, imgProcess: filePath(input.imgProcess), imgAfter: filePath(input.imgAfter) } : input
       await (pts.actions as unknown as Record<string, { run: (id: string, value?: Record<string, unknown>) => Promise<unknown> }>)[actionName].run(ptsId, payload)
     }
     await pts.invalidate({ id: ptsId })
@@ -129,71 +227,172 @@ async function closeAction(setOpen: (value: boolean) => void) {
 </script>
 
 <template>
-  <div class="flex flex-col gap-3">
+  <div class="flex flex-col gap-4">
     <NavigationHeader title="Manual PTS" :back-to="{ name: 'quality-pts' }" back-label="Kembali">
+      <template #header>
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 class="text-lg font-semibold leading-6 tracking-tight text-on-surface">Manual PTS</h1>
+            <Chip v-if="record" variant="tonal" :color="statusColor(record.statusCode)">{{ statusLabel(record.statusCode) }}</Chip>
+          </div>
+          <p class="mt-1 truncate text-sm leading-5 text-on-surface-variant">{{ value(record, 'number') }} · {{ relation(record, 'project', 'projectName') }}</p>
+        </div>
+      </template>
       <template #controls>
-        <RouterLink v-if="canUpdate()" :to="{ name: 'quality-pts-edit', params: { ptsId } }"><Button> Edit </Button></RouterLink>
+        <RouterLink v-if="canUpdate()" v-slot="{ href, navigate }" custom :to="{ name: 'quality-pts-edit', params: { ptsId } }">
+          <Button type="button" variant="tonal" :href="href" @click="navigate">
+            <template #icon><Icon name="edit" /></template>
+            Edit report
+          </Button>
+        </RouterLink>
       </template>
     </NavigationHeader>
 
-    <Card v-if="loaded.loading.value" variant="outlined" color="surfaceContainer"><p role="status" aria-live="polite">Memuat…</p></Card>
-    <Card v-else-if="loaded.error.value" variant="outlined" color="surfaceContainer"><p role="alert">{{ loaded.error.value.message }}</p></Card>
+    <Card v-if="loaded.loading.value" variant="outlined" color="surfaceContainer" class="p-6"><p role="status" aria-live="polite">Memuat…</p></Card>
+    <Card v-else-if="loaded.error.value" variant="outlined" color="surfaceContainer" class="p-6"
+      ><p role="alert">{{ loaded.error.value.message }}</p></Card
+    >
 
     <template v-else-if="record">
-      <Card variant="outlined" color="surfaceContainer">
-        <template #header><h2 class="font-semibold">Report images</h2></template>
-        <div class="grid gap-4 sm:grid-cols-3">
-          <div v-for="item in [{ label: 'Before', value: record.imgBefore }, { label: 'Process', value: record.imgProcess }, { label: 'After', value: record.imgAfter }]" :key="item.label" class="flex flex-col gap-2">
-            <span class="text-sm text-on-surface-variant">{{ item.label }}</span>
-            <ImagePreview v-if="image(item.value)" :image-u-r-l="image(item.value)" :disable-controls="true" class="w-full" />
-            <div v-else class="flex h-40 items-center justify-center rounded-xl bg-surface-container-high text-sm text-on-surface-variant">No image</div>
-          </div>
-        </div>
-      </Card>
+      <div class="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
+        <main class="flex min-w-0 flex-col gap-4">
+          <Card variant="outlined" color="surfaceContainer" class="gap-0 p-0">
+            <header class="flex items-center justify-between gap-4 border-b border-outline-variant px-5 py-4 sm:px-6">
+              <div>
+                <h2 class="font-semibold">Evidence</h2>
+                <p class="mt-1 text-sm text-on-surface-variant">Before, during, and after the corrective work.</p>
+              </div>
+              <Icon name="image" size="2xl" class="text-primary" />
+            </header>
+            <div class="grid gap-px bg-outline-variant sm:grid-cols-3">
+              <div
+                v-for="item in [
+                  { label: 'Before', value: record.imgBefore },
+                  { label: 'Process', value: record.imgProcess },
+                  { label: 'After', value: record.imgAfter },
+                ]"
+                :key="item.label"
+                class="bg-surface-container-low p-3"
+              >
+                <div class="mb-2 flex items-center justify-between gap-2 text-sm font-medium">
+                  <span>{{ item.label }}</span>
+                  <Icon name="image" size="sm" class="text-on-surface-variant" />
+                </div>
+                <ImagePreview v-if="image(item.value)" :image-u-r-l="image(item.value)" :disable-controls="true" class="aspect-[4/3] h-48 w-full rounded-lg" />
+                <div v-else class="flex aspect-[4/3] h-48 w-full items-center justify-center rounded-lg bg-surface-container-high text-on-surface-variant">
+                  <Icon name="image" size="2xl" />
+                </div>
+              </div>
+            </div>
+          </Card>
 
-      <Card variant="outlined" color="surfaceContainer">
-        <template #header><h2 class="font-semibold">Report summary</h2></template>
-        <Detail :fields="detail.fields as never" :data="record" />
-      </Card>
+          <Card variant="outlined" color="surfaceContainer" class="gap-0 p-0">
+            <header class="flex items-center justify-between gap-4 border-b border-outline-variant px-5 py-4 sm:px-6">
+              <div>
+                <h2 class="font-semibold">Report overview</h2>
+                <p class="mt-1 text-sm text-on-surface-variant">The finding and its original context.</p>
+              </div>
+              <Chip variant="tonal" :color="statusColor(record.statusCode)">{{ statusLabel(record.statusCode) }}</Chip>
+            </header>
+            <div class="p-5 sm:p-6">
+              <Detail :fields="detail.fields as never" :data="record" />
+            </div>
+          </Card>
 
-      <Card v-for="section in completedSections" :key="section.title" variant="outlined" color="surfaceContainer">
-        <template #header><h2 class="font-semibold">{{ section.title }}</h2></template>
-        <Detail :fields="section.fields as never" :data="record" />
-      </Card>
+          <Card variant="outlined" color="surfaceContainer" class="gap-0 p-0">
+            <header class="border-b border-outline-variant px-5 py-4 sm:px-6">
+              <h2 class="font-semibold">Workflow record</h2>
+              <p class="mt-1 text-sm text-on-surface-variant">Completed steps and decisions for this report.</p>
+            </header>
+            <div v-if="completedSections.length" class="divide-y divide-outline-variant">
+              <section v-for="section in completedSections" :key="section.title" class="p-5 sm:px-6">
+                <h3 class="font-medium">{{ section.title }}</h3>
+                <Detail class="mt-3" :fields="section.fields as never" :data="record" />
+              </section>
+            </div>
+            <p v-else class="p-5 text-sm text-on-surface-variant sm:p-6">No workflow steps have been recorded.</p>
+          </Card>
 
-      <Card variant="outlined" color="surfaceContainer">
-        <template #header><h2 class="font-semibold">Workflow actions</h2></template>
-        <div class="flex flex-wrap gap-2">
-          <template v-for="action in availableActions" :key="action">
-            <ConfirmationDialog v-if="action === 'close'" :title="'Close PTS report?'" :message="'The report will move to the close state.'" :on-confirm="closeAction">
-              <template #trigger><Button :disabled="submitting">{{ actionLabels[action] }}</Button></template>
-            </ConfirmationDialog>
-            <Button v-else type="button" :color="action === 'delete' ? 'error' : 'primary'" :disabled="submitting" @click="activeAction = action; dialogOpen = true">{{ actionLabels[action] }}</Button>
-          </template>
-          <span v-if="!availableActions.length" class="text-sm text-on-surface-variant">No actions available.</span>
-        </div>
-      </Card>
+          <Card variant="outlined" color="surfaceContainer" class="gap-0 p-0">
+            <header class="flex items-center gap-3 border-b border-outline-variant px-5 py-4 sm:px-6">
+              <Icon name="history" size="xl" class="text-primary" />
+              <div>
+                <h2 class="font-semibold">History</h2>
+                <p class="mt-1 text-sm text-on-surface-variant">A record of changes and actions.</p>
+              </div>
+            </header>
+            <div class="p-5 sm:p-6">
+              <Timeline v-if="record.activity?.length" :data="record.activity">
+                <template #node><span class="size-2 rounded-full bg-primary" /></template>
+                <template #header="{ data }"
+                  ><span class="font-medium">{{ data.shortDescription }}</span></template
+                >
+                <template #content="{ data }"
+                  ><span class="text-sm text-on-surface-variant">{{ data.createdAt }}</span></template
+                >
+              </Timeline>
+              <p v-else class="text-sm text-on-surface-variant">No history yet.</p>
+            </div>
+          </Card>
+        </main>
 
-      <Card v-if="availableActions.includes('verify-implementation')" variant="outlined" color="surfaceContainer">
-        <template #header><h2 class="font-semibold">Verification required</h2></template>
-        <Detail :fields="{ implementationStatusCode: { label: 'Implementation status' } } as never" :data="record" />
-      </Card>
+        <aside class="xl:sticky xl:top-4">
+          <Card variant="outlined" color="surfaceContainerLow" class="gap-0 p-0">
+            <header class="border-b border-outline-variant px-5 py-4">
+              <div class="flex items-center justify-between gap-3">
+                <h2 class="font-semibold">Next actions</h2>
+                <Icon name="flow-chart" size="xl" class="text-primary" />
+              </div>
+              <p class="mt-1 text-sm text-on-surface-variant">Step: {{ value(record, 'stepCode') }}</p>
+            </header>
+            <div class="flex flex-col gap-2 p-4">
+              <template v-for="action in availableActions" :key="action">
+                <ConfirmationDialog v-if="action === 'close'" title="Close PTS report?" message="The report will move to the close state." :on-confirm="closeAction">
+                  <template #trigger>
+                    <Button type="button" variant="filled" color="success" class="w-full justify-start" :disabled="submitting">
+                      <template #icon><Icon :name="actionIcon(action)" /></template>
+                      {{ actionLabels[action] }}
+                    </Button>
+                  </template>
+                </ConfirmationDialog>
+                <Button
+                  v-else
+                  type="button"
+                  :variant="action === 'delete' ? 'outlined' : 'tonal'"
+                  :color="action === 'delete' ? 'error' : 'primary'"
+                  class="w-full justify-start"
+                  :disabled="submitting"
+                  @click="openAction(action)"
+                >
+                  <template #icon><Icon :name="actionIcon(action)" /></template>
+                  {{ actionLabels[action] }}
+                </Button>
+              </template>
+              <p v-if="!availableActions.length" class="px-2 py-3 text-sm text-on-surface-variant">No actions available.</p>
 
-      <Card variant="outlined" color="surfaceContainer">
-        <template #header><h2 class="font-semibold">History</h2></template>
-        <Timeline :data="record.activity ?? []">
-          <template #node><span class="size-2 rounded-full bg-primary" /></template>
-          <template #header="{ data }"><span class="font-medium">{{ data.shortDescription }}</span></template>
-          <template #content="{ data }"><span class="text-sm text-on-surface-variant">{{ data.createdAt }}</span></template>
-        </Timeline>
-      </Card>
+              <div v-if="availableActions.includes('verify-implementation')" class="mt-3 border-t border-outline-variant pt-4">
+                <div class="flex items-center gap-2">
+                  <Icon name="shield-check" size="lg" class="text-warning" />
+                  <h3 class="font-medium">Verification required</h3>
+                </div>
+                <Detail class="mt-3" :fields="{ implementationStatusCode: { label: 'Implementation status' } } as never" :data="record" />
+              </div>
+            </div>
+          </Card>
+        </aside>
+      </div>
     </template>
 
     <DialogForm
       v-if="activeAction && activeAction !== 'close'"
       :key="activeAction"
       :open="dialogOpen"
-      @update:open="(open) => { dialogOpen = open; if (!open) activeAction = undefined }"
+      @update:open="
+        (open) => {
+          dialogOpen = open
+          if (!open) activeAction = undefined
+        }
+      "
       :title="actionLabels[activeAction]"
       :fields="dialogFields as never"
       :initial-data="{ projectId: record?.projectId }"
