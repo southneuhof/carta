@@ -82,7 +82,7 @@ function stepLabel(value: unknown) {
       :key="String(record.id)"
       variant="outlined"
       color="surfaceContainer"
-      class="group overlay relative h-full overflow-hidden p-0 after:pointer-events-none after:z-10 after:bg-on-surface/[4%]"
+      class="group overlay relative h-full overflow-hidden p-0 after:z-10 after:bg-on-surface-hover focus-visible:after:bg-on-surface-active active:after:bg-on-surface-active"
     >
       <RouterLink
         :to="{ name: 'quality-pts-detail', params: { ptsId: String(record.id) } }"

@@ -23,11 +23,11 @@ async function signOut() {
 </script>
 
 <template>
-  <Popover v-model="open" side="top" :side-offset="12" :align-offset="-8" content-class="w-[var(--radix-popover-trigger-width)] gap-2 rounded-xl p-3 shadow-xl">
+  <Popover v-model="open" side="top" :side-offset="12" :align-offset="-8" content-class="w-[var(--reka-popover-trigger-width)] gap-2 rounded-xl p-3 shadow-xl">
     <template #trigger>
       <button
         type="button"
-        class="flex w-full items-center gap-3 rounded-2xl bg-surface-container-lowest p-2.5 text-left shadow-[0_18px_50px_-24px_rgb(var(--md-sys-color-shadow)/0.42)] outline-none transition-colors hover:bg-surface-container-highest focus-visible:ring-2 focus-visible:ring-primary"
+        class="overlay flex w-full items-center gap-3 rounded-2xl bg-surface-container-highest p-2.5 text-left shadow-[0_18px_50px_-24px_rgb(var(--md-sys-color-shadow)/0.42)] outline-none after:bg-on-surface-hover focus-visible:ring-2 focus-visible:ring-primary focus-visible:after:bg-on-surface-active active:after:bg-on-surface-active"
         aria-label="Open account menu"
       >
         <span class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-surface-container text-on-primary-container">
@@ -48,7 +48,7 @@ async function signOut() {
       <div class="flex flex-col gap-1">
         <button
           type="button"
-          class="flex w-full items-center justify-between rounded-lg px-2 py-2 text-left hover:bg-surface-variant focus-visible:ring-2 focus-visible:ring-primary"
+          class="overlay flex w-full items-center justify-between rounded-lg px-2 py-2 text-left after:bg-on-surface-hover active:after:bg-on-surface-active"
           @click="colorPreference.toggle()"
         >
           <span>Mode Tampilan</span>
@@ -56,7 +56,7 @@ async function signOut() {
         </button>
         <button
           type="button"
-          class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-error hover:bg-error-container focus-visible:ring-2 focus-visible:ring-error"
+          class="overlay flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-error after:bg-error-hover active:after:bg-error-active"
           :disabled="signingOut"
           @click="signOut"
         >

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TabsList, TabsRoot, TabsTrigger } from 'radix-vue'
+import { TabsList, TabsRoot, TabsTrigger } from 'reka-ui'
 import Card from '../base/Card.vue'
 import type { PropType } from 'vue'
 import { ref, onMounted, watch } from 'vue'
@@ -121,8 +121,8 @@ defineExpose({
       <TabsTrigger v-for="(tab, index) in props.config" as-child :value="String(index)" :key="index">
         <button
           type="button"
-          class="overlay flex h-full w-full min-w-max items-center justify-center rounded-full px-6 py-0 font-bold after:hover:bg-on-surface/[8%] after:active:bg-on-surface/[12%]"
-          :class="selectedTab === index ? 'bg-secondary-container text-on-secondary-container  ' : 'text-on-surface '"
+          class="overlay flex h-full w-full min-w-max items-center justify-center rounded-full px-6 py-0 font-bold"
+          :class="selectedTab === index ? 'bg-secondary-container text-on-secondary-container after:bg-on-secondary-container-hover focus-visible:after:bg-on-secondary-container-active active:after:bg-on-secondary-container-active' : 'text-on-surface after:bg-on-surface-hover focus-visible:after:bg-on-surface-active active:after:bg-on-surface-active'"
           @click="changeTab(index)"
         >
           <div v-if="!$slots.tabContent">{{ tab[props.view] }}</div>

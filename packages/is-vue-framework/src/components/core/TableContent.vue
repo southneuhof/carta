@@ -291,8 +291,12 @@ function rendererFor(renderer: string | undefined) {
       <table class="w-full border-collapse table-auto" :style="{ minWidth: `${tableMinimumWidth}px` }">
         <colgroup>
           <col v-if="$slots['row-prefix']" style="width: 1%" />
-          <col v-for="field in visibleFields" :key="field.key" :style="{ width: `${sizeFor(field.key)}px` }" />
-          <col v-if="$slots['row-actions']" style="width: 64px" />
+          <col
+            v-for="field in visibleFields"
+            :key="field.key"
+            :style="columnSizing[field.key] == null ? undefined : { width: `${columnSizing[field.key]}px` }"
+          />
+          <col v-if="$slots['row-actions']" />
         </colgroup>
         <thead class="bg-surface-container-high text-on-surface-variant">
           <tr>
@@ -314,7 +318,7 @@ function rendererFor(renderer: string | undefined) {
               <button
                 v-if="field.sortable && !props.reorderable"
                 type="button"
-                class="-mx-2 inline-flex rounded-md px-2 font-semibold  hover:bg-primary/[10%] hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                class="overlay -mx-2 inline-flex rounded-md px-2 font-semibold after:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary focus-visible:after:bg-primary-active active:after:bg-primary-active"
                 @click="table.getColumn(field.key)?.toggleSorting()"
               >
                 {{ field.label }}
@@ -346,7 +350,7 @@ function rendererFor(renderer: string | undefined) {
           @end="reorder"
         >
           <template #item="{ element: record, index }">
-            <tr class="group hover:bg-primary/[6%] focus-within:bg-primary/[6%]" @click="emit('row-click', record, index)">
+            <tr class="group overlay transition-none after:bg-primary-hover focus-within:after:bg-primary-active active:after:bg-primary-active" @click="emit('row-click', record, index)">
               <td v-if="$slots['row-prefix']" class="w-px whitespace-nowrap px-3 py-2" style="width: 1%" @click.stop>
                 <slot name="row-prefix" :record="record" :index="index" />
               </td>
@@ -356,7 +360,7 @@ function rendererFor(renderer: string | undefined) {
                   <template v-else>{{ valueFor(record, field) ?? '-' }}</template>
                 </slot>
               </td>
-              <td v-if="$slots['row-actions']" class="is-table-row-action sticky right-0 z-10 w-px bg-surface-container px-3 py-2 text-right  before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-10 before:bg-gradient-to-l before:content-['']" @click.stop><slot name="row-actions" :record="record" :index="index" /></td>
+              <td v-if="$slots['row-actions']" class="is-table-row-action sticky right-0 z-10 w-px px-3 py-2 text-right transition-none before:pointer-events-none before:absolute before:inset-y-0 before:content-['']" @click.stop><slot name="row-actions" :record="record" :index="index" /></td>
             </tr>
           </template>
         </Draggable>
@@ -364,7 +368,7 @@ function rendererFor(renderer: string | undefined) {
           <tr
             v-for="(row, index) in table.getRowModel().rows"
             :key="row.id"
-            class="group hover:bg-primary/[6%] focus-within:bg-primary/[6%]"
+            class="group overlay transition-none after:bg-primary-hover focus-within:after:bg-primary-active active:after:bg-primary-active"
             @click="emit('row-click', row.original, index)"
           >
             <td v-if="$slots['row-prefix']" class="w-px whitespace-nowrap pr-0 pl-3 py-2" style="width: 1%" @click.stop>
@@ -396,7 +400,7 @@ function rendererFor(renderer: string | undefined) {
                 <template v-else>{{ valueFor(row.original, field) ?? '-' }}</template>
               </slot>
             </td>
-            <td v-if="$slots['row-actions']" class="is-table-row-action sticky right-0 z-10 w-px bg-surface-container px-3 py-2 text-right  before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-10 before:bg-gradient-to-l before:content-['']" @click.stop>
+            <td v-if="$slots['row-actions']" class="is-table-row-action sticky right-0 z-10 w-px px-3 py-2 text-right transition-none before:pointer-events-none before:absolute before:inset-y-0 before:content-['']" @click.stop>
               <slot name="row-actions" :record="row.original" :index="index" />
             </td>
           </tr>
@@ -448,23 +452,34 @@ function rendererFor(renderer: string | undefined) {
 
 <style scoped>
 .is-table-row-action {
-  --is-table-surface: rgb(var(--md-sys-color-surface-container));
-  --is-table-hover-surface: color-mix(in srgb, var(--is-table-surface) 94%, rgb(var(--md-sys-color-primary)));
-
-  background-color: var(--is-table-surface);
+  --is-table-row-surface: rgb(var(--md-sys-color-surface-container));
+  --is-table-row-layer: transparent;
+  background-color: transparent;
+  transition: none;
 }
 
 .is-table-row-action::before {
-  background-image: linear-gradient(to left, var(--is-table-surface), transparent);
+  left: -2.5rem;
+  width: calc(100% + 2.5rem);
+  background-image:
+    linear-gradient(to left, var(--is-table-row-layer) 0%, var(--is-table-row-layer) 80%, transparent 100%),
+    linear-gradient(to left, var(--is-table-row-surface) 0%, var(--is-table-row-surface) 80%, transparent 100%);
+  opacity: 1;
+  z-index: 0;
+  transition: none;
 }
 
-.group:hover .is-table-row-action,
-.group:focus-within .is-table-row-action {
-  background-color: var(--is-table-hover-surface);
+.is-table-row-action > * {
+  position: relative;
+  z-index: 1;
 }
 
-.group:hover .is-table-row-action::before,
-.group:focus-within .is-table-row-action::before {
-  background-image: linear-gradient(to left, var(--is-table-hover-surface), transparent);
+.group:hover .is-table-row-action {
+  --is-table-row-layer: var(--md-sys-color-primary-hover);
+}
+
+.group:focus-within .is-table-row-action,
+.group:active .is-table-row-action {
+  --is-table-row-layer: var(--md-sys-color-primary-active);
 }
 </style>

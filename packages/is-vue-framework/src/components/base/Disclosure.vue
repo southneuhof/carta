@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CollapsibleContent, CollapsibleRoot, CollapsibleTrigger } from 'radix-vue'
+import { CollapsibleContent, CollapsibleRoot, CollapsibleTrigger } from 'reka-ui'
 import { ref, watch } from 'vue'
 import Icon from './Icon.vue'
 
@@ -35,7 +35,7 @@ watch(
       <CollapsibleTrigger class="w-full">
         <div
           :class="panelState ? 'bg-secondary-container text-on-secondary-container  ' : 'bg-surface-container-high text-on-surface  '"
-          class="overlay flex w-full flex-row items-center justify-between rounded-xl px-4 py-2 after:bg-on-surface/[8%] after:active:bg-on-surface/[12%]"
+          class="overlay flex w-full flex-row items-center justify-between rounded-xl px-4 py-2 after:bg-on-surface-hover focus-visible:after:bg-on-surface-active active:after:bg-on-surface-active"
         >
           <div class="flex flex-col">
             <div class="text-start">{{ props.title }}</div>

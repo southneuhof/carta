@@ -373,7 +373,7 @@ describe('Table core', () => {
     expect(actionHeader?.classList.contains('right-0')).toBe(true)
     expect(actionCells).toHaveLength(rows.length)
     expect(actionCells.every((cell) => cell.classList.contains('sticky') && cell.classList.contains('right-0'))).toBe(true)
-    expect(actionCells.every((cell) => cell.classList.contains('is-table-row-action') && cell.classList.contains('bg-surface-container'))).toBe(true)
+    expect(actionCells.every((cell) => cell.classList.contains('is-table-row-action') && !cell.classList.contains('bg-surface-container'))).toBe(true)
     view.find<HTMLButtonElement>('.row-action')!.click()
     expect(onRowClick).not.toHaveBeenCalled()
     view.unmount()

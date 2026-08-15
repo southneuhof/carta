@@ -2,6 +2,7 @@
 @import url('./themes/dark.css');
 @import url('./themes/light-extension.css');
 @import url('./themes/dark-extension.css');
+@import url('./state-layers.css');
 
 @tailwind base;
 @tailwind components;
@@ -60,7 +61,19 @@ span a,
 
 @layer components {
   .overlay {
-    @apply relative after:absolute after:bottom-0 after:left-0 after:right-0 after:top-0 after:hidden after:rounded-[inherit] hover:after:flex;
+    @apply relative;
+  }
+
+  .overlay::after {
+    content: '';
+    @apply pointer-events-none absolute inset-0 block rounded-[inherit] opacity-0;
+  }
+
+  .overlay:hover::after,
+  .overlay:focus-visible::after,
+  .overlay:has(:focus-visible)::after,
+  .overlay:active::after {
+    opacity: 1;
   }
 
 
@@ -86,11 +99,11 @@ hr {
 }
 
 /* TinyMCE Dialog Compatibility */
-/* Ensure TinyMCE dialogs, menus, and auxiliary elements appear above Radix dialogs */
+/* Ensure TinyMCE dialogs, menus, and auxiliary elements appear above Reka dialogs */
 
-/* When a TinyMCE dialog is open, disable pointer events on the Radix overlay */
+/* When a TinyMCE dialog is open, disable pointer events on the Reka overlay */
 /* This allows clicks to pass through to TinyMCE dialogs */
-body:has(.tox-dialog-wrap) [data-radix-dialog-overlay] {
+body:has(.tox-dialog-wrap) [data-reka-dialog-overlay] {
   pointer-events: none !important;
 }
 

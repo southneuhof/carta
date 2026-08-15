@@ -6,6 +6,10 @@ slice. Plans 046-049 replace PTS-owned create-options with owner lists and
 split menu / list / detail / write verbs. Plan 050 applies the same verbs to
 the remaining catalog. Execute 046-050 in order. Plan 046 is the catalog
 gate; no owner-route or PTS web work starts before it is DONE.
+Plans 051-053 audit the shared Vue UI primitive boundary. Execute them in
+order: first make the web test baseline deterministic, then add browser
+characterization coverage, then migrate the framework primitive imports from
+Radix Vue to Reka UI.
 
 ## Execution order and status
 
@@ -44,6 +48,9 @@ gate; no owner-route or PTS web work starts before it is DONE.
 | 048 | Bind PTS forms to owner lists | P1 | M | 047 | DONE |
 | 049 | Align docs with owner list sources | P1 | S | 048 | DONE |
 | 050 | Apply the remaining permission verb convention | P2 | M | 049 | DONE |
+| 051 | Establish a green web-test baseline | P1 | S | — | TODO |
+| 052 | Add browser coverage for shared UI primitives | P1 | M | 051 | TODO |
+| 053 | Migrate framework primitives from Radix Vue to Reka UI | P1 | M | 051, 052 | TODO |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with reason) | REJECTED (with rationale).
 
@@ -80,6 +87,9 @@ flowchart TD
   P47 --> P48["048 PTS owner sources"]
   P48 --> P49["049 Docs alignment"]
   P49 --> P50["050 Remaining verb addendum"]
+  P50 -. separate audit stream .-> B51["051 Web test baseline"]
+  B51 --> B52["052 Browser primitive coverage"]
+  B52 --> B53["053 Radix Vue to Reka UI"]
 ```
 
 ## Cohort execution rules
@@ -114,6 +124,14 @@ flowchart TD
   `rootOnly`, `leafOnly`, and `projectId`.
 - Plan 049 updates docs only after 048 has shipped the code.
 - Plan 050 is a separate remaining-catalog pass. Do not mix it into 046-049.
+- Plan 051 must be DONE before browser characterization starts. It removes a
+  known app-test failure without changing production URL fallback behavior.
+- Plan 052 must be DONE before plan 053. The browser tests are the migration
+  gate for portal, focus, outside-interaction, disclosure, menu, split-button,
+  and tab behavior.
+- Plan 053 changes only the shared framework primitive dependency and the
+  verified Radix-generated selectors and variables. Do not add compatibility
+  aliases or migrate unrelated Headless UI code.
 
 ## Findings considered and rejected
 

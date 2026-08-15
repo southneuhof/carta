@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type HTMLAttributes, computed, useAttrs } from 'vue'
-import { DialogClose, DialogContent, type DialogContentEmits, type DialogContentProps, DialogOverlay, DialogPortal, useForwardPropsEmits } from 'radix-vue'
+import { DialogClose, DialogContent, type DialogContentEmits, type DialogContentProps, DialogOverlay, DialogPortal, useForwardPropsEmits } from 'reka-ui'
 import { twMerge } from 'tailwind-merge'
 
 const props = defineProps<DialogContentProps & { class?: HTMLAttributes['class'] }>()
@@ -17,7 +17,7 @@ const delegatedProps = computed(() => {
 
 const forwarded = useForwardPropsEmits(delegatedProps, emits) as any
 
-const allowedOutsideInteractionSelector = '.tox, .tox-tinymce-aux, [data-mce-bogus], [data-radix-popper-content-wrapper], [data-radix-menu-content]'
+const allowedOutsideInteractionSelector = '.tox, .tox-tinymce-aux, [data-mce-bogus], [data-reka-popper-content-wrapper], [data-reka-menu-content]'
 
 function shouldPreventOutsideClose(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false

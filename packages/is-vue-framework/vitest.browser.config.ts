@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [vue()],
   resolve: { alias: { '@southneuhof/is-vue-framework': fileURLToPath(new URL('./src', import.meta.url)) } },
   test: {
-    include: ['src/components/core/__tests__/Table.browser.spec.ts', 'src/components/views/__tests__/ListView.browser.spec.ts'],
+    include: ['src/components/core/__tests__/Table.browser.spec.ts', 'src/components/views/__tests__/ListView.browser.spec.ts', 'src/components/base/__tests__/primitives.browser.spec.ts'],
     browser: {
       enabled: true,
       headless: true,

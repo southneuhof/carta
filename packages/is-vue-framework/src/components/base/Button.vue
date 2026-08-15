@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, useAttrs, useSlots } from 'vue'
-import { DropdownMenuContent, DropdownMenuPortal, DropdownMenuRoot, DropdownMenuTrigger } from 'radix-vue'
+import { DropdownMenuContent, DropdownMenuPortal, DropdownMenuRoot, DropdownMenuTrigger } from 'reka-ui'
 import { twMerge } from 'tailwind-merge'
 
 defineOptions({
@@ -89,7 +89,7 @@ const hasTrailingIcon = computed(() => props.trailingIcon || !!slots['trailing-i
 const hasMenu = computed(() => !!slots.menu)
 
 const baseInteractiveClass =
-  'overlay relative inline-flex select-none items-center justify-center overflow-hidden whitespace-nowrap rounded-full border border-transparent align-middle transition-none after:pointer-events-none after:block after:bg-current after:opacity-0 hover:after:opacity-[.08] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:after:opacity-[.12] disabled:pointer-events-none disabled:cursor-default'
+  'overlay relative inline-flex select-none items-center justify-center overflow-hidden whitespace-nowrap rounded-full border border-transparent align-middle transition-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:pointer-events-none disabled:cursor-default'
 
 const labelButtonClass =
   'h-10 min-w-16 gap-2 px-6 text-sm font-medium leading-5 tracking-normal disabled:bg-on-surface/[12%] disabled:text-on-surface/[38%] aria-disabled:pointer-events-auto aria-disabled:cursor-default aria-disabled:bg-on-surface/[12%] aria-disabled:text-on-surface/[38%]'
@@ -99,53 +99,53 @@ const iconButtonClass =
 
 const variantClasses: Record<ButtonColor, Record<ButtonVariant, string>> = {
   primary: {
-    filled: 'bg-primary text-on-primary shadow-none focus-visible:outline-primary after:bg-on-primary',
-    tonal: 'bg-secondary-container text-on-secondary-container shadow-none focus-visible:outline-secondary after:bg-on-secondary-container',
-    elevated: 'bg-surface-container-low text-primary shadow-elevation-1 hover:shadow-elevation-2 focus-visible:outline-primary after:bg-primary',
-    outlined: 'border-outline bg-transparent text-primary focus-visible:outline-primary after:bg-primary disabled:border-on-surface/[12%] aria-disabled:border-on-surface/[12%]',
-    text: 'bg-transparent text-primary focus-visible:outline-primary after:bg-primary',
-    standard: 'bg-transparent text-on-surface-variant focus-visible:outline-primary after:bg-on-surface-variant',
+    filled: 'bg-primary text-on-primary shadow-none focus-visible:outline-primary after:bg-on-primary-hover focus-visible:after:bg-on-primary-active active:after:bg-on-primary-active',
+    tonal: 'bg-secondary-container text-on-secondary-container shadow-none focus-visible:outline-secondary after:bg-on-secondary-container-hover focus-visible:after:bg-on-secondary-container-active active:after:bg-on-secondary-container-active',
+    elevated: 'bg-surface-container-low text-primary shadow-elevation-1 hover:shadow-elevation-2 focus-visible:outline-primary after:bg-primary-hover focus-visible:after:bg-primary-active active:after:bg-primary-active',
+    outlined: 'border-outline bg-transparent text-primary focus-visible:outline-primary after:bg-primary-hover focus-visible:after:bg-primary-active active:after:bg-primary-active disabled:border-on-surface/[12%] aria-disabled:border-on-surface/[12%]',
+    text: 'bg-transparent text-primary focus-visible:outline-primary after:bg-primary-hover focus-visible:after:bg-primary-active active:after:bg-primary-active',
+    standard: 'bg-transparent text-on-surface-variant focus-visible:outline-primary after:bg-on-surface-variant-hover focus-visible:after:bg-on-surface-variant-active active:after:bg-on-surface-variant-active',
   },
   info: {
-    filled: 'bg-info text-on-info shadow-none focus-visible:outline-info after:bg-on-info',
-    tonal: 'bg-info-container text-on-info-container shadow-none focus-visible:outline-info after:bg-on-info-container',
-    elevated: 'bg-surface-container-low text-info shadow-elevation-1 hover:shadow-elevation-2 focus-visible:outline-info after:bg-info',
-    outlined: 'border-outline bg-transparent text-info focus-visible:outline-info after:bg-info disabled:border-on-surface/[12%] aria-disabled:border-on-surface/[12%]',
-    text: 'bg-transparent text-info focus-visible:outline-info after:bg-info',
-    standard: 'bg-transparent text-info focus-visible:outline-info after:bg-info',
+    filled: 'bg-info text-on-info shadow-none focus-visible:outline-info after:bg-on-info-hover focus-visible:after:bg-on-info-active active:after:bg-on-info-active',
+    tonal: 'bg-info-container text-on-info-container shadow-none focus-visible:outline-info after:bg-on-info-container-hover focus-visible:after:bg-on-info-container-active active:after:bg-on-info-container-active',
+    elevated: 'bg-surface-container-low text-info shadow-elevation-1 hover:shadow-elevation-2 focus-visible:outline-info after:bg-info-hover focus-visible:after:bg-info-active active:after:bg-info-active',
+    outlined: 'border-outline bg-transparent text-info focus-visible:outline-info after:bg-info-hover focus-visible:after:bg-info-active active:after:bg-info-active disabled:border-on-surface/[12%] aria-disabled:border-on-surface/[12%]',
+    text: 'bg-transparent text-info focus-visible:outline-info after:bg-info-hover focus-visible:after:bg-info-active active:after:bg-info-active',
+    standard: 'bg-transparent text-info focus-visible:outline-info after:bg-info-hover focus-visible:after:bg-info-active active:after:bg-info-active',
   },
   success: {
-    filled: 'bg-success text-on-success shadow-none focus-visible:outline-success after:bg-on-success',
-    tonal: 'bg-success-container text-on-success-container shadow-none focus-visible:outline-success after:bg-on-success-container',
-    elevated: 'bg-surface-container-low text-success shadow-elevation-1 hover:shadow-elevation-2 focus-visible:outline-success after:bg-success',
-    outlined: 'border-outline bg-transparent text-success focus-visible:outline-success after:bg-success disabled:border-on-surface/[12%] aria-disabled:border-on-surface/[12%]',
-    text: 'bg-transparent text-success focus-visible:outline-success after:bg-success',
-    standard: 'bg-transparent text-success focus-visible:outline-success after:bg-success',
+    filled: 'bg-success text-on-success shadow-none focus-visible:outline-success after:bg-on-success-hover focus-visible:after:bg-on-success-active active:after:bg-on-success-active',
+    tonal: 'bg-success-container text-on-success-container shadow-none focus-visible:outline-success after:bg-on-success-container-hover focus-visible:after:bg-on-success-container-active active:after:bg-on-success-container-active',
+    elevated: 'bg-surface-container-low text-success shadow-elevation-1 hover:shadow-elevation-2 focus-visible:outline-success after:bg-success-hover focus-visible:after:bg-success-active active:after:bg-success-active',
+    outlined: 'border-outline bg-transparent text-success focus-visible:outline-success after:bg-success-hover focus-visible:after:bg-success-active active:after:bg-success-active disabled:border-on-surface/[12%] aria-disabled:border-on-surface/[12%]',
+    text: 'bg-transparent text-success focus-visible:outline-success after:bg-success-hover focus-visible:after:bg-success-active active:after:bg-success-active',
+    standard: 'bg-transparent text-success focus-visible:outline-success after:bg-success-hover focus-visible:after:bg-success-active active:after:bg-success-active',
   },
   warning: {
-    filled: 'bg-warning text-on-warning shadow-none focus-visible:outline-warning after:bg-on-warning',
-    tonal: 'bg-warning-container text-on-warning-container shadow-none focus-visible:outline-warning after:bg-on-warning-container',
-    elevated: 'bg-surface-container-low text-warning shadow-elevation-1 hover:shadow-elevation-2 focus-visible:outline-warning after:bg-warning',
-    outlined: 'border-outline bg-transparent text-warning focus-visible:outline-warning after:bg-warning disabled:border-on-surface/[12%] aria-disabled:border-on-surface/[12%]',
-    text: 'bg-transparent text-warning focus-visible:outline-warning after:bg-warning',
-    standard: 'bg-transparent text-warning focus-visible:outline-warning after:bg-warning',
+    filled: 'bg-warning text-on-warning shadow-none focus-visible:outline-warning after:bg-on-warning-hover focus-visible:after:bg-on-warning-active active:after:bg-on-warning-active',
+    tonal: 'bg-warning-container text-on-warning-container shadow-none focus-visible:outline-warning after:bg-on-warning-container-hover focus-visible:after:bg-on-warning-container-active active:after:bg-on-warning-container-active',
+    elevated: 'bg-surface-container-low text-warning shadow-elevation-1 hover:shadow-elevation-2 focus-visible:outline-warning after:bg-warning-hover focus-visible:after:bg-warning-active active:after:bg-warning-active',
+    outlined: 'border-outline bg-transparent text-warning focus-visible:outline-warning after:bg-warning-hover focus-visible:after:bg-warning-active active:after:bg-warning-active disabled:border-on-surface/[12%] aria-disabled:border-on-surface/[12%]',
+    text: 'bg-transparent text-warning focus-visible:outline-warning after:bg-warning-hover focus-visible:after:bg-warning-active active:after:bg-warning-active',
+    standard: 'bg-transparent text-warning focus-visible:outline-warning after:bg-warning-hover focus-visible:after:bg-warning-active active:after:bg-warning-active',
   },
   error: {
-    filled: 'bg-error text-on-error shadow-none focus-visible:outline-error after:bg-on-error',
-    tonal: 'bg-error-container text-on-error-container shadow-none focus-visible:outline-error after:bg-on-error-container',
-    elevated: 'bg-surface-container-low text-error shadow-elevation-1 hover:shadow-elevation-2 focus-visible:outline-error after:bg-error',
-    outlined: 'border-outline bg-transparent text-error focus-visible:outline-error after:bg-error disabled:border-on-surface/[12%] aria-disabled:border-on-surface/[12%]',
-    text: 'bg-transparent text-error focus-visible:outline-error after:bg-error',
-    standard: 'bg-transparent text-error focus-visible:outline-error after:bg-error',
+    filled: 'bg-error text-on-error shadow-none focus-visible:outline-error after:bg-on-error-hover focus-visible:after:bg-on-error-active active:after:bg-on-error-active',
+    tonal: 'bg-error-container text-on-error-container shadow-none focus-visible:outline-error after:bg-on-error-container-hover focus-visible:after:bg-on-error-container-active active:after:bg-on-error-container-active',
+    elevated: 'bg-surface-container-low text-error shadow-elevation-1 hover:shadow-elevation-2 focus-visible:outline-error after:bg-error-hover focus-visible:after:bg-error-active active:after:bg-error-active',
+    outlined: 'border-outline bg-transparent text-error focus-visible:outline-error after:bg-error-hover focus-visible:after:bg-error-active active:after:bg-error-active disabled:border-on-surface/[12%] aria-disabled:border-on-surface/[12%]',
+    text: 'bg-transparent text-error focus-visible:outline-error after:bg-error-hover focus-visible:after:bg-error-active active:after:bg-error-active',
+    standard: 'bg-transparent text-error focus-visible:outline-error after:bg-error-hover focus-visible:after:bg-error-active active:after:bg-error-active',
   },
 }
 
 const selectedStandardIconClass: Record<ButtonColor, string> = {
-  primary: 'bg-primary text-on-primary after:bg-on-primary',
-  info: 'bg-info text-on-info after:bg-on-info',
-  success: 'bg-success text-on-success after:bg-on-success',
-  warning: 'bg-warning text-on-warning after:bg-on-warning',
-  error: 'bg-error text-on-error after:bg-on-error',
+  primary: 'bg-primary text-on-primary after:bg-on-primary-hover focus-visible:after:bg-on-primary-active active:after:bg-on-primary-active',
+  info: 'bg-info text-on-info after:bg-on-info-hover focus-visible:after:bg-on-info-active active:after:bg-on-info-active',
+  success: 'bg-success text-on-success after:bg-on-success-hover focus-visible:after:bg-on-success-active active:after:bg-on-success-active',
+  warning: 'bg-warning text-on-warning after:bg-on-warning-hover focus-visible:after:bg-on-warning-active active:after:bg-on-warning-active',
+  error: 'bg-error text-on-error after:bg-on-error-hover focus-visible:after:bg-on-error-active active:after:bg-on-error-active',
 }
 
 const regularPaddingClass = computed(() => {

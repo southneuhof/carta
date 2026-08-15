@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type HTMLAttributes, computed, useAttrs } from 'vue'
-import { DialogClose, DialogContent, type DialogContentEmits, type DialogContentProps, DialogOverlay, DialogPortal, useForwardPropsEmits } from 'radix-vue'
+import { DialogClose, DialogContent, type DialogContentEmits, type DialogContentProps, DialogOverlay, DialogPortal, useForwardPropsEmits } from 'reka-ui'
 import { twMerge } from 'tailwind-merge'
 import Icon from '../Icon.vue'
 
@@ -42,7 +42,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits) as any
       >
         <slot />
 
-        <DialogClose class="absolute right-3 top-3 rounded-md p-0.5 transition-colors hover:bg-secondary">
+        <DialogClose class="overlay absolute right-3 top-3 rounded-md p-0.5 after:bg-on-surface-hover focus-visible:after:bg-on-surface-active active:after:bg-on-surface-active">
           <Icon name="close"></Icon>
           <span class="sr-only">Close</span>
         </DialogClose>

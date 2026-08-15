@@ -71,7 +71,7 @@ onMounted(() => {
           <template #trigger>
             <div
               :key="`${selectedClass}`"
-              class="overlay flex max-w-fit cursor-pointer flex-row items-center justify-between gap-3 rounded-lg bg-surface-container-high px-4 py-2 after:bg-on-surface/[8%] after:active:bg-on-surface/[12%]"
+              class="overlay flex max-w-fit cursor-pointer flex-row items-center justify-between gap-3 rounded-lg bg-surface-container-high px-4 py-2 after:bg-on-surface-hover focus-visible:after:bg-on-surface-active active:after:bg-on-surface-active"
               @click="openPicker"
             >
               <template v-if="selectedClass">

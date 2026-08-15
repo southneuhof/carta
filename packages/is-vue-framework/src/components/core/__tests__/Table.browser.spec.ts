@@ -105,13 +105,13 @@ afterEach(async () => {
 })
 
 describe('Table browser interactions', () => {
-  it('uses direct row hover state classes', async () => {
+  it('uses the shared overlay state layer', async () => {
     const { host } = mount()
     await frame()
     const row = host.querySelector('tbody tr')!
-    expect(row.classList.contains('transition-colors')).toBe(true)
-    expect(row.classList.contains('hover:bg-primary/[6%]')).toBe(true)
-    expect(row.classList.contains('focus-within:bg-primary/[6%]')).toBe(true)
+    expect(row.classList.contains('overlay')).toBe(true)
+    expect(row.classList.contains('after:bg-primary-hover')).toBe(true)
+    expect(row.classList.contains('focus-within:after:bg-primary-active')).toBe(true)
   })
 
   it('keeps blank action header and action cells pinned during horizontal scroll', async () => {

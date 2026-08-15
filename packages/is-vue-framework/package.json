@@ -34,7 +34,7 @@
     "@vueuse/core": "^12.5.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "radix-vue": "^1.9.2",
+    "reka-ui": "^2.9.8",
     "tailwind-merge": "^1.13.1",
     "tinymce": "^7.2.1",
     "uuid": "^11.0.2",

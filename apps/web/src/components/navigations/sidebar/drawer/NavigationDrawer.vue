@@ -38,7 +38,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
         <h2 class="px-3 pb-2 text-xs font-semibold uppercase text-on-surface-variant">{{ module.title }}</h2>
         <template v-for="entry in module.routes" :key="entry.name">
           <p v-if="'separator' in entry" class="px-3 pb-1 pt-3 text-xs text-on-surface-variant">{{ entry.name }}</p>
-          <RouterLink v-else :to="entry.to as never" class="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 hover:bg-surface-variant focus-visible:ring-2 focus-visible:ring-primary" :class="entry.name === String(route.name) ? 'bg-primary-container text-on-primary-container' : ''">
+          <RouterLink v-else :to="entry.to as never" class="overlay flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 focus-visible:ring-2 focus-visible:ring-primary" :class="entry.name === String(route.name) ? 'bg-primary-container text-on-primary-container after:bg-on-primary-container-hover focus-visible:after:bg-on-primary-container-active active:after:bg-on-primary-container-active' : 'after:bg-on-surface-hover focus-visible:after:bg-on-surface-active active:after:bg-on-surface-active'">
             <Icon :name="entry.icon" /><span>{{ entry.title }}</span>
           </RouterLink>
         </template>

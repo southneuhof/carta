@@ -1,6 +1,61 @@
 /** @type {import('tailwindcss').Config} */
 const plugin = require('tailwindcss/plugin')
 
+const stateLayerColors = [
+  'primary',
+  'primary-container',
+  'on-primary',
+  'on-primary-container',
+  'secondary',
+  'secondary-container',
+  'on-secondary',
+  'on-secondary-container',
+  'tertiary',
+  'tertiary-container',
+  'on-tertiary',
+  'on-tertiary-container',
+  'warning',
+  'warning-container',
+  'on-warning',
+  'on-warning-container',
+  'info',
+  'info-container',
+  'on-info',
+  'on-info-container',
+  'success',
+  'success-container',
+  'on-success',
+  'on-success-container',
+  'error',
+  'error-container',
+  'on-error',
+  'on-error-container',
+  'background',
+  'on-background',
+  'surface',
+  'surface-variant',
+  'on-surface',
+  'on-surface-variant',
+  'outline',
+  'outline-variant',
+  'inverse-surface',
+  'inverse-on-surface',
+  'inverse-primary',
+  'surface-container-lowest',
+  'surface-container-low',
+  'surface-container',
+  'surface-container-high',
+  'surface-container-highest',
+]
+
+const stateLayerColorMap = Object.fromEntries(
+  stateLayerColors.flatMap((name) => [
+    [`${name}-hover`, `var(--md-sys-color-${name}-hover)`],
+    [`${name}-active`, `var(--md-sys-color-${name}-active)`],
+    [`${name}-drag`, `var(--md-sys-color-${name}-drag)`],
+  ])
+)
+
 module.exports = {
   content: ['./index.html', './src/**/*.{vue,js,ts}', '../../packages/is-vue-framework/src/**/*.{vue,js,ts,tsx}'],
   darkMode: ['class'],
@@ -19,6 +74,7 @@ module.exports = {
         DEFAULT: 'cubic-bezier(0.05, 0.7, 0.1, 1)',
       },
       colors: {
+        ...stateLayerColorMap,
         muted: 'rgb(var(--md-sys-color-on-surface) / 38%)',
         scrim: 'rgb(var(--md-sys-color-scrim))',
         primary: {

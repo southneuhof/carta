@@ -257,8 +257,8 @@ async function selectFileManagerAsset(payload: ManagedAsset) {
             <Draggable v-if="images.length" v-model="images" :item-key="resolveDragKey" class="flex flex-row items-center gap-4" @change="handleChange">
               <template #item="{ element, index }">
                 <div
-                  class="w-fit cursor-move rounded-xl transition-colors"
-                  :class="{ 'bg-tertiary/10 outline outline-1 outline-primary/[33%]': isReplaceDragActive && !props.multi && index === 0 }"
+                  class="overlay w-fit cursor-move rounded-xl after:bg-on-surface-hover focus-visible:after:bg-on-surface-active active:after:bg-on-surface-active"
+                  :class="{ 'after:bg-tertiary-drag after:opacity-100 outline outline-1 outline-primary/[33%]': isReplaceDragActive && !props.multi && index === 0 }"
                   @dragover="handleReplaceDragOver"
                   @dragleave="handleReplaceDragLeave"
                   @drop="handleReplaceDrop"
@@ -280,8 +280,8 @@ async function selectFileManagerAsset(payload: ManagedAsset) {
                 <template #trigger>
                   <button
                     type="button"
-                    class="relative flex h-40 w-40 items-center justify-center rounded-xl outline-dashed outline-2 outline-outline-variant transition-colors"
-                    :class="{ 'bg-primary/10 outline-primary/[33%]': isDragActive }"
+                    class="overlay relative flex h-40 w-40 items-center justify-center rounded-xl outline-dashed outline-2 outline-outline-variant after:bg-on-surface-hover focus-visible:after:bg-on-surface-active active:after:bg-on-surface-active"
+                    :class="{ 'after:bg-primary-drag after:opacity-100 outline-primary/[33%]': isDragActive }"
                     @dragover="handleDragOver"
                     @dragleave="handleDragLeave"
                     @drop="handleDrop"
@@ -294,11 +294,11 @@ async function selectFileManagerAsset(payload: ManagedAsset) {
                 </template>
                 <template #content>
                   <div class="flex flex-col">
-                    <button v-if="props.upload" type="button" class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-on-surface/[8%]" @click="openDevicePicker">
+                    <button v-if="props.upload" type="button" class="overlay flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm after:bg-on-surface-hover focus-visible:after:bg-on-surface-active active:after:bg-on-surface-active" @click="openDevicePicker">
                       <Icon name="upload-cloud" size="sm" />
                       <span>Upload from device</span>
                     </button>
-                    <button v-if="fileManager" type="button" class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-on-surface/[8%]" @click="openFileManager">
+                    <button v-if="fileManager" type="button" class="overlay flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm after:bg-on-surface-hover focus-visible:after:bg-on-surface-active active:after:bg-on-surface-active" @click="openFileManager">
                       <Icon name="folder-2" size="sm" />
                       <span>Choose from file manager</span>
                     </button>

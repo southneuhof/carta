@@ -268,7 +268,7 @@ const canAddFile = computed(() => props.multi || rows.value.length === 0)
       </div>
       <template v-else>
         <div v-if="canAddFile" class="flex flex-col gap-2">
-          <div ref="dropZoneRef" class="flex w-full flex-col items-center justify-center gap-4 rounded-md py-8 outline-dashed outline-2 outline-outline-variant" :class="{ 'bg-primary/10 outline-primary/[33%]': isOverDropZone }">
+          <div ref="dropZoneRef" class="overlay flex w-full flex-col items-center justify-center gap-4 rounded-md py-8 outline-dashed outline-2 outline-outline-variant after:bg-on-surface-hover focus-visible:after:bg-on-surface-active active:after:bg-on-surface-active" :class="{ 'after:bg-primary-drag after:opacity-100 outline-primary/[33%]': isOverDropZone }">
             <div v-if="!isOverDropZone" class="flex flex-row items-center gap-4">
               <div class="text-black-light font-bold">Letakkan file anda di sini</div>
               <div class="text-black-light">/</div>
@@ -283,11 +283,11 @@ const canAddFile = computed(() => props.multi || rows.value.length === 0)
                 </template>
                 <template #content>
                   <div class="flex flex-col">
-                    <button v-if="props.upload" type="button" class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-on-surface/[8%]" @click="openDevicePicker">
+                    <button v-if="props.upload" type="button" class="overlay flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm after:bg-on-surface-hover focus-visible:after:bg-on-surface-active active:after:bg-on-surface-active" @click="openDevicePicker">
                       <Icon name="upload-cloud" size="sm" />
                       <span>Upload from device</span>
                     </button>
-                    <button v-if="fileManager" type="button" class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-on-surface/[8%]" @click="openFileManager">
+                    <button v-if="fileManager" type="button" class="overlay flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm after:bg-on-surface-hover focus-visible:after:bg-on-surface-active active:after:bg-on-surface-active" @click="openFileManager">
                       <Icon name="folder-2" size="sm" />
                       <span>Choose from file manager</span>
                     </button>

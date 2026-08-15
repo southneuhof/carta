@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { DropdownMenuContent, DropdownMenuItem, DropdownMenuPortal, DropdownMenuRoot, DropdownMenuTrigger } from 'radix-vue'
+import { DropdownMenuContent, DropdownMenuItem, DropdownMenuPortal, DropdownMenuRoot, DropdownMenuTrigger } from 'reka-ui'
 import type { Component } from 'vue'
 
 type MenuItem = {
@@ -33,7 +33,7 @@ const props = defineProps({
       >
         <div class="px-1 py-1">
           <DropdownMenuItem v-for="item in items" :key="item.name" as-child @select="item.action">
-            <button class="group flex w-full items-center rounded-md px-2 py-2 text-sm text-gray-900 data-[highlighted]:bg-violet-500 data-[highlighted]:text-white">
+            <button class="overlay flex w-full items-center rounded-md px-2 py-2 text-sm text-on-surface after:bg-on-surface-hover data-[highlighted]:after:bg-on-surface-active data-[highlighted]:after:opacity-100">
               <component v-if="item.icon" :is="item.icon" class="mr-2 h-5 w-5 text-violet-400"></component>
               {{ item.name }}
             </button>

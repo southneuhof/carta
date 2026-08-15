@@ -17,8 +17,8 @@ const hasNestedRoutes = (route: NavItemRoute) => {
     class="overlay flex w-full min-w-full flex-row items-center justify-between gap-4 rounded-full p-4"
     :class="
       props.active
-        ? 'bg-secondary-container p-4 text-on-secondary-container after:hover:bg-on-secondary-container/[8%] after:active:bg-on-secondary-container/[12%]    '
-        : 'text-on-surface after:hover:bg-on-surface/[8%] after:active:bg-on-surface/[12%]   '
+        ? 'bg-secondary-container p-4 text-on-secondary-container after:bg-on-secondary-container-hover focus-visible:after:bg-on-secondary-container-active active:after:bg-on-secondary-container-active'
+        : 'text-on-surface after:bg-on-surface-hover focus-visible:after:bg-on-surface-active active:after:bg-on-surface-active'
     "
   >
     <div class="flex flex-row items-center gap-4">

@@ -34,6 +34,10 @@ function isGroupOpen(name: string) {
   return openGroups.value.has(name)
 }
 
+function isActiveRoute(moduleName: string, routeName: string, to: unknown) {
+  return routeName === String(route.name) || (moduleName === activeModule.value && route.path.startsWith(router.resolve(to as never).path))
+}
+
 function beforeEnter(element: Element) {
   const node = element as HTMLElement
   node.style.height = '0'
@@ -106,16 +110,17 @@ onBeforeUnmount(() => window.removeEventListener('resize', updateScrollFades))
   >
     <div class="relative h-full">
       <div v-if="showTopFade" class="sidebar-scroll-fade sidebar-scroll-fade--top" aria-hidden="true" />
-      <nav ref="navigationElement" aria-label="Main navigation" class="absolute inset-0 z-0 overflow-y-auto px-3 pt-[54px] pb-[72px]" @scroll="updateScrollFades">
+      <nav ref="navigationElement" aria-label="Main navigation" class="absolute inset-0 z-0 overflow-y-auto px-3 pt-16 pb-[72px]" @scroll="updateScrollFades">
         <section v-for="module in navigation" :key="module.name" class="mb-2">
           <RouterLink
             v-if="module.directRoute"
             :to="module.directRoute.to as never"
-            class="flex min-h-10 w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-on-surface-variant outline-none transition-colors hover:bg-surface-container-high hover:text-on-surface focus-visible:ring-2 focus-visible:ring-primary"
-            :class="{
-              'bg-primary-container text-on-primary-container shadow-sm':
-                module.directRoute.name === String(route.name) || (module.name === activeModule && route.path.startsWith(router.resolve(module.directRoute.to as never).path)),
-            }"
+            class="overlay flex min-h-10 w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-on-surface-variant outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            :class="
+              isActiveRoute(module.name, module.directRoute.name, module.directRoute.to)
+                ? 'bg-primary-container text-on-primary-container shadow-sm after:bg-on-primary-container-hover focus-visible:after:bg-on-primary-container-active active:after:bg-on-primary-container-active'
+                : 'after:bg-on-surface-variant-hover focus-visible:after:bg-on-surface-variant-active active:after:bg-on-surface-variant-active'
+            "
           >
             <Icon :name="module.directRoute.icon" size="lg" class="shrink-0" />
             <span class="min-w-0 truncate">{{ module.directRoute.title }}</span>
@@ -124,7 +129,7 @@ onBeforeUnmount(() => window.removeEventListener('resize', updateScrollFades))
           <template v-else>
             <button
               type="button"
-              class="flex min-h-10 w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium text-on-surface-variant outline-none transition-colors hover:bg-surface-container-high hover:text-on-surface focus-visible:ring-2 focus-visible:ring-primary"
+              class="overlay flex min-h-10 w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium text-on-surface-variant outline-none after:bg-on-surface-variant-hover focus-visible:ring-2 focus-visible:ring-primary focus-visible:after:bg-on-surface-variant-active active:after:bg-on-surface-variant-active"
               :aria-expanded="isGroupOpen(module.name)"
               :aria-controls="`sidebar-group-${module.name}`"
               @click="toggleGroup(module.name)"
@@ -144,16 +149,18 @@ onBeforeUnmount(() => window.removeEventListener('resize', updateScrollFades))
               @after-leave="afterLeave"
             >
               <div v-if="isGroupOpen(module.name)" :id="`sidebar-group-${module.name}`" class="space-y-1 overflow-hidden">
+                <div class="h-1"></div>
                 <template v-for="entry in module.routes" :key="entry.name">
                   <p v-if="'separator' in entry" class="ml-3 px-3 pb-1 pt-3 text-xs font-medium text-on-surface-variant">{{ entry.name }}</p>
                   <RouterLink
                     v-else
                     :to="entry.to as never"
-                    class="ml-3 flex min-h-10 items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-on-surface-variant outline-none transition-colors hover:bg-surface-container-high focus-visible:ring-2 focus-visible:ring-primary"
-                    :class="{
-                      'bg-primary-container text-on-primary-container shadow-sm':
-                        entry.name === String(route.name) || (module.name === activeModule && route.path.startsWith(router.resolve(entry.to as never).path)),
-                    }"
+                    class="overlay ml-3 flex min-h-10 items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-on-surface-variant outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    :class="
+                      isActiveRoute(module.name, entry.name, entry.to)
+                        ? 'bg-primary-container text-on-primary-container shadow-sm after:bg-on-primary-container-hover focus-visible:after:bg-on-primary-container-active active:after:bg-on-primary-container-active'
+                        : 'after:bg-on-surface-variant-hover focus-visible:after:bg-on-surface-variant-active active:after:bg-on-surface-variant-active'
+                    "
                   >
                     <Icon :name="entry.icon" size="lg" class="shrink-0" />
                     <span class="min-w-0 truncate">{{ entry.title }}</span>

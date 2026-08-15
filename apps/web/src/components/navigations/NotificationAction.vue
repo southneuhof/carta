@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useDocumentVisibility } from '@vueuse/core'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import { NOTIFICATIONS_SEEN_EVENT } from '@/routes/(authenticated)/to-do/notifications.actions'
 import { notifications } from '@/routes/(authenticated)/to-do/notifications.resource'
 
 const POLL_INTERVAL_MS = 30_000
+const route = useRoute()
 const visibility = useDocumentVisibility()
 const unread = ref(0)
 
@@ -41,8 +43,12 @@ onUnmounted(() => window.removeEventListener(NOTIFICATIONS_SEEN_EVENT, refresh))
   <RouterLink
     :to="{ name: 'notifications' }"
     aria-label="Notifications"
-    class="relative flex size-8 items-center justify-center rounded-lg outline-none hover:bg-surface-variant focus-visible:ring-2 focus-visible:ring-primary"
-    active-class="bg-primary-container text-on-primary-container"
+    :class="[
+      'overlay relative flex size-8 items-center justify-center rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary',
+      route.name === 'notifications'
+        ? 'bg-primary-container text-on-primary-container after:bg-on-primary-container-hover focus-visible:after:bg-on-primary-container-active active:after:bg-on-primary-container-active'
+        : 'after:bg-on-surface-hover focus-visible:after:bg-on-surface-active active:after:bg-on-surface-active',
+    ]"
   >
     <Icon name="notification" size="md" />
     <span

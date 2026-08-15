@@ -176,7 +176,7 @@ watch(() => modelValue.value, hydrate, { deep: true })
       <Dialog @close="reset">
         <template #trigger>
           <slot v-if="$slots.trigger" name="trigger" />
-          <div v-else class="overlay flex max-w-fit cursor-pointer items-center justify-between gap-4 rounded-lg bg-surface-container-high px-4 py-2">
+          <div v-else class="overlay flex max-w-fit cursor-pointer items-center justify-between gap-4 rounded-lg bg-surface-container-high px-4 py-2 after:bg-on-surface-hover focus-visible:after:bg-on-surface-active active:after:bg-on-surface-active">
             <p class="min-w-max">{{ displayValue }}</p>
             <Icon name="arrow-right-up" />
           </div>

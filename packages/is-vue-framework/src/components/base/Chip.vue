@@ -19,7 +19,7 @@ const props = defineProps({
 })
 
 const baseClass = `flex h-fit min-w-max w-fit items-center justify-center rounded-lg px-2 py-1 text-center text-sm ${
-  props.interactive ? 'overlay cursor-pointer after:bg-on-surface/[8%] after:active:bg-on-surface/[12%]  ' : ''
+  props.interactive ? 'overlay cursor-pointer after:bg-on-surface-hover focus-visible:after:bg-on-surface-active active:after:bg-on-surface-active' : ''
 }`
 
 const colorMap = {

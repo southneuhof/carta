@@ -15,7 +15,7 @@ const props = defineProps({
 })
 
 const stateClasses = {
-  0: ['', ' text-on-surface/[38%] hover:text-on-surface'],
+  0: ['', 'overlay text-on-surface/[38%] after:bg-on-surface-hover focus-visible:after:bg-on-surface-active active:after:bg-on-surface-active'],
   1: ['', 'text-on-surface'],
   2: ['font-semibold', 'text-primary'],
 }
