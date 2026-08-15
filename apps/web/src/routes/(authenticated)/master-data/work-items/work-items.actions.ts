@@ -4,7 +4,7 @@ import { rpc } from '@/framework/rpc'
 import type { WorkItemCreate, WorkItemUpdate } from './work-items.schema'
 
 const api = createHonoResourceActions(rpc['work-items'], dataAdapter)
-type WorkItemTreeEndpoint = (typeof rpc)['work-items']['tree']['$get']
+type WorkItemTreeEndpoint = (typeof rpc)['work-items']['tree']['tree']['$get']
 
 export type WorkItemTreeNode = {
   id: string
@@ -23,7 +23,7 @@ export type WorkItemTreeNode = {
 }
 
 async function loadTree(projectId: string) {
-  return (await parseHonoResponse<WorkItemTreeEndpoint>(await rpc['work-items'].tree.$get({ query: { projectId } }))).data as WorkItemTreeNode[]
+  return (await parseHonoResponse<WorkItemTreeEndpoint>(await rpc['work-items'].tree.tree.$get({ query: { projectId } }))).data as WorkItemTreeNode[]
 }
 
 export const workItemsActions = {

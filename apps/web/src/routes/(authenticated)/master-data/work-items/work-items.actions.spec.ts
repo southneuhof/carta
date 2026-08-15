@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
 const tree = vi.hoisted(() => vi.fn())
-vi.mock('@/framework/rpc', () => ({ rpc: { 'work-items': { tree: { $get: tree } } } }))
+vi.mock('@/framework/rpc', () => ({ rpc: { 'work-items': { tree: { tree: { $get: tree } } } } }))
 
 const { workItemsActions } = await import('./work-items.actions')
 

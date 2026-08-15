@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { toast } from 'vue-sonner'
 import { DialogForm, Form, Table, type FormProps } from '@southneuhof/is-vue-framework'
 import { Button, Card, Chip, Icon } from '@southneuhof/is-vue-framework/components/base'
@@ -8,10 +8,10 @@ import { projects } from '../projects/projects.resource'
 import { workItems } from './work-items.resource'
 import type { WorkItemTreeNode } from './work-items.actions'
 
-type WorkItemContext = { divisionId: string; projectId: string }
+type WorkItemContext = { divisionId: string | undefined; projectId: string | undefined }
 type TreeRow = WorkItemTreeNode & { depth: number }
 
-const context = reactive<WorkItemContext>({ divisionId: '', projectId: '' })
+const context = ref<WorkItemContext>({ divisionId: undefined, projectId: undefined })
 const loading = ref(false)
 const nodes = ref<WorkItemTreeNode[]>([])
 const formOpen = ref(false)
@@ -56,7 +56,7 @@ const form = computed<FormProps>(() => {
     return { ...props, submit: run } as unknown as FormProps
   }
   const action = workItems.create({
-    initialData: { projectId: context.projectId, ...(formMode.value === 'child' ? { parentId: parentId.value } : {}) },
+    initialData: { projectId: context.value.projectId, ...(formMode.value === 'child' ? { parentId: parentId.value } : {}) },
     context: { variant: formMode.value },
   })
   const { run, ...props } = action
@@ -65,10 +65,10 @@ const form = computed<FormProps>(() => {
 
 async function loadTree() {
   nodes.value = []
-  if (!context.projectId) return
+  if (!context.value.projectId) return
   loading.value = true
   try {
-    nodes.value = await workItems.actions.loadTree.run(context.projectId)
+    nodes.value = await workItems.actions.loadTree.run(context.value.projectId)
   } catch (error) {
     toast.error(error instanceof Error ? error.message : 'Jenis Pekerjaan could not be loaded.')
   } finally {
@@ -76,7 +76,7 @@ async function loadTree() {
   }
 }
 
-watch(() => context.projectId, loadTree)
+watch(() => context.value.projectId, loadTree)
 
 function addRoot() {
   formMode.value = 'root'

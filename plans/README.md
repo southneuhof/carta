@@ -10,6 +10,9 @@ Plans 051-053 audit the shared Vue UI primitive boundary. Execute them in
 order: first make the web test baseline deterministic, then add browser
 characterization coverage, then migrate the framework primitive imports from
 Radix Vue to Reka UI.
+Plan 054 adds the first authenticated-shell command palette. It has no
+dependency on the primitive audit plans because it consumes the already-migrated
+Reka-backed framework dialog and keeps the missing command surface app-local.
 
 ## Execution order and status
 
@@ -51,6 +54,7 @@ Radix Vue to Reka UI.
 | 051 | Establish a green web-test baseline | P1 | S | — | TODO |
 | 052 | Add browser coverage for shared UI primitives | P1 | M | 051 | TODO |
 | 053 | Migrate framework primitives from Radix Vue to Reka UI | P1 | M | 051, 052 | TODO |
+| 054 | Add route navigation command palette | P1 | M | — | DONE |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with reason) | REJECTED (with rationale).
 
@@ -90,6 +94,7 @@ flowchart TD
   P50 -. separate audit stream .-> B51["051 Web test baseline"]
   B51 --> B52["052 Browser primitive coverage"]
   B52 --> B53["053 Radix Vue to Reka UI"]
+  CP54["054 Command palette (independent)"]
 ```
 
 ## Cohort execution rules

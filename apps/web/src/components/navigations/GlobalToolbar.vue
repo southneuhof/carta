@@ -5,6 +5,7 @@ import { visibleNavigation } from '@/manifest'
 import { allowsPermission } from '@/framework/adapters/bundle'
 import Logo from '@/assets/corporate/common/Logo.vue'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
+import CommandPalette from './CommandPalette.vue'
 import NotificationAction from './NotificationAction.vue'
 import { routeBreadcrumbs } from './breadcrumbs'
 
@@ -34,6 +35,7 @@ const breadcrumbs = computed(() => routeBreadcrumbs(route, router, visibleNaviga
       </nav>
     </div>
     <div class="ml-3 flex items-center justify-end gap-1" aria-label="Global actions">
+      <CommandPalette />
       <NotificationAction />
     </div>
   </header>
