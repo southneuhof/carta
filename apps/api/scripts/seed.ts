@@ -1,4 +1,4 @@
-import { and, eq, inArray, sql } from 'drizzle-orm'
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm'
 import { closeDb, getDb } from '../src/db'
 import { authorizationModules as moduleCatalog } from '../src/authorization/catalog'
 import { createAuth } from '../src/routes/auth/auth'
@@ -11,6 +11,8 @@ import { ptsWorkCategories } from '../src/routes/pts-work-categories/pts-work-ca
 import { rootCauses } from '../src/routes/root-causes/root-causes.entity'
 import { uoms } from '../src/routes/uoms/uoms.entity'
 import { workItems } from '../src/routes/work-items/work-items.entity'
+import { createQualityInspection } from '../src/routes/quality-inspection/quality-inspection.service'
+import { qualityInspections, workItemSchedules } from '../src/routes/quality-inspection/quality-inspection.entity'
 import {
   inspectionTestPlanInspectorPoints,
   inspectionTestPlanInspectorTypes,
@@ -30,6 +32,7 @@ import { users } from '../src/routes/users/users.entity'
 
 const seedEmail = process.env.ADS_HK_ADMIN_EMAIL ?? 'admin@example.com'
 const seedPassword = process.env.ADS_HK_ADMIN_PASSWORD ?? 'demo-password'
+const seededQualityInspectionMarker = 'seed-quality-inspection-default'
 
 const seededInspectorTypes = [
   { id: 'itp-inspector-type-sc', code: 'SC', name: 'SubCon' },
@@ -235,6 +238,51 @@ async function seedItpPlans(userId: string) {
   }
 }
 
+async function seedQualityInspection(userId: string) {
+  const db = getDb()
+  const timestamp = new Date().toISOString()
+  await db.insert(workItemSchedules).values({
+    id: 'work-item-schedule-default',
+    projectId: 'project-default',
+    workItemId: 'work-item-category-default',
+    startDate: '2026-08-01',
+    endDate: '2026-08-31',
+    active: true,
+    createdByUserId: userId,
+    updatedByUserId: userId,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  }).onConflictDoUpdate({
+    target: workItemSchedules.id,
+    set: {
+      projectId: 'project-default',
+      workItemId: 'work-item-category-default',
+      startDate: '2026-08-01',
+      endDate: '2026-08-31',
+      active: true,
+      createdByUserId: userId,
+      updatedByUserId: userId,
+      updatedAt: timestamp,
+    },
+  })
+
+  const existing = (await db.select({ id: qualityInspections.id }).from(qualityInspections).where(and(
+    eq(qualityInspections.locationZone, seededQualityInspectionMarker),
+    isNull(qualityInspections.deletedAt),
+  )).limit(1))[0]
+  if (existing) return
+
+  await createQualityInspection(userId, {
+    divisionId: 'division-default',
+    projectId: 'project-default',
+    targetDate: '2026-08-18',
+    qualityWorkCategoryId: 'pts-category-default',
+    workItemCategoryId: 'work-item-category-default',
+    locationZone: seededQualityInspectionMarker,
+    selectedRows: [{ workItemId: 'work-item-default', volume: 1, itpTypeCodes: ['material'] }],
+  })
+}
+
 async function main() {
   await seedAuthorization()
   const db = getDb()
@@ -314,6 +362,7 @@ async function main() {
     set: { name: sql`excluded.name`, active: true },
   })
   await seedItpPlans(admin.id)
+  await seedQualityInspection(admin.id)
   await closeDb()
 }
 

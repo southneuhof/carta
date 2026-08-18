@@ -1,11 +1,17 @@
 import { loadIdentity } from '@/framework/identity'
 import { savePostLoginRedirect } from '@/utils/post-login-redirect'
 import { getDefaultAuthenticatedRouteLocation } from './navigation'
-import { resourceActionForRoute, useResourceRuntime, type AccessAdapter } from '@southneuhof/is-vue-framework'
+import { permissionByCode, realmForPermission, type PermissionCode } from '@southneuhof/api/authorization/catalog'
+import { resourceActionForRoute, useResourceRuntime, type AccessAdapter, type RegisteredResourceAction } from '@southneuhof/is-vue-framework'
 import type { NavigationGuard } from 'vue-router'
 
 function allowsExtraordinaryRoute(meta: { permission?: string }, access: AccessAdapter): boolean {
   return !meta.permission || access.allows({ operation: 'detail', permission: meta.permission })
+}
+
+function isProjectCreateAction(action: RegisteredResourceAction): boolean {
+  if (action.action !== 'create' || !action.permission || !Object.hasOwn(permissionByCode, action.permission)) return false
+  return realmForPermission(action.permission as PermissionCode) === 'project'
 }
 
 /** Enforces ordinary route permission metadata on direct URL entry. */
@@ -14,7 +20,7 @@ export function createPermissionGuard(access?: AccessAdapter): NavigationGuard {
     const adapter = access ?? useResourceRuntime().adapters.access
     const action = typeof to.name === 'string' ? resourceActionForRoute(to.name) : undefined
     const allowed = action
-      ? action.permission === null || adapter.allows({ operation: 'detail', permission: action.permission })
+      ? action.permission === null || isProjectCreateAction(action) || adapter.allows({ operation: 'detail', permission: action.permission })
       : allowsExtraordinaryRoute(to.meta, adapter)
     return allowed ? true : (getDefaultAuthenticatedRouteLocation() ?? { path: '/' }) as never
   }

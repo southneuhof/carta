@@ -126,6 +126,36 @@ describe('permission guard', () => {
     expect(createPermissionGuard(denyAll)({ meta: {} } as any, {} as any, next)).toBe(true)
   })
 
+  it('allows denied browser access for a registered project create action', () => {
+    defineResource(defineSchema({ identity: 'id' }), {
+      key: 'project-create-route',
+      actions: {
+        create: {
+          run: async (input) => ({ id: 'project-created', input }),
+          permission: 'create-quality-inspection',
+          route: { name: 'project-create-route' },
+        },
+      },
+    })
+
+    expect(createPermissionGuard(denyAll)({ name: 'project-create-route', meta: {} } as any, {} as any, next)).toBe(true)
+  })
+
+  it('still rejects denied browser access for a registered system create action', () => {
+    defineResource(defineSchema({ identity: 'id' }), {
+      key: 'system-create-route',
+      actions: {
+        create: {
+          run: async (input) => ({ id: 'system-created', input }),
+          permission: 'create-users',
+          route: { name: 'system-create-route' },
+        },
+      },
+    })
+
+    expect(createPermissionGuard(denyAll)({ name: 'system-create-route', meta: {} } as any, {} as any, next)).toEqual({ name: 'dashboard' })
+  })
+
   it('discovers lazy route action before resolving direct entry', async () => {
     const router = createRouter({
       history: createMemoryHistory(),

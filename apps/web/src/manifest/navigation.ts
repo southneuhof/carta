@@ -11,6 +11,7 @@ export const navigation = defineNavigation([
     routes: [
       { to: { name: 'quality-pts' }, permission: 'view-qhsse-pts', title: 'PTS', icon: 'folder' },
       { to: { name: 'quality-inspection-test-plans' }, permission: 'view-projects', title: 'Inspection & Test Plan', icon: 'folder' },
+      { to: { name: 'quality-quality-inspection' }, permission: 'view-quality-inspection', title: 'Inspection/Test', icon: 'folder' },
     ],
   },
   {

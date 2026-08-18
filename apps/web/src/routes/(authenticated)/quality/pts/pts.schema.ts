@@ -35,6 +35,7 @@ export const jobImplementorOptions = [
 
 export const stepLabels: Record<string, string> = {
   report: 'Report',
+  'qi-report': 'Inspection/Test report',
   'high-disposition': 'High disposition',
   'low-disposition': 'Low disposition',
   'temporary-plan': 'Temporary plan',

@@ -22,6 +22,16 @@ add tree behavior that 058 does not define.
 Plans 060-061 correct confirmed ITP defects. Execute 060 before 061: it locks
 the read and leaf-work-item rules, then the web route removes its broken
 template request and query loader.
+Plans 062-064 build the approved Quality Inspection slice. Execute 062 first:
+it defines the database, the server state machine, and the QI-to-PTS boundary.
+Then build the standard resource and report entry screens in 063. Plan 064 is
+the final workflow, PTS completion, and closed-evidence gate.
+Plan 065 corrects the missed normal legacy entry action and makes the local
+development database ready for Quality Inspection review. It does not change
+the database schema or project-permission design.
+Plan 066 corrects the route guard and custom API URL contract found during the
+Plan 065 browser check. Execute it after 065; it makes both approved entry
+paths usable without widening `/me` or changing framework code.
 
 ## Execution order and status
 
@@ -71,6 +81,11 @@ template request and query loader.
 | 059 | Render Work Items with TreeTable | P1 | M | 058 | BLOCKED (authenticated browser session unavailable) |
 | 060 | Protect ITP reads and leaf work items | P1 | M | 055 | DONE |
 | 061 | Repair ITP create UI and tree reload | P0 | M | 055-058, 060 | DONE |
+| 062 | Build Quality Inspection API and data contract | P1 | L | — | DONE |
+| 063 | Build Quality Inspection resource and report creation | P1 | L | 062 | DONE |
+| 064 | Build Quality Inspection detail workflow and evidence | P1 | L | 062, 063 | DONE |
+| 065 | Restore Quality Inspection entry and seed data | P0 | M | 062-064 | DONE |
+| 066 | Make Quality Inspection entry routes reachable | P0 | M | 065 | DONE |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with reason) | REJECTED (with rationale).
 
@@ -118,6 +133,11 @@ flowchart TD
   I60 --> I61["061 ITP UI and direct tree reload"]
   I57 --> I61
   TT58 --> I61
+  Q62["062 QI API, database, and PTS boundary"] --> Q63["063 QI resource and creation"]
+  Q62 --> Q64["064 QI workflow, PTS completion, evidence"]
+  Q63 --> Q64
+  Q64 --> Q65["065 QI entry and development seed"]
+  Q65 --> Q66["066 QI route contract"]
 ```
 
 ## Cohort execution rules
@@ -174,6 +194,20 @@ flowchart TD
   delete, migrate, or repair existing ITP rows.
 - Plan 061 calls the registered template endpoint once, uses route-owned fetch
   state for the ITP tree, and keeps the generic TreeTable unchanged.
+- Plan 062 is the Quality Inspection database authority. It must complete before
+  a web route starts, because report creation snapshots ITP data and uses the
+  PTS source contract.
+- Plan 063 owns normal and scheduled report entry only. It consumes the
+  read-only schedule origin; it must not build schedule configuration or Todo.
+- Plan 064 starts after 062 and 063. It may correct a confirmed web/API contract
+  defect but must stop for a workflow or framework design change.
+- Plan 065 is a correction gate after the QI slice. It restores the normal
+  legacy create entry with the existing Projects owner list and adds only
+  idempotent development data. It must not change `/me`, the framework, or the
+  QI database schema.
+- Plan 066 keeps the QI project-create permission on the server and makes the
+  route guard defer only that create route. Its route registration change must
+  use the existing Sprindle model tree; it must not modify framework code.
 
 ## Findings considered and rejected
 
@@ -223,6 +257,20 @@ flowchart TD
 - Change TreeTable metadata to use row keys in the ITP correction: rejected
   because it is a framework change without approval. Plan 061 avoids its
   loader path and remains an app-only fix.
+- Add a Quality Inspection schedule manager: rejected. The approved first slice
+  needs only a read-only scheduled work-item origin; control-plan schedule
+  configuration and its Todo behavior are deferred.
+- Reuse legacy automatic PTS creation without a guard: rejected. The approved
+  QI boundary reuses one unfinished `qi-report` PTS per project/work item and
+  keeps every rejection event.
+- Add QI Todo or notification writes: rejected. The approved design defers both
+  until their architecture is defined.
+- Add a generic Quality Inspection workflow, snapshot, photo, or evidence
+  framework: rejected. One domain uses them; route-local code and existing
+  framework surfaces are sufficient.
+- Put project-role permissions into the browser identity for this correction:
+  rejected. The existing Projects owner list already gives a server-filtered
+  create capability without widening `/me` or changing generic access rules.
 
 ## Superseded field decision
 

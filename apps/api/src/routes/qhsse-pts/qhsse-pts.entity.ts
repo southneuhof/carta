@@ -1,5 +1,6 @@
 import { createEntity } from '@southneuhof/sprindle/entity'
-import { decimal, index, integer, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core'
+import { decimal, index, integer, pgTable, primaryKey, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
 import { divisions } from '../divisions/divisions.entity'
 import { projects } from '../projects/projects.entity'
@@ -19,10 +20,11 @@ export const qhssePts = pgTable(
     ptsWorkCategoryId: text('pts_work_category_id').notNull().references(() => ptsWorkCategories.id),
     workItemCategoryId: text('work_item_category_id').notNull().references(() => workItems.id),
     workItemId: text('work_item_id').notNull().references(() => workItems.id),
+    source: text('source'),
     locationZone: text('location_zone'),
-    criteriaCode: text('criteria_code').notNull(),
-    imgBefore: text('img_before').notNull(),
-    location: text('location').notNull(),
+    criteriaCode: text('criteria_code'),
+    imgBefore: text('img_before'),
+    location: text('location'),
     description: text('description'),
     somUserId: text('som_user_id').references(() => users.id),
     dispositionStatusCode: text('disposition_status_code'),
@@ -59,6 +61,7 @@ export const qhssePts = pgTable(
     index('qhsse_pts_division_idx').on(table.divisionId),
     index('qhsse_pts_status_step_idx').on(table.statusCode, table.stepCode),
     index('qhsse_pts_created_at_idx').on(table.createdAt),
+    uniqueIndex('qhsse_pts_open_qi_source_idx').on(table.projectId, table.workItemId).where(sql`${table.source} = 'qi-report' and ${table.statusCode} <> 'close' and ${table.deletedAt} is null`),
   ],
 )
 
@@ -93,6 +96,7 @@ const audit = {
   deletedBy: true,
   deletedAt: true,
   deletedReason: true,
+  source: true,
 } as const
 
 export const qhssePtsEntity = createEntity({

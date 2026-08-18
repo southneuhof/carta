@@ -342,6 +342,48 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    'quality-quality-inspection': RouteRecordInfo<
+      'quality-quality-inspection',
+      '/quality/quality-inspection',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'quality-quality-inspection-detail': RouteRecordInfo<
+      'quality-quality-inspection-detail',
+      '/quality/quality-inspection/:qualityInspectionId/detail',
+      { qualityInspectionId: ParamValue<true> },
+      { qualityInspectionId: ParamValue<false> },
+      | never
+    >,
+    'quality-quality-inspection-edit': RouteRecordInfo<
+      'quality-quality-inspection-edit',
+      '/quality/quality-inspection/:qualityInspectionId/edit',
+      { qualityInspectionId: ParamValue<true> },
+      { qualityInspectionId: ParamValue<false> },
+      | never
+    >,
+    'quality-quality-inspection-create': RouteRecordInfo<
+      'quality-quality-inspection-create',
+      '/quality/quality-inspection/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'quality-quality-inspection-schedules': RouteRecordInfo<
+      'quality-quality-inspection-schedules',
+      '/quality/quality-inspection/schedules',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'quality-quality-inspection-schedules-create': RouteRecordInfo<
+      'quality-quality-inspection-schedules-create',
+      '/quality/quality-inspection/schedules/:scheduleId/create',
+      { scheduleId: ParamValue<true> },
+      { scheduleId: ParamValue<false> },
+      | never
+    >,
     'settings-permissions': RouteRecordInfo<
       'settings-permissions',
       '/settings/permissions',
@@ -528,6 +570,12 @@ declare module 'vue-router/auto-routes' {
         | 'quality-pts-create'
         | 'quality-pts-detail'
         | 'quality-pts-edit'
+        | 'quality-quality-inspection'
+        | 'quality-quality-inspection-create'
+        | 'quality-quality-inspection-detail'
+        | 'quality-quality-inspection-edit'
+        | 'quality-quality-inspection-schedules'
+        | 'quality-quality-inspection-schedules-create'
         | 'settings-permissions'
         | 'settings-permissions-detail'
         | 'settings-roles'
@@ -898,6 +946,54 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/quality/pts/create.route.vue': {
       routes:
         | 'quality-pts-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/quality/quality-inspection/index.route.vue': {
+      routes:
+        | 'quality-quality-inspection'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/quality/quality-inspection/[qualityInspectionId]/detail.route.vue': {
+      routes:
+        | 'quality-quality-inspection-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/quality/quality-inspection/[qualityInspectionId]/edit.route.vue': {
+      routes:
+        | 'quality-quality-inspection-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/quality/quality-inspection/create.route.vue': {
+      routes:
+        | 'quality-quality-inspection-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/quality/quality-inspection/schedules/index.route.vue': {
+      routes:
+        | 'quality-quality-inspection-schedules'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/quality/quality-inspection/schedules/[scheduleId]/create.route.vue': {
+      routes:
+        | 'quality-quality-inspection-schedules-create'
       views:
         | never
       pathParamNames:

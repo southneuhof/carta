@@ -1,5 +1,5 @@
 import { forbidden, HttpError, notFound, validationError } from '@southneuhof/sprindle'
-import { and, asc, count, desc, eq, gte, ilike, inArray, isNull, lt, or, sql, type SQL } from 'drizzle-orm'
+import { and, asc, count, desc, eq, gte, ilike, inArray, isNull, lt, not, or, sql, type SQL } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import type { PermissionCode } from '../../authorization/catalog'
 import { allowedProjectOperations, allowedProjectPermissions, coveredProjectIds, hasProjectCoverage, requireProjectRecord } from '../../authorization'
@@ -30,6 +30,7 @@ export type { ActionName, ActionInput, CreateReportInput, UpdateReportInput }
 
 const workflowSteps = [
   'report',
+  'qi-report',
   'high-disposition',
   'low-disposition',
   'temporary-plan',
@@ -45,7 +46,7 @@ const workflowSteps = [
 ] as const
 
 type PtsRow = typeof qhssePts.$inferSelect
-type ActionRow = Pick<PtsRow, 'criteriaCode' | 'projectId' | 'stepCode' | 'statusCode' | 'somUserId' | 'implementationUserId' | 'estimationCost'>
+type ActionRow = Pick<PtsRow, 'criteriaCode' | 'projectId' | 'stepCode' | 'statusCode' | 'somUserId' | 'implementationUserId' | 'estimationCost' | 'source'>
 type ActionDefinition = {
   permission: (row: ActionRow) => PermissionCode
   steps: readonly string[]
@@ -59,6 +60,7 @@ const actionCatalog: Record<ActionName, ActionDefinition> = {
   'temporary-plan': { permission: () => 'temporary-plan-qhsse-pts', steps: ['high-disposition'] },
   'management-notes': { permission: () => 'management-notes-qhsse-pts', steps: ['management-notes'] },
   'complete-report': { permission: () => 'complete-report-qhsse-pts', steps: ['low-disposition', 'complete-report'] },
+  'complete-qi-report': { permission: () => 'complete-qi-report-qhsse-pts', steps: ['qi-report'] },
   'follow-up-implementation': { permission: () => 'follow-up-implementation-qhsse-pts', steps: ['complete-report', 'follow-up-price'] },
   'follow-up-price': { permission: () => 'follow-up-price-qhsse-pts', steps: ['complete-report', 'follow-up-implementation'] },
   'implementation-report': { permission: () => 'implementation-report-qhsse-pts', steps: ['follow-up'] },
@@ -163,6 +165,68 @@ async function allocateNumber(tx: any, projectId: string, date: Date, projectNum
     return config.numberVariableCode === 'number' ? value.padStart(config.numberOfDigits, '0') : value
   }).filter(Boolean)
   return { number: parts.join('/'), year }
+}
+
+export type QualityInspectionPtsInput = {
+  reportId: string
+  workItemRowId: string
+  projectId: string
+  divisionId: string
+  ptsWorkCategoryId: string
+  workItemCategoryId: string
+  workItemId: string
+  locationZone?: string | null
+  actorUserId: string
+  note?: string | null
+}
+
+/** Server-only QI boundary. The QI transaction owns the caller's atomicity. */
+export async function createOrReuseQualityInspectionPts(tx: any, input: QualityInspectionPtsInput) {
+  const workItem = (await tx.select({ id: workItems.id, projectId: workItems.projectId }).from(workItems).where(eq(workItems.id, input.workItemId)).for('update'))[0]
+  if (!workItem || workItem.projectId !== input.projectId) throw validationError('The Quality Inspection work item does not belong to the project.')
+
+  const existing = (await tx.select().from(qhssePts).where(and(
+    eq(qhssePts.projectId, input.projectId),
+    eq(qhssePts.workItemId, input.workItemId),
+    eq(qhssePts.source, 'qi-report'),
+    not(eq(qhssePts.statusCode, 'close')),
+    isNull(qhssePts.deletedAt),
+  )).limit(1).for('update'))[0]
+  if (existing) return existing
+
+  const project = (await tx.select({ number: projects.number }).from(projects).where(eq(projects.id, input.projectId)).limit(1))[0]
+  const division = (await tx.select({ code: divisions.code }).from(divisions).where(eq(divisions.id, input.divisionId)).limit(1))[0]
+  if (!project || !division) throw validationError('Project or division not found.')
+  const date = new Date()
+  const allocated = await allocateNumber(tx, input.projectId, date, project.number, division.code)
+  const inserted = await tx.insert(qhssePts).values({
+    divisionId: input.divisionId,
+    projectId: input.projectId,
+    number: allocated.number,
+    source: 'qi-report',
+    ptsWorkCategoryId: input.ptsWorkCategoryId,
+    workItemCategoryId: input.workItemCategoryId,
+    workItemId: input.workItemId,
+    locationZone: input.locationZone ?? null,
+    criteriaCode: null,
+    imgBefore: null,
+    location: null,
+    description: input.note ?? null,
+    statusCode: 'open',
+    stepCode: 'qi-report',
+    createdBy: input.actorUserId,
+    updatedBy: input.actorUserId,
+  }).onConflictDoNothing().returning()
+  if (inserted[0]) return inserted[0]
+  const reused = (await tx.select().from(qhssePts).where(and(
+    eq(qhssePts.projectId, input.projectId),
+    eq(qhssePts.workItemId, input.workItemId),
+    eq(qhssePts.source, 'qi-report'),
+    not(eq(qhssePts.statusCode, 'close')),
+    isNull(qhssePts.deletedAt),
+  )).limit(1).for('update'))[0]
+  if (!reused) throw validationError('The QI PTS was not created.')
+  return reused
 }
 
 async function addActivity(tx: any, row: Pick<PtsRow, 'id' | 'projectId' | 'divisionId' | 'statusCode' | 'stepCode'>, actorUserId: string, shortDescription: string, description?: string) {
@@ -353,6 +417,7 @@ export async function listReports(userId: string, query: Record<string, unknown>
 export async function availableActions(row: ActionRow, userId: string): Promise<ActionName[]> {
   const candidates = row.statusCode === 'close' ? ['delete' as const] : actionOrder
     .filter((action) => actionCatalog[action].steps.includes(row.stepCode))
+    .filter((action) => action !== 'complete-qi-report' || row.source === 'qi-report')
     .filter((action) => action !== 'complete-report' || !row.somUserId)
     .filter((action) => action !== 'follow-up-implementation' || !row.implementationUserId)
     .filter((action) => action !== 'follow-up-price' || !row.estimationCost)
@@ -421,7 +486,7 @@ export function nextStep(row: PtsRow, action: ActionName, input: Record<string, 
     return row.criteriaCode === 'high' ? 'high-disposition' : 'low-disposition'
   }
   if (action === 'temporary-plan') return 'management-notes'
-  if (action === 'management-notes' || action === 'complete-report') return 'complete-report'
+  if (action === 'management-notes' || action === 'complete-report' || action === 'complete-qi-report') return action === 'complete-qi-report' ? 'report' : 'complete-report'
   if (action === 'follow-up-implementation') return row.stepCode === 'follow-up-price' ? 'follow-up' : 'follow-up-implementation'
   if (action === 'follow-up-price') return row.stepCode === 'follow-up-implementation' ? 'follow-up' : 'follow-up-price'
   if (action === 'implementation-report') return 'implementation-report'
@@ -468,7 +533,15 @@ export async function performAction(userId: string, id: string, action: ActionNa
     if (!actionCatalog[action].steps.includes(locked.stepCode)) throw new HttpError(409, 'invalid_transition', `Action "${action}" is not available for this PTS row.`)
     if (action === 'complete-report' && locked.somUserId) throw new HttpError(409, 'invalid_transition', 'The PTS report is already complete.')
 
-    if (action === 'complete-report') await requireProjectUser(tx, input.somUserId as string, locked.projectId, 'SOM user')
+    if (action === 'complete-report') {
+      await requireProjectUser(tx, input.somUserId as string, locked.projectId, 'SOM user')
+    }
+    if (action === 'complete-qi-report') {
+      if (locked.source !== 'qi-report') throw new HttpError(409, 'invalid_transition', 'Only QI-created PTS reports can use this action.')
+      const rootCauseIds = input.rootCauseIds as string[]
+      const causes = await tx.select({ id: rootCauses.id }).from(rootCauses).where(and(inArray(rootCauses.id, [...new Set(rootCauseIds)]), eq(rootCauses.active, true)))
+      if (causes.length !== new Set(rootCauseIds).size) throw validationError('All root causes must be active.')
+    }
     if (action === 'follow-up-implementation') {
       await requireProjectUser(tx, input.implementationUserId as string, locked.projectId, 'Implementation user')
       if (locked.implementationUserId) throw new HttpError(409, 'invalid_transition', 'Implementation follow-up is already complete.')
@@ -490,6 +563,7 @@ export async function performAction(userId: string, id: string, action: ActionNa
     if (action === 'temporary-plan') Object.assign(set, { temporaryFollowUpPlan: input.temporaryFollowUpPlan })
     if (action === 'management-notes') Object.assign(set, { managementNotes: input.managementNotes })
     if (action === 'complete-report') Object.assign(set, { somUserId: input.somUserId, followUpPlan: input.followUpPlan, targetDate: input.targetDate })
+    if (action === 'complete-qi-report') Object.assign(set, { criteriaCode: input.criteriaCode, imgBefore: input.imgBefore, location: input.location, description: input.description })
     if (action === 'follow-up-implementation') Object.assign(set, { implementationUserId: input.implementationUserId, workMethod: input.workMethod })
     if (action === 'follow-up-price') Object.assign(set, { estimationCost: input.estimationCost, jobImplementorType: input.jobImplementorType, projectVendorId: input.projectVendorId ?? null })
     if (action === 'implementation-report') Object.assign(set, { implementationDate: input.implementationDate, imgProcess: input.imgProcess, imgAfter: input.imgAfter, implementationDescription: input.implementationDescription, implementationStatusCode: 'waiting' })
@@ -500,8 +574,12 @@ export async function performAction(userId: string, id: string, action: ActionNa
     const savedRows = await tx.update(qhssePts).set(set).where(eq(qhssePts.id, id)).returning()
     const saved = savedRows[0]
     if (!saved) throw notFound()
+    if (action === 'complete-qi-report') {
+      await tx.delete(qhssePtsRootCauses).where(eq(qhssePtsRootCauses.qhssePtsId, id))
+      await tx.insert(qhssePtsRootCauses).values([...new Set(input.rootCauseIds as string[])].map((rootCauseId) => ({ qhssePtsId: id, rootCauseId })))
+    }
     await addActivity(tx, saved, userId, action === 'delete' ? 'PTS report deleted.' : `PTS ${action} completed.`)
-    if (action !== 'delete') await notifyAfterAction(tx, saved, locked.stepCode, action, userId)
+    if (action !== 'delete' && action !== 'complete-qi-report') await notifyAfterAction(tx, saved, locked.stepCode, action, userId)
     return saved
   })
   if (action === 'delete') return { ...qhssePtsEntity.schemas.select.parse(updated), availableActions: [] as ActionName[] }

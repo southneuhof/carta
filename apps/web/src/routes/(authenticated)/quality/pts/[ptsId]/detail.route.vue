@@ -28,6 +28,7 @@ const actionLabels: Record<string, string> = {
   'temporary-plan': 'Temporary plan',
   'management-notes': 'Management notes',
   'complete-report': 'Complete report',
+  'complete-qi-report': 'Lengkapi Laporan',
   'follow-up-implementation': 'Implementation follow-up',
   'follow-up-price': 'Price follow-up',
   'implementation-report': 'Implementation report',
@@ -56,6 +57,7 @@ const actionIcons: Record<string, ActionIcon> = {
   'temporary-plan': 'sticky-note',
   'management-notes': 'task',
   'complete-report': 'checkbox-circle',
+  'complete-qi-report': 'checkbox-circle',
   'follow-up-implementation': 'tools',
   'follow-up-price': 'money-dollar-box',
   'implementation-report': 'image-edit',
@@ -70,6 +72,7 @@ const actionFields: Record<string, Record<string, unknown>> = {
   'temporary-plan': { temporaryFollowUpPlan: ptsActionFields.temporaryFollowUpPlan },
   'management-notes': { managementNotes: ptsActionFields.managementNotes },
   'complete-report': { somUserId: ptsActionFields.somUserId, followUpPlan: ptsActionFields.followUpPlan, targetDate: ptsActionFields.targetDate },
+  'complete-qi-report': { criteriaCode: ptsActionFields.criteriaCode, rootCauseIds: ptsActionFields.rootCauseIds, imgBefore: ptsActionFields.imgBefore, location: ptsActionFields.location, description: ptsActionFields.description },
   'follow-up-implementation': { implementationUserId: ptsActionFields.implementationUserId, workMethod: ptsActionFields.workMethod },
   'follow-up-price': { estimationCost: ptsActionFields.estimationCost, jobImplementorType: ptsActionFields.jobImplementorType, projectVendorId: ptsActionFields.projectVendorId },
   'implementation-report': {
@@ -203,6 +206,8 @@ async function runAction(action: string, input: Record<string, unknown> = {}) {
         ? 'managementNotes'
         : action === 'complete-report'
         ? 'completeReport'
+        : action === 'complete-qi-report'
+        ? 'completeQiReport'
         : action === 'follow-up-implementation'
         ? 'followUpImplementation'
         : action === 'follow-up-price'
@@ -212,7 +217,11 @@ async function runAction(action: string, input: Record<string, unknown> = {}) {
         : action
     if (action === 'delete') await pts.actions.deleteReport.run(ptsId, String(input.deletedReason ?? ''))
     else {
-      const payload = action === 'implementation-report' ? { ...input, imgProcess: filePath(input.imgProcess), imgAfter: filePath(input.imgAfter) } : input
+      const payload = action === 'implementation-report'
+        ? { ...input, imgProcess: filePath(input.imgProcess), imgAfter: filePath(input.imgAfter) }
+        : action === 'complete-qi-report'
+        ? { ...input, rootCauseIds: (Array.isArray(input.rootCauseIds) ? input.rootCauseIds : []).map((item) => typeof item === 'string' ? item : item && typeof item === 'object' && typeof (item as { id?: unknown }).id === 'string' ? (item as { id: string }).id : '').filter(Boolean), imgBefore: filePath(input.imgBefore) }
+        : input
       await (pts.actions as unknown as Record<string, { run: (id: string, value?: Record<string, unknown>) => Promise<unknown> }>)[actionName].run(ptsId, payload)
     }
     await pts.invalidate({ id: ptsId })

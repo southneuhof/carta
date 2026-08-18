@@ -37,6 +37,7 @@ export const actionSchemas = {
   'temporary-plan': z.object({ temporaryFollowUpPlan: textValue }),
   'management-notes': z.object({ managementNotes: textValue }),
   'complete-report': z.object({ somUserId: textValue, followUpPlan: textValue, targetDate: textValue }),
+  'complete-qi-report': z.object({ criteriaCode: z.enum(criteriaCodes), rootCauseIds: z.array(textValue).min(1), imgBefore: imageKey, location: textValue, description: textValue }),
   'follow-up-implementation': z.object({ implementationUserId: textValue, workMethod: textValue }),
   'follow-up-price': z.object({ estimationCost: cost }).and(vendorFields()),
   'implementation-report': z.object({ implementationDate: textValue, imgProcess: imageKey, imgAfter: imageKey, implementationDescription: textValue.optional() }),
