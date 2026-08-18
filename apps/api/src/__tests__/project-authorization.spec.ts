@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, it } from 'vitest'
 import { hashPassword } from 'better-auth/crypto'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { app } from '../app'
 import { closeDb, getDb } from '../db'
 import { accessibleProjectIds, coveredProjectIds } from '../authorization'
@@ -13,6 +13,8 @@ import { projects } from '../routes/projects/projects.entity'
 import { projectVendors } from '../routes/project-vendors/project-vendors.entity'
 import { ptsWorkCategories } from '../routes/pts-work-categories/pts-work-categories.entity'
 import { qhssePts } from '../routes/qhsse-pts/qhsse-pts.entity'
+import { inspectionTestPlans } from '../routes/inspection-test-plans/inspection-test-plans.entity'
+import { uoms } from '../routes/uoms/uoms.entity'
 import { users } from '../routes/users/users.entity'
 import { workItems } from '../routes/work-items/work-items.entity'
 
@@ -66,6 +68,7 @@ async function makeFixture(coverageType: CoverageCase = 'project') {
     'detail-projects',
     'update-projects',
     'delete-projects',
+    'view-projects',
     'list-work-items',
     'detail-work-items',
     'create-work-items',
@@ -147,13 +150,20 @@ async function makeFixture(coverageType: CoverageCase = 'project') {
     })
     return { rootId, leafId, vendorId, reportId }
   }))
+  const uomId = id('uom')
+  const itpId = id('itp')
+  await db.insert(uoms).values({ id: uomId, code: id('uom-code'), name: 'Scope UOM', uomType: 'work-items', active: true })
+  await db.insert(inspectionTestPlans).values({ id: itpId, workItemId: records[0]!.leafId, type: 'material', frequency: 1, active: true })
 
   const signedIn = await getAuth().api.signInEmail({ body: { email, password: 'test-password' }, returnHeaders: true })
   return {
     db,
     userId,
     projectRoleId,
+    systemRoleId,
     categoryId,
+    uomId,
+    itpId,
     cookie: signedIn.headers.get('set-cookie')?.split(';')[0] ?? '',
     divisionAId,
     projectAId,
@@ -235,6 +245,76 @@ describe('project-owned authorization surfaces', () => {
     await fixture.db.update(rolePermissions).set({ active: false }).where(eq(rolePermissions.permissionId, createPermission.id))
     expect((await coveredProjectIds(fixture.userId)).map(({ id }) => id)).toEqual(expect.arrayContaining([fixture.projectAId]))
     expect((await accessibleProjectIds(fixture.userId, 'create-qhsse-pts')).map(({ id }) => id)).toEqual([])
+  })
+
+  it('protects ITP reads and rejects children below an active ITP', async () => {
+    const fixture = await makeFixture()
+    const leaf = fixture.records[0]!
+    const headers = { Cookie: fixture.cookie }
+
+    expect((await app.request(`/inspection-test-plans/template?projectId=${fixture.projectAId}`, { headers })).status).toBe(200)
+    const tree = await app.request(`/inspection-test-plans/project/${fixture.projectAId}/tree`, { headers })
+    expect(tree.status).toBe(200)
+    expect((await tree.json()).data[0].children[0].itps[0].id).toBe(fixture.itpId)
+    expect((await app.request(`/inspection-test-plans/detail/${fixture.itpId}`, { headers })).status).toBe(200)
+
+    expect((await app.request(`/inspection-test-plans/template?projectId=${fixture.projectCId}`, { headers })).status).toBe(404)
+    expect((await app.request(`/inspection-test-plans/project/${fixture.projectCId}/tree`, { headers })).status).toBe(404)
+
+    const viewPermission = (await fixture.db.select({ id: permissions.id }).from(permissions).where(eq(permissions.permissionCode, 'view-projects')).limit(1))[0]
+    if (!viewPermission) throw new Error('view-projects fixture is missing.')
+    await fixture.db.update(rolePermissions).set({ active: false }).where(and(
+      eq(rolePermissions.roleId, fixture.systemRoleId),
+      eq(rolePermissions.permissionId, viewPermission.id),
+    ))
+    expect((await app.request(`/inspection-test-plans/template?projectId=${fixture.projectAId}`, { headers })).status).toBe(403)
+    expect((await app.request(`/inspection-test-plans/project/${fixture.projectAId}/tree`, { headers })).status).toBe(403)
+    expect((await app.request(`/inspection-test-plans/detail/${fixture.itpId}`, { headers })).status).toBe(403)
+
+    const movableId = id('movable-work-item')
+    await fixture.db.insert(workItems).values({
+      id: movableId,
+      projectId: fixture.projectAId,
+      parentId: leaf.rootId,
+      code: id('movable-code'),
+      name: `${fixture.userId} Movable`,
+      level: 2,
+      volume: '1',
+      uomId: fixture.uomId,
+    })
+
+    const blockedCreate = await app.request('/work-items/create', {
+      method: 'POST',
+      headers: jsonHeaders(fixture.cookie),
+      body: JSON.stringify({ projectId: fixture.projectAId, parentId: leaf.leafId, name: `${fixture.userId} Blocked`, volume: '1', uomId: fixture.uomId }),
+    })
+    expect(blockedCreate.status).toBe(400)
+    expect(JSON.stringify(await blockedCreate.json())).toContain('Work item with an active ITP cannot receive a child.')
+    expect(await fixture.db.select({ id: workItems.id }).from(workItems).where(eq(workItems.name, `${fixture.userId} Blocked`))).toHaveLength(0)
+
+    const normalCreate = await app.request('/work-items/create', {
+      method: 'POST',
+      headers: jsonHeaders(fixture.cookie),
+      body: JSON.stringify({ projectId: fixture.projectAId, parentId: leaf.rootId, name: `${fixture.userId} Normal`, volume: '1', uomId: fixture.uomId }),
+    })
+    expect(normalCreate.status).toBe(201)
+    const normalChild = (await normalCreate.json()).data
+    const normalMove = await app.request(`/work-items/update/${movableId}`, {
+      method: 'PATCH',
+      headers: jsonHeaders(fixture.cookie),
+      body: JSON.stringify({ parentId: normalChild.id }),
+    })
+    expect(normalMove.status).toBe(200)
+
+    const blockedMove = await app.request(`/work-items/update/${movableId}`, {
+      method: 'PATCH',
+      headers: jsonHeaders(fixture.cookie),
+      body: JSON.stringify({ parentId: leaf.leafId }),
+    })
+    expect(blockedMove.status).toBe(400)
+    expect(JSON.stringify(await blockedMove.json())).toContain('Work item with an active ITP cannot receive a child.')
+    expect((await fixture.db.select({ parentId: workItems.parentId }).from(workItems).where(eq(workItems.id, movableId)).limit(1))[0]?.parentId).toBe(normalChild.id)
+    expect((await fixture.db.select({ active: inspectionTestPlans.active }).from(inspectionTestPlans).where(eq(inspectionTestPlans.id, fixture.itpId)).limit(1))[0]?.active).toBe(true)
   })
 
   it('paginates QHSSE rows and counts only the scoped rows', async () => {

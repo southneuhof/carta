@@ -1,4 +1,4 @@
-import { eq, inArray, sql } from 'drizzle-orm'
+import { and, eq, inArray, sql } from 'drizzle-orm'
 import { closeDb, getDb } from '../src/db'
 import { authorizationModules as moduleCatalog } from '../src/authorization/catalog'
 import { createAuth } from '../src/routes/auth/auth'
@@ -12,6 +12,13 @@ import { rootCauses } from '../src/routes/root-causes/root-causes.entity'
 import { uoms } from '../src/routes/uoms/uoms.entity'
 import { workItems } from '../src/routes/work-items/work-items.entity'
 import {
+  inspectionTestPlanInspectorPoints,
+  inspectionTestPlanInspectorTypes,
+  inspectionTestPlans,
+  itpInspectionPoints,
+  itpInspectorTypes,
+} from '../src/routes/inspection-test-plans/inspection-test-plans.entity'
+import {
   authorizationModules,
   permissions,
   projectRoleAssignments,
@@ -23,6 +30,71 @@ import { users } from '../src/routes/users/users.entity'
 
 const seedEmail = process.env.ADS_HK_ADMIN_EMAIL ?? 'admin@example.com'
 const seedPassword = process.env.ADS_HK_ADMIN_PASSWORD ?? 'demo-password'
+
+const seededInspectorTypes = [
+  { id: 'itp-inspector-type-sc', code: 'SC', name: 'SubCon' },
+  { id: 'itp-inspector-type-hk', code: 'HK', name: 'HK' },
+  { id: 'itp-inspector-type-cons', code: 'CONS', name: 'Konsultan' },
+  { id: 'itp-inspector-type-own', code: 'OWN', name: 'Owner' },
+  { id: 'itp-inspector-type-auth', code: 'AUTH', name: 'Authority' },
+] as const
+
+const seededInspectionPoints = [
+  { id: 'itp-inspection-point-p', code: 'P', name: 'Perform' },
+  { id: 'itp-inspection-point-r', code: 'R', name: 'Record' },
+  { id: 'itp-inspection-point-w', code: 'W', name: 'Witness' },
+  { id: 'itp-inspection-point-sw', code: 'SW', name: 'Spot Witness' },
+  { id: 'itp-inspection-point-s', code: 'S', name: 'Surveillance' },
+  { id: 'itp-inspection-point-h', code: 'H', name: 'Hold Point' },
+] as const
+
+type SeedItpPlan = {
+  id: string
+  type: 'material' | 'process' | 'product'
+  criteria: string
+  procedureCode: string
+  specification: string
+  method: string
+  frequency: number
+  description: string
+  checked: Record<string, readonly string[]>
+}
+
+const seededItpPlans: SeedItpPlan[] = [
+  {
+    id: 'itp-default-material',
+    type: 'material',
+    criteria: 'Approved material is received before installation.',
+    procedureCode: 'MAT-001',
+    specification: 'Material matches the approved submittal and project specification.',
+    method: 'Document review and visual inspection.',
+    frequency: 1,
+    description: 'Material receiving inspection.',
+    checked: { SC: ['P', 'R'], HK: ['R', 'W'], CONS: ['R'], OWN: ['R'], AUTH: [] },
+  },
+  {
+    id: 'itp-default-process',
+    type: 'process',
+    criteria: 'Installation follows the approved method statement.',
+    procedureCode: 'PROC-001',
+    specification: 'Workmanship and field measurements meet the approved drawings.',
+    method: 'Site inspection and field measurement.',
+    frequency: 1,
+    description: 'Installation process inspection.',
+    checked: { SC: ['P', 'R'], HK: ['W', 'S'], CONS: ['W', 'SW'], OWN: ['W'], AUTH: ['H'] },
+  },
+  {
+    id: 'itp-default-product',
+    type: 'product',
+    criteria: 'Completed work is ready for final acceptance.',
+    procedureCode: 'PROD-001',
+    specification: 'Finished work meets the approved drawings and acceptance criteria.',
+    method: 'Final inspection and test record review.',
+    frequency: 1,
+    description: 'Completed work acceptance inspection.',
+    checked: { SC: ['P', 'R'], HK: ['R', 'W'], CONS: ['R', 'W', 'S'], OWN: ['W', 'H'], AUTH: ['H'] },
+  },
+]
 
 async function seedAuthorization() {
   const db = getDb()
@@ -74,6 +146,93 @@ async function seedAuthorization() {
     target: [rolePermissions.roleId, rolePermissions.permissionId],
     set: { active: true },
   })
+}
+
+async function seedItpPlans(userId: string) {
+  const db = getDb()
+  const [inspectorTypes, inspectionPoints] = await Promise.all([
+    db.select({ id: itpInspectorTypes.id, code: itpInspectorTypes.code }).from(itpInspectorTypes).where(eq(itpInspectorTypes.active, true)),
+    db.select({ code: itpInspectionPoints.code }).from(itpInspectionPoints).where(eq(itpInspectionPoints.active, true)),
+  ])
+  const inspectorTypeIds = new Map(inspectorTypes.map((type) => [type.code, type.id]))
+  const pointCodes = inspectionPoints.map((point) => point.code)
+
+  for (const plan of seededItpPlans) {
+    const existing = (await db.select({ id: inspectionTestPlans.id }).from(inspectionTestPlans).where(and(
+      eq(inspectionTestPlans.workItemId, 'work-item-default'),
+      eq(inspectionTestPlans.type, plan.type),
+      eq(inspectionTestPlans.active, true),
+    )).limit(1))[0]
+    if (existing && existing.id !== plan.id) continue
+
+    const timestamp = new Date().toISOString()
+    await db.insert(inspectionTestPlans).values({
+      id: plan.id,
+      workItemId: 'work-item-default',
+      type: plan.type,
+      criteria: plan.criteria,
+      procedureCode: plan.procedureCode,
+      specification: plan.specification,
+      method: plan.method,
+      frequency: plan.frequency,
+      description: plan.description,
+      active: true,
+      createdByUserId: userId,
+      updatedByUserId: userId,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    }).onConflictDoUpdate({
+      target: inspectionTestPlans.id,
+      set: {
+        workItemId: 'work-item-default',
+        type: plan.type,
+        criteria: plan.criteria,
+        procedureCode: plan.procedureCode,
+        specification: plan.specification,
+        method: plan.method,
+        frequency: plan.frequency,
+        description: plan.description,
+        active: true,
+        updatedByUserId: userId,
+        updatedAt: timestamp,
+      },
+    })
+
+    for (const inspectorType of seededInspectorTypes) {
+      const inspectorTypeId = inspectorTypeIds.get(inspectorType.code)
+      if (!inspectorTypeId) continue
+      const child = (await db.insert(inspectionTestPlanInspectorTypes).values({
+        inspectionTestPlanId: plan.id,
+        inspectorTypeId,
+        active: true,
+        createdByUserId: userId,
+        updatedByUserId: userId,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      }).onConflictDoUpdate({
+        target: [inspectionTestPlanInspectorTypes.inspectionTestPlanId, inspectionTestPlanInspectorTypes.inspectorTypeId],
+        set: { active: true, updatedByUserId: userId, updatedAt: timestamp },
+      }).returning({ id: inspectionTestPlanInspectorTypes.id }))[0]
+      if (!child) throw new Error(`ITP inspector type was not seeded for ${plan.id}.`)
+
+      const checked = new Set(plan.checked[inspectorType.code] ?? [])
+      for (const inspectionPointCode of pointCodes) {
+        await db.insert(inspectionTestPlanInspectorPoints).values({
+          inspectionTestPlanInspectorTypeId: child.id,
+          inspectionPointCode,
+          value: checked.has(inspectionPointCode),
+          active: true,
+          createdByUserId: userId,
+          updatedByUserId: userId,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        }).onConflictDoUpdate({
+          target: [inspectionTestPlanInspectorPoints.inspectionTestPlanInspectorTypeId, inspectionTestPlanInspectorPoints.inspectionPointCode],
+          set: { value: checked.has(inspectionPointCode), active: true, updatedByUserId: userId, updatedAt: timestamp },
+        })
+      }
+    }
+  }
 }
 
 async function main() {
@@ -146,6 +305,15 @@ async function main() {
     { id: 'number-config-project', numberVariableCode: 'project_number', numberOfDigits: 0, displayOrder: 3, active: true },
     { id: 'number-config-year', numberVariableCode: 'year', numberOfDigits: 0, displayOrder: 4, active: true },
   ]).onConflictDoNothing()
+  await db.insert(itpInspectorTypes).values(seededInspectorTypes.map((type) => ({ ...type, active: true }))).onConflictDoUpdate({
+    target: itpInspectorTypes.code,
+    set: { name: sql`excluded.name`, active: true },
+  })
+  await db.insert(itpInspectionPoints).values(seededInspectionPoints.map((point) => ({ ...point, active: true }))).onConflictDoUpdate({
+    target: itpInspectionPoints.code,
+    set: { name: sql`excluded.name`, active: true },
+  })
+  await seedItpPlans(admin.id)
   await closeDb()
 }
 

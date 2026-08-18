@@ -11,6 +11,7 @@ import { getDb } from '../../db'
 import { ptsWorkCategories } from '../pts-work-categories/pts-work-categories.entity'
 import { projects } from '../projects/projects.entity'
 import { uoms } from '../uoms/uoms.entity'
+import { inspectionTestPlans } from '../inspection-test-plans/inspection-test-plans.entity'
 import { workItemRelations, workItems, workItem } from './work-items.entity'
 
 const workItemColumns = getTableColumns(workItems) as Record<string, unknown>
@@ -53,6 +54,11 @@ async function validateWorkItem(route: string, state: { input?: unknown; id?: st
       const parent = (await getDb().select({ projectId: workItems.projectId, active: workItems.active, parentId: workItems.parentId, level: workItems.level }).from(workItems).where(eq(workItems.id, parentId)).limit(1))[0]
       if (!parent || parent.projectId !== projectId) return 'Work-item parent must use the same project.'
       if (!parent.active) return 'Inactive work-item parent cannot receive an active child.'
+      const activeItp = await getDb().select({ id: inspectionTestPlans.id }).from(inspectionTestPlans).where(and(
+        eq(inspectionTestPlans.workItemId, parentId),
+        eq(inspectionTestPlans.active, true),
+      )).limit(1)
+      if (activeItp[0]) return 'Work item with an active ITP cannot receive a child.'
       if (route === 'create') input.level = parent.level + 1
       let current = parent.parentId
       while (current) {

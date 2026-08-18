@@ -78,6 +78,7 @@ export type {
   CollectionProps,
   CollectionSlotProps,
   TableProps,
+  TreeTableProps,
   TableContentProps,
   DetailProps,
   FormProps,

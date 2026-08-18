@@ -300,6 +300,20 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    'quality-inspection-test-plans': RouteRecordInfo<
+      'quality-inspection-test-plans',
+      '/quality/inspection-test-plans',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'quality-inspection-test-plans-detail': RouteRecordInfo<
+      'quality-inspection-test-plans-detail',
+      '/quality/inspection-test-plans/:projectId/detail',
+      { projectId: ParamValue<true> },
+      { projectId: ParamValue<false> },
+      | never
+    >,
     'quality-pts': RouteRecordInfo<
       'quality-pts',
       '/quality/pts',
@@ -508,6 +522,8 @@ declare module 'vue-router/auto-routes' {
         | 'master-data-uoms-edit'
         | 'master-data-work-items'
         | 'notifications'
+        | 'quality-inspection-test-plans'
+        | 'quality-inspection-test-plans-detail'
         | 'quality-pts'
         | 'quality-pts-create'
         | 'quality-pts-detail'
@@ -834,6 +850,22 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/notifications/index.route.vue': {
       routes:
         | 'notifications'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/quality/inspection-test-plans/index.route.vue': {
+      routes:
+        | 'quality-inspection-test-plans'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/quality/inspection-test-plans/[projectId]/detail.route.vue': {
+      routes:
+        | 'quality-inspection-test-plans-detail'
       views:
         | never
       pathParamNames:

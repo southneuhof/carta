@@ -261,6 +261,17 @@ export const authorizationModules = [
       { code: "close-qhsse-pts", name: "Close QHSSE PTS", description: "Close QHSSE PTS reports.", active: true },
     ],
   },
+  {
+    code: "work-item-itp",
+    name: "Work Item ITP",
+    realm: "project",
+    active: true,
+    permissions: [
+      { code: "create-work-item-itp", name: "Create Work Item ITP", description: "Create inspection test plans for work items in scope.", active: true },
+      { code: "update-work-item-itp", name: "Update Work Item ITP", description: "Update inspection test plans for work items in scope.", active: true },
+      { code: "delete-work-item-itp", name: "Delete Work Item ITP", description: "Delete inspection test plans for work items in scope.", active: true },
+    ],
+  },
 ] as const satisfies readonly ModuleDefinition[];
 
 export type AuthorizationModuleCode = (typeof authorizationModules)[number]["code"];

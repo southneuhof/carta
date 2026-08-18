@@ -32,7 +32,7 @@ function setFilter(value: unknown) {
 }
 </script>
 <template>
-  <ListView v-bind="projects.list()" title="Proyek" :query="query" @update:query="query = $event">
+  <ListView v-bind="projects.list()" title="Proyek" pagination="always" :query="query" @update:query="query = $event">
     <template #filters>
       <ChipFilter v-model="selectedFilter" :items="filterItems" @update:model-value="setFilter" />
     </template>

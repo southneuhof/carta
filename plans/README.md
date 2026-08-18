@@ -13,6 +13,15 @@ Radix Vue to Reka UI.
 Plan 054 adds the first authenticated-shell command palette. It has no
 dependency on the primitive audit plans because it consumes the already-migrated
 Reka-backed framework dialog and keeps the missing command surface app-local.
+Plans 055-057 build the approved Inspection & Test Plan setup slice. Execute
+them in order: API and constraints first, the schema-bound resource and
+inspector grid second, then the project list and route-local tree workflow.
+Plans 058-059 add a generic framework tree table and make Work Items its first
+consumer. Execute 058 first. It is a framework approval boundary; 059 must not
+add tree behavior that 058 does not define.
+Plans 060-061 correct confirmed ITP defects. Execute 060 before 061: it locks
+the read and leaf-work-item rules, then the web route removes its broken
+template request and query loader.
 
 ## Execution order and status
 
@@ -55,6 +64,13 @@ Reka-backed framework dialog and keeps the missing command surface app-local.
 | 052 | Add browser coverage for shared UI primitives | P1 | M | 051 | TODO |
 | 053 | Migrate framework primitives from Radix Vue to Reka UI | P1 | M | 051, 052 | TODO |
 | 054 | Add route navigation command palette | P1 | M | — | DONE |
+| 055 | Build the ITP database and API contract | P1 | L | — | DONE |
+| 056 | Build the ITP resource and editor | P1 | M | 055 | DONE |
+| 057 | Build the ITP project list and tree workflow | P1 | L | 055, 056 | DONE |
+| 058 | Add framework TreeTable | P1 | M | — | DONE |
+| 059 | Render Work Items with TreeTable | P1 | M | 058 | BLOCKED (authenticated browser session unavailable) |
+| 060 | Protect ITP reads and leaf work items | P1 | M | 055 | DONE |
+| 061 | Repair ITP create UI and tree reload | P0 | M | 055-058, 060 | DONE |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with reason) | REJECTED (with rationale).
 
@@ -95,6 +111,13 @@ flowchart TD
   B51 --> B52["052 Browser primitive coverage"]
   B52 --> B53["053 Radix Vue to Reka UI"]
   CP54["054 Command palette (independent)"]
+  I55["055 ITP API and constraints"] --> I56["056 ITP resource and editor"]
+  I56 --> I57["057 ITP project tree workflow"]
+  TT58["058 Framework TreeTable"] --> WI59["059 Work Items TreeTable integration"]
+  I55 --> I60["060 ITP read and leaf rules"]
+  I60 --> I61["061 ITP UI and direct tree reload"]
+  I57 --> I61
+  TT58 --> I61
 ```
 
 ## Cohort execution rules
@@ -137,6 +160,20 @@ flowchart TD
 - Plan 053 changes only the shared framework primitive dependency and the
   verified Radix-generated selectors and variables. Do not add compatibility
   aliases or migrate unrelated Headless UI code.
+- Plan 055 must define the ITP database, authorization, master template, and
+  transaction rules before the web module starts.
+- Plan 056 keeps the only inspector-grid input route-local and exposes its form
+  slot before plan 057 owns dialogs and tree refresh.
+- Plan 057 is the final ITP acceptance gate. It may fix confirmed slice defects
+  but must stop for a business-rule change or framework change.
+- Plan 058 is a framework-only change. It must be reviewed before the Work
+  Items route changes, because it defines the public component contract.
+- Plan 059 is the first consumer and must preserve the current full-tree
+  display. It does not migrate the ITP union-row tree.
+- Plan 060 rejects a child under a work item with an active ITP. It does not
+  delete, migrate, or repair existing ITP rows.
+- Plan 061 calls the registered template endpoint once, uses route-owned fetch
+  state for the ITP tree, and keeps the generic TreeTable unchanged.
 
 ## Findings considered and rejected
 
@@ -171,6 +208,21 @@ flowchart TD
 - Add automatic framework invalidation for custom actions: rejected because
   custom actions are plain functions; one local PTS helper supplies the required
   action-then-invalidate sequence.
+- Add an ITP-specific replacement for the project list: rejected because the
+  existing project resource already owns project list access and fields.
+- Extend the framework table with tree rows: rejected because only the ITP
+  route needs it; slots support the approved route-local layer.
+- The preceding tree-row rejection is superseded by plans 058-059: Work Items
+  is now an authorized second nested-record consumer. The new component stays
+  record-only and does not absorb the ITP union-row workflow.
+- Add import, export, inspector administration, or Quality Inspection stubs:
+  rejected because the approved slice explicitly defers them.
+- Add `/inspection-test-plans/template/template` as a compatibility endpoint:
+  rejected because the current request is wrong and the registered single
+  template endpoint is the API contract.
+- Change TreeTable metadata to use row keys in the ITP correction: rejected
+  because it is a framework change without approval. Plan 061 avoids its
+  loader path and remains an app-only fix.
 
 ## Superseded field decision
 

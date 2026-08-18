@@ -11,6 +11,11 @@ describe('navigation entrypoints', () => {
     ).toBe(true)
   })
 
+  it('guards the ITP entry with the existing project read grant', () => {
+    const quality = navigation.find((module) => module.name === 'quality')!
+    expect(quality.routes).toContainEqual({ to: { name: 'quality-inspection-test-plans' }, permission: 'view-projects', title: 'Inspection & Test Plan', icon: 'folder' })
+  })
+
   it('matches entrypoint subtrees at segment boundaries and prefers longest target', () => {
     const paths: Record<string, string> = {
       dashboard: '/dashboard',

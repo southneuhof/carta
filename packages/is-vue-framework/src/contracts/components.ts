@@ -63,6 +63,14 @@ export interface TableProps<
   schema?: ValidationSchema<TQuery>
 }
 
+export interface TreeTableProps<
+  TRecord extends object = Record<string, unknown>,
+  TQuery extends object = Record<string, unknown>,
+> extends Omit<TableProps<TRecord, TQuery>, 'reorderable'> {
+  children: (record: TRecord) => readonly TRecord[]
+  treeColumn: string
+}
+
 export interface TableContentProps<
   TRecord extends object = Record<string, unknown>,
   TQuery extends object = Record<string, unknown>,

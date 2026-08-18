@@ -40,6 +40,7 @@ import {
   presignedUploadRoute,
 } from "./files/files";
 import { domain as qhssePtsDomain, qhssePtsModel } from "./qhsse-pts/qhsse-pts";
+import { domain as inspectionTestPlansDomain, inspectionTestPlansModel } from "./inspection-test-plans/inspection-test-plans";
 
 export const domainParts = [
   authDomain,
@@ -57,6 +58,7 @@ export const domainParts = [
   usersDomain,
   notificationsDomain,
   qhssePtsDomain,
+  inspectionTestPlansDomain,
 ] as const;
 
 const installedRoutes = [
@@ -96,6 +98,7 @@ const installedRoutes = [
   userModel,
   createUser,
   qhssePtsModel,
+  inspectionTestPlansModel,
 ] as const;
 
 // Public like /health; attach authenticated() here if the document should require a session.
