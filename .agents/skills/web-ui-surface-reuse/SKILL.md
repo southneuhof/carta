@@ -1,6 +1,6 @@
 ---
 name: web-ui-surface-reuse
-description: Select and verify reusable @southneuhof/is-vue-framework surfaces for apps/web UI changes. Use when implementing or reviewing routes, filters, forms, tables, details, dialogs, tabs, inputs, or other web UI; do not use for backend, API, database, or architecture-only work.
+description: Select, compare, and verify reusable @southneuhof/is-vue-framework surfaces for apps/web UI changes, including route-scoped actions, sibling CRUD conventions, and real-browser visual checks. Use when implementing or reviewing routes, filters, forms, tables, details, dialogs, tabs, inputs, or other web UI; do not use for backend, API, database, or architecture-only work.
 ---
 
 # Web UI surface reuse
@@ -30,6 +30,31 @@ Reused: <exact component, renderer, or slot>
 Searched: <exact framework and application paths>
 Gap: <None, or the missing framework capability>
 ```
+
+## Establish route scope before editing
+
+Before removing, adding, or renaming a control:
+
+1. Identify the exact route and surface: list, detail, row, form, or shared
+   component.
+2. Write the intended action change for that surface only.
+3. Check sibling CRUD routes for the standard action names and layout.
+4. Do not remove an action from another surface because it uses the same
+   component or label.
+
+When the request is ambiguous, preserve actions on other surfaces until their
+scope is clear.
+
+## Reuse sibling UI patterns
+
+Search nearby CRUD routes before creating a custom action or layout.
+
+- Reuse the sibling route's standard action names, such as `View`, `Edit`,
+  `Delete`, or `Create`.
+- Reuse its action grouping and alignment, including horizontal row actions.
+- Prefer one existing standard action over a custom equivalent such as `Open`.
+- Use custom controls only when the sibling pattern cannot express the
+  requirement. Record the exact gap.
 
 ## Use the framework surfaces
 
@@ -77,8 +102,19 @@ without explicit user approval.
 
 ## Verify the result
 
-Test the observable UI surface, not only helper functions. For a framework
-surface change, run the focused route test, web type-check, lint, and
-`git diff --check`. Use the real browser for user-facing flows when available.
+Test the observable UI surface, not only helper functions. For every changed
+route, verify in the real browser when available:
+
+- requested controls exist on the intended surface and remain on other
+  surfaces;
+- action labels and alignment match sibling CRUD routes;
+- tree hierarchy remains clear after first load and reload;
+- indentation is stable and connector arms do not make the hierarchy unclear.
+
+Tests do not prove that the visible UI is correct. If browser verification is
+not possible, report the UI as unverified.
+
+For a framework surface change, run the focused route test, web type-check,
+lint, and `git diff --check`.
 In the final summary, state `Reused`, `Searched`, and `Gap` with exact paths or
 component names.

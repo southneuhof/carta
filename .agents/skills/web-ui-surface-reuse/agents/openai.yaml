@@ -1,4 +1,4 @@
 interface:
   display_name: "Web UI Surface Reuse"
-  short_description: "Find and reuse the web framework surfaces"
-  default_prompt: "Use $web-ui-surface-reuse to select framework components before implementing this web UI change."
+  short_description: "Reuse and visually verify framework UI surfaces"
+  default_prompt: "Use $web-ui-surface-reuse to check route scope, sibling CRUD patterns, and the final visible UI."
