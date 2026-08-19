@@ -3,7 +3,7 @@ import { rootCause } from '@southneuhof/api/routes/root-causes/root-causes.entit
 import type { AppResourceContract } from '@/framework/hono'
 import { rpc } from '@/framework/rpc'
 
-export const rootCausesSchema = defineSchema<AppResourceContract<typeof rpc['root-causes']>>({
+export const rootCausesSchema = defineSchema<AppResourceContract<(typeof rpc)['root-causes']>>({
   identity: 'id',
   record: { schema: fromZod(rootCause.schemas.select) },
   create: { schema: fromZod(rootCause.schemas.create) },

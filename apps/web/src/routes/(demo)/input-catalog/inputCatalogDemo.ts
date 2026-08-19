@@ -1,11 +1,33 @@
 import type { FieldCatalog } from '@southneuhof/is-vue-framework'
 
 export const inputCatalogKeys = [
-  'text', 'textarea', 'color', 'password', 'file', 'image', 'select', 'radio',
-  'date', 'daterange', 'month', 'year', 'tag', 'currency', 'switch', 'checkbox',
-  'lookup', 'location', 'multi-location', 'rich-text',
-  'icon-select', 'table', 'time', 'number', 'checkbox-group',
-  'separator', 'canvas',
+  'text',
+  'textarea',
+  'color',
+  'password',
+  'file',
+  'image',
+  'select',
+  'radio',
+  'date',
+  'daterange',
+  'month',
+  'year',
+  'tag',
+  'currency',
+  'switch',
+  'checkbox',
+  'lookup',
+  'location',
+  'multi-location',
+  'rich-text',
+  'icon-select',
+  'table',
+  'time',
+  'number',
+  'checkbox-group',
+  'separator',
+  'canvas',
 ] as const
 
 export type InputCatalogKey = (typeof inputCatalogKeys)[number]
@@ -65,17 +87,19 @@ const labels: Partial<Record<InputCatalogKey, string>> = {
   'checkbox-group': 'Checkbox group',
 }
 
-export const inputCatalogFields = Object.fromEntries(inputCatalogKeys.map((key) => [
-  key,
-  {
-    label: labels[key] ?? key.replaceAll('-', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()),
-    form: {
-      renderer: key,
-      props: fixtureProps[key],
-      span: ['separator', 'table', 'canvas', 'rich-text'].includes(key) ? 12 : 6,
+export const inputCatalogFields = Object.fromEntries(
+  inputCatalogKeys.map((key) => [
+    key,
+    {
+      label: labels[key] ?? key.replaceAll('-', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()),
+      form: {
+        renderer: key,
+        props: fixtureProps[key],
+        span: ['separator', 'table', 'canvas', 'rich-text'].includes(key) ? 12 : 6,
+      },
     },
-  },
-])) as FieldCatalog<InputCatalogDraft, InputCatalogDraft>
+  ])
+) as FieldCatalog<InputCatalogDraft, InputCatalogDraft>
 
 export const inputCatalogInitialData: Partial<InputCatalogDraft> = {
   text: 'Editable catalog value',
@@ -103,15 +127,19 @@ export const inputCatalogInitialData: Partial<InputCatalogDraft> = {
 
 export function serializeCatalogValue(value: unknown): string {
   const seen = new WeakSet<object>()
-  return JSON.stringify(value, (_key, entry) => {
-    if (entry instanceof Date) return entry.toISOString()
-    if (typeof File !== 'undefined' && entry instanceof File) return { name: entry.name, type: entry.type, size: entry.size }
-    if (typeof Blob !== 'undefined' && entry instanceof Blob) return { type: entry.type, size: entry.size }
-    if (entry instanceof Map) return Object.fromEntries(entry)
-    if (typeof entry === 'object' && entry !== null) {
-      if (seen.has(entry)) return '[Circular]'
-      seen.add(entry)
-    }
-    return entry
-  }, 2)
+  return JSON.stringify(
+    value,
+    (_key, entry) => {
+      if (entry instanceof Date) return entry.toISOString()
+      if (typeof File !== 'undefined' && entry instanceof File) return { name: entry.name, type: entry.type, size: entry.size }
+      if (typeof Blob !== 'undefined' && entry instanceof Blob) return { type: entry.type, size: entry.size }
+      if (entry instanceof Map) return Object.fromEntries(entry)
+      if (typeof entry === 'object' && entry !== null) {
+        if (seen.has(entry)) return '[Circular]'
+        seen.add(entry)
+      }
+      return entry
+    },
+    2
+  )
 }

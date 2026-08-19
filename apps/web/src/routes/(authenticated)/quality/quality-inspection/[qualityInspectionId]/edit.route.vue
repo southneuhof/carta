@@ -17,11 +17,25 @@ const form = computed(() => ({
   ...action,
   initialData: initialData.value,
   load: async () => {
-    const detail = await qualityInspection.detail({ id }).run() as Record<string, any>
+    const detail = (await qualityInspection.detail({ id }).run()) as Record<string, any>
     if (!Array.isArray(detail.allowedOperations) || !detail.allowedOperations.includes('update')) throw new Error('Inspection/Test ini tidak dapat diedit.')
-    const selectedRows = Array.isArray(detail.workItems) ? detail.workItems.map((item: Record<string, any>) => ({ workItemId: item.row.workItemId, volume: Number(item.row.volume), itpTypeCodes: Array.isArray(item.snapshots) ? item.snapshots.map((snapshot: Record<string, any>) => snapshot.type) : [] })) : []
-    initialData.value = { divisionId: detail.divisionId, projectId: detail.projectId, qualityWorkCategoryId: detail.qualityWorkCategoryId, workItemCategoryId: detail.workItemCategoryId, targetDate: detail.targetDate, locationZone: detail.locationZone, selectedRows }
-    context.value = await loadCreateContext(String(detail.projectId), 'update') as typeof context.value
+    const selectedRows = Array.isArray(detail.workItems)
+      ? detail.workItems.map((item: Record<string, any>) => ({
+          workItemId: item.row.workItemId,
+          volume: Number(item.row.volume),
+          itpTypeCodes: Array.isArray(item.snapshots) ? item.snapshots.map((snapshot: Record<string, any>) => snapshot.type) : [],
+        }))
+      : []
+    initialData.value = {
+      divisionId: detail.divisionId,
+      projectId: detail.projectId,
+      qualityWorkCategoryId: detail.qualityWorkCategoryId,
+      workItemCategoryId: detail.workItemCategoryId,
+      targetDate: detail.targetDate,
+      locationZone: detail.locationZone,
+      selectedRows,
+    }
+    context.value = (await loadCreateContext(String(detail.projectId), 'update')) as typeof context.value
     return initialData.value
   },
 }))
@@ -30,7 +44,12 @@ const form = computed(() => ({
 <template>
   <FormView v-bind="form" title="Edit Inspection/Test">
     <template #input:selectedRows="{ value, setValue, draft }">
-      <QualityInspectionWorkItemSelector :context="context" :root-id="typeof draft.workItemCategoryId === 'string' ? draft.workItemCategoryId : undefined" :model-value="Array.isArray(value) ? value as never[] : []" @update:model-value="setValue" />
+      <QualityInspectionWorkItemSelector
+        :context="context"
+        :root-id="typeof draft.workItemCategoryId === 'string' ? draft.workItemCategoryId : undefined"
+        :model-value="Array.isArray(value) ? value as never[] : []"
+        @update:model-value="setValue"
+      />
     </template>
   </FormView>
 </template>

@@ -22,7 +22,7 @@ export function createPermissionGuard(access?: AccessAdapter): NavigationGuard {
     const allowed = action
       ? action.permission === null || isProjectCreateAction(action) || adapter.allows({ operation: 'detail', permission: action.permission })
       : allowsExtraordinaryRoute(to.meta, adapter)
-    return allowed ? true : (getDefaultAuthenticatedRouteLocation() ?? { path: '/' }) as never
+    return allowed ? true : ((getDefaultAuthenticatedRouteLocation() ?? { path: '/' }) as never)
   }
 }
 

@@ -24,10 +24,22 @@ const forbiddenImports = [
 ]
 
 const forbiddenIdentifiers = [
-  'CRUDComposite', 'useCRUDOperations', 'resolveCRUDOperations', 'FrameworkCRUDRuntime',
-  'FrameworkDefaultsInput', 'FrameworkRuntime', 'useFrameworkDefaults',
-  'useFrameworkRuntime', 'mergeModelConfig', 'ModelConfig', 'InputConfig',
-  'fieldsAlias', 'fieldsProxy', 'fieldsParse', 'fieldsType', 'inputConfig',
+  'CRUDComposite',
+  'useCRUDOperations',
+  'resolveCRUDOperations',
+  'FrameworkCRUDRuntime',
+  'FrameworkDefaultsInput',
+  'FrameworkRuntime',
+  'useFrameworkDefaults',
+  'useFrameworkRuntime',
+  'mergeModelConfig',
+  'ModelConfig',
+  'InputConfig',
+  'fieldsAlias',
+  'fieldsProxy',
+  'fieldsParse',
+  'fieldsType',
+  'inputConfig',
 ]
 
 function collectFiles(directory: string): string[] {
@@ -45,9 +57,7 @@ describe('legacy CRUD boundary', () => {
   it('has no application import of a retired CRUD module', () => {
     const offenders = files.flatMap((file) => {
       const source = readFileSync(file, 'utf8')
-      return forbiddenImports
-        .filter((specifier) => source.includes(specifier))
-        .map((specifier) => `${relative(appRoot, file)}: ${specifier}`)
+      return forbiddenImports.filter((specifier) => source.includes(specifier)).map((specifier) => `${relative(appRoot, file)}: ${specifier}`)
     })
 
     expect(offenders).toEqual([])
@@ -57,9 +67,7 @@ describe('legacy CRUD boundary', () => {
     const offenders = files.flatMap((file) => {
       if (file.includes('legacy-urls')) return []
       const source = readFileSync(file, 'utf8')
-      return forbiddenIdentifiers
-        .filter((identifier) => source.includes(identifier))
-        .map((identifier) => `${relative(appRoot, file)}: ${identifier}`)
+      return forbiddenIdentifiers.filter((identifier) => source.includes(identifier)).map((identifier) => `${relative(appRoot, file)}: ${identifier}`)
     })
 
     expect(offenders).toEqual([])

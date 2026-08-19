@@ -11,7 +11,12 @@ function asset(value: unknown) {
   if (!value || typeof value !== 'object') return value
   const record = value as Record<string, unknown>
   if (typeof record.path !== 'string') return value
-  return { kind: 'file', path: record.path, url: typeof record.url === 'string' ? record.url : fileUrl(record.path), name: typeof record.name === 'string' ? record.name : record.path.split('/').pop() }
+  return {
+    kind: 'file',
+    path: record.path,
+    url: typeof record.url === 'string' ? record.url : fileUrl(record.path),
+    name: typeof record.name === 'string' ? record.name : record.path.split('/').pop(),
+  }
 }
 
 function stored(value: unknown) {

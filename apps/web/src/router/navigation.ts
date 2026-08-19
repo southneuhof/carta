@@ -12,7 +12,7 @@ export function getFirstAccessibleRouteName(): string | null {
 
 export function getDefaultAuthenticatedRouteLocation(): RouteLocationRaw | null {
   const routeName = getFirstAccessibleRouteName()
-  return routeName ? { name: routeName } as never : null
+  return routeName ? ({ name: routeName } as never) : null
 }
 
 export function resolvePostLoginRoute(router: Router, redirect: string | null): RouteLocationRaw | null {

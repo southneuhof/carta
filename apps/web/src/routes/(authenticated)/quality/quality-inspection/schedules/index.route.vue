@@ -10,7 +10,11 @@ const rows = ref<Record<string, unknown>[]>([])
 const loading = ref(true)
 
 onMounted(async () => {
-  try { rows.value = await loadSchedules() as Record<string, unknown>[] } finally { loading.value = false }
+  try {
+    rows.value = (await loadSchedules()) as Record<string, unknown>[]
+  } finally {
+    loading.value = false
+  }
 })
 
 const fields = {
@@ -24,7 +28,13 @@ const fields = {
 <template>
   <ListView :table="{ data: rows, fields, pagination: false }" title="Jadwal Inspection/Test">
     <template #row-actions="{ record }">
-      <Button type="button" variant="tonal" :disabled="loading" @click="router.push({ name: 'quality-quality-inspection-schedules-create', params: { scheduleId: String((record as Record<string, any>).schedule?.id) } })">Buat Inspection/Test</Button>
+      <Button
+        type="button"
+        variant="tonal"
+        :disabled="loading"
+        @click="router.push({ name: 'quality-quality-inspection-schedules-create', params: { scheduleId: String((record as Record<string, any>).schedule?.id) } })"
+        >Buat Inspection/Test</Button
+      >
     </template>
   </ListView>
 </template>

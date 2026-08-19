@@ -21,7 +21,7 @@ const view = ref<View>('table')
 const status = ref<Status>('open')
 const createProjectSearchParameters = { permission: 'create-quality-inspection', active: true }
 const statusItems = statusOptions.map(({ id, name }) => ({ id, label: name }))
-const createRoute = computed(() => hasCreateProject.value ? { name: 'quality-quality-inspection-create' } as const : undefined)
+const createRoute = computed(() => (hasCreateProject.value ? ({ name: 'quality-quality-inspection-create' } as const) : undefined))
 
 function writeMonth(draft: Record<string, unknown>, value: unknown) {
   draft.startMonth = typeof value === 'string' ? value.slice(0, 7) : value
@@ -53,11 +53,11 @@ function updateQuery(value: Record<string, unknown>) {
 }
 
 function detailRoute(record: Record<string, unknown>) {
-  return can(record, 'detail') ? { name: 'quality-quality-inspection-detail', params: { qualityInspectionId: String(record.id) } } as const : undefined
+  return can(record, 'detail') ? ({ name: 'quality-quality-inspection-detail', params: { qualityInspectionId: String(record.id) } } as const) : undefined
 }
 
 function updateRoute(record: Record<string, unknown>) {
-  return can(record, 'update') ? { name: 'quality-quality-inspection-edit', params: { qualityInspectionId: String(record.id) } } as const : undefined
+  return can(record, 'update') ? ({ name: 'quality-quality-inspection-edit', params: { qualityInspectionId: String(record.id) } } as const) : undefined
 }
 
 function canDelete(record: Record<string, unknown>) {
@@ -76,7 +76,11 @@ onMounted(async () => {
   } catch {
     hasCreateProject.value = false
   }
-  try { schedules.value = await qualityInspection.actions.loadSchedules.run() as unknown[] } catch { schedules.value = [] }
+  try {
+    schedules.value = (await qualityInspection.actions.loadSchedules.run()) as unknown[]
+  } catch {
+    schedules.value = []
+  }
 })
 
 const scheduleCount = computed(() => schedules.value.length)

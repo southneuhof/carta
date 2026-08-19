@@ -8,7 +8,7 @@ export type PermitAttachment = z.output<typeof permitAttachment.schemas.select>
 export type PermitAttachmentCreate = z.input<typeof permitAttachment.schemas.create>
 export type PermitAttachmentUpdate = z.input<typeof permitAttachment.schemas.update>
 
-export const permitAttachmentsSchema = defineSchema<AppResourceContract<typeof rpc['permit-attachment']>>({
+export const permitAttachmentsSchema = defineSchema<AppResourceContract<(typeof rpc)['permit-attachment']>>({
   identity: 'id',
   record: { schema: fromZod(permitAttachment.schemas.select) },
   create: { schema: fromZod(permitAttachment.schemas.create) },

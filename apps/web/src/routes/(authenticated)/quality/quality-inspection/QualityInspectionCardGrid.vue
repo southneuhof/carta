@@ -28,7 +28,7 @@ function image(value: unknown) {
 }
 
 function documentations(record: Record<string, unknown>) {
-  return Array.isArray(record.documentations) ? record.documentations as Documentation[] : []
+  return Array.isArray(record.documentations) ? (record.documentations as Documentation[]) : []
 }
 
 function photo(record: Record<string, unknown>, name: string) {
@@ -143,15 +143,7 @@ async function remove(record: Record<string, unknown>, setOpen: (value: boolean)
 
       <Dialog v-if="props.canDelete(record)">
         <template #trigger>
-          <Button
-            type="button"
-            kind="icon"
-            variant="standard"
-            color="error"
-            aria-label="Hapus laporan"
-            class="absolute bottom-3 right-3 z-20"
-            @click.stop
-          >
+          <Button type="button" kind="icon" variant="standard" color="error" aria-label="Hapus laporan" class="absolute bottom-3 right-3 z-20" @click.stop>
             <template #icon><Icon name="delete-bin" size="base" /></template>
           </Button>
         </template>

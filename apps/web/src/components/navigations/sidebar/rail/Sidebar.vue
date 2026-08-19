@@ -139,15 +139,7 @@ onBeforeUnmount(() => window.removeEventListener('resize', updateScrollFades))
               <Icon size="sm" :name="isGroupOpen(module.name) ? 'arrow-up-s' : 'arrow-down-s'" class="shrink-0" />
             </button>
 
-            <Transition
-              name="sidebar-collapse"
-              @before-enter="beforeEnter"
-              @enter="enter"
-              @after-enter="afterEnter"
-              @before-leave="beforeLeave"
-              @leave="leave"
-              @after-leave="afterLeave"
-            >
+            <Transition name="sidebar-collapse" @before-enter="beforeEnter" @enter="enter" @after-enter="afterEnter" @before-leave="beforeLeave" @leave="leave" @after-leave="afterLeave">
               <div v-if="isGroupOpen(module.name)" :id="`sidebar-group-${module.name}`" class="space-y-1 overflow-hidden">
                 <div class="h-1"></div>
                 <template v-for="entry in module.routes" :key="entry.name">

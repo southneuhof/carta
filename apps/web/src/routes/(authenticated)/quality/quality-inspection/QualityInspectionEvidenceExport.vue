@@ -72,7 +72,12 @@ function imageUrl(value: unknown) {
 const reporterName = computed(() => props.record.createdByUser?.name ?? props.record.createdByName ?? '—')
 const reportDate = computed(() => formatDate(props.record.createdAt))
 const qrValue = computed(() => `Dilaporkan oleh ${reporterName.value} pada ${reportDate.value}`)
-const photos = computed(() => photoNames.map((name) => (Array.isArray(props.record.documentations) ? props.record.documentations : []).find((photo: Record<string, any>) => photo.name === name) ?? { name, fileAttachment: null, description: null }))
+const photos = computed(() =>
+  photoNames.map(
+    (name) =>
+      (Array.isArray(props.record.documentations) ? props.record.documentations : []).find((photo: Record<string, any>) => photo.name === name) ?? { name, fileAttachment: null, description: null }
+  )
+)
 const canPrint = computed(() => props.record.statusCode === 'close' && props.record.stepCode === 'close')
 </script>
 
@@ -100,23 +105,56 @@ const canPrint = computed(() => props.record.statusCode === 'close' && props.rec
         <section>
           <h2 class="mb-3 text-lg font-semibold">Detail Laporan</h2>
           <dl class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-            <div><dt class="font-medium">Nomor Laporan</dt><dd>{{ display(record.number) }}</dd></div>
-            <div><dt class="font-medium">Dilaporkan Oleh</dt><dd>{{ reporterName }}</dd></div>
-            <div><dt class="font-medium">Tanggal Laporan</dt><dd>{{ reportDate }}</dd></div>
-            <div><dt class="font-medium">Divisi</dt><dd>{{ relation(record, 'division', 'divisionName') }}</dd></div>
-            <div><dt class="font-medium">Proyek</dt><dd>{{ relation(record, 'project', 'projectName') }}</dd></div>
-            <div><dt class="font-medium">Kategori Pekerjaan</dt><dd>{{ relation(record, 'qualityWorkCategory', 'qualityWorkCategoryName') }}</dd></div>
-            <div><dt class="font-medium">Jenis Pekerjaan</dt><dd>{{ relation(record, 'workItemCategory', 'workItemCategoryName') }}</dd></div>
-            <div><dt class="font-medium">Target Pelaksanaan</dt><dd>{{ display(record.targetDate) }}</dd></div>
-            <div><dt class="font-medium">Area/Zona Kerja</dt><dd>{{ display(record.locationZone) }}</dd></div>
+            <div>
+              <dt class="font-medium">Nomor Laporan</dt>
+              <dd>{{ display(record.number) }}</dd>
+            </div>
+            <div>
+              <dt class="font-medium">Dilaporkan Oleh</dt>
+              <dd>{{ reporterName }}</dd>
+            </div>
+            <div>
+              <dt class="font-medium">Tanggal Laporan</dt>
+              <dd>{{ reportDate }}</dd>
+            </div>
+            <div>
+              <dt class="font-medium">Divisi</dt>
+              <dd>{{ relation(record, 'division', 'divisionName') }}</dd>
+            </div>
+            <div>
+              <dt class="font-medium">Proyek</dt>
+              <dd>{{ relation(record, 'project', 'projectName') }}</dd>
+            </div>
+            <div>
+              <dt class="font-medium">Kategori Pekerjaan</dt>
+              <dd>{{ relation(record, 'qualityWorkCategory', 'qualityWorkCategoryName') }}</dd>
+            </div>
+            <div>
+              <dt class="font-medium">Jenis Pekerjaan</dt>
+              <dd>{{ relation(record, 'workItemCategory', 'workItemCategoryName') }}</dd>
+            </div>
+            <div>
+              <dt class="font-medium">Target Pelaksanaan</dt>
+              <dd>{{ display(record.targetDate) }}</dd>
+            </div>
+            <div>
+              <dt class="font-medium">Area/Zona Kerja</dt>
+              <dd>{{ display(record.locationZone) }}</dd>
+            </div>
           </dl>
         </section>
 
         <section>
           <h2 class="mb-3 text-lg font-semibold">Prosedur &amp; Penyelesaian</h2>
           <dl class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-            <div><dt class="font-medium">Inspection Point</dt><dd>{{ display(record.inspectionPointName ?? record.inspectionPointCode) }}</dd></div>
-            <div><dt class="font-medium">Prosedur / Metode Kerja</dt><dd>{{ display(record.workMethod) }}</dd></div>
+            <div>
+              <dt class="font-medium">Inspection Point</dt>
+              <dd>{{ display(record.inspectionPointName ?? record.inspectionPointCode) }}</dd>
+            </div>
+            <div>
+              <dt class="font-medium">Prosedur / Metode Kerja</dt>
+              <dd>{{ display(record.workMethod) }}</dd>
+            </div>
           </dl>
         </section>
 
@@ -126,10 +164,26 @@ const canPrint = computed(() => props.record.statusCode === 'close' && props.rec
             <article v-for="item in record.workItems ?? []" :key="item.row.id" data-testid="evidence-item" class="break-inside-avoid border-b border-slate-300 pb-5 last:border-0">
               <h3 class="mb-3 font-semibold">{{ display(item.workItem?.name) }}</h3>
               <dl class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                <div><dt class="font-medium">Volume</dt><dd>{{ display(item.row?.volume) }}</dd></div>
-                <div><dt class="font-medium">Satuan</dt><dd>{{ display(item.workItem?.uomName) }}</dd></div>
-                <div><dt class="font-medium">Hasil Inspeksi</dt><dd>{{ resultLabel(item.row?.statusCode) }}</dd></div>
-                <div class="col-span-2"><dt class="font-medium">Verifikasi</dt><dd v-if="latestVerification(item).verifiedAt">Inspeksi dilakukan oleh {{ display(latestVerification(item).verifierName ?? latestVerification(item).verifierId ?? latestVerification(item).verifiedBy) }} pada {{ display(latestVerification(item).verifiedAt) }}</dd><dd v-else>—</dd></div>
+                <div>
+                  <dt class="font-medium">Volume</dt>
+                  <dd>{{ display(item.row?.volume) }}</dd>
+                </div>
+                <div>
+                  <dt class="font-medium">Satuan</dt>
+                  <dd>{{ display(item.workItem?.uomName) }}</dd>
+                </div>
+                <div>
+                  <dt class="font-medium">Hasil Inspeksi</dt>
+                  <dd>{{ resultLabel(item.row?.statusCode) }}</dd>
+                </div>
+                <div class="col-span-2">
+                  <dt class="font-medium">Verifikasi</dt>
+                  <dd v-if="latestVerification(item).verifiedAt">
+                    Inspeksi dilakukan oleh {{ display(latestVerification(item).verifierName ?? latestVerification(item).verifierId ?? latestVerification(item).verifiedBy) }} pada
+                    {{ display(latestVerification(item).verifiedAt) }}
+                  </dd>
+                  <dd v-else>—</dd>
+                </div>
               </dl>
               <div class="mt-4 grid grid-cols-3 gap-4">
                 <div v-for="group in criteriaGroups" :key="group.type" :data-criteria-type="group.type">
@@ -147,12 +201,30 @@ const canPrint = computed(() => props.record.statusCode === 'close' && props.rec
                   <article v-for="snapshot in snapshots(item)" :key="snapshot.id" class="break-inside-avoid border border-slate-300 p-3 text-sm">
                     <h5 class="font-medium">{{ snapshotTypeLabel(snapshot.type) }}</h5>
                     <dl class="mt-2 grid grid-cols-2 gap-x-4 gap-y-1">
-                      <div><dt class="font-medium">Kriteria/Tolok Ukur Penerimaan</dt><dd>{{ display(snapshot.criteria) }}</dd></div>
-                      <div><dt class="font-medium">Kode Prosedur</dt><dd>{{ display(snapshot.procedureCode) }}</dd></div>
-                      <div><dt class="font-medium">Spesifikasi</dt><dd>{{ display(snapshot.specification) }}</dd></div>
-                      <div><dt class="font-medium">Metode</dt><dd>{{ display(snapshot.method) }}</dd></div>
-                      <div><dt class="font-medium">Frekuensi</dt><dd>{{ display(snapshot.frequency) }}</dd></div>
-                      <div class="col-span-2"><dt class="font-medium">Deskripsi</dt><dd>{{ display(snapshot.description) }}</dd></div>
+                      <div>
+                        <dt class="font-medium">Kriteria/Tolok Ukur Penerimaan</dt>
+                        <dd>{{ display(snapshot.criteria) }}</dd>
+                      </div>
+                      <div>
+                        <dt class="font-medium">Kode Prosedur</dt>
+                        <dd>{{ display(snapshot.procedureCode) }}</dd>
+                      </div>
+                      <div>
+                        <dt class="font-medium">Spesifikasi</dt>
+                        <dd>{{ display(snapshot.specification) }}</dd>
+                      </div>
+                      <div>
+                        <dt class="font-medium">Metode</dt>
+                        <dd>{{ display(snapshot.method) }}</dd>
+                      </div>
+                      <div>
+                        <dt class="font-medium">Frekuensi</dt>
+                        <dd>{{ display(snapshot.frequency) }}</dd>
+                      </div>
+                      <div class="col-span-2">
+                        <dt class="font-medium">Deskripsi</dt>
+                        <dd>{{ display(snapshot.description) }}</dd>
+                      </div>
                     </dl>
                     <div v-if="imageUrl(snapshot.imgDocumentation)" class="mt-3 max-w-sm">
                       <p class="mb-1 font-medium">Foto Dokumentasi</p>
@@ -174,7 +246,7 @@ const canPrint = computed(() => props.record.statusCode === 'close' && props.rec
           </div>
         </section>
 
-        <section data-testid="documentation-section" class="break-before-page" style="break-before: page; page-break-before: always;">
+        <section data-testid="documentation-section" class="break-before-page" style="break-before: page; page-break-before: always">
           <h2 class="mb-3 text-lg font-semibold">Dokumentasi</h2>
           <div class="grid grid-cols-2 gap-4">
             <article v-for="photo in photos" :key="photo.name" data-testid="documentation-slot" class="break-inside-avoid border border-slate-300 p-3">

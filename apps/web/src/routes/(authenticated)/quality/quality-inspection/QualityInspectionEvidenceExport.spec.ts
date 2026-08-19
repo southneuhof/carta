@@ -9,7 +9,9 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@southneuhof/is-vue-framework/components/utils/Printable.vue', () => ({
   default: {
     props: ['documentTitle'],
-    setup() { return { handlePrint: mocks.handlePrint } },
+    setup() {
+      return { handlePrint: mocks.handlePrint }
+    },
     template: '<div data-testid="printable"><slot name="trigger" :handle-print="handlePrint" /><div data-testid="print-content"><slot name="content" /></div></div>',
   },
 }))
@@ -65,7 +67,10 @@ function record(values: Record<string, unknown> = {}) {
         workItem: { name: 'Work Item One', uomName: 'm³' },
         verifications: [{ verifierName: 'Verifier One', verifiedAt: '2026-08-21T12:00:00.000Z', resultCode: 'approved' }],
         snapshots: [
-          snapshot('material', { imgDocumentation: 'uploads/material.jpg', inspectors: [{ id: 'inspector-1', inspectorTypeName: 'Inspector', points: [{ id: 'point-1', inspectionPointName: 'Point One', value: true }] }] }),
+          snapshot('material', {
+            imgDocumentation: 'uploads/material.jpg',
+            inspectors: [{ id: 'inspector-1', inspectorTypeName: 'Inspector', points: [{ id: 'point-1', inspectionPointName: 'Point One', value: true }] }],
+          }),
           snapshot('process'),
           snapshot('product'),
         ],

@@ -8,7 +8,7 @@ export type PermitWorkType = z.output<typeof permitWorkType.schemas.select>
 export type PermitWorkTypeCreate = z.input<typeof permitWorkType.schemas.create>
 export type PermitWorkTypeUpdate = z.input<typeof permitWorkType.schemas.update>
 
-export const permitWorkTypesSchema = defineSchema<AppResourceContract<typeof rpc['permit-work-types']>>({
+export const permitWorkTypesSchema = defineSchema<AppResourceContract<(typeof rpc)['permit-work-types']>>({
   identity: 'id',
   record: { schema: fromZod(permitWorkType.schemas.select) },
   create: { schema: fromZod(permitWorkType.schemas.create) },

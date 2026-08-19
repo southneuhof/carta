@@ -4,4 +4,3 @@ import { emergencySimulationTopics } from './emergency-simulation-topics.resourc
 </script>
 
 <template><ListView v-bind="emergencySimulationTopics.list()" title="Topik Simulasi Tanggap Darurat" /></template>
-

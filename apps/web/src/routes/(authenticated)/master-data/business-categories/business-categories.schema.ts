@@ -8,7 +8,7 @@ export type BusinessCategory = z.output<typeof businessCategory.schemas.select>
 export type BusinessCategoryCreate = z.input<typeof businessCategory.schemas.create>
 export type BusinessCategoryUpdate = z.input<typeof businessCategory.schemas.update>
 
-export const businessCategoriesSchema = defineSchema<AppResourceContract<typeof rpc['business-categories']>>({
+export const businessCategoriesSchema = defineSchema<AppResourceContract<(typeof rpc)['business-categories']>>({
   identity: 'id',
   record: { schema: fromZod(businessCategory.schemas.select) },
   create: { schema: fromZod(businessCategory.schemas.create) },

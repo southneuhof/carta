@@ -1,5 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { createFrameworkQueryClient, registerResourceRuntime, resetResourceRuntimeForTests, resolveFields, resolveFrameworkAdapters, resolveFrameworkFieldDefaults, resourceActionForRoute } from '@southneuhof/is-vue-framework'
+import {
+  createFrameworkQueryClient,
+  registerResourceRuntime,
+  resetResourceRuntimeForTests,
+  resolveFields,
+  resolveFrameworkAdapters,
+  resolveFrameworkFieldDefaults,
+  resourceActionForRoute,
+} from '@southneuhof/is-vue-framework'
 import { appFieldDefaults } from '@/configs/defaults'
 import { permitCategoryApds } from './permit-category-apd.resource'
 
@@ -19,7 +27,13 @@ describe('Permit Category APD resource', () => {
     expect(formFields.map((field) => field.key)).toEqual(keys)
     expect(formFields.map((field) => field.renderer)).toEqual(['text', 'textarea', 'radio'])
     expect(formFields.map((field) => field.label)).toEqual(['Nama', 'Deskripsi', 'Status'])
-    expect(formFields.find((field) => field.key === 'active')).toMatchObject({ renderer: 'radio', source: [{ id: true, name: 'Aktif' }, { id: false, name: 'Tidak Aktif' }] })
+    expect(formFields.find((field) => field.key === 'active')).toMatchObject({
+      renderer: 'radio',
+      source: [
+        { id: true, name: 'Aktif' },
+        { id: false, name: 'Tidak Aktif' },
+      ],
+    })
     expect(permitCategoryApds.create().initialData).toEqual({ active: true })
     expect(formFields.map((field) => field.key)).not.toEqual(expect.arrayContaining(['id', 'code', 'createdAt', 'updatedAt', 'createdByUserId', 'updatedByUserId']))
   })

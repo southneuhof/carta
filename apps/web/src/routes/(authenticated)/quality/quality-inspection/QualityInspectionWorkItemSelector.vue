@@ -55,7 +55,11 @@ watch([() => props.rootId, treeRows], () => {
 
 function toggle(node: Candidate) {
   if (!node.isLeaf || !node.itps.length) return
-  if (selectedIds.value.has(node.id)) emit('update:modelValue', scopedModelValue.value.filter((row) => row.workItemId !== node.id))
+  if (selectedIds.value.has(node.id))
+    emit(
+      'update:modelValue',
+      scopedModelValue.value.filter((row) => row.workItemId !== node.id)
+    )
   else emit('update:modelValue', [...scopedModelValue.value, { workItemId: node.id, volume: 1, itpTypeCodes: [node.itps[0].type as SelectedWorkItemInput['itpTypeCodes'][number]] }])
 }
 
@@ -63,7 +67,10 @@ function updateRow(row: SelectedInspectionRow, value: Record<string, unknown>) {
   const volume = Number(value.volume)
   const itpTypeCodes = Array.isArray(value.itpTypeCodes) ? value.itpTypeCodes.filter((item): item is SelectedWorkItemInput['itpTypeCodes'][number] => typeof item === 'string') : row.itpTypeCodes
   if (!Number.isFinite(volume) || volume <= 0 || !itpTypeCodes.length) return
-  emit('update:modelValue', scopedModelValue.value.map((item) => item.workItemId === row.workItemId ? { ...item, volume, itpTypeCodes } : item))
+  emit(
+    'update:modelValue',
+    scopedModelValue.value.map((item) => (item.workItemId === row.workItemId ? { ...item, volume, itpTypeCodes } : item))
+  )
 }
 
 function children(row: QualityInspectionTreeNode) {

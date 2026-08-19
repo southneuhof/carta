@@ -25,7 +25,12 @@ describe('navigation entrypoints', () => {
     expect(masterData.routes).toContainEqual({ to: { name: 'master-data-safety-checklist' }, permission: 'view-safety-checklist', title: 'Safety Checklist', icon: 'folder' })
     expect(masterData.routes).toContainEqual({ to: { name: 'master-data-permit-category-apd' }, permission: 'view-permit-category-apd', title: 'APD', icon: 'folder' })
     expect(masterData.routes).toContainEqual({ separator: 'Emergency Simulation' })
-    expect(masterData.routes).toContainEqual({ to: { name: 'master-data-emergency-simulation-topics' }, permission: 'view-emergency-simulation-topics', title: 'Topik Simulasi Tanggap Darurat', icon: 'folder' })
+    expect(masterData.routes).toContainEqual({
+      to: { name: 'master-data-emergency-simulation-topics' },
+      permission: 'view-emergency-simulation-topics',
+      title: 'Topik Simulasi Tanggap Darurat',
+      icon: 'folder',
+    })
     expect(masterData.routes).not.toContainEqual(expect.objectContaining({ to: { name: 'master-data-permit-apd' } }))
   })
 
@@ -44,7 +49,10 @@ describe('navigation entrypoints', () => {
 
   it('keeps only open menus visible without grants', () => {
     const visible = visibleNavigation(() => false)
-    const routes = visible.flatMap((module) => module.routes).filter((entry) => !('separator' in entry)).map((entry) => entry.name)
+    const routes = visible
+      .flatMap((module) => module.routes)
+      .filter((entry) => !('separator' in entry))
+      .map((entry) => entry.name)
 
     expect(routes).toEqual(['dashboard', 'to-do'])
   })

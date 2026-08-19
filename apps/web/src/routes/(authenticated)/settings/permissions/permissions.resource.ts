@@ -2,7 +2,7 @@ import { defineFields, defineResource } from '@southneuhof/is-vue-framework'
 import { permissionsActions } from './permissions.actions'
 import { permissionsSchema, type Permission } from './permissions.schema'
 
-const realmLabel = (value: unknown) => value === 'system' ? 'System' : value === 'project' ? 'Project' : value
+const realmLabel = (value: unknown) => (value === 'system' ? 'System' : value === 'project' ? 'Project' : value)
 
 const fields = defineFields(permissionsSchema, {
   permissionCode: { label: 'Code' },

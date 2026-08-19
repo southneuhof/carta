@@ -21,4 +21,3 @@ describe('Topik Simulasi Tanggap Darurat route integration', () => {
     })
   })
 })
-

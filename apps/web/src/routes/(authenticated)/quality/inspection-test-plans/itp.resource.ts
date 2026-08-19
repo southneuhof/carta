@@ -3,7 +3,7 @@ import { itpActions } from './itp.actions'
 import { itpSchema, itpTypeOptions } from './itp.schema'
 
 function writeImagePath(draft: Record<string, unknown>, value: unknown) {
-  const file = value && typeof value === 'object' ? value as { path?: unknown } : undefined
+  const file = value && typeof value === 'object' ? (value as { path?: unknown }) : undefined
   draft.imgDocumentation = typeof file?.path === 'string' ? file.path : typeof value === 'string' ? value : undefined
 }
 
@@ -19,17 +19,7 @@ const fields = defineFields(itpSchema, {
   description: { label: 'Description', form: { renderer: 'textarea' } },
 })
 
-const formFields = [
-  fields.type,
-  fields.criteria,
-  fields.procedureCode,
-  fields.specification,
-  fields.method,
-  fields.frequency,
-  fields.inspectors,
-  fields.imgDocumentation,
-  fields.description,
-] as const
+const formFields = [fields.type, fields.criteria, fields.procedureCode, fields.specification, fields.method, fields.frequency, fields.inspectors, fields.imgDocumentation, fields.description] as const
 
 export const itp = defineResource(itpSchema, {
   key: 'inspection-test-plans',

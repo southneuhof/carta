@@ -19,11 +19,7 @@ function titleCase(value: string): string {
     .join(' ')
 }
 
-export function routeBreadcrumbs(
-  route: RouteLocationNormalizedLoaded,
-  router: Pick<Router, 'resolve'>,
-  navigation: readonly VisibleNavigationModule[],
-): BreadcrumbItem[] {
+export function routeBreadcrumbs(route: RouteLocationNormalizedLoaded, router: Pick<Router, 'resolve'>, navigation: readonly VisibleNavigationModule[]): BreadcrumbItem[] {
   if (route.name === 'notifications') return [{ label: 'Notifications' }]
 
   const routeName = String(route.name ?? '')
@@ -31,10 +27,8 @@ export function routeBreadcrumbs(
     module.routes.flatMap((entry) => {
       if ('separator' in entry) return []
       const resolved = router.resolve(entry.to as never)
-      return route.path === resolved.path || route.path.startsWith(`${resolved.path}/`)
-        ? [{ module, entry, resolved }]
-        : []
-    }),
+      return route.path === resolved.path || route.path.startsWith(`${resolved.path}/`) ? [{ module, entry, resolved }] : []
+    })
   )
   const match = candidates.sort((a, b) => b.resolved.path.length - a.resolved.path.length)[0]
 

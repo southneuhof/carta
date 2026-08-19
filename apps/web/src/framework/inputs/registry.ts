@@ -27,7 +27,12 @@ const lookup: InputPropsAdapter<ResourceSource, LookupProps> = {
     const list = source.list()
     if (!source.detail) throw new Error(`Input source "${source.key}" requires a detail action.`)
     const detail = source.detail
-    return { fields: list.fields, load, loadDetail: (context: { id?: unknown; searchParameters?: Record<string, unknown> }) => detail({ id: context.id, searchParameters: context.searchParameters }).run(context), namespace }
+    return {
+      fields: list.fields,
+      load,
+      loadDetail: (context: { id?: unknown; searchParameters?: Record<string, unknown> }) => detail({ id: context.id, searchParameters: context.searchParameters }).run(context),
+      namespace,
+    }
   },
 }
 const options: InputPropsAdapter<OptionSource, Record<string, unknown>> = { normalize: optionSource }

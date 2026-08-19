@@ -1,10 +1,7 @@
 import { defineSchema } from '@southneuhof/is-vue-framework'
 import type { WebResourceSchema } from '@southneuhof/is-vue-framework'
 
-export type ProjectRoleCoverage =
-  | { coverageType: 'all_projects' }
-  | { coverageType: 'division'; divisionId: string }
-  | { coverageType: 'project'; projectId: string }
+export type ProjectRoleCoverage = { coverageType: 'all_projects' } | { coverageType: 'division'; divisionId: string } | { coverageType: 'project'; projectId: string }
 
 export type ProjectRoleAssignmentOptions = {
   divisions: { id: string; name: string; active: boolean }[]
@@ -37,12 +34,6 @@ export type ProjectRoleAssignmentQuery = {
   projectId?: string
 }
 
-export type ProjectRoleAssignmentSchema = WebResourceSchema<
-  ProjectRoleAssignment,
-  ProjectRoleAssignmentQuery,
-  Record<string, never>,
-  Record<string, never>,
-  string
->
+export type ProjectRoleAssignmentSchema = WebResourceSchema<ProjectRoleAssignment, ProjectRoleAssignmentQuery, Record<string, never>, Record<string, never>, string>
 
 export const projectRoleAssignmentsSchema = defineSchema<ProjectRoleAssignmentSchema>({ identity: 'id' })

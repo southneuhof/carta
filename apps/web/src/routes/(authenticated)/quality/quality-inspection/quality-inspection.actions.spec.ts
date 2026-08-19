@@ -25,7 +25,14 @@ vi.mock('@/framework/rpc', () => ({
       delete: { ':id': { $delete: mocks.remove } },
       createContext: { $get: mocks.createContext },
       schedules: { list: { $get: mocks.schedules }, ':id': { createContext: { $get: mocks.scheduleContext } } },
-      actions: { ':id': { completeReport: { $post: mocks.completeReport }, submitDocumentations: { $post: mocks.submitDocumentations }, verify: { $post: mocks.verify }, workItems: { ':workItemRowId': { verify: { $post: mocks.verifyWorkItem } } } } },
+      actions: {
+        ':id': {
+          completeReport: { $post: mocks.completeReport },
+          submitDocumentations: { $post: mocks.submitDocumentations },
+          verify: { $post: mocks.verify },
+          workItems: { ':workItemRowId': { verify: { $post: mocks.verifyWorkItem } } },
+        },
+      },
     },
   },
 }))

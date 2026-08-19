@@ -6,7 +6,8 @@ vi.mock('@southneuhof/is-vue-framework', () => ({
     name: 'Form',
     props: ['modelValue', 'fields', 'submit'],
     data: () => ({ names: ['sudut 1', 'sudut 2', 'sudut 3', 'sudut 4'] }),
-    template: '<div data-testid="form"><div v-for="name in names" :key="name"><span>{{ modelValue[name] }}</span><span>{{ modelValue[name + \'Description\'] }}</span></div><slot name="actions" :submit="submit" :submitting="false" /></div>',
+    template:
+      '<div data-testid="form"><div v-for="name in names" :key="name"><span>{{ modelValue[name] }}</span><span>{{ modelValue[name + \'Description\'] }}</span></div><slot name="actions" :submit="submit" :submitting="false" /></div>',
   },
 }))
 

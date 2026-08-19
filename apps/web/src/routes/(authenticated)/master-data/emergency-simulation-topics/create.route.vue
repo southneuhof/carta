@@ -6,4 +6,3 @@ const form = { ...emergencySimulationTopics.create(), successMessage: 'Berhasil 
 </script>
 
 <template><FormView v-bind="form" title="Tambah Topik Simulasi Tanggap Darurat" submit-label="Submit" /></template>
-

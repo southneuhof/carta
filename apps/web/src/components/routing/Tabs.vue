@@ -69,11 +69,13 @@ watchEffect(() => {
   if (destination.fullPath === route.fullPath || pendingDestination === destination.fullPath) return
 
   pendingDestination = destination.fullPath
-  void router.replace({ path: first.to.path, query: siblingQuery() }).catch(() => undefined).finally(() => {
-    if (pendingDestination === destination.fullPath) pendingDestination = undefined
-  })
+  void router
+    .replace({ path: first.to.path, query: siblingQuery() })
+    .catch(() => undefined)
+    .finally(() => {
+      if (pendingDestination === destination.fullPath) pendingDestination = undefined
+    })
 })
-
 </script>
 
 <template>

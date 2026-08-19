@@ -86,7 +86,11 @@ describe('createAuthGuard', () => {
 
   it('awaits one in-flight identity load before protecting a direct URL', async () => {
     let resolve: (value: { userId: string }) => void = () => undefined
-    loadIdentitySpy.mockReturnValue(new Promise((promiseResolve) => { resolve = promiseResolve }))
+    loadIdentitySpy.mockReturnValue(
+      new Promise((promiseResolve) => {
+        resolve = promiseResolve
+      })
+    )
     const guard = createAuthGuard()
     const result = guard({ name: 'users', fullPath: '/settings/users', path: '/settings/users', meta: { requiresAuth: true }, matched: [{}] } as any, {} as any, next)
 

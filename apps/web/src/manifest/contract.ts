@@ -10,4 +10,6 @@ export type NavigationModule = {
   description?: string
   routes: readonly NavigationEntry[]
 }
-export function defineNavigation<const TNavigation extends readonly NavigationModule[]>(navigation: TNavigation): TNavigation { return navigation }
+export function defineNavigation<const TNavigation extends readonly NavigationModule[]>(navigation: TNavigation): TNavigation {
+  return navigation
+}

@@ -20,7 +20,14 @@ describe('App', () => {
   it('shows a generic reload action when a route render fails', async () => {
     const error = new Error('private route details')
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined)
-    const brokenRoute = defineComponent({ setup: () => { onMounted(() => { throw error }); return () => '<div />' } })
+    const brokenRoute = defineComponent({
+      setup: () => {
+        onMounted(() => {
+          throw error
+        })
+        return () => '<div />'
+      },
+    })
     const wrapper = mount(App, {
       global: {
         plugins: [createPinia()],

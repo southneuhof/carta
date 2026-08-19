@@ -5,10 +5,22 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createHonoResourceActions } from './actions'
 
 const app = new Hono()
-  .get('/rows/list', validator('query', (value) => value as { page?: string; search?: string; blank?: string }), (context) => context.json({ data: [{ id: '1', name: 'One' }], page: 1, limit: 10, total: 1 }))
+  .get(
+    '/rows/list',
+    validator('query', (value) => value as { page?: string; search?: string; blank?: string }),
+    (context) => context.json({ data: [{ id: '1', name: 'One' }], page: 1, limit: 10, total: 1 })
+  )
   .get('/rows/detail/:id', (context) => context.json({ data: { id: context.req.param('id'), name: 'One' } }))
-  .post('/rows/create', validator('json', (value) => value as { name: string }), (context) => context.json({ data: { id: '2', name: 'Two' } }, 201))
-  .patch('/rows/update/:id', validator('json', (value) => value as { name: string }), (context) => context.json({ data: { id: context.req.param('id'), name: 'Updated' } }))
+  .post(
+    '/rows/create',
+    validator('json', (value) => value as { name: string }),
+    (context) => context.json({ data: { id: '2', name: 'Two' } }, 201)
+  )
+  .patch(
+    '/rows/update/:id',
+    validator('json', (value) => value as { name: string }),
+    (context) => context.json({ data: { id: context.req.param('id'), name: 'Updated' } })
+  )
   .delete('/rows/delete/:id', (context) => context.json({ deleted: context.req.param('id') }))
 
 const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => app.fetch(new Request(String(input), init)))

@@ -22,9 +22,17 @@ const rowsVersion = ref(0)
 const list = computed(() => systemRoleAssignments.list({ namespace: `system-role-assignments-${userId.value}`, searchParameters: { userId: userId.value } }))
 
 const visibleRows = computed(() => {
-  const search = String(listQuery.value.search ?? '').trim().toLowerCase()
+  const search = String(listQuery.value.search ?? '')
+    .trim()
+    .toLowerCase()
   if (!search) return rows.value
-  return rows.value.filter((row) => [row.roleCode, row.name, row.description].some((value) => String(value ?? '').toLowerCase().includes(search)))
+  return rows.value.filter((row) =>
+    [row.roleCode, row.name, row.description].some((value) =>
+      String(value ?? '')
+        .toLowerCase()
+        .includes(search)
+    )
+  )
 })
 
 const listSurface = computed(() => {
@@ -70,7 +78,7 @@ async function toggle(row: SystemRoleAssignment) {
   pending.value = new Set(pending.value).add(roleId)
   try {
     const updated = await systemRoleAssignments.actions.set.run(userId.value, roleId, assigned)
-    rows.value = rows.value.map((item) => item.id === row.id ? updated : item)
+    rows.value = rows.value.map((item) => (item.id === row.id ? updated : item))
     rowsVersion.value += 1
     if (identity.value?.user.id === userId.value) await refreshIdentity()
   } catch (error) {

@@ -81,7 +81,13 @@ async function mountScreen() {
   })
   app.mount(host)
   await flush()
-  return { host, unmount: () => { app.unmount(); host.remove() } }
+  return {
+    host,
+    unmount: () => {
+      app.unmount()
+      host.remove()
+    },
+  }
 }
 
 function hasButton(host: HTMLElement, label: string) {
@@ -120,10 +126,7 @@ describe('Inspection/Test entry controls', () => {
 
     expect(hasButton(view.host, 'Create')).toBe(true)
     expect(hasButton(view.host, 'Jadwal Inspection/Test')).toBe(true)
-    expect(mocks.projectsList).toHaveBeenCalledWith(
-      { query: { permission: 'create-quality-inspection', active: 'true' } },
-      expect.anything(),
-    )
+    expect(mocks.projectsList).toHaveBeenCalledWith({ query: { permission: 'create-quality-inspection', active: 'true' } }, expect.anything())
     view.unmount()
   })
 

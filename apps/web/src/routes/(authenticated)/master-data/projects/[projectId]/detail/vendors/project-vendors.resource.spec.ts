@@ -1,6 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { appFieldDefaults } from '@/configs/defaults'
-import { createFrameworkQueryClient, registerResourceRuntime, resetResourceRuntimeForTests, resolveFields, resolveFrameworkAdapters, resolveFrameworkFieldDefaults } from '@southneuhof/is-vue-framework'
+import {
+  createFrameworkQueryClient,
+  registerResourceRuntime,
+  resetResourceRuntimeForTests,
+  resolveFields,
+  resolveFrameworkAdapters,
+  resolveFrameworkFieldDefaults,
+} from '@southneuhof/is-vue-framework'
 
 const mocks = vi.hoisted(() => ({ list: vi.fn(), create: vi.fn(), detail: vi.fn(), update: vi.fn(), delete: vi.fn() }))
 vi.mock('@/framework/rpc', () => ({
@@ -52,7 +59,9 @@ describe('project vendors resource', () => {
 
   it('invalidates the scoped collection after create', async () => {
     const invalidate = vi.spyOn(queryClient, 'invalidateQueries')
-    await projectVendors('project-1').create().run({ name: 'Vendor', projectId: 'project-1' } as never)
+    await projectVendors('project-1')
+      .create()
+      .run({ name: 'Vendor', projectId: 'project-1' } as never)
     expect(invalidate).toHaveBeenCalled()
   })
 })

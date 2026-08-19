@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import Button from '@southneuhof/is-vue-framework/components/base/Button.vue';
-import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue';
+import Button from '@southneuhof/is-vue-framework/components/base/Button.vue'
+import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 definePage({ path: '/:path(.*)' })
 </script>
 

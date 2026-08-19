@@ -127,8 +127,13 @@ describe('system role assignment screen', () => {
   })
 
   it('keeps the prior switch state and disables only the pending row', async () => {
-    let resolve: (value: typeof catalogue[number]) => void = () => undefined
-    mocks.set.mockImplementationOnce(() => new Promise((promiseResolve) => { resolve = promiseResolve }))
+    let resolve: (value: (typeof catalogue)[number]) => void = () => undefined
+    mocks.set.mockImplementationOnce(
+      () =>
+        new Promise((promiseResolve) => {
+          resolve = promiseResolve
+        })
+    )
     const view = await mountRoute()
 
     view.switchButton('r3').click()

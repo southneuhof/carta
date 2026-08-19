@@ -1,6 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { appFieldDefaults } from '@/configs/defaults'
-import { createFrameworkQueryClient, registerResourceRuntime, resetResourceRuntimeForTests, resolveFields, resolveFrameworkAdapters, resolveFrameworkFieldDefaults } from '@southneuhof/is-vue-framework'
+import {
+  createFrameworkQueryClient,
+  registerResourceRuntime,
+  resetResourceRuntimeForTests,
+  resolveFields,
+  resolveFrameworkAdapters,
+  resolveFrameworkFieldDefaults,
+} from '@southneuhof/is-vue-framework'
 import { businessCategories } from '../business-categories/business-categories.resource'
 import { divisions } from './divisions.resource'
 

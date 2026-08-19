@@ -8,10 +8,9 @@ export type EmergencySimulationTopic = z.output<typeof emergencySimulationTopic.
 export type EmergencySimulationTopicCreate = z.input<typeof emergencySimulationTopic.schemas.create>
 export type EmergencySimulationTopicUpdate = z.input<typeof emergencySimulationTopic.schemas.update>
 
-export const emergencySimulationTopicsSchema = defineSchema<AppResourceContract<typeof rpc['emergency-simulation-topics']>>({
+export const emergencySimulationTopicsSchema = defineSchema<AppResourceContract<(typeof rpc)['emergency-simulation-topics']>>({
   identity: 'id',
   record: { schema: fromZod(emergencySimulationTopic.schemas.select) },
   create: { schema: fromZod(emergencySimulationTopic.schemas.create) },
   update: { schema: fromZod(emergencySimulationTopic.schemas.update) },
 })
-

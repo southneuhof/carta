@@ -95,7 +95,9 @@ function stepLabel(value: unknown) {
               <div v-else class="flex h-full w-full items-center justify-center bg-surface-container-highest text-on-surface-variant">
                 <Icon name="image" size="lg" />
               </div>
-              <span class="pointer-events-none absolute left-2 top-2 z-10 rounded-md bg-surface/[88%] px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-on-surface-variant">{{ item.label }}</span>
+              <span class="pointer-events-none absolute left-2 top-2 z-10 rounded-md bg-surface/[88%] px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-on-surface-variant">{{
+                item.label
+              }}</span>
             </div>
           </div>
         </div>

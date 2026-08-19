@@ -28,12 +28,16 @@ function startPolling() {
   if (timer === undefined) timer = setInterval(() => void refresh(), POLL_INTERVAL_MS)
 }
 
-watch(visibility, (state) => {
-  if (state === 'visible') {
-    void refresh()
-    startPolling()
-  } else stopPolling()
-}, { immediate: true })
+watch(
+  visibility,
+  (state) => {
+    if (state === 'visible') {
+      void refresh()
+      startPolling()
+    } else stopPolling()
+  },
+  { immediate: true }
+)
 onUnmounted(stopPolling)
 onMounted(() => window.addEventListener(NOTIFICATIONS_SEEN_EVENT, refresh))
 onUnmounted(() => window.removeEventListener(NOTIFICATIONS_SEEN_EVENT, refresh))
@@ -51,10 +55,6 @@ onUnmounted(() => window.removeEventListener(NOTIFICATIONS_SEEN_EVENT, refresh))
     ]"
   >
     <Icon name="notification" size="md" />
-    <span
-      v-if="unread > 0"
-      data-unread-badge
-      class="absolute right-0.5 top-0.5 min-w-5 rounded-full bg-error px-1 text-center text-xs font-semibold leading-5 text-on-error"
-    >{{ unread }}</span>
+    <span v-if="unread > 0" data-unread-badge class="absolute right-0.5 top-0.5 min-w-5 rounded-full bg-error px-1 text-center text-xs font-semibold leading-5 text-on-error">{{ unread }}</span>
   </RouterLink>
 </template>

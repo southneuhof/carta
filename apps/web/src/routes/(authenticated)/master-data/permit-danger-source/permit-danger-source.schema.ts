@@ -8,7 +8,7 @@ export type PermitDangerSource = z.output<typeof permitDangerSource.schemas.sele
 export type PermitDangerSourceCreate = z.input<typeof permitDangerSource.schemas.create>
 export type PermitDangerSourceUpdate = z.input<typeof permitDangerSource.schemas.update>
 
-export const permitDangerSourcesSchema = defineSchema<AppResourceContract<typeof rpc['permit-danger-source']>>({
+export const permitDangerSourcesSchema = defineSchema<AppResourceContract<(typeof rpc)['permit-danger-source']>>({
   identity: 'id',
   record: { schema: fromZod(permitDangerSource.schemas.select) },
   create: { schema: fromZod(permitDangerSource.schemas.create) },

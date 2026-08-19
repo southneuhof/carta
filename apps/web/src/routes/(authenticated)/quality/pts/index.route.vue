@@ -69,14 +69,7 @@ async function submitDelete(input: Record<string, unknown>) {
 </script>
 
 <template>
-  <ListView
-    v-bind="pts.list()"
-    title="PTS"
-    :query="query"
-    :filters="filters"
-    :presentation="view === 'grid' ? 'custom' : 'table'"
-    @update:query="query = $event"
-  >
+  <ListView v-bind="pts.list()" title="PTS" :query="query" :filters="filters" :presentation="view === 'grid' ? 'custom' : 'table'" @update:query="query = $event">
     <template #header>
       <div class="flex min-w-0 flex-wrap items-center gap-3">
         <h1 class="text-lg font-semibold tracking-tight text-on-surface">PTS</h1>

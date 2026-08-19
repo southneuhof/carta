@@ -7,7 +7,7 @@ const realmOptions = [
   { id: 'project', name: 'Project' },
 ] as const
 
-const realmLabel = (value: unknown) => value === 'system' ? 'System' : value === 'project' ? 'Project' : value
+const realmLabel = (value: unknown) => (value === 'system' ? 'System' : value === 'project' ? 'Project' : value)
 const fields = defineFields(rolesSchema, {
   roleCode: { label: 'Role Code', form: { renderer: 'text' } },
   name: { label: 'Role Name', form: { renderer: 'text' } },

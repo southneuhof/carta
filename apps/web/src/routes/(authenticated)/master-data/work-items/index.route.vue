@@ -25,7 +25,16 @@ const canDelete = computed(() => access.has('delete-work-items'))
 
 const contextFields = {
   divisionId: { label: 'Division', form: { renderer: 'lookup', span: 6, source: divisions, props: { pick: 'id', view: 'name', required: true } } },
-  projectId: { label: 'Project', form: { renderer: 'lookup', span: 6, source: projects, props: { pick: 'id', view: 'name', required: true }, behavior: { disabled: ({ draft }) => !draft.divisionId, props: ({ draft }) => ({ searchParameters: { divisionId: draft.divisionId } }), resetWhen: ({ draft }) => draft.divisionId } } },
+  projectId: {
+    label: 'Project',
+    form: {
+      renderer: 'lookup',
+      span: 6,
+      source: projects,
+      props: { pick: 'id', view: 'name', required: true },
+      behavior: { disabled: ({ draft }) => !draft.divisionId, props: ({ draft }) => ({ searchParameters: { divisionId: draft.divisionId } }), resetWhen: ({ draft }) => draft.divisionId },
+    },
+  },
 }
 
 function volume(value: unknown) {
@@ -131,15 +140,7 @@ async function remove(row: WorkItemTreeNode) {
         </Button>
       </div>
       <div v-if="loading" class="flex min-h-40 items-center justify-center px-6 py-10 text-on-surface-variant" role="status" aria-live="polite">Loading…</div>
-      <TreeTable
-        v-else
-        :data="nodes"
-        :fields="treeFields"
-        :children="treeChildren"
-        tree-column="name"
-        :pagination="false"
-        row-key="id"
-      >
+      <TreeTable v-else :data="nodes" :fields="treeFields" :children="treeChildren" tree-column="name" :pagination="false" row-key="id">
         <template #tree-cell="{ value, depth }">
           <span :class="{ 'font-medium': depth === 0 }">{{ value }}</span>
         </template>
@@ -178,6 +179,13 @@ async function remove(row: WorkItemTreeNode) {
       <span>Select a project to load Jenis Pekerjaan.</span>
     </Card>
 
-    <DialogForm v-if="formOpen" :key="`${formMode}-${editId ?? parentId ?? 'new'}`" v-model:open="formOpen" :title="formMode === 'edit' ? 'Edit Jenis Pekerjaan' : formMode === 'child' ? 'Add Child Jenis Pekerjaan' : 'Add Root Jenis Pekerjaan'" v-bind="form" @submitted="loadTree" />
+    <DialogForm
+      v-if="formOpen"
+      :key="`${formMode}-${editId ?? parentId ?? 'new'}`"
+      v-model:open="formOpen"
+      :title="formMode === 'edit' ? 'Edit Jenis Pekerjaan' : formMode === 'child' ? 'Add Child Jenis Pekerjaan' : 'Add Root Jenis Pekerjaan'"
+      v-bind="form"
+      @submitted="loadTree"
+    />
   </section>
 </template>

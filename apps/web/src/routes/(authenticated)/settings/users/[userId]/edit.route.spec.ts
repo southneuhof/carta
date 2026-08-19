@@ -22,7 +22,16 @@ vi.mock('@southneuhof/is-vue-framework', async () => {
     FormView: {
       props: { run: { type: Function, required: true } },
       setup(props: { run: (input: unknown) => unknown }) {
-        return () => h('button', { onClick: () => { void Promise.resolve(props.run(mocks.input)).catch(() => undefined) } }, 'submit')
+        return () =>
+          h(
+            'button',
+            {
+              onClick: () => {
+                void Promise.resolve(props.run(mocks.input)).catch(() => undefined)
+              },
+            },
+            'submit'
+          )
       },
     },
   }

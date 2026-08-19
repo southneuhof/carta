@@ -64,22 +64,24 @@ function gridFromRecord(value: unknown): ItpInspectorGridEntry[] {
     if (!entry || typeof entry !== 'object') return []
     const inspector = entry as { inspectorTypeId?: unknown; inspectorTypeCode?: unknown; inspectorTypeName?: unknown; points?: unknown }
     if (typeof inspector.inspectorTypeId !== 'string' || !Array.isArray(inspector.points)) return []
-    return [{
-      inspectorTypeId: inspector.inspectorTypeId,
-      inspectorTypeCode: typeof inspector.inspectorTypeCode === 'string' ? inspector.inspectorTypeCode : undefined,
-      inspectorTypeName: typeof inspector.inspectorTypeName === 'string' ? inspector.inspectorTypeName : undefined,
-      points: inspector.points.flatMap((point) => {
-        if (!point || typeof point !== 'object') return []
-        const item = point as { inspectionPointCode?: unknown; inspectionPointName?: unknown; value?: unknown }
-        return typeof item.inspectionPointCode === 'string'
-          ? [{ inspectionPointCode: item.inspectionPointCode, inspectionPointName: typeof item.inspectionPointName === 'string' ? item.inspectionPointName : undefined, value: item.value === true }]
-          : []
-      }),
-    }]
+    return [
+      {
+        inspectorTypeId: inspector.inspectorTypeId,
+        inspectorTypeCode: typeof inspector.inspectorTypeCode === 'string' ? inspector.inspectorTypeCode : undefined,
+        inspectorTypeName: typeof inspector.inspectorTypeName === 'string' ? inspector.inspectorTypeName : undefined,
+        points: inspector.points.flatMap((point) => {
+          if (!point || typeof point !== 'object') return []
+          const item = point as { inspectionPointCode?: unknown; inspectionPointName?: unknown; value?: unknown }
+          return typeof item.inspectionPointCode === 'string'
+            ? [{ inspectionPointCode: item.inspectionPointCode, inspectionPointName: typeof item.inspectionPointName === 'string' ? item.inspectionPointName : undefined, value: item.value === true }]
+            : []
+        }),
+      },
+    ]
   })
 }
 
-const formTypeOptions = ref<typeof itpTypeOptions[number][]>([])
+const formTypeOptions = ref<(typeof itpTypeOptions)[number][]>([])
 
 function typeOptionsFor(types: readonly (InspectionTestPlanType | string)[]) {
   return itpTypeOptions.filter((option) => types.includes(option.id))
@@ -121,10 +123,10 @@ const createInitialData = ref<Partial<ItpCreate>>({})
 const formMode = ref<'create' | 'update'>()
 const updateAction = ref<ReturnType<typeof itp.update>>()
 const formOpen = computed(() => formMode.value !== undefined)
-const formTitle = computed(() => formMode.value === 'update' ? 'Edit Inspection & Test Plan' : 'Create Inspection & Test Plan')
-const formSchema = computed(() => formMode.value === 'update' ? itpSchema.update!.schema : itpSchema.create!.schema)
-const formInitialData = computed(() => formMode.value === 'create' ? createInitialData.value : undefined)
-const formLoad = computed(() => formMode.value === 'update' ? updateAction.value?.load : undefined)
+const formTitle = computed(() => (formMode.value === 'update' ? 'Edit Inspection & Test Plan' : 'Create Inspection & Test Plan'))
+const formSchema = computed(() => (formMode.value === 'update' ? itpSchema.update!.schema : itpSchema.create!.schema))
+const formInitialData = computed(() => (formMode.value === 'create' ? createInitialData.value : undefined))
+const formLoad = computed(() => (formMode.value === 'update' ? updateAction.value?.load : undefined))
 
 function openEdit(row: ItpTreePlanRow) {
   if (!allowsItpOperation(row.plan, 'update')) return
@@ -136,9 +138,22 @@ function openEdit(row: ItpTreePlanRow) {
 
 const baseFormFields = itp.create().fields as readonly (Record<string, unknown> & { key: string })[]
 const detailFields = itp.detail({ id: '' }).fields
-const formFields = computed(() => baseFormFields.map((field) => field.key === 'type'
-  ? { ...field, label: 'Tahapan ITP', form: { ...(field.form as Record<string, unknown> | undefined), renderer: 'radio', source: formTypeOptions.value, props: { ...((field.form as { props?: Record<string, unknown> } | undefined)?.props ?? {}), required: true } } }
-  : field))
+const formFields = computed(() =>
+  baseFormFields.map((field) =>
+    field.key === 'type'
+      ? {
+          ...field,
+          label: 'Tahapan ITP',
+          form: {
+            ...(field.form as Record<string, unknown> | undefined),
+            renderer: 'radio',
+            source: formTypeOptions.value,
+            props: { ...((field.form as { props?: Record<string, unknown> } | undefined)?.props ?? {}), required: true },
+          },
+        }
+      : field
+  )
+)
 
 async function submitForm(input: Record<string, unknown>) {
   if (formMode.value === 'create') {
@@ -166,7 +181,7 @@ async function openView(row: ItpTreePlanRow) {
   viewOpen.value = true
   viewLoading.value = true
   try {
-    viewRecord.value = await itp.detail({ id: String(row.plan.id) }).run() as InspectionTestPlanRecord
+    viewRecord.value = (await itp.detail({ id: String(row.plan.id) }).run()) as InspectionTestPlanRecord
   } catch (error) {
     viewOpen.value = false
     toast.error(normalizeError(error))
@@ -187,13 +202,13 @@ function deleteError(error: unknown) {
 }
 
 const treeFields = {
-  item: { label: 'Work item', read: (row: ItpTreeTableRow) => row.kind === 'work-item' ? row.node.name : `${typeName(row.plan.type)} ITP` },
-  type: { label: 'Type', read: (row: ItpTreeTableRow) => row.kind === 'itp' ? typeName(row.plan.type) : '—' },
-  criteria: { label: 'Criteria', read: (row: ItpTreeTableRow) => row.kind === 'itp' ? row.plan.criteria : '—' },
-  procedureCode: { label: 'Procedure Code', read: (row: ItpTreeTableRow) => row.kind === 'itp' ? row.plan.procedureCode : '—' },
-  specification: { label: 'Specification', read: (row: ItpTreeTableRow) => row.kind === 'itp' ? row.plan.specification : '—' },
-  method: { label: 'Method', read: (row: ItpTreeTableRow) => row.kind === 'itp' ? row.plan.method : '—' },
-  frequency: { label: 'Frequency', read: (row: ItpTreeTableRow) => row.kind === 'itp' ? row.plan.frequency : '—' },
+  item: { label: 'Work item', read: (row: ItpTreeTableRow) => (row.kind === 'work-item' ? row.node.name : `${typeName(row.plan.type)} ITP`) },
+  type: { label: 'Type', read: (row: ItpTreeTableRow) => (row.kind === 'itp' ? typeName(row.plan.type) : '—') },
+  criteria: { label: 'Criteria', read: (row: ItpTreeTableRow) => (row.kind === 'itp' ? row.plan.criteria : '—') },
+  procedureCode: { label: 'Procedure Code', read: (row: ItpTreeTableRow) => (row.kind === 'itp' ? row.plan.procedureCode : '—') },
+  specification: { label: 'Specification', read: (row: ItpTreeTableRow) => (row.kind === 'itp' ? row.plan.specification : '—') },
+  method: { label: 'Method', read: (row: ItpTreeTableRow) => (row.kind === 'itp' ? row.plan.method : '—') },
+  frequency: { label: 'Frequency', read: (row: ItpTreeTableRow) => (row.kind === 'itp' ? row.plan.frequency : '—') },
 }
 
 const treeChildren = (row: ItpTreeTableRow) => row.children
@@ -201,24 +216,11 @@ const treeChildren = (row: ItpTreeTableRow) => row.children
 
 <template>
   <div class="flex min-w-0 flex-col gap-3">
-    <NavigationHeader
-      title="Inspection &amp; Test Plan"
-      description="Project work items and active inspection plans."
-      :back-to="{ name: 'quality-inspection-test-plans' }"
-      back-label="Kembali"
-    />
+    <NavigationHeader title="Inspection &amp; Test Plan" description="Project work items and active inspection plans." :back-to="{ name: 'quality-inspection-test-plans' }" back-label="Kembali" />
 
     <Card variant="outlined" color="surfaceContainer" class="gap-0 p-0">
       <p v-if="treeLoading" class="p-4 text-center text-on-surface-variant" role="status" aria-live="polite">Loading…</p>
-      <TreeTable
-        v-else
-        :fields="treeFields"
-        :data="treeRows"
-        :children="treeChildren"
-        tree-column="item"
-        :pagination="false"
-        :row-key="(row: ItpTreeTableRow) => row.key"
-      >
+      <TreeTable v-else :fields="treeFields" :data="treeRows" :children="treeChildren" tree-column="item" :pagination="false" :row-key="(row: ItpTreeTableRow) => row.key">
         <template #tree-cell="{ value, record }">
           <span class="truncate" :class="isPlanRow(record) ? 'text-on-surface-variant' : 'font-medium'">{{ value }}</span>
         </template>
@@ -266,14 +268,26 @@ const treeChildren = (row: ItpTreeTableRow) => row.children
       :initial-data="formInitialData"
       :load="formLoad"
       :submit="submitForm"
-      @update:open="(open) => { if (!open) formMode = undefined }"
+      @update:open="
+        (open) => {
+          if (!open) formMode = undefined
+        }
+      "
     >
       <template #input:inspectors="{ value, setValue, disabled }">
         <ItpInspectorGrid :model-value="Array.isArray(value) ? value as ItpInspectorGridEntry[] : []" :disabled="disabled" @update:model-value="setValue" />
       </template>
     </DialogForm>
 
-    <Dialog :model-value="viewOpen" @update:model-value="(open) => { viewOpen = open; if (!open) viewRecord = undefined }">
+    <Dialog
+      :model-value="viewOpen"
+      @update:model-value="
+        (open) => {
+          viewOpen = open
+          if (!open) viewRecord = undefined
+        }
+      "
+    >
       <template #title>View Inspection &amp; Test Plan</template>
       <template #content>
         <p v-if="viewLoading" role="status" aria-live="polite">Loading…</p>

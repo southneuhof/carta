@@ -1,7 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
-import { createFrameworkQueryClient, FrameworkPlugin, FormView, registerResourceRuntime, resetResourceRuntimeForTests, resolveFields, resolveFrameworkAdapters, resolveFrameworkFieldDefaults } from '@southneuhof/is-vue-framework'
+import {
+  createFrameworkQueryClient,
+  FrameworkPlugin,
+  FormView,
+  registerResourceRuntime,
+  resetResourceRuntimeForTests,
+  resolveFields,
+  resolveFrameworkAdapters,
+  resolveFrameworkFieldDefaults,
+} from '@southneuhof/is-vue-framework'
 import { appFieldDefaults } from '@/configs/defaults'
 
 const ok = (payload: unknown) => ({ ok: true, json: async () => payload })
@@ -16,18 +25,26 @@ const listSystemRoleAssignments = vi.fn(async () =>
     total: 2,
   })
 )
-const listProjectRoleAssignmentOptions = vi.fn(async () => ok({
-  data: {
-    divisions: [{ id: 'd1', name: 'Division 1', active: true }],
-    projects: [{ id: 'p1', divisionId: 'd1', number: 'P-1', name: 'Project 1', active: true }],
-  },
-}))
-const listProjectRoleAssignments = vi.fn(async () => ok({
-  data: [{ id: 'r1', roleCode: 'project-admin', name: 'Project Administrator', description: null, active: true, direct: false, effective: false, locked: false, source: null }],
-  total: 1,
-}))
-const assignProjectRole = vi.fn(async () => ok({ data: [{ id: 'r1', roleCode: 'project-admin', name: 'Project Administrator', description: null, active: true, direct: true, effective: true, locked: false, source: null }] }))
-const revokeProjectRole = vi.fn(async () => ok({ data: [{ id: 'r1', roleCode: 'project-admin', name: 'Project Administrator', description: null, active: true, direct: false, effective: false, locked: false, source: null }] }))
+const listProjectRoleAssignmentOptions = vi.fn(async () =>
+  ok({
+    data: {
+      divisions: [{ id: 'd1', name: 'Division 1', active: true }],
+      projects: [{ id: 'p1', divisionId: 'd1', number: 'P-1', name: 'Project 1', active: true }],
+    },
+  })
+)
+const listProjectRoleAssignments = vi.fn(async () =>
+  ok({
+    data: [{ id: 'r1', roleCode: 'project-admin', name: 'Project Administrator', description: null, active: true, direct: false, effective: false, locked: false, source: null }],
+    total: 1,
+  })
+)
+const assignProjectRole = vi.fn(async () =>
+  ok({ data: [{ id: 'r1', roleCode: 'project-admin', name: 'Project Administrator', description: null, active: true, direct: true, effective: true, locked: false, source: null }] })
+)
+const revokeProjectRole = vi.fn(async () =>
+  ok({ data: [{ id: 'r1', roleCode: 'project-admin', name: 'Project Administrator', description: null, active: true, direct: false, effective: false, locked: false, source: null }] })
+)
 
 vi.mock('@/framework/rpc', () => ({
   rpc: {
@@ -44,14 +61,16 @@ vi.mock('@/framework/rpc', () => ({
     },
     roles: {
       list: {
-        $get: vi.fn(async () => ok({
-          data: [
-            { id: 'r1', roleCode: 'admin', name: 'Admin', description: null, realm: 'system', active: true },
-            { id: 'r2', roleCode: 'editor', name: 'Editor', description: null, realm: 'system', active: true },
-          ],
-          total: 2,
-          limit: 100,
-        })),
+        $get: vi.fn(async () =>
+          ok({
+            data: [
+              { id: 'r1', roleCode: 'admin', name: 'Admin', description: null, realm: 'system', active: true },
+              { id: 'r2', roleCode: 'editor', name: 'Editor', description: null, realm: 'system', active: true },
+            ],
+            total: 2,
+            limit: 100,
+          })
+        ),
       },
       detail: { ':id': { $get: vi.fn(async () => ok({ data: {} })) } },
       create: { $post: vi.fn(async () => ok({ data: {} })) },
@@ -128,7 +147,10 @@ describe('users resource', () => {
 
     const valid = schema.validate({
       ...createInput,
-      systemRoleIds: [{ id: 'r1', name: 'Admin' }, { id: 'r2', name: 'Editor' }],
+      systemRoleIds: [
+        { id: 'r1', name: 'Admin' },
+        { id: 'r2', name: 'Editor' },
+      ],
     })
     expect(valid).toMatchObject({ success: true, data: { systemRoleIds: ['r1', 'r2'] } })
 
@@ -167,12 +189,15 @@ describe('users resource', () => {
       global: {
         plugins: [
           router,
-          [FrameworkPlugin, {
-            adapters: resolveFrameworkAdapters(),
-            fieldDefaults: appFieldDefaults,
-            inputProps: appInputProps,
-            queryClient: createFrameworkQueryClient({ retry: 0, staleTime: 0 }),
-          }],
+          [
+            FrameworkPlugin,
+            {
+              adapters: resolveFrameworkAdapters(),
+              fieldDefaults: appFieldDefaults,
+              inputProps: appInputProps,
+              queryClient: createFrameworkQueryClient({ retry: 0, staleTime: 0 }),
+            },
+          ],
         ],
       },
     })
@@ -203,7 +228,13 @@ describe('system role assignments', () => {
 
   it('loads all system roles with direct assignment state', async () => {
     const action = systemRoleAssignments.list({ searchParameters: { userId: 'u1' } })
-    await expect(action.run({ query: {}, searchParameters: action.searchParameters })).resolves.toMatchObject({ data: [{ id: 'r1', assigned: true }, { id: 'r2', assigned: false }], meta: { total: 2 } })
+    await expect(action.run({ query: {}, searchParameters: action.searchParameters })).resolves.toMatchObject({
+      data: [
+        { id: 'r1', assigned: true },
+        { id: 'r2', assigned: false },
+      ],
+      meta: { total: 2 },
+    })
     expect(listSystemRoleAssignments).toHaveBeenCalledWith({ param: { userId: 'u1' } })
   })
 

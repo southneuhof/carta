@@ -22,10 +22,7 @@ function buildWorkItemRow(node: InspectionTestPlanTreeNode): ItpTreeWorkItemRow 
     kind: 'work-item',
     key: `work-item:${node.id}`,
     node,
-    children: [
-      ...node.children.map(buildWorkItemRow),
-      ...node.itps.map((plan): ItpTreePlanRow => ({ kind: 'itp', key: `itp:${plan.id}`, plan, parentId: node.id, children: [] })),
-    ],
+    children: [...node.children.map(buildWorkItemRow), ...node.itps.map((plan): ItpTreePlanRow => ({ kind: 'itp', key: `itp:${plan.id}`, plan, parentId: node.id, children: [] }))],
   }
 }
 

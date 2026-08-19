@@ -6,5 +6,10 @@ import { emergencySimulationTopics } from '../emergency-simulation-topics.resour
 const route = useRoute('master-data-emergency-simulation-topics-detail')
 </script>
 
-<template><DetailView v-bind="emergencySimulationTopics.detail({ id: String(route.params.emergencySimulationTopicId) })" title="Detail Topik Simulasi Tanggap Darurat" :back-to="{ name: 'master-data-emergency-simulation-topics' }" /></template>
-
+<template>
+  <DetailView
+    v-bind="emergencySimulationTopics.detail({ id: String(route.params.emergencySimulationTopicId) })"
+    title="Detail Topik Simulasi Tanggap Darurat"
+    :back-to="{ name: 'master-data-emergency-simulation-topics' }"
+  />
+</template>

@@ -9,10 +9,12 @@ const props = defineProps<{ initial?: Record<string, unknown>; submit: (input: S
 const emit = defineEmits<{ (event: 'submitted', value: unknown): void }>()
 const model = ref<Record<string, unknown>>({ ...(props.initial ?? {}) })
 const names = ['sudut 1', 'sudut 2', 'sudut 3', 'sudut 4'] as const
-const fields = Object.fromEntries(names.flatMap((name) => [
-  [name, { label: name, form: { renderer: 'image', props: { required: true } } }],
-  [`${name}Description`, { label: 'Catatan', form: { renderer: 'textarea' } }],
-]))
+const fields = Object.fromEntries(
+  names.flatMap((name) => [
+    [name, { label: name, form: { renderer: 'image', props: { required: true } } }],
+    [`${name}Description`, { label: 'Catatan', form: { renderer: 'textarea' } }],
+  ])
+)
 
 function path(value: unknown) {
   return value && typeof value === 'object' && typeof (value as { path?: unknown }).path === 'string' ? (value as { path: string }).path : typeof value === 'string' ? value : ''
@@ -23,7 +25,13 @@ const previews = computed(() => names.map((name) => ({ name, value: path(model.v
 
 async function submitForm(value: Record<string, unknown>) {
   if (!names.every((name) => path(value[name]))) throw new Error('Semua empat foto dokumentasi wajib diisi.')
-  const result = await props.submit({ documentations: names.map((name) => ({ name, fileAttachment: path(value[name]), description: typeof value[`${name}Description`] === 'string' && value[`${name}Description`] ? value[`${name}Description`] as string : undefined })) })
+  const result = await props.submit({
+    documentations: names.map((name) => ({
+      name,
+      fileAttachment: path(value[name]),
+      description: typeof value[`${name}Description`] === 'string' && value[`${name}Description`] ? (value[`${name}Description`] as string) : undefined,
+    })),
+  })
   emit('submitted', result)
   return result
 }

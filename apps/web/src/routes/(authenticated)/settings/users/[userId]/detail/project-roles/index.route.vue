@@ -7,11 +7,7 @@ import { Alert, Button, Spinner } from '@southneuhof/is-vue-framework/components
 import Switch from '@southneuhof/is-vue-framework/components/inputs/Switch.vue'
 import { permissions } from '@/stores/permissions'
 import { projectRoleAssignments } from './project-role-assignments.resource'
-import type {
-  ProjectRoleAssignment,
-  ProjectRoleAssignmentOptions,
-  ProjectRoleCoverage,
-} from './project-role-assignments.schema'
+import type { ProjectRoleAssignment, ProjectRoleAssignmentOptions, ProjectRoleCoverage } from './project-role-assignments.schema'
 
 const route = useRoute('settings-users-detail-project-roles')
 const userId = computed(() => String(route.params.userId))
@@ -30,10 +26,18 @@ type ProjectRoleFilters = { divisionId: string; projectId: string }
 type FilterOption = { id: string; name: string }
 
 const visibleRows = computed(() => {
-  const search = String(listQuery.value.search ?? '').trim().toLowerCase()
+  const search = String(listQuery.value.search ?? '')
+    .trim()
+    .toLowerCase()
   if (!search) return rows.value
   // ponytail: role catalogs are small; keep ListView search local until the API accepts it.
-  return rows.value.filter((row) => [row.roleCode, row.name, row.description].some((value) => String(value ?? '').toLowerCase().includes(search)))
+  return rows.value.filter((row) =>
+    [row.roleCode, row.name, row.description].some((value) =>
+      String(value ?? '')
+        .toLowerCase()
+        .includes(search)
+    )
+  )
 })
 
 function queryValue(key: 'divisionId' | 'projectId') {
@@ -46,9 +50,7 @@ const selectedDivisionId = computed(() => {
   return options.value.divisions.some((division) => division.id === value) ? value : ''
 })
 
-const projectOptions = computed(() => selectedDivisionId.value
-  ? options.value.projects.filter((project) => project.divisionId === selectedDivisionId.value)
-  : options.value.projects)
+const projectOptions = computed(() => (selectedDivisionId.value ? options.value.projects.filter((project) => project.divisionId === selectedDivisionId.value) : options.value.projects))
 
 const selectedProjectId = computed(() => {
   const value = queryValue('projectId')
@@ -61,10 +63,12 @@ const coverage = computed<ProjectRoleCoverage>(() => {
   return { coverageType: 'all_projects' }
 })
 
-const list = computed(() => projectRoleAssignments.list({
-  namespace: `project-role-assignments-${userId.value}`,
-  searchParameters: { userId: userId.value, ...coverage.value },
-}))
+const list = computed(() =>
+  projectRoleAssignments.list({
+    namespace: `project-role-assignments-${userId.value}`,
+    searchParameters: { userId: userId.value, ...coverage.value },
+  })
+)
 
 const listSurface = computed(() => {
   const data = [...visibleRows.value]
@@ -79,9 +83,7 @@ const listSurface = computed(() => {
 function setFilters(value: Record<string, unknown>) {
   const requestedDivision = typeof value.divisionId === 'string' ? value.divisionId : ''
   const nextDivision = options.value.divisions.some((division) => division.id === requestedDivision) ? requestedDivision : ''
-  const nextProjects = nextDivision
-    ? options.value.projects.filter((project) => project.divisionId === nextDivision)
-    : options.value.projects
+  const nextProjects = nextDivision ? options.value.projects.filter((project) => project.divisionId === nextDivision) : options.value.projects
   const requestedProject = typeof value.projectId === 'string' ? value.projectId : ''
   const nextProject = nextProjects.some((project) => project.id === requestedProject) ? requestedProject : undefined
   query.update({ divisionId: nextDivision, projectId: nextProject })

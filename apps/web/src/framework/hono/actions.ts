@@ -13,7 +13,11 @@ type RuntimeRoute = {
 }
 
 function wireQuery(values: Record<string, unknown>): Record<string, string> {
-  return Object.fromEntries(Object.entries(values).filter(([, value]) => value != null && value !== '').map(([key, value]) => [key, String(value)]))
+  return Object.fromEntries(
+    Object.entries(values)
+      .filter(([, value]) => value != null && value !== '')
+      .map(([key, value]) => [key, String(value)])
+  )
 }
 
 function wireIdentity(id: RecordIdentity): string {
@@ -26,10 +30,7 @@ async function payload(response: Response): Promise<unknown> {
   return value
 }
 
-export function createHonoResourceActions<const TRoute>(
-  route: TRoute,
-  adapter: Pick<DataAdapter, 'normalizeCollection' | 'normalizeRecord'> = dataAdapter,
-): HonoResourceActions<TRoute> {
+export function createHonoResourceActions<const TRoute>(route: TRoute, adapter: Pick<DataAdapter, 'normalizeCollection' | 'normalizeRecord'> = dataAdapter): HonoResourceActions<TRoute> {
   const source = route as TRoute & RuntimeRoute
   const actions = {
     list: async ({ query, searchParameters, signal }: { query: Record<string, unknown>; searchParameters: Record<string, unknown>; signal?: AbortSignal }) =>

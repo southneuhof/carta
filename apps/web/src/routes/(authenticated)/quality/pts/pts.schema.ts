@@ -8,7 +8,7 @@ import type { z } from 'zod/v4'
 export type PtsCreate = z.input<typeof createReportSchema>
 export type PtsUpdate = z.input<typeof updateReportSchema>
 
-export const ptsSchema = defineSchema<AppResourceContract<typeof rpc['qhsse-pts']>>({
+export const ptsSchema = defineSchema<AppResourceContract<(typeof rpc)['qhsse-pts']>>({
   identity: 'id',
   record: { schema: fromZod(qhssePtsEntity.schemas.select) },
   create: { schema: fromZod(createReportSchema) },

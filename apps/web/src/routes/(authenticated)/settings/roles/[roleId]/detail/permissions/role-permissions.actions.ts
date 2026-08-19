@@ -10,10 +10,7 @@ type ListResponse = HonoResponseOf<ListEndpoint, 200>
 async function list({ searchParameters }: { searchParameters: Record<string, unknown> }): Promise<CollectionResult<RolePermission>> {
   const roleId = String(searchParameters.role_id ?? '')
   if (!roleId) return { data: [] }
-  const [role, result] = await Promise.all([
-    rolesActions.detail({ id: roleId, searchParameters: {} }),
-    loadRolePermissions(roleId),
-  ])
+  const [role, result] = await Promise.all([rolesActions.detail({ id: roleId, searchParameters: {} }), loadRolePermissions(roleId)])
   if (!role) throw new Error('Role not found.')
   if (result.data.some((row) => row.module.realm !== role.realm)) throw new Error('Permission catalog realm mismatch.')
   return result

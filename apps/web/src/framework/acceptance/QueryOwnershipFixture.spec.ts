@@ -28,7 +28,7 @@ async function mountFixture() {
   const app = createApp(defineComponent(() => () => h(Fixture)))
   app.use(router)
   app.use(FrameworkPlugin, {
-        adapters: { query: createRouteQueryAdapter(router) },
+    adapters: { query: createRouteQueryAdapter(router) },
     queryClient: createFrameworkQueryClient({ retry: 0, staleTime: 0 }),
   })
   app.mount(host)

@@ -38,7 +38,11 @@ export async function completeReport(id: RecordIdentity, input: CompleteQualityI
 }
 
 export async function verifyWorkItem(id: RecordIdentity, rowId: RecordIdentity, input: VerifyQualityInspectionWorkItem) {
-  return (await parseHonoResponse<WorkItemVerifyEndpoint>(await rpc['quality-inspection'].actions[':id'].workItems[':workItemRowId'].verify.$post({ param: { id: String(id), workItemRowId: String(rowId) }, json: input }))).data
+  return (
+    await parseHonoResponse<WorkItemVerifyEndpoint>(
+      await rpc['quality-inspection'].actions[':id'].workItems[':workItemRowId'].verify.$post({ param: { id: String(id), workItemRowId: String(rowId) }, json: input })
+    )
+  ).data
 }
 
 export async function submitDocumentations(id: RecordIdentity, input: SubmitQualityInspectionDocumentations) {

@@ -1,18 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { Form } from '@southneuhof/is-vue-framework'
-import {
-  inputCatalogFields,
-  inputCatalogInitialData,
-  serializeCatalogValue,
-  type InputCatalogDraft,
-} from './inputCatalogDemo'
+import { inputCatalogFields, inputCatalogInitialData, serializeCatalogValue, type InputCatalogDraft } from './inputCatalogDemo'
 
 const draft = ref<Partial<InputCatalogDraft>>({ ...inputCatalogInitialData })
 const submitted = ref<Partial<InputCatalogDraft>>()
 const errors = ref<string[]>([])
 const liveJson = computed(() => serializeCatalogValue(draft.value))
-const submittedJson = computed(() => submitted.value ? serializeCatalogValue(submitted.value) : 'Not submitted yet.')
+const submittedJson = computed(() => (submitted.value ? serializeCatalogValue(submitted.value) : 'Not submitted yet.'))
 
 async function submit(value: InputCatalogDraft) {
   submitted.value = { ...value }
@@ -26,13 +21,7 @@ async function submit(value: InputCatalogDraft) {
     <section class="rounded-xl border border-outline-variant bg-surface-container text-on-surface p-5 sm:p-6">
       <h1 class="text-2xl font-semibold text-on-surface">Input catalog</h1>
       <p class="mt-2 text-sm text-on-surface-variant">Local, unauthenticated renderer inspection. No values leave this page.</p>
-      <Form
-        v-model="draft"
-        class="mt-6"
-        :fields="inputCatalogFields"
-        :initial-data="inputCatalogInitialData"
-        :submit="submit"
-      >
+      <Form v-model="draft" class="mt-6" :fields="inputCatalogFields" :initial-data="inputCatalogInitialData" :submit="submit">
         <template #actions="{ submit: submitForm }">
           <button type="button" class="rounded-lg bg-primary px-4 py-2 text-on-primary" @click="submitForm">Submit locally</button>
         </template>

@@ -1,12 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createApp, defineComponent, h, nextTick } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
-import {
-  FrameworkPlugin,
-  createFrameworkQueryClient,
-  resetResourceRuntimeForTests,
-  resolveFrameworkAdapters,
-} from '@southneuhof/is-vue-framework'
+import { FrameworkPlugin, createFrameworkQueryClient, resetResourceRuntimeForTests, resolveFrameworkAdapters } from '@southneuhof/is-vue-framework'
 import { createRouteQueryAdapter } from '@/framework/adapters/query/routeQuery'
 import { appInputProps } from '@/framework/inputs/registry'
 
@@ -23,9 +18,10 @@ vi.mock('./project-role-assignments.actions', () => ({
   projectRoleAssignmentsActions: {
     options: (userId: string) => mocks.loadOptions(userId),
     list: ({ searchParameters }: { searchParameters: Record<string, unknown> }) => {
-      const coverage = searchParameters.coverageType === 'division'
-        ? { coverageType: 'division', divisionId: searchParameters.divisionId }
-        : searchParameters.coverageType === 'project'
+      const coverage =
+        searchParameters.coverageType === 'division'
+          ? { coverageType: 'division', divisionId: searchParameters.divisionId }
+          : searchParameters.coverageType === 'project'
           ? { coverageType: 'project', projectId: searchParameters.projectId }
           : { coverageType: 'all_projects' }
       return mocks.loadRows(String(searchParameters.userId ?? ''), coverage)
@@ -51,7 +47,17 @@ const options = {
 
 const baseRows = [
   { id: 'r1', roleCode: 'project-admin', name: 'Project Administrator', description: 'Manage projects', active: true, direct: true, effective: true, locked: false, source: null },
-  { id: 'r2', roleCode: 'project-auditor', name: 'Project Auditor', description: 'Read projects', active: true, direct: false, effective: true, locked: true, source: { coverageType: 'all_projects', divisionId: null, projectId: null, divisionName: undefined, label: 'Assigned for All Projects' } },
+  {
+    id: 'r2',
+    roleCode: 'project-auditor',
+    name: 'Project Auditor',
+    description: 'Read projects',
+    active: true,
+    direct: false,
+    effective: true,
+    locked: true,
+    source: { coverageType: 'all_projects', divisionId: null, projectId: null, divisionName: undefined, label: 'Assigned for All Projects' },
+  },
   { id: 'r3', roleCode: 'project-reader', name: 'Project Reader', description: null, active: true, direct: false, effective: false, locked: false, source: null },
   { id: 'r4', roleCode: 'legacy-project', name: 'Legacy Project', description: 'Cleanup only', active: false, direct: true, effective: true, locked: false, source: null },
 ]
@@ -215,13 +221,16 @@ describe('project role assignment screen', () => {
   })
 
   it('keeps the prior state while pending and restores it after an error', async () => {
-    mocks.set.mockImplementationOnce(() => new Promise((resolve) => {
-      mocks.resolveSet = () => {
-        mocks.rows[2].direct = true
-        mocks.rows[2].effective = true
-        resolve(mocks.rows.map((item) => ({ ...item })))
-      }
-    }))
+    mocks.set.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          mocks.resolveSet = () => {
+            mocks.rows[2].direct = true
+            mocks.rows[2].effective = true
+            resolve(mocks.rows.map((item) => ({ ...item })))
+          }
+        })
+    )
     const view = await mountRoute()
 
     view.switchButton('r3').click()
@@ -246,9 +255,11 @@ describe('project role assignment screen', () => {
 
   it('reloads after a coverage conflict and shows the server lock state', async () => {
     mocks.set.mockImplementationOnce(async () => {
-      mocks.rows = mocks.rows.map((row) => row.id === 'r3'
-        ? { ...row, effective: true, locked: true, source: { coverageType: 'all_projects', divisionId: null, projectId: null, divisionName: undefined, label: 'Assigned for All Projects' } }
-        : row)
+      mocks.rows = mocks.rows.map((row) =>
+        row.id === 'r3'
+          ? { ...row, effective: true, locked: true, source: { coverageType: 'all_projects', divisionId: null, projectId: null, divisionName: undefined, label: 'Assigned for All Projects' } }
+          : row
+      )
       throw { error: 'assignment_already_covered', message: 'Assignment is already covered.' }
     })
     const view = await mountRoute()

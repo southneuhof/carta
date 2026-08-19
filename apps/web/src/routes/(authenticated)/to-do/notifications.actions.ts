@@ -10,8 +10,7 @@ const transport = createHonoResourceActions(rpc.notifications)
 const list = (context: CollectionLoadContext<Record<string, unknown>>): Promise<CollectionResult<NotificationRecord>> =>
   transport.list(context as never) as Promise<CollectionResult<NotificationRecord>>
 
-const detail = (context: RecordLoadContext<string>): Promise<NotificationRecord | undefined> =>
-  transport.detail(context as never) as Promise<NotificationRecord | undefined>
+const detail = (context: RecordLoadContext<string>): Promise<NotificationRecord | undefined> => transport.detail(context as never) as Promise<NotificationRecord | undefined>
 
 type UnreadEndpoint = (typeof rpc.notifications)['unread-count']['$get']
 type MarkSeenEndpoint = (typeof rpc.notifications)['mark-seen']['$post']

@@ -8,4 +8,3 @@ const form = { ...emergencySimulationTopics.update({ id: String(route.params.eme
 </script>
 
 <template><FormView v-bind="form" title="Ubah Topik Simulasi Tanggap Darurat" submit-label="Submit" /></template>
-

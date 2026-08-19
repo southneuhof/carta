@@ -21,9 +21,7 @@ export function normalizeCollection<TRecord extends object>(payload: unknown): C
   const total = typeof source.total === 'number' ? source.total : undefined
   const pageSize = typeof source.limit === 'number' ? source.limit : typeof source.pageSize === 'number' ? source.pageSize : undefined
   const page = typeof source.page === 'number' ? source.page : undefined
-  const totalPage = typeof source.totalPage === 'number'
-    ? source.totalPage
-    : total != null && pageSize && pageSize > 0 ? Math.ceil(total / pageSize) : undefined
+  const totalPage = typeof source.totalPage === 'number' ? source.totalPage : total != null && pageSize && pageSize > 0 ? Math.ceil(total / pageSize) : undefined
 
   return {
     data: payload.data as TRecord[],

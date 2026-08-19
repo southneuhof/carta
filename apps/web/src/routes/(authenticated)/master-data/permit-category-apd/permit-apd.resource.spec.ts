@@ -1,5 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { createFrameworkQueryClient, registerResourceRuntime, resetResourceRuntimeForTests, resolveFields, resolveFrameworkAdapters, resolveFrameworkFieldDefaults, resourceActionForRoute } from '@southneuhof/is-vue-framework'
+import {
+  createFrameworkQueryClient,
+  registerResourceRuntime,
+  resetResourceRuntimeForTests,
+  resolveFields,
+  resolveFrameworkAdapters,
+  resolveFrameworkFieldDefaults,
+  resourceActionForRoute,
+} from '@southneuhof/is-vue-framework'
 import { appFieldDefaults } from '@/configs/defaults'
 import { permitApds } from './permit-category-apd.resource'
 

@@ -42,4 +42,3 @@ export const emergencySimulationTopics = defineResource(emergencySimulationTopic
 })
 
 export type { EmergencySimulationTopic, EmergencySimulationTopicCreate, EmergencySimulationTopicUpdate } from './emergency-simulation-topics.schema'
-

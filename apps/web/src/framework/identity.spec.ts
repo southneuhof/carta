@@ -31,7 +31,11 @@ describe('browser identity', () => {
 
   it('shares one in-flight /me request and builds memory permissions', async () => {
     let resolve: (value: ReturnType<typeof response>) => void = () => undefined
-    mocks.meGet.mockReturnValue(new Promise((promiseResolve) => { resolve = promiseResolve }))
+    mocks.meGet.mockReturnValue(
+      new Promise((promiseResolve) => {
+        resolve = promiseResolve
+      })
+    )
 
     const first = refreshIdentity()
     const second = loadIdentity()

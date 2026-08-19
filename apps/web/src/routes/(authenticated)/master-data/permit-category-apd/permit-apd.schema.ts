@@ -8,7 +8,7 @@ export type PermitApd = z.output<typeof permitApd.schemas.select>
 export type PermitApdCreate = z.input<typeof permitApd.schemas.create>
 export type PermitApdUpdate = z.input<typeof permitApd.schemas.update>
 
-export const permitApdsSchema = defineSchema<AppResourceContract<typeof rpc['permit-apd']>>({
+export const permitApdsSchema = defineSchema<AppResourceContract<(typeof rpc)['permit-apd']>>({
   identity: 'id',
   record: { schema: fromZod(permitApd.schemas.select) },
   create: { schema: fromZod(permitApd.schemas.create) },

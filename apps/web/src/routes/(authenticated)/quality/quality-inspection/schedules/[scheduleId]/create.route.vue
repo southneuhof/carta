@@ -23,7 +23,15 @@ const form = computed(() => ({
   ...base,
   fields,
   initialData: initialData.value,
-  run: (input: Record<string, unknown>) => qualityInspection.create().run({ scheduleId, targetDate: String(input.targetDate ?? ''), locationZone: typeof input.locationZone === 'string' ? input.locationZone : undefined, selectedRows: input.selectedRows } as never),
+  run: (input: Record<string, unknown>) =>
+    qualityInspection
+      .create()
+      .run({
+        scheduleId,
+        targetDate: String(input.targetDate ?? ''),
+        locationZone: typeof input.locationZone === 'string' ? input.locationZone : undefined,
+        selectedRows: input.selectedRows,
+      } as never),
 }))
 const origin = computed(() => ({
   scheduleId,

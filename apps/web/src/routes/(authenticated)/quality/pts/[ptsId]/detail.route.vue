@@ -72,7 +72,13 @@ const actionFields: Record<string, Record<string, unknown>> = {
   'temporary-plan': { temporaryFollowUpPlan: ptsActionFields.temporaryFollowUpPlan },
   'management-notes': { managementNotes: ptsActionFields.managementNotes },
   'complete-report': { somUserId: ptsActionFields.somUserId, followUpPlan: ptsActionFields.followUpPlan, targetDate: ptsActionFields.targetDate },
-  'complete-qi-report': { criteriaCode: ptsActionFields.criteriaCode, rootCauseIds: ptsActionFields.rootCauseIds, imgBefore: ptsActionFields.imgBefore, location: ptsActionFields.location, description: ptsActionFields.description },
+  'complete-qi-report': {
+    criteriaCode: ptsActionFields.criteriaCode,
+    rootCauseIds: ptsActionFields.rootCauseIds,
+    imgBefore: ptsActionFields.imgBefore,
+    location: ptsActionFields.location,
+    description: ptsActionFields.description,
+  },
   'follow-up-implementation': { implementationUserId: ptsActionFields.implementationUserId, workMethod: ptsActionFields.workMethod },
   'follow-up-price': { estimationCost: ptsActionFields.estimationCost, jobImplementorType: ptsActionFields.jobImplementorType, projectVendorId: ptsActionFields.projectVendorId },
   'implementation-report': {
@@ -131,7 +137,11 @@ const completedSections = computed<DetailSection[]>(() => {
   const row = record.value
   if (!row) return []
   const sections: Array<DetailSection & { visible: boolean }> = [
-    { title: 'Disposition', fields: { dispositionStatusCode: { label: 'Disposition', read: (value) => codeLabel(value.dispositionStatusCode, dispositionLabels) } }, visible: hasValue(row, 'dispositionStatusCode') },
+    {
+      title: 'Disposition',
+      fields: { dispositionStatusCode: { label: 'Disposition', read: (value) => codeLabel(value.dispositionStatusCode, dispositionLabels) } },
+      visible: hasValue(row, 'dispositionStatusCode'),
+    },
     { title: 'Temporary plan', fields: { temporaryFollowUpPlan: { label: 'Temporary Follow-up Plan' } }, visible: hasValue(row, 'temporaryFollowUpPlan') },
     { title: 'Management notes', fields: { managementNotes: { label: 'Management Notes' } }, visible: hasValue(row, 'managementNotes') },
     {
@@ -160,7 +170,10 @@ const completedSections = computed<DetailSection[]>(() => {
     },
     {
       title: 'Verification',
-      fields: { implementationStatusCode: { label: 'Verification', read: (value) => codeLabel(value.implementationStatusCode, implementationStatusLabels) }, implementationVerificationDescription: { label: 'Verification Description' } },
+      fields: {
+        implementationStatusCode: { label: 'Verification', read: (value) => codeLabel(value.implementationStatusCode, implementationStatusLabels) },
+        implementationVerificationDescription: { label: 'Verification Description' },
+      },
       visible: hasValue(row, 'implementationStatusCode', 'implementationVerificationDescription'),
     },
     {
@@ -217,11 +230,18 @@ async function runAction(action: string, input: Record<string, unknown> = {}) {
         : action
     if (action === 'delete') await pts.actions.deleteReport.run(ptsId, String(input.deletedReason ?? ''))
     else {
-      const payload = action === 'implementation-report'
-        ? { ...input, imgProcess: filePath(input.imgProcess), imgAfter: filePath(input.imgAfter) }
-        : action === 'complete-qi-report'
-        ? { ...input, rootCauseIds: (Array.isArray(input.rootCauseIds) ? input.rootCauseIds : []).map((item) => typeof item === 'string' ? item : item && typeof item === 'object' && typeof (item as { id?: unknown }).id === 'string' ? (item as { id: string }).id : '').filter(Boolean), imgBefore: filePath(input.imgBefore) }
-        : input
+      const payload =
+        action === 'implementation-report'
+          ? { ...input, imgProcess: filePath(input.imgProcess), imgAfter: filePath(input.imgAfter) }
+          : action === 'complete-qi-report'
+          ? {
+              ...input,
+              rootCauseIds: (Array.isArray(input.rootCauseIds) ? input.rootCauseIds : [])
+                .map((item) => (typeof item === 'string' ? item : item && typeof item === 'object' && typeof (item as { id?: unknown }).id === 'string' ? (item as { id: string }).id : ''))
+                .filter(Boolean),
+              imgBefore: filePath(input.imgBefore),
+            }
+          : input
       await (pts.actions as unknown as Record<string, { run: (id: string, value?: Record<string, unknown>) => Promise<unknown> }>)[actionName].run(ptsId, payload)
     }
     await pts.invalidate({ id: ptsId })
@@ -302,7 +322,9 @@ async function closeAction(setOpen: (value: boolean) => void) {
                   <div v-else class="flex h-full w-full items-center justify-center bg-surface-container-high text-on-surface-variant">
                     <Icon name="image" size="2xl" />
                   </div>
-                  <span class="pointer-events-none absolute left-3 top-3 z-10 rounded-md bg-surface/[88%] px-2 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-on-surface-variant">{{ item.label }}</span>
+                  <span class="pointer-events-none absolute left-3 top-3 z-10 rounded-md bg-surface/[88%] px-2 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-on-surface-variant">{{
+                    item.label
+                  }}</span>
                 </div>
               </div>
             </div>
@@ -397,7 +419,11 @@ async function closeAction(setOpen: (value: boolean) => void) {
                   <Icon name="shield-check" size="lg" class="text-warning" />
                   <h3 class="font-medium">Verification required</h3>
                 </div>
-                <Detail class="mt-3" :fields="{ implementationStatusCode: { label: 'Implementation status', read: (value: Record<string, any>) => codeLabel(value.implementationStatusCode, implementationStatusLabels) } } as never" :data="record" />
+                <Detail
+                  class="mt-3"
+                  :fields="{ implementationStatusCode: { label: 'Implementation status', read: (value: Record<string, any>) => codeLabel(value.implementationStatusCode, implementationStatusLabels) } } as never"
+                  :data="record"
+                />
               </div>
             </div>
           </Card>

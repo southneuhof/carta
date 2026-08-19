@@ -37,9 +37,11 @@ function plan(id: string, type: 'material' | 'process' | 'product' = 'material')
 
 describe('ITP tree helpers', () => {
   it('builds nested work-item and plan rows', () => {
-    const tree = [node({
-      children: [node({ id: 'leaf', parentId: 'root', level: 1, code: '1.1', name: 'Leaf', isLeaf: true, availableTypes: ['process', 'product'], itps: [plan('itp-1')] })],
-    })]
+    const tree = [
+      node({
+        children: [node({ id: 'leaf', parentId: 'root', level: 1, code: '1.1', name: 'Leaf', isLeaf: true, availableTypes: ['process', 'product'], itps: [plan('itp-1')] })],
+      }),
+    ]
     const rows = buildItpTree(tree)
     expect(rows.map((row) => row.key)).toEqual(['work-item:root'])
     expect(rows[0]?.children.map((row) => row.key)).toEqual(['work-item:leaf'])

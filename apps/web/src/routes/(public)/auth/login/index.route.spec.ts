@@ -92,7 +92,12 @@ describe('login route', () => {
 
   it('sends credentials, refreshes identity, and navigates once without storage', async () => {
     mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', name: 'Alice', email: 'alice@example.com' } }))
-    mocks.refreshIdentity.mockResolvedValue({ userId: 'user-1', user: { id: 'user-1', name: 'Alice', email: 'alice@example.com', username: null, statusCode: 'active' }, roleCodes: ['role-1'], permissions: ['view-users'] })
+    mocks.refreshIdentity.mockResolvedValue({
+      userId: 'user-1',
+      user: { id: 'user-1', name: 'Alice', email: 'alice@example.com', username: null, statusCode: 'active' },
+      roleCodes: ['role-1'],
+      permissions: ['view-users'],
+    })
 
     const wrapper = mountLogin()
     const inputs = wrapper.findAll('input')
@@ -163,7 +168,12 @@ describe('login route', () => {
 
   it('allows an authenticated identity without system permissions', async () => {
     mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', name: 'Alice', email: 'alice@example.com' } }))
-    mocks.refreshIdentity.mockResolvedValue({ userId: 'user-1', user: { id: 'user-1', name: 'Alice', email: 'alice@example.com', username: null, statusCode: 'active' }, roleCodes: [], permissions: [] })
+    mocks.refreshIdentity.mockResolvedValue({
+      userId: 'user-1',
+      user: { id: 'user-1', name: 'Alice', email: 'alice@example.com', username: null, statusCode: 'active' },
+      roleCodes: [],
+      permissions: [],
+    })
 
     const wrapper = mountLogin()
     await wrapper.find('form').trigger('submit')
@@ -180,7 +190,12 @@ describe('login route', () => {
 
   it('rejects a missing destination without persisting or navigating', async () => {
     mocks.signIn.mockResolvedValue(response(true, { user: { id: 'user-1', name: 'Alice', email: 'alice@example.com' } }))
-    mocks.refreshIdentity.mockResolvedValue({ userId: 'user-1', user: { id: 'user-1', name: 'Alice', email: 'alice@example.com', username: null, statusCode: 'active' }, roleCodes: ['role-1'], permissions: ['view-users'] })
+    mocks.refreshIdentity.mockResolvedValue({
+      userId: 'user-1',
+      user: { id: 'user-1', name: 'Alice', email: 'alice@example.com', username: null, statusCode: 'active' },
+      roleCodes: ['role-1'],
+      permissions: ['view-users'],
+    })
     mocks.resolvePostLoginRoute.mockReturnValue(null)
 
     const wrapper = mountLogin()

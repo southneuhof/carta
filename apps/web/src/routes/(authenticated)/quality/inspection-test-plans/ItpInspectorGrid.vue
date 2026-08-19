@@ -15,10 +15,13 @@ export type ItpInspectorGridEntry = {
   points: ItpInspectorGridPoint[]
 }
 
-const props = withDefaults(defineProps<{
-  modelValue: ItpInspectorGridEntry[]
-  disabled?: boolean
-}>(), { disabled: false })
+const props = withDefaults(
+  defineProps<{
+    modelValue: ItpInspectorGridEntry[]
+    disabled?: boolean
+  }>(),
+  { disabled: false }
+)
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: ItpInspectorGridEntry[]): void
@@ -26,12 +29,17 @@ const emit = defineEmits<{
 
 function toggle(inspectorTypeId: string, inspectionPointCode: string, value: boolean) {
   if (props.disabled) return
-  emit('update:modelValue', props.modelValue.map((inspector) => inspector.inspectorTypeId !== inspectorTypeId
-    ? { ...inspector, points: inspector.points.map((point) => ({ ...point })) }
-    : {
-        ...inspector,
-        points: inspector.points.map((point) => point.inspectionPointCode === inspectionPointCode ? { ...point, value } : { ...point }),
-      }))
+  emit(
+    'update:modelValue',
+    props.modelValue.map((inspector) =>
+      inspector.inspectorTypeId !== inspectorTypeId
+        ? { ...inspector, points: inspector.points.map((point) => ({ ...point })) }
+        : {
+            ...inspector,
+            points: inspector.points.map((point) => (point.inspectionPointCode === inspectionPointCode ? { ...point, value } : { ...point })),
+          }
+    )
+  )
 }
 </script>
 

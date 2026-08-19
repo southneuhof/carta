@@ -7,4 +7,10 @@ const route = useRoute('master-data-permit-category-apd-detail-apd-detail')
 const parentId = String(route.params.permitCategoryApdId)
 </script>
 
-<template><DetailView v-bind="permitApds(parentId).detail({ id: String(route.params.permitApdId) })" title="Detail APD" :back-to="{ name: 'master-data-permit-category-apd-detail', params: { permitCategoryApdId: parentId } }" /></template>
+<template>
+  <DetailView
+    v-bind="permitApds(parentId).detail({ id: String(route.params.permitApdId) })"
+    title="Detail APD"
+    :back-to="{ name: 'master-data-permit-category-apd-detail', params: { permitCategoryApdId: parentId } }"
+  />
+</template>

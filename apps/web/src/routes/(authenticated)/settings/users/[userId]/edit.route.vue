@@ -17,7 +17,8 @@ const form = computed(() => {
     run: async (input: UserUpdate) => {
       const current = await users.detail({ id: userId.value }).run()
       if (!current) throw new Error('User not found.')
-      if (current.statusCode === 'active' && input.statusCode && input.statusCode !== 'active' && !window.confirm('Disabling this user will end all active sessions. Continue?')) throw new Error('Status change cancelled.')
+      if (current.statusCode === 'active' && input.statusCode && input.statusCode !== 'active' && !window.confirm('Disabling this user will end all active sessions. Continue?'))
+        throw new Error('Status change cancelled.')
       return action.run(input)
     },
   }

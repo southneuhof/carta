@@ -3,7 +3,7 @@ import { numberConfig } from '@southneuhof/api/routes/number-configs/number-conf
 import type { AppResourceContract } from '@/framework/hono'
 import { rpc } from '@/framework/rpc'
 
-export const numberConfigsSchema = defineSchema<AppResourceContract<typeof rpc['number-configs']>>({
+export const numberConfigsSchema = defineSchema<AppResourceContract<(typeof rpc)['number-configs']>>({
   identity: 'id',
   record: { schema: fromZod(numberConfig.schemas.select) },
   create: { schema: fromZod(numberConfig.schemas.create) },

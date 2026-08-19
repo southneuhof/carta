@@ -22,27 +22,71 @@ vi.mock('@/framework/rpc', () => ({
       detail: { ':id': { $get: vi.fn(async () => ok({ data: { id: 'role-1', roleCode: 'admin', name: 'Admin', description: null, realm: 'system', active: true } })) } },
       ':roleId': {
         permissions: {
-          $get: vi.fn(async () => ok({
-            data: [
-              { id: 'p1', permissionCode: 'view-users', name: 'View users', description: 'Read users', module: { id: 'm1', code: 'users', name: 'Users', realm: crossRealm ? 'project' : 'system' }, assigned: assignmentState.p1 },
-              { id: 'p2', permissionCode: 'manage-users', name: 'Manage users', description: null, module: { id: 'm1', code: 'users', name: 'Users', realm: crossRealm ? 'project' : 'system' }, assigned: assignmentState.p2 },
-              { id: 'p3', permissionCode: 'view-roles', name: 'View roles', description: null, module: { id: 'm2', code: 'roles', name: 'Roles', realm: crossRealm ? 'project' : 'system' }, assigned: assignmentState.p3 },
-            ],
-            total: 3,
-          })),
+          $get: vi.fn(async () =>
+            ok({
+              data: [
+                {
+                  id: 'p1',
+                  permissionCode: 'view-users',
+                  name: 'View users',
+                  description: 'Read users',
+                  module: { id: 'm1', code: 'users', name: 'Users', realm: crossRealm ? 'project' : 'system' },
+                  assigned: assignmentState.p1,
+                },
+                {
+                  id: 'p2',
+                  permissionCode: 'manage-users',
+                  name: 'Manage users',
+                  description: null,
+                  module: { id: 'm1', code: 'users', name: 'Users', realm: crossRealm ? 'project' : 'system' },
+                  assigned: assignmentState.p2,
+                },
+                {
+                  id: 'p3',
+                  permissionCode: 'view-roles',
+                  name: 'View roles',
+                  description: null,
+                  module: { id: 'm2', code: 'roles', name: 'Roles', realm: crossRealm ? 'project' : 'system' },
+                  assigned: assignmentState.p3,
+                },
+              ],
+              total: 3,
+            })
+          ),
           ':permissionId': {
             $put: vi.fn(async ({ param }: { param: { permissionId: string } }) => {
               calls.push({ method: 'put', permissionId: param.permissionId })
-              if (deferPut) await new Promise<void>((resolve) => { resolvePut = resolve })
+              if (deferPut)
+                await new Promise<void>((resolve) => {
+                  resolvePut = resolve
+                })
               if (failure) return { ok: false, json: async () => ({ message: 'Denied' }) }
               assignmentState[param.permissionId] = true
-              return ok({ data: { id: param.permissionId, permissionCode: 'view-users', name: 'View users', description: null, module: { id: 'm1', code: 'users', name: 'Users', realm: 'system' }, assigned: true } })
+              return ok({
+                data: {
+                  id: param.permissionId,
+                  permissionCode: 'view-users',
+                  name: 'View users',
+                  description: null,
+                  module: { id: 'm1', code: 'users', name: 'Users', realm: 'system' },
+                  assigned: true,
+                },
+              })
             }),
             $delete: vi.fn(async ({ param }: { param: { permissionId: string } }) => {
               calls.push({ method: 'delete', permissionId: param.permissionId })
               if (failure) return { ok: false, json: async () => ({ message: 'Denied' }) }
               assignmentState[param.permissionId] = false
-              return ok({ data: { id: param.permissionId, permissionCode: 'manage-users', name: 'Manage users', description: null, module: { id: 'm1', code: 'users', name: 'Users', realm: 'system' }, assigned: false } })
+              return ok({
+                data: {
+                  id: param.permissionId,
+                  permissionCode: 'manage-users',
+                  name: 'Manage users',
+                  description: null,
+                  module: { id: 'm1', code: 'users', name: 'Users', realm: 'system' },
+                  assigned: false,
+                },
+              })
             }),
           },
         },
@@ -74,7 +118,13 @@ async function mountScreen() {
   app.use(FrameworkPlugin, { queryClient: createFrameworkQueryClient({ retry: 0, staleTime: 0 }) })
   app.mount(host)
   await flush()
-  return { host, unmount: () => { app.unmount(); host.remove() } }
+  return {
+    host,
+    unmount: () => {
+      app.unmount()
+      host.remove()
+    },
+  }
 }
 
 beforeEach(() => {
@@ -119,7 +169,10 @@ describe('role permission editor', () => {
     const remove = view.host.querySelector<HTMLElement>('[data-permission="p2"]')!
     remove.querySelector<HTMLButtonElement>('button')!.click()
     await flush()
-    expect(calls).toEqual([{ method: 'put', permissionId: 'p1' }, { method: 'delete', permissionId: 'p2' }])
+    expect(calls).toEqual([
+      { method: 'put', permissionId: 'p1' },
+      { method: 'delete', permissionId: 'p2' },
+    ])
     expect(view.host.querySelector<HTMLElement>('[data-permission="p2"]')?.getAttribute('aria-checked')).toBe('false')
     view.unmount()
   })

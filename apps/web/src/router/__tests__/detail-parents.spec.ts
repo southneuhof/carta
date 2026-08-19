@@ -9,10 +9,17 @@ vi.mock('@southneuhof/is-vue-framework', () => ({
     setup: (props) => () => h('div', { 'data-detail': props.id }, 'Detail'),
   }),
 }))
-vi.mock('@/components/routing/Tabs.vue', () => ({ default: defineComponent({
-  props: { items: { type: Array, default: () => [] } },
-  setup: (props) => () => h('nav', { 'data-tabs': true }, props.items.map((item: { label: string }) => h('span', { 'data-tab-label': item.label }, item.label))),
-}) }))
+vi.mock('@/components/routing/Tabs.vue', () => ({
+  default: defineComponent({
+    props: { items: { type: Array, default: () => [] } },
+    setup: (props) => () =>
+      h(
+        'nav',
+        { 'data-tabs': true },
+        props.items.map((item: { label: string }) => h('span', { 'data-tab-label': item.label }, item.label))
+      ),
+  }),
+}))
 vi.mock('@/routes/(authenticated)/settings/roles/roles.resource', () => ({
   roles: {
     detail: ({ id }: { id: string }) => ({ id }),
@@ -42,12 +49,14 @@ async function mountParent(kind: 'roles' | 'users', child: boolean) {
   const parent = kind === 'roles' ? RolesParent : UsersParent
   const router = createRouter({
     history: createMemoryHistory(),
-    routes: [{
-      path: `/${kind}/:${idKey}`,
-      name: parentName,
-      component: parent,
-      children: [{ path: 'child', name: childName, component: Child }],
-    }],
+    routes: [
+      {
+        path: `/${kind}/:${idKey}`,
+        name: parentName,
+        component: parent,
+        children: [{ path: 'child', name: childName, component: Child }],
+      },
+    ],
   })
   await router.push(`/${kind}/7${child ? '/child' : ''}`)
   await router.isReady()
@@ -58,7 +67,10 @@ async function mountParent(kind: 'roles' | 'users', child: boolean) {
   app.use(router)
   app.mount(host)
   await nextTick()
-  mounted.push(() => { app.unmount(); host.remove() })
+  mounted.push(() => {
+    app.unmount()
+    host.remove()
+  })
   return host
 }
 

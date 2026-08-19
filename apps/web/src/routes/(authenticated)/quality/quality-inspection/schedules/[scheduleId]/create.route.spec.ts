@@ -15,7 +15,8 @@ vi.mock('@southneuhof/is-vue-framework', () => ({
   },
   FormView: {
     props: ['fields', 'initialData', 'description', 'title'],
-    template: '<div data-testid="form-view"><h1>{{ title }}</h1><p>{{ description }}</p><p data-testid="form-fields">{{ fields.map((field) => field.key).join(",") }}</p><p data-testid="form-initial">{{ JSON.stringify(initialData) }}</p><slot name="input:selectedRows" :value="initialData.selectedRows" :set-value="() => undefined" /></div>',
+    template:
+      '<div data-testid="form-view"><h1>{{ title }}</h1><p>{{ description }}</p><p data-testid="form-fields">{{ fields.map((field) => field.key).join(",") }}</p><p data-testid="form-initial">{{ JSON.stringify(initialData) }}</p><slot name="input:selectedRows" :value="initialData.selectedRows" :set-value="() => undefined" /></div>',
   },
 }))
 vi.mock('@southneuhof/is-vue-framework/components/base', () => ({ Card: { template: '<section><slot /></section>' } }))
@@ -39,7 +40,23 @@ beforeEach(() => {
     schedule: { id: 'schedule-1', workItemId: 'root-1', startDate: '2026-08-01', endDate: '2026-08-31' },
     project: { name: 'Project One' },
     context: {
-      tree: [{ id: 'root-1', projectId: 'project-1', parentId: null, level: 0, code: 'ROOT', name: 'Root Work', categoryName: 'Category', volume: '10.00', uomName: 'm³', isHighRisk: false, isLeaf: true, itps: [], children: [] }],
+      tree: [
+        {
+          id: 'root-1',
+          projectId: 'project-1',
+          parentId: null,
+          level: 0,
+          code: 'ROOT',
+          name: 'Root Work',
+          categoryName: 'Category',
+          volume: '10.00',
+          uomName: 'm³',
+          isHighRisk: false,
+          isLeaf: true,
+          itps: [],
+          children: [],
+        },
+      ],
     },
   })
 })

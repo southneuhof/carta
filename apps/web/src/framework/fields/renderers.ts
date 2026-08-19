@@ -58,9 +58,7 @@ const arrayRenderer = defineComponent({
       h(
         'ul',
         { class: 'list-disc ps-5' },
-        (Array.isArray(props.value) ? props.value : [props.value])
-          .filter(Boolean)
-          .map((item) => h('li', String(typeof item === 'object' ? JSON.stringify(item) : item)))
+        (Array.isArray(props.value) ? props.value : [props.value]).filter(Boolean).map((item) => h('li', String(typeof item === 'object' ? JSON.stringify(item) : item)))
       )
   },
 })

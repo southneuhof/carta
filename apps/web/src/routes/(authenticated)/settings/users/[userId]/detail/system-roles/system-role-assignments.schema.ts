@@ -10,12 +10,6 @@ export type SystemRoleAssignment = {
   assigned: boolean
 }
 
-export type SystemRoleAssignmentSchema = WebResourceSchema<
-  SystemRoleAssignment,
-  Record<string, unknown>,
-  Record<string, never>,
-  Record<string, never>,
-  string
->
+export type SystemRoleAssignmentSchema = WebResourceSchema<SystemRoleAssignment, Record<string, unknown>, Record<string, never>, Record<string, never>, string>
 
 export const systemRoleAssignmentsSchema = defineSchema<SystemRoleAssignmentSchema>({ identity: 'id' })

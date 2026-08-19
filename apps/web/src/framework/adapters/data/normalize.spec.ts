@@ -10,10 +10,12 @@ describe('web data adapter', () => {
   })
 
   it('preserves canonical nested metadata', () => {
-    expect(normalizeCollection({
-      data: [{ id: '1' }],
-      meta: { page: 2, pageSize: 10, total: 21, totalPage: 3 },
-    })).toEqual({
+    expect(
+      normalizeCollection({
+        data: [{ id: '1' }],
+        meta: { page: 2, pageSize: 10, total: 21, totalPage: 3 },
+      })
+    ).toEqual({
       data: [{ id: '1' }],
       meta: { page: 2, pageSize: 10, total: 21, totalPage: 3 },
     })

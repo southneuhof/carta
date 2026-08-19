@@ -14,7 +14,9 @@ const roleId = route.params.roleId
 const deleting = ref(false)
 const updateTarget = roles.list().updateRoute?.({ id: roleId } as never)
 
-const tabs = [{ action: { permission: 'view-role-permissions', to: { name: 'settings-roles-detail-permissions', params: { roleId: String(roleId) } } as never }, label: 'Permissions' }] as const satisfies readonly RouteTab[]
+const tabs = [
+  { action: { permission: 'view-role-permissions', to: { name: 'settings-roles-detail-permissions', params: { roleId: String(roleId) } } as never }, label: 'Permissions' },
+] as const satisfies readonly RouteTab[]
 
 function deleteErrorMessage(error: unknown) {
   if (error && typeof error === 'object' && !Array.isArray(error) && 'error' in error && error.error === 'role_in_use') {

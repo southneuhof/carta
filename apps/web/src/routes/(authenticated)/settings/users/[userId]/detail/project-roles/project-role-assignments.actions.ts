@@ -1,12 +1,7 @@
 import type { CollectionLoadContext, CollectionResult } from '@southneuhof/is-vue-framework'
 import { parseHonoResponse, type HonoResponseOf } from '@/framework/hono'
 import { rpc } from '@/framework/rpc'
-import type {
-  ProjectRoleAssignment,
-  ProjectRoleAssignmentOptions,
-  ProjectRoleAssignmentQuery,
-  ProjectRoleCoverage,
-} from './project-role-assignments.schema'
+import type { ProjectRoleAssignment, ProjectRoleAssignmentOptions, ProjectRoleAssignmentQuery, ProjectRoleCoverage } from './project-role-assignments.schema'
 
 type OptionsEndpoint = (typeof rpc.users)[':userId']['project-role-assignment-options']['$get']
 type ListEndpoint = (typeof rpc.users)[':userId']['project-role-assignments']['$get']
@@ -45,10 +40,12 @@ async function list({ searchParameters }: CollectionLoadContext<ProjectRoleAssig
   const userId = String(searchParameters.userId ?? '')
   if (!userId) return { data: [] }
   const coverage = coverageFromSearchParameters(searchParameters)
-  const payload = await parseHonoResponse<ListEndpoint>(await rpc.users[':userId']['project-role-assignments'].$get({
-    param: { userId },
-    query: queryForCoverage(coverage),
-  }))
+  const payload = await parseHonoResponse<ListEndpoint>(
+    await rpc.users[':userId']['project-role-assignments'].$get({
+      param: { userId },
+      query: queryForCoverage(coverage),
+    })
+  )
   return { data: payload.data as ListResponse['data'] as ProjectRoleAssignment[], meta: { total: payload.total } }
 }
 

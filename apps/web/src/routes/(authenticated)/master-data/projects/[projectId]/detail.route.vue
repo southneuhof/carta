@@ -8,7 +8,9 @@ import { projects } from '../projects.resource'
 
 const route = useRoute('master-data-projects-detail')
 
-const tabs = [{ action: { permission: null, to: { name: 'master-data-projects-detail-vendors', params: { projectId: String(route.params.projectId) } } as never }, label: 'Vendor/Subkon/Mandor' }] as const satisfies readonly RouteTab[]
+const tabs = [
+  { action: { permission: null, to: { name: 'master-data-projects-detail-vendors', params: { projectId: String(route.params.projectId) } } as never }, label: 'Vendor/Subkon/Mandor' },
+] as const satisfies readonly RouteTab[]
 </script>
 
 <template>

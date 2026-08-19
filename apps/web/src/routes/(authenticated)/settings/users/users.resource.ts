@@ -9,7 +9,10 @@ const fields = defineFields(usersSchema, {
   email: { label: 'Email', form: { renderer: 'text', props: { type: 'email', required: true } } },
   password: { label: 'Password', form: { renderer: 'text', props: { type: 'password', required: true } } },
   imgPhotoUser: { label: 'Photo Key', form: { renderer: 'text' } },
-  systemRoleIds: { label: 'System Roles', form: { renderer: 'checkbox-group', source: roles, props: { pick: 'id', view: 'name', required: true, searchParameters: { active: true, realm: 'system' } } } },
+  systemRoleIds: {
+    label: 'System Roles',
+    form: { renderer: 'checkbox-group', source: roles, props: { pick: 'id', view: 'name', required: true, searchParameters: { active: true, realm: 'system' } } },
+  },
   statusCode: { label: 'Status', form: { renderer: 'radio' } },
   createdAt: { label: 'Created At' },
   updatedAt: { label: 'Updated At' },

@@ -20,7 +20,7 @@ export type VerifyQualityInspectionWorkItem = z.input<typeof verifyQualityInspec
 export type SubmitQualityInspectionDocumentations = z.input<typeof submitQualityInspectionDocumentationsSchema>
 export type VerifyQualityInspection = z.input<typeof verifyQualityInspectionSchema>
 
-export const qualityInspectionSchema = defineSchema<AppResourceContract<typeof rpc['quality-inspection']>>({
+export const qualityInspectionSchema = defineSchema<AppResourceContract<(typeof rpc)['quality-inspection']>>({
   identity: 'id',
   record: { schema: fromZod(qualityInspectionRecordSchema) },
   query: { schema: fromZod(qualityInspectionListQuerySchema) },

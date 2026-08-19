@@ -48,7 +48,12 @@ const action = qualityInspection.create()
 <template>
   <FormView v-bind="action" title="Buat Inspection/Test" :initial-data="initialData">
     <template #input:selectedRows="{ value, setValue, draft }">
-      <QualityInspectionWorkItemSelector :context="contextFor(draft)" :root-id="typeof draft.workItemCategoryId === 'string' ? draft.workItemCategoryId : undefined" :model-value="Array.isArray(value) ? value as never[] : []" @update:model-value="setValue" />
+      <QualityInspectionWorkItemSelector
+        :context="contextFor(draft)"
+        :root-id="typeof draft.workItemCategoryId === 'string' ? draft.workItemCategoryId : undefined"
+        :model-value="Array.isArray(value) ? value as never[] : []"
+        @update:model-value="setValue"
+      />
     </template>
   </FormView>
 </template>

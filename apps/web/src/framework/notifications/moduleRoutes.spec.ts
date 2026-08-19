@@ -15,7 +15,7 @@ const notification = (overrides: Partial<NotificationRecord> = {}): Notification
     createdAt: '',
     updatedAt: '',
     ...overrides,
-  }) as NotificationRecord
+  } as NotificationRecord)
 
 describe('notification deep links', () => {
   it('returns no route for an unregistered module', () => {

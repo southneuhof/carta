@@ -7,7 +7,7 @@ import type { z } from 'zod/v4'
 export type ItpCreate = z.input<typeof createInspectionTestPlanSchema>
 export type ItpUpdate = z.input<typeof updateInspectionTestPlanSchema>
 
-export const itpSchema = defineSchema<AppResourceContract<typeof rpc['inspection-test-plans']>>({
+export const itpSchema = defineSchema<AppResourceContract<(typeof rpc)['inspection-test-plans']>>({
   identity: 'id',
   record: { schema: fromZod(inspectionTestPlanRecordSchema) },
   create: { schema: fromZod(createInspectionTestPlanSchema) },

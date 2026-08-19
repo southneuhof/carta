@@ -7,7 +7,7 @@ import type { z } from 'zod/v4'
 export type ProjectVendorCreate = z.input<typeof projectVendor.schemas.create>
 export type ProjectVendorUpdate = z.input<typeof projectVendor.schemas.update>
 
-export const projectVendorsSchema = defineSchema<AppResourceContract<typeof rpc['project-vendors']>>({
+export const projectVendorsSchema = defineSchema<AppResourceContract<(typeof rpc)['project-vendors']>>({
   identity: 'id',
   record: { schema: fromZod(projectVendor.schemas.select) },
   create: { schema: fromZod(projectVendor.schemas.create) },
