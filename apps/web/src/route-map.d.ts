@@ -101,6 +101,34 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    'master-data-emergency-simulation-topics': RouteRecordInfo<
+      'master-data-emergency-simulation-topics',
+      '/master-data/emergency-simulation-topics',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-emergency-simulation-topics-detail': RouteRecordInfo<
+      'master-data-emergency-simulation-topics-detail',
+      '/master-data/emergency-simulation-topics/:emergencySimulationTopicId/detail',
+      { emergencySimulationTopicId: ParamValue<true> },
+      { emergencySimulationTopicId: ParamValue<false> },
+      | never
+    >,
+    'master-data-emergency-simulation-topics-edit': RouteRecordInfo<
+      'master-data-emergency-simulation-topics-edit',
+      '/master-data/emergency-simulation-topics/:emergencySimulationTopicId/edit',
+      { emergencySimulationTopicId: ParamValue<true> },
+      { emergencySimulationTopicId: ParamValue<false> },
+      | never
+    >,
+    'master-data-emergency-simulation-topics-create': RouteRecordInfo<
+      'master-data-emergency-simulation-topics-create',
+      '/master-data/emergency-simulation-topics/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     'master-data-number-configs': RouteRecordInfo<
       'master-data-number-configs',
       '/master-data/number-configs',
@@ -141,6 +169,93 @@ declare module 'vue-router/auto-routes' {
       '/master-data/number-variables/:numberVariableId/detail',
       { numberVariableId: ParamValue<true> },
       { numberVariableId: ParamValue<false> },
+      | never
+    >,
+    'master-data-permit-attachment': RouteRecordInfo<
+      'master-data-permit-attachment',
+      '/master-data/permit-attachment',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-permit-attachment-detail': RouteRecordInfo<
+      'master-data-permit-attachment-detail',
+      '/master-data/permit-attachment/:permitAttachmentId/detail',
+      { permitAttachmentId: ParamValue<true> },
+      { permitAttachmentId: ParamValue<false> },
+      | never
+    >,
+    'master-data-permit-attachment-edit': RouteRecordInfo<
+      'master-data-permit-attachment-edit',
+      '/master-data/permit-attachment/:permitAttachmentId/edit',
+      { permitAttachmentId: ParamValue<true> },
+      { permitAttachmentId: ParamValue<false> },
+      | never
+    >,
+    'master-data-permit-attachment-create': RouteRecordInfo<
+      'master-data-permit-attachment-create',
+      '/master-data/permit-attachment/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-permit-category-apd': RouteRecordInfo<
+      'master-data-permit-category-apd',
+      '/master-data/permit-category-apd',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-permit-category-apd-detail': RouteRecordInfo<
+      'master-data-permit-category-apd-detail',
+      '/master-data/permit-category-apd/:permitCategoryApdId/detail',
+      { permitCategoryApdId: ParamValue<true> },
+      { permitCategoryApdId: ParamValue<false> },
+      | 'master-data-permit-category-apd-detail-apd'
+      | 'master-data-permit-category-apd-detail-apd-create'
+      | 'master-data-permit-category-apd-detail-apd-detail'
+      | 'master-data-permit-category-apd-detail-apd-edit'
+    >,
+    'master-data-permit-category-apd-detail-apd': RouteRecordInfo<
+      'master-data-permit-category-apd-detail-apd',
+      '/master-data/permit-category-apd/:permitCategoryApdId/detail/apd',
+      { permitCategoryApdId: ParamValue<true> },
+      { permitCategoryApdId: ParamValue<false> },
+      | never
+    >,
+    'master-data-permit-category-apd-detail-apd-detail': RouteRecordInfo<
+      'master-data-permit-category-apd-detail-apd-detail',
+      '/master-data/permit-category-apd/:permitCategoryApdId/detail/apd/:permitApdId/detail',
+      { permitCategoryApdId: ParamValue<true>, permitApdId: ParamValue<true> },
+      { permitCategoryApdId: ParamValue<false>, permitApdId: ParamValue<false> },
+      | never
+    >,
+    'master-data-permit-category-apd-detail-apd-edit': RouteRecordInfo<
+      'master-data-permit-category-apd-detail-apd-edit',
+      '/master-data/permit-category-apd/:permitCategoryApdId/detail/apd/:permitApdId/edit',
+      { permitCategoryApdId: ParamValue<true>, permitApdId: ParamValue<true> },
+      { permitCategoryApdId: ParamValue<false>, permitApdId: ParamValue<false> },
+      | never
+    >,
+    'master-data-permit-category-apd-detail-apd-create': RouteRecordInfo<
+      'master-data-permit-category-apd-detail-apd-create',
+      '/master-data/permit-category-apd/:permitCategoryApdId/detail/apd/create',
+      { permitCategoryApdId: ParamValue<true> },
+      { permitCategoryApdId: ParamValue<false> },
+      | never
+    >,
+    'master-data-permit-category-apd-edit': RouteRecordInfo<
+      'master-data-permit-category-apd-edit',
+      '/master-data/permit-category-apd/:permitCategoryApdId/edit',
+      { permitCategoryApdId: ParamValue<true> },
+      { permitCategoryApdId: ParamValue<false> },
+      | never
+    >,
+    'master-data-permit-category-apd-create': RouteRecordInfo<
+      'master-data-permit-category-apd-create',
+      '/master-data/permit-category-apd/create',
+      Record<never, never>,
+      Record<never, never>,
       | never
     >,
     'master-data-permit-danger-source': RouteRecordInfo<
@@ -310,6 +425,34 @@ declare module 'vue-router/auto-routes' {
     'master-data-root-causes-create': RouteRecordInfo<
       'master-data-root-causes-create',
       '/master-data/root-causes/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-safety-checklist': RouteRecordInfo<
+      'master-data-safety-checklist',
+      '/master-data/safety-checklist',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-safety-checklist-detail': RouteRecordInfo<
+      'master-data-safety-checklist-detail',
+      '/master-data/safety-checklist/:safetyChecklistId/detail',
+      { safetyChecklistId: ParamValue<true> },
+      { safetyChecklistId: ParamValue<false> },
+      | never
+    >,
+    'master-data-safety-checklist-edit': RouteRecordInfo<
+      'master-data-safety-checklist-edit',
+      '/master-data/safety-checklist/:safetyChecklistId/edit',
+      { safetyChecklistId: ParamValue<true> },
+      { safetyChecklistId: ParamValue<false> },
+      | never
+    >,
+    'master-data-safety-checklist-create': RouteRecordInfo<
+      'master-data-safety-checklist-create',
+      '/master-data/safety-checklist/create',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -592,12 +735,28 @@ declare module 'vue-router/auto-routes' {
         | 'master-data-divisions-create'
         | 'master-data-divisions-detail'
         | 'master-data-divisions-edit'
+        | 'master-data-emergency-simulation-topics'
+        | 'master-data-emergency-simulation-topics-create'
+        | 'master-data-emergency-simulation-topics-detail'
+        | 'master-data-emergency-simulation-topics-edit'
         | 'master-data-number-configs'
         | 'master-data-number-configs-create'
         | 'master-data-number-configs-detail'
         | 'master-data-number-configs-edit'
         | 'master-data-number-variables'
         | 'master-data-number-variables-detail'
+        | 'master-data-permit-attachment'
+        | 'master-data-permit-attachment-create'
+        | 'master-data-permit-attachment-detail'
+        | 'master-data-permit-attachment-edit'
+        | 'master-data-permit-category-apd'
+        | 'master-data-permit-category-apd-create'
+        | 'master-data-permit-category-apd-detail'
+        | 'master-data-permit-category-apd-detail-apd'
+        | 'master-data-permit-category-apd-detail-apd-create'
+        | 'master-data-permit-category-apd-detail-apd-detail'
+        | 'master-data-permit-category-apd-detail-apd-edit'
+        | 'master-data-permit-category-apd-edit'
         | 'master-data-permit-danger-source'
         | 'master-data-permit-danger-source-create'
         | 'master-data-permit-danger-source-detail'
@@ -622,6 +781,10 @@ declare module 'vue-router/auto-routes' {
         | 'master-data-root-causes-create'
         | 'master-data-root-causes-detail'
         | 'master-data-root-causes-edit'
+        | 'master-data-safety-checklist'
+        | 'master-data-safety-checklist-create'
+        | 'master-data-safety-checklist-detail'
+        | 'master-data-safety-checklist-edit'
         | 'master-data-uoms'
         | 'master-data-uoms-create'
         | 'master-data-uoms-detail'
@@ -739,6 +902,38 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
+    'src/routes/(authenticated)/master-data/emergency-simulation-topics/index.route.vue': {
+      routes:
+        | 'master-data-emergency-simulation-topics'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/emergency-simulation-topics/[emergencySimulationTopicId]/detail.route.vue': {
+      routes:
+        | 'master-data-emergency-simulation-topics-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/emergency-simulation-topics/[emergencySimulationTopicId]/edit.route.vue': {
+      routes:
+        | 'master-data-emergency-simulation-topics-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/emergency-simulation-topics/create.route.vue': {
+      routes:
+        | 'master-data-emergency-simulation-topics-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
     'src/routes/(authenticated)/master-data/number-configs/index.route.vue': {
       routes:
         | 'master-data-number-configs'
@@ -782,6 +977,106 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/master-data/number-variables/[numberVariableId]/detail.route.vue': {
       routes:
         | 'master-data-number-variables-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/permit-attachment/index.route.vue': {
+      routes:
+        | 'master-data-permit-attachment'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/permit-attachment/[permitAttachmentId]/detail.route.vue': {
+      routes:
+        | 'master-data-permit-attachment-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/permit-attachment/[permitAttachmentId]/edit.route.vue': {
+      routes:
+        | 'master-data-permit-attachment-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/permit-attachment/create.route.vue': {
+      routes:
+        | 'master-data-permit-attachment-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/permit-category-apd/index.route.vue': {
+      routes:
+        | 'master-data-permit-category-apd'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/permit-category-apd/[permitCategoryApdId]/detail.route.vue': {
+      routes:
+        | 'master-data-permit-category-apd-detail'
+        | 'master-data-permit-category-apd-detail-apd'
+        | 'master-data-permit-category-apd-detail-apd-create'
+        | 'master-data-permit-category-apd-detail-apd-detail'
+        | 'master-data-permit-category-apd-detail-apd-edit'
+      views:
+        | 'default'
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/permit-category-apd/[permitCategoryApdId]/detail/apd/index.route.vue': {
+      routes:
+        | 'master-data-permit-category-apd-detail-apd'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/permit-category-apd/[permitCategoryApdId]/detail/apd/[permitApdId]/detail.route.vue': {
+      routes:
+        | 'master-data-permit-category-apd-detail-apd-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/permit-category-apd/[permitCategoryApdId]/detail/apd/[permitApdId]/edit.route.vue': {
+      routes:
+        | 'master-data-permit-category-apd-detail-apd-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/permit-category-apd/[permitCategoryApdId]/detail/apd/create.route.vue': {
+      routes:
+        | 'master-data-permit-category-apd-detail-apd-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/permit-category-apd/[permitCategoryApdId]/edit.route.vue': {
+      routes:
+        | 'master-data-permit-category-apd-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/permit-category-apd/create.route.vue': {
+      routes:
+        | 'master-data-permit-category-apd-create'
       views:
         | never
       pathParamNames:
@@ -978,6 +1273,38 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/master-data/root-causes/create.route.vue': {
       routes:
         | 'master-data-root-causes-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/safety-checklist/index.route.vue': {
+      routes:
+        | 'master-data-safety-checklist'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/safety-checklist/[safetyChecklistId]/detail.route.vue': {
+      routes:
+        | 'master-data-safety-checklist-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/safety-checklist/[safetyChecklistId]/edit.route.vue': {
+      routes:
+        | 'master-data-safety-checklist-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/safety-checklist/create.route.vue': {
+      routes:
+        | 'master-data-safety-checklist-create'
       views:
         | never
       pathParamNames:

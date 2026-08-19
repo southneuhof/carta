@@ -44,6 +44,12 @@ import { domain as inspectionTestPlansDomain, inspectionTestPlansModel } from ".
 import { domain as qualityInspectionDomain, qualityInspectionModel } from "./quality-inspection/quality-inspection";
 import { domain as permitWorkTypesDomain, permitWorkTypeModel } from "./permit-work-types/permit-work-types";
 import { domain as permitDangerSourceDomain, permitDangerSourceModel } from "./permit-danger-source/permit-danger-source";
+import { domain as permitAttachmentDomain, permitAttachmentModel } from "./permit-attachment/permit-attachment";
+import { domain as safetyChecklistDomain, safetyChecklistModel } from "./safety-checklist/safety-checklist";
+import { domain as permitCategoryApdDomain, permitCategoryApdModel } from "./permit-category-apd/permit-category-apd";
+import { domain as permitApdDomain, permitApdModel } from "./permit-apd/permit-apd";
+
+import { emergencySimulationTopicModel, domain as emergencySimulationTopicsDomain } from "./emergency-simulation-topics/emergency-simulation-topics";
 
 export const domainParts = [
   authDomain,
@@ -65,6 +71,11 @@ export const domainParts = [
   qualityInspectionDomain,
   permitWorkTypesDomain,
   permitDangerSourceDomain,
+  permitAttachmentDomain,
+  safetyChecklistDomain,
+  permitCategoryApdDomain,
+  permitApdDomain,
+  emergencySimulationTopicsDomain,
 ] as const;
 
 const installedRoutes = [
@@ -108,6 +119,11 @@ const installedRoutes = [
   qualityInspectionModel,
   permitWorkTypeModel,
   permitDangerSourceModel,
+  permitAttachmentModel,
+  safetyChecklistModel,
+  permitCategoryApdModel,
+  permitApdModel,
+  emergencySimulationTopicModel,
 ] as const;
 
 // Public like /health; attach authenticated() here if the document should require a session.

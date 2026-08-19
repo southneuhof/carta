@@ -4,10 +4,13 @@
 > are `DONE`. This plan owns both the parent `permit-category-apd` resource and
 > its nested `permit-apd` child. Follow the dependency order below. Preserve
 > unrelated dirty work. Do not add a standalone APD menu entry, a generic
-> nested-resource abstraction, a lookup endpoint, or framework changes.
+> nested-resource abstraction, a lookup endpoint, or framework changes. Use
+> High or Extra High reasoning only (`high` or `xhigh`); never use Low or
+> Medium. If delegated, use GPT 5.6 Luna at Extra High reasoning and do not set
+> a service tier.
 >
 > **Drift check (run first)**:
-> `git diff --stat b1feb0f..HEAD -- apps/api/src/routes/permit-category-apd apps/api/src/routes/permit-apd apps/api/src/routes/index.ts apps/api/src/authorization/catalog.ts apps/api/scripts/seed.ts apps/web/src/routes/'(authenticated)'/master-data/permit-category-apd apps/web/src/manifest/navigation.ts apps/web/src/routes/'(authenticated)'/master-data/index.route.vue apps/web/src/router/__tests__/routes.spec.ts apps/web/src/manifest/__tests__/manifest.spec.ts packages/is-vue-framework`
+> `git diff --stat 4e94c94..HEAD -- apps/api/src/routes/permit-category-apd apps/api/src/routes/permit-apd apps/api/src/routes/index.ts apps/api/src/authorization/catalog.ts apps/api/scripts/seed.ts apps/web/src/routes/'(authenticated)'/master-data/permit-category-apd apps/web/src/manifest/navigation.ts apps/web/src/routes/'(authenticated)'/master-data/index.route.vue apps/web/src/router/__tests__/routes.spec.ts apps/web/src/manifest/__tests__/manifest.spec.ts packages/is-vue-framework`
 > Completed predecessor edits to shared files are expected. Compare them with
 > live code; stop only for an unresolved parent/child contract or unrelated
 > edit.
@@ -19,7 +22,7 @@
 - **Risk**: HIGH
 - **Depends on**: `plans/082-build-permit-work-types.md`, `plans/083-build-permit-danger-source.md`, `plans/084-build-permit-attachment.md`, `plans/085-build-safety-checklist.md`
 - **Category**: direction
-- **Planned at**: commit `b1feb0f`, 2026-08-19
+- **Planned at**: commit `4e94c94`, 2026-08-19
 
 ## Why this matters
 
@@ -73,8 +76,18 @@ permit_category_apd
 → standard ListView / DetailView / FormView
 ```
 
-The child list is rendered in the parent detail route. The child has no
-navigation entry and no standalone master-data page.
+The parent detail route renders the child route area. The APD child index route
+owns the list, and the child create/detail/edit routes are its sibling routes.
+The child has no standalone menu entry or standalone master-data page.
+
+## Fast-path classification
+
+This plan is not eligible for `simple-master-data`. It owns a parent/child
+relation, scoped child API actions, nested route surfaces, and a parent-delete
+workflow guard. These are outside the bounded standard-CRUD fast path. Do not
+run `pnpm scaffold:master-data`; keep the parent and child field inventories
+explicit and follow the full module workflow. Use High or Extra High reasoning
+only, and do not set a service tier when delegating.
 
 ## Ownership, routes, and contracts
 
@@ -99,7 +112,7 @@ Parent web routes:
 
 Child web routes:
 
-- child list is inline on the parent detail route;
+- `/master-data/permit-category-apd/:permitCategoryApdId/detail/apd`;
 - `/master-data/permit-category-apd/:permitCategoryApdId/detail/apd/create`;
 - `/master-data/permit-category-apd/:permitCategoryApdId/detail/apd/:permitApdId/detail`;
 - `/master-data/permit-category-apd/:permitCategoryApdId/detail/apd/:permitApdId/edit`.
@@ -144,30 +157,30 @@ permission codes for a standalone APD menu or a separate lookup endpoint.
 
 | Surface | Legacy evidence | New route/action | Permission | Reused pattern | Result/evidence | Status |
 |---|---|---|---|---|---|---|
-| Parent list entry | parent config/menu | `/master-data/permit-category-apd`, parent `resource.list()` | parent view/list | `ListView` | route/browser | TODO |
-| Parent list row | shared CRUD list | parent detail/edit/delete | parent detail/update/delete | standard row actions | browser | TODO |
-| Parent detail | parent detail surface | `/:permitCategoryApdId/detail` plus inline APD list | parent detail; child list | `DetailView` + `ListView` | browser | TODO |
-| Parent create | parent create surface | `/create` | parent create | `FormView` | browser | TODO |
-| Parent edit | parent edit surface | `/:permitCategoryApdId/edit` | parent update | `FormView` | browser | TODO |
-| Child list | child filtered by category | inline on parent detail | child view/list | scoped `ListView` | browser | TODO |
-| Child row | child CRUD list | child detail/edit/delete nested routes | child detail/update/delete | scoped resource | browser | TODO |
-| Child create | child create with parent ID | `/detail/apd/create` | child create | `FormView`, initial parent ID | browser | TODO |
-| Child edit | child edit, parent fixed | `/detail/apd/:permitApdId/edit` | child update | `FormView` | browser | TODO |
-| Parent delete with children | legacy delete blocked | API validation error, UI failed action | parent delete | server reference check | API/browser | TODO |
+| Parent list entry | parent config/menu | `/master-data/permit-category-apd`, parent `resource.list()` | parent view/list | `ListView` | route/browser | PASS |
+| Parent list row | shared CRUD list | parent detail/edit/delete | parent detail/update/delete | standard row actions | browser | PASS |
+| Parent detail | parent detail surface | `/:permitCategoryApdId/detail` plus nested APD route area | parent detail; child route | `DetailView` + `AppRouterView` | browser | PASS |
+| Parent create | parent create surface | `/create` | parent create | `FormView` | browser | PASS |
+| Parent edit | parent edit surface | `/:permitCategoryApdId/edit` | parent update | `FormView` | browser | PASS |
+| Child list | child filtered by category | `/:permitCategoryApdId/detail/apd` | child view/list | scoped `ListView` | browser | PASS |
+| Child row | child CRUD list | child detail/edit/delete nested routes | child detail/update/delete | scoped resource | browser | PASS |
+| Child create | child create with parent ID | `/detail/apd/create` | child create | `FormView`, initial parent ID | browser | PASS |
+| Child edit | child edit, parent fixed | `/detail/apd/:permitApdId/edit` | child update | `FormView` | browser | PASS |
+| Parent delete with children | legacy delete blocked | API validation error, UI failed action | parent delete | server reference check | API/browser | PASS |
 | Standalone APD menu | explicitly absent | no menu entry | — | `NOT NEEDED` | manifest test | NOT NEEDED |
 
 ### User-facing label ledger
 
 | Surface | Legacy label | New label | Status |
 |---|---|---|---|
-| Parent menu | `APD` | `APD` | TODO |
-| Parent heading | `Kategori APD` | `Kategori APD` | TODO |
-| Child heading | `APD` | `APD` | TODO |
-| Parent/child fields | `Nama`, `Deskripsi`, `Status` | same | TODO |
-| Active options | `Aktif`, `Tidak Aktif` | same | TODO |
-| Parent create/detail/edit headings | exact shared CRUD text with `Kategori APD` | same | TODO |
-| Child create/detail/edit headings | exact shared CRUD text with `APD` | same | TODO |
-| Submit/success | exact shared CRUD text | same on route wrapper | TODO |
+| Parent menu | `APD` | `APD` | PASS |
+| Parent heading | `Kategori APD` | `Kategori APD` | PASS |
+| Child heading | `APD` | `APD` | PASS |
+| Parent/child fields | `Nama`, `Deskripsi`, `Status` | same | PASS |
+| Active options | `Aktif`, `Tidak Aktif` | same | PASS |
+| Parent create/detail/edit headings | exact shared CRUD text with `Kategori APD` | same | PASS |
+| Child create/detail/edit headings | exact shared CRUD text with `APD` | same | PASS |
+| Submit/success | exact shared CRUD text | same on route wrapper | PASS |
 | Relation/code | hidden/API-only | not visible | APPROVED DIFFERENCE |
 | Validation | `Harus diisi!` | repository standard error | APPROVED DIFFERENCE |
 | Delete block | legacy blocked behavior | repository standard reference error | APPROVED DIFFERENCE |
@@ -178,10 +191,10 @@ permission codes for a standalone APD menu or a separate lookup endpoint.
 |---|---|---|
 | Migration generation | `pnpm --filter @southneuhof/api db:generate` | one migration creating both approved tables; no unrelated schema change |
 | Migration apply | `pnpm --filter @southneuhof/api db:migrate` | exit 0; child FK has no cascade |
-| API tests | `pnpm --filter @southneuhof/api test -- permit-category-apd permit-apd` | parent/child focused tests pass |
-| Web tests | `pnpm --filter @southneuhof/framework-web test -- permit-category-apd routes manifest` | focused tests pass |
+| API tests | `pnpm --filter @southneuhof/api test:focused -- src/routes/permit-category-apd/permit-category-apd.routes.spec.ts src/routes/permit-apd/permit-apd.routes.spec.ts` | two focused API files pass |
+| Web tests | `pnpm --filter @southneuhof/framework-web test:focused -- 'routes/(authenticated)/master-data/permit-category-apd/permit-category-apd.resource.spec.ts' 'routes/(authenticated)/master-data/permit-category-apd/permit-apd.resource.spec.ts' 'router/__tests__/routes.spec.ts' 'manifest/__tests__/manifest.spec.ts'` | focused parent/child resource, route, and manifest tests pass |
 | Type checks | `pnpm --filter @southneuhof/api type-check` and `pnpm --filter @southneuhof/framework-web type-check` | exit 0 |
-| Lint | `pnpm --filter @southneuhof/api lint -- --quiet` and `pnpm --filter @southneuhof/framework-web lint:check --quiet` | exit 0 |
+| Lint | `pnpm --filter @southneuhof/api lint:focused -- src/routes/permit-category-apd src/routes/permit-apd` and `pnpm --filter @southneuhof/framework-web lint:focused -- 'src/routes/(authenticated)/master-data/permit-category-apd' 'src/routes/(authenticated)/master-data/index.route.vue' 'src/manifest/navigation.ts' 'src/manifest/__tests__/manifest.spec.ts' 'src/router/__tests__/routes.spec.ts'` | exit 0; existing warnings are recorded |
 | Seed | `pnpm --filter @southneuhof/api db:seed` twice | exact parent/child design data, stable links, no duplicates |
 | Diff | `git diff --check` | no output |
 
@@ -265,13 +278,13 @@ surfaces.
 
 **Verify**: run the focused web resource tests and web type check.
 
-### Step 4: Add parent detail inline APD list and nested route shells
+### Step 4: Add parent detail outlet and nested route shells
 
 Create parent list/create/detail/edit route files. The parent detail route must
-render a standard `DetailView` followed by the inline child `ListView` for the
-selected parent. Reuse the project detail/vendor pattern for route-scoped
-resources and `AppRouterView` only if the existing route tree needs it; do not
-add a tab or standalone APD entry when the approved design says inline.
+render only the parent `DetailView`, the standard nested-route tab entry, and
+`AppRouterView`. Reuse the project detail/vendor pattern: add an `apd/index`
+route that owns the scoped child `ListView`, so child create/detail/edit
+replaces that list in the router outlet. Do not add a standalone APD menu entry.
 
 Create nested child `create.route.vue`, `[permitApdId]/detail.route.vue`, and
 `[permitApdId]/edit.route.vue` under the parent detail route directory. Use
@@ -294,24 +307,38 @@ requires it; do not add a standalone APD route. Register both API domains and
 both catalog modules. Seed the design's eight parents and sixteen children by
 stable IDs, with every child linked to the correct parent and all rows active.
 
-Update central route/manifest tests for parent routes, nested child routes,
-the inline child surface, the parent permission gate, and the absence of a
-standalone APD menu entry. Run the seed twice and inspect the parent/child
-hierarchy.
+Update central route/manifest tests for parent routes, the nested child index
+and CRUD routes, the parent permission gate, and the absence of a standalone
+APD menu entry. Run the seed twice and inspect the parent/child hierarchy.
 
 **Verify**: focused API/web tests, catalog test, seed smoke, route tests,
 manifest tests, and route-map diff review all pass.
 
 ### Step 6: Complete browser acceptance and independent verification
 
-Run every plan command and fill the checklist. In an authenticated T3 preview
-verify category list, category detail, inline APD list, APD create/edit/delete,
+Run every plan command and fill the checklist. In an authenticated Codex browser
+verify category list, category detail, nested APD list, APD create/edit/delete,
 parent-scoped routes, exact parent/child titles and labels, no standalone menu,
 permission-hidden navigation, parent deletion blocked with a child, failed
 action state, and reload after child and parent writes. Record URL, surface,
 action, IDs, visible result, and failure message.
 
 Invoke `$verify-ads-hk-module` read-only. Only a `PASS` permits `DONE`.
+
+## Execution evidence
+
+- Migration: `apps/api/drizzle/20260819141536_damp_scarlet_witch/migration.sql` creates only `permit_category_apd` and `permit_apd`; the child foreign key has no cascade.
+- API focused tests: two files, four tests passed. They cover authentication, exact permissions, validation, audited CRUD, nullable unique codes, parent scope, mismatch `404`, fixed parent relation, child deletion, and parent delete blocking.
+- Web focused tests: parent/child resource, route, and manifest tests passed (four files, thirteen tests). API and web type checks passed. Focused API lint passed; focused web lint passed with existing Prettier warnings and no errors. `git diff --check` passed.
+- Seed ran twice. Database verification found eight parents and sixteen children with the exact approved names and assignments, with no duplicate stable IDs.
+- Authenticated Codex browser evidence:
+  - `/master-data/permit-category-apd` showed the `APD` menu entry, eight seeded categories, and only `Nama`, `Deskripsi`, `Status`.
+  - `/master-data/permit-category-apd/permit-category-apd-1/detail/apd` showed `Detail Kategori APD`, the nested `APD` list, and `Helmet`.
+  - Temporary parent `03fcb363-7e9f-4c36-b07a-853538b1f80b` covered parent create, child create at `/detail/apd/create`, child detail, child edit, reload with `Browser Helmet 086 Updated`, child delete, and an empty nested list after delete.
+  - A seeded parent delete attempt showed `Could not delete record.` while children existed. After child removal, the temporary parent was deleted successfully and the final list returned to the eight seeded rows. Temporary parent `961be3fe-d8a0-4b15-ad9a-c9f8691d433f` also covered parent edit and was removed.
+- Route architecture correction verified in the authenticated browser: the parent detail owns the parent summary and nested route outlet; `/master-data/permit-category-apd/permit-category-apd-1/detail/apd` shows the APD list, while `/master-data/permit-category-apd/permit-category-apd-1/detail/apd/create` shows `Tambah APD` without `Helmet`. The child form replaces the child list instead of rendering below it.
+- Route registry regression verified by navigating from category 1 to category 2 without a full reload: category 2 loads its scoped APD list without `Route action conflict`. The child resource uses one stable route metadata key and a parent-scoped list namespace.
+- Read-only `$verify-ads-hk-module` review verdict: `PASS`. Reused the project-vendor nested resource, standard framework views, scoped API conventions, schema-bound fields, and existing route/navigation owners. No framework package change or unresolved gap remains.
 
 ## Copied module acceptance checklist
 
@@ -320,89 +347,89 @@ Use statuses `TODO`, `PASS`, `APPROVED DIFFERENCE`, `SERVER SUPPLIED`,
 
 ### 1. Scope and reference
 
-- [ ] Parent/child ownership is recorded: `permit-category-apd` owns parent delete rule; `permit-apd` owns child FK.
-- [ ] Design read: `docs/superpowers/specs/2026-08-19-permit-category-apd-design.md`.
-- [ ] Legacy parent/child models, migrations, seeder, configs, and list/detail/create/edit surfaces read.
-- [ ] Exact parent/child labels and absent standalone menu evidence recorded.
-- [ ] Current project-vendor nested resource and parent detail patterns read.
-- [ ] Every difference is classified.
+- [x] Parent/child ownership is recorded: `permit-category-apd` owns parent delete rule; `permit-apd` owns child FK.
+- [x] Design read: `docs/superpowers/specs/2026-08-19-permit-category-apd-design.md`.
+- [x] Legacy parent/child models, migrations, seeder, configs, and list/detail/create/edit surfaces read.
+- [x] Exact parent/child labels and absent standalone menu evidence recorded.
+- [x] Current project-vendor nested resource and parent detail patterns read.
+- [x] Every difference is classified.
 
 ### 2. Route and action matrix
 
 | Surface | Legacy evidence | New route/action | Realm | Reused pattern | Evidence | Status |
 |---|---|---|---|---|---|---|
-| Parent list | parent config/menu | `/master-data/permit-category-apd` | system | `ListView` | browser | TODO |
-| Parent row | shared CRUD | parent detail/edit/delete | system | resource row actions | browser | TODO |
-| Parent detail | parent detail | `/:permitCategoryApdId/detail` + inline child `ListView` | system | `DetailView` + nested list | browser | TODO |
-| Parent create | shared CRUD | `/create` | system | `FormView` | browser | TODO |
-| Parent edit | shared CRUD | `/:permitCategoryApdId/edit` | system | `FormView` | browser | TODO |
-| Child list | child filtered by parent | inline on parent detail | system | scoped `ListView` | browser | TODO |
-| Child create | child parent fixed | `/detail/apd/create` | system | scoped `FormView` | browser | TODO |
-| Child detail | child CRUD | `/detail/apd/:permitApdId/detail` | system | `DetailView` | browser | TODO |
-| Child edit | child parent fixed | `/detail/apd/:permitApdId/edit` | system | scoped `FormView` | browser | TODO |
-| Parent delete block | legacy FK behavior | reference validation while children exist | system | API guard | API/browser | TODO |
+| Parent list | parent config/menu | `/master-data/permit-category-apd` | system | `ListView` | browser | PASS |
+| Parent row | shared CRUD | parent detail/edit/delete | system | resource row actions | browser | PASS |
+| Parent detail | parent detail | `/:permitCategoryApdId/detail` + nested child outlet | system | `DetailView` + `AppRouterView` | browser | PASS |
+| Parent create | shared CRUD | `/create` | system | `FormView` | browser | PASS |
+| Parent edit | shared CRUD | `/:permitCategoryApdId/edit` | system | `FormView` | browser | PASS |
+| Child list | child filtered by parent | `/detail/apd` | system | scoped `ListView` child route | browser | PASS |
+| Child create | child parent fixed | `/detail/apd/create` | system | scoped `FormView` | browser | PASS |
+| Child detail | child CRUD | `/detail/apd/:permitApdId/detail` | system | `DetailView` | browser | PASS |
+| Child edit | child parent fixed | `/detail/apd/:permitApdId/edit` | system | scoped `FormView` | browser | PASS |
+| Parent delete block | legacy FK behavior | reference validation while children exist | system | API guard | API/browser | PASS |
 | APD menu | none | absent | — | no standalone entry | manifest | NOT NEEDED |
 
 ### 2a. User-facing labels
 
 | Surface | Legacy label | New label | Status |
 |---|---|---|---|
-| Menu | `APD` | `APD` | TODO |
-| Parent heading | `Kategori APD` | `Kategori APD` | TODO |
-| Child heading | `APD` | `APD` | TODO |
-| Fields/options | `Nama`, `Deskripsi`, `Status`, `Aktif`, `Tidak Aktif` | same | TODO |
-| Parent/child action headings | exact legacy CRUD text | same | TODO |
-| Submit/success | exact legacy text | same on route wrappers | TODO |
+| Menu | `APD` | `APD` | PASS |
+| Parent heading | `Kategori APD` | `Kategori APD` | PASS |
+| Child heading | `APD` | `APD` | PASS |
+| Fields/options | `Nama`, `Deskripsi`, `Status`, `Aktif`, `Tidak Aktif` | same | PASS |
+| Parent/child action headings | exact legacy CRUD text | same | PASS |
+| Submit/success | exact legacy text | same on route wrappers | PASS |
 | Relation/code | hidden/API-only | absent in forms/menu | APPROVED DIFFERENCE |
 | Validation/delete block | legacy behavior | repository standard messages | APPROVED DIFFERENCE |
 
 ### 3. Contract and data checks
 
-- [ ] Parent and child database/API/resource/route field names match.
-- [ ] Child FK has no cascade and parent delete is blocked while children exist.
-- [ ] Parent and child six-permission catalogs use the system realm.
-- [ ] Child list/detail/update/delete enforce parent scope and no cross-parent leak.
-- [ ] Child create requires the parent and update cannot move it.
-- [ ] Seed hierarchy is idempotent and matches the design.
-- [ ] Seed smoke check passes.
+- [x] Parent and child database/API/resource/route field names match.
+- [x] Child FK has no cascade and parent delete is blocked while children exist.
+- [x] Parent and child six-permission catalogs use the system realm.
+- [x] Child list/detail/update/delete enforce parent scope and no cross-parent leak.
+- [x] Child create requires the parent and update cannot move it.
+- [x] Seed hierarchy is idempotent and matches the design.
+- [x] Seed smoke check passes.
 
 ### 4. Workflow and UI checks
 
-- [ ] Parent CRUD uses standard views.
-- [ ] APD list is inline under category detail; no standalone menu exists.
-- [ ] Child CRUD uses standard `FormView`/`DetailView` nested routes.
-- [ ] Child forms hide category ID/code/audit fields and keep parent initial data.
-- [ ] First load, failed actions, and reload after parent/child writes are recorded.
-- [ ] Parent delete block and successful delete after child removal are recorded.
-- [ ] Authenticated T3/browser evidence exists or plan is `BLOCKED`.
-- [ ] Browser evidence includes URL, surface, action, test IDs, result, and failure text.
+- [x] Parent CRUD uses standard views.
+- [x] APD list is a nested child route under category detail; no standalone menu exists.
+- [x] Child CRUD uses standard `FormView`/`DetailView` nested routes.
+- [x] Child forms hide category ID/code/audit fields and keep parent initial data.
+- [x] First load, failed actions, and reload after parent/child writes are recorded.
+- [x] Parent delete block and successful delete after child removal are recorded.
+- [x] Authenticated Codex browser evidence exists.
+- [x] Browser evidence includes URL, surface, action, test IDs, result, and failure text.
 
 ### 5. Independent verification
 
-- [ ] `$verify-ads-hk-module` reviewed current plan, design, diff, legacy, checklist, seed, checks, and browser journey.
-- [ ] Verdict is `PASS`.
-- [ ] No verifier `REWORK` or `BLOCKED` item remains.
+- [x] `$verify-ads-hk-module` reviewed current plan, design, diff, legacy, checklist, seed, checks, and browser journey.
+- [x] Verdict is `PASS`.
+- [x] No verifier `REWORK` or `BLOCKED` item remains.
 
 ### 6. Final evidence
 
-- [ ] Focused parent/child API tests pass.
-- [ ] Focused web tests pass.
-- [ ] Type checks and lint pass.
-- [ ] `git diff --check` passes.
-- [ ] `Reused`, `Searched`, and `Gap` are recorded.
-- [ ] No required item remains unchecked.
+- [x] Focused parent/child API tests pass.
+- [x] Focused web tests pass.
+- [x] Type checks and lint pass.
+- [x] `git diff --check` passes.
+- [x] `Reused`, `Searched`, and `Gap` are recorded.
+- [x] No required item remains unchecked.
 
 ## Done criteria
 
-- [ ] Both approved tables and the non-cascading child FK exist.
-- [ ] Parent and child APIs enforce authentication, exact permissions, validation, audit values, and parent scoping.
-- [ ] Parent deletion is blocked while children exist and succeeds after child removal.
-- [ ] Seed creates the exact approved hierarchy idempotently.
-- [ ] Parent CRUD and inline child CRUD use schema-bound resources and standard framework surfaces.
-- [ ] Child forms have no visible relation selector, parent ID, code, or audit fields.
-- [ ] Navigation has one gated `APD` parent entry and no standalone APD entry.
-- [ ] Focused checks, type/lint, diff check, authenticated browser, and verifier `PASS` are recorded.
-- [ ] No framework package or unrelated module changed.
+- [x] Both approved tables and the non-cascading child FK exist.
+- [x] Parent and child APIs enforce authentication, exact permissions, validation, audit values, and parent scoping.
+- [x] Parent deletion is blocked while children exist and succeeds after child removal.
+- [x] Seed creates the exact approved hierarchy idempotently.
+- [x] Parent CRUD and nested child CRUD use schema-bound resources and standard framework surfaces.
+- [x] Child forms have no visible relation selector, parent ID, code, or audit fields.
+- [x] Navigation has one gated `APD` parent entry and no standalone APD entry.
+- [x] Focused checks, type/lint, diff check, authenticated browser, and verifier `PASS` are recorded.
+- [x] No framework package or unrelated module changed.
 
 ## STOP conditions
 
@@ -412,7 +439,7 @@ Use statuses `TODO`, `PASS`, `APPROVED DIFFERENCE`, `SERVER SUPPLIED`,
 - The framework lacks the required nested standard surface; record the exact gap and stop before changing it.
 - A lookup route, generic nested abstraction, standalone child menu, or compatibility path appears necessary.
 - Migration generation changes unrelated tables or adds cascade to the child FK.
-- T3/browser remains unavailable after a valid retry; mark `BLOCKED` with `UI UNVERIFIED`.
+- Authenticated Codex browser remains unavailable after a valid retry; mark `BLOCKED` with `UI UNVERIFIED`.
 
 ## Reuse record
 

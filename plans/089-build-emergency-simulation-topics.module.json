@@ -1,0 +1,64 @@
+{
+  "kind": "simple-master-data",
+  "slug": "emergency-simulation-topics",
+  "table": "emergency_simulation_topics",
+  "symbol": "EmergencySimulationTopic",
+  "title": "Topik Simulasi Tanggap Darurat",
+  "identity": {
+    "key": "id",
+    "type": "text",
+    "primary": true,
+    "generated": "uuid"
+  },
+  "fields": [
+    {
+      "key": "name",
+      "type": "text",
+      "label": "Nama",
+      "required": true,
+      "renderer": "text"
+    }
+  ],
+  "serverFields": [
+    { "key": "code", "type": "text" },
+    { "key": "description", "type": "text" },
+    { "key": "active", "type": "boolean", "default": true }
+  ],
+  "labels": {
+    "listTitle": "Topik Simulasi Tanggap Darurat",
+    "detailTitle": "Detail Topik Simulasi Tanggap Darurat",
+    "createTitle": "Tambah Topik Simulasi Tanggap Darurat",
+    "editTitle": "Ubah Topik Simulasi Tanggap Darurat",
+    "submitLabel": "Submit",
+    "createSuccessMessage": "Berhasil menambahkan data!",
+    "updateSuccessMessage": "Berhasil mengubah data!"
+  },
+  "permissions": {
+    "moduleName": "Emergency Simulation Topics",
+    "realm": "system",
+    "entries": {
+      "view": { "name": "View Emergency Simulation Topics", "description": "View emergency simulation topics." },
+      "list": { "name": "List Emergency Simulation Topics", "description": "List emergency simulation topics." },
+      "detail": { "name": "Detail Emergency Simulation Topics", "description": "View an emergency simulation topic." },
+      "create": { "name": "Create Emergency Simulation Topics", "description": "Create emergency simulation topics." },
+      "update": { "name": "Update Emergency Simulation Topics", "description": "Update emergency simulation topics." },
+      "delete": { "name": "Delete Emergency Simulation Topics", "description": "Delete emergency simulation topics." }
+    }
+  },
+  "navigation": {
+    "after": "master-data-number-configs",
+    "title": "Topik Simulasi Tanggap Darurat",
+    "icon": "folder",
+    "separator": "Emergency Simulation"
+  },
+  "seed": {
+    "records": [
+      { "id": "emergency-simulation-topic-1", "name": "Spill Drill" },
+      { "id": "emergency-simulation-topic-2", "name": "Medivac" },
+      { "id": "emergency-simulation-topic-3", "name": "Huru Hara" },
+      { "id": "emergency-simulation-topic-4", "name": "Fire" },
+      { "id": "emergency-simulation-topic-5", "name": "Mustering Drill" }
+    ],
+    "updateFields": ["name"]
+  }
+}

@@ -11,6 +11,10 @@ import { ptsWorkCategories } from '../src/routes/pts-work-categories/pts-work-ca
 import { rootCauses } from '../src/routes/root-causes/root-causes.entity'
 import { permitWorkTypes } from '../src/routes/permit-work-types/permit-work-types.entity'
 import { permitDangerSources } from '../src/routes/permit-danger-source/permit-danger-source.entity'
+import { permitAttachments } from '../src/routes/permit-attachment/permit-attachment.entity'
+import { safetyChecklists } from '../src/routes/safety-checklist/safety-checklist.entity'
+import { permitCategoryApds } from '../src/routes/permit-category-apd/permit-category-apd.entity'
+import { permitApds } from '../src/routes/permit-apd/permit-apd.entity'
 import { uoms } from '../src/routes/uoms/uoms.entity'
 import { workItems } from '../src/routes/work-items/work-items.entity'
 import { createQualityInspection } from '../src/routes/quality-inspection/quality-inspection.service'
@@ -32,6 +36,8 @@ import {
 } from '../src/routes/roles/roles.entity'
 import { users } from '../src/routes/users/users.entity'
 
+import { seedEmergencySimulationTopic } from '../src/routes/emergency-simulation-topics/emergency-simulation-topics.seed'
+
 const seedEmail = process.env.ADS_HK_ADMIN_EMAIL ?? 'admin@example.com'
 const seedPassword = process.env.ADS_HK_ADMIN_PASSWORD ?? 'demo-password'
 const seededQualityInspectionMarker = 'seed-quality-inspection-default'
@@ -42,6 +48,56 @@ const seededInspectorTypes = [
   { id: 'itp-inspector-type-cons', code: 'CONS', name: 'Konsultan' },
   { id: 'itp-inspector-type-own', code: 'OWN', name: 'Owner' },
   { id: 'itp-inspector-type-auth', code: 'AUTH', name: 'Authority' },
+] as const
+
+const seededSafetyChecklists = [
+  { id: 'safety-checklist-1', name: 'Apakah pekerja memahami pekerjaan yang akan dilakukan ?' },
+  { id: 'safety-checklist-2', name: 'Apakah bahaya pekerjaan sudah dipahami ?' },
+  { id: 'safety-checklist-3', name: 'Apakah tanda peringatan bahaya sudah dipasang ?' },
+  { id: 'safety-checklist-4', name: 'Apakah peralatan sudah diamankan dari sumber bahaya ?' },
+  { id: 'safety-checklist-5', name: 'Apakah peralatan bergerak sudah diisolasi ?' },
+  { id: 'safety-checklist-6', name: 'Apakah peralatan sudah dipasang LOTO ?' },
+  { id: 'safety-checklist-7', name: 'Lakukan pengamanan & pengawasan terhadap  percikan api las ?' },
+  { id: 'safety-checklist-8', name: 'Bahan-bahan yang mudah terbakar, perlu dipindah atau dilindungi ?' },
+  { id: 'safety-checklist-9', name: 'Apakah lubang-lubang disekitar pekerjaan sudah ditutup?' },
+  { id: 'safety-checklist-10', name: 'Amankan area kerja dari tumpahan minyak dan bocoran gas ?' },
+  { id: 'safety-checklist-11', name: 'Apakah ada pekerjaan lain disekitar tempat kerja ?' },
+  { id: 'safety-checklist-12', name: 'Apakah semua peralatan sudah berada pada posisi aman ?' },
+  { id: 'safety-checklist-13', name: 'Apakah peralatan elektrik sudah di grounding ?' },
+  { id: 'safety-checklist-14', name: 'Apakah alat pemadam sudah tersedia ?' },
+  { id: 'safety-checklist-15', name: 'Apakah petugas safety/ fire man stand by di lapangan ?\t' },
+  { id: 'safety-checklist-16', name: 'Apakah penunjuk arah angin tersedia ?' },
+  { id: 'safety-checklist-17', name: 'Apakah diperlukan ijin kerja lain ?' },
+] as const
+
+const seededPermitCategoryApds = [
+  { id: 'permit-category-apd-1', name: 'Kepala' },
+  { id: 'permit-category-apd-2', name: 'Wajah' },
+  { id: 'permit-category-apd-3', name: 'Pernafasan' },
+  { id: 'permit-category-apd-4', name: 'Telinga' },
+  { id: 'permit-category-apd-5', name: 'Tangan' },
+  { id: 'permit-category-apd-6', name: 'Badan' },
+  { id: 'permit-category-apd-7', name: 'Kaki' },
+  { id: 'permit-category-apd-8', name: 'Pada ketinggian' },
+] as const
+
+const seededPermitApds = [
+  { id: 'permit-apd-1', permitCategoryApdId: 'permit-category-apd-1', name: 'Helmet' },
+  { id: 'permit-apd-2', permitCategoryApdId: 'permit-category-apd-2', name: 'Face Shield' },
+  { id: 'permit-apd-3', permitCategoryApdId: 'permit-category-apd-2', name: 'Safety Glass' },
+  { id: 'permit-apd-4', permitCategoryApdId: 'permit-category-apd-2', name: 'Safety Googles' },
+  { id: 'permit-apd-5', permitCategoryApdId: 'permit-category-apd-3', name: 'Masker' },
+  { id: 'permit-apd-6', permitCategoryApdId: 'permit-category-apd-3', name: 'Respirator' },
+  { id: 'permit-apd-7', permitCategoryApdId: 'permit-category-apd-3', name: 'SCBA' },
+  { id: 'permit-apd-8', permitCategoryApdId: 'permit-category-apd-4', name: 'Ear Plug' },
+  { id: 'permit-apd-9', permitCategoryApdId: 'permit-category-apd-4', name: 'Ear Muff' },
+  { id: 'permit-apd-10', permitCategoryApdId: 'permit-category-apd-5', name: 'Hand Glove' },
+  { id: 'permit-apd-11', permitCategoryApdId: 'permit-category-apd-6', name: 'Cover All' },
+  { id: 'permit-apd-12', permitCategoryApdId: 'permit-category-apd-6', name: 'Apron' },
+  { id: 'permit-apd-13', permitCategoryApdId: 'permit-category-apd-6', name: 'Work Vest' },
+  { id: 'permit-apd-14', permitCategoryApdId: 'permit-category-apd-7', name: 'Safety Shoes' },
+  { id: 'permit-apd-15', permitCategoryApdId: 'permit-category-apd-7', name: 'Safety Boot' },
+  { id: 'permit-apd-16', permitCategoryApdId: 'permit-category-apd-8', name: 'Full Body Harness' },
 ] as const
 
 const seededInspectionPoints = [
@@ -287,6 +343,7 @@ async function seedQualityInspection(userId: string) {
 
 async function main() {
   await seedAuthorization()
+  await seedEmergencySimulationTopic()
   const db = getDb()
   let admin = (await db.select({ id: users.id }).from(users).where(eq(users.email, seedEmail)).limit(1))[0]
   if (!admin) {
@@ -378,6 +435,49 @@ async function main() {
   ]).onConflictDoUpdate({
     target: permitDangerSources.id,
     set: { name: sql`excluded.name`, active: true },
+  })
+  await db.insert(permitAttachments).values([
+    { id: 'permit-attachment-1', name: 'Checklist Hot Work', code: null, description: null, active: true, permitWorkTypeId: 'permit-work-type-1' },
+    { id: 'permit-attachment-2', name: 'Checklist Electrical', code: null, description: null, active: true, permitWorkTypeId: 'permit-work-type-2' },
+    { id: 'permit-attachment-3', name: 'Checklist Cold Work', code: null, description: null, active: true, permitWorkTypeId: 'permit-work-type-3' },
+    { id: 'permit-attachment-4', name: 'Checklist Demolition', code: null, description: null, active: true, permitWorkTypeId: 'permit-work-type-4' },
+    { id: 'permit-attachment-5', name: 'Checklist Working At Height', code: null, description: null, active: true, permitWorkTypeId: 'permit-work-type-5' },
+    { id: 'permit-attachment-6', name: 'Checklist Confined Space Entry', code: null, description: null, active: true, permitWorkTypeId: 'permit-work-type-6' },
+    { id: 'permit-attachment-7', name: 'Checklist Gas Test', code: null, description: null, active: true, permitWorkTypeId: 'permit-work-type-6' },
+    { id: 'permit-attachment-8', name: 'Checklist Excavation', code: null, description: null, active: true, permitWorkTypeId: 'permit-work-type-8' },
+    { id: 'permit-attachment-9', name: 'Checklist Work Over Water', code: null, description: null, active: true, permitWorkTypeId: 'permit-work-type-8' },
+    { id: 'permit-attachment-10', name: 'Checklist Radiography', code: null, description: null, active: true, permitWorkTypeId: 'permit-work-type-10' },
+    { id: 'permit-attachment-11', name: 'CSA/JSA/AKK', code: null, description: null, active: false, permitWorkTypeId: null },
+    { id: 'permit-attachment-12', name: 'Metode Kerja', code: null, description: null, active: true, permitWorkTypeId: null },
+    { id: 'permit-attachment-13', name: 'Rigging/Lifting Plan', code: null, description: null, active: true, permitWorkTypeId: null },
+    { id: 'permit-attachment-14', name: 'Rescue Plan', code: null, description: null, active: true, permitWorkTypeId: null },
+    { id: 'permit-attachment-15', name: 'MSDS', code: null, description: null, active: true, permitWorkTypeId: null },
+    { id: 'permit-attachment-16', name: 'Checklist Operator/Lisensi', code: null, description: null, active: true, permitWorkTypeId: null },
+    { id: 'permit-attachment-17', name: 'Drawing Area Activity', code: null, description: null, active: true, permitWorkTypeId: null },
+    { id: 'permit-attachment-18', name: 'Shop Drawing', code: null, description: null, active: true, permitWorkTypeId: null },
+    { id: 'permit-attachment-19', name: 'LOTO', code: null, description: null, active: true, permitWorkTypeId: null },
+    { id: 'permit-attachment-20', name: 'Checklist Kerja', code: null, description: null, active: true, permitWorkTypeId: null },
+  ]).onConflictDoUpdate({
+    target: permitAttachments.id,
+    set: {
+      name: sql`excluded.name`,
+      code: sql`excluded.code`,
+      description: sql`excluded.description`,
+      active: sql`excluded.active`,
+      permitWorkTypeId: sql`excluded.permit_work_type_id`,
+    },
+  })
+  await db.insert(safetyChecklists).values(seededSafetyChecklists.map((checklist) => ({ ...checklist, active: true }))).onConflictDoUpdate({
+    target: safetyChecklists.id,
+    set: { name: sql`excluded.name`, active: true },
+  })
+  await db.insert(permitCategoryApds).values(seededPermitCategoryApds.map((category) => ({ ...category, active: true }))).onConflictDoUpdate({
+    target: permitCategoryApds.id,
+    set: { name: sql`excluded.name`, active: true },
+  })
+  await db.insert(permitApds).values(seededPermitApds.map((apd) => ({ ...apd, active: true }))).onConflictDoUpdate({
+    target: permitApds.id,
+    set: { permitCategoryApdId: sql`excluded.permit_category_apd_id`, name: sql`excluded.name`, active: true },
   })
   for (const [id, code] of [
     ['number-variable-number', 'number'],

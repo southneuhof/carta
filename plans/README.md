@@ -34,19 +34,29 @@ Plan 065 browser check. Execute it after 065; it makes both approved entry
 paths usable without widening `/me` or changing framework code.
 
 Plans 082-086 build the five approved legacy-backed Work Permit master-data
-modules. Execute them one at a time in this order: work types, danger source,
-attachment, safety checklist, then category APD with nested APD. Plan 084
-depends on the work-type table for its cascade FK. Each plan requires the
-authenticated browser gate and `$verify-ads-hk-module` `PASS` before the next
-plan starts.
+modules. Execute them one at a time in this order: 082, 083, 087, 088, 084,
+085, then 086. Plan 084 depends on the work-type table for its cascade FK. Plans
+084-086 require the full acceptance checklist, an authenticated Codex browser
+check, and `$verify-ads-hk-module` `PASS` before the next plan starts. Plan 087
+is the bounded simple-master-data setup step. Plan 088 is the manifest-driven
+integration and verification pipeline for future simple modules. Keep Plans 087
+and 088 `DONE` only when their tooling checks, type checks, validator, diff
+check, and scope review pass; they change no user flow, so they do not need a
+new user-flow browser check. Future module plans still require the
+authenticated Codex browser gate.
+
+Plan 089 adds the legacy-backed Emergency Simulation Topics master-data module
+after the manifest pipeline. It is complete only after its focused checks,
+idempotent seed, authenticated browser journey, and independent verifier pass.
 
 ## User-facing completion gate
 
-For every plan that changes `apps/web`, `DONE` requires an authenticated Codex
-browser check of the changed user flow. Automated tests, type
-checks, and source review do not replace this check. If the preview is
-unavailable after a valid retry, mark the plan `BLOCKED` with a UI-unverified
-reason. Do not mark the plan `DONE`.
+For every plan that changes a user-facing `apps/web` flow, `DONE` requires an
+authenticated Codex browser check of the changed user flow. Automated tests,
+type checks, and source review do not replace this check. If the authenticated
+Codex browser is unavailable after a valid retry, mark the plan `BLOCKED` with
+a UI-unverified reason. Do not mark the plan `DONE`. Tooling-only changes under
+`apps/web`, such as Plan 087, do not need a new user-flow browser check.
 
 When legacy is the business reference, the plan must also list its entry paths,
 surfaces, actions, permissions, seed data, and first-load/reload checks.
@@ -121,9 +131,12 @@ surfaces, actions, permissions, seed data, and first-load/reload checks.
 | 081 | Align Quality Inspection language and UI | P1 | M | 079, 080 | DONE |
 | 082 | Implement permit-work-types module | P1 | L | — | DONE |
 | 083 | Implement permit-danger-source module | P1 | L | 082 | DONE |
-| 084 | Implement permit-attachment module | P1 | L | 082, 083 | TODO |
-| 085 | Implement safety-checklist module | P1 | L | 082-084 | TODO |
-| 086 | Implement permit-category-apd and nested permit-apd | P1 | L | 082-085 | TODO |
+| 087 | Add simple master-data scaffold and fast verification workflow | P1 | M | 082, 083 | DONE |
+| 088 | Build the manifest-driven module pipeline | P1 | L | 087 | DONE |
+| 089 | Implement emergency simulation topics | P1 | M | 088 | DONE |
+| 084 | Implement permit-attachment module | P1 | L | 082, 083, 087 | DONE |
+| 085 | Implement safety-checklist module | P1 | L | 082-084 | DONE |
+| 086 | Implement permit-category-apd and nested permit-apd | P1 | L | 082-085 | DONE |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with reason) | DEFERRED (with reason) | REJECTED (with rationale).
 
@@ -197,7 +210,9 @@ flowchart TD
   Q80 --> Q81
   PW82["082 permit-work-types module"]
   PW82 --> PW83["083 permit-danger-source module"]
-  PW83 --> PW84["084 permit-attachment module"]
+  PW83 --> PW87["087 simple master-data scaffold + fast path"]
+  PW87 --> PW88["088 manifest-driven module pipeline"]
+  PW88 --> PW84["084 permit-attachment module"]
   PW84 --> PW85["085 safety-checklist module"]
   PW85 --> PW86["086 permit-category-apd + permit-apd"]
 ```
@@ -288,12 +303,16 @@ DONE.
 Plans 083-086 are single-module checkpoints in the approved Work Permit
 sequence. Plan 083 adds danger source. Plan 084 consumes the Plan 082 work
 type table for its cascade FK and keeps `permitWorkTypeId` hidden. Plan 085 is
-the standalone safety checklist. Plan 086 owns both the category parent and
-the nested APD child, including parent-scoped child access and blocked parent
-deletes. Do not duplicate the design records' seed lists in the plan files;
-read the applicable design during execution. Every `apps/web` plan must use
-`web-ui-surface-reuse`, report `Reused`, `Searched`, and `Gap`, and pass the
-authenticated browser and verifier gates.
+the standalone safety checklist and is eligible for the explicit-field
+`simple-master-data` scaffold because it has no relation or custom workflow.
+Plan 084 is not eligible because it owns a cascade relation and relation
+validation. Plan 086 owns both the category parent and the nested APD child,
+including parent-scoped child access and blocked parent deletes, so it is not
+eligible either. Do not duplicate the design records' seed lists in the plan
+files; read the applicable design during execution. Every `apps/web` plan must
+use `web-ui-surface-reuse`, report `Reused`, `Searched`, and `Gap`, and pass the
+authenticated Codex browser and verifier gates. Delegated execution uses High
+or Extra High reasoning only; do not set a service tier.
 
 ## Findings considered and rejected
 

@@ -7,7 +7,7 @@
 - When explaining something to the user, use the Visualize skill
 - Be concise, direct, and candid. Challenge weak assumptions and distinguish verified facts from uncertainty
 - Ground research in authoritative, current sources and link important evidence
-- Preserve the original goal and constraints; finish authorized work end to end and verify the actual result before claiming completion. For user-facing `apps/web` work, a real authenticated browser or T3 preview check of the changed flow is a completion gate. Automated tests, type checks, and source review do not replace it. If the preview is unavailable after a valid retry, report `UI UNVERIFIED` or `BLOCKED`; do not claim completion or mark the plan `DONE`.
+- Preserve the original goal and constraints; finish authorized work end to end and verify the actual result before claiming completion. For user-facing `apps/web` work, a real authenticated Codex browser check of the changed flow is a completion gate. Automated tests, type checks, and source review do not replace it. If the browser is unavailable after a valid retry, report `UI UNVERIFIED` or `BLOCKED`; do not claim completion or mark the plan `DONE`.
 - Ask questions only when a decision is materially ambiguous, risky, or requires approval
 - Use relevant skills; spawn subagents only for genuinely independent work and synthesize their findings
 - Keep changes focused and simple. Avoid unrelated edits, unnecessary abstractions, and low-signal tests
@@ -28,4 +28,20 @@
 - For a new or legacy-backed ADS-HK module, use `$ads-hk-module-slice` with the default end-to-end `develop` workflow. Use `/Users/gamer/Documents/projects/ads-hk-legacy` as the legacy reference unless the user gives another path.
 - Complete discovery, brainstorming, the approved design document, and the `$improve` implementation plan before source edits. Execute the plan in dependency order, then run `$verify-ads-hk-module`; only a `PASS` verifier result can mark the plan `DONE`. Use the acceptance checklist as the handoff and completion contract.
 - When legacy is the business reference, copy user-facing labels exactly from legacy. Do not translate, shorten, improve, or invent labels. Record an approved difference before using any other text; otherwise stop.
-- Stop on unresolved business, API, permission, framework, route/action, or legacy-parity decisions. Do not guess or report completion while the authenticated browser/T3 gate is unverified.
+- Stop on unresolved business, API, permission, framework, route/action, or legacy-parity decisions. Do not guess or report completion while the authenticated Codex browser gate is unverified.
+
+### Simple master-data workflow
+- Use the bounded simple-master-data fast path only after discovery, legacy review, brainstorming, and the approved design are complete; no business, API, permission, route/action, or framework decision may remain unresolved.
+- Use one explicit `kind: "simple-master-data"` manifest per module. It must define the identity, every domain field, exact labels, six permission entries, navigation placement, and optional seed records. The scaffold never invents `name`, `description`, `active`, `code`, audit, relation, or seed fields.
+- The module must use standard CRUD only. It must have no child relation, lookup consumer, workflow transition, custom API operation, or framework change. Nested or relation-backed work must use the normal end-to-end workflow.
+- Run these commands in order. The JSON output gives absolute generated, integration, and manual paths:
+  ```sh
+  pnpm scaffold:master-data --config /absolute/path/module.json --json
+  pnpm integrate:master-data --manifest /absolute/path/module.json --check
+  pnpm integrate:master-data --manifest /absolute/path/module.json --apply
+  pnpm verify:module --manifest /absolute/path/module.json --check-only
+  pnpm verify:module --manifest /absolute/path/module.json --run
+  ```
+- Use `--with-seed` with `verify:module --run` only when the manifest has seed records. The integration command is guarded and idempotent; do not edit route-map files by hand.
+- The full acceptance checklist, authenticated Codex browser check, and `$verify-ads-hk-module` `PASS` remain mandatory. Reuse the same worker, session, and browser context for a safe sequence of simple modules when possible.
+- Use High or Extra High reasoning only for this workflow (`high` or `xhigh` in model control). Never use Low or Medium. Max-level effort remains optional for complex modules.

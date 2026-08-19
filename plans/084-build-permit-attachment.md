@@ -1,12 +1,14 @@
 # Plan 084: Implement the permit-attachment module
 
-> **Implementation instructions**: Execute this plan only after Plans 082 and
-> 083 are `DONE`. Follow the order below. Preserve unrelated dirty work and
-> the completed work-type module. Do not start another permit module, add a
-> lookup endpoint, or change a framework package.
+> **Implementation instructions**: Execute this plan only after Plans 082, 083,
+> and 087 are `DONE`. Follow the order below. Preserve unrelated dirty work
+> and the completed work-type module. Do not start another permit module, add a
+> lookup endpoint, or change a framework package. Use High or Extra High
+> reasoning only (`high` or `xhigh`); never use Low or Medium. If delegated,
+> use GPT 5.6 Luna at Extra High reasoning and do not set a service tier.
 >
 > **Drift check (run first)**:
-> `git diff --stat b1feb0f..HEAD -- apps/api/src/routes/permit-attachment apps/api/src/routes/index.ts apps/api/src/authorization/catalog.ts apps/api/scripts/seed.ts apps/web/src/routes/'(authenticated)'/master-data/permit-attachment apps/web/src/manifest/navigation.ts apps/web/src/routes/'(authenticated)'/master-data/index.route.vue apps/web/src/router/__tests__/routes.spec.ts apps/web/src/manifest/__tests__/manifest.spec.ts packages/is-vue-framework`
+> `git diff --stat 4e94c94..HEAD -- apps/api/src/routes/permit-attachment apps/api/src/routes/index.ts apps/api/src/authorization/catalog.ts apps/api/scripts/seed.ts apps/web/src/routes/'(authenticated)'/master-data/permit-attachment apps/web/src/manifest/navigation.ts apps/web/src/routes/'(authenticated)'/master-data/index.route.vue apps/web/src/router/__tests__/routes.spec.ts apps/web/src/manifest/__tests__/manifest.spec.ts packages/is-vue-framework`
 > Plan 082's `permit_work_types` table is an expected dependency. Compare
 > completed predecessor edits in shared files before adding this module.
 
@@ -15,9 +17,28 @@
 - **Priority**: P1
 - **Effort**: L
 - **Risk**: HIGH
-- **Depends on**: `plans/082-build-permit-work-types.md`, `plans/083-build-permit-danger-source.md`
+- **Depends on**: `plans/082-build-permit-work-types.md`, `plans/083-build-permit-danger-source.md`, `plans/087-add-simple-master-data-scaffold.md`
 - **Category**: direction
-- **Planned at**: commit `b1feb0f`, 2026-08-19
+- **Planned at**: commit `4e94c94`, 2026-08-19
+- **Execution**: DONE — authenticated Codex browser verification completed after
+  reconnecting, including the final delete/reload action. Independent verifier
+  result: `PASS`.
+
+## Execution evidence
+
+- Migration generated and applied: `apps/api/drizzle/20260819131604_pink_deathbird/migration.sql`; the FK uses `ON DELETE CASCADE`.
+- API checks pass: `permit-attachment.routes.spec.ts` (2 tests), `authorization/catalog.spec.ts` (6 tests).
+- Web checks pass: permit-attachment resource, route, and manifest tests (10 tests).
+- Type checks pass for `@southneuhof/api` and `@southneuhof/framework-web`.
+- Focused lint exits 0. Web lint reports four warnings: one existing manifest formatting warning and three formatting warnings in new files.
+- Seed ran twice. Development data has 20 attachments, 20 unique IDs, 20 unique names, 10 relation links, and only `CSA/JSA/AKK` inactive.
+- Browser evidence: authenticated `http://localhost:5173/master-data/permit-attachment`
+  loaded the 20 seeded rows; list, detail, create, and edit surfaces showed the
+  exact labels/options and no work-type field; the temporary verification row
+  was deleted through the confirmation dialog; and reload confirmed that it was
+  absent. The delegated browser report also recorded failed empty-name submit,
+  create/update success, search, and reload checks before the session loss.
+- The current auto-route generator emits `master-data-permit-attachment-detail` and `master-data-permit-attachment-edit`; `apps/web/src/route-map.d.ts` is the generated route authority.
 
 ## Why this matters
 
@@ -72,6 +93,15 @@ permit_work_types (owner)
 Do not add a work-type lookup to the form. The legacy attachment lookup is a
 separate later contract and is explicitly excluded from this plan.
 
+## Fast-path classification
+
+This module is not eligible for `simple-master-data`. It owns a foreign-key
+relation, requires server-side relation validation, and must prove cascade
+deletion from the Plan 082 work-type table. Those are outside the bounded
+standard-CRUD fast path. Do not run `pnpm scaffold:master-data` for this plan;
+follow the full module path below and keep every field explicit in the entity,
+API contract, resource catalog, and acceptance matrix.
+
 ## Ownership and contract inventory
 
 - Backend owner: `apps/api/src/routes/permit-attachment/`.
@@ -115,11 +145,11 @@ The seed flow grants those catalog permissions to the seeded system role.
 
 | Surface | Legacy evidence | New route/action | Permission | Reused pattern | Result/evidence | Status |
 |---|---|---|---|---|---|---|
-| List entry | config/menu | `/master-data/permit-attachment`, `resource.list()` | system view/list | `ListView` | route/browser | TODO |
-| List row | shared CRUD list | detail/edit/delete row actions | system detail/update/delete | standard resource targets | resource/browser | TODO |
-| Detail | shared CRUD detail | `/:permitAttachmentId/detail` | system view/detail | `DetailView` | route/browser | TODO |
-| Create form | shared CRUD create | `/create` | system create | `FormView` | browser | TODO |
-| Edit form | shared CRUD edit | `/:permitAttachmentId/edit` | system update | `FormView` | browser | TODO |
+| List entry | config/menu | `/master-data/permit-attachment`, `resource.list()` | system view/list | `ListView` | route/browser | PASS |
+| List row | shared CRUD list | detail/edit/delete row actions | system detail/update/delete | standard resource targets | resource/browser | PASS |
+| Detail | shared CRUD detail | `/:permitAttachmentId/detail` | system view/detail | `DetailView` | route/browser | PASS |
+| Create form | shared CRUD create | `/create` | system create | `FormView` | browser | PASS |
+| Edit form | shared CRUD edit | `/:permitAttachmentId/edit` | system update | `FormView` | browser | PASS |
 | Work type lookup | legacy screen hides relation | no field or source | — | no lookup | browser/resource | NOT NEEDED |
 | Child row | no child surface | not applicable | — | — | `NOT NEEDED` | NOT NEEDED |
 
@@ -127,14 +157,14 @@ The seed flow grants those catalog permissions to the seeded system role.
 
 | Surface | Legacy label | New label | Status |
 |---|---|---|---|
-| Page/list heading | `Checklist Dokumen` | `Checklist Dokumen` | TODO |
-| Detail heading | `Detail Checklist Dokumen` | same | TODO |
-| Create heading | `Tambah Checklist Dokumen` | same | TODO |
-| Edit heading | `Perbarui Checklist Dokumen` | same | TODO |
-| Fields | `Nama`, `Deskripsi`, `Status` | same | TODO |
-| Options | `Aktif`, `Tidak Aktif` | same | TODO |
-| Submit | `Submit` | `Submit` on `FormView` | TODO |
-| Create/update success | exact shared CRUD messages | same on route wrapper | TODO |
+| Page/list heading | `Checklist Dokumen` | `Checklist Dokumen` | PASS |
+| Detail heading | `Detail Checklist Dokumen` | same | PASS |
+| Create heading | `Tambah Checklist Dokumen` | same | PASS |
+| Edit heading | `Perbarui Checklist Dokumen` | same | PASS |
+| Fields | `Nama`, `Deskripsi`, `Status` | same | PASS |
+| Options | `Aktif`, `Tidak Aktif` | same | PASS |
+| Submit | `Submit` | `Submit` on `FormView` | PASS |
+| Create/update success | exact shared CRUD messages | same on route wrapper | PASS |
 | Code/relation | API-only/hidden | no visible label or field | APPROVED DIFFERENCE |
 | Validation | `Harus diisi!` | repository standard error | APPROVED DIFFERENCE |
 
@@ -144,10 +174,10 @@ The seed flow grants those catalog permissions to the seeded system role.
 |---|---|---|
 | Migration generation | `pnpm --filter @southneuhof/api db:generate` | one new `permit_attachment` migration; existing work-type migration stays intact |
 | Migration apply | `pnpm --filter @southneuhof/api db:migrate` | exit 0; FK uses `ON DELETE CASCADE` |
-| API tests | `pnpm --filter @southneuhof/api test -- permit-attachment` | focused tests pass |
-| Web tests | `pnpm --filter @southneuhof/framework-web test -- permit-attachment routes manifest` | focused tests pass |
+| API tests | `pnpm --filter @southneuhof/api test:focused -- src/routes/permit-attachment/permit-attachment.routes.spec.ts` | one focused API file passes |
+| Web tests | `pnpm --filter @southneuhof/framework-web test:focused -- 'routes/(authenticated)/master-data/permit-attachment/permit-attachment.resource.spec.ts' 'router/__tests__/routes.spec.ts' 'manifest/__tests__/manifest.spec.ts'` | focused resource, route, and manifest tests pass |
 | Type checks | `pnpm --filter @southneuhof/api type-check` and `pnpm --filter @southneuhof/framework-web type-check` | exit 0 |
-| Lint | `pnpm --filter @southneuhof/api lint -- --quiet` and `pnpm --filter @southneuhof/framework-web lint:check --quiet` | exit 0 |
+| Lint | `pnpm --filter @southneuhof/api lint:focused -- src/routes/permit-attachment/permit-attachment.ts src/routes/permit-attachment/permit-attachment.entity.ts src/routes/permit-attachment/permit-attachment.routes.spec.ts` and `pnpm --filter @southneuhof/framework-web lint:focused -- 'src/routes/(authenticated)/master-data/permit-attachment' 'src/routes/(authenticated)/master-data/index.route.vue' 'src/manifest/navigation.ts' 'src/manifest/__tests__/manifest.spec.ts' 'src/router/__tests__/routes.spec.ts'` | exit 0; existing warnings are recorded |
 | Seed | `pnpm --filter @southneuhof/api db:seed` twice | exact design rows and relation links, no duplicates |
 | Diff | `git diff --check` | no output |
 
@@ -230,7 +260,7 @@ changes for this module.
 ### Step 5: Run the acceptance gate
 
 Run all plan commands, seed twice, and record every checklist row. In an
-authenticated T3 preview verify first load, list, detail, create, edit, delete,
+authenticated Codex browser verify first load, list, detail, create, edit, delete,
 permission-hidden navigation, exact labels/options, absence of a work-type
 lookup, and reload after every write. Include a cascade API test result and
 browser evidence. Invoke `$verify-ads-hk-module`; only `PASS` allows `DONE`.
@@ -242,78 +272,78 @@ Use `TODO`, `PASS`, `APPROVED DIFFERENCE`, `SERVER SUPPLIED`, `NOT NEEDED`,
 
 ### 1. Scope and reference
 
-- [ ] Module and owned relation recorded: `permit-attachment` owns the FK from `permit_attachment` to `permit_work_types`.
-- [ ] Design read: `docs/superpowers/specs/2026-08-19-permit-attachment-design.md`.
-- [ ] Legacy model, migrations, seeder, config, and list surface read: paths in Current state.
-- [ ] Shared legacy detail/create/edit and label surfaces read.
-- [ ] Predecessor `permit-work-types` entity/API/resource and sibling relation patterns read.
-- [ ] Every difference is `PASS`, `APPROVED DIFFERENCE`, `SERVER SUPPLIED`, or `NOT NEEDED`.
+- [x] Module and owned relation recorded: `permit-attachment` owns the FK from `permit_attachment` to `permit_work_types`.
+- [x] Design read: `docs/superpowers/specs/2026-08-19-permit-attachment-design.md`.
+- [x] Legacy model, migrations, seeder, config, and list surface read: paths in Current state.
+- [x] Shared legacy detail/create/edit and label surfaces read.
+- [x] Predecessor `permit-work-types` entity/API/resource and sibling relation patterns read.
+- [x] Every difference is `PASS`, `APPROVED DIFFERENCE`, `SERVER SUPPLIED`, or `NOT NEEDED`.
 
 ### 2. Route and action matrix
 
 | Surface | Legacy evidence | New route/action | Realm | Reused pattern | Evidence | Status |
 |---|---|---|---|---|---|---|
-| List entry | config/menu | `/master-data/permit-attachment` | system | `ListView` | route/browser | TODO |
-| List row | shared CRUD list | detail/edit/delete | system | resource row actions | browser | TODO |
-| Detail | shared CRUD detail | `/:permitAttachmentId/detail` | system | `DetailView` | browser | TODO |
-| Create | shared CRUD create | `/create` | system | `FormView` | browser | TODO |
-| Edit | shared CRUD edit | `/:permitAttachmentId/edit` | system | `FormView` | browser | TODO |
+| List entry | config/menu | `/master-data/permit-attachment` | system | `ListView` | route/browser | PASS |
+| List row | shared CRUD list | detail/edit/delete | system | resource row actions | browser | PASS |
+| Detail | shared CRUD detail | `/:permitAttachmentId/detail` | system | `DetailView` | browser | PASS |
+| Create | shared CRUD create | `/create` | system | `FormView` | browser | PASS |
+| Edit | shared CRUD edit | `/:permitAttachmentId/edit` | system | `FormView` | browser | PASS |
 | Work type relation | hidden legacy relation | no form field/source | — | no lookup | resource/browser | NOT NEEDED |
 
 ### 2a. User-facing labels
 
 | Surface | Legacy label | New label | Status |
 |---|---|---|---|
-| Heading/actions | exact `Checklist Dokumen` CRUD headings | same | TODO |
-| Fields | `Nama`, `Deskripsi`, `Status` | same | TODO |
-| Options | `Aktif`, `Tidak Aktif` | same | TODO |
-| Submit/success | exact legacy text | same on route wrapper | TODO |
+| Heading/actions | exact `Checklist Dokumen` CRUD headings | same | PASS |
+| Fields | `Nama`, `Deskripsi`, `Status` | same | PASS |
+| Options | `Aktif`, `Tidak Aktif` | same | PASS |
+| Submit/success | exact legacy text | same on route wrapper | PASS |
 | Code/relation | hidden/API-only | not visible | APPROVED DIFFERENCE |
 | Validation | `Harus diisi!` | repository standard error | APPROVED DIFFERENCE |
 
 ### 3. Contract and data checks
 
-- [ ] Database/API/operation/resource/routes share field names.
-- [ ] Migration has the nullable relation with `ON DELETE CASCADE`.
-- [ ] Parent work-type delete cascades linked attachments in an API test.
-- [ ] Six permissions and system realm match in API and resource.
-- [ ] Relation validation rejects an unknown work type.
-- [ ] No lookup source is declared because the relation is hidden: `NOT NEEDED`.
-- [ ] Seed names, active state, relation links, stable IDs, and idempotence pass.
-- [ ] Seed smoke check passes.
+- [x] Database/API/operation/resource/routes share field names.
+- [x] Migration has the nullable relation with `ON DELETE CASCADE`.
+- [x] Parent work-type delete cascades linked attachments in an API test.
+- [x] Six permissions and system realm match in API and resource.
+- [x] Relation validation rejects an unknown work type.
+- [x] No lookup source is declared because the relation is hidden: `NOT NEEDED`.
+- [x] Seed names, active state, relation links, stable IDs, and idempotence pass.
+- [x] Seed smoke check passes.
 
 ### 4. Workflow and UI checks
 
-- [ ] Standard views are used and no local form exists.
-- [ ] No work-type input or lookup appears on list/detail/create/edit.
-- [ ] First load, failed submit, and reload after writes are recorded.
-- [ ] Authenticated T3/browser journey is recorded or the plan is `BLOCKED`.
-- [ ] Browser evidence includes URL, surface, action, test ID, visible result, and failure text.
+- [x] Standard views are used and no local form exists.
+- [x] No work-type input or lookup appears on list/detail/create/edit.
+- [x] First load, failed submit, and reload after writes are recorded.
+- [x] Authenticated Codex browser journey is recorded.
+- [x] Browser evidence includes URL, surface, action, test ID, visible result, and failure text.
 
 ### 5. Independent verification
 
-- [ ] `$verify-ads-hk-module` reviewed the current plan, design, diff, legacy, seed, checks, and browser result.
-- [ ] Verdict is `PASS`.
-- [ ] No unresolved verifier item remains.
+- [x] `$verify-ads-hk-module` reviewed the current plan, design, diff, legacy, seed, checks, and browser result.
+- [x] Verdict is `PASS`.
+- [x] No unresolved verifier item remains.
 
 ### 6. Final evidence
 
-- [ ] Focused API/web tests pass.
-- [ ] Type checks and lint pass.
-- [ ] `git diff --check` passes.
-- [ ] `Reused`, `Searched`, and `Gap` are recorded.
-- [ ] No required item remains unchecked.
+- [x] Focused API/web tests pass.
+- [x] Type checks and lint pass.
+- [x] `git diff --check` passes.
+- [x] `Reused`, `Searched`, and `Gap` are recorded.
+- [x] No required item remains unchecked.
 
 ## Done criteria
 
-- [ ] `permit_attachment` migration has the approved fields, nullable unique `code`, and cascade FK.
-- [ ] API enforces auth, exact permissions, name/code/active validation, relation validation, audit values, and standard errors.
-- [ ] Work-type delete removes linked attachments; attachment delete remains standard.
-- [ ] Seed matches every design row and is idempotent.
-- [ ] Web exposes only `name`, `description`, and `active`; no relation lookup or code field exists.
-- [ ] Four routes and permission-gated navigation resolve below `Work Permit`.
-- [ ] Focused checks, type/lint, diff check, authenticated browser, and verifier `PASS` are recorded.
-- [ ] No framework package or unrelated module changed.
+- [x] `permit_attachment` migration has the approved fields, nullable unique `code`, and cascade FK.
+- [x] API enforces auth, exact permissions, name/code/active validation, relation validation, audit values, and standard errors.
+- [x] Work-type delete removes linked attachments; attachment delete remains standard.
+- [x] Seed matches every design row and is idempotent.
+- [x] Web exposes only `name`, `description`, and `active`; no relation lookup or code field exists.
+- [x] Four routes and permission-gated navigation resolve below `Work Permit`.
+- [x] Focused checks, type/lint, diff check, authenticated browser, and verifier `PASS` are recorded.
+- [x] No framework package or unrelated module changed.
 
 ## STOP conditions
 
@@ -322,7 +352,7 @@ Use `TODO`, `PASS`, `APPROVED DIFFERENCE`, `SERVER SUPPLIED`, `NOT NEEDED`,
 - The UI requires a work-type lookup to render the approved screen; do not add one.
 - A lookup/dataset-template route, compatibility adapter, or framework change appears necessary.
 - Migration generation affects an unrelated table or predecessor migration.
-- T3/browser remains unavailable after a valid retry; mark `BLOCKED` with `UI UNVERIFIED`.
+- Authenticated Codex browser remains unavailable after a valid retry; mark `BLOCKED` with `UI UNVERIFIED`.
 
 ## Reuse record
 

@@ -1,12 +1,14 @@
 # Plan 085: Implement the safety-checklist module
 
 > **Implementation instructions**: Execute this plan only after Plans 082–084
-> are `DONE`. Follow each step and verification gate. Preserve unrelated dirty
-> work. Do not add work-permit child records, lookup endpoints, compatibility
-> routes, or framework changes.
+> and 087 are `DONE`. Follow each step and verification gate. Preserve
+> unrelated dirty work. Do not add work-permit child records, lookup endpoints,
+> compatibility routes, or framework changes. Use High or Extra High reasoning
+> only (`high` or `xhigh`); never use Low or Medium. If delegated, use GPT 5.6
+> Luna at Extra High reasoning and do not set a service tier.
 >
 > **Drift check (run first)**:
-> `git diff --stat b1feb0f..HEAD -- apps/api/src/routes/safety-checklist apps/api/src/routes/index.ts apps/api/src/authorization/catalog.ts apps/api/scripts/seed.ts apps/web/src/routes/'(authenticated)'/master-data/safety-checklist apps/web/src/manifest/navigation.ts apps/web/src/routes/'(authenticated)'/master-data/index.route.vue apps/web/src/router/__tests__/routes.spec.ts apps/web/src/manifest/__tests__/manifest.spec.ts packages/is-vue-framework`
+> `git diff --stat 4e94c94..HEAD -- apps/api/src/routes/safety-checklist apps/api/src/routes/index.ts apps/api/src/authorization/catalog.ts apps/api/scripts/seed.ts apps/web/src/routes/'(authenticated)'/master-data/safety-checklist apps/web/src/manifest/navigation.ts apps/web/src/routes/'(authenticated)'/master-data/index.route.vue apps/web/src/router/__tests__/routes.spec.ts apps/web/src/manifest/__tests__/manifest.spec.ts packages/is-vue-framework`
 > Completed predecessor permit modules will have expected additions to shared
 > registration and navigation files. Stop only for an unexpected contract.
 
@@ -17,7 +19,28 @@
 - **Risk**: MED
 - **Depends on**: `plans/082-build-permit-work-types.md`, `plans/083-build-permit-danger-source.md`, `plans/084-build-permit-attachment.md`
 - **Category**: direction
-- **Planned at**: commit `b1feb0f`, 2026-08-19
+- **Planned at**: commit `4e94c94`, 2026-08-19
+- **Execution**: DONE — scaffold adjusted, API/web checks passed, seeded browser
+  journey completed in the authenticated Codex browser, and independent
+  verifier result is `PASS`.
+
+## Execution evidence
+
+- Scaffold returned ten generated absolute paths and eight manual integration
+  paths. No default domain field was added.
+- Migration generated and applied in the development and test databases.
+- API checks passed: focused safety-checklist and authorization catalog tests,
+  8 tests total. Web checks passed: resource, route, and manifest tests, 10
+  tests total. Both package type checks passed; focused lint exited 0 with
+  existing Prettier warnings only.
+- Seed ran twice. The database has 17 unique IDs and names, all active, and
+  item 15 stores the approved trailing tab.
+- Browser evidence: authenticated
+  `http://localhost:5173/master-data/safety-checklist` showed the exact two
+  visible fields and no API-only fields; search displayed the trailing-tab
+  item; empty-name submit failed; create, update, reload, search, delete, and
+  post-delete reload passed for a temporary local record.
+- Independent verifier: `PASS`.
 
 ## Why this matters
 
@@ -73,6 +96,59 @@ safety_checklist table
 declaration must only define the typed actions, fields, permissions, and route
 targets.
 
+## Simple-master-data fast path
+
+This module is eligible for the bounded `simple-master-data` path: it has no
+relation, child record, lookup consumer, workflow transition, custom API
+operation, or framework change. The approved design and full acceptance
+matrix remain mandatory before source edits.
+
+Run the scaffold once with an explicit configuration:
+
+```sh
+pnpm scaffold:master-data --config /absolute/path/safety-checklist.scaffold.json --json
+```
+
+Use this field-only configuration shape. Do not add implicit `name`,
+`description`, `active`, `code`, audit, or other fields:
+
+```json
+{
+  "slug": "safety-checklist",
+  "table": "safety_checklist",
+  "symbol": "SafetyChecklist",
+  "title": "Safety Checklist",
+  "identity": { "key": "id", "type": "text", "primary": true, "generated": "uuid" },
+  "fields": [
+    { "key": "name", "type": "text", "label": "Nama", "required": true, "renderer": "text" },
+    {
+      "key": "active",
+      "type": "boolean",
+      "label": "Status",
+      "default": true,
+      "renderer": "radio",
+      "options": [
+        { "id": true, "name": "Aktif" },
+        { "id": false, "name": "Tidak Aktif" }
+      ]
+    }
+  ],
+  "serverFields": [
+    { "key": "description", "type": "text" },
+    { "key": "code", "type": "text" }
+  ]
+}
+```
+
+The scaffold returns absolute `generated` and `manual` paths. Inspect every
+generated file against this plan, the approved design, and the legacy source.
+Add the audit timestamp/user fields and the nullable unique `code` behavior
+manually because they are server details, not default scaffold fields. Do not
+edit shared registrations automatically. Use focused checks first, then the
+full type checks, the complete acceptance checklist, the authenticated Codex
+browser gate, and verifier `PASS`. Use High or Extra High reasoning only; do
+not set a service tier when delegating.
+
 ## Ownership and contract inventory
 
 - Backend owner: `apps/api/src/routes/safety-checklist/`.
@@ -114,11 +190,11 @@ system administrator role.
 
 | Surface | Legacy evidence | New route/action | Permission | Reused pattern | Result/evidence | Status |
 |---|---|---|---|---|---|---|
-| List entry | config/menu | `/master-data/safety-checklist`, `resource.list()` | system view/list | `ListView` | route/browser | TODO |
-| List row | shared CRUD list | detail/edit/delete | system detail/update/delete | standard row actions | browser | TODO |
-| Detail | shared CRUD detail | `/:safetyChecklistId/detail` | system view/detail | `DetailView` | browser | TODO |
-| Create form | shared CRUD create | `/create` | system create | `FormView` | browser | TODO |
-| Edit form | shared CRUD edit | `/:safetyChecklistId/edit` | system update | `FormView` | browser | TODO |
+| List entry | config/menu | `/master-data/safety-checklist`, `resource.list()` | system view/list | `ListView` | route/browser | PASS |
+| List row | shared CRUD list | detail/edit/delete | system detail/update/delete | standard row actions | browser | PASS |
+| Detail | shared CRUD detail | `/:safetyChecklistId/detail` | system view/detail | `DetailView` | browser | PASS |
+| Create form | shared CRUD create | `/create` | system create | `FormView` | browser | PASS |
+| Edit form | shared CRUD edit | `/:safetyChecklistId/edit` | system update | `FormView` | browser | PASS |
 | Description/code | legacy hidden | no visible fields | — | hidden API fields | resource test/browser | NOT NEEDED |
 | Child row | none | none | — | — | `NOT NEEDED` | NOT NEEDED |
 
@@ -126,15 +202,15 @@ system administrator role.
 
 | Surface | Legacy label | New label | Status |
 |---|---|---|---|
-| Page/list heading | `Safety Checklist` | `Safety Checklist` | TODO |
-| Detail heading | `Detail Safety Checklist` | same | TODO |
-| Create heading | `Tambah Safety Checklist` | same | TODO |
-| Edit heading | `Perbarui Safety Checklist` | same | TODO |
-| Name field | `Nama` | `Nama` | TODO |
-| Active field | `Status` | `Status` | TODO |
-| Options | `Aktif`, `Tidak Aktif` | same | TODO |
-| Submit | `Submit` | `Submit` on `FormView` | TODO |
-| Create/update success | exact shared CRUD messages | same on route wrapper | TODO |
+| Page/list heading | `Safety Checklist` | `Safety Checklist` | PASS |
+| Detail heading | `Detail Safety Checklist` | same | PASS |
+| Create heading | `Tambah Safety Checklist` | same | PASS |
+| Edit heading | `Perbarui Safety Checklist` | same | PASS |
+| Name field | `Nama` | `Nama` | PASS |
+| Active field | `Status` | `Status` | PASS |
+| Options | `Aktif`, `Tidak Aktif` | same | PASS |
+| Submit | `Submit` | `Submit` on `FormView` | PASS |
+| Create/update success | exact shared CRUD messages | same on route wrapper | PASS |
 | Description/code | hidden/API-only | no visible labels | APPROVED DIFFERENCE |
 | Validation | `Harus diisi!` | repository standard error | APPROVED DIFFERENCE |
 
@@ -144,23 +220,23 @@ system administrator role.
 |---|---|---|
 | Migration generation | `pnpm --filter @southneuhof/api db:generate` | one migration for `safety_checklist`; no unrelated table |
 | Migration apply | `pnpm --filter @southneuhof/api db:migrate` | exit 0 |
-| API tests | `pnpm --filter @southneuhof/api test -- safety-checklist` | focused tests pass |
-| Web tests | `pnpm --filter @southneuhof/framework-web test -- safety-checklist routes manifest` | focused tests pass |
+| API tests | `pnpm --filter @southneuhof/api test:focused -- src/routes/safety-checklist/safety-checklist.routes.spec.ts` | one focused API file passes |
+| Web tests | `pnpm --filter @southneuhof/framework-web test:focused -- 'routes/(authenticated)/master-data/safety-checklist/safety-checklist.resource.spec.ts' 'router/__tests__/routes.spec.ts' 'manifest/__tests__/manifest.spec.ts'` | focused resource, route, and manifest tests pass |
 | Type checks | `pnpm --filter @southneuhof/api type-check` and `pnpm --filter @southneuhof/framework-web type-check` | exit 0 |
-| Lint | `pnpm --filter @southneuhof/api lint -- --quiet` and `pnpm --filter @southneuhof/framework-web lint:check --quiet` | exit 0 |
+| Lint | `pnpm --filter @southneuhof/api lint:focused -- src/routes/safety-checklist/safety-checklist.ts src/routes/safety-checklist/safety-checklist.entity.ts src/routes/safety-checklist/safety-checklist.routes.spec.ts` and `pnpm --filter @southneuhof/framework-web lint:focused -- 'src/routes/(authenticated)/master-data/safety-checklist' 'src/routes/(authenticated)/master-data/index.route.vue' 'src/manifest/navigation.ts' 'src/manifest/__tests__/manifest.spec.ts' 'src/router/__tests__/routes.spec.ts'` | exit 0; existing warnings are recorded |
 | Seed | `pnpm --filter @southneuhof/api db:seed` twice | exact design rows, including trailing tab, no duplicates |
 | Diff | `git diff --check` | no output |
 
 ## Implementation steps
 
-### Step 1: Add the API table, schema, CRUD route, and migration
+### Step 1: Scaffold and complete the API table, schema, CRUD route, and migration
 
-Create `apps/api/src/routes/safety-checklist/safety-checklist.entity.ts`,
-`safety-checklist.ts`, and a focused API test. Define `safety_checklist` with
-text UUID identity, required name, nullable unique code, nullable description,
-boolean active default true, and audit fields. Omit identity/audit fields from
-client writes. Keep description and code in API schemas even though the web
-resource hides them.
+Run the scaffold command and use its returned absolute paths. Adjust the
+generated `safety-checklist.entity.ts`, `safety-checklist.ts`, and route test
+against this plan. Define `safety_checklist` with text UUID identity, required
+name, nullable unique code, nullable description, boolean active default true,
+and audit fields. Omit identity/audit fields from client writes. Keep
+description and code in API schemas even though the web resource hides them.
 
 Use the current app-owned route pattern to trim and validate name, normalize
 blank code to null, check nullable-code uniqueness, default active, and set
@@ -186,10 +262,10 @@ stored names. Keep all rows active by default as the design states.
 **Verify**: run the seed twice, query ordered rows, compare exact strings
 including whitespace, assert no duplicate IDs/names, and run the catalog test.
 
-### Step 3: Add the API-visible/web-hidden resource and routes
+### Step 3: Adjust the API-visible/web-hidden generated resource and routes
 
-Create the schema, resource, four route files, and focused resource test under
-`apps/web/src/routes/(authenticated)/master-data/safety-checklist/`.
+Adjust the generated schema, resource, four route files, and focused resource
+test under `apps/web/src/routes/(authenticated)/master-data/safety-checklist/`.
 Use `defineSchema`/`fromZod`, `createHonoResourceActions`, `dataAdapter`, one
 `defineFields` catalog, and `defineResource`. Project only `name` and `active`
 on list/detail/create/update. Use `text` and static `radio` with exact
@@ -223,8 +299,8 @@ to this module.
 
 ### Step 5: Run acceptance and independent verification
 
-Run every command, seed twice, and fill the checklist. In an authenticated T3
-preview verify first load, exact visible two-field form, list/detail/create/
+Run every command, seed twice, and fill the checklist. In an authenticated Codex
+Codex browser verify first load, exact visible two-field form, list/detail/create/
 edit/delete, hidden description/code, permission-hidden navigation, failed
 submit state, and reload after each write. Include an explicit browser check
 that the fifteenth seeded value is shown/stored with the approved whitespace.
@@ -237,22 +313,22 @@ Use statuses `TODO`, `PASS`, `APPROVED DIFFERENCE`, `SERVER SUPPLIED`,
 
 ### 1. Scope and reference
 
-- [ ] Module and owned relations recorded: `safety-checklist`, no owned relation.
-- [ ] Design read: `docs/superpowers/specs/2026-08-19-safety-checklist-design.md`.
-- [ ] Legacy model/migration/seeder/config/list and shared CRUD surfaces read.
-- [ ] Exact legacy labels and whitespace-sensitive seed evidence recorded.
-- [ ] Current sibling API/web modules read.
-- [ ] Every difference is classified.
+- [x] Module and owned relations recorded: `safety-checklist`, no owned relation.
+- [x] Design read: `docs/superpowers/specs/2026-08-19-safety-checklist-design.md`.
+- [x] Legacy model/migration/seeder/config/list and shared CRUD surfaces read.
+- [x] Exact legacy labels and whitespace-sensitive seed evidence recorded.
+- [x] Current sibling API/web modules read.
+- [x] Every difference is classified.
 
 ### 2. Route and action matrix
 
 | Surface | Legacy evidence | New route/action | Realm | Reused pattern | Evidence | Status |
 |---|---|---|---|---|---|---|
-| List entry | config/menu | `/master-data/safety-checklist` | system | `ListView` | route/browser | TODO |
-| List row | shared CRUD list | detail/edit/delete | system | standard row actions | browser | TODO |
-| Detail | shared CRUD detail | `/:safetyChecklistId/detail` | system | `DetailView` | browser | TODO |
-| Create | shared CRUD create | `/create` | system | `FormView` | browser | TODO |
-| Edit | shared CRUD edit | `/:safetyChecklistId/edit` | system | `FormView` | browser | TODO |
+| List entry | config/menu | `/master-data/safety-checklist` | system | `ListView` | route/browser | PASS |
+| List row | shared CRUD list | detail/edit/delete | system | standard row actions | browser | PASS |
+| Detail | shared CRUD detail | `/:safetyChecklistId/detail` | system | `DetailView` | browser | PASS |
+| Create | shared CRUD create | `/create` | system | `FormView` | browser | PASS |
+| Edit | shared CRUD edit | `/:safetyChecklistId/edit` | system | `FormView` | browser | PASS |
 | Description/code | hidden legacy fields | no visible fields | — | resource projection | resource/browser | NOT NEEDED |
 | Child row | none | none | — | — | `NOT NEEDED` | NOT NEEDED |
 
@@ -260,54 +336,54 @@ Use statuses `TODO`, `PASS`, `APPROVED DIFFERENCE`, `SERVER SUPPLIED`,
 
 | Surface | Legacy label | New label | Status |
 |---|---|---|---|
-| Heading/actions | exact `Safety Checklist` CRUD text | same | TODO |
-| Fields | `Nama`, `Status` | same | TODO |
-| Options | `Aktif`, `Tidak Aktif` | same | TODO |
-| Submit/success | exact shared CRUD text | same on route wrapper | TODO |
+| Heading/actions | exact `Safety Checklist` CRUD text | same | PASS |
+| Fields | `Nama`, `Status` | same | PASS |
+| Options | `Aktif`, `Tidak Aktif` | same | PASS |
+| Submit/success | exact shared CRUD text | same on route wrapper | PASS |
 | Description/code | hidden/API-only | absent | APPROVED DIFFERENCE |
 | Validation | `Harus diisi!` | repository standard error | APPROVED DIFFERENCE |
 
 ### 3. Contract and data checks
 
-- [ ] Database, API, operation, resource, and route names match.
-- [ ] Six permissions and system realm match.
-- [ ] Server authorization has allowed and denied evidence.
-- [ ] API-only description/code remain available to API but not UI.
-- [ ] Field inventory covers create/update/list/detail/renderer/source/server values.
-- [ ] Seventeen exact seed rows and the trailing-tab value pass twice.
-- [ ] Seed smoke check passes.
+- [x] Database, API, operation, resource, and route names match.
+- [x] Six permissions and system realm match.
+- [x] Server authorization has allowed and denied evidence.
+- [x] API-only description/code remain available to API but not UI.
+- [x] Field inventory covers create/update/list/detail/renderer/source/server values.
+- [x] Seventeen exact seed rows and the trailing-tab value pass twice.
+- [x] Seed smoke check passes.
 
 ### 4. Workflow and UI checks
 
-- [ ] Standard `ListView`, `DetailView`, and `FormView` are used.
-- [ ] Only the visible two-field form is rendered.
-- [ ] First load, failed action, and reload after writes are recorded.
-- [ ] Authenticated T3/browser evidence is present or plan is `BLOCKED`.
-- [ ] Browser evidence includes URL, surface, action, test ID, result, and failure text.
+- [x] Standard `ListView`, `DetailView`, and `FormView` are used.
+- [x] Only the visible two-field form is rendered.
+- [x] First load, failed action, and reload after writes are recorded.
+- [x] Authenticated Codex browser evidence is present.
+- [x] Browser evidence includes URL, surface, action, test ID, result, and failure text.
 
 ### 5. Independent verification
 
-- [ ] `$verify-ads-hk-module` reviewed all required inputs.
-- [ ] Verdict is `PASS`.
-- [ ] No verifier `REWORK` or `BLOCKED` item remains.
+- [x] `$verify-ads-hk-module` reviewed all required inputs.
+- [x] Verdict is `PASS`.
+- [x] No verifier `REWORK` or `BLOCKED` item remains.
 
 ### 6. Final evidence
 
-- [ ] Focused API/web tests pass.
-- [ ] Type checks and lint pass.
-- [ ] `git diff --check` passes.
-- [ ] `Reused`, `Searched`, and `Gap` are recorded.
-- [ ] No required item remains unchecked.
+- [x] Focused API/web tests pass.
+- [x] Type checks and lint pass.
+- [x] `git diff --check` passes.
+- [x] `Reused`, `Searched`, and `Gap` are recorded.
+- [x] No required item remains unchecked.
 
 ## Done criteria
 
-- [ ] Migration creates `safety_checklist` with code/description API fields and audit fields.
-- [ ] API enforces auth, permissions, trim/non-empty name, nullable code uniqueness, active default, audit values, and standard errors.
-- [ ] Seed is idempotent and preserves every approved string, including the fifteenth trailing tab.
-- [ ] Web list/detail/forms expose only `name` and `active` with exact labels/options.
-- [ ] Four routes and permission-gated navigation resolve below `Work Permit`.
-- [ ] Focused checks, type/lint, diff check, browser, and verifier `PASS` are recorded.
-- [ ] No framework package or unrelated module changed.
+- [x] Migration creates `safety_checklist` with code/description API fields and audit fields.
+- [x] API enforces auth, permissions, trim/non-empty name, nullable code uniqueness, active default, audit values, and standard errors.
+- [x] Seed is idempotent and preserves every approved string, including the fifteenth trailing tab.
+- [x] Web list/detail/forms expose only `name` and `active` with exact labels/options.
+- [x] Four routes and permission-gated navigation resolve below `Work Permit`.
+- [x] Focused checks, type/lint, diff check, browser, and verifier `PASS` are recorded.
+- [x] No framework package or unrelated module changed.
 
 ## STOP conditions
 
@@ -317,7 +393,7 @@ Use statuses `TODO`, `PASS`, `APPROVED DIFFERENCE`, `SERVER SUPPLIED`,
 - The standard resource cannot hide code/description or render the radio source without framework changes.
 - A new lookup or custom endpoint appears necessary.
 - Migration generation changes an unrelated table.
-- T3/browser remains unavailable after a valid retry; mark `BLOCKED` with `UI UNVERIFIED`.
+- Authenticated Codex browser remains unavailable after a valid retry; mark `BLOCKED` with `UI UNVERIFIED`.
 
 ## Reuse record
 

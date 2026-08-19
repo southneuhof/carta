@@ -9,6 +9,8 @@
     "type-check": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
     "test": "node --env-file-if-exists=.env --env-file-if-exists=.env.test ./node_modules/drizzle-kit/bin.cjs migrate && node --env-file-if-exists=.env --env-file-if-exists=.env.test ./node_modules/vitest/vitest.mjs run",
+    "test:focused": "sh -c 'shift; exec node --env-file-if-exists=.env --env-file-if-exists=.env.test ./node_modules/vitest/vitest.mjs run \"$@\"' --",
+    "lint:focused": "eslint",
     "db:push": "drizzle-kit push",
     "db:reset": "tsx --env-file-if-exists=.env scripts/reset-db.ts && pnpm run db:migrate",
     "db:refresh": "pnpm run db:reset && pnpm run db:seed",

@@ -29,7 +29,7 @@ The legacy child config is `frontend-ads-vuejs/src/app/configs/permit-apd.ts`:
 - Child visible fields: `name`, `description`, `active`
 - Child records are filtered by the selected category and created with that
   category ID.
-- The child CRUD is shown inline under the parent detail page.
+- The child CRUD is shown in the nested route area under the parent detail page.
 
 The parent table is `permit_category_apd`. The child table is `permit_apd`.
 Both have `id`, `name`, nullable unique `code`, nullable `description`,
@@ -74,12 +74,13 @@ fields. The child route supplies the parent ID.
   and seeded role permissions.
 - Reuse standard `ListView`, `DetailView`, and `FormView`. The parent detail
   uses the existing nested-resource pattern for the child `APD` list and
-  actions. Do not add framework code or a local generic CRUD component.
+  actions: the parent renders `AppRouterView`, and the child index route owns
+  the list. Do not add framework code or a local generic CRUD component.
 
 ```mermaid
 flowchart TD
   C[(permit_category_apd)] --> CD[Category detail]
-  CD --> A[Inline APD ListView]
+  CD --> A[Nested APD route area]
   A --> F[APD FormView]
   A --> D[APD DetailView]
   A --> X[APD delete action]
@@ -97,7 +98,8 @@ Parent web routes:
 
 Child web routes are nested under the parent detail page:
 
-- list: inline on `/master-data/permit-category-apd/:permitCategoryApdId/detail`
+- list: `/master-data/permit-category-apd/:permitCategoryApdId/detail/apd`,
+  rendered in the parent detail route area
 - `/master-data/permit-category-apd/:permitCategoryApdId/detail/apd/create`
 - `/master-data/permit-category-apd/:permitCategoryApdId/detail/apd/:permitApdId/detail`
 - `/master-data/permit-category-apd/:permitCategoryApdId/detail/apd/:permitApdId/edit`
@@ -165,8 +167,8 @@ run updates the same rows and does not create duplicates.
   nested route/action wiring, and the absence of a standalone child menu
   entry.
 - Run focused type, lint, and test checks for the API and web packages.
-- Use seeded data in an authenticated T3 preview to verify category list,
-  category detail, inline APD list, APD create/edit/delete, category delete
+- Use seeded data in the authenticated Codex browser to verify category list,
+  category detail, nested APD list, APD create/edit/delete, category delete
   blocking, permission visibility, exact titles, and exact labels.
 - Run `$verify-ads-hk-module` after implementation. Do not mark this module
   complete before the verifier returns `PASS`.

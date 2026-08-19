@@ -10,8 +10,12 @@ const entries = [
   ['pts-work-categories', 'Kategori Pekerjaan'],
   ['root-causes', 'Penyebab QHSSE'],
   ['number-configs', 'Number Configurations'],
+  ['emergency-simulation-topics', 'Topik Simulasi Tanggap Darurat'],
   ['permit-work-types', 'Tipe Pekerjaan'],
   ['permit-danger-source', 'Sumber Bahaya'],
+  ['permit-attachment', 'Checklist Dokumen'],
+  ['safety-checklist', 'Safety Checklist'],
+  ['permit-category-apd', 'APD'],
 ] as const
 </script>
 

@@ -21,6 +21,12 @@ describe('navigation entrypoints', () => {
     expect(masterData.routes).toContainEqual({ separator: 'Work Permit' })
     expect(masterData.routes).toContainEqual({ to: { name: 'master-data-permit-work-types' }, permission: 'view-permit-work-types', title: 'Tipe Pekerjaan', icon: 'folder' })
     expect(masterData.routes).toContainEqual({ to: { name: 'master-data-permit-danger-source' }, permission: 'view-permit-danger-source', title: 'Sumber Bahaya', icon: 'folder' })
+    expect(masterData.routes).toContainEqual({ to: { name: 'master-data-permit-attachment' }, permission: 'view-permit-attachment', title: 'Checklist Dokumen', icon: 'folder' })
+    expect(masterData.routes).toContainEqual({ to: { name: 'master-data-safety-checklist' }, permission: 'view-safety-checklist', title: 'Safety Checklist', icon: 'folder' })
+    expect(masterData.routes).toContainEqual({ to: { name: 'master-data-permit-category-apd' }, permission: 'view-permit-category-apd', title: 'APD', icon: 'folder' })
+    expect(masterData.routes).toContainEqual({ separator: 'Emergency Simulation' })
+    expect(masterData.routes).toContainEqual({ to: { name: 'master-data-emergency-simulation-topics' }, permission: 'view-emergency-simulation-topics', title: 'Topik Simulasi Tanggap Darurat', icon: 'folder' })
+    expect(masterData.routes).not.toContainEqual(expect.objectContaining({ to: { name: 'master-data-permit-apd' } }))
   })
 
   it('matches entrypoint subtrees at segment boundaries and prefers longest target', () => {

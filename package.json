@@ -21,6 +21,9 @@
     "packages:pull": "node scripts/package-repos.mjs pull",
     "packages:push": "node scripts/package-repos.mjs push",
     "packages:status": "node scripts/package-repos.mjs status",
+    "scaffold:master-data": "node scripts/scaffold-master-data.mjs",
+    "integrate:master-data": "node scripts/integrate-master-data.mjs",
+    "verify:module": "node scripts/verify-module.mjs",
     "push:all": "node scripts/package-repos.mjs push-all"
   },
   "devDependencies": {

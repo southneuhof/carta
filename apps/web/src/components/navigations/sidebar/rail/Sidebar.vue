@@ -151,7 +151,7 @@ onBeforeUnmount(() => window.removeEventListener('resize', updateScrollFades))
               <div v-if="isGroupOpen(module.name)" :id="`sidebar-group-${module.name}`" class="space-y-1 overflow-hidden">
                 <div class="h-1"></div>
                 <template v-for="entry in module.routes" :key="entry.name">
-                  <p v-if="'separator' in entry" class="ml-3 px-3 pb-1 pt-3 text-xs font-medium text-on-surface-variant">{{ entry.name }}</p>
+                  <p v-if="'separator' in entry" class="ml-3 px-3 pb-1 pt-2 text-xs font-medium text-on-surface-variant">{{ entry.name }}</p>
                   <RouterLink
                     v-else
                     :to="entry.to as never"
