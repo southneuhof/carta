@@ -20,23 +20,27 @@ The plan may summarize approved design decisions, but it must link to the
 approved design document. Do not silently change a locked decision in the plan
 or worksheet.
 
-## Plan-shell lifecycle
+## Discovery stub and plan lifecycle
 
-Create the module plan shell before the first module-specific source read. Use
-the same plan file through all phases:
+Create a minimal discovery worksheet stub before the first module-specific
+source read. It may identify the module and record live discovery evidence, but
+it is not the technical plan. Use the same plan file through all phases:
 
 1. `DISCOVERY`: initialize the worksheet and record the evidence ledger.
-2. `DESIGN`: link the approved design and record locked decisions.
-3. `PLAN`: add technical steps, file ownership, commands, stop conditions, and
-   the copied acceptance checklist.
+2. `DESIGN`: write the design document, obtain written approval, link its path,
+   and record locked decisions.
+3. `PLAN`: derive the technical plan from the approved design, then add
+   technical steps, file ownership, commands, stop conditions, and the copied
+   acceptance checklist.
 4. `READY`: mark the plan ready for source edits after design and plan approval.
 5. `EXECUTE`: work one active step at a time and update the worksheet.
 6. `VERIFY`: finish implementation steps and hand the plan to the independent
    verifier.
 7. `DONE`: use only after the verifier returns `PASS`.
 
-For a bounded simple module, the manifest is the bounded contract. The plan
-still owns the worksheet, evidence, acceptance checkpoint, and reports.
+For a bounded simple module, the approved manifest is the bounded contract.
+Create it only after the discovery and design gate. The plan still owns the
+worksheet, evidence, acceptance checkpoint, and reports.
 
 ## Worksheet template
 
@@ -48,7 +52,7 @@ Put this section near the top of the module plan:
 - State: `DISCOVERY`
 - Module: `<module>`
 - Plan: `<absolute or repository-relative plan path>`
-- Design: `<approved design path or bounded manifest decision>`
+- Design: `<TBD during DISCOVERY; required before PLAN>`
 - Planned at: `<short SHA>`
 - Active step: `1`
 - Next action: `<one exact read, edit, or command>`
@@ -87,6 +91,14 @@ Apply these rules:
 
 - During `DISCOVERY`, `DESIGN`, and `PLAN`, write only the plan, design, and
   other explicitly approved planning artifacts. Do not edit module source.
+- Before design approval, keep the plan limited to the discovery worksheet,
+  evidence ledger, unresolved questions, and generic placeholders. Do not add
+  technical scope, target files, implementation commands, design decisions, or
+  done criteria.
+- After discovery, write the design document to the repository and stop for
+  written approval. A chat proposal is not a design artifact. Only after
+  approval may `$improve` derive the technical plan and may the plan enter
+  `PLAN`.
 - Set the worksheet to `READY` only after the design and technical plan are
   approved. Set it to `EXECUTE` when source edits begin.
 - Every module-specific file read must answer a named ledger or plan question.

@@ -39,17 +39,28 @@ module plan. The selected module plan is the single human-facing handoff. Its
 required execution worksheet is a section in that same plan, not a separate
 task-notes file.
 
-Create the plan shell before the first module-specific source read. Keep the
-same plan through discovery, design, planning, execution, and verification:
+Create a minimal discovery worksheet stub before the first module-specific
+source read. The stub is a tracking envelope, not an approved design or a
+technical plan. Keep the same plan file through discovery, design, planning,
+execution, and verification:
 
 1. `DISCOVERY`: initialize the worksheet and record the evidence ledger.
-2. `DESIGN`: link the approved design and record locked decisions.
-3. `PLAN`: add technical steps, file ownership, commands, stop conditions, and
-   the copied acceptance checklist.
+2. `DESIGN`: write the design document, obtain written approval, link its path,
+   and record locked decisions.
+3. `PLAN`: use `$improve` to derive the technical plan from the approved
+   design, then add file ownership, commands, stop conditions, and the copied
+   acceptance checklist.
 4. `READY`: require design and plan approval before source edits.
 5. `EXECUTE`: work one active worksheet step at a time.
 6. `VERIFY`: hand the completed plan to `$verify-ads-hk-module`.
 7. `DONE`: use only after the verifier returns `PASS`.
+
+Before the design is approved, the worksheet may contain only module identity,
+live state, exact next action, read/write boundaries, discovery evidence, and
+unresolved questions. Generic template and checklist placeholders are allowed.
+Do not add technical scope, target files, implementation commands, design
+decisions, or done criteria before the approved design exists. A chat proposal
+does not replace the written design document.
 
 The approved design remains the authority for business and architecture
 decisions. The plan owns the technical contract, evidence ledger, acceptance
@@ -62,8 +73,9 @@ Do not use a worksheet note to bypass a design or planning decision.
 Read `references/module-discovery.md` before module source discovery. The
 required sequence is:
 
-1. Create or open the module plan shell and initialize its worksheet in
-   `DISCOVERY` state. Do not create separate task notes.
+1. Create or open the minimal discovery worksheet stub and initialize its
+   worksheet in `DISCOVERY` state. Do not create separate task notes or a
+   technical plan at this point.
 2. Read the repository `AGENTS.md`, the user request, and any plan or design
    path supplied by the user.
 3. Search exact module identifiers: slug, table, symbol, legacy title, and
@@ -99,6 +111,9 @@ Use one explicit manifest with `kind: "simple-master-data"`. It must define
 the identity, every domain field, exact labels, six permission entries,
 navigation placement, and optional seed records. The scaffold does not invent
 `name`, `description`, `active`, `code`, audit, relation, or seed fields.
+Create the manifest and any technical plan only after discovery, the required
+brainstorming and design gate, and written approval. The manifest is the
+approved bounded contract; it does not replace an unresolved design decision.
 
 Run these commands in order:
 
@@ -141,12 +156,13 @@ business decision. Do not force these modules into the manifest pipeline.
 2. For a new or legacy-backed complex module, invoke `$brainstorming` to
    validate the business and architecture. For an approved repair with no
    unresolved item, reuse the approved design and record that evidence.
-3. Write the approved design document and wait for written-spec approval
-   before source edits.
-4. Use `$improve` to create a self-contained implementation plan. Include the
-   design path, exact file ownership, dependency order, matrices, copied
-   acceptance checklist, commands, stop conditions, and machine-checkable
-   done criteria.
+3. Write the design document to the repository, record its path in the
+   worksheet, and stop for written-spec approval. Do not use a chat-only
+   proposal as the design artifact.
+4. After written approval, use `$improve` to derive a self-contained
+   implementation plan from that design. Include the design path, exact file
+   ownership, dependency order, matrices, copied acceptance checklist,
+   commands, stop conditions, and machine-checkable done criteria.
 5. Complete the execution worksheet section from
    `references/module-execution-worksheet.md` in that plan. Set its state to
    `READY` only after the design and plan are approved.

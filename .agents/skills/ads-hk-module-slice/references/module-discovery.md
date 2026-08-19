@@ -4,9 +4,10 @@ Use this reference before reading module source. The goal is to discover the
 contract with enough context for a safe decision, then stop reading when the
 decision is supported.
 
-Create or open the module plan shell before the first module-specific source
-read. Initialize its execution worksheet in `DISCOVERY` state. The plan is the
-canonical handoff for the module; do not create separate task notes.
+Create or open a minimal discovery worksheet stub before the first
+module-specific source read. Initialize its execution worksheet in `DISCOVERY`
+state. The stub is not the technical plan. The eventual plan is the canonical
+handoff for the module; do not create separate task notes.
 
 ## 1. Parse the request
 
@@ -127,7 +128,8 @@ module family.
 
 For a proven bounded module:
 
-1. Write the explicit manifest from the ledger.
+1. After the approved bounded design, write the explicit manifest from the
+   ledger.
 2. Run `pnpm scaffold:master-data ... --json`.
 3. Read the returned `generated`, `integration`, and `manual` paths.
 4. Run guarded integration and the static verifier.
@@ -142,16 +144,18 @@ generator is an existing tool, not a discovery prerequisite.
 ## 7. Complex handoff
 
 For a complex module, keep the ledger in the plan and carry its supported
-answers into the design and plan. The approved design owns locked business and
-architecture decisions. The plan owns the technical contract, complete field
-inventory, ownership map, route/action matrix, permission matrix, seed/reload
-behavior, exact legacy label evidence, acceptance checklist, and execution
-worksheet. Mark each row `PASS`, `APPROVED DIFFERENCE`, `SERVER SUPPLIED`, `NOT
-NEEDED`, `STOP`, or `BLOCKED`.
+answers into the design and derived plan. The approved design owns locked
+business and architecture decisions. The technical plan is created only after
+that design is written and approved. It owns the technical contract, complete
+field inventory, ownership map, route/action matrix, permission matrix,
+seed/reload behavior, exact legacy label evidence, acceptance checklist, and
+execution worksheet. Mark each row `PASS`, `APPROVED DIFFERENCE`, `SERVER
+SUPPLIED`, `NOT NEEDED`, `STOP`, or `BLOCKED`.
 
 For a new or legacy-backed complex module, use `$brainstorming` to validate
-business and architecture, then write the approved design and `$improve` plan
-before source edits. Add the execution worksheet from
+business and architecture, write the design document, and stop for written
+approval. Then use `$improve` to derive the implementation plan before source
+edits. Add the execution worksheet from
 `references/module-execution-worksheet.md` to the same plan. An approved repair
 with no unresolved item may reuse its design. The plan is the handoff; the next
 worker must not repeat broad discovery when the ledger already answers the
