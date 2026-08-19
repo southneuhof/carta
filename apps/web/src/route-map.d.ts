@@ -143,6 +143,62 @@ declare module 'vue-router/auto-routes' {
       { numberVariableId: ParamValue<false> },
       | never
     >,
+    'master-data-permit-danger-source': RouteRecordInfo<
+      'master-data-permit-danger-source',
+      '/master-data/permit-danger-source',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-permit-danger-source-detail': RouteRecordInfo<
+      'master-data-permit-danger-source-detail',
+      '/master-data/permit-danger-source/:permitDangerSourceId/detail',
+      { permitDangerSourceId: ParamValue<true> },
+      { permitDangerSourceId: ParamValue<false> },
+      | never
+    >,
+    'master-data-permit-danger-source-edit': RouteRecordInfo<
+      'master-data-permit-danger-source-edit',
+      '/master-data/permit-danger-source/:permitDangerSourceId/edit',
+      { permitDangerSourceId: ParamValue<true> },
+      { permitDangerSourceId: ParamValue<false> },
+      | never
+    >,
+    'master-data-permit-danger-source-create': RouteRecordInfo<
+      'master-data-permit-danger-source-create',
+      '/master-data/permit-danger-source/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-permit-work-types': RouteRecordInfo<
+      'master-data-permit-work-types',
+      '/master-data/permit-work-types',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-permit-work-types-detail': RouteRecordInfo<
+      'master-data-permit-work-types-detail',
+      '/master-data/permit-work-types/:permitWorkTypeId/detail',
+      { permitWorkTypeId: ParamValue<true> },
+      { permitWorkTypeId: ParamValue<false> },
+      | never
+    >,
+    'master-data-permit-work-types-edit': RouteRecordInfo<
+      'master-data-permit-work-types-edit',
+      '/master-data/permit-work-types/:permitWorkTypeId/edit',
+      { permitWorkTypeId: ParamValue<true> },
+      { permitWorkTypeId: ParamValue<false> },
+      | never
+    >,
+    'master-data-permit-work-types-create': RouteRecordInfo<
+      'master-data-permit-work-types-create',
+      '/master-data/permit-work-types/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     'master-data-projects': RouteRecordInfo<
       'master-data-projects',
       '/master-data/projects',
@@ -542,6 +598,14 @@ declare module 'vue-router/auto-routes' {
         | 'master-data-number-configs-edit'
         | 'master-data-number-variables'
         | 'master-data-number-variables-detail'
+        | 'master-data-permit-danger-source'
+        | 'master-data-permit-danger-source-create'
+        | 'master-data-permit-danger-source-detail'
+        | 'master-data-permit-danger-source-edit'
+        | 'master-data-permit-work-types'
+        | 'master-data-permit-work-types-create'
+        | 'master-data-permit-work-types-detail'
+        | 'master-data-permit-work-types-edit'
         | 'master-data-projects'
         | 'master-data-projects-create'
         | 'master-data-projects-detail'
@@ -718,6 +782,70 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/master-data/number-variables/[numberVariableId]/detail.route.vue': {
       routes:
         | 'master-data-number-variables-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/permit-danger-source/index.route.vue': {
+      routes:
+        | 'master-data-permit-danger-source'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/permit-danger-source/[permitDangerSourceId]/detail.route.vue': {
+      routes:
+        | 'master-data-permit-danger-source-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/permit-danger-source/[permitDangerSourceId]/edit.route.vue': {
+      routes:
+        | 'master-data-permit-danger-source-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/permit-danger-source/create.route.vue': {
+      routes:
+        | 'master-data-permit-danger-source-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/permit-work-types/index.route.vue': {
+      routes:
+        | 'master-data-permit-work-types'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/permit-work-types/[permitWorkTypeId]/detail.route.vue': {
+      routes:
+        | 'master-data-permit-work-types-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/permit-work-types/[permitWorkTypeId]/edit.route.vue': {
+      routes:
+        | 'master-data-permit-work-types-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/permit-work-types/create.route.vue': {
+      routes:
+        | 'master-data-permit-work-types-create'
       views:
         | never
       pathParamNames:

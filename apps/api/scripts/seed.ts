@@ -9,6 +9,8 @@ import { numberVariables } from '../src/routes/number-variables/number-variables
 import { projects } from '../src/routes/projects/projects.entity'
 import { ptsWorkCategories } from '../src/routes/pts-work-categories/pts-work-categories.entity'
 import { rootCauses } from '../src/routes/root-causes/root-causes.entity'
+import { permitWorkTypes } from '../src/routes/permit-work-types/permit-work-types.entity'
+import { permitDangerSources } from '../src/routes/permit-danger-source/permit-danger-source.entity'
 import { uoms } from '../src/routes/uoms/uoms.entity'
 import { workItems } from '../src/routes/work-items/work-items.entity'
 import { createQualityInspection } from '../src/routes/quality-inspection/quality-inspection.service'
@@ -337,6 +339,46 @@ async function main() {
     set: { projectId: 'project-default', parentId: 'work-item-category-default', categoryId: 'pts-category-default', code: 'ITEM', name: 'Default Item', level: 1, uomId: 'uom-each', active: true },
   })
   await db.insert(rootCauses).values({ id: 'root-cause-default', code: 'DEFAULT', name: 'Default', active: true }).onConflictDoNothing()
+  await db.insert(permitWorkTypes).values([
+    { id: 'permit-work-type-1', name: 'Hot Work', active: true },
+    { id: 'permit-work-type-2', name: 'Electrical', active: true },
+    { id: 'permit-work-type-3', name: 'Cold Work', active: true },
+    { id: 'permit-work-type-4', name: 'Demolition', active: true },
+    { id: 'permit-work-type-5', name: 'Working At Height', active: true },
+    { id: 'permit-work-type-6', name: 'Confined Space Entry', active: true },
+    { id: 'permit-work-type-7', name: 'Gas Test', active: true },
+    { id: 'permit-work-type-8', name: 'Excavation', active: true },
+    { id: 'permit-work-type-9', name: 'Work Over Water', active: true },
+    { id: 'permit-work-type-10', name: 'Radiography', active: true },
+  ]).onConflictDoUpdate({
+    target: permitWorkTypes.id,
+    set: { name: sql`excluded.name`, active: true },
+  })
+  await db.insert(permitDangerSources).values([
+    { id: 'permit-danger-source-1', name: 'Listrik', active: true },
+    { id: 'permit-danger-source-2', name: 'Gas', active: true },
+    { id: 'permit-danger-source-3', name: 'Ergonomi', active: true },
+    { id: 'permit-danger-source-4', name: 'Penggalian', active: true },
+    { id: 'permit-danger-source-5', name: 'Pada Ketinggian', active: true },
+    { id: 'permit-danger-source-6', name: 'Bongkar Muat', active: true },
+    { id: 'permit-danger-source-7', name: 'Alat listrik', active: true },
+    { id: 'permit-danger-source-8', name: 'Bahan kimia', active: true },
+    { id: 'permit-danger-source-9', name: 'Bertekanan', active: true },
+    { id: 'permit-danger-source-10', name: 'Penggunaan Bahan Kimia', active: true },
+    { id: 'permit-danger-source-11', name: 'Uji Bertekanan', active: true },
+    { id: 'permit-danger-source-12', name: 'Pengecatan', active: true },
+    { id: 'permit-danger-source-13', name: 'Moving part', active: true },
+    { id: 'permit-danger-source-14', name: 'Bising', active: true },
+    { id: 'permit-danger-source-15', name: 'Mudah terbakar', active: true },
+    { id: 'permit-danger-source-16', name: 'Lifting', active: true },
+    { id: 'permit-danger-source-17', name: 'Drilling', active: true },
+    { id: 'permit-danger-source-18', name: 'Crane', active: true },
+    { id: 'permit-danger-source-19', name: 'Kejatuhan', active: true },
+    { id: 'permit-danger-source-20', name: 'Biologi', active: true },
+  ]).onConflictDoUpdate({
+    target: permitDangerSources.id,
+    set: { name: sql`excluded.name`, active: true },
+  })
   for (const [id, code] of [
     ['number-variable-number', 'number'],
     ['number-variable-form', 'form_name'],

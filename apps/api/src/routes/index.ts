@@ -42,6 +42,8 @@ import {
 import { domain as qhssePtsDomain, qhssePtsModel } from "./qhsse-pts/qhsse-pts";
 import { domain as inspectionTestPlansDomain, inspectionTestPlansModel } from "./inspection-test-plans/inspection-test-plans";
 import { domain as qualityInspectionDomain, qualityInspectionModel } from "./quality-inspection/quality-inspection";
+import { domain as permitWorkTypesDomain, permitWorkTypeModel } from "./permit-work-types/permit-work-types";
+import { domain as permitDangerSourceDomain, permitDangerSourceModel } from "./permit-danger-source/permit-danger-source";
 
 export const domainParts = [
   authDomain,
@@ -61,6 +63,8 @@ export const domainParts = [
   qhssePtsDomain,
   inspectionTestPlansDomain,
   qualityInspectionDomain,
+  permitWorkTypesDomain,
+  permitDangerSourceDomain,
 ] as const;
 
 const installedRoutes = [
@@ -102,6 +106,8 @@ const installedRoutes = [
   qhssePtsModel,
   inspectionTestPlansModel,
   qualityInspectionModel,
+  permitWorkTypeModel,
+  permitDangerSourceModel,
 ] as const;
 
 // Public like /health; attach authenticated() here if the document should require a session.

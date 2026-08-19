@@ -33,10 +33,17 @@ Plan 066 corrects the route guard and custom API URL contract found during the
 Plan 065 browser check. Execute it after 065; it makes both approved entry
 paths usable without widening `/me` or changing framework code.
 
+Plans 082-086 build the five approved legacy-backed Work Permit master-data
+modules. Execute them one at a time in this order: work types, danger source,
+attachment, safety checklist, then category APD with nested APD. Plan 084
+depends on the work-type table for its cascade FK. Each plan requires the
+authenticated browser gate and `$verify-ads-hk-module` `PASS` before the next
+plan starts.
+
 ## User-facing completion gate
 
-For every plan that changes `apps/web`, `DONE` requires an authenticated T3
-preview or real browser check of the changed user flow. Automated tests, type
+For every plan that changes `apps/web`, `DONE` requires an authenticated Codex
+browser check of the changed user flow. Automated tests, type
 checks, and source review do not replace this check. If the preview is
 unavailable after a valid retry, mark the plan `BLOCKED` with a UI-unverified
 reason. Do not mark the plan `DONE`.
@@ -112,6 +119,11 @@ surfaces, actions, permissions, seed data, and first-load/reload checks.
 | 079 | Match Quality Inspection evidence export | P1 | L | 073, 075, 078 | DONE |
 | 080 | Restore Quality Inspection KPI effects | P1 | L | 076 | BLOCKED (no current KPI write contract, owner module, or owner tests found in the repository) |
 | 081 | Align Quality Inspection language and UI | P1 | M | 079, 080 | DONE |
+| 082 | Implement permit-work-types module | P1 | L | — | DONE |
+| 083 | Implement permit-danger-source module | P1 | L | 082 | DONE |
+| 084 | Implement permit-attachment module | P1 | L | 082, 083 | TODO |
+| 085 | Implement safety-checklist module | P1 | L | 082-084 | TODO |
+| 086 | Implement permit-category-apd and nested permit-apd | P1 | L | 082-085 | TODO |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with reason) | DEFERRED (with reason) | REJECTED (with rationale).
 
@@ -183,6 +195,11 @@ flowchart TD
   Q76 --> Q80["080 KPI effects"]
   Q79 --> Q81["081 language and UI"]
   Q80 --> Q81
+  PW82["082 permit-work-types module"]
+  PW82 --> PW83["083 permit-danger-source module"]
+  PW83 --> PW84["084 permit-attachment module"]
+  PW84 --> PW85["085 safety-checklist module"]
+  PW85 --> PW86["086 permit-category-apd + permit-apd"]
 ```
 
 ## Cohort execution rules
@@ -261,6 +278,22 @@ Plans 067-081 are the next Quality Inspection parity pass. Plan 068 is
 explicitly deferred by the user. Execute the remaining plans in order and use
 the PTS routes as the web UI standard. Every plan that edits `apps/web` must
 invoke `web-ui-surface-reuse` and report `Reused`, `Searched`, and `Gap`.
+
+Plan 082 is an independent Plan 1 execution for the approved
+`permit-work-types` module. It does not start any other permit module. Keep
+the API and web implementation within the plan's explicit scope and require
+the authenticated browser gate plus `$verify-ads-hk-module` before marking it
+DONE.
+
+Plans 083-086 are single-module checkpoints in the approved Work Permit
+sequence. Plan 083 adds danger source. Plan 084 consumes the Plan 082 work
+type table for its cascade FK and keeps `permitWorkTypeId` hidden. Plan 085 is
+the standalone safety checklist. Plan 086 owns both the category parent and
+the nested APD child, including parent-scoped child access and blocked parent
+deletes. Do not duplicate the design records' seed lists in the plan files;
+read the applicable design during execution. Every `apps/web` plan must use
+`web-ui-surface-reuse`, report `Reused`, `Searched`, and `Gap`, and pass the
+authenticated browser and verifier gates.
 
 ## Findings considered and rejected
 

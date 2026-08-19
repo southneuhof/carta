@@ -16,6 +16,13 @@ describe('navigation entrypoints', () => {
     expect(quality.routes).toContainEqual({ to: { name: 'quality-inspection-test-plans' }, permission: 'view-projects', title: 'Inspection & Test Plan', icon: 'folder' })
   })
 
+  it('adds the Work Permit entry with its system view grant', () => {
+    const masterData = navigation.find((module) => module.name === 'master-data')!
+    expect(masterData.routes).toContainEqual({ separator: 'Work Permit' })
+    expect(masterData.routes).toContainEqual({ to: { name: 'master-data-permit-work-types' }, permission: 'view-permit-work-types', title: 'Tipe Pekerjaan', icon: 'folder' })
+    expect(masterData.routes).toContainEqual({ to: { name: 'master-data-permit-danger-source' }, permission: 'view-permit-danger-source', title: 'Sumber Bahaya', icon: 'folder' })
+  })
+
   it('matches entrypoint subtrees at segment boundaries and prefers longest target', () => {
     const paths: Record<string, string> = {
       dashboard: '/dashboard',

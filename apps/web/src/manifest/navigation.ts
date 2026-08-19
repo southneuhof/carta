@@ -40,6 +40,9 @@ export const navigation = defineNavigation([
       { to: { name: 'master-data-pts-work-categories' }, permission: 'view-pts-work-categories', title: 'Kategori Pekerjaan', icon: 'folder' },
       { to: { name: 'master-data-root-causes' }, permission: 'view-root-causes', title: 'Penyebab QHSSE', icon: 'folder' },
       { to: { name: 'master-data-number-configs' }, permission: 'view-number-configs', title: 'Number Configurations', icon: 'folder' },
+      { separator: 'Work Permit' },
+      { to: { name: 'master-data-permit-work-types' }, permission: 'view-permit-work-types', title: 'Tipe Pekerjaan', icon: 'folder' },
+      { to: { name: 'master-data-permit-danger-source' }, permission: 'view-permit-danger-source', title: 'Sumber Bahaya', icon: 'folder' },
     ],
   },
 ] as const satisfies readonly NavigationModule[])

@@ -10,6 +10,8 @@ const entries = [
   ['pts-work-categories', 'Kategori Pekerjaan'],
   ['root-causes', 'Penyebab QHSSE'],
   ['number-configs', 'Number Configurations'],
+  ['permit-work-types', 'Tipe Pekerjaan'],
+  ['permit-danger-source', 'Sumber Bahaya'],
 ] as const
 </script>
 
