@@ -12,6 +12,7 @@ const entries = [
   ['number-configs', 'Number Configurations'],
   ['emergency-simulation-topics', 'Topik Simulasi Tanggap Darurat'],
   ['emergency-simulation-employees', 'Karyawan Terlibat'],
+  ['emergency-simulation-tools', 'Perlengkapan Tanggap Darurat'],
   ['permit-work-types', 'Tipe Pekerjaan'],
   ['permit-danger-source', 'Sumber Bahaya'],
   ['permit-attachment', 'Checklist Dokumen'],

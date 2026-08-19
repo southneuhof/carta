@@ -129,6 +129,34 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    'master-data-emergency-simulation-tools': RouteRecordInfo<
+      'master-data-emergency-simulation-tools',
+      '/master-data/emergency-simulation-tools',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-emergency-simulation-tools-detail': RouteRecordInfo<
+      'master-data-emergency-simulation-tools-detail',
+      '/master-data/emergency-simulation-tools/:emergencySimulationToolId/detail',
+      { emergencySimulationToolId: ParamValue<true> },
+      { emergencySimulationToolId: ParamValue<false> },
+      | never
+    >,
+    'master-data-emergency-simulation-tools-edit': RouteRecordInfo<
+      'master-data-emergency-simulation-tools-edit',
+      '/master-data/emergency-simulation-tools/:emergencySimulationToolId/edit',
+      { emergencySimulationToolId: ParamValue<true> },
+      { emergencySimulationToolId: ParamValue<false> },
+      | never
+    >,
+    'master-data-emergency-simulation-tools-create': RouteRecordInfo<
+      'master-data-emergency-simulation-tools-create',
+      '/master-data/emergency-simulation-tools/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     'master-data-emergency-simulation-topics': RouteRecordInfo<
       'master-data-emergency-simulation-topics',
       '/master-data/emergency-simulation-topics',
@@ -767,6 +795,10 @@ declare module 'vue-router/auto-routes' {
         | 'master-data-emergency-simulation-employees-create'
         | 'master-data-emergency-simulation-employees-detail'
         | 'master-data-emergency-simulation-employees-edit'
+        | 'master-data-emergency-simulation-tools'
+        | 'master-data-emergency-simulation-tools-create'
+        | 'master-data-emergency-simulation-tools-detail'
+        | 'master-data-emergency-simulation-tools-edit'
         | 'master-data-emergency-simulation-topics'
         | 'master-data-emergency-simulation-topics-create'
         | 'master-data-emergency-simulation-topics-detail'
@@ -961,6 +993,38 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/master-data/emergency-simulation-employees/create.route.vue': {
       routes:
         | 'master-data-emergency-simulation-employees-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/emergency-simulation-tools/index.route.vue': {
+      routes:
+        | 'master-data-emergency-simulation-tools'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/emergency-simulation-tools/[emergencySimulationToolId]/detail.route.vue': {
+      routes:
+        | 'master-data-emergency-simulation-tools-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/emergency-simulation-tools/[emergencySimulationToolId]/edit.route.vue': {
+      routes:
+        | 'master-data-emergency-simulation-tools-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/emergency-simulation-tools/create.route.vue': {
+      routes:
+        | 'master-data-emergency-simulation-tools-create'
       views:
         | never
       pathParamNames:

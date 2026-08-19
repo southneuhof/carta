@@ -1,0 +1,69 @@
+{
+  "kind": "simple-master-data",
+  "slug": "emergency-simulation-tools",
+  "table": "emergency_simulation_tools",
+  "symbol": "EmergencySimulationTool",
+  "title": "Perlengkapan Tanggap Darurat",
+  "identity": {
+    "key": "id",
+    "type": "text",
+    "primary": true,
+    "generated": "uuid"
+  },
+  "fields": [
+    {
+      "key": "name",
+      "type": "text",
+      "label": "Nama",
+      "required": true,
+      "renderer": "text"
+    }
+  ],
+  "serverFields": [
+    { "key": "code", "type": "text" },
+    { "key": "description", "type": "text" },
+    { "key": "active", "type": "boolean", "default": true }
+  ],
+  "labels": {
+    "listTitle": "Perlengkapan Tanggap Darurat",
+    "detailTitle": "Detail Perlengkapan Tanggap Darurat",
+    "createTitle": "Tambah Perlengkapan Tanggap Darurat",
+    "editTitle": "Ubah Perlengkapan Tanggap Darurat",
+    "submitLabel": "Submit",
+    "createSuccessMessage": "Berhasil menambahkan data!",
+    "updateSuccessMessage": "Berhasil mengubah data!"
+  },
+  "permissions": {
+    "moduleName": "Emergency Simulation Tools",
+    "realm": "system",
+    "entries": {
+      "view": { "name": "View Emergency Simulation Tools", "description": "View emergency simulation tools." },
+      "list": { "name": "List Emergency Simulation Tools", "description": "List emergency simulation tools." },
+      "detail": { "name": "Detail Emergency Simulation Tools", "description": "View an emergency simulation tool." },
+      "create": { "name": "Create Emergency Simulation Tools", "description": "Create emergency simulation tools." },
+      "update": { "name": "Update Emergency Simulation Tools", "description": "Update emergency simulation tools." },
+      "delete": { "name": "Delete Emergency Simulation Tools", "description": "Delete emergency simulation tools." }
+    }
+  },
+  "navigation": {
+    "after": "master-data-emergency-simulation-employees",
+    "title": "Perlengkapan Tanggap Darurat",
+    "icon": "folder",
+    "separator": "Emergency Simulation"
+  },
+  "seed": {
+    "records": [
+      { "id": "emergency-simulation-tool-1", "name": "Shut down System" },
+      { "id": "emergency-simulation-tool-2", "name": "Petunjuk Kerja" },
+      { "id": "emergency-simulation-tool-3", "name": "Alarm & Detector Sytem" },
+      { "id": "emergency-simulation-tool-4", "name": " Alat Pelindung Diri" },
+      { "id": "emergency-simulation-tool-5", "name": "Mustering Drill" },
+      { "id": "emergency-simulation-tool-6", "name": "Sistem Keamanan Terpadu" },
+      { "id": "emergency-simulation-tool-7", "name": "Racun Api, Karung Basah" },
+      { "id": "emergency-simulation-tool-8", "name": "Sebuk Gergaji, Pasir" },
+      { "id": "emergency-simulation-tool-9", "name": "Sistem Pengamanan Sumber Energi" },
+      { "id": "emergency-simulation-tool-10", "name": "Lain lain" }
+    ],
+    "updateFields": ["name"]
+  }
+}

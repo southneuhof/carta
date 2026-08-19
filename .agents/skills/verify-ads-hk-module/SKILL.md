@@ -7,7 +7,9 @@ description: Read-only acceptance verification for one ADS-HK module after imple
 
 Verify the observable result of one module. Do not implement fixes. Do not
 edit source, plans, checklists, designs, or indexes. Do not trust the
-implementation summary or test claims.
+implementation summary or test claims. The browser step may use temporary
+local or development fixtures as defined below; this does not permit production
+or irreversible business writes.
 
 Use the selected plan's discovery ledger as the read boundary. Read additional
 files when the ledger or contract requires them. Do not require unrelated
@@ -118,6 +120,11 @@ failed, or does not cover a required risk. Use local or development data only.
 If a command targets production or an irreversible external system, return
 `BLOCKED`.
 
+The API and web test commands must be module-scoped and must name the module's
+spec files. Do not substitute a package-wide `test`, `test:unit`, or bare
+`vitest run`. Run a full suite only when a focused failure shows cross-module
+risk or the user asks for it, and record the reason.
+
 For a bounded manifest module:
 
 1. Read the named JSON result from `verify:module --check-only`.
@@ -158,6 +165,13 @@ Record the URL, surface, action, test-data identifier, visible result, and
 failure message for each journey row. If the browser remains unavailable
 after the retry, return `BLOCKED` with `UI UNVERIFIED`; automated checks do
 not replace this gate.
+
+For local or development CRUD verification, temporary fixtures required by the
+approved journey are pre-authorized. Create only clearly marked temporary
+records, keep their identifiers, update and reload them as required, delete
+them after the check, and reload to confirm removal. Do not ask for confirmation
+again. Do not mutate seeded/reference/existing-user records or perform an
+irreversible business action.
 
 ## Output
 

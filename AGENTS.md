@@ -13,6 +13,8 @@
 - Keep changes focused and simple. Avoid unrelated edits, unnecessary abstractions, and low-signal tests
 - Test observable behavior, review substantial changes, and validate user-facing work in the real interface. Use seeded local data when the flow needs records, lookups, or child rows.
 - Preserve unrelated work and never take destructive, production, or external actions beyond what the user authorized
+- For an authenticated browser check against local or development ADS-HK data, temporary fixtures required by the approved module journey are pre-authorized. Create only clearly marked temporary records, keep their identifiers, update and reload them as required, delete them after the check, and reload to confirm removal. Do not ask for confirmation again. This does not authorize production or external writes, changes to seeded/reference/existing-user records, or irreversible business actions.
+- For module acceptance, use the module-scoped commands from the selected plan or `verify:module`. Do not run a package-wide `test`, `test:unit`, or bare `vitest run` as the default. Run a full suite only when a focused failure shows a cross-module risk or the user asks for it, and record the reason.
 - Report meaningful blockers, outcomes, and evidence without noisy progress
 
 # Web UI reuse
@@ -46,6 +48,8 @@
   report for the module. The independent verifier consumes a fresh report and
   reruns a command only when the report is missing, stale, failed, or does not
   cover a required risk.
+- The focused test commands must include the module's API and web spec paths.
+  Do not replace them with a package-wide suite.
 - Use `--with-seed` with `verify:module --run` only when the manifest has seed records. The integration command is guarded and idempotent; do not edit route-map files by hand.
 - The full acceptance checklist, authenticated Codex browser check, and `$verify-ads-hk-module` `PASS` remain mandatory. Reuse the same worker, session, and browser context for a safe sequence of simple modules when possible.
 - Use High or Extra High reasoning only for this workflow (`high` or `xhigh` in model control). Never use Low or Medium. Max-level effort remains optional for complex modules.

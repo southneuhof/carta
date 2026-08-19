@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "module": "emergency-simulation-tools",
+  "manifest": "/Users/gamer/Documents/projects/ads-hk/plans/091-build-emergency-simulation-tools.module.json",
+  "command": "pnpm --silent verify:module --manifest /Users/gamer/Documents/projects/ads-hk/plans/091-build-emergency-simulation-tools.module.json --run --with-seed --json",
+  "static": "PASS",
+  "focusedApiTests": "PASS: 2/2",
+  "focusedWebTests": "PASS: 3/3",
+  "apiLint": "PASS",
+  "webLint": "PASS with 12 existing formatter warnings",
+  "apiTypeCheck": "PASS",
+  "webTypeCheck": "PASS",
+  "gitDiffCheck": "PASS",
+  "migration": "PASS",
+  "seedRuns": "PASS: 2/2",
+  "browserRequired": true
+}

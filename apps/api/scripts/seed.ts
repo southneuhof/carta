@@ -40,6 +40,8 @@ import { seedEmergencySimulationTopic } from '../src/routes/emergency-simulation
 
 import { seedEmergencySimulationEmployee } from '../src/routes/emergency-simulation-employees/emergency-simulation-employees.seed'
 
+import { seedEmergencySimulationTool } from '../src/routes/emergency-simulation-tools/emergency-simulation-tools.seed'
+
 const seedEmail = process.env.ADS_HK_ADMIN_EMAIL ?? 'admin@example.com'
 const seedPassword = process.env.ADS_HK_ADMIN_PASSWORD ?? 'demo-password'
 const seededQualityInspectionMarker = 'seed-quality-inspection-default'
@@ -345,6 +347,7 @@ async function seedQualityInspection(userId: string) {
 
 async function main() {
   await seedAuthorization()
+  await seedEmergencySimulationTool()
   await seedEmergencySimulationTopic()
   await seedEmergencySimulationEmployee()
   const db = getDb()

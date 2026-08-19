@@ -53,6 +53,8 @@ import { emergencySimulationTopicModel, domain as emergencySimulationTopicsDomai
 
 import { emergencySimulationEmployeeModel, domain as emergencySimulationEmployeesDomain } from "./emergency-simulation-employees/emergency-simulation-employees";
 
+import { emergencySimulationToolModel, domain as emergencySimulationToolsDomain } from "./emergency-simulation-tools/emergency-simulation-tools";
+
 export const domainParts = [
   authDomain,
   businessCategoriesDomain,
@@ -79,6 +81,7 @@ export const domainParts = [
   permitApdDomain,
   emergencySimulationTopicsDomain,
   emergencySimulationEmployeesDomain,
+  emergencySimulationToolsDomain,
 ] as const;
 
 const installedRoutes = [
@@ -128,6 +131,7 @@ const installedRoutes = [
   permitApdModel,
   emergencySimulationTopicModel,
   emergencySimulationEmployeeModel,
+  emergencySimulationToolModel,
 ] as const;
 
 // Public like /health; attach authenticated() here if the document should require a session.

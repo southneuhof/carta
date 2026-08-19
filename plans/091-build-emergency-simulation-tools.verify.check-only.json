@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "module": "emergency-simulation-tools",
+  "manifest": "/Users/gamer/Documents/projects/ads-hk/plans/091-build-emergency-simulation-tools.module.json",
+  "command": "pnpm --silent verify:module --manifest /Users/gamer/Documents/projects/ads-hk/plans/091-build-emergency-simulation-tools.module.json --check-only --json",
+  "static": "PASS",
+  "generatedFiles": 12,
+  "permissions": 6,
+  "routes": [
+    "master-data-emergency-simulation-tools",
+    "master-data-emergency-simulation-tools-detail",
+    "master-data-emergency-simulation-tools-create",
+    "master-data-emergency-simulation-tools-edit"
+  ],
+  "browserRequired": true
+}

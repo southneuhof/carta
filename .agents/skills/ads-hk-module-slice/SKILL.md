@@ -155,6 +155,21 @@ database and schema
 → focused API and web tests
 ```
 
+## Focused checks and local browser fixtures
+
+Use the module-scoped commands from the selected plan or `verify:module` for
+every module, including the full path. The API and web test commands must name
+the module's spec files. Do not run a package-wide `test`, `test:unit`, or bare
+`vitest run` as a default. Run a full suite only when a focused failure shows
+cross-module risk or the user asks for it, and record the reason.
+
+For an authenticated browser check against local or development data, temporary
+fixtures required by the approved module journey are already authorized. Create
+only clearly marked temporary records, keep their identifiers, update and reload
+them as required, delete them after the check, and reload to confirm removal.
+Do not ask for confirmation again. This does not cover production or external
+writes, seeded/reference/existing-user records, or irreversible business actions.
+
 Invoke `$build-resource-form` for resource-backed forms,
 `$web-ui-surface-reuse` for web surfaces, and `$migrate-web-resource` only for
 an approved migration. These skills own layer details; do not copy them into
