@@ -513,6 +513,34 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    'master-data-toll-causes-accidents': RouteRecordInfo<
+      'master-data-toll-causes-accidents',
+      '/master-data/toll-causes-accidents',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-toll-causes-accidents-detail': RouteRecordInfo<
+      'master-data-toll-causes-accidents-detail',
+      '/master-data/toll-causes-accidents/:tollCausesAccidentsId/detail',
+      { tollCausesAccidentsId: ParamValue<true> },
+      { tollCausesAccidentsId: ParamValue<false> },
+      | never
+    >,
+    'master-data-toll-causes-accidents-edit': RouteRecordInfo<
+      'master-data-toll-causes-accidents-edit',
+      '/master-data/toll-causes-accidents/:tollCausesAccidentsId/edit',
+      { tollCausesAccidentsId: ParamValue<true> },
+      { tollCausesAccidentsId: ParamValue<false> },
+      | never
+    >,
+    'master-data-toll-causes-accidents-create': RouteRecordInfo<
+      'master-data-toll-causes-accidents-create',
+      '/master-data/toll-causes-accidents/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     'master-data-uoms': RouteRecordInfo<
       'master-data-uoms',
       '/master-data/uoms',
@@ -849,6 +877,10 @@ declare module 'vue-router/auto-routes' {
         | 'master-data-safety-checklist-create'
         | 'master-data-safety-checklist-detail'
         | 'master-data-safety-checklist-edit'
+        | 'master-data-toll-causes-accidents'
+        | 'master-data-toll-causes-accidents-create'
+        | 'master-data-toll-causes-accidents-detail'
+        | 'master-data-toll-causes-accidents-edit'
         | 'master-data-uoms'
         | 'master-data-uoms-create'
         | 'master-data-uoms-detail'
@@ -1433,6 +1465,38 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/master-data/safety-checklist/create.route.vue': {
       routes:
         | 'master-data-safety-checklist-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/toll-causes-accidents/index.route.vue': {
+      routes:
+        | 'master-data-toll-causes-accidents'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/toll-causes-accidents/[tollCausesAccidentsId]/detail.route.vue': {
+      routes:
+        | 'master-data-toll-causes-accidents-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/toll-causes-accidents/[tollCausesAccidentsId]/edit.route.vue': {
+      routes:
+        | 'master-data-toll-causes-accidents-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/toll-causes-accidents/create.route.vue': {
+      routes:
+        | 'master-data-toll-causes-accidents-create'
       views:
         | never
       pathParamNames:

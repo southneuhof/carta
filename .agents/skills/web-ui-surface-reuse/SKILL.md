@@ -83,6 +83,23 @@ Use these mappings unless a documented gap exists:
 | Buttons, alerts, cards, loading | Framework base components |
 | Tabs, dialogs, search, filter chips | Framework composite components |
 
+For database-backed identifier relations or reference fields, the API response
+must contain the named relation object. Keep the ID or code field for form
+values and writes. Define a separate computed field with `read` for list/detail
+display. Do not fetch or map in the browser only to label a database-owned
+reference. Fixed non-database enums may use an approved local lookup. `read`
+does not fetch the display value. Do not show a raw ID when the contract
+provides a user-facing name.
+
+When a legacy tab strip only changes the query for one `ListView` collection,
+it is a filter, not independent tabbed content. Use `ChipFilter` in the
+`ListView` `filters` slot, following
+`apps/web/src/routes/(authenticated)/master-data/projects/index.route.vue`.
+Keep `Tabs` for independent surfaces or route navigation. Preserve the legacy
+labels, order, selected default, and query semantics. Do not invent an `all`
+state when the legacy contract has no such state. If the chip can clear,
+normalize `null` to the approved default before querying.
+
 For a Form select, use the field contract and an option source:
 
 ```ts

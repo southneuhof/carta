@@ -32,21 +32,48 @@ ask for another reference or explicit approval to work without legacy parity.
 When the user names only this skill and a module, use `develop`. Do not ask
 for the default legacy path again.
 
+## Canonical plan and execution worksheet
+
+Read `references/module-execution-worksheet.md` before creating or executing a
+module plan. The selected module plan is the single human-facing handoff. Its
+required execution worksheet is a section in that same plan, not a separate
+task-notes file.
+
+Create the plan shell before the first module-specific source read. Keep the
+same plan through discovery, design, planning, execution, and verification:
+
+1. `DISCOVERY`: initialize the worksheet and record the evidence ledger.
+2. `DESIGN`: link the approved design and record locked decisions.
+3. `PLAN`: add technical steps, file ownership, commands, stop conditions, and
+   the copied acceptance checklist.
+4. `READY`: require design and plan approval before source edits.
+5. `EXECUTE`: work one active worksheet step at a time.
+6. `VERIFY`: hand the completed plan to `$verify-ads-hk-module`.
+7. `DONE`: use only after the verifier returns `PASS`.
+
+The approved design remains the authority for business and architecture
+decisions. The plan owns the technical contract, evidence ledger, acceptance
+checklist, and reports. The worksheet owns only live state: the current step,
+next action, read/write boundary, result, evidence, blockers, and handoff notes.
+Do not use a worksheet note to bypass a design or planning decision.
+
 ## Route before broad reading
 
 Read `references/module-discovery.md` before module source discovery. The
 required sequence is:
 
-1. Read the repository `AGENTS.md`, the user request, and any plan or design
+1. Create or open the module plan shell and initialize its worksheet in
+   `DISCOVERY` state. Do not create separate task notes.
+2. Read the repository `AGENTS.md`, the user request, and any plan or design
    path supplied by the user.
-2. Search exact module identifiers: slug, table, symbol, legacy title, and
+3. Search exact module identifiers: slug, table, symbol, legacy title, and
    direct route. Use `rg --files` and `rg -n -F`; do not scan every file with a
    shared prefix.
-3. Read the direct legacy owner and the current owner or direct route when
+4. Read the direct legacy owner and the current owner or direct route when
    they exist. Record each answer in the evidence ledger.
-4. Classify the shape from evidence. If any contract is ambiguous, escalate
+5. Classify the shape from evidence. If any contract is ambiguous, escalate
    to the full path.
-5. Use the bounded path only when its eligibility conditions are all proven.
+6. Use the bounded path only when its eligibility conditions are all proven.
    Otherwise use the full path.
 
 This triage applies to simple and complex modules. Complex modules receive
@@ -97,10 +124,10 @@ Medium. Keep one manifest, one verifier report, and one acceptance checkpoint
 per module.
 
 Capture the JSON output of the `--check-only` and `--run` commands as the
-module's named machine report. Record its absolute path in the plan or task
-notes. The independent verifier consumes a fresh report and does not repeat
-passing commands only to reproduce them. It reruns a command when the report
-is missing, stale, failed, or does not cover a required risk.
+module's named machine report. Record its absolute path in the plan's worksheet
+or reports section. The independent verifier consumes a fresh report and does
+not repeat passing commands only to reproduce them. It reruns a command when
+the report is missing, stale, failed, or does not cover a required risk.
 
 ## Full path for complex or unclear modules
 
@@ -120,11 +147,14 @@ business decision. Do not force these modules into the manifest pipeline.
    design path, exact file ownership, dependency order, matrices, copied
    acceptance checklist, commands, stop conditions, and machine-checkable
    done criteria.
-5. Execute one plan at a time in database → authenticated API → typed
+5. Complete the execution worksheet section from
+   `references/module-execution-worksheet.md` in that plan. Set its state to
+   `READY` only after the design and plan are approved.
+6. Execute one plan at a time in database → authenticated API → typed
    operation → resource and field catalog → standard or approved custom
    surface order.
-6. Invoke `$verify-ads-hk-module` after execution. Only `PASS` can mark the
-   plan `DONE`.
+7. Set the worksheet state to `VERIFY` and invoke `$verify-ads-hk-module` after
+   execution. Only `PASS` can mark the plan `DONE`.
 
 Read all legacy list, detail, create, edit, and workflow surfaces that the
 matrix marks as part of the contract. Do not read unrelated surfaces only
@@ -157,8 +187,9 @@ database and schema
 
 ## Focused checks and local browser fixtures
 
-Use the module-scoped commands from the selected plan or `verify:module` for
-every module, including the full path. The API and web test commands must name
+Use the module-scoped commands from the selected plan's worksheet or
+`verify:module` for every module, including the full path. The API and web test
+commands must name
 the module's spec files. Do not run a package-wide `test`, `test:unit`, or bare
 `vitest run` as a default. Run a full suite only when a focused failure shows
 cross-module risk or the user asks for it, and record the reason.
@@ -182,8 +213,23 @@ approval. Record `Reused`, `Searched`, and `Gap` for web UI decisions.
   punctuation, terminology, validation, and workflow text. Record an approved
   difference or stop.
 - Keep database, API, operation, resource, and route field names aligned.
+- For database-backed identifier relations or reference fields, make the API
+  the source of display metadata. Add the named relation object to the API
+  select schema, define the Drizzle relation, and load it for list/detail and
+  returned create/update records. Keep `projectId`/`categoryCode`-style fields
+  for form values and writes; use a computed `defineFields` field with a `read`
+  projection for list/detail names. Do not fetch or map in the frontend only to
+  label a database-owned reference. Fixed non-database enums may use an
+  approved local lookup. The `read` projection does not fetch data.
 - Use `ListView`, `DetailView`, and `FormView` for standard CRUD. Use a custom
   endpoint or route-local form only for an approved domain workflow.
+- When a legacy tab strip only changes the query for one `ListView` collection,
+  render it as the framework `ChipFilter` in the `ListView` `filters` slot,
+  following `apps/web/src/routes/(authenticated)/master-data/projects/index.route.vue`.
+  Keep `Tabs` for independent surfaces or route navigation. Preserve exact
+  legacy labels, order, selected default, and query semantics. Do not invent an
+  `all` state when the legacy contract has no such state. If the chip can clear,
+  normalize `null` to the approved default before querying.
 - Use the owning resource `list` and `detail` as lookup sources. Do not add a
   consumer-owned options route or ask users to enter IDs.
 - Keep API authorization as the authority. Match permission names and realms.
@@ -194,9 +240,9 @@ approval. Record `Reused`, `Searched`, and `Gap` for web UI decisions.
 
 ## Acceptance and finish gate
 
-Copy `references/module-acceptance-checklist.md` into the selected plan or
-task notes before editing. Complete every required route, surface, action,
-permission, label, seed, reload, focused-check, and evidence row.
+Copy `references/module-acceptance-checklist.md` into the selected plan before
+editing. Complete every required route, surface, action, permission, label,
+seed, reload, focused-check, worksheet, and evidence row.
 
 Before reporting completion:
 

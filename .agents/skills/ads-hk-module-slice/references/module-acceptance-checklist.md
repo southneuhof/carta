@@ -1,11 +1,29 @@
 # Module acceptance checklist
 
-Copy this checklist into the selected plan or task notes before editing. Fill
-the direct evidence paths, results, and statuses. Do not report completion
-while a required item is `TODO`, `REWORK`, `STOP`, or `BLOCKED`.
+Copy this checklist into the selected module plan before editing. The module
+plan is the canonical handoff and contains the execution worksheet, evidence
+ledger, technical steps, checklist, and evidence links. Do not create separate
+task notes. Fill the direct evidence paths, results, and statuses. Do not
+report completion while a required item is `TODO`, `REWORK`, `STOP`, or
+`BLOCKED`.
 
 Use these statuses: `TODO`, `PASS`, `APPROVED DIFFERENCE`, `SERVER SUPPLIED`,
 `NOT NEEDED`, `REWORK`, `STOP`, and `BLOCKED`.
+
+## 0. Execution worksheet
+
+- [ ] The selected plan contains the worksheet from
+      `references/module-execution-worksheet.md`.
+- [ ] The worksheet has one module, plan path, design or bounded manifest
+      decision, planned-at SHA, current state, active step, next action,
+      read/write boundary, last evidence, and blocker.
+- [ ] The worksheet state is `READY` before source edits, `EXECUTE` during
+      implementation, and `VERIFY` before independent verification.
+- [ ] Only one worksheet step is `ACTIVE` at a time.
+- [ ] Every completed step has a path, command report, or browser result.
+- [ ] The worksheet has no unresolved `TODO`, `REWORK`, `STOP`, or `BLOCKED`
+      step before verification.
+- [ ] The worksheet is not marked `DONE` before verifier `PASS`.
 
 ## 1. Scope and evidence
 
@@ -38,8 +56,9 @@ Use these statuses: `TODO`, `PASS`, `APPROVED DIFFERENCE`, `SERVER SUPPLIED`,
 | Framework or UI gap | `<path:line>` | `<none/gap>` | TODO |
 
 For a bounded manifest module, the scaffold JSON result and static verifier
-report may provide the generated-path and route evidence. The acceptance
-matrix and browser gate still remain required.
+report may provide the generated-path and route evidence. Record their absolute
+paths in the plan worksheet or reports section. The acceptance matrix and
+browser gate still remain required.
 
 ## 2. Route and action matrix
 
@@ -84,6 +103,12 @@ approved design labels.
 - [ ] Required lookup sources use the owning resource list and detail.
 - [ ] The field inventory covers API create/update, list, detail, renderer,
       source, and server-supplied values.
+- [ ] Database-backed identifier relations or reference fields have a named
+      nested relation in the API select schema, a defined and loaded backend
+      relation, and that relation in list/detail and returned create/update
+      records. The web resource uses a write field for IDs/codes and a computed
+      `read` field for list/detail names without a frontend-only label fetch or
+      map. Raw IDs are not shown as user-facing values.
 - [ ] User-facing labels match the legacy label ledger exactly, or the
       difference is approved in the design.
 - [ ] The seed or fixture command, owner, expected records, and idempotence
@@ -109,6 +134,8 @@ approved design labels.
 
 ## 5. Independent verification
 
+- [ ] Worksheet state is `VERIFY`, all implementation steps are `PASS`, and
+      no implementation step is still `ACTIVE`.
 - [ ] `$verify-ads-hk-module` reviewed the current plan, design or bounded
       manifest decision, scoped ledger, diff, legacy reference, checklist,
       checks, seed, and browser journey.

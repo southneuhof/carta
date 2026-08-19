@@ -115,7 +115,7 @@ const surface = computed<ListViewSurface>(() => {
         namespace: props.namespace,
         searchParameters: props.searchParameters,
         schema: props.schema,
-        pagination: props.pagination,
+        pagination: props.pagination || "always",
         pageSizeOptions: props.pageSizeOptions,
         defaultPageSize: props.defaultPageSize,
         minColumnWidth: props.minColumnWidth,
@@ -129,7 +129,10 @@ const surface = computed<ListViewSurface>(() => {
     } as ListViewSurface;
   }
   return {
-    table: props.table!,
+    table: {
+      ...props.table!,
+      pagination: props.table!.pagination ?? "always",
+    },
     createRoute: undefined,
     detailRoute: undefined,
     updateRoute: undefined,

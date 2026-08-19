@@ -11,10 +11,11 @@ implementation summary or test claims. The browser step may use temporary
 local or development fixtures as defined below; this does not permit production
 or irreversible business writes.
 
-Use the selected plan's discovery ledger as the read boundary. Read additional
-files when the ledger or contract requires them. Do not require unrelated
-siblings, every module file with a shared prefix, or the full generator source
-when a simple module has a valid machine report and direct generated paths.
+Use the selected plan's execution worksheet and evidence ledger as the read
+boundary. Read additional files when the worksheet, ledger, or contract
+requires them. Do not require unrelated siblings, every module file with a
+shared prefix, or the full generator source when a simple module has a valid
+machine report and direct generated paths.
 
 ## Verdicts
 
@@ -36,7 +37,8 @@ Read these before judging the result:
 1. Repository `AGENTS.md` and the selected Improve plan.
 2. The approved design and its legacy reference for the full path, or the
    bounded manifest and recorded decision for a simple path.
-3. The copied `module-acceptance-checklist.md` and discovery evidence ledger.
+3. The execution worksheet, copied `module-acceptance-checklist.md`, and
+   discovery evidence ledger in the selected plan.
 4. The plan's planned-at SHA, scope, dependencies, commands, and done
    criteria.
 5. Current `git status`, the in-scope diff, database migration or schema,
@@ -51,6 +53,21 @@ Read these before judging the result:
 
 If a required input or evidence row is missing, return `BLOCKED`. Do not
 recreate a missing design decision from memory.
+
+## Worksheet gate
+
+Before judging source or browser behavior:
+
+- confirm the selected plan contains one execution worksheet;
+- confirm its state is `VERIFY`, not `DONE` or an earlier phase;
+- confirm exactly one module and plan are named;
+- confirm all implementation steps are `PASS` and none is `TODO`, `ACTIVE`,
+  `REWORK`, `STOP`, or `BLOCKED`;
+- confirm each completed step has a path, command report, or browser result;
+- confirm the worksheet does not contain a silent design or plan change.
+
+If any worksheet requirement fails, return `BLOCKED` with the exact missing or
+inconsistent field. Do not repair the worksheet during read-only verification.
 
 ## 1. Scope and drift
 
@@ -103,6 +120,11 @@ Confirm:
 - client route-tree and server registration produce one URL per action;
 - API authorization remains the authority and lookup sources use the owner;
 - standard CRUD uses the resource and `ListView`, `DetailView`, or `FormView`;
+- database-backed identifier relations or reference fields have a named nested
+  relation in the API select schema and read responses, with the relation
+  loaded by the backend; the web resource uses a write field for IDs/codes and
+  a computed `read` field for list/detail names, without a frontend-only label
+  fetch or map; raw IDs are not user-facing display values;
 - custom actions have an approved reason, exact payload, visible fields, and
   route-local scope;
 - create, update, delete, and workflow writes refresh expected data.
@@ -189,9 +211,11 @@ LABELS: <PASS, differences, or blockers>
 CHECKS: <commands and results>
 BROWSER: <URL, journey, result, or UI UNVERIFIED>
 EVIDENCE: <ledger, checklist rows, and file:line references>
+WORKSHEET: <state, step result, and unresolved item result>
 REWORK: <exact correction, or None>
 BLOCKER: <exact blocker, or None>
 ```
 
 Do not mark the plan or module complete from this report. The calling module
-workflow updates the checklist and plan index only after `PASS`.
+workflow changes the worksheet state to `DONE` and updates the checklist and
+plan index only after `PASS`.

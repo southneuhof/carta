@@ -41,6 +41,7 @@ import { seedEmergencySimulationTopic } from '../src/routes/emergency-simulation
 import { seedEmergencySimulationEmployee } from '../src/routes/emergency-simulation-employees/emergency-simulation-employees.seed'
 
 import { seedEmergencySimulationTool } from '../src/routes/emergency-simulation-tools/emergency-simulation-tools.seed'
+import { seedTollCausesAccidents } from '../src/routes/toll-causes-accidents/toll-causes-accidents.seed'
 
 const seedEmail = process.env.ADS_HK_ADMIN_EMAIL ?? 'admin@example.com'
 const seedPassword = process.env.ADS_HK_ADMIN_PASSWORD ?? 'demo-password'
@@ -350,6 +351,7 @@ async function main() {
   await seedEmergencySimulationTool()
   await seedEmergencySimulationTopic()
   await seedEmergencySimulationEmployee()
+  await seedTollCausesAccidents()
   const db = getDb()
   let admin = (await db.select({ id: users.id }).from(users).where(eq(users.email, seedEmail)).limit(1))[0]
   if (!admin) {

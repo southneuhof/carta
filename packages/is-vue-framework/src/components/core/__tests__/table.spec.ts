@@ -344,6 +344,17 @@ describe('Table core', () => {
     view.unmount()
   })
 
+  it('defaults standalone table pagination to auto', async () => {
+    const view = mountCore(Table, {
+      fields,
+      load: () => ({ data: rows, meta: { total: 1, pageSize: 10, totalPage: 1 } }),
+    })
+    await flush()
+
+    expect(view.find('nav[aria-label="Pagination"]')).toBeNull()
+    view.unmount()
+  })
+
   it('can keep disabled pagination visible for a single known page', async () => {
     const view = mountCore(Table, {
       fields,

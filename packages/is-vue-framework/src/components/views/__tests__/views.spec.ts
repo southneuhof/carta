@@ -85,6 +85,19 @@ describe('ListView', () => {
     view.unmount()
   })
 
+  it('defaults list pagination to always', async () => {
+    const view = mountCore(ListView, {
+      table: {
+        fields: { name: { label: 'Nama' } },
+        load: () => ({ data: [{ name: 'Admin' }], meta: { total: 1, totalPage: 1 } }),
+      },
+    })
+    await flush()
+
+    expect(view.find('nav[aria-label="Pagination"]')).not.toBeNull()
+    view.unmount()
+  })
+
   it('updates visible columns immediately, coalesces persistence, and reset cancels pending visibility', async () => {
     vi.useFakeTimers()
     const storage = installStorage()

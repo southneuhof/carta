@@ -4,6 +4,10 @@ Use this reference before reading module source. The goal is to discover the
 contract with enough context for a safe decision, then stop reading when the
 decision is supported.
 
+Create or open the module plan shell before the first module-specific source
+read. Initialize its execution worksheet in `DISCOVERY` state. The plan is the
+canonical handoff for the module; do not create separate task notes.
+
 ## 1. Parse the request
 
 Extract exact values from the request or supplied plan:
@@ -40,8 +44,10 @@ search.
 
 ## 3. Evidence ledger
 
-Keep this small table in the task notes, design, or plan. Every decision must
-point to a path and symbol or line. `NOT NEEDED` is valid only with a reason.
+Keep this small table in the execution worksheet section of the module plan.
+Every decision must point to a path and symbol or line. `NOT NEEDED` is valid
+only with a reason. Every module-specific read must answer a ledger or plan
+question; otherwise stop and record why a new read boundary is required.
 
 | Question | Evidence path and symbol/line | Result | Status |
 |---|---|---|---|
@@ -135,17 +141,21 @@ generator is an existing tool, not a discovery prerequisite.
 
 ## 7. Complex handoff
 
-For a complex module, carry the ledger into the design and plan. Add the
-complete field inventory, ownership map, route/action matrix, permission
-matrix, seed/reload behavior, and exact legacy label evidence. Mark each row
-`PASS`, `APPROVED DIFFERENCE`, `SERVER SUPPLIED`, `NOT NEEDED`, `STOP`, or
-`BLOCKED`.
+For a complex module, keep the ledger in the plan and carry its supported
+answers into the design and plan. The approved design owns locked business and
+architecture decisions. The plan owns the technical contract, complete field
+inventory, ownership map, route/action matrix, permission matrix, seed/reload
+behavior, exact legacy label evidence, acceptance checklist, and execution
+worksheet. Mark each row `PASS`, `APPROVED DIFFERENCE`, `SERVER SUPPLIED`, `NOT
+NEEDED`, `STOP`, or `BLOCKED`.
 
 For a new or legacy-backed complex module, use `$brainstorming` to validate
 business and architecture, then write the approved design and `$improve` plan
-before source edits. An approved repair with no unresolved item may reuse its
-design. The plan is the handoff; the next worker must not repeat broad
-discovery when the ledger already answers the question.
+before source edits. Add the execution worksheet from
+`references/module-execution-worksheet.md` to the same plan. An approved repair
+with no unresolved item may reuse its design. The plan is the handoff; the next
+worker must not repeat broad discovery when the ledger already answers the
+question.
 
 ## 8. Stop conditions
 

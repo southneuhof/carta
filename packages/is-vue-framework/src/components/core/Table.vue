@@ -6,7 +6,7 @@ import TableContent from './TableContent.vue'
 
 const props = withDefaults(defineProps<TableProps<TRecord, TQuery>>(), {
   searchParameters: () => ({}),
-  pagination: 'always',
+  pagination: 'auto',
   pageSizeOptions: () => [10, 25, 50, 100],
   defaultPageSize: 10,
   minColumnWidth: 96,

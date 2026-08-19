@@ -383,6 +383,20 @@ export const authorizationModules = [
     ],
   },
   {
+    code: "toll-causes-accidents",
+    name: "Toll Causes Accidents",
+    realm: "system",
+    active: true,
+    permissions: [
+      { code: "view-toll-causes-accidents", name: "View Toll Causes Accidents", description: "View toll accident causes.", active: true },
+      { code: "list-toll-causes-accidents", name: "List Toll Causes Accidents", description: "List toll accident causes.", active: true },
+      { code: "detail-toll-causes-accidents", name: "Detail Toll Causes Accidents", description: "View a toll accident cause.", active: true },
+      { code: "create-toll-causes-accidents", name: "Create Toll Causes Accidents", description: "Create toll accident causes.", active: true },
+      { code: "update-toll-causes-accidents", name: "Update Toll Causes Accidents", description: "Update toll accident causes.", active: true },
+      { code: "delete-toll-causes-accidents", name: "Delete Toll Causes Accidents", description: "Delete toll accident causes.", active: true },
+    ],
+  },
+  {
     code: "emergency-simulation-topics",
     name: "Emergency Simulation Topics",
     realm: "system",

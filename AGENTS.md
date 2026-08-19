@@ -21,14 +21,17 @@
 - For `apps/web` UI work, use `.agents/skills/web-ui-surface-reuse/SKILL.md`; do not load it for backend or architecture-only work.
 - For `apps/web` UI work, read `docs/architecture/web-application-architecture.md`, `packages/is-vue-framework/README.md`, and the nearest route/resource first.
 - Use `defineResource` + `ListView`/`DetailView`/`FormView` for standard CRUD; use `Table`/`Detail`/`Form`, `defineFields`, and package components for custom surfaces.
+- For database-backed identifier relations or reference fields, the API owns display metadata. Its select schema and read responses must include the named relation object; the frontend keeps `projectId`/`categoryCode`-style fields for form values and writes and uses a computed `defineFields` field with a `read` projection for list/detail names. Do not fetch only to label a record. Fixed non-database enums may use an approved local lookup; `read` does not fetch.
 - Before editing a route, record the exact route and surface (`list`, `detail`, `row`, `form`, or shared component), its intended actions, and the sibling pattern. Do not remove or rename an action on another surface because it uses the same component or label.
 - Use the framework standard action for standard CRUD. Add a custom control only when the standard surface cannot express the requirement; record the exact gap and get approval when the change affects a shared package.
 - Do not create generic local components or custom inputs, tables, forms, or dialogs when `@southneuhof/is-vue-framework` has an equivalent. Local components are for navigation, app shell, or domain workflows.
+- When a legacy tab strip only filters one collection, use the framework `ChipFilter` in the `ListView` `filters` slot, following `apps/web/src/routes/(authenticated)/master-data/projects/index.route.vue`. Keep `Tabs` for independent surfaces or route navigation. Preserve the legacy labels, order, selected default, and query semantics.
 - If no equivalent fits, record the exact gap, keep code route-local, and do not edit framework code without explicit approval. Summaries must state `Reused`, `Searched`, and `Gap`.
 
 ## Module development
 - For a new or legacy-backed ADS-HK module, use `$ads-hk-module-slice` with the default end-to-end `develop` workflow. Start with exact-identifier shape triage and a small evidence ledger. Use `/Users/gamer/Documents/projects/ads-hk-legacy` as the legacy reference unless the user gives another path.
-- Use the bounded manifest path only when direct evidence proves standard CRUD and no decision remains unresolved. Use `$brainstorming`, an approved design, and the `$improve` implementation plan for relation-backed, workflow, custom-surface, or unclear modules. Execute the plan in dependency order, then run `$verify-ads-hk-module`; only a `PASS` verifier result can mark the plan `DONE`. Use the acceptance checklist as the handoff and completion contract.
+- For database-backed identifier relations or reference fields, define the nested relation in the API select schema, define the Drizzle relation, and load it in list/detail and returned create/update records. Keep the scalar ID/code as the write contract and the relation object as the display contract. Do not add a frontend-only labeling fetch or map when the database owns the reference.
+- Use the bounded manifest path only when direct evidence proves standard CRUD and no decision remains unresolved. Use `$brainstorming`, an approved design, and the `$improve` implementation plan for relation-backed, workflow, custom-surface, or unclear modules. Create one module plan shell before module-specific source reads. Keep the discovery ledger, approved decision summary, technical plan, execution worksheet, acceptance checklist, and evidence links in that plan; do not use separate task notes. Execute the plan in dependency order, then run `$verify-ads-hk-module`; only a `PASS` verifier result can mark the plan `DONE`. Use the plan and its worksheet as the handoff and completion contract.
 - When legacy is the business reference, copy user-facing labels exactly from legacy. Do not translate, shorten, improve, or invent labels. Record an approved difference before using any other text; otherwise stop.
 - Stop on unresolved business, API, permission, framework, route/action, or legacy-parity decisions. Do not guess or report completion while the authenticated Codex browser gate is unverified.
 
@@ -45,9 +48,12 @@
   pnpm --silent verify:module --manifest /absolute/path/module.json --run --json
   ```
 - Capture the JSON result from the check and run commands as the named machine
-  report for the module. The independent verifier consumes a fresh report and
-  reruns a command only when the report is missing, stale, failed, or does not
-  cover a required risk.
+  report for the module. Record its absolute path in the module plan's
+  worksheet or reports section. The independent verifier consumes a fresh
+  report and reruns a command only when the report is missing, stale, failed,
+  or does not cover a required risk.
+- Keep one plan and one execution worksheet per module, even when several
+  simple modules share a cohort pattern.
 - The focused test commands must include the module's API and web spec paths.
   Do not replace them with a package-wide suite.
 - Use `--with-seed` with `verify:module --run` only when the manifest has seed records. The integration command is guarded and idempotent; do not edit route-map files by hand.

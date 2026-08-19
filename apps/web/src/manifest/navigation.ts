@@ -50,6 +50,8 @@ export const navigation = defineNavigation([
       { to: { name: 'master-data-permit-attachment' }, permission: 'view-permit-attachment', title: 'Checklist Dokumen', icon: 'folder' },
       { to: { name: 'master-data-safety-checklist' }, permission: 'view-safety-checklist', title: 'Safety Checklist', icon: 'folder' },
       { to: { name: 'master-data-permit-category-apd' }, permission: 'view-permit-category-apd', title: 'APD', icon: 'folder' },
+      { separator: 'Road Traffic Safety' },
+      { to: { name: 'master-data-toll-causes-accidents' }, permission: 'view-toll-causes-accidents', title: 'Faktor Kecelakaan', icon: 'folder' },
     ],
   },
 ] as const satisfies readonly NavigationModule[])
