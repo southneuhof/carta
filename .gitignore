@@ -18,6 +18,7 @@ coverage
 *.tsbuildinfo
 *.local
 .env
+.env.test
 .expo/
 /cypress/videos/
 /cypress/screenshots/

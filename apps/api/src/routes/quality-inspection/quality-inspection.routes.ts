@@ -1,11 +1,11 @@
 import { authenticated, defineRoute } from '@southneuhof/sprindle/routes'
 import { notFound, unauthorized } from '@southneuhof/sprindle'
-import { listQuerySchema } from '@southneuhof/sprindle/validation'
 import { orgIdentity, requirePermission } from '../../identity'
 import {
   completeReportQualityInspectionSchema,
   createQualityInspectionSchema,
   qualityInspectionContextOperationSchema,
+  qualityInspectionListQuerySchema,
   submitQualityInspectionDocumentationsSchema,
   updateQualityInspectionSchema,
   verifyQualityInspectionSchema,
@@ -36,7 +36,7 @@ export const listQualityInspectionRoute = defineRoute({
   method: 'get',
   authorize: [authenticated(), requirePermission('view-quality-inspection')],
   action: async (args) => {
-    const query = listQuerySchema.parse(args.c.req.query())
+    const query = qualityInspectionListQuerySchema.parse(args.c.req.query())
     const result = await listQualityInspections(await caller(args), query)
     return args.c.json({ data: result.data, page: query.page, limit: query.limit, total: result.total })
   },

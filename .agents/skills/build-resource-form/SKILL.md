@@ -24,7 +24,11 @@ Read these files before editing:
    `source` when configuring a resource-backed standard list field.
 
 Do not guess framework APIs from memory. Copy the shape of a nearby current
-module and change only the domain values. Do not edit
+module and change only the domain values. For standard CRUD, use the returned
+resource action and its named route target. Do not add a route-local Create,
+Edit, or Delete control when the standard view can express it. If the standard
+view cannot express it, record the exact gap before adding the smallest
+route-local control. Do not edit
 `packages/is-vue-framework` without explicit user approval. If no framework
 surface fits, record the exact gap and keep the smallest route-local solution.
 
@@ -71,6 +75,13 @@ const fields = defineFields(recordsSchema, {
   },
 })
 ```
+
+When legacy is the business reference, copy each user-facing label exactly
+from the legacy field and surface inventory. Preserve capitalization,
+punctuation, singular/plural form, terminology, and visible validation or
+workflow text. Do not translate, shorten, improve, or invent a synonym. If the
+legacy label is missing or ambiguous, stop and record the decision before
+editing the resource.
 
 Keep a relation label in `read` and the submitted ID in the form field. Use
 `write` when the input value needs conversion before submit. See
@@ -212,7 +223,10 @@ Run focused checks for the changed module:
   detail access, and write rules;
 - web type check and focused lint;
 - `git diff --check`; and
-- browser create or edit verification when the route is available.
+- authenticated browser or T3 preview verification of the changed create, edit,
+  list, detail, and workflow path. If the preview is unavailable after a valid
+  retry, report `UI UNVERIFIED` or `BLOCKED`; automated checks do not replace
+  the browser check and the module must not be reported complete.
 
 In the browser, confirm that a standard list source sends page, limit, search,
 and dependency values; changing search sends a new server request; returned
@@ -240,6 +254,8 @@ After the user approves a custom write:
 - define a separate input schema and endpoint when permission, state, or
   response differs from CRUD;
 - use a custom resource action or a route-local `Form`/`DialogForm` submit;
+- give each workflow action its own field set. Do not reuse a generic dialog
+  field set when the clicked action already fixes a value such as a result;
 - use `Table` and registered inputs for route-local child editing;
 - keep workflow controls and refresh behavior in the route;
 - use one database transaction when parent and child writes must succeed
@@ -254,7 +270,7 @@ permission during submit even when the form source already filtered its rows.
 ## Stop conditions
 
 Stop and ask the user when the decision changes the API contract, permission
-model, transaction boundary, or required framework surface. Stop and use the
-brainstorming skill when a form seems to need a new endpoint, a consumer-owned
-list, or a lookup route. Otherwise use the nearest current pattern and record
-the assumption in the final report.
+model, transaction boundary, required framework surface, or legacy label. Stop
+and use the brainstorming skill when a form seems to need a new endpoint, a
+consumer-owned list, or a lookup route. Otherwise use the nearest current
+pattern and record the assumption in the final report.

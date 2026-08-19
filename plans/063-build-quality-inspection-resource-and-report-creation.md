@@ -134,6 +134,7 @@ re-test framework TreeTable behavior.
 - [ ] Standard list/create/edit reuse ListView/FormView and schema-bound fields.
 - [ ] The only custom UI is the route-local selector; it reuses framework TreeTable/Table/Form controls.
 - [ ] Scheduled creation reads origins but creates no schedule, Todo, or notification.
+- [ ] An authenticated T3 preview or real browser confirms both normal and scheduled entry paths and the create/edit forms.
 - [ ] Focused tests, web type/lint checks, API type check, and diff check pass.
 
 ## STOP conditions

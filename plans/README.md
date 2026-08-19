@@ -33,6 +33,17 @@ Plan 066 corrects the route guard and custom API URL contract found during the
 Plan 065 browser check. Execute it after 065; it makes both approved entry
 paths usable without widening `/me` or changing framework code.
 
+## User-facing completion gate
+
+For every plan that changes `apps/web`, `DONE` requires an authenticated T3
+preview or real browser check of the changed user flow. Automated tests, type
+checks, and source review do not replace this check. If the preview is
+unavailable after a valid retry, mark the plan `BLOCKED` with a UI-unverified
+reason. Do not mark the plan `DONE`.
+
+When legacy is the business reference, the plan must also list its entry paths,
+surfaces, actions, permissions, seed data, and first-load/reload checks.
+
 ## Execution order and status
 
 | Plan | Title | Priority | Effort | Depends on | Status |
@@ -86,8 +97,23 @@ paths usable without widening `/me` or changing framework code.
 | 064 | Build Quality Inspection detail workflow and evidence | P1 | L | 062, 063 | DONE |
 | 065 | Restore Quality Inspection entry and seed data | P0 | M | 062-064 | DONE |
 | 066 | Make Quality Inspection entry routes reachable | P0 | M | 065 | DONE |
+| 067 | Align Quality Inspection list parity | P1 | L | 062-066 | DONE |
+| 068 | Defer Quality Inspection recap Excel export | P2 | L | 067 | DEFERRED (user decision) |
+| 069 | Align Quality Inspection creation form | P0 | L | 067 | DONE |
+| 070 | Show Quality Inspection schedule origin | P1 | M | 069 | DONE |
+| 071 | Complete Quality Inspection report detail | P0 | M | 070 | DONE |
+| 072 | Add Quality Inspection Point selector | P0 | M | 071 | DONE |
+| 073 | Render Quality Inspection item criteria | P0 | L | 071 | DONE |
+| 074 | Render Quality Inspection item history | P0 | M | 073 | DONE |
+| 075 | Restore Quality Inspection documentation surface | P0 | M | 071 | DONE |
+| 076 | Align Quality Inspection workflow actions | P0 | M | 072, 075 | DONE |
+| 077 | Align Quality Inspection PTS presentation | P1 | S | 074 | DONE |
+| 078 | Complete Quality Inspection audit history | P0 | L | 074, 077 | DONE |
+| 079 | Match Quality Inspection evidence export | P1 | L | 073, 075, 078 | DONE |
+| 080 | Restore Quality Inspection KPI effects | P1 | L | 076 | BLOCKED (no current KPI write contract, owner module, or owner tests found in the repository) |
+| 081 | Align Quality Inspection language and UI | P1 | M | 079, 080 | DONE |
 
-Status values: TODO | IN PROGRESS | DONE | BLOCKED (with reason) | REJECTED (with rationale).
+Status values: TODO | IN PROGRESS | DONE | BLOCKED (with reason) | DEFERRED (with reason) | REJECTED (with rationale).
 
 ## Dependency flow
 
@@ -138,6 +164,25 @@ flowchart TD
   Q63 --> Q64
   Q64 --> Q65["065 QI entry and development seed"]
   Q65 --> Q66["066 QI route contract"]
+  Q66 --> Q67["067 QI list parity"]
+  Q67 --> Q69["069 QI creation and standard Create"]
+  Q69 --> Q70["070 schedule origin"]
+  Q70 --> Q71["071 report detail"]
+  Q71 --> Q72["072 Inspection Point selector"]
+  Q71 --> Q73["073 item criteria and snapshots"]
+  Q73 --> Q74["074 item history"]
+  Q71 --> Q75["075 documentation surface"]
+  Q72 --> Q76["076 workflow actions"]
+  Q75 --> Q76
+  Q74 --> Q77["077 PTS presentation"]
+  Q74 --> Q78["078 audit history"]
+  Q77 --> Q78
+  Q73 --> Q79["079 evidence export"]
+  Q75 --> Q79
+  Q78 --> Q79
+  Q76 --> Q80["080 KPI effects"]
+  Q79 --> Q81["081 language and UI"]
+  Q80 --> Q81
 ```
 
 ## Cohort execution rules
@@ -208,6 +253,14 @@ flowchart TD
 - Plan 066 keeps the QI project-create permission on the server and makes the
   route guard defer only that create route. Its route registration change must
   use the existing Sprindle model tree; it must not modify framework code.
+
+- Plan 068 recap Excel export: deferred by the user. Keep the legacy endpoint
+  evidence in the plan, but do not implement it in this sequence.
+
+Plans 067-081 are the next Quality Inspection parity pass. Plan 068 is
+explicitly deferred by the user. Execute the remaining plans in order and use
+the PTS routes as the web UI standard. Every plan that edits `apps/web` must
+invoke `web-ui-surface-reuse` and report `Reused`, `Searched`, and `Gap`.
 
 ## Findings considered and rejected
 

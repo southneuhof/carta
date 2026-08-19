@@ -1,5 +1,5 @@
 import { HttpError, notFound, validationError } from '@southneuhof/sprindle'
-import { and, asc, count, desc, eq, inArray, isNull, sql, type SQL } from 'drizzle-orm'
+import { and, asc, count, desc, eq, gte, ilike, inArray, isNull, lt, or, sql, type SQL } from 'drizzle-orm'
 import { accessibleProjectIds, allowedProjectOperations, allowedProjectPermissions, coveredProjectIds, hasProjectCoverage, requireProjectRecord, resolveSystemIdentity } from '../../authorization'
 import type { PermissionCode } from '../../authorization/catalog'
 import { getDb } from '../../db'
@@ -13,6 +13,7 @@ import { ptsWorkCategories } from '../pts-work-categories/pts-work-categories.en
 import { qhssePts } from '../qhsse-pts/qhsse-pts.entity'
 import { createOrReuseQualityInspectionPts } from '../qhsse-pts/qhsse-pts.service'
 import { users } from '../users/users.entity'
+import { uoms } from '../uoms/uoms.entity'
 import { workItems } from '../work-items/work-items.entity'
 import {
   qualityInspectionDocumentations,
@@ -60,6 +61,17 @@ type Tx = Parameters<Parameters<Db['transaction']>[0]>[0]
 
 function now() {
   return new Date().toISOString()
+}
+
+function monthStart(value: unknown, name: string) {
+  if (value === undefined) return undefined
+  if (typeof value !== 'string' || !/^\d{4}-(0[1-9]|1[0-2])$/.test(value)) throw validationError(`${name} must use YYYY-MM.`)
+  return `${value}-01T00:00:00.000Z`
+}
+
+function nextMonth(value: string) {
+  const [year, month] = value.slice(0, 7).split('-').map(Number)
+  return new Date(Date.UTC(year, month, 1)).toISOString()
 }
 
 async function reportById(id: string, includeDeleted = false, db: Db | Tx = getDb()) {
@@ -167,12 +179,25 @@ async function loadContext(userId: string, projectId: string, operation: Quality
     if (parent) parent.children.push(node)
     else roots.push(node)
   }
-  const [divisionRows, projectRows, categoryRows, ownerRows] = await Promise.all([
+  const [divisionRows, projectRows, categoryRows, ownerRows, uomRows] = await Promise.all([
     db.select({ id: divisions.id, code: divisions.code, name: divisions.name }).from(divisions).where(eq(divisions.active, true)).orderBy(asc(divisions.name)),
     db.select({ id: projects.id, number: projects.number, name: projects.name, divisionId: projects.divisionId }).from(projects).where(and(eq(projects.id, projectId), eq(projects.active, true))),
     db.select({ id: ptsWorkCategories.id, code: ptsWorkCategories.code, name: ptsWorkCategories.name }).from(ptsWorkCategories).where(eq(ptsWorkCategories.active, true)).orderBy(asc(ptsWorkCategories.name)),
     projectUsers(db as unknown as Tx, projectId),
+    db.select({ id: uoms.id, name: uoms.name }).from(uoms).where(eq(uoms.active, true)).orderBy(asc(uoms.name)),
   ])
+  const categoriesById = new Map(categoryRows.map((category) => [category.id, category.name]))
+  const uomsById = new Map(uomRows.map((uom) => [uom.id, uom.name]))
+  const itemsById = new Map(items.map((item) => [item.id, item]))
+  for (const node of nodeById.values()) {
+    const item = itemsById.get(node.id)
+    if (item) {
+      node.categoryName = item.categoryId ? categoriesById.get(item.categoryId) ?? null : null
+      node.volume = item.volume
+      node.uomName = item.uomId ? uomsById.get(item.uomId) ?? null : null
+      node.isHighRisk = item.isHighRisk
+    }
+  }
   const activeItpTypes = [...new Set(itps.map((itp) => itp.type).filter((type): type is typeof qualityInspectionItpTypes[number] => (qualityInspectionItpTypes as readonly string[]).includes(type as string)))]
   return { tree: roots, activeItpTypes, divisions: divisionRows, projects: projectRows, qualityWorkCategories: categoryRows, owners: ownerRows }
 }
@@ -303,17 +328,67 @@ export async function listQualityInspections(userId: string, query: Record<strin
   if (typeof query.projectId === 'string') conditions.push(eq(qualityInspections.projectId, query.projectId))
   if (typeof query.statusCode === 'string') conditions.push(eq(qualityInspections.statusCode, query.statusCode))
   if (typeof query.stepCode === 'string') conditions.push(eq(qualityInspections.stepCode, query.stepCode))
-  if (typeof query.search === 'string' && query.search) conditions.push(sql`${qualityInspections.number} ilike ${`%${query.search}%`}`)
+  const start = monthStart(query.startMonth, 'startMonth')
+  const end = typeof query.endMonth === 'string' ? nextMonth(monthStart(query.endMonth, 'endMonth')!) : undefined
+  const search = typeof query.search === 'string' && query.search ? `%${query.search}%` : undefined
+  if (start) conditions.push(gte(qualityInspections.createdAt, start))
+  if (end) conditions.push(lt(qualityInspections.createdAt, end))
+  if (search) conditions.push(or(
+    ilike(qualityInspections.number, search),
+    ilike(projects.name, search),
+    ilike(divisions.name, search),
+    ilike(workItems.name, search),
+    ilike(users.name, search),
+    ilike(qualityInspections.locationZone, search),
+  )!)
   const page = Number(query.page)
   const limit = Number(query.limit)
   const where = and(...conditions)
   const db = getDb()
-  const rows = await db.select({ row: qualityInspections, projectName: projects.name, divisionName: divisions.name }).from(qualityInspections)
-    .innerJoin(projects, eq(projects.id, qualityInspections.projectId)).innerJoin(divisions, eq(divisions.id, qualityInspections.divisionId))
-    .where(where).orderBy(desc(qualityInspections.createdAt)).limit(limit).offset((page - 1) * limit)
-  const total = await db.select({ value: count() }).from(qualityInspections).where(where)
+  const [rows, total] = await Promise.all([
+    db.select({
+      row: qualityInspections,
+      projectName: projects.name,
+      divisionName: divisions.name,
+      createdByName: users.name,
+      createdByPhoto: users.imgPhotoUser,
+      workItemCategoryName: workItems.name,
+    }).from(qualityInspections)
+      .innerJoin(projects, eq(projects.id, qualityInspections.projectId))
+      .innerJoin(divisions, eq(divisions.id, qualityInspections.divisionId))
+      .innerJoin(workItems, eq(workItems.id, qualityInspections.workItemCategoryId))
+      .innerJoin(users, eq(users.id, qualityInspections.createdByUserId))
+      .where(where).orderBy(desc(qualityInspections.createdAt)).limit(limit).offset((page - 1) * limit),
+    db.select({ value: count() }).from(qualityInspections)
+      .innerJoin(projects, eq(projects.id, qualityInspections.projectId))
+      .innerJoin(divisions, eq(divisions.id, qualityInspections.divisionId))
+      .innerJoin(workItems, eq(workItems.id, qualityInspections.workItemCategoryId))
+      .innerJoin(users, eq(users.id, qualityInspections.createdByUserId))
+      .where(where),
+  ])
+  const reportIds = rows.map(({ row }) => row.id)
+  const documentations = reportIds.length ? await db.select({
+    qualityInspectionId: qualityInspectionDocumentations.qualityInspectionId,
+    name: qualityInspectionDocumentations.name,
+    fileAttachment: qualityInspectionDocumentations.fileAttachment,
+    description: qualityInspectionDocumentations.description,
+  }).from(qualityInspectionDocumentations).where(inArray(qualityInspectionDocumentations.qualityInspectionId, reportIds)).orderBy(asc(qualityInspectionDocumentations.name)) : []
+  const documentationsByReport = new Map<string, typeof documentations>()
+  for (const documentation of documentations) documentationsByReport.set(documentation.qualityInspectionId, [...(documentationsByReport.get(documentation.qualityInspectionId) ?? []), documentation])
   const ops = await operationMap(userId, [...new Set(rows.map(({ row }) => row.projectId))])
-  return { data: rows.map(({ row, projectName, divisionName }) => ({ ...qualityInspectionRecordSchema.parse(row), projectName, divisionName, allowedOperations: row.stepCode === 'report' && row.statusCode === 'open' ? ops.get(row.projectId) ?? ['detail'] : ['detail'] })), total: Number(total[0]?.value ?? 0) }
+  return {
+    data: rows.map(({ row, projectName, divisionName, createdByName, createdByPhoto, workItemCategoryName }) => ({
+      ...qualityInspectionRecordSchema.parse(row),
+      projectName,
+      divisionName,
+      createdByName,
+      createdByPhoto,
+      workItemCategoryName,
+      documentations: documentationsByReport.get(row.id) ?? [],
+      allowedOperations: row.stepCode === 'report' && row.statusCode === 'open' ? ops.get(row.projectId) ?? ['detail'] : ['detail'],
+    })),
+    total: Number(total[0]?.value ?? 0),
+  }
 }
 
 async function loadDetail(db: Db | Tx, row: typeof qualityInspections.$inferSelect, userId: string): Promise<QualityInspectionRecord> {
@@ -323,7 +398,7 @@ async function loadDetail(db: Db | Tx, row: typeof qualityInspections.$inferSele
     db.select({ id: ptsWorkCategories.id, code: ptsWorkCategories.code, name: ptsWorkCategories.name }).from(ptsWorkCategories).where(eq(ptsWorkCategories.id, row.qualityWorkCategoryId)).limit(1),
     db.select({ id: workItems.id, code: workItems.code, name: workItems.name }).from(workItems).where(eq(workItems.id, row.workItemCategoryId)).limit(1),
     db.select({ id: users.id, name: users.name }).from(users).where(eq(users.id, row.createdByUserId)).limit(1),
-    db.select({ row: qualityInspectionWorkItemItps, workItem: { id: workItems.id, code: workItems.code, name: workItems.name } }).from(qualityInspectionWorkItemItps).innerJoin(workItems, eq(workItems.id, qualityInspectionWorkItemItps.workItemId)).where(eq(qualityInspectionWorkItemItps.qualityInspectionId, row.id)).orderBy(asc(qualityInspectionWorkItemItps.createdAt)),
+    db.select({ row: qualityInspectionWorkItemItps, workItem: { id: workItems.id, code: workItems.code, name: workItems.name, uomName: uoms.name } }).from(qualityInspectionWorkItemItps).innerJoin(workItems, eq(workItems.id, qualityInspectionWorkItemItps.workItemId)).leftJoin(uoms, eq(uoms.id, workItems.uomId)).where(eq(qualityInspectionWorkItemItps.qualityInspectionId, row.id)).orderBy(asc(qualityInspectionWorkItemItps.createdAt)),
     db.select().from(qualityInspectionDocumentations).where(eq(qualityInspectionDocumentations.qualityInspectionId, row.id)).orderBy(asc(qualityInspectionDocumentations.name)),
     db.select().from(qualityInspectionVerifications).where(eq(qualityInspectionVerifications.qualityInspectionId, row.id)).orderBy(asc(qualityInspectionVerifications.verifiedAt)),
     db.select().from(qualityInspectionPtsRejections).where(eq(qualityInspectionPtsRejections.qualityInspectionId, row.id)).orderBy(asc(qualityInspectionPtsRejections.rejectedAt)),
@@ -336,6 +411,18 @@ async function loadDetail(db: Db | Tx, row: typeof qualityInspections.$inferSele
   const inspectorIds = inspectors.map((inspector) => inspector.id)
   const points = inspectorIds.length ? await db.select().from(qualityInspectionWorkItemItpSnapshotPoints).where(inArray(qualityInspectionWorkItemItpSnapshotPoints.snapshotInspectorId, inspectorIds)).orderBy(asc(qualityInspectionWorkItemItpSnapshotPoints.createdAt)) : []
   const itemVerifications = rowIds.length ? await db.select().from(qualityInspectionWorkItemItpVerifications).where(inArray(qualityInspectionWorkItemItpVerifications.qualityInspectionWorkItemItpId, rowIds)).orderBy(asc(qualityInspectionWorkItemItpVerifications.verifiedAt)) : []
+  const actorIds = [...new Set([
+    ...activity.map((event) => event.actorUserId),
+    ...itemVerifications.map((event) => event.verifierId),
+    ...reportEvents.map((event) => event.verifierId),
+    ...rejections.map((event) => event.rejectingUserId),
+  ])]
+  const actorRows = actorIds.length ? await db.select({ id: users.id, name: users.name }).from(users).where(inArray(users.id, actorIds)) : []
+  const actorNames = new Map(actorRows.map((actor) => [actor.id, actor.name]))
+  const itemVerificationsWithNames = itemVerifications.map((event) => ({ ...event, verifierName: actorNames.get(event.verifierId) ?? null }))
+  const reportEventsWithNames = reportEvents.map((event) => ({ ...event, verifierName: actorNames.get(event.verifierId) ?? null }))
+  const rejectionsWithNames = rejections.map((event) => ({ ...event, rejectingUserName: actorNames.get(event.rejectingUserId) ?? null }))
+  const activityWithNames = activity.map((event) => ({ ...event, actorName: actorNames.get(event.actorUserId) ?? null }))
   const ptsIds = itemRows.map(({ row: item }) => item.qhssePtsId).filter((id): id is string => Boolean(id))
   const ptsRows = ptsIds.length ? await db.select({ id: qhssePts.id, number: qhssePts.number, statusCode: qhssePts.statusCode, stepCode: qhssePts.stepCode }).from(qhssePts).where(inArray(qhssePts.id, ptsIds)) : []
   const snapshotsByRow = new Map<string, typeof snapshots>()
@@ -344,8 +431,8 @@ async function loadDetail(db: Db | Tx, row: typeof qualityInspections.$inferSele
   for (const inspector of inspectors) inspectorsBySnapshot.set(inspector.snapshotId, [...(inspectorsBySnapshot.get(inspector.snapshotId) ?? []), inspector])
   const pointsByInspector = new Map<string, typeof points>()
   for (const point of points) pointsByInspector.set(point.snapshotInspectorId, [...(pointsByInspector.get(point.snapshotInspectorId) ?? []), point])
-  const verificationsByRow = new Map<string, typeof itemVerifications>()
-  for (const event of itemVerifications) verificationsByRow.set(event.qualityInspectionWorkItemItpId, [...(verificationsByRow.get(event.qualityInspectionWorkItemItpId) ?? []), event])
+  const verificationsByRow = new Map<string, typeof itemVerificationsWithNames>()
+  for (const event of itemVerificationsWithNames) verificationsByRow.set(event.qualityInspectionWorkItemItpId, [...(verificationsByRow.get(event.qualityInspectionWorkItemItpId) ?? []), event])
   const ptsById = new Map(ptsRows.map((pts) => [pts.id, pts]))
   const allowedOperations = row.statusCode === 'open' && row.stepCode === 'report' ? (await operationMap(userId, [row.projectId])).get(row.projectId) ?? ['detail'] : ['detail']
   const allowedActions = await actionMap(userId, row)
@@ -361,9 +448,9 @@ async function loadDetail(db: Db | Tx, row: typeof qualityInspections.$inferSele
       pts: item.qhssePtsId ? ptsById.get(item.qhssePtsId) : undefined,
     })),
     documentations: docs,
-    verifications: reportEvents,
-    ptsRejections: rejections,
-    activity,
+    verifications: reportEventsWithNames,
+    ptsRejections: rejectionsWithNames,
+    activity: activityWithNames,
     allowedOperations,
     allowedActions,
   } as unknown as QualityInspectionRecord

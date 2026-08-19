@@ -176,7 +176,8 @@ development administrator. On **Inspection/Test**, confirm all of these:
 
 Do not submit a browser-created report unless the form needs a real submission
 to prove the fix. If a browser session is unavailable after a valid T3 retry,
-record the exact reason and complete all automated and database checks.
+record the exact reason and mark the plan `BLOCKED`; automated and database
+checks do not replace this browser check.
 
 **Verify**: report the browser result and run the commands in the table above.
 

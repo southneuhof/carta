@@ -31,6 +31,9 @@ Searched: <exact framework and application paths>
 Gap: <None, or the missing framework capability>
 ```
 
+Keep this record in the plan or task notes. Do not start route UI changes until
+the route, surface, action scope, and reuse decision are recorded.
+
 ## Establish route scope before editing
 
 Before removing, adding, or renaming a control:
@@ -42,8 +45,9 @@ Before removing, adding, or renaming a control:
 4. Do not remove an action from another surface because it uses the same
    component or label.
 
-When the request is ambiguous, preserve actions on other surfaces until their
-scope is clear.
+When the request is ambiguous, stop and ask for the surface or preserve actions
+on other surfaces until their scope is clear. After the change, verify that the
+intended surface changed and the other surfaces still have their actions.
 
 ## Reuse sibling UI patterns
 
@@ -55,6 +59,11 @@ Search nearby CRUD routes before creating a custom action or layout.
 - Prefer one existing standard action over a custom equivalent such as `Open`.
 - Use custom controls only when the sibling pattern cannot express the
   requirement. Record the exact gap.
+
+When legacy is the business reference, use the exact label from the approved
+legacy label ledger for fields, headings, actions, dialogs, and messages. Do
+not translate, shorten, improve, or invent a synonym. An unapproved label
+difference is a review failure.
 
 ## Use the framework surfaces
 
@@ -103,7 +112,7 @@ without explicit user approval.
 ## Verify the result
 
 Test the observable UI surface, not only helper functions. For every changed
-route, verify in the real browser when available:
+route, verify in an authenticated real browser or T3 preview:
 
 - requested controls exist on the intended surface and remain on other
   surfaces;
@@ -112,7 +121,8 @@ route, verify in the real browser when available:
 - indentation is stable and connector arms do not make the hierarchy unclear.
 
 Tests do not prove that the visible UI is correct. If browser verification is
-not possible, report the UI as unverified.
+not possible after a valid retry, report `UI UNVERIFIED` or `BLOCKED`; do not
+mark the plan `DONE` or report the route complete.
 
 For a framework surface change, run the focused route test, web type-check,
 lint, and `git diff --check`.

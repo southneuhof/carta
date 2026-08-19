@@ -3,7 +3,7 @@ import { computed, watch } from 'vue'
 import { Form, Table, TreeTable } from '@southneuhof/is-vue-framework'
 import { Button, Card, Chip, Icon } from '@southneuhof/is-vue-framework/components/base'
 import type { QualityInspectionTreeNode, SelectedWorkItemInput } from '@southneuhof/api/routes/quality-inspection/quality-inspection.schemas'
-import { itpTypeOptions } from './quality-inspection.schema'
+import { itpTypeLabels, itpTypeOptions } from './quality-inspection.schema'
 import { selectableLeaves, selectedRowsForRoot, treeForRoot } from './quality-inspection.selector'
 
 type Context = { tree: QualityInspectionTreeNode[]; activeItpTypes?: string[] }
@@ -19,25 +19,25 @@ const selectedIds = computed(() => new Set(scopedModelValue.value.map((row) => r
 
 const selectedFields = {
   item: { label: 'Item Pekerjaan', read: (row: SelectedInspectionRow) => row.name },
-  volume: { label: 'Volume', read: (row: SelectedInspectionRow) => row.volume },
-  types: { label: 'ITP', read: (row: SelectedInspectionRow) => row.itpTypeCodes.map((type) => itpTypeOptions.find((option) => option.id === type)?.name ?? type).join(', ') },
+  method: { label: 'Metode Inspeksi', read: (row: SelectedInspectionRow) => row.itpTypeCodes.map((type) => itpTypeLabels[type] ?? type).join(', ') },
+  volume: { label: 'Volume', read: (row: SelectedInspectionRow) => `${row.volume} ${row.uomName ?? ''}`.trim() },
 }
 const volumeFields = {
   volume: { label: 'Volume', form: { renderer: 'number', props: { min: 0.01, step: 0.01, required: true } } },
 }
 
-type SelectedInspectionRow = SelectedWorkItemInput & { id: string; name: string }
+type SelectedInspectionRow = SelectedWorkItemInput & { id: string; name: string; uomName: string | null }
 
 function selectedRow(row: SelectedWorkItemInput): SelectedInspectionRow {
   const node = candidates.value.find((candidate) => candidate.id === row.workItemId)
-  return { ...row, id: row.workItemId, name: node?.name ?? row.workItemId }
+  return { ...row, id: row.workItemId, name: node?.name ?? row.workItemId, uomName: node?.uomName ?? null }
 }
 
 function fieldsFor(row: SelectedInspectionRow) {
   const candidate = candidates.value.find((item) => item.id === row.workItemId)
   const availableTypes = new Set(candidate?.itps.map((itp) => itp.type))
   return {
-    itpTypeCodes: { label: 'ITP Type', form: { renderer: 'checkbox-group', source: itpTypeOptions.filter((option) => availableTypes.has(option.id)), props: { required: true } } },
+    itpTypeCodes: { label: 'Metode Inspeksi', form: { renderer: 'checkbox-group', source: itpTypeOptions.filter((option) => availableTypes.has(option.id)), props: { required: true } } },
   }
 }
 
@@ -73,6 +73,14 @@ function children(row: QualityInspectionTreeNode) {
 function isCandidate(row: unknown): row is Candidate {
   return Boolean(row && typeof row === 'object' && 'id' in row && candidates.value.some((item) => item.id === (row as { id: string }).id))
 }
+
+function categoryName(row: unknown) {
+  return row && typeof row === 'object' && typeof (row as { categoryName?: unknown }).categoryName === 'string' ? (row as { categoryName: string }).categoryName : undefined
+}
+
+function highRisk(row: unknown) {
+  return row && typeof row === 'object' && (row as { isHighRisk?: unknown }).isHighRisk === true
+}
 </script>
 
 <template>
@@ -80,18 +88,37 @@ function isCandidate(row: unknown): row is Candidate {
     <Card variant="outlined" color="surfaceContainer" class="gap-0 p-0">
       <div class="border-b border-outline-variant px-4 py-3">
         <h3 class="font-semibold">Pilih Item Pekerjaan</h3>
-        <p class="mt-1 text-sm text-on-surface-variant">Only active leaf work items with ITP data are available.</p>
+        <p class="mt-1 text-sm text-on-surface-variant">Hanya item pekerjaan aktif dengan data ITP yang dapat dipilih.</p>
       </div>
-      <TreeTable :data="treeRows" :fields="{ item: { label: 'Item Pekerjaan', read: (row: QualityInspectionTreeNode) => row.name } }" :children="children" tree-column="item" :pagination="false" row-key="id">
+      <TreeTable
+        :data="treeRows"
+        :fields="{
+          item: { label: 'Item Pekerjaan', read: (row: QualityInspectionTreeNode) => row.name },
+          volume: { label: 'Volume', read: (row: QualityInspectionTreeNode) => row.volume ?? '—' },
+          uomName: { label: 'Satuan', read: (row: QualityInspectionTreeNode) => row.uomName ?? '—' },
+          isHighRisk: { label: 'High Risk', read: (row: QualityInspectionTreeNode) => row.isHighRisk ? 'High Risk' : '—' },
+        }"
+        :children="children"
+        tree-column="item"
+        :pagination="false"
+        row-key="id"
+      >
         <template #tree-cell="{ value, record }">
-          <span :class="isCandidate(record) ? 'font-medium' : 'text-on-surface-variant'">{{ value }}</span>
+          <span :class="isCandidate(record) ? 'font-medium' : 'text-on-surface-variant'">
+            <span>{{ value }}</span>
+            <span v-if="categoryName(record)" class="ml-2 text-sm text-on-surface-variant">{{ categoryName(record) }}</span>
+          </span>
+        </template>
+        <template #cell:isHighRisk="{ record }">
+          <Chip v-if="highRisk(record)" color="error">High Risk</Chip>
+          <span v-else>—</span>
         </template>
         <template #row-actions="{ record }">
           <Button v-if="isCandidate(record)" type="button" variant="tonal" @click.stop="toggle(record)">
             <template #icon><Icon :name="selectedIds.has(record.id) ? 'close' : 'add'" /></template>
             {{ selectedIds.has(record.id) ? 'Hapus' : 'Pilih' }}
           </Button>
-          <Chip v-else color="neutral">Parent</Chip>
+          <Chip v-else color="neutral">Induk</Chip>
         </template>
       </TreeTable>
     </Card>
@@ -109,7 +136,7 @@ function isCandidate(row: unknown): row is Candidate {
           </Button>
         </template>
       </Table>
-      <p v-else class="p-4 text-sm text-on-surface-variant">Select at least one active leaf work item.</p>
+      <p v-else class="p-4 text-sm text-on-surface-variant">Pilih paling sedikit satu item pekerjaan aktif.</p>
     </Card>
   </div>
 </template>

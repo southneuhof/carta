@@ -43,8 +43,9 @@ async function adminSession(grantAssignmentView = true) {
   ] as const) {
     if (!grantAssignmentView && code === 'list-project-role-assignments') continue
     const permissionId = id(code)
-    await db.insert(permissions).values({ id: permissionId, permissionCode: code, name: code, moduleId: module }).onConflictDoNothing()
-    permissionIds.set(code, (await db.select({ id: permissions.id }).from(permissions).where(eq(permissions.permissionCode, code)).limit(1))[0]!.id)
+    const permissionCode = code === 'view-projects' ? id('project-view-permission') : code
+    await db.insert(permissions).values({ id: permissionId, permissionCode, name: code, moduleId: module }).onConflictDoNothing()
+    permissionIds.set(code, (await db.select({ id: permissions.id }).from(permissions).where(eq(permissions.permissionCode, permissionCode)).limit(1))[0]!.id)
   }
   const adminRoleId = id('admin-role')
   await db.insert(roles).values({ id: adminRoleId, roleCode: id('admin-role-code'), name: 'Roles Admin', realm: 'system' })

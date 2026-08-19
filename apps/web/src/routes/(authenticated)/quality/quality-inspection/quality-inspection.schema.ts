@@ -4,6 +4,7 @@ import { rpc } from '@/framework/rpc'
 import {
   completeReportQualityInspectionSchema,
   createQualityInspectionSchema,
+  qualityInspectionListQuerySchema,
   qualityInspectionRecordSchema,
   submitQualityInspectionDocumentationsSchema,
   updateQualityInspectionSchema,
@@ -22,6 +23,7 @@ export type VerifyQualityInspection = z.input<typeof verifyQualityInspectionSche
 export const qualityInspectionSchema = defineSchema<AppResourceContract<typeof rpc['quality-inspection']>>({
   identity: 'id',
   record: { schema: fromZod(qualityInspectionRecordSchema) },
+  query: { schema: fromZod(qualityInspectionListQuerySchema) },
   create: { schema: fromZod(createQualityInspectionSchema) },
   update: { schema: fromZod(updateQualityInspectionSchema) },
 })
@@ -31,6 +33,13 @@ export const statusOptions = [
   { id: 'on-progress', name: 'On Progress' },
   { id: 'close', name: 'Closed' },
 ] as const
+
+export const statusLabels = Object.fromEntries(statusOptions.map(({ id, name }) => [id, name])) as Record<string, string>
+export const statusColors: Record<string, 'info' | 'warning' | 'success'> = {
+  open: 'info',
+  'on-progress': 'warning',
+  close: 'success',
+}
 
 export const stepLabels: Record<string, string> = {
   report: 'Dilaporkan',
@@ -47,8 +56,24 @@ export const resultOptions = [
   { id: 'pending', name: 'Ditunda' },
 ] as const
 
+export const resultLabels = Object.fromEntries(resultOptions.map(({ id, name }) => [id, name])) as Record<string, string>
+export const resultColors: Record<string, 'success' | 'error' | 'warning'> = {
+  approved: 'success',
+  rejected: 'error',
+  repair: 'warning',
+  pending: 'warning',
+}
+
 export const itpTypeOptions = [
   { id: 'material', name: 'Material' },
-  { id: 'process', name: 'Process' },
+  { id: 'process', name: 'Proses' },
   { id: 'product', name: 'Product' },
 ] as const
+
+export const itpTypeLabels = Object.fromEntries(itpTypeOptions.map(({ id, name }) => [id, name])) as Record<string, string>
+
+export const acceptanceCriteriaLabels = {
+  material: 'Kriteria/Tolok Ukur Penerimaan (Material)',
+  process: 'Kriteria/Tolok Ukur Penerimaan (Proses)',
+  product: 'Kriteria/Tolok Ukur Penerimaan (Product)',
+} as const

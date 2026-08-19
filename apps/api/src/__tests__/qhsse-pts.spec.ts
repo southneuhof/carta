@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, describe, expect, it } from 'vitest'
 import { hashPassword } from 'better-auth/crypto'
 import { and, eq, inArray } from 'drizzle-orm'
 import { app } from '../app'
@@ -17,6 +17,7 @@ import { workItems } from '../routes/work-items/work-items.entity'
 import { activityLogs, notifications } from '../routes/notifications/notifications.entity'
 import { authorizationModules, permissions, projectRoleAssignments, rolePermissions, roles, systemRoleAssignments } from '../routes/roles/roles.entity'
 import { users } from '../routes/users/users.entity'
+import { qhssePts, qhssePtsNumberCounters } from '../routes/qhsse-pts/qhsse-pts.entity'
 import { createReport, listReports, performAction } from '../routes/qhsse-pts/qhsse-pts.service'
 import { actionSchemas } from '../routes/qhsse-pts/qhsse-pts.schemas'
 
@@ -24,7 +25,33 @@ function id(name: string) {
   return `qhsse-test-${name}-${crypto.randomUUID()}`
 }
 
-async function makeFixture() {
+type Fixture = {
+  db: ReturnType<typeof getDb>
+  userId: string
+  recipientId: string
+  divisionRecipientId: string
+  allProjectsRecipientId: string
+  unrelatedRecipientId: string
+  divisionId: string
+  projectId: string
+  roleId: string
+  moduleId: string
+  systemModuleId: string
+  systemRoleId: string
+  businessCategoryId: string
+  otherDivisionId: string
+  otherProjectId: string
+  categoryId: string
+  leafId: string
+  ptsCategoryId: string
+  rootCauseId: string
+  vendorId: string
+  cookie: string
+}
+
+const fixtures: Fixture[] = []
+
+async function makeFixture(): Promise<Fixture> {
   const db = getDb()
   const userId = id('user')
   const recipientId = id('recipient')
@@ -104,11 +131,14 @@ async function makeFixture() {
   await db.insert(numberVariables).values({ id: id('number-variable'), code: 'number', name: 'Number' }).onConflictDoNothing()
   await db.insert(numberConfigs).values({ id: id('number-config'), numberVariableCode: 'number', numberOfDigits: 4, displayOrder: 900001 }).onConflictDoNothing()
   const signedIn = await getAuth().api.signInEmail({ body: { email: `${userId}@example.invalid`, password: 'test-password' }, returnHeaders: true })
-  return {
+  const fixture = {
     db, userId, recipientId, divisionRecipientId, allProjectsRecipientId, unrelatedRecipientId, divisionId, projectId, roleId,
+    moduleId, systemModuleId, systemRoleId, businessCategoryId, otherDivisionId, otherProjectId,
     categoryId, leafId, ptsCategoryId, rootCauseId, vendorId,
     cookie: signedIn.headers.get('set-cookie')?.split(';')[0] ?? '',
   }
+  fixtures.push(fixture)
+  return fixture
 }
 
 function reportInput(fixture: Awaited<ReturnType<typeof makeFixture>>, criteriaCode: 'low' | 'medium' | 'high' = 'low') {
@@ -189,6 +219,34 @@ describe('manual PTS workflow', () => {
     expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1)
     expect(results.filter((result) => result.status === 'rejected')).toHaveLength(1)
   })
+})
+
+async function cleanupFixture(fixture: Awaited<ReturnType<typeof makeFixture>>) {
+  const userIds = [fixture.userId, fixture.recipientId, fixture.divisionRecipientId, fixture.allProjectsRecipientId, fixture.unrelatedRecipientId]
+  const projectIds = [fixture.projectId, fixture.otherProjectId]
+  await fixture.db.delete(qhssePts).where(eq(qhssePts.createdBy, fixture.userId))
+  await fixture.db.delete(qhssePtsNumberCounters).where(eq(qhssePtsNumberCounters.projectId, fixture.projectId))
+  await fixture.db.delete(notifications).where(inArray(notifications.projectId, projectIds))
+  await fixture.db.delete(activityLogs).where(inArray(activityLogs.projectId, projectIds))
+  await fixture.db.delete(projectRoleAssignments).where(inArray(projectRoleAssignments.userId, userIds))
+  await fixture.db.delete(systemRoleAssignments).where(inArray(systemRoleAssignments.userId, userIds))
+  await fixture.db.delete(rolePermissions).where(inArray(rolePermissions.roleId, [fixture.roleId, fixture.systemRoleId]))
+  await fixture.db.delete(projectVendors).where(eq(projectVendors.id, fixture.vendorId))
+  await fixture.db.delete(workItems).where(eq(workItems.id, fixture.leafId))
+  await fixture.db.delete(workItems).where(eq(workItems.id, fixture.categoryId))
+  await fixture.db.delete(rootCauses).where(eq(rootCauses.id, fixture.rootCauseId))
+  await fixture.db.delete(projects).where(inArray(projects.id, projectIds))
+  await fixture.db.delete(ptsWorkCategories).where(eq(ptsWorkCategories.id, fixture.ptsCategoryId))
+  await fixture.db.delete(divisions).where(inArray(divisions.id, [fixture.divisionId, fixture.otherDivisionId]))
+  await fixture.db.delete(businessCategories).where(eq(businessCategories.id, fixture.businessCategoryId))
+  await fixture.db.delete(permissions).where(inArray(permissions.moduleId, [fixture.moduleId, fixture.systemModuleId]))
+  await fixture.db.delete(roles).where(inArray(roles.id, [fixture.roleId, fixture.systemRoleId]))
+  await fixture.db.delete(authorizationModules).where(inArray(authorizationModules.id, [fixture.moduleId, fixture.systemModuleId]))
+  await fixture.db.delete(users).where(inArray(users.id, userIds))
+}
+
+afterEach(async () => {
+  while (fixtures.length) await cleanupFixture(fixtures.pop()!)
 })
 
 afterAll(() => closeDb())

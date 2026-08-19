@@ -94,6 +94,9 @@ Call `defineResource(schema, definition)` with one `actions` object.
 
 - Define one adjacent field set with `defineFields(schema, definitions)`.
 - Put shared labels, accessors, and write functions at the field root.
+- When legacy is the business reference, copy user-facing labels exactly from
+  the approved legacy label ledger. Do not translate, shorten, improve, or
+  invent a synonym.
 - Put surface behavior in `display`, `table`, `detail`, and `form` projections.
 - Put `run`, ordered field references, permission, route, and standard View
   options in the same standard action block.
@@ -155,7 +158,10 @@ git diff --check
 ```
 
 Also run a focused framework test when the module exposes a new framework edge.
-Validate changed user flows in the real browser when available.
+Validate changed user flows in an authenticated real browser or T3 preview.
+If the preview is unavailable after a valid retry, report `UI UNVERIFIED` or
+`BLOCKED`; automated checks do not replace the browser check and the migration
+must not be reported complete.
 
 Test contract and observable behavior. Do not copy every field list into a test.
 
@@ -172,6 +178,8 @@ Before completion, verify:
 - every View owns complete fields;
 - every standard action has one execution path through the returned `run`;
 - custom actions remain plain application functions;
+- user-facing labels match the legacy label ledger exactly, or an approved
+  difference is recorded;
 - UI effects stay in routes;
 - no framework code changed without its own approval;
 - old module resource patterns are absent;

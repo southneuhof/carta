@@ -74,14 +74,14 @@ around it by loosening the schema.
 | `db:push` | dev-only direct schema sync, no history |
 | `db:reset` | drop every table in `public` + migration history, then migrate |
 | `db:seed` | idempotent development seed |
-| `db:refresh` | `db:reset` then `db:seed` — **use this after `pnpm test`** |
+| `db:refresh` | `db:reset` then `db:seed` — use only when intentionally refreshing the development database |
 | `db:smoke` | signs in as the seeded admin and exercises product create/update/delete |
 
 ## Notes
 
-- Tests hit a real Postgres via `DATABASE_URL` and rebuild their own tables in `beforeEach`. They own
-  the database while they run: they leave their own fixture rows behind, so `db:seed` on its own will
-  fail afterwards on a unique-code collision. Run `db:refresh` to get back to a usable dev database.
+- Tests load `.env`, then `.env.test` when it exists, and apply pending migrations before Vitest.
+  Keep `.env.test` pointed at a separate test database. Tests hit real Postgres and rebuild or leave
+  fixture rows, so they must not use the development database.
 - Spec files run serially (`vitest.config.ts` sets `fileParallelism: false`) for the same reason —
   in parallel, one file drops the tables another is using. Nothing else may touch that database
   while the suite runs.

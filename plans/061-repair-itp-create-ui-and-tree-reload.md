@@ -161,8 +161,9 @@ nested work-item tree. Check:
 5. indentation and connectors remain after every reload; and
 6. a failed create keeps the dialog and its values.
 
-If an in-app browser cannot reach the local preview, record that limitation and
-do not replace this check with a browser tool outside the project preview.
+If an in-app browser cannot reach the local preview after a valid retry, record
+the exact limitation and mark the plan `BLOCKED`; do not claim completion or
+replace this check with a browser tool outside the project preview.
 
 ## Test plan
 
