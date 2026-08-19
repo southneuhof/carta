@@ -1,0 +1,4 @@
+interface:
+  display_name: "Verify ADS-HK Module"
+  short_description: "Verify ADS-HK modules from scoped evidence"
+  default_prompt: "Use $verify-ads-hk-module to independently verify this ADS-HK module from its scoped evidence ledger, plan or manifest, legacy contract, focused checks, seed, and authenticated browser flow."

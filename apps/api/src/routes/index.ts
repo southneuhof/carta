@@ -51,6 +51,8 @@ import { domain as permitApdDomain, permitApdModel } from "./permit-apd/permit-a
 
 import { emergencySimulationTopicModel, domain as emergencySimulationTopicsDomain } from "./emergency-simulation-topics/emergency-simulation-topics";
 
+import { emergencySimulationEmployeeModel, domain as emergencySimulationEmployeesDomain } from "./emergency-simulation-employees/emergency-simulation-employees";
+
 export const domainParts = [
   authDomain,
   businessCategoriesDomain,
@@ -76,6 +78,7 @@ export const domainParts = [
   permitCategoryApdDomain,
   permitApdDomain,
   emergencySimulationTopicsDomain,
+  emergencySimulationEmployeesDomain,
 ] as const;
 
 const installedRoutes = [
@@ -124,6 +127,7 @@ const installedRoutes = [
   permitCategoryApdModel,
   permitApdModel,
   emergencySimulationTopicModel,
+  emergencySimulationEmployeeModel,
 ] as const;
 
 // Public like /health; attach authenticated() here if the document should require a session.

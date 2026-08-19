@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url'
 import { expectedGeneratedPaths, moduleMetadata, validateConfig } from './scaffold-master-data.mjs'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const defaultCommandTimeoutMs = 180_000
 
 function quoted(value) {
   return `'${String(value).replaceAll('\\', '\\\\').replaceAll("'", "\\'").replaceAll('\n', '\\n').replaceAll('\r', '\\r')}'`
@@ -100,18 +101,31 @@ function commandText(command, args) {
   return [command, ...args].join(' ')
 }
 
-function runCommand(command, args, { cwd }) {
-  const result = spawnSync(command, args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
+export function runCommand(command, args, { cwd, timeoutMs = defaultCommandTimeoutMs } = {}) {
+  const startedAt = Date.now()
+  const result = spawnSync(command, args, {
+    cwd,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+    timeout: timeoutMs,
+    killSignal: 'SIGTERM',
+  })
+  const durationMs = Date.now() - startedAt
   const output = `${result.stdout ?? ''}${result.stderr ?? ''}`.trim()
   return {
     command: commandText(command, args),
-    status: result.status === 0 ? 'PASS' : 'FAIL',
+    status: result.status === 0 && !result.error ? 'PASS' : 'FAIL',
     exitCode: result.status ?? 1,
+    durationMs,
+    timeoutMs,
+    timedOut: result.error?.code === 'ETIMEDOUT',
+    signal: result.signal ?? null,
+    error: result.error?.message ?? null,
     output: output.slice(-3000),
   }
 }
 
-function runChecks(config, { root, withSeed }) {
+export function verificationCommands(config, { withSeed = false } = {}) {
   const slug = config.slug
   const apiRouteFiles = [
     `src/routes/${slug}/${slug}.entity.ts`,
@@ -142,23 +156,29 @@ function runChecks(config, { root, withSeed }) {
     ['pnpm', ['--filter', '@southneuhof/framework-web', 'type-check']],
     ['git', ['diff', '--check']],
   ]
+  if (withSeed) specs.push(['pnpm', ['--filter', '@southneuhof/api', 'db:migrate']])
   if (withSeed) specs.push(['pnpm', ['--filter', '@southneuhof/api', 'db:seed']])
   if (withSeed) specs.push(['pnpm', ['--filter', '@southneuhof/api', 'db:seed']])
+  return specs
+}
+
+function runChecks(config, { root, withSeed, timeoutMs }) {
   const commands = []
-  for (const [command, args] of specs) {
-    const result = runCommand(command, args, { cwd: root })
+  for (const [command, args] of verificationCommands(config, { withSeed })) {
+    const result = runCommand(command, args, { cwd: root, timeoutMs })
     commands.push(result)
     if (result.status === 'FAIL') break
   }
   return commands
 }
 
-export function verify(value, { root = repoRoot, run = false, withSeed = false } = {}) {
+export function verify(value, { root = repoRoot, run = false, withSeed = false, timeoutMs = defaultCommandTimeoutMs } = {}) {
   const config = validateConfig(value)
   if (withSeed && !config.seed) throw new Error('--with-seed requires a manifest seed block.')
+  if (!Number.isInteger(timeoutMs) || timeoutMs < 1) throw new Error('timeoutMs must be a positive integer.')
   const outputRoot = resolve(root)
   const staticResult = staticVerify(config, { root: outputRoot })
-  const commands = staticResult.status === 'PASS' && run ? runChecks(config, { root: outputRoot, withSeed }) : []
+  const commands = staticResult.status === 'PASS' && run ? runChecks(config, { root: outputRoot, withSeed, timeoutMs }) : []
   const commandFailure = commands.find((command) => command.status === 'FAIL')
   return {
     status: staticResult.status === 'PASS' && !commandFailure ? 'PASS' : 'FAIL',
@@ -182,6 +202,7 @@ function parseArgs(argv) {
   let run = false
   let withSeed = false
   let json = false
+  let timeoutMs = defaultCommandTimeoutMs
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index]
     if (argument === '--manifest') {
@@ -200,12 +221,16 @@ function parseArgs(argv) {
       withSeed = true
     } else if (argument === '--json') {
       json = true
+    } else if (argument === '--timeout-ms') {
+      timeoutMs = Number(argv[index + 1])
+      index += 1
+      if (!Number.isInteger(timeoutMs) || timeoutMs < 1) throw new Error('--timeout-ms must be a positive integer.')
     } else {
       throw new Error(`Unknown argument: ${argument}`)
     }
   }
-  if (!manifest) throw new Error('Usage: node scripts/verify-module.mjs --manifest <file.json> [--check-only|--run] [--with-seed] [--root <directory>] [--json]')
-  return { manifest, root, run, withSeed, json }
+  if (!manifest) throw new Error('Usage: node scripts/verify-module.mjs --manifest <file.json> [--check-only|--run] [--with-seed] [--timeout-ms <milliseconds>] [--root <directory>] [--json]')
+  return { manifest, root, run, withSeed, json, timeoutMs }
 }
 
 function output(result, json) {
@@ -214,7 +239,13 @@ function output(result, json) {
     `MODULE ${result.status}`,
     `Static checks: ${result.static.status}`,
     ...result.static.checks.map((check) => `- ${check.status}: ${check.name}`),
-    ...(result.commands.length ? ['Commands:', ...result.commands.map((command) => `- ${command.status}: ${command.command}`)] : []),
+    ...(result.commands.length ? [
+      'Commands:',
+      ...result.commands.flatMap((command) => [
+        `- ${command.status}: ${command.command} (${command.durationMs} ms${command.timedOut ? ', timed out' : ''})`,
+        ...(command.status === 'FAIL' && command.output ? [`  ${command.output}`] : []),
+      ]),
+    ] : []),
     '',
     'Authenticated browser paths to verify:',
     ...result.browser.paths.map((path) => `- ${path}`),
@@ -223,7 +254,7 @@ function output(result, json) {
 }
 
 export function execute(argv, { root = repoRoot, cwd = process.cwd() } = {}) {
-  const { manifest, root: outputRoot, run, withSeed, json } = parseArgs(argv)
+  const { manifest, root: outputRoot, run, withSeed, json, timeoutMs } = parseArgs(argv)
   const manifestPath = resolve(cwd, manifest)
   let config
   try {
@@ -232,7 +263,7 @@ export function execute(argv, { root = repoRoot, cwd = process.cwd() } = {}) {
     const message = error instanceof Error ? error.message : String(error)
     throw new Error(`Cannot read module manifest ${manifestPath}: ${message}`)
   }
-  return output(verify(config, { root: outputRoot ? resolve(cwd, outputRoot) : root, run, withSeed }), json)
+  return output(verify(config, { root: outputRoot ? resolve(cwd, outputRoot) : root, run, withSeed, timeoutMs }), json)
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

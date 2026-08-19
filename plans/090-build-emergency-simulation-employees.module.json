@@ -1,0 +1,70 @@
+{
+  "kind": "simple-master-data",
+  "slug": "emergency-simulation-employees",
+  "table": "emergency_simulation_employees",
+  "symbol": "EmergencySimulationEmployee",
+  "title": "Karyawan Terlibat Simulasi Tanggap Darurat",
+  "identity": {
+    "key": "id",
+    "type": "text",
+    "primary": true,
+    "generated": "uuid"
+  },
+  "fields": [
+    {
+      "key": "name",
+      "type": "text",
+      "label": "Nama",
+      "required": true,
+      "renderer": "text"
+    }
+  ],
+  "serverFields": [
+    { "key": "code", "type": "text" },
+    { "key": "description", "type": "text" },
+    { "key": "active", "type": "boolean", "default": true }
+  ],
+  "labels": {
+    "listTitle": "Karyawan Terlibat Simulasi Tanggap Darurat",
+    "detailTitle": "Detail Karyawan Terlibat Simulasi Tanggap Darurat",
+    "createTitle": "Tambah Karyawan Terlibat Simulasi Tanggap Darurat",
+    "editTitle": "Ubah Karyawan Terlibat Simulasi Tanggap Darurat",
+    "submitLabel": "Submit",
+    "createSuccessMessage": "Berhasil menambahkan data!",
+    "updateSuccessMessage": "Berhasil mengubah data!"
+  },
+  "permissions": {
+    "moduleName": "Emergency Simulation Employees",
+    "realm": "system",
+    "entries": {
+      "view": { "name": "View Emergency Simulation Employees", "description": "View emergency simulation employees." },
+      "list": { "name": "List Emergency Simulation Employees", "description": "List emergency simulation employees." },
+      "detail": { "name": "Detail Emergency Simulation Employees", "description": "View an emergency simulation employee." },
+      "create": { "name": "Create Emergency Simulation Employees", "description": "Create emergency simulation employees." },
+      "update": { "name": "Update Emergency Simulation Employees", "description": "Update emergency simulation employees." },
+      "delete": { "name": "Delete Emergency Simulation Employees", "description": "Delete emergency simulation employees." }
+    }
+  },
+  "navigation": {
+    "after": "master-data-emergency-simulation-topics",
+    "title": "Karyawan Terlibat",
+    "icon": "folder",
+    "separator": "Emergency Simulation"
+  },
+  "seed": {
+    "records": [
+      { "id": "emergency-simulation-employee-1", "name": "Direktur " },
+      { "id": "emergency-simulation-employee-2", "name": "EVP" },
+      { "id": "emergency-simulation-employee-3", "name": "VP" },
+      { "id": "emergency-simulation-employee-4", "name": "PM/Prodir/BM" },
+      { "id": "emergency-simulation-employee-5", "name": "M-QHSSE" },
+      { "id": "emergency-simulation-employee-6", "name": "HSSE" },
+      { "id": "emergency-simulation-employee-7", "name": "Supervisor" },
+      { "id": "emergency-simulation-employee-8", "name": "Security" },
+      { "id": "emergency-simulation-employee-9", "name": "Paramedic" },
+      { "id": "emergency-simulation-employee-10", "name": "Karyawan" },
+      { "id": "emergency-simulation-employee-11", "name": "Pekerja" }
+    ],
+    "updateFields": ["name"]
+  }
+}

@@ -11,6 +11,7 @@ const entries = [
   ['root-causes', 'Penyebab QHSSE'],
   ['number-configs', 'Number Configurations'],
   ['emergency-simulation-topics', 'Topik Simulasi Tanggap Darurat'],
+  ['emergency-simulation-employees', 'Karyawan Terlibat'],
   ['permit-work-types', 'Tipe Pekerjaan'],
   ['permit-danger-source', 'Sumber Bahaya'],
   ['permit-attachment', 'Checklist Dokumen'],

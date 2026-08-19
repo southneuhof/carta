@@ -128,11 +128,7 @@ function insertNavigation(source, config) {
   const afterEnd = master.indexOf('\n', afterStart)
   const separator = config.navigation.separator ? `      { separator: ${quoted(config.navigation.separator)} },\n` : ''
   const existingSeparator = config.navigation.separator ? `      { separator: ${quoted(config.navigation.separator)} },` : null
-  let insertion = afterEnd
-  if (existingSeparator) {
-    const separatorIndex = master.indexOf(existingSeparator)
-    if (separatorIndex >= 0) insertion = master.indexOf('\n', separatorIndex)
-  }
+  const insertion = afterEnd
   const prefix = existingSeparator && master.includes(existingSeparator) ? '' : separator
   const updatedMaster = `${master.slice(0, insertion)}\n${prefix}${desired}${master.slice(insertion)}`
   return source.slice(0, masterStart) + updatedMaster + source.slice(masterEnd)

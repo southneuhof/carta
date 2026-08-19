@@ -49,6 +49,15 @@ Plan 089 adds the legacy-backed Emergency Simulation Topics master-data module
 after the manifest pipeline. It is complete only after its focused checks,
 idempotent seed, authenticated browser journey, and independent verifier pass.
 
+Plan 090 focused module discovery and moved the ADS-HK workflow skills into
+this repository. It keeps the generator unchanged, routes clear CRUD through
+the manifest pipeline, and escalates relation-backed or unclear modules to
+the full design and plan workflow. It is `DONE`.
+
+Plan 091 fixes module-pipeline navigation order and makes verification reports
+observable. It keeps independent parity and browser review, while allowing the
+verifier to consume one fresh JSON command report. It is `DONE`.
+
 ## User-facing completion gate
 
 For every plan that changes a user-facing `apps/web` flow, `DONE` requires an
@@ -134,6 +143,8 @@ surfaces, actions, permissions, seed data, and first-load/reload checks.
 | 087 | Add simple master-data scaffold and fast verification workflow | P1 | M | 082, 083 | DONE |
 | 088 | Build the manifest-driven module pipeline | P1 | L | 087 | DONE |
 | 089 | Implement emergency simulation topics | P1 | M | 088 | DONE |
+| 090 | Focus module discovery and localize workflow skills | P1 | M | 087, 088 | DONE |
+| 091 | Improve module pipeline feedback | P0/P1 | M | 088, 090 | DONE |
 | 084 | Implement permit-attachment module | P1 | L | 082, 083, 087 | DONE |
 | 085 | Implement safety-checklist module | P1 | L | 082-084 | DONE |
 | 086 | Implement permit-category-apd and nested permit-apd | P1 | L | 082-085 | DONE |

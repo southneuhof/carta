@@ -129,6 +129,25 @@ test('integrates all owner files, reports paths, and is idempotent', () => {
   assert.deepEqual(second.pending, [])
 })
 
+test('places an entry after its anchor inside an existing separator', () => {
+  const root = fixture()
+  const navigationPath = join(root, 'apps/web/src/manifest/navigation.ts')
+  const navigation = readFileSync(navigationPath, 'utf8').replace(
+    "      { to: { name: 'master-data-number-configs' }, permission: 'view-number-configs', title: 'Number Configurations', icon: 'folder' },",
+    "      { separator: 'Test' },\n      { to: { name: 'master-data-number-configs' }, permission: 'view-number-configs', title: 'Number Configurations', icon: 'folder' },",
+  )
+  writeFileSync(navigationPath, navigation)
+
+  integrate(config(), { root, apply: true })
+  const updated = readFileSync(navigationPath, 'utf8')
+  const separator = updated.indexOf("{ separator: 'Test' }")
+  const anchor = updated.indexOf('master-data-number-configs')
+  const entry = updated.indexOf('master-data-test-catalog')
+
+  assert.ok(separator < anchor && anchor < entry)
+  assert.equal((updated.match(/separator: 'Test'/g) ?? []).length, 1)
+})
+
 test('fails closed on a missing anchor without writing partial changes', () => {
   const root = fixture()
   const navigationPath = join(root, 'apps/web/src/manifest/navigation.ts')

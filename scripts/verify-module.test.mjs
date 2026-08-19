@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os'
 import { test } from 'node:test'
 import { integrate } from './integrate-master-data.mjs'
 import { expectedGeneratedPaths, scaffold } from './scaffold-master-data.mjs'
-import { execute, verify } from './verify-module.mjs'
+import { execute, runCommand, verificationCommands, verify } from './verify-module.mjs'
 
 const temporaryDirectories = []
 
@@ -139,4 +139,24 @@ test('fails on duplicate integration metadata and invalid manifests', () => {
   assert.ok(duplicateResult.static.failed.some((check) => check.name === 'navigation route'))
 
   assert.throws(() => verify({ ...setup.value, kind: 'other' }, { root: setup.root }), /kind must be simple-master-data/)
+})
+
+test('plans migration before repeated seed verification', () => {
+  const commands = verificationCommands(config(), { withSeed: true }).map(([command, args]) => [command, ...args].join(' '))
+  assert.deepEqual(commands.slice(-3), [
+    'pnpm --filter @southneuhof/api db:migrate',
+    'pnpm --filter @southneuhof/api db:seed',
+    'pnpm --filter @southneuhof/api db:seed',
+  ])
+})
+
+test('reports command duration and timeout state', () => {
+  const passed = runCommand(process.execPath, ['-e', ''], { cwd: process.cwd(), timeoutMs: 1000 })
+  assert.equal(passed.status, 'PASS')
+  assert.equal(passed.timedOut, false)
+  assert.equal(typeof passed.durationMs, 'number')
+
+  const timedOut = runCommand(process.execPath, ['-e', 'setTimeout(() => {}, 1000)'], { cwd: process.cwd(), timeoutMs: 100 })
+  assert.equal(timedOut.status, 'FAIL')
+  assert.equal(timedOut.timedOut, true)
 })

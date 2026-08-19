@@ -396,6 +396,20 @@ export const authorizationModules = [
       { code: "delete-emergency-simulation-topics", name: "Delete Emergency Simulation Topics", description: "Delete emergency simulation topics.", active: true },
     ],
   },
+  {
+    code: "emergency-simulation-employees",
+    name: "Emergency Simulation Employees",
+    realm: "system",
+    active: true,
+    permissions: [
+      { code: "view-emergency-simulation-employees", name: "View Emergency Simulation Employees", description: "View emergency simulation employees.", active: true },
+      { code: "list-emergency-simulation-employees", name: "List Emergency Simulation Employees", description: "List emergency simulation employees.", active: true },
+      { code: "detail-emergency-simulation-employees", name: "Detail Emergency Simulation Employees", description: "View an emergency simulation employee.", active: true },
+      { code: "create-emergency-simulation-employees", name: "Create Emergency Simulation Employees", description: "Create emergency simulation employees.", active: true },
+      { code: "update-emergency-simulation-employees", name: "Update Emergency Simulation Employees", description: "Update emergency simulation employees.", active: true },
+      { code: "delete-emergency-simulation-employees", name: "Delete Emergency Simulation Employees", description: "Delete emergency simulation employees.", active: true },
+    ],
+  },
 ] as const satisfies readonly ModuleDefinition[];
 
 export type AuthorizationModuleCode = (typeof authorizationModules)[number]["code"];

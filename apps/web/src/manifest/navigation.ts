@@ -42,6 +42,7 @@ export const navigation = defineNavigation([
       { to: { name: 'master-data-number-configs' }, permission: 'view-number-configs', title: 'Number Configurations', icon: 'folder' },
       { separator: 'Emergency Simulation' },
       { to: { name: 'master-data-emergency-simulation-topics' }, permission: 'view-emergency-simulation-topics', title: 'Topik Simulasi Tanggap Darurat', icon: 'folder' },
+      { to: { name: 'master-data-emergency-simulation-employees' }, permission: 'view-emergency-simulation-employees', title: 'Karyawan Terlibat', icon: 'folder' },
       { separator: 'Work Permit' },
       { to: { name: 'master-data-permit-work-types' }, permission: 'view-permit-work-types', title: 'Tipe Pekerjaan', icon: 'folder' },
       { to: { name: 'master-data-permit-danger-source' }, permission: 'view-permit-danger-source', title: 'Sumber Bahaya', icon: 'folder' },

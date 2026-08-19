@@ -1,0 +1,4 @@
+interface:
+  display_name: "ADS-HK Module Slice"
+  short_description: "Route ADS-HK module work with focused discovery"
+  default_prompt: "Use $ads-hk-module-slice to triage this ADS-HK module with direct evidence, use the manifest path only for proven standard CRUD, and use the full design, plan, implementation, and browser workflow for complex or unclear contracts."
