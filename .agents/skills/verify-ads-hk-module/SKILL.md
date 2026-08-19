@@ -1,6 +1,6 @@
 ---
 name: verify-ads-hk-module
-description: Read-only acceptance verification for one ADS-HK module after implementation. Compare its scoped evidence, approved design or bounded manifest, Improve plan, legacy contract, database/API/resource/FormView path, acceptance checklist, seeded data, focused checks, and authenticated Codex browser flow.
+description: Read-only acceptance verification for one ADS-HK module plan within a feature folder after implementation. Compare its scoped evidence, approved design or bounded manifest, Improve plan, legacy contract, database/API/resource/FormView path, acceptance checklist, seeded data, focused checks, and authenticated Codex browser flow.
 ---
 
 # Verify ADS-HK module
@@ -11,11 +11,12 @@ implementation summary or test claims. The browser step may use temporary
 local or development fixtures as defined below; this does not permit production
 or irreversible business writes.
 
-Use the selected plan's execution worksheet and evidence ledger as the read
-boundary. Read additional files when the worksheet, ledger, or contract
-requires them. Do not require unrelated siblings, every module file with a
-shared prefix, or the full generator source when a simple module has a valid
-machine report and direct generated paths.
+Use the feature folder's `worksheet.md`, the selected numbered plan's local
+execution worksheet, and the feature evidence ledger as the read boundary.
+Read additional files when the worksheet, ledger, or contract requires them.
+Do not require unrelated siblings, every module file with a shared prefix, or
+the full generator source when a simple module has a valid machine report and
+direct generated paths.
 
 ## Verdicts
 
@@ -37,10 +38,11 @@ Read these before judging the result:
 1. Repository `AGENTS.md` and the selected Improve plan.
 2. The approved design and its legacy reference for the full path, or the
    bounded manifest and recorded decision for a simple path.
-3. The execution worksheet, copied `module-acceptance-checklist.md`, and
-   discovery evidence ledger in the selected plan.
-4. The plan's planned-at SHA, scope, dependencies, commands, and done
-   criteria.
+3. The feature folder's `worksheet.md`, the selected plan's local execution
+   worksheet, copied `module-acceptance-checklist.md`, and discovery evidence
+   ledger.
+4. The selected plan's planned-at SHA, scope, dependencies, commands, and done
+   criteria, plus the feature worksheet's plan map and cross-plan blockers.
 5. Current `git status`, the in-scope diff, database migration or schema,
    authenticated API, typed operation, resource, routes, and focused tests.
 6. The direct legacy model, service, config, seed, menu, and surfaces that
@@ -58,9 +60,10 @@ recreate a missing design decision from memory.
 
 Before judging source or browser behavior:
 
-- confirm the selected plan contains one execution worksheet;
-- confirm its state is `VERIFY`, not `DONE` or an earlier phase;
-- confirm exactly one module and plan are named;
+- confirm the feature folder contains `design.md` and `worksheet.md`;
+- confirm the selected plan contains one local execution worksheet;
+- confirm the local worksheet state is `VERIFY`, not `DONE` or an earlier phase;
+- confirm exactly one feature and numbered plan are named;
 - confirm all implementation steps are `PASS` and none is `TODO`, `ACTIVE`,
   `REWORK`, `STOP`, or `BLOCKED`;
 - confirm each completed step has a path, command report, or browser result;
@@ -71,7 +74,8 @@ inconsistent field. Do not repair the worksheet during read-only verification.
 
 ## 1. Scope and drift
 
-- Confirm plan dependencies are `DONE` before verifying the selected plan.
+- Confirm the feature worksheet lists the selected plan's dependencies and
+  each dependency is `DONE` before verifying the selected plan.
 - Run the plan drift check and compare only the plan's in-scope paths.
 - Record unrelated pre-existing changes. Do not use them as module evidence.
 - Confirm no framework package changed without explicit approval.
@@ -202,6 +206,7 @@ Return this report:
 ```text
 VERDICT: PASS | REWORK | BLOCKED
 MODULE: <name>
+FEATURE: <feature-folder>
 PLAN: <path>
 DESIGN: <path or bounded manifest decision>
 LEGACY: <root and inspected direct evidence>
@@ -211,7 +216,7 @@ LABELS: <PASS, differences, or blockers>
 CHECKS: <commands and results>
 BROWSER: <URL, journey, result, or UI UNVERIFIED>
 EVIDENCE: <ledger, checklist rows, and file:line references>
-WORKSHEET: <state, step result, and unresolved item result>
+WORKSHEET: <feature worksheet path; local worksheet state, step result, and unresolved item result>
 REWORK: <exact correction, or None>
 BLOCKER: <exact blocker, or None>
 ```

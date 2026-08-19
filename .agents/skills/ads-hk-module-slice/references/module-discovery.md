@@ -4,10 +4,11 @@ Use this reference before reading module source. The goal is to discover the
 contract with enough context for a safe decision, then stop reading when the
 decision is supported.
 
-Create or open a minimal discovery worksheet stub before the first
-module-specific source read. Initialize its execution worksheet in `DISCOVERY`
-state. The stub is not the technical plan. The eventual plan is the canonical
-handoff for the module; do not create separate task notes.
+Create or open `plans/<feature-slug>/worksheet.md` before the first
+module-specific source read. Initialize it in `DISCOVERY` state. The feature
+worksheet is not the technical plan. The feature folder is the canonical
+handoff; do not create separate task notes or numbered plans before the design
+is approved.
 
 ## 1. Parse the request
 
@@ -45,7 +46,8 @@ search.
 
 ## 3. Evidence ledger
 
-Keep this small table in the execution worksheet section of the module plan.
+Keep this small table in the feature worksheet at
+`plans/<feature-slug>/worksheet.md`.
 Every decision must point to a path and symbol or line. `NOT NEEDED` is valid
 only with a reason. Every module-specific read must answer a ledger or plan
 question; otherwise stop and record why a new read boundary is required.
@@ -128,8 +130,8 @@ module family.
 
 For a proven bounded module:
 
-1. After the approved bounded design, write the explicit manifest from the
-   ledger.
+1. After the approved bounded design, write the explicit manifest at
+   `plans/<feature-slug>/module.json` from the ledger.
 2. Run `pnpm scaffold:master-data ... --json`.
 3. Read the returned `generated`, `integration`, and `manual` paths.
 4. Run guarded integration and the static verifier.
@@ -143,23 +145,24 @@ generator is an existing tool, not a discovery prerequisite.
 
 ## 7. Complex handoff
 
-For a complex module, keep the ledger in the plan and carry its supported
-answers into the design and derived plan. The approved design owns locked
-business and architecture decisions. The technical plan is created only after
-that design is written and approved. It owns the technical contract, complete
-field inventory, ownership map, route/action matrix, permission matrix,
-seed/reload behavior, exact legacy label evidence, acceptance checklist, and
-execution worksheet. Mark each row `PASS`, `APPROVED DIFFERENCE`, `SERVER
-SUPPLIED`, `NOT NEEDED`, `STOP`, or `BLOCKED`.
+For a complex module, keep the ledger in the feature worksheet and carry its
+supported answers into the design and derived plans. The approved design owns
+locked business and architecture decisions. The technical plans are created
+only after that design is written and approved. Each numbered plan owns its
+technical contract, complete field inventory, ownership map, route/action
+matrix, permission matrix, seed/reload behavior, exact legacy label evidence,
+acceptance checklist, and local execution worksheet. Mark each row `PASS`,
+`APPROVED DIFFERENCE`, `SERVER SUPPLIED`, `NOT NEEDED`, `STOP`, or `BLOCKED`.
 
 For a new or legacy-backed complex module, use `$brainstorming` to validate
-business and architecture, write the design document, and stop for written
-approval. Then use `$improve` to derive the implementation plan before source
-edits. Add the execution worksheet from
-`references/module-execution-worksheet.md` to the same plan. An approved repair
-with no unresolved item may reuse its design. The plan is the handoff; the next
-worker must not repeat broad discovery when the ledger already answers the
-question.
+business and architecture, write `plans/<feature-slug>/design.md`, and stop
+for written approval. Then record the plan boundaries in the feature worksheet
+and use `$improve` to derive one numbered implementation plan per slice before
+source edits. Add the local execution worksheet from
+`references/module-execution-worksheet.md` to each plan. An approved repair
+with no unresolved item may reuse its design. The feature folder is the
+handoff; the next worker must not repeat broad discovery when the worksheet
+already answers the question.
 
 ## 8. Stop conditions
 

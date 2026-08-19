@@ -1,35 +1,40 @@
 # Module acceptance checklist
 
-Copy this checklist into the selected module plan before editing. The module
-plan is the canonical handoff and contains the execution worksheet, evidence
-ledger, technical steps, checklist, and evidence links. Do not create separate
-task notes. Fill the direct evidence paths, results, and statuses. Do not
-report completion while a required item is `TODO`, `REWORK`, `STOP`, or
-`BLOCKED`.
+Copy this checklist into each numbered plan under the feature folder before
+editing. The feature folder is the canonical handoff: `design.md` contains
+locked decisions, `worksheet.md` contains discovery and cross-plan status, and
+the numbered plan contains its local execution worksheet, technical steps,
+checklist, and evidence links. Do not create separate task notes. Fill the
+direct evidence paths, results, and statuses. Do not report completion while a
+required item is `TODO`, `REWORK`, `STOP`, or `BLOCKED`.
 
 Use these statuses: `TODO`, `PASS`, `APPROVED DIFFERENCE`, `SERVER SUPPLIED`,
 `NOT NEEDED`, `REWORK`, `STOP`, and `BLOCKED`.
 
-## 0. Execution worksheet
+## 0. Execution worksheets
 
-- [ ] The selected plan contains the worksheet from
+- [ ] The feature folder contains `design.md` and `worksheet.md`.
+- [ ] The feature worksheet contains the discovery ledger, plan map,
+      dependency order, overall status, and cross-plan blockers.
+- [ ] The selected numbered plan contains the local worksheet from
       `references/module-execution-worksheet.md`.
-- [ ] The worksheet has one module, plan path, design or bounded manifest
-      decision, planned-at SHA, current state, active step, next action,
-      read/write boundary, last evidence, and blocker.
-- [ ] The worksheet state is `READY` before source edits, `EXECUTE` during
-      implementation, and `VERIFY` before independent verification.
-- [ ] Only one worksheet step is `ACTIVE` at a time.
-- [ ] Every completed step has a path, command report, or browser result.
-- [ ] The worksheet has no unresolved `TODO`, `REWORK`, `STOP`, or `BLOCKED`
+- [ ] The local worksheet has one feature, one numbered plan, the feature
+      worksheet path, the design path, planned-at SHA, current state, active
+      step, next action, read/write boundary, last evidence, and blocker.
+- [ ] The local worksheet state is `READY` before source edits, `EXECUTE`
+      during implementation, and `VERIFY` before independent verification.
+- [ ] Only one local worksheet step is `ACTIVE` at a time.
+- [ ] Every completed local step has a path, command report, or browser result.
+- [ ] The local worksheet has no unresolved `TODO`, `REWORK`, `STOP`, or `BLOCKED`
       step before verification.
-- [ ] The worksheet is not marked `DONE` before verifier `PASS`.
+- [ ] The local worksheet is not marked `DONE` before verifier `PASS`.
 
 ## 1. Scope and evidence
 
 - [ ] Module name, shape classification, and owned relations are recorded.
-- [ ] The discovery evidence ledger is copied: `<path>`.
-- [ ] Selected plan or design is read: `<path>`.
+- [ ] The feature worksheet discovery evidence ledger is linked: `<path>`.
+- [ ] The selected plan and feature design are read: `<plan path>`,
+      `<design path>`.
 - [ ] Direct legacy owner evidence is read: `<paths>`.
 - [ ] Current owner or direct route evidence is read when it exists: `<paths>`.
 - [ ] Legacy list, detail, create, edit, and workflow surfaces needed by the
@@ -57,8 +62,8 @@ Use these statuses: `TODO`, `PASS`, `APPROVED DIFFERENCE`, `SERVER SUPPLIED`,
 
 For a bounded manifest module, the scaffold JSON result and static verifier
 report may provide the generated-path and route evidence. Record their absolute
-paths in the plan worksheet or reports section. The acceptance matrix and
-browser gate still remain required.
+paths under the feature folder and link them from the numbered plan or its
+reports section. The acceptance matrix and browser gate still remain required.
 
 ## 2. Route and action matrix
 
@@ -134,11 +139,11 @@ approved design labels.
 
 ## 5. Independent verification
 
-- [ ] Worksheet state is `VERIFY`, all implementation steps are `PASS`, and
+- [ ] The selected plan's local worksheet state is `VERIFY`, all implementation steps are `PASS`, and
       no implementation step is still `ACTIVE`.
-- [ ] `$verify-ads-hk-module` reviewed the current plan, design or bounded
-      manifest decision, scoped ledger, diff, legacy reference, checklist,
-      checks, seed, and browser journey.
+- [ ] `$verify-ads-hk-module` reviewed the feature folder's design, feature
+      worksheet, selected plan, scoped ledger, diff, legacy reference,
+      checklist, checks, seed, and browser journey.
 - [ ] Verifier verdict is `PASS`: `<date or evidence path>`.
 - [ ] Verifier `REWORK` and `BLOCKED` items are resolved, or the plan remains
       open with the exact reason.

@@ -20,8 +20,8 @@ ask for another reference or explicit approval to work without legacy parity.
   and verify it.
 - `design <module>`: route and complete the design gate, then stop before
   source edits.
-- `plan <module>`: use an approved design to create one self-contained
-  `$improve` plan without source edits.
+- `plan <module>`: use an approved design to create one or more self-contained
+  numbered `$improve` plans without source edits.
 - `execute <plan>`: use `$improve execute`, then run
   `$verify-ads-hk-module`.
 - `simple-master-data <module>`: use the bounded manifest pipeline below only
@@ -32,50 +32,71 @@ ask for another reference or explicit approval to work without legacy parity.
 When the user names only this skill and a module, use `develop`. Do not ask
 for the default legacy path again.
 
-## Canonical plan and execution worksheet
+## Feature artifact folder and worksheets
 
 Read `references/module-execution-worksheet.md` before creating or executing a
-module plan. The selected module plan is the single human-facing handoff. Its
-required execution worksheet is a section in that same plan, not a separate
-task-notes file.
+module plan. Every new feature or module execution uses one folder under
+`plans/`:
 
-Create a minimal discovery worksheet stub before the first module-specific
-source read. The stub is a tracking envelope, not an approved design or a
-technical plan. Keep the same plan file through discovery, design, planning,
-execution, and verification:
+```text
+plans/<feature-slug>/
+├── design.md
+├── worksheet.md
+├── 01-<implementation-slice>.md
+└── 02-<implementation-slice>.md
+```
 
-1. `DISCOVERY`: initialize the worksheet and record the evidence ledger.
-2. `DESIGN`: write the design document, obtain written approval, link its path,
-   and record locked decisions.
-3. `PLAN`: use `$improve` to derive the technical plan from the approved
-   design, then add file ownership, commands, stop conditions, and the copied
-   acceptance checklist.
-4. `READY`: require design and plan approval before source edits.
-5. `EXECUTE`: work one active worksheet step at a time.
-6. `VERIFY`: hand the completed plan to `$verify-ads-hk-module`.
-7. `DONE`: use only after the verifier returns `PASS`.
+Use the feature folder as the human-facing handoff. `design.md` is the stable
+business and architecture authority. `worksheet.md` is the feature-level
+coordinator for discovery evidence, plan decomposition, dependencies, overall
+status, and cross-plan blockers. Each numbered plan is one technical slice and
+contains its own execution worksheet section. Keep `plans/README.md` as the
+global index only. Do not create new feature artifacts directly under
+`plans/`, and do not migrate old executions.
 
-Before the design is approved, the worksheet may contain only module identity,
-live state, exact next action, read/write boundaries, discovery evidence, and
-unresolved questions. Generic template and checklist placeholders are allowed.
+Create the feature folder and a minimal `worksheet.md` before the first
+module-specific source read. The worksheet is a tracking envelope, not an
+approved design or a technical plan. Keep the same feature folder through
+discovery, design, planning, execution, and verification:
+
+1. `DISCOVERY`: initialize `worksheet.md` and record the evidence ledger.
+2. `DESIGN`: write `<feature-folder>/design.md`, obtain written approval, and
+   link its path from the worksheet.
+3. `DECOMPOSE`: after design approval, record numbered plan boundaries and
+   dependency order in the feature worksheet.
+4. `PLAN`: use `$improve` to derive one or more numbered technical plans from
+   the approved design. Each plan gets a local execution worksheet and the
+   copied acceptance checklist.
+5. `READY`: require design, feature decomposition, and selected plan approval
+   before source edits.
+6. `EXECUTE`: work one active numbered plan and one active local worksheet step
+   at a time.
+7. `VERIFY`: hand the feature folder and selected plan to
+   `$verify-ads-hk-module`.
+8. `DONE`: use only after the selected plan verifier returns `PASS` and the
+   feature worksheet records the completed plan.
+
+Before the design is approved, `worksheet.md` may contain only feature
+identity, live state, exact next action, read/write boundaries, discovery
+evidence, and unresolved questions. Generic template placeholders are allowed.
 Do not add technical scope, target files, implementation commands, design
-decisions, or done criteria before the approved design exists. A chat proposal
-does not replace the written design document.
+decisions, or done criteria before `design.md` exists and is approved. A chat
+proposal does not replace the written design document.
 
 The approved design remains the authority for business and architecture
-decisions. The plan owns the technical contract, evidence ledger, acceptance
-checklist, and reports. The worksheet owns only live state: the current step,
-next action, read/write boundary, result, evidence, blockers, and handoff notes.
-Do not use a worksheet note to bypass a design or planning decision.
+decisions. The feature worksheet owns discovery and cross-plan coordination.
+Each numbered plan owns its technical contract, acceptance checklist, reports,
+and local live execution state. Do not use a worksheet note to bypass a design
+or planning decision.
 
 ## Route before broad reading
 
 Read `references/module-discovery.md` before module source discovery. The
 required sequence is:
 
-1. Create or open the minimal discovery worksheet stub and initialize its
-   worksheet in `DISCOVERY` state. Do not create separate task notes or a
-   technical plan at this point.
+1. Create or open `plans/<feature-slug>/worksheet.md` and initialize it in
+   `DISCOVERY` state. Do not create separate task notes or numbered technical
+   plans at this point.
 2. Read the repository `AGENTS.md`, the user request, and any plan or design
    path supplied by the user.
 3. Search exact module identifiers: slug, table, symbol, legacy title, and
@@ -107,7 +128,8 @@ Use this path only when the evidence proves all of the following:
 A resource that serves as a lookup source can still use this path. A resource
 that owns a dependent lookup, relation, or consumer-specific query cannot.
 
-Use one explicit manifest with `kind: "simple-master-data"`. It must define
+Use one explicit manifest at `plans/<feature-slug>/module.json` with
+`kind: "simple-master-data"`. It must define
 the identity, every domain field, exact labels, six permission entries,
 navigation placement, and optional seed records. The scaffold does not invent
 `name`, `description`, `active`, `code`, audit, relation, or seed fields.
@@ -139,10 +161,11 @@ Medium. Keep one manifest, one verifier report, and one acceptance checkpoint
 per module.
 
 Capture the JSON output of the `--check-only` and `--run` commands as the
-module's named machine report. Record its absolute path in the plan's worksheet
-or reports section. The independent verifier consumes a fresh report and does
-not repeat passing commands only to reproduce them. It reruns a command when
-the report is missing, stale, failed, or does not cover a required risk.
+module's named machine report under the feature folder, preferably in a
+`reports/` subfolder. Record its absolute path in the numbered plan. The
+independent verifier consumes a fresh report and does not repeat passing
+commands only to reproduce them. It reruns a command when the report is
+missing, stale, failed, or does not cover a required risk.
 
 ## Full path for complex or unclear modules
 
@@ -152,25 +175,28 @@ transaction, permission or route ambiguity, legacy mismatch, or missing
 business decision. Do not force these modules into the manifest pipeline.
 
 1. Build the direct field, route/action, ownership, permission, seed, and
-   first-load/reload evidence matrix.
+   first-load/reload evidence matrix in the feature worksheet.
 2. For a new or legacy-backed complex module, invoke `$brainstorming` to
    validate the business and architecture. For an approved repair with no
    unresolved item, reuse the approved design and record that evidence.
-3. Write the design document to the repository, record its path in the
-   worksheet, and stop for written-spec approval. Do not use a chat-only
-   proposal as the design artifact.
-4. After written approval, use `$improve` to derive a self-contained
-   implementation plan from that design. Include the design path, exact file
-   ownership, dependency order, matrices, copied acceptance checklist,
-   commands, stop conditions, and machine-checkable done criteria.
+3. Write `<feature-folder>/design.md`, record its path in `worksheet.md`, and
+   stop for written-spec approval. Do not use a chat-only proposal as the
+   design artifact.
+4. After written approval, record the plan boundaries and dependencies in
+   `worksheet.md`, then use `$improve` to derive one self-contained numbered
+   plan per implementation slice. Include the design path, feature worksheet
+   path, exact file ownership, dependency order, matrices, copied acceptance
+   checklist, commands, stop conditions, and machine-checkable done criteria.
 5. Complete the execution worksheet section from
-   `references/module-execution-worksheet.md` in that plan. Set its state to
-   `READY` only after the design and plan are approved.
-6. Execute one plan at a time in database → authenticated API → typed
+   `references/module-execution-worksheet.md` in each numbered plan. Set a
+   plan to `READY` only after the design, decomposition, and selected plan are
+   approved.
+6. Execute one numbered plan at a time in database → authenticated API → typed
    operation → resource and field catalog → standard or approved custom
    surface order.
-7. Set the worksheet state to `VERIFY` and invoke `$verify-ads-hk-module` after
-   execution. Only `PASS` can mark the plan `DONE`.
+7. Set the selected plan's local worksheet to `VERIFY`, update the feature
+   worksheet, and invoke `$verify-ads-hk-module` after execution. Only `PASS`
+   can mark that plan `DONE`.
 
 Read all legacy list, detail, create, edit, and workflow surfaces that the
 matrix marks as part of the contract. Do not read unrelated surfaces only
@@ -203,8 +229,8 @@ database and schema
 
 ## Focused checks and local browser fixtures
 
-Use the module-scoped commands from the selected plan's worksheet or
-`verify:module` for every module, including the full path. The API and web test
+Use the module-scoped commands from the selected numbered plan's local
+worksheet or `verify:module` for every module, including the full path. The API and web test
 commands must name
 the module's spec files. Do not run a package-wide `test`, `test:unit`, or bare
 `vitest run` as a default. Run a full suite only when a focused failure shows
@@ -256,9 +282,11 @@ approval. Record `Reused`, `Searched`, and `Gap` for web UI decisions.
 
 ## Acceptance and finish gate
 
-Copy `references/module-acceptance-checklist.md` into the selected plan before
-editing. Complete every required route, surface, action, permission, label,
-seed, reload, focused-check, worksheet, and evidence row.
+Copy `references/module-acceptance-checklist.md` into each selected numbered
+plan before editing. Complete every required route, surface, action,
+permission, label, seed, reload, focused-check, local worksheet, and evidence
+row. Keep feature-level status and cross-plan acceptance in
+`<feature-folder>/worksheet.md`.
 
 Before reporting completion:
 

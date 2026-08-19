@@ -58,6 +58,12 @@ Plan 091 fixes module-pipeline navigation order and makes verification reports
 observable. It keeps independent parity and browser review, while allowing the
 verifier to consume one fresh JSON command report. It is `DONE`.
 
+Plan 093 builds the legacy-backed Law Reference Items module. It uses the full
+design and plan workflow because the module owns a recursive tree, category
+relation, lookup filters, and recursive soft delete. It requires focused
+checks, an idempotent category seed, an authenticated browser journey, and
+independent verifier `PASS`.
+
 ## User-facing completion gate
 
 For every plan that changes a user-facing `apps/web` flow, `DONE` requires an
@@ -145,6 +151,7 @@ surfaces, actions, permissions, seed data, and first-load/reload checks.
 | 089 | Implement emergency simulation topics | P1 | M | 088 | DONE |
 | 090 | Focus module discovery and localize workflow skills | P1 | M | 087, 088 | DONE |
 | 091 | Improve module pipeline feedback | P0/P1 | M | 088, 090 | DONE |
+| 093 | Build law reference items | P1 | L | — | IN PROGRESS |
 | 084 | Implement permit-attachment module | P1 | L | 082, 083, 087 | DONE |
 | 085 | Implement safety-checklist module | P1 | L | 082-084 | DONE |
 | 086 | Implement permit-category-apd and nested permit-apd | P1 | L | 082-085 | DONE |
