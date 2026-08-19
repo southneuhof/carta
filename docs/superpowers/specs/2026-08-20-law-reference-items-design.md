@@ -60,13 +60,15 @@ write contract.
 
 ## API contract
 
-Use the standard item routes:
+Use the standard item actions. The current route model exposes these actions
+with its standard `/list`, `/detail/:id`, `/create`, `/update/:id`, and
+`/delete/:id` URL segments:
 
-- `GET /law-reference-items` — flat records for lookup consumers and filters.
-- `GET /law-reference-items/:id` — one record with relation metadata.
-- `POST /law-reference-items` — create a root or child.
-- `PATCH /law-reference-items/:id` — update name, type where valid, or active.
-- `DELETE /law-reference-items/:id` — recursively soft-delete the item and
+- `GET /law-reference-items/list` — flat records for lookup consumers and filters.
+- `GET /law-reference-items/detail/:id` — one record with relation metadata.
+- `POST /law-reference-items/create` — create a root or child.
+- `PATCH /law-reference-items/update/:id` — update name, type where valid, or active.
+- `DELETE /law-reference-items/delete/:id` — recursively soft-delete the item and
   all descendants.
 
 Add one custom route:
