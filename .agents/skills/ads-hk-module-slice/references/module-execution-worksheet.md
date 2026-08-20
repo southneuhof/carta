@@ -1,8 +1,10 @@
 # Module execution worksheet
 
-The feature folder is the human-facing handoff. It contains one stable design,
-one feature worksheet, and one or more numbered technical plans. Do not create
-a separate free-form task-notes file.
+The feature folder is one design document and the human-facing handoff. It
+contains one stable design for one related module group, one feature worksheet,
+and one or more numbered technical plans. The design document is the complete
+folder, not only `design.md`. For unrelated modules, create one feature folder
+per group. Do not create a separate free-form task-notes file.
 
 ```text
 plans/<feature-slug>/
@@ -30,10 +32,10 @@ plan or worksheet.
 
 ## Feature folder lifecycle
 
-Create the feature folder and a minimal `worksheet.md` before the first
-module-specific source read. It may identify the feature and record live
-discovery evidence, but it is not the technical plan. Use the folder through
-all phases:
+Create one feature folder and a minimal `worksheet.md` per related module
+group before the first module-specific source read. It may identify the
+feature and record live discovery evidence, but it is not the technical plan.
+Use each folder through all phases:
 
 1. `DISCOVERY`: initialize the feature worksheet and record the evidence ledger.
 2. `DESIGN`: write `design.md`, obtain written approval, and link its path.
@@ -62,6 +64,8 @@ Put this file at `<feature-folder>/worksheet.md`:
 
 - State: `DISCOVERY`
 - Feature: `<feature-slug>`
+- Modules: `<related modules in this feature group>`
+- Grouping reason: `<shared workflow or business/architecture contract>`
 - Folder: `plans/<feature-slug>/`
 - Design: `TBD during DISCOVERY`
 - Active plan: `None`
@@ -77,6 +81,7 @@ Put this file at `<feature-folder>/worksheet.md`:
 | Question | Evidence path and symbol/line | Result | Status |
 |---|---|---|---|
 | Identity and fields | `<path:line>` | `<answer>` | TODO |
+| Surface field placement and filters | `<path:line>` | `<list/detail/create/update/filter>` | TODO |
 | Legacy labels and behavior | `<path:line>` | `<answer>` | TODO |
 | Relation or child owner | `<path:line>` | `<none/owner>` | TODO |
 | Lookup consumer or dependency | `<path:line>` | `<none/owner>` | TODO |
@@ -110,6 +115,7 @@ Put this section near the top of each numbered plan:
 - Feature worksheet: `<feature-folder>/worksheet.md`
 - Plan: `<feature-folder>/<numbered-plan>.md`
 - Design: `<feature-folder>/design.md`
+- Test environment: `.env.test` / repository test database
 - Planned at: `<short SHA>`
 - Active step: `1`
 - Next action: `<one exact read, edit, or command>`
@@ -168,6 +174,14 @@ Apply these rules:
 - A new business, API, permission, route, framework, or legacy decision is
   `PLAN CHANGE REQUIRED`; stop and return to the design or planning gate.
 - A full-suite command needs an explicit cross-module reason in the worksheet.
+- API focused tests must use `pnpm --filter @southneuhof/api test:focused --
+  <spec>`. That command migrates `.env.test` before Vitest. Do not use bare
+  `db:migrate` for the test database. Record the exact command and test
+  database environment in the worksheet.
+- For bounded manifests, record `actionFields` when list, detail, create, or
+  update does not use every declared domain field. The map must match the
+  approved surface field matrix; do not add a field-specific exception to the
+  generator.
 - Browser evidence must record the URL, surface, action, temporary data ID, and
   visible result. Local CRUD fixtures remain pre-authorized only within the
   existing browser safety rules.

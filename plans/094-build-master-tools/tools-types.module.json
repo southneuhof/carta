@@ -1,0 +1,41 @@
+{
+  "kind": "simple-master-data",
+  "slug": "tools-types",
+  "table": "tools_types",
+  "symbol": "ToolsType",
+  "title": "Jenis Alat Berat & Alat Ukur/Uji",
+  "identity": { "key": "id", "type": "text", "primary": true, "generated": "uuid" },
+  "fields": [
+    { "key": "categoryCode", "type": "text", "label": "Kategori", "required": true, "renderer": "text" },
+    { "key": "name", "type": "text", "label": "Nama", "required": true, "renderer": "text" },
+    { "key": "description", "type": "text", "label": "Deskripsi", "renderer": "textarea" },
+    { "key": "active", "type": "boolean", "label": "Status", "renderer": "switch", "default": true }
+  ],
+  "labels": {
+    "listTitle": "Jenis Alat Berat & Alat Ukur/Uji",
+    "detailTitle": "Detail Jenis Alat Berat & Alat Ukur/Uji",
+    "createTitle": "Tambah Jenis Alat Berat & Alat Ukur/Uji",
+    "editTitle": "Ubah Jenis Alat Berat & Alat Ukur/Uji",
+    "submitLabel": "Submit",
+    "createSuccessMessage": "Berhasil menambahkan data!",
+    "updateSuccessMessage": "Berhasil mengubah data!"
+  },
+  "permissions": {
+    "moduleName": "Tools Types",
+    "realm": "system",
+    "entries": {
+      "view": { "name": "View Tools Types", "description": "View tool types." },
+      "list": { "name": "List Tools Types", "description": "List tool types." },
+      "detail": { "name": "Detail Tools Types", "description": "View a tool type." },
+      "create": { "name": "Create Tools Types", "description": "Create tool types." },
+      "update": { "name": "Update Tools Types", "description": "Update tool types." },
+      "delete": { "name": "Delete Tools Types", "description": "Delete tool types." }
+    }
+  },
+  "navigation": {
+    "after": "master-data-number-configs",
+    "title": "Jenis Alat Berat & Alat Ukur/Uji",
+    "icon": "folder",
+    "separator": "Data"
+  }
+}

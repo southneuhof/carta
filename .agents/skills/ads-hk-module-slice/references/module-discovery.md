@@ -4,11 +4,13 @@ Use this reference before reading module source. The goal is to discover the
 contract with enough context for a safe decision, then stop reading when the
 decision is supported.
 
-Create or open `plans/<feature-slug>/worksheet.md` before the first
-module-specific source read. Initialize it in `DISCOVERY` state. The feature
-worksheet is not the technical plan. The feature folder is the canonical
+For a request with multiple modules, partition the modules into related
+feature groups before source discovery. Create or open one
+`plans/<feature-slug>/worksheet.md` per group before the first module-specific
+source read. Initialize each in `DISCOVERY` state. The feature worksheet is not
+the technical plan. The feature folder is the canonical design document and
 handoff; do not create separate task notes or numbered plans before the design
-is approved.
+is approved. If the relation between modules is not clear, use separate groups.
 
 ## 1. Parse the request
 
@@ -16,11 +18,12 @@ Extract exact values from the request or supplied plan:
 
 | Question | Result |
 |---|---|
-| Requested module name and user-facing title | `<value>` |
-| Exact slug, table, or route | `<value>` |
-| Legacy reference and exact legacy title | `<path/value>` |
+| Requested module(s) and user-facing title(s) | `<value>` |
+| Exact slug(s), table(s), or route(s) | `<value>` |
+| Legacy reference(s) and exact legacy title(s) | `<path/value>` |
 | Requested behavior and actions | `<value>` |
 | Explicit constraints or approved differences | `<value>` |
+| Feature grouping reason | `<shared workflow or contract>` |
 
 If the request does not identify a safe module slug, derive one candidate from
 the direct legacy title, search it, and record ambiguity. Do not search every
@@ -55,6 +58,7 @@ question; otherwise stop and record why a new read boundary is required.
 | Question | Evidence path and symbol/line | Result | Status |
 |---|---|---|---|
 | Identity and fields | `<path:line>` | `<answer>` | `FOUND` |
+| Surface field placement and filters | `<path:line>` | `<list/detail/create/update/filter>` | `FOUND` |
 | Legacy labels and behavior | `<path:line>` | `<answer>` | `FOUND` |
 | Relation or child owner | `<path:line>` | `<none/owner>` | `NOT NEEDED` |
 | Lookup consumer or dependency | `<path:line>` | `<none/owner>` | `NOT NEEDED` |
@@ -97,7 +101,8 @@ Classify from the ledger, not from the module label:
 ### Bounded standard CRUD
 
 Use the manifest path when one resource has known identity, fields, labels,
-permissions, navigation, and optional seed data, and the contract has:
+per-surface field placement, permissions, navigation, and optional seed data,
+and the contract has:
 
 - standard list, detail, create, update, and delete;
 - no owned child or relation write;
@@ -132,6 +137,8 @@ For a proven bounded module:
 
 1. After the approved bounded design, write the explicit manifest at
    `plans/<feature-slug>/module.json` from the ledger.
+   Add `actionFields` when list, detail, create, or update does not use every
+   declared domain field. Omit it when all actions use the same field set.
 2. Run `pnpm scaffold:master-data ... --json`.
 3. Read the returned `generated`, `integration`, and `manual` paths.
 4. Run guarded integration and the static verifier.
@@ -141,7 +148,10 @@ For a proven bounded module:
 Read `scripts/scaffold-master-data.mjs`, `integrate-master-data.mjs`, or
 `verify-module.mjs` only when the command output is missing, contradicts the
 manifest, or exposes an error that the command report cannot explain. The
-generator is an existing tool, not a discovery prerequisite.
+generator is an existing tool, not a discovery prerequisite. For API checks,
+use `pnpm --filter @southneuhof/api test:focused -- <spec>`; it migrates the
+test database from `.env.test` before Vitest. Do not substitute bare
+`db:migrate` for that command.
 
 ## 7. Complex handoff
 

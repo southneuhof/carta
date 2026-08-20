@@ -1,0 +1,256 @@
+{
+  "status": "FAIL",
+  "static": {
+    "status": "PASS",
+    "checks": [
+      {
+        "name": "generated files",
+        "status": "PASS",
+        "detail": "11 files present"
+      },
+      {
+        "name": "API route index",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/api/src/routes/index.ts"
+      },
+      {
+        "name": "API route import",
+        "status": "PASS",
+        "detail": "import { toolsTypeModel, domain as toolsTypesDomain } from \"./tools-types/tools-types\"; (1 occurrences)"
+      },
+      {
+        "name": "API domain registration",
+        "status": "PASS",
+        "detail": "  toolsTypesDomain, (1 occurrences)"
+      },
+      {
+        "name": "API route registration",
+        "status": "PASS",
+        "detail": "  toolsTypeModel, (1 occurrences)"
+      },
+      {
+        "name": "authorization catalog",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/api/src/authorization/catalog.ts"
+      },
+      {
+        "name": "permission view-tools-types",
+        "status": "PASS",
+        "detail": "code: \"view-tools-types\" (1 occurrences)"
+      },
+      {
+        "name": "permission list-tools-types",
+        "status": "PASS",
+        "detail": "code: \"list-tools-types\" (1 occurrences)"
+      },
+      {
+        "name": "permission detail-tools-types",
+        "status": "PASS",
+        "detail": "code: \"detail-tools-types\" (1 occurrences)"
+      },
+      {
+        "name": "permission create-tools-types",
+        "status": "PASS",
+        "detail": "code: \"create-tools-types\" (1 occurrences)"
+      },
+      {
+        "name": "permission update-tools-types",
+        "status": "PASS",
+        "detail": "code: \"update-tools-types\" (1 occurrences)"
+      },
+      {
+        "name": "permission delete-tools-types",
+        "status": "PASS",
+        "detail": "code: \"delete-tools-types\" (1 occurrences)"
+      },
+      {
+        "name": "web navigation",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/manifest/navigation.ts"
+      },
+      {
+        "name": "navigation route",
+        "status": "PASS",
+        "detail": "to: { name: 'master-data-tools-types' } (1 occurrences)"
+      },
+      {
+        "name": "navigation permission",
+        "status": "PASS",
+        "detail": "permission: 'view-tools-types'"
+      },
+      {
+        "name": "navigation title",
+        "status": "PASS",
+        "detail": "title: 'Jenis Alat Berat & Alat Ukur/Uji'"
+      },
+      {
+        "name": "master-data index",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/index.route.vue"
+      },
+      {
+        "name": "master-data index entry",
+        "status": "PASS",
+        "detail": "  ['tools-types', 'Jenis Alat Berat & Alat Ukur/Uji'], (1 occurrences)"
+      },
+      {
+        "name": "list title",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/index.route.vue"
+      },
+      {
+        "name": "list title content",
+        "status": "PASS",
+        "detail": "title=\"Jenis Alat Berat &amp; Alat Ukur/Uji\""
+      },
+      {
+        "name": "create title",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/create.route.vue"
+      },
+      {
+        "name": "create title content",
+        "status": "PASS",
+        "detail": "title=\"Tambah Jenis Alat Berat &amp; Alat Ukur/Uji\""
+      },
+      {
+        "name": "create submit label",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/create.route.vue"
+      },
+      {
+        "name": "create submit label content",
+        "status": "PASS",
+        "detail": "submit-label=\"Submit\""
+      },
+      {
+        "name": "create success message",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/create.route.vue"
+      },
+      {
+        "name": "create success message content",
+        "status": "PASS",
+        "detail": "successMessage: 'Berhasil menambahkan data!'"
+      },
+      {
+        "name": "detail title",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/[toolsTypeId]/detail.route.vue"
+      },
+      {
+        "name": "detail title content",
+        "status": "PASS",
+        "detail": "title=\"Detail Jenis Alat Berat &amp; Alat Ukur/Uji\""
+      },
+      {
+        "name": "edit title",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/[toolsTypeId]/edit.route.vue"
+      },
+      {
+        "name": "edit title content",
+        "status": "PASS",
+        "detail": "title=\"Ubah Jenis Alat Berat &amp; Alat Ukur/Uji\""
+      },
+      {
+        "name": "edit submit label",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/[toolsTypeId]/edit.route.vue"
+      },
+      {
+        "name": "edit submit label content",
+        "status": "PASS",
+        "detail": "submit-label=\"Submit\""
+      },
+      {
+        "name": "update success message",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/[toolsTypeId]/edit.route.vue"
+      },
+      {
+        "name": "update success message content",
+        "status": "PASS",
+        "detail": "successMessage: 'Berhasil mengubah data!'"
+      }
+    ],
+    "failed": []
+  },
+  "commands": [
+    {
+      "command": "pnpm --filter @southneuhof/api test:focused -- src/routes/tools-types/tools-types.routes.spec.ts",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 5371,
+      "timeoutMs": 180000,
+      "timedOut": false,
+      "signal": null,
+      "error": null,
+      "output": "RUN  v2.1.9 /Users/gamer/Documents/projects/ads-hk/apps/api\n\n ✓ src/routes/tools-types/tools-types.routes.spec.ts (2 tests) 2297ms\n   ✓ Jenis Alat Berat & Alat Ukur/Uji routes > requires authentication and permission 741ms\n   ✓ Jenis Alat Berat & Alat Ukur/Uji routes > filters by category and supports validated audited CRUD 1553ms\n\n Test Files  1 passed (1)\n      Tests  2 passed (2)\n   Start at  05:16:25\n   Duration  4.67s (transform 463ms, setup 0ms, collect 2.18s, tests 2.30s, environment 0ms, prepare 60ms)"
+    },
+    {
+      "command": "pnpm --filter @southneuhof/framework-web test:focused -- routes/(authenticated)/master-data/tools-types/tools-types.resource.spec.ts routes/(authenticated)/master-data/tools-types/tools-types.integration.spec.ts",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 5465,
+      "timeoutMs": 180000,
+      "timedOut": false,
+      "signal": null,
+      "error": null,
+      "output": "RUN  v4.1.10 /Users/gamer/Documents/projects/ads-hk/apps/web/src\n\n\n Test Files  2 passed (2)\n      Tests  3 passed (3)\n   Start at  05:16:31\n   Duration  4.33s (transform 1.13s, setup 0ms, import 2.82s, tests 10ms, environment 2.99s)\n\nBoth esbuild and oxc options were set. oxc options will be used and esbuild options will be ignored. The following esbuild options were set: `{ jsxFactory: 'h', jsxFragment: 'Fragment' }`"
+    },
+    {
+      "command": "pnpm --filter @southneuhof/api lint:focused -- src/routes/tools-types/tools-types.entity.ts src/routes/tools-types/tools-types.ts src/routes/tools-types/tools-types.routes.spec.ts src/routes/index.ts src/authorization/catalog.ts",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 3881,
+      "timeoutMs": 180000,
+      "timedOut": false,
+      "signal": null,
+      "error": null,
+      "output": ""
+    },
+    {
+      "command": "pnpm --filter @southneuhof/framework-web lint:focused -- src/routes/(authenticated)/master-data/tools-types/tools-types.schema.ts src/routes/(authenticated)/master-data/tools-types/tools-types.resource.ts src/routes/(authenticated)/master-data/tools-types/tools-types.resource.spec.ts src/routes/(authenticated)/master-data/tools-types/tools-types.integration.spec.ts src/routes/(authenticated)/master-data/tools-types/index.route.vue src/routes/(authenticated)/master-data/tools-types/create.route.vue src/routes/(authenticated)/master-data/tools-types/[toolsTypeId]/detail.route.vue src/routes/(authenticated)/master-data/tools-types/[toolsTypeId]/edit.route.vue src/manifest/navigation.ts src/routes/(authenticated)/master-data/index.route.vue",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 1517,
+      "timeoutMs": 180000,
+      "timedOut": false,
+      "signal": null,
+      "error": null,
+      "output": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/[toolsTypeId]/detail.route.vue\n   9:11  warning  Replace `<DetailView·v-bind=\"toolsTypes.detail({·id:·String(route.params.toolsTypeId)·})\"·title=\"Detail·Jenis·Alat·Berat·&amp;·Alat·Ukur/Uji\"·:back-to=\"{·name:·'master-data-tools-types'·}\"·/>` with `⏎··<DetailView·v-bind=\"toolsTypes.detail({·id:·String(route.params.toolsTypeId)·})\"·title=\"Detail·Jenis·Alat·Berat·&amp;·Alat·Ukur/Uji\"·:back-to=\"{·name:·'master-data-tools-types'·}\"·/>⏎`  prettier/prettier\n  10:1   warning  Delete `⏎`                                                                                                                                                                                                                                                                                                                                                                                          prettier/prettier\n\n/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/[toolsTypeId]/edit.route.vue\n  11:1  warning  Delete `⏎`  prettier/prettier\n\n/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/create.route.vue\n  9:1  warning  Delete `⏎`  prettier/prettier\n\n/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/index.route.vue\n  12:85  warning  Replace `value·as·CategoryCode` with `(value·as·CategoryCode)`  prettier/prettier\n\n/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/tools-types.integration.spec.ts\n  24:1  warning  Delete `⏎`  prettier/prettier\n\n/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/tools-types.resource.spec.ts\n  2:9  warning  Replace `·createFrameworkQueryClient,·registerResourceRuntime,·resetResourceRuntimeForTests,·resolveFields,·resolveFrameworkAdapters,·resolveFrameworkFieldDefaults·` with `⏎··createFrameworkQueryClient,⏎··registerResourceRuntime,⏎··resetResourceRuntimeForTests,⏎··resolveFields,⏎··resolveFrameworkAdapters,⏎··resolveFrameworkFieldDefaults,⏎`  prettier/prettier\n\n/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/tools-types.schema.ts\n  11:66  warning  Replace `typeof·rpc` with `(typeof·rpc)`  prettier/prettier\n  17:1   warning  Delete `⏎`                                prettier/prettier\n\n✖ 9 problems (0 errors, 9 warnings)\n  0 errors and 9 warnings potentially fixable with the `--fix` option."
+    },
+    {
+      "command": "pnpm --filter @southneuhof/api type-check",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 13073,
+      "timeoutMs": 180000,
+      "timedOut": false,
+      "signal": null,
+      "error": null,
+      "output": ""
+    },
+    {
+      "command": "pnpm --filter @southneuhof/framework-web type-check",
+      "status": "FAIL",
+      "exitCode": 2,
+      "durationMs": 22353,
+      "timeoutMs": 180000,
+      "timedOut": false,
+      "signal": null,
+      "error": null,
+      "output": "../../packages/is-vue-framework/src/components/views/DetailView.vue(39,17): error TS2590: Expression produces a union type that is too complex to represent.\n../../packages/is-vue-framework/src/components/views/FormView.vue(59,55): error TS2590: Expression produces a union type that is too complex to represent.\n../../packages/is-vue-framework/src/components/views/ListView.vue(113,17): error TS2590: Expression produces a union type that is too complex to represent."
+    }
+  ],
+  "browser": {
+    "required": true,
+    "paths": [
+      "/master-data/tools-types",
+      "/master-data/tools-types/create",
+      "/master-data/tools-types/record-1/detail",
+      "/master-data/tools-types/record-1/edit"
+    ]
+  }
+}

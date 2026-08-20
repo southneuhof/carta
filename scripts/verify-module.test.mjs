@@ -141,13 +141,11 @@ test('fails on duplicate integration metadata and invalid manifests', () => {
   assert.throws(() => verify({ ...setup.value, kind: 'other' }, { root: setup.root }), /kind must be simple-master-data/)
 })
 
-test('plans migration before repeated seed verification', () => {
+test('prepares the test database before seeded verification', () => {
   const commands = verificationCommands(config(), { withSeed: true }).map(([command, args]) => [command, ...args].join(' '))
-  assert.deepEqual(commands.slice(-3), [
-    'pnpm --filter @southneuhof/api db:migrate',
-    'pnpm --filter @southneuhof/api db:seed',
-    'pnpm --filter @southneuhof/api db:seed',
-  ])
+  assert.equal(commands[0], 'pnpm --filter @southneuhof/api db:seed:test')
+  assert.equal(commands.filter((command) => command === 'pnpm --filter @southneuhof/api db:seed:test').length, 1)
+  assert.equal(commands.some((command) => command === 'pnpm --filter @southneuhof/api db:migrate'), false)
 })
 
 test('reports command duration and timeout state', () => {

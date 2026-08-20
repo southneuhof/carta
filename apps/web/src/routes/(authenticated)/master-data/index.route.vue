@@ -10,6 +10,8 @@ const entries = [
   ['pts-work-categories', 'Kategori Pekerjaan'],
   ['root-causes', 'Penyebab QHSSE'],
   ['number-configs', 'Number Configurations'],
+  ['tools-types', 'Jenis Alat Berat & Alat Ukur/Uji'],
+  ['tools-brands', 'Merk Alat Berat & Alat Ukur/Uji'],
   ['emergency-simulation-topics', 'Topik Simulasi Tanggap Darurat'],
   ['emergency-simulation-employees', 'Karyawan Terlibat'],
   ['emergency-simulation-tools', 'Perlengkapan Tanggap Darurat'],

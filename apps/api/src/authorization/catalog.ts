@@ -438,6 +438,34 @@ export const authorizationModules = [
       { code: "delete-emergency-simulation-tools", name: "Delete Emergency Simulation Tools", description: "Delete emergency simulation tools.", active: true },
     ],
   },
+  {
+    code: "tools-types",
+    name: "Tools Types",
+    realm: "system",
+    active: true,
+    permissions: [
+      { code: "view-tools-types", name: "View Tools Types", description: "View tool types.", active: true },
+      { code: "list-tools-types", name: "List Tools Types", description: "List tool types.", active: true },
+      { code: "detail-tools-types", name: "Detail Tools Types", description: "View a tool type.", active: true },
+      { code: "create-tools-types", name: "Create Tools Types", description: "Create tool types.", active: true },
+      { code: "update-tools-types", name: "Update Tools Types", description: "Update tool types.", active: true },
+      { code: "delete-tools-types", name: "Delete Tools Types", description: "Delete tool types.", active: true },
+    ],
+  },
+  {
+    code: "tools-brands",
+    name: "Tools Brands",
+    realm: "system",
+    active: true,
+    permissions: [
+      { code: "view-tools-brands", name: "View Tools Brands", description: "View tool brands.", active: true },
+      { code: "list-tools-brands", name: "List Tools Brands", description: "List tool brands.", active: true },
+      { code: "detail-tools-brands", name: "Detail Tools Brands", description: "View a tool brand.", active: true },
+      { code: "create-tools-brands", name: "Create Tools Brands", description: "Create tool brands.", active: true },
+      { code: "update-tools-brands", name: "Update Tools Brands", description: "Update tool brands.", active: true },
+      { code: "delete-tools-brands", name: "Delete Tools Brands", description: "Delete tool brands.", active: true },
+    ],
+  },
 ] as const satisfies readonly ModuleDefinition[];
 
 export type AuthorizationModuleCode = (typeof authorizationModules)[number]["code"];

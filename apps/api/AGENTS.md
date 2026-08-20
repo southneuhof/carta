@@ -50,6 +50,13 @@ migration.
 pnpm --filter @southneuhof/api test
 ```
 
+For one or more API specs, use the test-aware focused command. It applies
+pending migrations to `.env.test` and forwards the spec paths after `--`:
+
+```bash
+pnpm --filter @southneuhof/api test:focused -- src/routes/<name>/<name>.routes.spec.ts
+```
+
 ```bash
 pnpm --filter @southneuhof/api type-check
 ```
@@ -74,6 +81,8 @@ around it by loosening the schema.
 | `db:push` | dev-only direct schema sync, no history |
 | `db:reset` | drop every table in `public` + migration history, then migrate |
 | `db:seed` | idempotent development seed |
+| `db:migrate:test` | apply pending migrations to the `.env.test` database |
+| `db:seed:test` | migrate and seed the `.env.test` database |
 | `db:refresh` | `db:reset` then `db:seed` — use only when intentionally refreshing the development database |
 | `db:smoke` | signs in as the seeded admin and exercises product create/update/delete |
 
@@ -81,7 +90,8 @@ around it by loosening the schema.
 
 - Tests load `.env`, then `.env.test` when it exists, and apply pending migrations before Vitest.
   Keep `.env.test` pointed at a separate test database. Tests hit real Postgres and rebuild or leave
-  fixture rows, so they must not use the development database.
+  fixture rows, so they must not use the development database. Do not run bare `db:migrate` before
+  focused tests; use `test:focused -- <spec>` or `db:migrate:test`.
 - Spec files run serially (`vitest.config.ts` sets `fileParallelism: false`) for the same reason —
   in parallel, one file drops the tables another is using. Nothing else may touch that database
   while the suite runs.

@@ -1,0 +1,41 @@
+{
+  "kind": "simple-master-data",
+  "slug": "tools-brands",
+  "table": "tools_brands",
+  "symbol": "ToolsBrand",
+  "title": "Merk Alat Berat & Alat Ukur/Uji",
+  "identity": { "key": "id", "type": "text", "primary": true, "generated": "uuid" },
+  "fields": [
+    { "key": "categoryCode", "type": "text", "label": "Kategori", "required": true, "renderer": "text" },
+    { "key": "name", "type": "text", "label": "Nama", "required": true, "renderer": "text" },
+    { "key": "description", "type": "text", "label": "Deskripsi", "renderer": "textarea" },
+    { "key": "active", "type": "boolean", "label": "Status", "renderer": "switch", "default": true }
+  ],
+  "labels": {
+    "listTitle": "Merk Alat Berat & Alat Ukur/Uji",
+    "detailTitle": "Detail Merk Alat Berat & Alat Ukur/Uji",
+    "createTitle": "Tambah Merk Alat Berat & Alat Ukur/Uji",
+    "editTitle": "Ubah Merk Alat Berat & Alat Ukur/Uji",
+    "submitLabel": "Submit",
+    "createSuccessMessage": "Berhasil menambahkan data!",
+    "updateSuccessMessage": "Berhasil mengubah data!"
+  },
+  "permissions": {
+    "moduleName": "Tools Brands",
+    "realm": "system",
+    "entries": {
+      "view": { "name": "View Tools Brands", "description": "View tool brands." },
+      "list": { "name": "List Tools Brands", "description": "List tool brands." },
+      "detail": { "name": "Detail Tools Brands", "description": "View a tool brand." },
+      "create": { "name": "Create Tools Brands", "description": "Create tool brands." },
+      "update": { "name": "Update Tools Brands", "description": "Update tool brands." },
+      "delete": { "name": "Delete Tools Brands", "description": "Delete tool brands." }
+    }
+  },
+  "navigation": {
+    "after": "master-data-tools-types",
+    "title": "Merk Alat Berat & Alat Ukur/Uji",
+    "icon": "folder",
+    "separator": "Data"
+  }
+}

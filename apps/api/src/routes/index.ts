@@ -56,6 +56,10 @@ import { emergencySimulationEmployeeModel, domain as emergencySimulationEmployee
 import { emergencySimulationToolModel, domain as emergencySimulationToolsDomain } from "./emergency-simulation-tools/emergency-simulation-tools";
 import { tollCausesAccidentsModel, domain as tollCausesAccidentsDomain } from "./toll-causes-accidents/toll-causes-accidents";
 
+import { toolsTypeModel, domain as toolsTypesDomain } from "./tools-types/tools-types";
+
+import { toolsBrandModel, domain as toolsBrandsDomain } from "./tools-brands/tools-brands";
+
 export const domainParts = [
   authDomain,
   businessCategoriesDomain,
@@ -84,6 +88,8 @@ export const domainParts = [
   emergencySimulationEmployeesDomain,
   emergencySimulationToolsDomain,
   tollCausesAccidentsDomain,
+  toolsTypesDomain,
+  toolsBrandsDomain,
 ] as const;
 
 const installedRoutes = [
@@ -135,6 +141,8 @@ const installedRoutes = [
   emergencySimulationEmployeeModel,
   emergencySimulationToolModel,
   tollCausesAccidentsModel,
+  toolsTypeModel,
+  toolsBrandModel,
 ] as const;
 
 // Public like /health; attach authenticated() here if the document should require a session.

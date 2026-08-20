@@ -1,6 +1,6 @@
 ---
 name: ads-hk-module-slice
-description: Develop, plan, implement, or verify one ADS-HK authenticated module end to end. Use for legacy-backed or new modules, including master data, Settings, PTS, Quality Inspection, ITP, and modules with database, API, resource, FormView, route, permission, seed, or browser work.
+description: Develop, plan, implement, or verify one ADS-HK authenticated module or one directly related module group end to end. Use for legacy-backed or new modules, including master data, Settings, PTS, Quality Inspection, ITP, and modules with database, API, resource, FormView, route, permission, seed, or browser work. Keep unrelated modules in separate feature folders and design documents.
 ---
 
 # ADS-HK module slice
@@ -29,14 +29,35 @@ ask for another reference or explicit approval to work without legacy parity.
 - `verify <module or plan>` and `review <module>`: invoke the read-only
   `$verify-ads-hk-module` skill.
 
-When the user names only this skill and a module, use `develop`. Do not ask
-for the default legacy path again.
+When the user names only this skill and a module or related module group, use
+`develop`. Do not ask for the default legacy path again.
+
+## Multiple modules in one request
+
+If a request names multiple modules, group them before creating a worksheet or
+reading module-specific source. Use one feature group only when the modules
+share a user-facing workflow or a business or architecture decision. Examples
+include a parent and its child records, a required lookup owner and its
+consumer, or one workflow that uses both modules.
+
+Use separate feature groups when the modules have separate workflows, designs,
+permissions, routes, seeds, acceptance journeys, or independent legacy
+owners. A shared menu group, name prefix, domain, CRUD pattern, or delivery
+turn does not make modules related. If the relation is not clear, use separate
+groups.
+
+Treat a "design document" as the complete feature folder, not only
+`design.md`. Each group gets its own `plans/<feature-slug>/` folder with its
+own `design.md`, `worksheet.md`, numbered plans, manifests, reports, and
+acceptance evidence. Do not put unrelated modules in one folder or one
+`design.md`. Record the group members and the reason for the grouping in each
+feature worksheet. Link dependencies between separate groups; do not merge
+their design folders to show the dependency.
 
 ## Feature artifact folder and worksheets
 
 Read `references/module-execution-worksheet.md` before creating or executing a
-module plan. Every new feature or module execution uses one folder under
-`plans/`:
+module plan. Every new feature group uses one folder under `plans/`:
 
 ```text
 plans/<feature-slug>/
@@ -54,10 +75,10 @@ contains its own execution worksheet section. Keep `plans/README.md` as the
 global index only. Do not create new feature artifacts directly under
 `plans/`, and do not migrate old executions.
 
-Create the feature folder and a minimal `worksheet.md` before the first
-module-specific source read. The worksheet is a tracking envelope, not an
-approved design or a technical plan. Keep the same feature folder through
-discovery, design, planning, execution, and verification:
+Create one feature folder and a minimal `worksheet.md` per feature group
+before the first module-specific source read. The worksheet is a tracking
+envelope, not an approved design or a technical plan. Keep each feature folder
+through discovery, design, planning, execution, and verification:
 
 1. `DISCOVERY`: initialize `worksheet.md` and record the evidence ledger.
 2. `DESIGN`: write `<feature-folder>/design.md`, obtain written approval, and
@@ -95,8 +116,9 @@ Read `references/module-discovery.md` before module source discovery. The
 required sequence is:
 
 1. Create or open `plans/<feature-slug>/worksheet.md` and initialize it in
-   `DISCOVERY` state. Do not create separate task notes or numbered technical
-   plans at this point.
+   `DISCOVERY` state for each feature group. Do not use one worksheet for
+   unrelated modules, and do not create separate task notes or numbered
+   technical plans at this point.
 2. Read the repository `AGENTS.md`, the user request, and any plan or design
    path supplied by the user.
 3. Search exact module identifiers: slug, table, symbol, legacy title, and
@@ -131,8 +153,25 @@ that owns a dependent lookup, relation, or consumer-specific query cannot.
 Use one explicit manifest at `plans/<feature-slug>/module.json` with
 `kind: "simple-master-data"`. It must define
 the identity, every domain field, exact labels, six permission entries,
-navigation placement, and optional seed records. The scaffold does not invent
-`name`, `description`, `active`, `code`, audit, relation, or seed fields.
+navigation placement, optional seed records, and action field placement when a
+field is not present on every CRUD surface. Use the optional generic
+`actionFields` map for that case:
+
+```json
+{
+  "actionFields": {
+    "list": ["name", "description", "active"],
+    "detail": ["name", "description", "active"],
+    "create": ["categoryCode", "name", "description", "active"],
+    "update": ["categoryCode", "name", "description", "active"]
+  }
+}
+```
+
+When omitted, the scaffold uses all domain fields for every action. Every key
+in the map must be a declared domain field. The scaffold does not invent
+`name`, `description`, `active`, `code`, audit, relation, seed, or surface
+fields.
 Create the manifest and any technical plan only after discovery, the required
 brainstorming and design gate, and written approval. The manifest is the
 approved bounded contract; it does not replace an unresolved design decision.
@@ -152,7 +191,8 @@ review. Read the generated files and direct integration owners. Do not read
 the generator implementation unless its output is missing or conflicts with
 the manifest. The integration command is guarded and idempotent. Do not edit
 route-map files by hand. Use `--with-seed` only when the manifest has seed
-records.
+records. `verify:module` prepares seeded data in the test database before
+focused checks.
 
 The commands do not replace the acceptance checklist, legacy parity review,
 authenticated Codex browser check, or independent verifier `PASS`. Use High
@@ -235,6 +275,12 @@ commands must name
 the module's spec files. Do not run a package-wide `test`, `test:unit`, or bare
 `vitest run` as a default. Run a full suite only when a focused failure shows
 cross-module risk or the user asks for it, and record the reason.
+
+For API checks, use `pnpm --filter @southneuhof/api test:focused -- <spec>`.
+This command applies pending migrations to `.env.test` before running the
+focused spec. Do not use bare `db:migrate` before a test, because it targets
+the development database. Keep the `--` before spec paths so the package
+script forwards the paths and does not run the full suite.
 
 For an authenticated browser check against local or development data, temporary
 fixtures required by the approved module journey are already authorized. Create

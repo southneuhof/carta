@@ -11,6 +11,7 @@ const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const tablePattern = /^[a-z][a-z0-9_]*$/
 const supportedTypes = new Set(['text', 'boolean'])
 const permissionActions = ['view', 'list', 'detail', 'create', 'update', 'delete']
+const resourceActions = ['list', 'detail', 'create', 'update']
 const labelKeys = ['listTitle', 'detailTitle', 'createTitle', 'editTitle', 'submitLabel', 'createSuccessMessage', 'updateSuccessMessage']
 const renderersByType = {
   text: new Set(['text', 'textarea']),
@@ -93,7 +94,7 @@ function validateNavigation(value) {
 }
 
 function validateSeed(value, { identity, fields }) {
-  if (value === undefined) return null
+  if (value === undefined || value === null) return null
   if (!isObject(value)) throw new Error('seed must be an object when provided.')
   if (!Array.isArray(value.records) || value.records.length === 0) throw new Error('seed.records must be a non-empty array when seed is provided.')
   if (!Array.isArray(value.updateFields) || value.updateFields.length === 0) throw new Error('seed.updateFields must be a non-empty array when seed is provided.')
@@ -142,6 +143,29 @@ function validateField(value, name, { domain }) {
   }
 }
 
+function validateActionFields(value, fields) {
+  const fieldKeys = fields.map((field) => field.key)
+  const defaults = Object.fromEntries(resourceActions.map((action) => [action, [...fieldKeys]]))
+  if (value === undefined || value === null) return defaults
+  if (!isObject(value)) throw new Error('actionFields must be an object when provided.')
+
+  for (const action of Object.keys(value)) {
+    if (!resourceActions.includes(action)) throw new Error(`actionFields.${action} is unsupported.`)
+  }
+
+  return Object.fromEntries(resourceActions.map((action) => {
+    const configured = value[action]
+    if (configured === undefined) return [action, defaults[action]]
+    if (!Array.isArray(configured)) throw new Error(`actionFields.${action} must be an array.`)
+    const keys = configured.map((key, index) => identifier(key, `actionFields.${action}[${index}]`))
+    if (new Set(keys).size !== keys.length) throw new Error(`actionFields.${action} must contain unique fields.`)
+    for (const key of keys) {
+      if (!fieldKeys.includes(key)) throw new Error(`actionFields.${action} contains unsupported field "${key}".`)
+    }
+    return [action, keys]
+  }))
+}
+
 export function validateConfig(value) {
   if (!isObject(value)) throw new Error('Scaffold configuration must be a JSON object.')
 
@@ -166,6 +190,7 @@ export function validateConfig(value) {
 
   if (!Array.isArray(value.fields) || value.fields.length === 0) throw new Error('fields must be a non-empty array.')
   const fields = value.fields.map((field, index) => validateField(field, `fields[${index}]`, { domain: true }))
+  const actionFields = validateActionFields(value.actionFields, fields)
   const explicitFields = (key) => {
     if (value[key] === undefined) return []
     if (!Array.isArray(value[key])) throw new Error(`${key} must be an array when provided.`)
@@ -182,7 +207,7 @@ export function validateConfig(value) {
   const navigation = validateNavigation(value.navigation)
   const seed = validateSeed(value.seed, { identity, fields })
 
-  return { kind: value.kind, slug, table, symbol, title, identity, fields, serverFields, auditFields, labels, permissions, navigation, seed }
+  return { kind: value.kind, slug, table, symbol, title, identity, fields, actionFields, serverFields, auditFields, labels, permissions, navigation, seed }
 }
 
 function literal(value) {
@@ -352,7 +377,7 @@ function renderResource(config) {
   const plural = `${entity}s`
   const metadata = moduleMetadata(config)
   const routeParam = metadata.routeParam
-  const fieldKeys = config.fields.map((field) => `fields.${field.key}`).join(', ')
+  const fieldKeys = (action) => config.actionFields[action].map((key) => `fields.${key}`).join(', ')
   const initial = config.fields
     .filter((field) => Object.hasOwn(field, 'default'))
     .map((field) => `${field.key}: ${literal(field.default)}`)
@@ -376,25 +401,25 @@ export const ${plural} = defineResource(${plural}Schema, {
   actions: {
     list: {
       run: api.list,
-      fields: [${fieldKeys}],
+      fields: [${fieldKeys('list')}],
       permission: '${metadata.permissions.view}',
       route: { name: '${metadata.routes.list}' },
     },
     detail: {
       run: api.detail,
-      fields: [${fieldKeys}],
+      fields: [${fieldKeys('detail')}],
       permission: '${metadata.permissions.view}',
       route: { name: '${metadata.routes.detail}', params: (id) => ({ ${routeParam}: String(id) }) },
     },
     create: {
       run: api.create,
-      fields: [${fieldKeys}],
+      fields: [${fieldKeys('create')}],
       permission: '${metadata.permissions.create}',
       route: { name: '${metadata.routes.create}' },${initialData}
     },
     update: {
       run: api.update,
-      fields: [${fieldKeys}],
+      fields: [${fieldKeys('update')}],
       permission: '${metadata.permissions.update}',
       route: { name: '${metadata.routes.edit}', params: (id) => ({ ${routeParam}: String(id) }) },
     },
@@ -411,7 +436,7 @@ function renderResourceTest(config) {
   const plural = `${entity}s`
   const metadata = moduleMetadata(config)
   const routeParam = metadata.routeParam
-  const keys = literal(config.fields.map((field) => field.key))
+  const keys = Object.fromEntries(resourceActions.map((action) => [action, literal(config.actionFields[action])]))
   return `import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { createFrameworkQueryClient, registerResourceRuntime, resetResourceRuntimeForTests, resolveFields, resolveFrameworkAdapters, resolveFrameworkFieldDefaults } from '@southneuhof/is-vue-framework'
 import { appFieldDefaults } from '@/configs/defaults'
@@ -426,10 +451,10 @@ function fields(value: unknown, surface: 'form' | 'table' | 'detail') {
 
 describe(${literal(`${config.title} resource`)}, () => {
   it('exposes only the configured domain fields', () => {
-    const keys = ${keys}
-    expect(fields(${plural}.list().fields, 'table').map((field) => field.key)).toEqual(keys)
-    expect(fields(${plural}.detail({ id: '1' }).fields, 'detail').map((field) => field.key)).toEqual(keys)
-    expect(fields(${plural}.create().fields, 'form').map((field) => field.key)).toEqual(keys)
+    expect(fields(${plural}.list().fields, 'table').map((field) => field.key)).toEqual(${keys.list})
+    expect(fields(${plural}.detail({ id: '1' }).fields, 'detail').map((field) => field.key)).toEqual(${keys.detail})
+    expect(fields(${plural}.create().fields, 'form').map((field) => field.key)).toEqual(${keys.create})
+    expect(fields(${plural}.update({ id: '1' }).fields, 'form').map((field) => field.key)).toEqual(${keys.update})
   })
 
   it('maps standard CRUD routes', () => {

@@ -76,6 +76,8 @@ inconsistent field. Do not repair the worksheet during read-only verification.
 
 - Confirm the feature worksheet lists the selected plan's dependencies and
   each dependency is `DONE` before verifying the selected plan.
+- For a bounded manifest, confirm the approved surface field matrix is encoded
+  by `actionFields` when list, detail, create, or update uses different fields.
 - Run the plan drift check and compare only the plan's in-scope paths.
 - Record unrelated pre-existing changes. Do not use them as module evidence.
 - Confirm no framework package changed without explicit approval.
@@ -150,6 +152,11 @@ The API and web test commands must be module-scoped and must name the module's
 spec files. Do not substitute a package-wide `test`, `test:unit`, or bare
 `vitest run`. Run a full suite only when a focused failure shows cross-module
 risk or the user asks for it, and record the reason.
+
+API focused reports must show `test:focused -- <spec>` and the `.env.test`
+database migration. A bare `db:migrate` is development-database evidence and
+does not prepare the test database. For seeded bounded verification, confirm
+`db:seed:test` ran before the focused API check.
 
 For a bounded manifest module:
 

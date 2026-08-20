@@ -14,6 +14,9 @@ Use these statuses: `TODO`, `PASS`, `APPROVED DIFFERENCE`, `SERVER SUPPLIED`,
 ## 0. Execution worksheets
 
 - [ ] The feature folder contains `design.md` and `worksheet.md`.
+- [ ] The feature folder contains one related module group only; unrelated
+      modules have separate feature folders, designs, and worksheets.
+- [ ] The feature worksheet records the group members and grouping reason.
 - [ ] The feature worksheet contains the discovery ledger, plan map,
       dependency order, overall status, and cross-plan blockers.
 - [ ] The selected numbered plan contains the local worksheet from
@@ -25,6 +28,8 @@ Use these statuses: `TODO`, `PASS`, `APPROVED DIFFERENCE`, `SERVER SUPPLIED`,
       during implementation, and `VERIFY` before independent verification.
 - [ ] Only one local worksheet step is `ACTIVE` at a time.
 - [ ] Every completed local step has a path, command report, or browser result.
+- [ ] API focused checks use `test:focused -- <spec>` and the test database
+      migration; no bare `db:migrate` targets the test step.
 - [ ] The local worksheet has no unresolved `TODO`, `REWORK`, `STOP`, or `BLOCKED`
       step before verification.
 - [ ] The local worksheet is not marked `DONE` before verifier `PASS`.
@@ -32,6 +37,8 @@ Use these statuses: `TODO`, `PASS`, `APPROVED DIFFERENCE`, `SERVER SUPPLIED`,
 ## 1. Scope and evidence
 
 - [ ] Module name, shape classification, and owned relations are recorded.
+- [ ] List, detail, create, update, and filter field placement is recorded;
+      bounded manifests use `actionFields` when the sets differ.
 - [ ] The feature worksheet discovery evidence ledger is linked: `<path>`.
 - [ ] The selected plan and feature design are read: `<plan path>`,
       `<design path>`.
@@ -51,6 +58,7 @@ Use these statuses: `TODO`, `PASS`, `APPROVED DIFFERENCE`, `SERVER SUPPLIED`,
 | Question | Evidence path and symbol/line | Result | Status |
 |---|---|---|---|
 | Identity and fields | `<path:line>` | `<answer>` | TODO |
+| Surface field placement and filters | `<path:line>` | `<list/detail/create/update/filter>` | TODO |
 | Legacy labels and behavior | `<path:line>` | `<answer>` | TODO |
 | Relation or child owner | `<path:line>` | `<none/owner>` | TODO |
 | Lookup consumer or dependency | `<path:line>` | `<none/owner>` | TODO |

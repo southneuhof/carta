@@ -147,7 +147,9 @@ export function verificationCommands(config, { withSeed = false } = {}) {
     'src/manifest/navigation.ts',
     'src/routes/(authenticated)/master-data/index.route.vue',
   ]
-  const specs = [
+  const specs = []
+  if (withSeed) specs.push(['pnpm', ['--filter', '@southneuhof/api', 'db:seed:test']])
+  specs.push(
     ['pnpm', ['--filter', '@southneuhof/api', 'test:focused', '--', `src/routes/${slug}/${slug}.routes.spec.ts`]],
     ['pnpm', ['--filter', '@southneuhof/framework-web', 'test:focused', '--', `routes/(authenticated)/master-data/${slug}/${slug}.resource.spec.ts`, `routes/(authenticated)/master-data/${slug}/${slug}.integration.spec.ts`]],
     ['pnpm', ['--filter', '@southneuhof/api', 'lint:focused', '--', ...apiRouteFiles]],
@@ -155,10 +157,7 @@ export function verificationCommands(config, { withSeed = false } = {}) {
     ['pnpm', ['--filter', '@southneuhof/api', 'type-check']],
     ['pnpm', ['--filter', '@southneuhof/framework-web', 'type-check']],
     ['git', ['diff', '--check']],
-  ]
-  if (withSeed) specs.push(['pnpm', ['--filter', '@southneuhof/api', 'db:migrate']])
-  if (withSeed) specs.push(['pnpm', ['--filter', '@southneuhof/api', 'db:seed']])
-  if (withSeed) specs.push(['pnpm', ['--filter', '@southneuhof/api', 'db:seed']])
+  )
   return specs
 }
 

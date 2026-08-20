@@ -8,8 +8,8 @@
     "build": "tsc -p tsconfig.json --noEmit",
     "type-check": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
-    "test": "node --env-file-if-exists=.env --env-file-if-exists=.env.test ./node_modules/drizzle-kit/bin.cjs migrate && node --env-file-if-exists=.env --env-file-if-exists=.env.test ./node_modules/vitest/vitest.mjs run",
-    "test:focused": "sh -c 'shift; exec node --env-file-if-exists=.env --env-file-if-exists=.env.test ./node_modules/vitest/vitest.mjs run \"$@\"' --",
+    "test": "pnpm run db:migrate:test && node --env-file-if-exists=.env --env-file-if-exists=.env.test ./node_modules/vitest/vitest.mjs run",
+    "test:focused": "pnpm run db:migrate:test && sh -c 'if [ \"$1\" = \"--\" ]; then shift; fi; exec node --env-file-if-exists=.env --env-file-if-exists=.env.test ./node_modules/vitest/vitest.mjs run \"$@\"' --",
     "lint:focused": "eslint",
     "db:push": "drizzle-kit push",
     "db:reset": "tsx --env-file-if-exists=.env scripts/reset-db.ts && pnpm run db:migrate",
@@ -17,7 +17,9 @@
     "db:smoke": "tsx --env-file-if-exists=.env scripts/smoke-db.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed": "tsx --env-file-if-exists=.env scripts/seed.ts"
+    "db:migrate:test": "node --env-file-if-exists=.env --env-file-if-exists=.env.test ./node_modules/drizzle-kit/bin.cjs migrate",
+    "db:seed": "tsx --env-file-if-exists=.env scripts/seed.ts",
+    "db:seed:test": "pnpm run db:migrate:test && tsx --env-file-if-exists=.env --env-file-if-exists=.env.test scripts/seed.ts"
   },
   "exports": {
     ".": "./src/index.ts",

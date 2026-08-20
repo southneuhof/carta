@@ -123,6 +123,28 @@ test('creates explicit source files and stable absolute output', () => {
   assert.match(seed, /label: sql`excluded\.label`/)
 })
 
+test('generates different field lists for each resource action', () => {
+  const value = config()
+  value.fields.push({ key: 'category', type: 'text', label: 'Category', required: true, renderer: 'text' })
+  value.actionFields = {
+    list: ['label', 'enabled'],
+    detail: ['label'],
+    create: ['category', 'label', 'enabled'],
+    update: ['category', 'label', 'enabled'],
+  }
+  const setup = workspace(value)
+  const result = JSON.parse(execute(['--config', setup.configPath, '--json'], { root: setup.outputRoot, cwd: setup.directory }))
+  const resource = readFileSync(result.generated.find((path) => path.endsWith('.resource.ts')), 'utf8')
+  const resourceSpec = readFileSync(result.generated.find((path) => path.endsWith('.resource.spec.ts')), 'utf8')
+
+  assert.match(resource, /fields: \[fields\.label, fields\.enabled\]/)
+  assert.match(resource, /fields: \[fields\.label\]/)
+  assert.match(resource, /fields: \[fields\.category, fields\.label, fields\.enabled\]/)
+  assert.ok(resourceSpec.includes('toEqual(["label","enabled"])'))
+  assert.ok(resourceSpec.includes('toEqual(["label"])'))
+  assert.ok(resourceSpec.includes('toEqual(["category","label","enabled"])'))
+})
+
 test('human output lists generated and manual absolute paths', () => {
   const setup = workspace(config())
   const output = execute(['--config', setup.configPath], { root: setup.outputRoot, cwd: setup.directory })
@@ -164,6 +186,7 @@ test('rejects missing metadata, duplicate keys, and unsupported types', () => {
     ['missing labels', (value) => { delete value.labels }, /labels is required/],
     ['duplicate keys', (value) => { value.fields[1].key = value.fields[0].key }, /Field keys.*unique/],
     ['unsupported type', (value) => { value.fields[0].type = 'number' }, /unsupported/],
+    ['unknown action field', (value) => { value.actionFields = { list: ['missing'] } }, /actionFields\.list contains unsupported field/],
   ]
 
   for (const [, mutate, error] of cases) {

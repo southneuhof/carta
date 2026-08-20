@@ -1,0 +1,189 @@
+{
+  "status": "PASS",
+  "static": {
+    "status": "PASS",
+    "checks": [
+      {
+        "name": "generated files",
+        "status": "PASS",
+        "detail": "11 files present"
+      },
+      {
+        "name": "API route index",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/api/src/routes/index.ts"
+      },
+      {
+        "name": "API route import",
+        "status": "PASS",
+        "detail": "import { toolsTypeModel, domain as toolsTypesDomain } from \"./tools-types/tools-types\"; (1 occurrences)"
+      },
+      {
+        "name": "API domain registration",
+        "status": "PASS",
+        "detail": "  toolsTypesDomain, (1 occurrences)"
+      },
+      {
+        "name": "API route registration",
+        "status": "PASS",
+        "detail": "  toolsTypeModel, (1 occurrences)"
+      },
+      {
+        "name": "authorization catalog",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/api/src/authorization/catalog.ts"
+      },
+      {
+        "name": "permission view-tools-types",
+        "status": "PASS",
+        "detail": "code: \"view-tools-types\" (1 occurrences)"
+      },
+      {
+        "name": "permission list-tools-types",
+        "status": "PASS",
+        "detail": "code: \"list-tools-types\" (1 occurrences)"
+      },
+      {
+        "name": "permission detail-tools-types",
+        "status": "PASS",
+        "detail": "code: \"detail-tools-types\" (1 occurrences)"
+      },
+      {
+        "name": "permission create-tools-types",
+        "status": "PASS",
+        "detail": "code: \"create-tools-types\" (1 occurrences)"
+      },
+      {
+        "name": "permission update-tools-types",
+        "status": "PASS",
+        "detail": "code: \"update-tools-types\" (1 occurrences)"
+      },
+      {
+        "name": "permission delete-tools-types",
+        "status": "PASS",
+        "detail": "code: \"delete-tools-types\" (1 occurrences)"
+      },
+      {
+        "name": "web navigation",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/manifest/navigation.ts"
+      },
+      {
+        "name": "navigation route",
+        "status": "PASS",
+        "detail": "to: { name: 'master-data-tools-types' } (1 occurrences)"
+      },
+      {
+        "name": "navigation permission",
+        "status": "PASS",
+        "detail": "permission: 'view-tools-types'"
+      },
+      {
+        "name": "navigation title",
+        "status": "PASS",
+        "detail": "title: 'Jenis Alat Berat & Alat Ukur/Uji'"
+      },
+      {
+        "name": "master-data index",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/index.route.vue"
+      },
+      {
+        "name": "master-data index entry",
+        "status": "PASS",
+        "detail": "  ['tools-types', 'Jenis Alat Berat & Alat Ukur/Uji'], (1 occurrences)"
+      },
+      {
+        "name": "list title",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/index.route.vue"
+      },
+      {
+        "name": "list title content",
+        "status": "PASS",
+        "detail": "title=\"Jenis Alat Berat &amp; Alat Ukur/Uji\""
+      },
+      {
+        "name": "create title",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/create.route.vue"
+      },
+      {
+        "name": "create title content",
+        "status": "PASS",
+        "detail": "title=\"Tambah Jenis Alat Berat &amp; Alat Ukur/Uji\""
+      },
+      {
+        "name": "create submit label",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/create.route.vue"
+      },
+      {
+        "name": "create submit label content",
+        "status": "PASS",
+        "detail": "submit-label=\"Submit\""
+      },
+      {
+        "name": "create success message",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/create.route.vue"
+      },
+      {
+        "name": "create success message content",
+        "status": "PASS",
+        "detail": "successMessage: 'Berhasil menambahkan data!'"
+      },
+      {
+        "name": "detail title",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/[toolsTypeId]/detail.route.vue"
+      },
+      {
+        "name": "detail title content",
+        "status": "PASS",
+        "detail": "title=\"Detail Jenis Alat Berat &amp; Alat Ukur/Uji\""
+      },
+      {
+        "name": "edit title",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/[toolsTypeId]/edit.route.vue"
+      },
+      {
+        "name": "edit title content",
+        "status": "PASS",
+        "detail": "title=\"Ubah Jenis Alat Berat &amp; Alat Ukur/Uji\""
+      },
+      {
+        "name": "edit submit label",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/[toolsTypeId]/edit.route.vue"
+      },
+      {
+        "name": "edit submit label content",
+        "status": "PASS",
+        "detail": "submit-label=\"Submit\""
+      },
+      {
+        "name": "update success message",
+        "status": "PASS",
+        "detail": "/Users/gamer/Documents/projects/ads-hk/apps/web/src/routes/(authenticated)/master-data/tools-types/[toolsTypeId]/edit.route.vue"
+      },
+      {
+        "name": "update success message content",
+        "status": "PASS",
+        "detail": "successMessage: 'Berhasil mengubah data!'"
+      }
+    ],
+    "failed": []
+  },
+  "commands": [],
+  "browser": {
+    "required": true,
+    "paths": [
+      "/master-data/tools-types",
+      "/master-data/tools-types/create",
+      "/master-data/tools-types/record-1/detail",
+      "/master-data/tools-types/record-1/edit"
+    ]
+  }
+}

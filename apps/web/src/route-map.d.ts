@@ -541,6 +541,62 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    'master-data-tools-brands': RouteRecordInfo<
+      'master-data-tools-brands',
+      '/master-data/tools-brands',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-tools-brands-detail': RouteRecordInfo<
+      'master-data-tools-brands-detail',
+      '/master-data/tools-brands/:toolsBrandId/detail',
+      { toolsBrandId: ParamValue<true> },
+      { toolsBrandId: ParamValue<false> },
+      | never
+    >,
+    'master-data-tools-brands-edit': RouteRecordInfo<
+      'master-data-tools-brands-edit',
+      '/master-data/tools-brands/:toolsBrandId/edit',
+      { toolsBrandId: ParamValue<true> },
+      { toolsBrandId: ParamValue<false> },
+      | never
+    >,
+    'master-data-tools-brands-create': RouteRecordInfo<
+      'master-data-tools-brands-create',
+      '/master-data/tools-brands/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-tools-types': RouteRecordInfo<
+      'master-data-tools-types',
+      '/master-data/tools-types',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-tools-types-detail': RouteRecordInfo<
+      'master-data-tools-types-detail',
+      '/master-data/tools-types/:toolsTypeId/detail',
+      { toolsTypeId: ParamValue<true> },
+      { toolsTypeId: ParamValue<false> },
+      | never
+    >,
+    'master-data-tools-types-edit': RouteRecordInfo<
+      'master-data-tools-types-edit',
+      '/master-data/tools-types/:toolsTypeId/edit',
+      { toolsTypeId: ParamValue<true> },
+      { toolsTypeId: ParamValue<false> },
+      | never
+    >,
+    'master-data-tools-types-create': RouteRecordInfo<
+      'master-data-tools-types-create',
+      '/master-data/tools-types/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     'master-data-uoms': RouteRecordInfo<
       'master-data-uoms',
       '/master-data/uoms',
@@ -881,6 +937,14 @@ declare module 'vue-router/auto-routes' {
         | 'master-data-toll-causes-accidents-create'
         | 'master-data-toll-causes-accidents-detail'
         | 'master-data-toll-causes-accidents-edit'
+        | 'master-data-tools-brands'
+        | 'master-data-tools-brands-create'
+        | 'master-data-tools-brands-detail'
+        | 'master-data-tools-brands-edit'
+        | 'master-data-tools-types'
+        | 'master-data-tools-types-create'
+        | 'master-data-tools-types-detail'
+        | 'master-data-tools-types-edit'
         | 'master-data-uoms'
         | 'master-data-uoms-create'
         | 'master-data-uoms-detail'
@@ -1497,6 +1561,70 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/master-data/toll-causes-accidents/create.route.vue': {
       routes:
         | 'master-data-toll-causes-accidents-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/tools-brands/index.route.vue': {
+      routes:
+        | 'master-data-tools-brands'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/tools-brands/[toolsBrandId]/detail.route.vue': {
+      routes:
+        | 'master-data-tools-brands-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/tools-brands/[toolsBrandId]/edit.route.vue': {
+      routes:
+        | 'master-data-tools-brands-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/tools-brands/create.route.vue': {
+      routes:
+        | 'master-data-tools-brands-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/tools-types/index.route.vue': {
+      routes:
+        | 'master-data-tools-types'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/tools-types/[toolsTypeId]/detail.route.vue': {
+      routes:
+        | 'master-data-tools-types-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/tools-types/[toolsTypeId]/edit.route.vue': {
+      routes:
+        | 'master-data-tools-types-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/tools-types/create.route.vue': {
+      routes:
+        | 'master-data-tools-types-create'
       views:
         | never
       pathParamNames:

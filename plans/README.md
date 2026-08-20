@@ -64,6 +64,7 @@ relation, lookup filters, and recursive soft delete. It requires focused
 checks, an idempotent category seed, an authenticated browser journey, and
 independent verifier `PASS`.
 
+
 ## User-facing completion gate
 
 For every plan that changes a user-facing `apps/web` flow, `DONE` requires an
