@@ -15,6 +15,18 @@ export const navigation = defineNavigation([
     ],
   },
   {
+    name: 'orientation',
+    title: 'Orientation',
+    icon: 'folder',
+    description: 'Orientation',
+    routes: [
+      { separator: 'QHSSE Orientation' },
+      { to: { name: 'orientation-syllabus' }, permission: 'view-syllabus', title: 'Silabus', icon: 'folder' },
+      { to: { name: 'orientation-syllabus-categories' }, permission: 'view-syllabus-categories', title: 'Kategori Silabus', icon: 'folder' },
+      { to: { name: 'orientation-learning-materials' }, permission: 'view-learning-materials', title: 'Materi', icon: 'folder' },
+    ],
+  },
+  {
     name: 'settings',
     title: 'Pengaturan',
     icon: 'settings',
@@ -47,6 +59,11 @@ export const navigation = defineNavigation([
       { to: { name: 'master-data-emergency-simulation-topics' }, permission: 'view-emergency-simulation-topics', title: 'Topik Simulasi Tanggap Darurat', icon: 'folder' },
       { to: { name: 'master-data-emergency-simulation-employees' }, permission: 'view-emergency-simulation-employees', title: 'Karyawan Terlibat', icon: 'folder' },
       { to: { name: 'master-data-emergency-simulation-tools' }, permission: 'view-emergency-simulation-tools', title: 'Perlengkapan Tanggap Darurat', icon: 'folder' },
+      { separator: 'HSSE' },
+      { to: { name: 'master-data-hsse-observation' }, permission: 'view-hsse-observation', title: 'Kriteria Temuan Observation', icon: 'folder' },
+      { to: { name: 'master-data-incident-statement-document-configs' }, permission: 'view-incident-statement-document-configs', title: 'Dokumen Pernyataan Insiden', icon: 'folder' },
+      { separator: 'Undang-Undang' },
+      { to: { name: 'master-data-law-reference-items' }, permission: 'view-law-reference-items', title: 'Regulasi & Perundangan HSSE', icon: 'folder' },
       { separator: 'Work Permit' },
       { to: { name: 'master-data-permit-work-types' }, permission: 'view-permit-work-types', title: 'Tipe Pekerjaan', icon: 'folder' },
       { to: { name: 'master-data-permit-danger-source' }, permission: 'view-permit-danger-source', title: 'Sumber Bahaya', icon: 'folder' },
@@ -83,13 +100,17 @@ export function visibleNavigation(allows: (permission: string) => boolean): Visi
   })
 }
 
+export function matchesNavigationPath(path: string, entryPath: string) {
+  return path === entryPath || path.startsWith(`${entryPath}/`)
+}
+
 /** Finds entrypoint module owning path, by segment boundary then longest match. */
 export function activeNavigationModule(path: string, resolve: (to: unknown) => { path: string }, allows: (permission: string) => boolean): string | undefined {
   const candidates = visibleNavigation(allows).flatMap((module, index) =>
     module.routes.flatMap((route) => {
       if ('separator' in route) return []
       const entryPath = resolve(route.to).path
-      return path === entryPath || path.startsWith(`${entryPath}/`) ? [{ name: module.name, pathLength: entryPath.length, index }] : []
+      return matchesNavigationPath(path, entryPath) ? [{ name: module.name, pathLength: entryPath.length, index }] : []
     })
   )
   return candidates.sort((left, right) => right.pathLength - left.pathLength || left.index - right.index)[0]?.name

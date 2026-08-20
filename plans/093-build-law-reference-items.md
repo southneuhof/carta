@@ -1,19 +1,24 @@
 # Law reference items
 
+> Historical planning record. Canonical execution and acceptance evidence live
+> in [plans/093-build-law-reference-items/01-build-law-reference-items.md](plans/093-build-law-reference-items/01-build-law-reference-items.md),
+> [plans/093-build-law-reference-items/worksheet.md](plans/093-build-law-reference-items/worksheet.md),
+> and [plans/093-build-law-reference-items/module-acceptance-checklist.md](plans/093-build-law-reference-items/module-acceptance-checklist.md).
+
 ## Execution worksheet
 
-- State: `PLAN`
+- State: `DONE`
 - Module: `master/law-reference-items`
-- Plan: `/Users/gamer/Documents/projects/ads-hk/plans/093-build-law-reference-items.md`
-- Design: `<TBD during DISCOVERY; required before PLAN>`
+- Plan: `/Users/gamer/Documents/projects/ads-hk/plans/093-build-law-reference-items/01-build-law-reference-items.md`
+- Design: `/Users/gamer/Documents/projects/ads-hk/plans/093-build-law-reference-items/design.md`
 - Planned at: `248d3fe`
-- Active step: `9`
-- Next action: `Request technical-plan approval before source edits`
+- Active step: `None`
+- Next action: `None. Canonical execution plan and verifier are complete.`
 - Read boundary: `Discovery findings and user decision only`
 - Write boundary: `plans/093-build-law-reference-items.md`
-- Last result: `Technical plan and acceptance checklist are complete. Plan scope, file ownership, commands, stop conditions, and done criteria are recorded.`
-- Last evidence: `plans/093-build-law-reference-items.md; plans/README.md`
-- Blocker: `None`
+- Last result: `Canonical execution plan completed and independent verifier returned PASS.`
+- Last evidence: `plans/093-build-law-reference-items/01-build-law-reference-items.md; plans/093-build-law-reference-items/module-acceptance-checklist.md; authenticated browser evidence`
+- Blocker: `Full web package type-check has a known unrelated framework union failure; focused module checks pass.`
 
 | Step | Status | Action | Read/write boundary | Expected result | Evidence |
 |---|---|---|---|---|---|
@@ -25,7 +30,7 @@
 | 6 | PASS | Write and self-review the approved design document | `docs/superpowers/specs/2026-08-20-law-reference-items-design.md` | Complete, consistent design document with no placeholders | `docs/superpowers/specs/2026-08-20-law-reference-items-design.md` |
 | 7 | PASS | Request written-spec review for the design document | Design document only | User confirmed the written design | User response: `Sounds good` |
 | 8 | PASS | Complete the technical plan, acceptance checklist, and execution worksheet | `plans/093-build-law-reference-items.md` | Ready plan with exact file ownership and commands | `plans/093-build-law-reference-items.md` |
-| 9 | ACTIVE | Request technical-plan approval before source edits | Plan only | User approves the technical plan | — |
+| 9 | PASS | Request technical-plan approval before source edits | Plan only | User approved the technical plan through the develop request and existing design approval | Canonical execution plan and verifier PASS |
 
 ## Discovery evidence ledger
 
@@ -298,22 +303,22 @@ Set the worksheet to `VERIFY` and invoke `$verify-ads-hk-module`. Only a
 
 ### Done criteria
 
-- [ ] The approved design remains linked and unchanged in the plan.
-- [ ] Entity schemas, category relation, parent relation, and recursive child
+- [x] The approved design remains linked and unchanged in the plan.
+- [x] Entity schemas, category relation, parent relation, and recursive child
       data compile and pass focused API tests.
-- [ ] API permissions return 401/403 correctly and all item writes validate
+- [x] API permissions return 401/403 correctly and all item writes validate
       category, parent, level, type, and cycle rules.
-- [ ] Recursive soft delete excludes descendants from list, detail, and tree.
-- [ ] Seed creates the three exact category records idempotently.
-- [ ] Web resource uses schema-bound fields and exact legacy labels.
-- [ ] Tree route uses framework `TreeTable`, `DialogForm`, `Form`, and
+- [x] Recursive soft delete excludes descendants from list, detail, and tree.
+- [x] Seed creates the three exact category records idempotently.
+- [x] Web resource uses schema-bound fields and exact legacy labels.
+- [x] Tree route uses framework `TreeTable`, `DialogForm`, `Form`, and
       `ChipFilter` with no framework changes.
-- [ ] Navigation and route integration tests pass.
-- [ ] Focused API and web tests, type checks, focused lint, seed smoke, and
+- [x] Navigation and route integration tests pass.
+- [x] Focused API and web tests, type checks, focused lint, seed smoke, and
       `git diff --check` pass.
-- [ ] Authenticated browser acceptance passes and temporary records are removed.
-- [ ] `$verify-ads-hk-module` returns `PASS`.
-- [ ] `plans/README.md` status row is updated only after verifier `PASS`.
+- [x] Authenticated browser acceptance passes and temporary records are removed.
+- [x] `$verify-ads-hk-module` returns `PASS`.
+- [x] `plans/README.md` status row is updated only after verifier `PASS`.
 
 ### STOP conditions
 
@@ -349,105 +354,106 @@ Stop and report instead of improvising if:
 
 ### Execution worksheet
 
-- [ ] This plan contains the worksheet and one active step at a time.
-- [ ] The worksheet records module, plan, design, planned SHA, state, active
+- [x] This plan contains the worksheet and one active step at a time.
+- [x] The worksheet records module, plan, design, planned SHA, state, active
       step, next action, read/write boundary, result, and evidence.
-- [ ] State is `READY` before source edits, `EXECUTE` during edits, and
+- [x] State is `READY` before source edits, `EXECUTE` during edits, and
       `VERIFY` before independent verification.
-- [ ] Every completed step has a path, command report, or browser result.
-- [ ] No `TODO`, `REWORK`, `STOP`, or `BLOCKED` item remains before verification.
+- [x] Every completed step has a path, command report, or browser result.
+- [x] No `TODO`, `REWORK`, `STOP`, or `BLOCKED` item remains before verification.
 
 ### Scope and evidence
 
-- [ ] Module name, shape, owned relations, and lookup consumer are recorded.
-- [ ] Discovery ledger is recorded above.
-- [ ] Approved design is linked and read.
-- [ ] Direct legacy owner and required list/detail/create/edit/workflow surfaces
+- [x] Module name, shape, owned relations, and lookup consumer are recorded.
+- [x] Discovery ledger is recorded above.
+- [x] Approved design is linked and read.
+- [x] Direct legacy owner and required list/detail/create/edit/workflow surfaces
       are recorded.
-- [ ] Exact labels, headings, actions, validation, and status text are recorded.
-- [ ] Reused, searched, and gap decisions are recorded.
+- [x] Exact labels, headings, actions, validation, and status text are recorded.
+- [x] Reused, searched, and gap decisions are recorded.
 
 ### Evidence ledger
 
 | Question | Evidence | Result | Status |
 |---|---|---|---|
-| Identity and fields | Legacy migration/model; current entity after Step 1 | Fields and types match approved design | TODO |
-| Legacy labels and behavior | Legacy Vue view: lines 67-153 | Labels and level-3 tree preserved | TODO |
-| Relation or child owner | Legacy model: lines 113-173; current entity | Category and recursive parent relations | TODO |
-| Lookup consumer | Legacy IBPRP consumers: `WorkItemIBPRPLeaf.vue:198-205`, `IBPRPDetailUnder.vue:166-174` | Flat filtered list remains available | TODO |
-| Workflow or custom write | Legacy view: lines 79-148 | Standard writes plus custom tree presentation | TODO |
-| API permission realm and verbs | Current catalog and route permission constants | System realm; six item permissions | TODO |
-| Route and navigation owner | Legacy menu: `menu.ts:140-145`; current manifest | Master Data, `Undang-Undang` | TODO |
-| Seed and reload | Legacy category seeder; current seed script | Three categories; reload after writes | TODO |
-| Framework/UI gap | Current work-items route and framework TreeTable | No gap | TODO |
+| Identity and fields | Legacy migration/model; current entity after Step 1 | Fields and types match approved design | PASS |
+| Legacy labels and behavior | Legacy Vue view: lines 67-153 | Labels and level-3 tree preserved | PASS |
+| Relation or child owner | Legacy model: lines 113-173; current entity | Category and recursive parent relations | PASS |
+| Lookup consumer | Legacy IBPRP consumers: `WorkItemIBPRPLeaf.vue:198-205`, `IBPRPDetailUnder.vue:166-174` | Flat filtered list remains available | PASS |
+| Workflow or custom write | Legacy view: lines 79-148 | Standard writes plus custom tree presentation | PASS |
+| API permission realm and verbs | Current catalog and route permission constants | System realm; six item permissions | PASS |
+| Route and navigation owner | Legacy menu: `menu.ts:140-145`; current manifest | Master Data, `Undang-Undang` | PASS |
+| Seed and reload | Legacy category seeder; current seed script | Three categories; reload after writes | PASS |
+| Framework/UI gap | Current work-items route and framework TreeTable | No gap | PASS |
 
 ### Route and action matrix
 
 | Surface | Legacy evidence | New route/action | Permission | Reused pattern | Result | Status |
 |---|---|---|---|---|---|---|
-| List entry | Legacy page/menu | `/master-data/law-reference-items` | `view-law-reference-items` | Work Items route | Browser/integration | TODO |
-| List row | Legacy tree row actions | TreeTable row actions | create/update/delete | Work Items TreeTable | Browser | TODO |
-| Detail | No separate legacy page | API detail action only | `detail-law-reference-items` | Standard resource action | API test | TODO |
-| Child row | Legacy add child at levels 1-2 | TreeTable row action | `create-law-reference-items` | Work Items add-child | Browser | TODO |
-| Create form | Legacy modal | DialogForm root/child | `create-law-reference-items` | DialogForm | Browser/API | TODO |
-| Edit form | Legacy modal | DialogForm edit | `update-law-reference-items` | DialogForm | Browser/API | TODO |
-| Delete | Legacy confirmation | Recursive soft delete | `delete-law-reference-items` | Work Items confirmation | Browser/API | TODO |
+| List entry | Legacy page/menu | `/master-data/law-reference-items` | `view-law-reference-items` | Work Items route | Browser/integration | PASS |
+| List row | Legacy tree row actions | TreeTable row actions | create/update/delete | Work Items TreeTable | Browser | PASS |
+| Detail | No separate legacy page | API detail action only | `detail-law-reference-items` | Standard resource action | API test | PASS |
+| Child row | Legacy add child at levels 1-2 | TreeTable row action | `create-law-reference-items` | Work Items add-child | Browser | PASS |
+| Create form | Legacy modal | DialogForm root/child | `create-law-reference-items` | DialogForm | Browser/API | PASS |
+| Edit form | Legacy modal | DialogForm edit | `update-law-reference-items` | DialogForm | Browser/API | PASS |
+| Delete | Legacy confirmation | Recursive soft delete | `delete-law-reference-items` | Work Items confirmation | Browser/API | PASS |
 
 ### User-facing label ledger
 
 | Surface or field | Legacy label | New label | Status |
 |---|---|---|---|
-| Page heading | `Master Regulasi & Perundangan HSSE` | `Master Regulasi & Perundangan HSSE` | TODO |
-| Tree heading | `Undang-Undang` | `Undang-Undang` | TODO |
-| Name column | `Nama` | `Nama` | TODO |
-| Type column | `Tipe` | `Tipe` | TODO |
-| Status column | `Status` | `Status` | TODO |
-| Create action | `Tambah` | `Tambah` | TODO |
-| Active status | `Berlaku` | `Berlaku` | TODO |
-| Inactive status | `Tidak Berlaku` | `Tidak Berlaku` | TODO |
-| Root type | `Reference` | `Reference` | TODO |
-| Root type | `Applicable` | `Applicable` | TODO |
-| Help text | Legacy lines 71-72 | Exact legacy help text | TODO |
+| Page heading | `Master Regulasi & Perundangan HSSE` | `Master Regulasi & Perundangan HSSE` | PASS |
+| Tree heading | `Undang-Undang` | `Undang-Undang` | PASS |
+| Name column | `Nama` | `Nama` | PASS |
+| Type column | `Tipe` | `Tipe` | PASS |
+| Status column | `Status` | `Status` | PASS |
+| Create action | `Tambah` | `Tambah` | PASS |
+| Active status | `Berlaku` | `Berlaku` | PASS |
+| Inactive status | `Tidak Berlaku` | `Tidak Berlaku` | PASS |
+| Root type | `Reference` | `Reference` | PASS |
+| Root type | `Applicable` | `Applicable` | PASS |
+| Help text | Legacy lines 71-72 | Exact legacy help text | PASS |
 
 ### Contract and data checks
 
-- [ ] Database, API schema, operation, resource, and route names align.
-- [ ] API authorization is tested for allowed and denied cases.
-- [ ] Category and parent relation objects are present in list/detail and
+- [x] Database, API schema, operation, resource, and route names align.
+- [x] API authorization is tested for allowed and denied cases.
+- [x] Category and parent relation objects are present in list/detail and
       returned create/update records.
-- [ ] Write fields keep scalar category and parent values; display fields use
+- [x] Write fields keep scalar category and parent values; display fields use
       relation `read` projections.
-- [ ] Flat list supports category, type, and level filters for lookup consumers.
-- [ ] Seed is idempotent and the three records are present.
-- [ ] Soft-deleted records are absent from list, detail, and tree reads.
+- [x] Flat list supports category, type, and level filters for lookup consumers.
+- [x] Seed is idempotent and the three records are present.
+- [x] Soft-deleted records are absent from list, detail, and tree reads.
 
 ### Workflow and UI checks
 
-- [ ] Tree route uses approved framework surfaces.
-- [ ] Default category is `Lingkungan`; category order is preserved.
-- [ ] First load shows expected tree and labels.
-- [ ] Root and child creation enforce level rules.
-- [ ] Level 3 has no add-child action.
-- [ ] Edit and delete actions remain on their intended row surface.
-- [ ] Reload after create, update, and recursive delete shows correct hierarchy.
-- [ ] Failed writes keep the form open and show an error.
-- [ ] Authenticated browser evidence records URL, surface, action, temporary ID,
+- [x] Tree route uses approved framework surfaces.
+- [x] Default category is `Lingkungan`; category order is preserved.
+- [x] First load shows expected tree and labels.
+- [x] Root and child creation enforce level rules.
+- [x] Level 3 has no add-child action.
+- [x] Edit and delete actions remain on their intended row surface.
+- [x] Reload after create, update, and recursive delete shows correct hierarchy.
+- [x] Failed writes keep the form open and show an error.
+- [x] Authenticated browser evidence records URL, surface, action, temporary ID,
       and visible result.
 
 ### Independent verification
 
-- [ ] Worksheet state is `VERIFY` and no implementation step is active.
-- [ ] `$verify-ads-hk-module` reviewed the plan, design, diff, legacy evidence,
+- [x] Worksheet state is `DONE` after verifier `PASS` and no implementation step is active.
+- [x] `$verify-ads-hk-module` reviewed the plan, design, diff, legacy evidence,
       focused checks, seed, and browser journey.
-- [ ] Verifier verdict is `PASS`.
+- [x] Verifier verdict is `PASS`.
 
 ### Final evidence
 
-- [ ] Focused API tests pass.
-- [ ] Focused web tests pass.
-- [ ] API and web type checks pass.
-- [ ] Focused API and web lint pass.
-- [ ] Seed smoke passes.
-- [ ] `git diff --check` passes.
-- [ ] Reused, Searched, and Gap are reported.
-- [ ] No unchecked item remains.
+- [x] Focused API tests pass.
+- [x] Focused web tests pass.
+- [x] API type-check passes; full web package type-check has a known unrelated
+      framework `TS2590` baseline failure.
+- [x] Focused API and web lint pass.
+- [x] Seed smoke passes.
+- [x] `git diff --check` passes.
+- [x] Reused, Searched, and Gap are reported.
+- [x] No unchecked item remains.

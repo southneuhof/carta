@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { activeNavigationModule, visibleNavigation, type VisibleNavigationModule, type VisibleNavigationRoute } from '@/manifest'
+import { activeNavigationModule, matchesNavigationPath, visibleNavigation, type VisibleNavigationModule, type VisibleNavigationRoute } from '@/manifest'
 import { allowsPermission } from '@/framework/adapters/bundle'
 import Icon from '@southneuhof/is-vue-framework/components/base/Icon.vue'
 import ProfileSegment from '../../layouts/ProfileSegment.vue'
@@ -35,7 +35,7 @@ function isGroupOpen(name: string) {
 }
 
 function isActiveRoute(moduleName: string, routeName: string, to: unknown) {
-  return routeName === String(route.name) || (moduleName === activeModule.value && route.path.startsWith(router.resolve(to as never).path))
+  return routeName === String(route.name) || (moduleName === activeModule.value && matchesNavigationPath(route.path, router.resolve(to as never).path))
 }
 
 function beforeEnter(element: Element) {

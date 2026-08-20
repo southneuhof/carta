@@ -64,6 +64,19 @@ relation, lookup filters, and recursive soft delete. It requires focused
 checks, an idempotent category seed, an authenticated browser journey, and
 independent verifier `PASS`.
 
+Plans 095-096 build the approved HSSE master-data slice. Execute 095 before
+096 because both plans update shared catalog, navigation, route-map, and index
+owners. Plan 095 uses the standard `ChipFilter` for `master/hsse-observation`
+and keeps separate legacy permission families for each finding resource. Plan
+096 adds the separate incident statement document permission family and file
+resource.
+
+Plans 097-098 build the approved Orientation syllabus and learning-materials
+slice. Execute 097 before 098 because the web resources consume the API
+contract. The category detail owns syllabus mapping, the syllabus detail owns
+quiz-material configuration, and the material detail owns attachments and quiz
+questions.
+
 
 ## User-facing completion gate
 
@@ -152,7 +165,11 @@ surfaces, actions, permissions, seed data, and first-load/reload checks.
 | 089 | Implement emergency simulation topics | P1 | M | 088 | DONE |
 | 090 | Focus module discovery and localize workflow skills | P1 | M | 087, 088 | DONE |
 | 091 | Improve module pipeline feedback | P0/P1 | M | 088, 090 | DONE |
-| 093 | Build law reference items | P1 | L | — | IN PROGRESS |
+| 093 | Build law reference items | P1 | L | — | DONE |
+| 095 | Build master HSSE observation | P1 | L | — | DONE |
+| 096 | Build master incident statement document configs | P1 | M | 095 | BLOCKED |
+| 097 | Build orientation syllabus API and data contract | P1 | L | — | TODO |
+| 098 | Build orientation web resources and surfaces | P1 | L | 097 | TODO |
 | 084 | Implement permit-attachment module | P1 | L | 082, 083, 087 | DONE |
 | 085 | Implement safety-checklist module | P1 | L | 082-084 | DONE |
 | 086 | Implement permit-category-apd and nested permit-apd | P1 | L | 082-085 | DONE |
@@ -234,6 +251,7 @@ flowchart TD
   PW88 --> PW84["084 permit-attachment module"]
   PW84 --> PW85["085 safety-checklist module"]
   PW85 --> PW86["086 permit-category-apd + permit-apd"]
+  HSSE95["095 HSSE observation"] --> INCIDENT96["096 incident statement document configs"]
 ```
 
 ## Cohort execution rules

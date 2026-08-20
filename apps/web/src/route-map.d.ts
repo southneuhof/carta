@@ -185,6 +185,135 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    'master-data-hsse-observation': RouteRecordInfo<
+      'master-data-hsse-observation',
+      '/master-data/hsse-observation',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-hsse-observation-detail': RouteRecordInfo<
+      'master-data-hsse-observation-detail',
+      '/master-data/hsse-observation/:findingTypeId/detail',
+      { findingTypeId: ParamValue<true> },
+      { findingTypeId: ParamValue<false> },
+      | 'master-data-hsse-observation-detail-categories'
+      | 'master-data-hsse-observation-detail-categories-create'
+      | 'master-data-hsse-observation-detail-categories-detail'
+      | 'master-data-hsse-observation-detail-categories-detail-causes'
+      | 'master-data-hsse-observation-detail-categories-detail-causes-create'
+      | 'master-data-hsse-observation-detail-categories-detail-causes-detail'
+      | 'master-data-hsse-observation-detail-categories-detail-causes-edit'
+      | 'master-data-hsse-observation-detail-categories-edit'
+    >,
+    'master-data-hsse-observation-detail-categories': RouteRecordInfo<
+      'master-data-hsse-observation-detail-categories',
+      '/master-data/hsse-observation/:findingTypeId/detail/categories',
+      { findingTypeId: ParamValue<true> },
+      { findingTypeId: ParamValue<false> },
+      | never
+    >,
+    'master-data-hsse-observation-detail-categories-detail': RouteRecordInfo<
+      'master-data-hsse-observation-detail-categories-detail',
+      '/master-data/hsse-observation/:findingTypeId/detail/categories/:findingCategoryId/detail',
+      { findingTypeId: ParamValue<true>, findingCategoryId: ParamValue<true> },
+      { findingTypeId: ParamValue<false>, findingCategoryId: ParamValue<false> },
+      | 'master-data-hsse-observation-detail-categories-detail-causes'
+      | 'master-data-hsse-observation-detail-categories-detail-causes-create'
+      | 'master-data-hsse-observation-detail-categories-detail-causes-detail'
+      | 'master-data-hsse-observation-detail-categories-detail-causes-edit'
+    >,
+    'master-data-hsse-observation-detail-categories-detail-causes': RouteRecordInfo<
+      'master-data-hsse-observation-detail-categories-detail-causes',
+      '/master-data/hsse-observation/:findingTypeId/detail/categories/:findingCategoryId/detail/causes',
+      { findingTypeId: ParamValue<true>, findingCategoryId: ParamValue<true> },
+      { findingTypeId: ParamValue<false>, findingCategoryId: ParamValue<false> },
+      | never
+    >,
+    'master-data-hsse-observation-detail-categories-detail-causes-detail': RouteRecordInfo<
+      'master-data-hsse-observation-detail-categories-detail-causes-detail',
+      '/master-data/hsse-observation/:findingTypeId/detail/categories/:findingCategoryId/detail/causes/:findingCauseId/detail',
+      { findingTypeId: ParamValue<true>, findingCategoryId: ParamValue<true>, findingCauseId: ParamValue<true> },
+      { findingTypeId: ParamValue<false>, findingCategoryId: ParamValue<false>, findingCauseId: ParamValue<false> },
+      | never
+    >,
+    'master-data-hsse-observation-detail-categories-detail-causes-edit': RouteRecordInfo<
+      'master-data-hsse-observation-detail-categories-detail-causes-edit',
+      '/master-data/hsse-observation/:findingTypeId/detail/categories/:findingCategoryId/detail/causes/:findingCauseId/edit',
+      { findingTypeId: ParamValue<true>, findingCategoryId: ParamValue<true>, findingCauseId: ParamValue<true> },
+      { findingTypeId: ParamValue<false>, findingCategoryId: ParamValue<false>, findingCauseId: ParamValue<false> },
+      | never
+    >,
+    'master-data-hsse-observation-detail-categories-detail-causes-create': RouteRecordInfo<
+      'master-data-hsse-observation-detail-categories-detail-causes-create',
+      '/master-data/hsse-observation/:findingTypeId/detail/categories/:findingCategoryId/detail/causes/create',
+      { findingTypeId: ParamValue<true>, findingCategoryId: ParamValue<true> },
+      { findingTypeId: ParamValue<false>, findingCategoryId: ParamValue<false> },
+      | never
+    >,
+    'master-data-hsse-observation-detail-categories-edit': RouteRecordInfo<
+      'master-data-hsse-observation-detail-categories-edit',
+      '/master-data/hsse-observation/:findingTypeId/detail/categories/:findingCategoryId/edit',
+      { findingTypeId: ParamValue<true>, findingCategoryId: ParamValue<true> },
+      { findingTypeId: ParamValue<false>, findingCategoryId: ParamValue<false> },
+      | never
+    >,
+    'master-data-hsse-observation-detail-categories-create': RouteRecordInfo<
+      'master-data-hsse-observation-detail-categories-create',
+      '/master-data/hsse-observation/:findingTypeId/detail/categories/create',
+      { findingTypeId: ParamValue<true> },
+      { findingTypeId: ParamValue<false> },
+      | never
+    >,
+    'master-data-hsse-observation-edit': RouteRecordInfo<
+      'master-data-hsse-observation-edit',
+      '/master-data/hsse-observation/:findingTypeId/edit',
+      { findingTypeId: ParamValue<true> },
+      { findingTypeId: ParamValue<false> },
+      | never
+    >,
+    'master-data-hsse-observation-create': RouteRecordInfo<
+      'master-data-hsse-observation-create',
+      '/master-data/hsse-observation/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-incident-statement-document-configs': RouteRecordInfo<
+      'master-data-incident-statement-document-configs',
+      '/master-data/incident-statement-document-configs',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-incident-statement-document-configs-detail': RouteRecordInfo<
+      'master-data-incident-statement-document-configs-detail',
+      '/master-data/incident-statement-document-configs/:incidentStatementDocumentConfigId/detail',
+      { incidentStatementDocumentConfigId: ParamValue<true> },
+      { incidentStatementDocumentConfigId: ParamValue<false> },
+      | never
+    >,
+    'master-data-incident-statement-document-configs-edit': RouteRecordInfo<
+      'master-data-incident-statement-document-configs-edit',
+      '/master-data/incident-statement-document-configs/:incidentStatementDocumentConfigId/edit',
+      { incidentStatementDocumentConfigId: ParamValue<true> },
+      { incidentStatementDocumentConfigId: ParamValue<false> },
+      | never
+    >,
+    'master-data-incident-statement-document-configs-create': RouteRecordInfo<
+      'master-data-incident-statement-document-configs-create',
+      '/master-data/incident-statement-document-configs/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'master-data-law-reference-items': RouteRecordInfo<
+      'master-data-law-reference-items',
+      '/master-data/law-reference-items',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     'master-data-number-configs': RouteRecordInfo<
       'master-data-number-configs',
       '/master-data/number-configs',
@@ -639,6 +768,120 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    'orientation-learning-materials': RouteRecordInfo<
+      'orientation-learning-materials',
+      '/orientation/learning-materials',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'orientation-learning-materials-detail': RouteRecordInfo<
+      'orientation-learning-materials-detail',
+      '/orientation/learning-materials/:learningMaterialId/detail',
+      { learningMaterialId: ParamValue<true> },
+      { learningMaterialId: ParamValue<false> },
+      | 'orientation-learning-materials-detail-configuration'
+      | 'orientation-learning-materials-detail-questions'
+    >,
+    'orientation-learning-materials-detail-configuration': RouteRecordInfo<
+      'orientation-learning-materials-detail-configuration',
+      '/orientation/learning-materials/:learningMaterialId/detail/configuration',
+      { learningMaterialId: ParamValue<true> },
+      { learningMaterialId: ParamValue<false> },
+      | never
+    >,
+    'orientation-learning-materials-detail-questions': RouteRecordInfo<
+      'orientation-learning-materials-detail-questions',
+      '/orientation/learning-materials/:learningMaterialId/detail/questions',
+      { learningMaterialId: ParamValue<true> },
+      { learningMaterialId: ParamValue<false> },
+      | never
+    >,
+    'orientation-learning-materials-edit': RouteRecordInfo<
+      'orientation-learning-materials-edit',
+      '/orientation/learning-materials/:learningMaterialId/edit',
+      { learningMaterialId: ParamValue<true> },
+      { learningMaterialId: ParamValue<false> },
+      | never
+    >,
+    'orientation-learning-materials-create': RouteRecordInfo<
+      'orientation-learning-materials-create',
+      '/orientation/learning-materials/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'orientation-syllabus': RouteRecordInfo<
+      'orientation-syllabus',
+      '/orientation/syllabus',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'orientation-syllabus-detail': RouteRecordInfo<
+      'orientation-syllabus-detail',
+      '/orientation/syllabus/:syllabusId/detail',
+      { syllabusId: ParamValue<true> },
+      { syllabusId: ParamValue<false> },
+      | never
+    >,
+    'orientation-syllabus-edit': RouteRecordInfo<
+      'orientation-syllabus-edit',
+      '/orientation/syllabus/:syllabusId/edit',
+      { syllabusId: ParamValue<true> },
+      { syllabusId: ParamValue<false> },
+      | never
+    >,
+    'orientation-syllabus-create': RouteRecordInfo<
+      'orientation-syllabus-create',
+      '/orientation/syllabus/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'orientation-syllabus-categories': RouteRecordInfo<
+      'orientation-syllabus-categories',
+      '/orientation/syllabus-categories',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'orientation-syllabus-categories-detail': RouteRecordInfo<
+      'orientation-syllabus-categories-detail',
+      '/orientation/syllabus-categories/:syllabusCategoryId/detail',
+      { syllabusCategoryId: ParamValue<true> },
+      { syllabusCategoryId: ParamValue<false> },
+      | 'orientation-syllabus-categories-detail-roles'
+      | 'orientation-syllabus-categories-detail-syllabi'
+    >,
+    'orientation-syllabus-categories-detail-roles': RouteRecordInfo<
+      'orientation-syllabus-categories-detail-roles',
+      '/orientation/syllabus-categories/:syllabusCategoryId/detail/roles',
+      { syllabusCategoryId: ParamValue<true> },
+      { syllabusCategoryId: ParamValue<false> },
+      | never
+    >,
+    'orientation-syllabus-categories-detail-syllabi': RouteRecordInfo<
+      'orientation-syllabus-categories-detail-syllabi',
+      '/orientation/syllabus-categories/:syllabusCategoryId/detail/syllabi',
+      { syllabusCategoryId: ParamValue<true> },
+      { syllabusCategoryId: ParamValue<false> },
+      | never
+    >,
+    'orientation-syllabus-categories-edit': RouteRecordInfo<
+      'orientation-syllabus-categories-edit',
+      '/orientation/syllabus-categories/:syllabusCategoryId/edit',
+      { syllabusCategoryId: ParamValue<true> },
+      { syllabusCategoryId: ParamValue<false> },
+      | never
+    >,
+    'orientation-syllabus-categories-create': RouteRecordInfo<
+      'orientation-syllabus-categories-create',
+      '/orientation/syllabus-categories/create',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     'quality-inspection-test-plans': RouteRecordInfo<
       'quality-inspection-test-plans',
       '/quality/inspection-test-plans',
@@ -887,6 +1130,23 @@ declare module 'vue-router/auto-routes' {
         | 'master-data-emergency-simulation-topics-create'
         | 'master-data-emergency-simulation-topics-detail'
         | 'master-data-emergency-simulation-topics-edit'
+        | 'master-data-hsse-observation'
+        | 'master-data-hsse-observation-create'
+        | 'master-data-hsse-observation-detail'
+        | 'master-data-hsse-observation-detail-categories'
+        | 'master-data-hsse-observation-detail-categories-create'
+        | 'master-data-hsse-observation-detail-categories-detail'
+        | 'master-data-hsse-observation-detail-categories-detail-causes'
+        | 'master-data-hsse-observation-detail-categories-detail-causes-create'
+        | 'master-data-hsse-observation-detail-categories-detail-causes-detail'
+        | 'master-data-hsse-observation-detail-categories-detail-causes-edit'
+        | 'master-data-hsse-observation-detail-categories-edit'
+        | 'master-data-hsse-observation-edit'
+        | 'master-data-incident-statement-document-configs'
+        | 'master-data-incident-statement-document-configs-create'
+        | 'master-data-incident-statement-document-configs-detail'
+        | 'master-data-incident-statement-document-configs-edit'
+        | 'master-data-law-reference-items'
         | 'master-data-number-configs'
         | 'master-data-number-configs-create'
         | 'master-data-number-configs-detail'
@@ -951,6 +1211,22 @@ declare module 'vue-router/auto-routes' {
         | 'master-data-uoms-edit'
         | 'master-data-work-items'
         | 'notifications'
+        | 'orientation-learning-materials'
+        | 'orientation-learning-materials-create'
+        | 'orientation-learning-materials-detail'
+        | 'orientation-learning-materials-detail-configuration'
+        | 'orientation-learning-materials-detail-questions'
+        | 'orientation-learning-materials-edit'
+        | 'orientation-syllabus'
+        | 'orientation-syllabus-categories'
+        | 'orientation-syllabus-categories-create'
+        | 'orientation-syllabus-categories-detail'
+        | 'orientation-syllabus-categories-detail-roles'
+        | 'orientation-syllabus-categories-detail-syllabi'
+        | 'orientation-syllabus-categories-edit'
+        | 'orientation-syllabus-create'
+        | 'orientation-syllabus-detail'
+        | 'orientation-syllabus-edit'
         | 'quality-inspection-test-plans'
         | 'quality-inspection-test-plans-detail'
         | 'quality-pts'
@@ -1153,6 +1429,154 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/master-data/emergency-simulation-topics/create.route.vue': {
       routes:
         | 'master-data-emergency-simulation-topics-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/hsse-observation/index.route.vue': {
+      routes:
+        | 'master-data-hsse-observation'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/hsse-observation/[findingTypeId]/detail.route.vue': {
+      routes:
+        | 'master-data-hsse-observation-detail'
+        | 'master-data-hsse-observation-detail-categories'
+        | 'master-data-hsse-observation-detail-categories-create'
+        | 'master-data-hsse-observation-detail-categories-detail'
+        | 'master-data-hsse-observation-detail-categories-detail-causes'
+        | 'master-data-hsse-observation-detail-categories-detail-causes-create'
+        | 'master-data-hsse-observation-detail-categories-detail-causes-detail'
+        | 'master-data-hsse-observation-detail-categories-detail-causes-edit'
+        | 'master-data-hsse-observation-detail-categories-edit'
+      views:
+        | 'default'
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/hsse-observation/[findingTypeId]/detail/categories/index.route.vue': {
+      routes:
+        | 'master-data-hsse-observation-detail-categories'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/hsse-observation/[findingTypeId]/detail/categories/[findingCategoryId]/detail.route.vue': {
+      routes:
+        | 'master-data-hsse-observation-detail-categories-detail'
+        | 'master-data-hsse-observation-detail-categories-detail-causes'
+        | 'master-data-hsse-observation-detail-categories-detail-causes-create'
+        | 'master-data-hsse-observation-detail-categories-detail-causes-detail'
+        | 'master-data-hsse-observation-detail-categories-detail-causes-edit'
+      views:
+        | 'default'
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/hsse-observation/[findingTypeId]/detail/categories/[findingCategoryId]/detail/causes/index.route.vue': {
+      routes:
+        | 'master-data-hsse-observation-detail-categories-detail-causes'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/hsse-observation/[findingTypeId]/detail/categories/[findingCategoryId]/detail/causes/[findingCauseId]/detail.route.vue': {
+      routes:
+        | 'master-data-hsse-observation-detail-categories-detail-causes-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/hsse-observation/[findingTypeId]/detail/categories/[findingCategoryId]/detail/causes/[findingCauseId]/edit.route.vue': {
+      routes:
+        | 'master-data-hsse-observation-detail-categories-detail-causes-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/hsse-observation/[findingTypeId]/detail/categories/[findingCategoryId]/detail/causes/create.route.vue': {
+      routes:
+        | 'master-data-hsse-observation-detail-categories-detail-causes-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/hsse-observation/[findingTypeId]/detail/categories/[findingCategoryId]/edit.route.vue': {
+      routes:
+        | 'master-data-hsse-observation-detail-categories-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/hsse-observation/[findingTypeId]/detail/categories/create.route.vue': {
+      routes:
+        | 'master-data-hsse-observation-detail-categories-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/hsse-observation/[findingTypeId]/edit.route.vue': {
+      routes:
+        | 'master-data-hsse-observation-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/hsse-observation/create.route.vue': {
+      routes:
+        | 'master-data-hsse-observation-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/incident-statement-document-configs/index.route.vue': {
+      routes:
+        | 'master-data-incident-statement-document-configs'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/incident-statement-document-configs/[incidentStatementDocumentConfigId]/detail.route.vue': {
+      routes:
+        | 'master-data-incident-statement-document-configs-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/incident-statement-document-configs/[incidentStatementDocumentConfigId]/edit.route.vue': {
+      routes:
+        | 'master-data-incident-statement-document-configs-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/incident-statement-document-configs/create.route.vue': {
+      routes:
+        | 'master-data-incident-statement-document-configs-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/master-data/law-reference-items/index.route.vue': {
+      routes:
+        | 'master-data-law-reference-items'
       views:
         | never
       pathParamNames:
@@ -1673,6 +2097,138 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/notifications/index.route.vue': {
       routes:
         | 'notifications'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/orientation/learning-materials/index.route.vue': {
+      routes:
+        | 'orientation-learning-materials'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/orientation/learning-materials/[learningMaterialId]/detail.route.vue': {
+      routes:
+        | 'orientation-learning-materials-detail'
+        | 'orientation-learning-materials-detail-configuration'
+        | 'orientation-learning-materials-detail-questions'
+      views:
+        | 'default'
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/orientation/learning-materials/[learningMaterialId]/detail/configuration/index.route.vue': {
+      routes:
+        | 'orientation-learning-materials-detail-configuration'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/orientation/learning-materials/[learningMaterialId]/detail/questions/index.route.vue': {
+      routes:
+        | 'orientation-learning-materials-detail-questions'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/orientation/learning-materials/[learningMaterialId]/edit.route.vue': {
+      routes:
+        | 'orientation-learning-materials-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/orientation/learning-materials/create.route.vue': {
+      routes:
+        | 'orientation-learning-materials-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/orientation/syllabus/index.route.vue': {
+      routes:
+        | 'orientation-syllabus'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/orientation/syllabus/[syllabusId]/detail.route.vue': {
+      routes:
+        | 'orientation-syllabus-detail'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/orientation/syllabus/[syllabusId]/edit.route.vue': {
+      routes:
+        | 'orientation-syllabus-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/orientation/syllabus/create.route.vue': {
+      routes:
+        | 'orientation-syllabus-create'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/orientation/syllabus-categories/index.route.vue': {
+      routes:
+        | 'orientation-syllabus-categories'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/orientation/syllabus-categories/[syllabusCategoryId]/detail.route.vue': {
+      routes:
+        | 'orientation-syllabus-categories-detail'
+        | 'orientation-syllabus-categories-detail-roles'
+        | 'orientation-syllabus-categories-detail-syllabi'
+      views:
+        | 'default'
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/orientation/syllabus-categories/[syllabusCategoryId]/detail/roles/index.route.vue': {
+      routes:
+        | 'orientation-syllabus-categories-detail-roles'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/orientation/syllabus-categories/[syllabusCategoryId]/detail/syllabi/index.route.vue': {
+      routes:
+        | 'orientation-syllabus-categories-detail-syllabi'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/orientation/syllabus-categories/[syllabusCategoryId]/edit.route.vue': {
+      routes:
+        | 'orientation-syllabus-categories-edit'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/routes/(authenticated)/orientation/syllabus-categories/create.route.vue': {
+      routes:
+        | 'orientation-syllabus-categories-create'
       views:
         | never
       pathParamNames:

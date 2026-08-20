@@ -50,6 +50,7 @@ import { domain as permitCategoryApdDomain, permitCategoryApdModel } from "./per
 import { domain as permitApdDomain, permitApdModel } from "./permit-apd/permit-apd";
 
 import { emergencySimulationTopicModel, domain as emergencySimulationTopicsDomain } from "./emergency-simulation-topics/emergency-simulation-topics";
+import { lawReferenceItemModel, domain as lawReferenceItemsDomain } from "./law-reference-items/law-reference-items";
 
 import { emergencySimulationEmployeeModel, domain as emergencySimulationEmployeesDomain } from "./emergency-simulation-employees/emergency-simulation-employees";
 
@@ -59,6 +60,12 @@ import { tollCausesAccidentsModel, domain as tollCausesAccidentsDomain } from ".
 import { toolsTypeModel, domain as toolsTypesDomain } from "./tools-types/tools-types";
 
 import { toolsBrandModel, domain as toolsBrandsDomain } from "./tools-brands/tools-brands";
+import { domain as hsseObservationDomain, findingCauseModel, findingCategoryModel, findingCriteriaModel, findingTypeModel } from "./hsse-observation/hsse-observation";
+import { domain as incidentStatementDocumentConfigsDomain, incidentStatementDocumentConfigModel } from "./incident-statement-document-configs/incident-statement-document-configs";
+import { domain as orientationDomain } from "./orientation/orientation";
+import { domain as syllabusDomain, syllabusModel } from "./syllabus/syllabus";
+import { domain as syllabusCategoriesDomain, syllabusCategoriesModel } from "./syllabus-categories/syllabus-categories";
+import { domain as learningMaterialsDomain, learningMaterialsModel } from "./learning-materials/learning-materials";
 
 export const domainParts = [
   authDomain,
@@ -85,11 +92,18 @@ export const domainParts = [
   permitCategoryApdDomain,
   permitApdDomain,
   emergencySimulationTopicsDomain,
+  lawReferenceItemsDomain,
   emergencySimulationEmployeesDomain,
   emergencySimulationToolsDomain,
   tollCausesAccidentsDomain,
   toolsTypesDomain,
   toolsBrandsDomain,
+  hsseObservationDomain,
+  incidentStatementDocumentConfigsDomain,
+  orientationDomain,
+  syllabusDomain,
+  syllabusCategoriesDomain,
+  learningMaterialsDomain,
 ] as const;
 
 const installedRoutes = [
@@ -138,11 +152,20 @@ const installedRoutes = [
   permitCategoryApdModel,
   permitApdModel,
   emergencySimulationTopicModel,
+  lawReferenceItemModel,
   emergencySimulationEmployeeModel,
   emergencySimulationToolModel,
   tollCausesAccidentsModel,
   toolsTypeModel,
   toolsBrandModel,
+  findingCriteriaModel,
+  findingTypeModel,
+  findingCategoryModel,
+  findingCauseModel,
+  incidentStatementDocumentConfigModel,
+  syllabusModel,
+  syllabusCategoriesModel,
+  learningMaterialsModel,
 ] as const;
 
 // Public like /health; attach authenticated() here if the document should require a session.

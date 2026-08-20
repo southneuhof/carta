@@ -1,3 +1,4 @@
+import { defineComponent, h, ref } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
 import FileInput from '../FileInput.vue'
 import { deferred, mountInput } from './harness'
@@ -41,6 +42,37 @@ describe('FileInput upload surface', () => {
 
     expect(view.text()).toContain('Letakkan file anda di sini')
     expect(view.text()).toContain('Pilih sumber file')
+    view.unmount()
+  })
+
+  it('keeps the uploaded row when the form writer stores its path', async () => {
+    const upload = vi.fn(async () => asset('first.pdf'))
+    const model = ref<Record<string, unknown>>({ file: null })
+    const host = defineComponent({
+      setup: () => () => h(Form, {
+        fields: {
+          file: {
+            label: 'File',
+            form: { renderer: 'file', props: { upload } },
+            write: (draft: Record<string, unknown>, value: unknown) => {
+              const file = value as { path?: unknown }
+              draft.file = typeof file?.path === 'string' ? file.path : value
+            },
+          },
+        },
+        modelValue: model.value,
+        'onUpdate:modelValue': (value: Record<string, unknown>) => { model.value = value },
+      }),
+    })
+    const view = mountCore(host, {})
+    await flush()
+
+    const input = view.find<HTMLInputElement>('input[type="file"]')!
+    selectFiles(input, [new File(['first'], 'first.pdf', { type: 'application/pdf' })])
+    await flush()
+
+    expect(model.value.file).toBe('/uploads/first.pdf')
+    expect(view.text()).toContain('first.pdf')
     view.unmount()
   })
 

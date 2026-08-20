@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { activeNavigationModule, navigation, visibleNavigation } from '../navigation'
+import { activeNavigationModule, matchesNavigationPath, navigation, visibleNavigation } from '../navigation'
 
 describe('navigation entrypoints', () => {
   it('keeps ordered resource and direct entrypoints only', () => {
-    expect(navigation.map((module) => module.name)).toEqual(['dashboard', 'to-do', 'quality', 'settings', 'master-data'])
+    expect(navigation.map((module) => module.name)).toEqual(['dashboard', 'to-do', 'quality', 'orientation', 'settings', 'master-data'])
     expect(
       visibleNavigation(() => true)
         .flatMap((module) => module.routes)
@@ -14,6 +14,14 @@ describe('navigation entrypoints', () => {
   it('guards the ITP entry with the existing project read grant', () => {
     const quality = navigation.find((module) => module.name === 'quality')!
     expect(quality.routes).toContainEqual({ to: { name: 'quality-inspection-test-plans' }, permission: 'view-projects', title: 'Inspection & Test Plan', icon: 'folder' })
+  })
+
+  it('adds the Orientation entrypoints with their system view grants', () => {
+    const orientation = navigation.find((module) => module.name === 'orientation')!
+    expect(orientation.routes).toContainEqual({ separator: 'QHSSE Orientation' })
+    expect(orientation.routes).toContainEqual({ to: { name: 'orientation-syllabus' }, permission: 'view-syllabus', title: 'Silabus', icon: 'folder' })
+    expect(orientation.routes).toContainEqual({ to: { name: 'orientation-syllabus-categories' }, permission: 'view-syllabus-categories', title: 'Kategori Silabus', icon: 'folder' })
+    expect(orientation.routes).toContainEqual({ to: { name: 'orientation-learning-materials' }, permission: 'view-learning-materials', title: 'Materi', icon: 'folder' })
   })
 
   it('adds the Work Permit entry with its system view grant', () => {
@@ -31,6 +39,14 @@ describe('navigation entrypoints', () => {
       title: 'Topik Simulasi Tanggap Darurat',
       icon: 'folder',
     })
+    expect(masterData.routes).toContainEqual({ separator: 'HSSE' })
+    expect(masterData.routes).toContainEqual({ to: { name: 'master-data-hsse-observation' }, permission: 'view-hsse-observation', title: 'Kriteria Temuan Observation', icon: 'folder' })
+    expect(masterData.routes).toContainEqual({
+      to: { name: 'master-data-incident-statement-document-configs' },
+      permission: 'view-incident-statement-document-configs',
+      title: 'Dokumen Pernyataan Insiden',
+      icon: 'folder',
+    })
     expect(masterData.routes).not.toContainEqual(expect.objectContaining({ to: { name: 'master-data-permit-apd' } }))
   })
 
@@ -45,6 +61,8 @@ describe('navigation entrypoints', () => {
 
     expect(activeNavigationModule('/settings/roles/7/detail', resolve, () => true)).toBe('settings')
     expect(activeNavigationModule('/settings/role', resolve, () => true)).toBeUndefined()
+    expect(matchesNavigationPath('/orientation/syllabus/7/detail', '/orientation/syllabus')).toBe(true)
+    expect(matchesNavigationPath('/orientation/syllabus-categories', '/orientation/syllabus')).toBe(false)
   })
 
   it('keeps only open menus visible without grants', () => {
