@@ -32,15 +32,15 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.1.0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Setup pnpm
-        run: |
-          corepack enable
-          corepack prepare pnpm@12.1.0 --activate
 
       - name: Install workspace dependencies
         run: pnpm install --frozen-lockfile
