@@ -1,0 +1,73 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": [
+    "env.d.ts",
+    "src/**/*",
+    "src/**/*.vue",
+    "../../packages/sdk/src/**/*",
+    "../../packages/loom/src/**/*",
+    "../../packages/utilities/src/**/*"
+  ],
+  "exclude": [
+    "src/**/__tests__/*",
+    "../../packages/sdk/src/__tests__/*",
+    "../../packages/loom/src/**/__tests__/*",
+    "../../packages/utilities/src/**/__tests__/*"
+  ],
+  "compilerOptions": {
+    "strictNullChecks": true,
+    "moduleSuffixes": [
+      ".web",
+      ""
+    ],
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "vue3-google-map": [
+        "./node_modules/vue3-google-map/dist/types/index.d.ts"
+      ],
+      "@southneuhof/api": [
+        "./../api/src/index.ts"
+      ],
+      "@southneuhof/api/*": [
+        "./../api/src/*"
+      ],
+      "@southneuhof/sdk": [
+        "./../../packages/sdk/src/index.ts"
+      ],
+      "@southneuhof/sdk/*": [
+        "./../../packages/sdk/src/*"
+      ],
+      "@southneuhof/sprindle": [
+        "./../../packages/sprindle/src/index.ts"
+      ],
+      "@southneuhof/sprindle/*": [
+        "./../../packages/sprindle/src/*"
+      ],
+      "@southneuhof/loom": [
+        "./../../packages/loom/src/index.ts"
+      ],
+      "@southneuhof/loom/*": [
+        "./../../packages/loom/src/*"
+      ],
+      "@southneuhof/utilities": [
+        "./../../packages/utilities/src/index.ts"
+      ],
+      "@southneuhof/utilities/*": [
+        "./../../packages/utilities/src/*"
+      ],
+    },
+    "module": "esnext",
+    "target": "es2017"
+  },
+  "vueCompilerOptions": {
+    "strictTemplates": true,
+    "checkUnknownProps": false,
+    "checkUnknownEvents": false,
+    "checkUnknownDirectives": false,
+    "checkUnknownComponents": false,
+    "checkUnknownSlots": false,
+    "checkUnknownAttributes": false
+  }
+}

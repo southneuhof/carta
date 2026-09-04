@@ -1,0 +1,4 @@
+interface:
+  display_name: "Verify Carta Module"
+  short_description: "Verify Carta modules from scoped evidence"
+  default_prompt: "As the parent agent, use $verify-carta-module to verify this feature against its approved design, plans, semantic handoff, and focused evidence."

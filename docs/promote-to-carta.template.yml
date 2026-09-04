@@ -1,0 +1,62 @@
+name: Promote to Carta (template)
+
+# Copy this file into a private Carta-based project as
+# .github/workflows/promote-to-carta.yml, then set the GH_CARTA_TOKEN secret
+# (a maintainer PAT with contents:write on southneuhof/carta).
+#
+# Trigger it manually from the Actions tab (workflow_dispatch) with a target
+# branch name. It splits each framework path below, pushes it to that branch
+# on southneuhof/carta, and prints the gh command to open the PR.
+#
+# Only the listed paths ever leave the private repo. Never add apps/, plans/,
+# docs/ project files, or .env files to the PATHS input.
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: 'Branch name to propose in southneuhof/carta'
+        required: true
+      paths:
+        description: 'Space-separated subtree prefixes to promote'
+        required: false
+        default: 'packages/loom packages/sprindle packages/utilities packages/sdk'
+
+permissions:
+  contents: read
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Split and push each framework path
+        env:
+          GH_CARTA_TOKEN: ${{ secrets.GH_CARTA_TOKEN }}
+          TARGET_BRANCH: ${{ inputs.target_branch }}
+          PATHS: ${{ inputs.paths }}
+        run: |
+          set -eu
+          test -n "${GH_CARTA_TOKEN}"
+          test -n "${TARGET_BRANCH}"
+          git config --global url."https://x-access-token:${GH_CARTA_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git remote add carta https://github.com/southneuhof/carta.git 2>/dev/null || \
+            git remote set-url carta https://github.com/southneuhof/carta.git
+          git fetch carta main
+          # shellcheck disable=SC2086
+          for prefix in ${PATHS}; do
+            if [ ! -d "${prefix}" ]; then
+              echo "skip ${prefix}: directory not present"
+              continue
+            fi
+            sha="$(git subtree split --prefix="${prefix}" HEAD)"
+            git push carta "${sha}:refs/heads/${TARGET_BRANCH}-$(echo "${prefix}" | tr '/' '-')"
+            echo "pushed ${prefix} (${sha})"
+          done
+          echo "Open the PR with:"
+          echo "  gh pr create --repo southneuhof/carta --base main --head <pushed-branch>"

@@ -1,0 +1,32 @@
+# Carta
+
+Carta template: Users, Roles, Permissions on Better Auth. API port 5180, web port 5181, PostgreSQL database `carta`.
+
+## Layout
+
+```txt
+apps/api/   # Hono API: health, auth, users, roles, permissions, files
+apps/web/   # Vue 3 admin: dashboard, settings users/roles/permissions
+packages/   # sprindle, sdk, utilities, loom (framework, unchanged)
+```
+
+## Start
+
+```sh
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env
+pnpm install
+pnpm --filter @southneuhof/api db:migrate
+pnpm --filter @southneuhof/api db:seed
+pnpm dev
+```
+
+Seed the admin with `CARTA_ADMIN_EMAIL` and `CARTA_ADMIN_PASSWORD`.
+
+## Permissions
+
+Flat global codes: `view/list/detail/create/update-users`,
+`view/list/detail/create/update/delete-roles`,
+`view/list/detail-permissions`,
+`list/create/delete-role-permissions`,
+`list/create/delete-role-assignments`.

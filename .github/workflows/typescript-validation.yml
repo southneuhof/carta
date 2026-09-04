@@ -1,0 +1,76 @@
+name: TypeScript Validation
+
+on:
+  pull_request:
+    paths:
+      - 'apps/api/**'
+      - 'apps/web/**'
+      - 'packages/loom/**'
+      - 'packages/sdk/**'
+      - 'packages/sprindle/**'
+      - 'packages/utilities/**'
+      - 'package.json'
+      - 'pnpm-workspace.yaml'
+      - 'pnpm-lock.yaml'
+      - 'tsconfig.base.json'
+      - 'apps/api/tsconfig.json'
+      - 'apps/web/tsconfig*.json'
+      - 'packages/loom/tsconfig.json'
+      - 'packages/sdk/tsconfig.json'
+      - 'packages/sprindle/tsconfig.json'
+      - 'packages/utilities/tsconfig.json'
+      - '.github/workflows/typescript-validation.yml'
+  push:
+    paths:
+      - 'apps/api/**'
+      - 'apps/web/**'
+      - 'packages/loom/**'
+      - 'packages/sdk/**'
+      - 'packages/sprindle/**'
+      - 'packages/utilities/**'
+      - 'package.json'
+      - 'pnpm-workspace.yaml'
+      - 'pnpm-lock.yaml'
+      - 'tsconfig.base.json'
+      - 'apps/api/tsconfig.json'
+      - 'apps/web/tsconfig*.json'
+      - 'packages/loom/tsconfig.json'
+      - 'packages/sdk/tsconfig.json'
+      - 'packages/sprindle/tsconfig.json'
+      - 'packages/utilities/tsconfig.json'
+      - '.github/workflows/typescript-validation.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: typescript-validation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Setup pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@12.1.0 --activate
+
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type-check affected packages
+        run: pnpm exec turbo run type-check --affected --output-logs=errors-only

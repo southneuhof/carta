@@ -1,0 +1,64 @@
+{
+  "name": "@southneuhof/api",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "tsx scripts/dev.ts",
+    "build": "tsc -p tsconfig.json --noEmit --singleThreaded",
+    "type-check": "NODE_OPTIONS=--max-old-space-size=4096 tsc -p tsconfig.json --noEmit --singleThreaded",
+    "lint": "oxlint src scripts",
+    "test": "pnpm run db:migrate:test && node --env-file-if-exists=.env --env-file-if-exists=.env.test ./node_modules/vitest/vitest.mjs run",
+    "test:focused": "pnpm run db:migrate:test && sh -c 'if [ \"$1\" = \"--\" ]; then shift; fi; exec node --env-file-if-exists=.env --env-file-if-exists=.env.test ./node_modules/vitest/vitest.mjs run \"$@\"' --",
+    "lint:focused": "sh -c 'if [ \"$1\" = \"--\" ]; then shift; fi; exec oxlint --quiet \"$@\"' --",
+    "test:lint-rules": "node ./node_modules/vitest/vitest.mjs run scripts/oxlint-plugin.spec.mjs",
+    "db:push": "drizzle-kit push",
+    "db:reset": "tsx --env-file-if-exists=.env scripts/reset-db.ts && pnpm run db:migrate",
+    "db:refresh": "pnpm run db:reset && pnpm run db:seed",
+    "db:smoke": "tsx --env-file-if-exists=.env scripts/smoke-db.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:migrate:test": "node --env-file-if-exists=.env --env-file-if-exists=.env.test ./node_modules/drizzle-kit/bin.cjs migrate",
+    "db:seed": "tsx --env-file-if-exists=.env scripts/seed.ts",
+    "db:seed:test": "pnpm run db:migrate:test && tsx --env-file-if-exists=.env --env-file-if-exists=.env.test scripts/seed.ts",
+    "e2e:reset": "node --env-file=.env --env-file=.env.e2e --import tsx scripts/reset-e2e.ts",
+    "e2e:migrate": "node --env-file=.env --env-file=.env.e2e ./node_modules/drizzle-kit/bin.cjs migrate",
+    "e2e:seed": "node --env-file=.env --env-file=.env.e2e --import tsx scripts/seed-e2e.ts",
+    "e2e:clear": "node --env-file=.env --env-file=.env.e2e --import tsx scripts/clear-e2e-storage.ts",
+    "e2e:cleanup-incident-reports": "node --env-file=.env --env-file=.env.e2e --import tsx scripts/cleanup-e2e-incident-reports.ts",
+    "e2e:prepare": "pnpm run e2e:reset && pnpm run e2e:migrate && pnpm run e2e:clear && pnpm run e2e:seed"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./app": "./src/app.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1106.0",
+    "@aws-sdk/s3-request-presigner": "^3.1106.0",
+    "@better-auth/drizzle-adapter": "^1.6.23",
+    "@hono/node-server": "^2.0.6",
+    "@southneuhof/sprindle": "workspace:*",
+    "better-auth": "^1.6.23",
+    "drizzle-orm": "1.0.0-rc.4",
+    "drizzle-zod": "^0.8.3",
+    "hono": "^4.12.27",
+    "pdf-lib": "^1.17.1",
+    "pg": "^8.22.0",
+    "qrcode": "^1.5.4",
+    "xlsx-js-style": "^1.2.0",
+    "zod": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/pg": "^8.20.0",
+    "@types/qrcode": "^1.5.6",
+    "drizzle-kit": "1.0.0-rc.4",
+    "oxlint": "1.79.0",
+    "tsx": "^4.22.4",
+    "typescript": "7.0.2",
+    "vitest": "^2.1.9"
+  }
+}

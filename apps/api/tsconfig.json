@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "strict": true,
+    "types": ["node"],
+    "module": "esnext",
+    "moduleSuffixes": [".server", ""],
+    "paths": {
+      "@southneuhof/api": ["./src/index.ts"],
+      "@southneuhof/api/*": ["./src/*"],
+      "@southneuhof/sdk": ["../../packages/sdk/src/index.ts"],
+      "@southneuhof/sdk/*": ["../../packages/sdk/src/*"],
+
+    }
+  },
+  "include": [
+    "src/**/*",
+    "scripts/**/*",
+    "drizzle.config.ts"
+  ]
+}

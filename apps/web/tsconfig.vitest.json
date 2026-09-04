@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.app.json",
+  "exclude": [
+    "../../packages/sdk/src/__tests__/*",
+    "../../packages/loom/src/**/__tests__/*",
+    "../../packages/utilities/src/**/__tests__/*"
+  ],
+  "compilerOptions": {
+    "lib": ["DOM", "es2022"],
+    "types": ["node", "jsdom"],
+    "verbatimModuleSyntax": true
+  }
+}

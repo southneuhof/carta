@@ -1,0 +1,4 @@
+interface:
+  display_name: "Build Resource Forms"
+  short_description: "Build current Carta resource forms"
+  default_prompt: "Use $build-resource-form to add or repair a resource form in this repository."

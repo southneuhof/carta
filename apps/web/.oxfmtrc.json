@@ -1,0 +1,9 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "trailingComma": "es5",
+  "tabWidth": 2,
+  "semi": false,
+  "singleQuote": true,
+  "printWidth": 200,
+  "ignorePatterns": ["env/**", "node_modules/**", ".vscode/**", "favicons/**", "public/**", "src/assets/lib/tinymce/**", "src/route-map.d.ts", "dist/**", "build/**", "coverage/**"]
+}

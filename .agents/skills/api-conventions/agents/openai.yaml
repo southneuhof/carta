@@ -1,0 +1,4 @@
+interface:
+  display_name: "API Conventions"
+  short_description: "Follow Carta backend API conventions"
+  default_prompt: "Use $api-conventions when adding or changing apps/api modules, routes, entities, or services."

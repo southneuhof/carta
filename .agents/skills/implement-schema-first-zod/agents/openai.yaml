@@ -1,0 +1,4 @@
+interface:
+  display_name: "Implement schema-first Zod"
+  short_description: "Apply schema-first Zod type inference"
+  default_prompt: "Use $implement-schema-first-zod to implement the schema-first Zod type inference design."

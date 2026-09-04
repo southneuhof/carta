@@ -1,0 +1,14 @@
+.light {
+  --md-sys-color-warning: 179 139 0;
+  --md-sys-color-on-warning: 255 255 255;
+  --md-sys-color-warning-container: 255 242 236;
+  --md-sys-color-on-warning-container: 179 139 0;
+  --md-sys-color-success: 0 92 54;
+  --md-sys-color-on-success: 255 255 255;
+  --md-sys-color-success-container: 34 132 84;
+  --md-sys-color-on-success-container: 255 255 255;
+  --md-sys-color-info: 0 72 143;
+  --md-sys-color-on-info: 255 255 255;
+  --md-sys-color-info-container: 229 237 248;
+  --md-sys-color-on-info-container: 0 72 143;
+}

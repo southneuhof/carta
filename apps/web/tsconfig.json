@@ -1,0 +1,18 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.config.json"
+    },
+    {
+      "path": "./tsconfig.app.json"
+    }
+  ],
+  "compilerOptions": {
+    "strict": true,
+    "target": "es2022",
+    "module": "NodeNext",
+    "lib": ["dom", "es2022"],
+    "jsx": "preserve"
+  },
+}

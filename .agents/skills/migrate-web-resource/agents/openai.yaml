@@ -1,0 +1,4 @@
+interface:
+  display_name: "Migrate Web Resource"
+  short_description: "Migrate one planned Carta web resource module"
+  default_prompt: "Use $migrate-web-resource to migrate one selected Carta web module from its approved dedicated or cohort plan."

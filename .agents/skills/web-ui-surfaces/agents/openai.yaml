@@ -1,0 +1,4 @@
+interface:
+  display_name: "Web UI Surfaces"
+  short_description: "Reuse framework surfaces for web UI"
+  default_prompt: "Use $web-ui-surfaces to check framework components, route scope, and visible UI."

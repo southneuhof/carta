@@ -1,0 +1,35 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  // dependencyOutputs is not used: every type-check/build task runs with
+  // --noEmit and declares no file outputs, so there are no dependency
+  // outputs to hash. Cross-package inputs resolve to workspace sources via
+  // tsconfig paths, and topological dependsOn plus default input hashing
+  // already covers invalidation.
+  "futureFlags": {
+    // Lets --affected resolve the PR base ref from origin/ on GitHub
+    // Actions checkouts where the base branch has no local ref.
+    "githubActionsRemoteBaseRefFallback": true
+  },
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "type-check": {
+      "dependsOn": ["^type-check"],
+      "outputs": []
+    },
+    "lint": {
+      "dependsOn": ["^lint"],
+      "outputs": []
+    }
+  }
+}
