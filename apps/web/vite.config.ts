@@ -7,14 +7,14 @@ import { applyFileRouteConventions } from './src/router/file-routing/layout-grou
 import { staticRouteName } from './src/router/file-routing/names'
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const port = Number(env.WEB_PORT)
-  if (!port) throw new Error('WEB_PORT is not set.')
+  const port = Number(process.env.WEB_PORT ?? env.WEB_PORT)
+  if (command === 'serve' && !process.env.VITEST && !port) throw new Error('WEB_PORT is not set.')
   return {
   envPrefix: ['VITE_'],
   server: {
-    port,
+    port: port || 5181,
     strictPort: true,
   },
   plugins: [
