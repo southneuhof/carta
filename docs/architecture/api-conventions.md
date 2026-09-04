@@ -2,8 +2,10 @@
 
 Conventions for `apps/api` (Hono + Sprindle + Drizzle). This file is the
 human-readable summary; the operational rule book for agents is the
-`api-conventions` skill (`.agents/skills/api-conventions/SKILL.md`). When rules
-change, change the skill first, then this file — they must not diverge.
+`api-conventions` skill from `southneuhof/skills`
+(`npx skills@latest add southneuhof/skills --skill api-conventions`).
+When rules change, change the skill first, then this file — they must not
+diverge.
 Framework vocabulary lives in
 [`packages/sprindle/docs/reference.md`](../../packages/sprindle/docs/reference.md);
 read it before inventing names.

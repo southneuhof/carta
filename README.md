@@ -23,6 +23,16 @@ pnpm dev
 
 Seed the admin with `CARTA_ADMIN_EMAIL` and `CARTA_ADMIN_PASSWORD`.
 
+## Skills
+
+Agent skills live separately at `southneuhof/skills` and are not vendored here.
+Install what you need:
+
+```sh
+npx skills@latest add southneuhof/skills --skill api-conventions
+npx skills@latest add southneuhof/skills --skill web-ui-surfaces
+```
+
 ## Permissions
 
 Flat global codes: `view/list/detail/create/update-users`,

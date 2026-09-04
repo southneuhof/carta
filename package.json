@@ -18,7 +18,9 @@
     "packages:pull": "node scripts/package-repos.mjs pull",
     "packages:push": "node scripts/package-repos.mjs push",
     "packages:status": "node scripts/package-repos.mjs status",
-    "push:all": "node scripts/package-repos.mjs push-all"
+    "push:all": "node scripts/package-repos.mjs push-all",
+    "skills:add": "sh -c 'npx skills@latest add southneuhof/skills --skill \"$1\"' --",
+    "skills:update": "npx skills update"
   },
   "devDependencies": {
     "turbo": "^2.10.12",

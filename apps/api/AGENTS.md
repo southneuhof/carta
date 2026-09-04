@@ -2,7 +2,7 @@
 
 Hono + Sprindle API. Framework vocabulary lives in
 [`packages/sprindle/docs/reference.md`](../../packages/sprindle/docs/reference.md); read it before
-inventing names. Conventions live in `docs/architecture/api-conventions.md`; read it before adding or changing a module. The exemplar resources are `src/routes/users/` for standard CRUD and `src/routes/roles/` for the route → service shape. The operational rule book for agents is the `api-conventions` skill (`.agents/skills/api-conventions/SKILL.md`); the charter stays the human-readable summary and must not diverge from it — when rules change, change the skill first.
+inventing names. Conventions live in `docs/architecture/api-conventions.md`; read it before adding or changing a module. The exemplar resources are `src/routes/users/` for standard CRUD and `src/routes/roles/` for the route → service shape. The operational rule book for agents is the `api-conventions` skill from `southneuhof/skills` (`npx skills@latest add southneuhof/skills --skill api-conventions`); the charter stays the human-readable summary and must not diverge from it — when rules change, change the skill first.
 
 ## Setup
 

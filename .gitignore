@@ -50,3 +50,8 @@ BaseCRUD (Postmodern).vue
 /apps/landing-mjl/storage/private/*
 /apps/landing-mjl/storage/public/*
 /apps/landing-mjl/storage/temp/*
+
+# Private working state, never pushed upstream
+/advisor-plans/
+/.commandcode/
+/docs/superpowers/specs/

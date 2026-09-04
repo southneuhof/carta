@@ -47,7 +47,9 @@ Use the first option that expresses the complete value contract:
 5. A new framework primitive after an approved framework gap.
 
 The selection decision ends at step 4. After selecting a custom field, read
-[the custom field contract](../../.agents/skills/build-resource-form/references/custom-field-contract.md)
+the custom field contract from the `build-resource-form` skill in
+`southneuhof/skills`
+(`npx skills@latest add southneuhof/skills --skill build-resource-form`)
 for its implementation contract.
 
 ## Custom form pages
