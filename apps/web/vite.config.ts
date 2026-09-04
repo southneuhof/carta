@@ -12,73 +12,73 @@ export default defineConfig(({ command, mode }) => {
   const port = Number(process.env.WEB_PORT ?? env.WEB_PORT)
   if (command === 'serve' && !process.env.VITEST && !port) throw new Error('WEB_PORT is not set.')
   return {
-  envPrefix: ['VITE_'],
-  server: {
-    port: port || 5181,
-    strictPort: true,
-  },
-  plugins: [
-    VueRouter({
-      routesFolder: 'src/routes',
-      extensions: ['.route.vue', '.layout.vue'],
-      dts: 'src/route-map.d.ts',
-      getRouteName: staticRouteName,
-      beforeWriteFiles: applyFileRouteConventions,
-    }),
-    vue({
-      script: {
-        defineModel: true,
-      },
-    }),
-  ],
-  resolve: {
-    dedupe: ['vue', 'vue-router'],
-    extensions: ['.web.ts', '.web.tsx', '.web.mts', '.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
-    alias: [
-      {
-        find: '@',
-        replacement: fileURLToPath(new URL('./src', import.meta.url)),
-      },
-      {
-        find: /^@southneuhof\/loom$/,
-        replacement: fileURLToPath(new URL('../../packages/loom/src/index.ts', import.meta.url)),
-      },
-      {
-        find: '@southneuhof/loom/',
-        replacement: fileURLToPath(new URL('../../packages/loom/src/', import.meta.url)),
-      },
-      {
-        find: /^@southneuhof\/api$/,
-        replacement: fileURLToPath(new URL('../api/src/index.ts', import.meta.url)),
-      },
-      {
-        find: '@southneuhof/api/',
-        replacement: fileURLToPath(new URL('../api/src/', import.meta.url)),
-      },
-      {
-        find: /^@southneuhof\/sdk$/,
-        replacement: fileURLToPath(new URL('../../packages/sdk/src/index.ts', import.meta.url)),
-      },
-      {
-        find: '@southneuhof/sdk/',
-        replacement: fileURLToPath(new URL('../../packages/sdk/src/', import.meta.url)),
-      },
+    envPrefix: ['VITE_'],
+    server: {
+      port: port || 5181,
+      strictPort: true,
+    },
+    plugins: [
+      VueRouter({
+        routesFolder: 'src/routes',
+        extensions: ['.route.vue', '.layout.vue'],
+        dts: 'src/route-map.d.ts',
+        getRouteName: staticRouteName,
+        beforeWriteFiles: applyFileRouteConventions,
+      }),
+      vue({
+        script: {
+          defineModel: true,
+        },
+      }),
     ],
-  },
-  esbuild: {
-    jsxFactory: 'h',
-    jsxFragment: 'Fragment',
-  },
-  test: {
-    environment: 'jsdom',
-    testTimeout: 30000,
-    hookTimeout: 30000,
-    teardownTimeout: 10000,
-    poolOptions: {
-      forks: {
-        maxWorkers: 2,
+    resolve: {
+      dedupe: ['vue', 'vue-router'],
+      extensions: ['.web.ts', '.web.tsx', '.web.mts', '.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
+      alias: [
+        {
+          find: '@',
+          replacement: fileURLToPath(new URL('./src', import.meta.url)),
+        },
+        {
+          find: /^@southneuhof\/loom$/,
+          replacement: fileURLToPath(new URL('../../packages/loom/src/index.ts', import.meta.url)),
+        },
+        {
+          find: '@southneuhof/loom/',
+          replacement: fileURLToPath(new URL('../../packages/loom/src/', import.meta.url)),
+        },
+        {
+          find: /^@southneuhof\/api$/,
+          replacement: fileURLToPath(new URL('../api/src/index.ts', import.meta.url)),
+        },
+        {
+          find: '@southneuhof/api/',
+          replacement: fileURLToPath(new URL('../api/src/', import.meta.url)),
+        },
+        {
+          find: /^@southneuhof\/sdk$/,
+          replacement: fileURLToPath(new URL('../../packages/sdk/src/index.ts', import.meta.url)),
+        },
+        {
+          find: '@southneuhof/sdk/',
+          replacement: fileURLToPath(new URL('../../packages/sdk/src/', import.meta.url)),
+        },
+      ],
+    },
+    esbuild: {
+      jsxFactory: 'h',
+      jsxFragment: 'Fragment',
+    },
+    test: {
+      environment: 'jsdom',
+      testTimeout: 30000,
+      hookTimeout: 30000,
+      teardownTimeout: 10000,
+      poolOptions: {
+        forks: {
+          maxWorkers: 2,
+        },
       },
     },
-  },
   }
 })
