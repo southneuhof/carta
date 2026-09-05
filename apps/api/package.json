@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "tsx scripts/dev.ts",
     "build": "tsc -p tsconfig.json --noEmit --singleThreaded",
-    "type-check": "NODE_OPTIONS=--max-old-space-size=4096 tsc -p tsconfig.json --noEmit --singleThreaded",
+    "type-check": "tsc -p tsconfig.json --noEmit --singleThreaded",
     "lint": "oxlint src scripts",
     "test": "pnpm run db:migrate:test && node --env-file-if-exists=.env --env-file-if-exists=.env.test ./node_modules/vitest/vitest.mjs run",
     "test:focused": "pnpm run db:migrate:test && sh -c 'if [ \"$1\" = \"--\" ]; then shift; fi; exec node --env-file-if-exists=.env --env-file-if-exists=.env.test ./node_modules/vitest/vitest.mjs run \"$@\"' --",
