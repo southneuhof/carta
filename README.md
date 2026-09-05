@@ -10,6 +10,20 @@ apps/web/   # Vue 3 admin: dashboard, settings users/roles/permissions
 packages/   # sprindle, sdk, utilities, loom (framework, unchanged)
 ```
 
+## Quick setup
+
+Create a new app from any parent directory:
+
+```sh
+npx --yes create-carta-app@latest my-app
+```
+
+To configure the project remote during setup:
+
+```sh
+npx --yes create-carta-app@latest my-app --remote <private-repo-url>
+```
+
 ## Start
 
 ```sh
