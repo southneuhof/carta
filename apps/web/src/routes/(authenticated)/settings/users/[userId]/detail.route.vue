@@ -10,7 +10,7 @@ const route = useRoute('settings-users-detail')
 const userId = route.params.userId
 
 const tabs = [
-  { action: { permission: 'view-role-assignments', to: { name: 'settings-users-detail-role-assignments', params: { userId: String(userId) } } as never }, label: 'Role Assignments' },
+  { action: { permission: 'view-role-assignments', to: { name: 'settings-users-detail-role-assignments', params: { userId: String(userId) } } }, label: 'Role Assignments' },
 ] satisfies readonly RouteTab[]
 </script>
 

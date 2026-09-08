@@ -23,7 +23,8 @@ record is [Frontend Resource and Schema Architecture](../superpowers/specs/2026-
 
 Filesystem routes define the page structure and route names. A list, detail,
 create form, update form, or nested page gets its own route when it is an
-independent screen.
+independent screen. Follow the [file-routing convention](file-routing.md) for
+retained parents, replacement pages, tabs, and Back behavior.
 
 ```text
 settings/roles/

@@ -18,7 +18,10 @@ const renderedRecord = computed(() => {
 const routeViewKey = computed(() => {
   const record = renderedRecord.value
   if (!record) return 'unmatched'
-  if (record.name == null) return `${record.path}:undefined`
+  if (record.name == null) {
+    const params = [...record.path.matchAll(/:([A-Za-z0-9_]+)/g)].map(([, name]) => route.params[name])
+    return `${record.path}:${JSON.stringify(params)}`
+  }
 
   const name = String(record.name)
   const path = router.resolve({ name: record.name as keyof RouteNamedMap }).path

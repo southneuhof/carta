@@ -68,7 +68,14 @@ async function mountRoutes(initialPath: string) {
                 path: 'group',
                 children: [{ path: 'deep', name: 'roles-grouped', component: Grouped }],
               },
+              { path: 'permissions/:permissionId/detail/inspect', name: 'roles-permission-inspect', component: Grouped },
             ],
+          },
+          { path: 'roles/:roleId/permissions/:permissionId/detail', name: 'permission-detail', component: Deep },
+          {
+            path: 'users/:userId/detail',
+            component: Detail,
+            children: [{ path: '', name: 'user-default', component: List }],
           },
         ],
       },
@@ -136,6 +143,14 @@ describe('AppRouterView', () => {
     expect(counters.permissions.mounts).toBe(1)
   })
 
+  it('remounts an unnamed parent when its identity changes', async () => {
+    const { counters, router } = await mountRoutes('/users/7/detail')
+    await router.push({ name: 'user-default', params: { userId: '8' } } as never)
+    await settle()
+    expect(counters.detail.mounts).toBe(2)
+    expect(counters.list.mounts).toBe(2)
+  })
+
   it('keeps ancestors mounted when third rendered outlet changes', async () => {
     const { counters, router } = await mountRoutes('/roles/7/permissions')
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
@@ -164,6 +179,25 @@ describe('AppRouterView', () => {
     expect(counters.list.unmounts).toBe(1)
     expect(counters.detail.mounts).toBe(1)
     expect(counters.permissions.mounts).toBe(1)
+  })
+
+  it('replaces the detail parent for a flat destination', async () => {
+    const { counters, host, router } = await mountRoutes('/roles/7/permissions')
+    await router.push('/roles/7/permissions/9/detail')
+    await settle()
+    expect(counters.detail.unmounts).toBe(1)
+    expect(counters.permissions.unmounts).toBe(1)
+    expect(counters.shell.mounts).toBe(1)
+    expect(host.querySelector('[data-route="deep"]')).not.toBeNull()
+  })
+
+  it('keeps the higher parent for an intermediate flat destination', async () => {
+    const { counters, host, router } = await mountRoutes('/roles/7/permissions')
+    await router.push('/roles/7/permissions/9/detail/inspect')
+    await settle()
+    expect(counters.detail.mounts).toBe(1)
+    expect(counters.permissions.unmounts).toBe(1)
+    expect(host.querySelector('[data-route="grouped"]')).not.toBeNull()
   })
 
   it('refreshes only outlet whose record key changed', async () => {

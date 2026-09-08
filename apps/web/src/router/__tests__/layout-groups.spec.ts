@@ -78,4 +78,16 @@ describe('route-group layouts', () => {
     expect(layout.deleted).toBe(true)
     expect(page.deleted).toBe(false)
   })
+
+  it('rejects multiple layouts', () => {
+    const group = new Node(undefined, [new Node('/project/src/routes/(authenticated)/first.layout.vue'), new Node('/project/src/routes/(authenticated)/second.layout.vue')])
+
+    expect(() => applyFileRouteConventions(group as any, false)).toThrow(/multiple layouts/)
+  })
+
+  it('rejects a layout that overwrites a parent component', () => {
+    const group = new Node('/project/src/routes/(authenticated).route.vue', [new Node('/project/src/routes/(authenticated)/authenticated.layout.vue')])
+
+    expect(() => applyFileRouteConventions(group as any, false)).toThrow(/overwrite parent component/)
+  })
 })

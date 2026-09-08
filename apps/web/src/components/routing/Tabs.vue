@@ -17,20 +17,24 @@ const props = defineProps<{
 const route = useRoute()
 const router = useRouter()
 
-const tabs = computed(() => {
+const resolvedTabs = computed(() => {
   return props.items.flatMap((item) => {
     let target
     const to = item.action.to
     if (!to) return []
     try {
-      target = router.resolve({ ...(to as object), params: route.params } as never)
+      target = router.resolve({
+        ...to,
+        params: { ...route.params, ...to.params },
+        query: { ...siblingQuery(), ...to.query },
+      } as never)
     } catch {
       return []
     }
     if (target.name !== to.name || !target.matched.length) return []
     const access = useResourceRuntime().adapters.access
     if (item.action.permission !== null && !access.allows({ operation: 'detail', permission: item.action.permission })) return []
-    return [{ ...item, to: target, active: route.name === target.name }]
+    return [{ ...item, to: target }]
   })
 })
 
@@ -39,9 +43,16 @@ function componentRecord(records: readonly RouteRecordNormalized[]): RouteRecord
 }
 
 const owner = computed(() => {
-  const owners = tabs.value.map((tab) => componentRecord(tab.to.matched.slice(0, -1)))
+  const owners = resolvedTabs.value.map((tab) => componentRecord(tab.to.matched.slice(0, -1)))
   if (!owners.length || owners.some((candidate) => !candidate) || owners.some((candidate) => candidate !== owners[0])) return undefined
   return owners[0]
+})
+
+const tabs = computed(() => {
+  const owned = owner.value && route.matched.includes(owner.value)
+  const sections = owned ? resolvedTabs.value.filter((tab) => route.path === tab.to.path || route.path.startsWith(`${tab.to.path}/`)) : []
+  const activePath = sections.reduce<string | undefined>((longest, tab) => (!longest || tab.to.path.length > longest.length ? tab.to.path : longest), undefined)
+  return resolvedTabs.value.map((tab) => ({ ...tab, active: tab.to.path === activePath }))
 })
 
 const currentOwner = computed(() => componentRecord(route.matched))
@@ -65,12 +76,12 @@ watchEffect(() => {
   const first = tabs.value[0]
   if (!first || !owner.value || currentOwner.value !== owner.value) return
 
-  const destination = router.resolve({ path: first.to.path, query: siblingQuery() })
+  const destination = first.to
   if (destination.fullPath === route.fullPath || pendingDestination === destination.fullPath) return
 
   pendingDestination = destination.fullPath
   void router
-    .replace({ path: first.to.path, query: siblingQuery() })
+    .replace(first.to)
     .catch(() => undefined)
     .finally(() => {
       if (pendingDestination === destination.fullPath) pendingDestination = undefined
@@ -84,7 +95,7 @@ watchEffect(() => {
       <RouterLink
         v-for="tab in tabs"
         :key="tab.action.to?.name"
-        :to="{ path: tab.to.path, query: siblingQuery() }"
+        :to="tab.to"
         class="min-w-max text-start focus-visible:outline-none"
         :data-tab="tab.action.to?.name"
         :aria-current="tab.active ? 'page' : undefined"

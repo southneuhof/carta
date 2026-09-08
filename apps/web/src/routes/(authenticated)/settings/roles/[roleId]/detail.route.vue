@@ -19,7 +19,7 @@ const deleting = ref(false)
 const updateTarget = roles.list().updateRoute?.({ id: roleId } as never)
 
 const tabs = [
-  { action: { permission: 'view-role-permissions', to: { name: 'settings-roles-detail-permissions', params: { roleId: String(roleId) } } as never }, label: 'Permissions' },
+  { action: { permission: 'view-role-permissions', to: { name: 'settings-roles-detail-permissions', params: { roleId: String(roleId) } } }, label: 'Permissions' },
 ] as const satisfies readonly RouteTab[]
 
 async function remove() {
