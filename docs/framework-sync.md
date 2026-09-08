@@ -1,15 +1,15 @@
 # Framework sync
 
-Carta is the upstream template. Projects start private with full history, then
-sync only framework paths as subtrees. `apps/`, `plans/`, `docs/` project
-inventory, and `.env` files never go upstream.
+Carta is the project template. Projects start private with full history, then
+sync only framework packages as subtrees. `apps/`, `plans/`, project documents,
+and `.env` files never change during an update.
 
 ## Sync boundary
 
-| Synced upstream | Owned by the project |
+| Updated from package repositories | Owned by the project |
 |---|---|
 | `packages/loom`, `packages/sprindle`, `packages/utilities`, `packages/sdk` | `apps/api`, `apps/web` |
-| Shared tooling: `turbo.json`, `tsconfig.base.json`, `pnpm-workspace.yaml`, `.github/workflows` | `plans/`, `docs/` project inventory |
+|  | Root tooling, `.github/workflows`, `plans/`, and project documents |
 | Skills live separately at `southneuhof/skills` (`skills/<name>/`) | `.env`, `.env.test`, `.env.e2e` secrets |
 
 Router integration under `apps/web` is project-owned. A routing convention
@@ -26,22 +26,22 @@ git remote add carta https://github.com/southneuhof/carta.git
 git push -u origin main
 ```
 
-## Pull newest Carta into a project
+## Update Carta packages in a project
 
-Pull each framework path as a subtree. Local patches to framework code merge
-normally; resolve conflicts by hand and keep the patch commits local.
+Run the safe update command from a clean working tree:
 
 ```sh
-git fetch carta main
-git subtree pull --prefix=packages/loom carta main --squash
-git subtree pull --prefix=packages/sprindle carta main --squash
-git subtree pull --prefix=packages/utilities carta main --squash
-git subtree pull --prefix=packages/sdk carta main --squash
+pnpm carta:update
 ```
 
-Without `--squash` the merge keeps full per-package history, which helps when a
-project carries a long-lived local patch. With `--squash` the history is
-coarser and later merges conflict more often.
+This command pulls each framework package from its package repository, installs
+dependencies, and runs type checks and tests. It does not write to `apps/`.
+Local framework patches merge normally. Resolve any conflict by hand and keep
+the patch commits local.
+
+Root tooling does not update automatically. A Carta release that needs a root
+change must include a small migration or manual instructions. Review and apply
+that change in each project.
 
 ## Propose a framework change upstream
 

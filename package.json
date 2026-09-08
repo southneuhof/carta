@@ -18,6 +18,7 @@
     "packages:pull": "node scripts/package-repos.mjs pull",
     "packages:push": "node scripts/package-repos.mjs push",
     "packages:status": "node scripts/package-repos.mjs status",
+    "carta:update": "pnpm packages:pull && pnpm install && pnpm type-check && pnpm test",
     "push:all": "node scripts/package-repos.mjs push-all",
     "skills:add": "sh -c 'npx skills@latest add southneuhof/skills --skill \"$1\"' --",
     "skills:update": "npx skills update",
