@@ -2,7 +2,7 @@
 
 The web app caches server data through the framework's query runtime
 (`packages/loom/src/query/`, TanStack Query under the hood). One
-client is installed per app by the framework plugin (default `staleTime` 30s).
+client is installed per app by the framework plugin.
 Application code never creates clients or authors raw query keys.
 
 ## Rules
@@ -18,9 +18,9 @@ Application code never creates clients or authors raw query keys.
   exist. `resource.actions.list` is `undefined` — a real crash seen in review.
 - **Mutations invalidate automatically — mostly.** The standard wrappers
   (`resource.create/update/delete(...).run`) call `invalidate()` internally:
-  create without id, update/delete with `{ id }`. An explicit
-  `resource.invalidate()` after `@submitted` is convention and insurance; it is
-  required only when a mutation bypasses the wrappers (custom action run).
+  create without id, update/delete with `{ id }`. Add invalidation only when a mutation bypasses the wrappers (a custom action)
+  or affects another resource. Await each affected resource invalidation; avoid
+  repeating the standard wrapper refresh.
   Invalidate without `{ id }` also refreshes custom-namespaced collections of
   that resource (they live under the `[resource, 'list']` key segment).
 - **One loader per logical dataset**, keyed by the exported key helpers.
@@ -57,7 +57,7 @@ loader fetches on mount.
 Use the current owning resource's detail contract (the names below are illustrative):
 
 ```ts
-const detail = pts.detail({ id: ptsId })
+const detail = records.detail({ id: recordId })
 const loaded = useLoader({
   key: recordKey({ resource: detail.namespace, id: detail.id, searchParameters: detail.searchParameters }),
   context: { id: detail.id, searchParameters: detail.searchParameters },

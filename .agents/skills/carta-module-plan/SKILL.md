@@ -6,8 +6,7 @@ description: Turn an approved Carta module design into implementation plans, or 
 # Carta module plan
 
 Translate an approved module contract into repository-grounded implementation
-plans. Preserve the `improve` handoff structure: intent, current evidence,
-commands, scope, steps, tests, done criteria, stop conditions and maintenance.
+plans. Record intent, affected owners, scope, steps, checks and completion.
 This skill plans the selected behavior; it does not run a general audit, choose
 new product scope, or implement source changes.
 

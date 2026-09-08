@@ -14,7 +14,8 @@ planning, implementation contracts and acceptance review.
 Inspect the request, supplied artifacts, existing feature folder and relevant
 working tree. Judge an artifact by its content, approval and currentness, not
 its filename. Use one feature folder for a coherent journey; separate unrelated
-requests. Record continuity with the
+requests. Keep one short plan for a small result; split only for a real dependency
+or separate outcome. Record continuity with the
 [worksheet contract](references/module-execution-worksheet.md).
 
 | Strongest usable input | Next action |
@@ -28,6 +29,20 @@ requests. Record continuity with the
 Design-only and plan-only requests stop at their requested deliverable. Existing
 approval is not a reason to repeat an interview. A material conflict goes back
 to the owner of that decision; unaffected work remains valid.
+
+## Start from the Carta application
+
+Treat `apps/api` and `apps/web` as the application owners. Reuse their registered
+modules, app adapters, navigation and design tokens. Inspect current public
+framework exports before using an example from another app. A completed app
+can show a useful interaction; its domain, permission model, helper files and
+old framework API are not prerequisites for a new Carta app.
+
+For a first module, establish its actor, data owner, action and visible result,
+then build that complete path. Add child resources, reports or workflow services
+when the behavior needs them. Keep domain logic in its module and use existing
+framework contracts directly. A forwarding function or copied type needs a
+purpose beyond renaming an existing API.
 
 ## Implement and verify
 

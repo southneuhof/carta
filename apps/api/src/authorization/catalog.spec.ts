@@ -1,15 +1,26 @@
 import { describe, expect, it } from "vitest";
-import { permissionByCode, permissions } from "./catalog";
+import { authorizationModules, permissionByCode } from "./catalog";
 
 describe("authorization catalog", () => {
-  it("has unique active permissions", () => {
+  type CatalogPermission = (typeof authorizationModules)[number]["permissions"][number];
+  const permissions = authorizationModules.flatMap((module) => [
+    ...module.permissions,
+  ]) as CatalogPermission[];
+
+  it("has unique active modules and permissions", () => {
+    expect(new Set(authorizationModules.map((module) => module.code)).size).toBe(
+      authorizationModules.length,
+    );
+    expect(authorizationModules.every((module) => module.active)).toBe(true);
     expect(new Set(permissions.map((item) => item.code)).size).toBe(permissions.length);
     expect(permissions.every((item) => item.active)).toBe(true);
   });
 
   it("resolves every permission by code", () => {
-    for (const item of permissions) {
-      expect(permissionByCode[item.code]).toMatchObject({ permission: item });
+    for (const module of authorizationModules) {
+      for (const permission of module.permissions) {
+        expect(permissionByCode[permission.code]).toMatchObject({ module, permission });
+      }
     }
   });
 

@@ -36,8 +36,8 @@ test('current checkout owners integrate with typed permission definitions and se
   assert.equal(integrate(value, { root, apply: true }).status, 'UP_TO_DATE')
   const catalog = readFileSync(join(root, ownerPaths[1]), 'utf8')
   for (const action of ['list', 'detail', 'create', 'update', 'delete']) {
-    assert.match(catalog, new RegExp(`\\| ["']${action}-test-catalog["']`))
-    assert.match(catalog, new RegExp(`permission\\(["']${action}-test-catalog["']`))
+    const code = `${action}-test-catalog`
+    assert.match(catalog, new RegExp(`code: ["']${code}["']`))
   }
   assert.match(readFileSync(join(root, ownerPaths[2]), 'utf8'), /await seedTestCatalog\(\)/)
   assert.equal(verify(value, { root }).status, 'PASS')

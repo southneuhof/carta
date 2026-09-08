@@ -46,34 +46,33 @@ function stringPattern(value) {
 }
 
 function insertCatalog(source, config) {
-  const typeMatch = source.match(/export type PermissionCode\s*=([\s\S]*?);/)
-  const startMarker = 'export const permissions = ['
-  let start = source.indexOf(startMarker)
-  let end = source.indexOf('] as const', start)
-  if (!typeMatch || start < 0 || end < 0 || source.indexOf(startMarker, start + 1) >= 0) {
-    throw new Error('Current PermissionCode union and permissions definitions are missing or ambiguous.')
+  const startMarker = 'export const authorizationModules = ['
+  const start = source.indexOf(startMarker)
+  const end = source.indexOf('] as const', start)
+  if (start < 0 || end < 0 || source.indexOf(startMarker, start + 1) >= 0) {
+    throw new Error('Current authorizationModules definitions are missing or ambiguous.')
   }
   const codes = moduleMetadata(config).permissions
   const section = source.slice(start, end)
   const states = Object.entries(codes).map(([action, code]) => {
-    const token = stringPattern(code)
-    const typeCount = [...typeMatch[1].matchAll(new RegExp(`\\|\\s*${token}`, 'g'))].length
-    const callCount = [...section.matchAll(new RegExp(`permission\\(\\s*${token}\\s*,`, 'g'))].length
     const entry = config.permissions.entries[action]
-    const exact = new RegExp(`permission\\(\\s*${token}\\s*,\\s*${stringPattern(entry.name)}\\s*,\\s*${stringPattern(entry.description)}\\s*\\)`)
-    if (typeCount > 1 || callCount > 1) throw new Error(`permission "${code}" is duplicated.`)
-    if (typeCount !== callCount || (callCount && !exact.test(section))) throw new Error(`permission "${code}" is incomplete or has different metadata.`)
-    return callCount
+    const token = stringPattern(code)
+    const count = [...section.matchAll(new RegExp(`code:\\s*${token}`, 'g'))].length
+    const exact = new RegExp(`\\{\\s*code:\\s*${token},\\s*name:\\s*${stringPattern(entry.name)},\\s*description:\\s*${stringPattern(entry.description)},\\s*targetType:\\s*['"]global['"],\\s*active:\\s*true\\s*\\}`)
+    if (count > 1) throw new Error(`permission "${code}" is duplicated.`)
+    if (count && !exact.test(section)) throw new Error(`permission "${code}" has different metadata.`)
+    return count
   })
   if (states.every(Boolean)) return source
   if (states.some(Boolean)) throw new Error(`permissions for "${config.slug}" are incomplete.`)
-  const typeLines = Object.values(codes).map((code) => `  | ${quoted(code)}`).join('\n')
-  source = source.replace(typeMatch[0], `export type PermissionCode =${typeMatch[1].trimEnd()}\n${typeLines};`)
-  const definitions = Object.entries(codes).map(([action, code]) => {
+  const moduleCount = [...section.matchAll(new RegExp(`code:\\s*${stringPattern(config.slug)}`, 'g'))].length
+  if (moduleCount) throw new Error(`authorization module "${config.slug}" has different metadata.`)
+  const permissions = Object.entries(codes).map(([action, code]) => {
     const entry = config.permissions.entries[action]
-    return `  permission(${quoted(code)}, ${quoted(entry.name)}, ${quoted(entry.description)}),`
+    return `      { code: ${quoted(code)}, name: ${quoted(entry.name)}, description: ${quoted(entry.description)}, targetType: 'global', active: true },`
   }).join('\n')
-  return insertBeforeArrayEnd(source, startMarker, definitions, 'permissions')
+  const definition = `  {\n    code: ${quoted(config.slug)},\n    name: ${quoted(config.permissions.moduleName)},\n    active: true,\n    permissions: [\n${permissions}\n    ],\n  },`
+  return insertBeforeArrayEnd(source, startMarker, definition, 'authorization modules')
 }
 
 function insertSeed(source, config) {

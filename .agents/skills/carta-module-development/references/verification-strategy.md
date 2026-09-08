@@ -7,25 +7,50 @@ those tools are framework defaults, not product choices.
 
 ## Select proof by behavior and impact
 
-Start from each approved acceptance ID and the affected owners/consumers. Choose
-the smallest check that could distinguish the required result from a plausible
-wrong implementation. Share evidence across rows where it genuinely proves them.
+For each acceptance outcome, name a plausible fault, then choose the smallest
+check that detects it. Reuse one check across outcomes it proves. Test names
+state behavior; file count and coverage percentage are not completion criteria.
 
-| Changed behavior / risk | Required evidence to consider |
+| Risk | Useful proof |
 |---|---|
-| Input/value conversion, defaults or validation | Focused schema/resource tests and the relevant accepted/rejected API round trip. |
-| Relationship/lookup | Correct key and owner, edit loading, parent-change behavior, and server rejection of invalid/out-of-scope references. |
-| Authorization / scope | Authenticated allowed and denied direct API cases, including relevant ownership/scope; UI action visibility separately. Anonymous 401 alone is insufficient. |
-| Workflow / coupled writes | Legal and rejected transitions, persisted effects, transaction rollback and retry/concurrency semantics when applicable. |
-| Routes / form interaction | Focused route/component checks plus Playwright for required visible journeys and persisted results. |
-| Consumer or cache effects | Relevant list/detail/report or other consumer freshness after the changed mutation. |
-| Migration / seed | Reviewed SQL/data effects and execution against the explicitly isolated target. |
-| Shared API/resource/framework boundary | Relevant dependent-consumer tests and package-level checks justified by dependency exposure. |
+| Input conversion or domain validation | Accepted and rejected values at the owning schema or API boundary; verify the stored value when persistence can change it. |
+| Relationship | Valid selection persists; a wrong-parent or inaccessible reference is rejected. Check edit hydration and parent-change clearing through the form when changed. |
+| Access | Direct authenticated requests with and without the required permission or record access; rejected writes leave state unchanged. |
+| Workflow | Legal and illegal transitions, stored effects, and rollback of coupled writes. Test races or retries when their outcome is part of the contract. |
+| UI integration | A focused browser journey through the changed interaction, with visible feedback and a persisted result after reload. |
+| Cache or consumer | A successful mutation updates the affected list, detail or summary without a manual browser reload. |
+| Migration | Inspect SQL and test the relevant old-to-new data shape on an isolated target. |
 
-Do not translate every row into a separate tool run. Backend tests explore state
-and access combinations; browser tests establish the real UI integration. Broader
-verification follows affected dependencies and risk, not only a prior focused
-failure. Lint and type checking cannot replace business assertions.
+Use API integration tests with the real application and test database for
+access, query scope, constraints and transactions. Use unit tests for domain
+logic with meaningful inputs and outputs. Use browser tests for interaction
+and integration; keep exhaustive permission and state combinations at the API.
+A layout or copy-only change can use visual inspection and existing checks.
+An explicit acceptance requirement still needs its stated evidence.
+
+## Tests that earn their cost
+
+- Assert public outcomes and persisted effects. A status code alone cannot
+  prove that a write succeeded or that a denied write changed nothing.
+- Create the few records that distinguish correct behavior from the fault:
+  another parent for scope, a tie for sorting, a conflicting state for a
+  transition. Give fixtures unique identities and clean up only owned rows.
+- Separate independent rules so one failure does not hide the others. Keep
+  one sequential test when the sequence itself is the behavior under test.
+- Use installed test helpers and inferred types. Mock an external boundary
+  when needed; keep authorization, persistence and transaction behavior real
+  when those are the claim. Test-specific wrappers must remove real repeated
+  setup or express a domain action.
+- For a regression, show that the assertion fails on the prior behavior when
+  practical. Otherwise explain which wrong outcome it detects. A test that
+  still passes with the changed behavior removed needs stronger assertions.
+
+Skip tests that only copy field arrays, labels, renderer names, route literals,
+export names or source text. Check important configuration through its effect:
+a hidden action, a selected value, a navigable route or rejected access.
+Keep type tests at a changed type contract and framework tests at the framework
+owner. Ordinary modules need neither repeated framework CRUD matrices nor
+snapshots of component internals. Existing weak tests are not templates.
 
 ## Commands and environment
 

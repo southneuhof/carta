@@ -19,8 +19,8 @@
 
 ## Execution order and status
 
-| Plan | Observable result | Priority | Effort | Depends on | Status | Evidence |
-|---|---|---|---|---|---|---|
+| Plan | Observable result | Depends on | Status | Evidence |
+|---|---|---|---|---|
 
 ## Dependency notes
 

@@ -58,9 +58,10 @@ gaps rather than polishing ambiguous prose. An available independent reviewer
 can inspect the packet without the discovery conversation; otherwise perform
 and label a self-review. A heading check is not a semantic review.
 
-New material behavior requires user approval. Present a readable summary of the
-new decisions and the exact design revision, then record explicit approval and
-its source. Approval of unchanged decisions survives a revision; approval is
+The user request and confirmed decisions can establish approval. Record their
+source and scope. For a material product decision not yet authorized, present
+the proposed behavior and exact design revision for approval. Visual composition
+and routine technical choices within the requested result need no separate gate. Approval of unchanged decisions survives a revision; approval is
 not inferred from silence. Unresolved material decisions leave the design in
 `DRAFT` or `BLOCKED`, with their impact visible. A user can instead explicitly
 exclude the affected behavior from this delivery.

@@ -17,7 +17,7 @@ workflow changes the page body, not the page chrome.
 
 ## Header actions
 
-The header action region is right-aligned and uses `flex flex-row gap-2`.
+The header action region is right-aligned and normally uses `flex flex-row flex-wrap gap-2`.
 `ListView` exposes these adjacent slots in this order:
 
 1. `#create-action` is only for replacing the standard Create action. When the

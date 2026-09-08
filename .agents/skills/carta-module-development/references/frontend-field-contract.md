@@ -21,8 +21,6 @@ owns the normal input behavior. A module declares only its domain difference.
 - There is no public top-level field `read` or `write`.
 - Field `form.validate` replaces the renderer's default non-empty control-shape
   validation.
-- `form.write` is the only submit writer. If it is absent, submit keeps the
-  copied control value unchanged.
 
 ## Value and validation flow
 
@@ -106,41 +104,11 @@ The renderer/schema compatibility diagnostic skips its mismatch error only when
 the field has `form.write`. Keep compatibility metadata private to the
 framework.
 
-## Observed failure map
+## Check the boundary
 
-These failures occurred in prior agent work. Check them during planning and
-review.
-
-| Failure | Required correction |
-|---|---|
-| Every resource field schema was written as text | Derive each submitted type from the API contract and control. Do not use a string schema as a default template. |
-| Image or file objects became IDs in the frontend | Keep complete objects in the draft and request. Use backend `storedAssetInput` to extract IDs. |
-| A submit conversion replaced the live control value | Keep the control value in the live draft. Apply one field `form.write` to a shallow submit copy. |
-| An action wrote the full payload after field writers ran | Remove the action writer. Send the wire-ready input unchanged. |
-| A nested custom block wrote its owner and child fields | Keep one writer on the owning top-level field. |
-| Fields contained top-level `read` or `write` | Move display access to `display.read` and submit conversion to `form.write`. |
-| Users had to write identity readers or writers | Delete them. Omission is the identity path. |
-| Basic number, image, or lookup validation was copied into each field | Delete the copy. Use the renderer default unless a domain rule replaces it. |
-| A second hard-coded list of renderer names was added | Remove it. Use the existing renderer and input registries. |
-| App test doubles still read `field.read` from public field definitions | Update them to `field.display?.read`. Do not keep a compatibility branch. |
-| Search changed only `read:` definitions and missed `.read` calls | Search both definitions and direct property access before completion. |
-| A focused command reported success but skipped a named test file | Check the runner output for the requested file names and expected file/test counts. |
-| A helper command used `python` on a host that exposes only `python3` | Use the skill's `python3` commands. Do not assume a `python` alias exists. |
-
-## Review checks
-
-Use searches as review aids; read each match in context.
-
-```sh
-rg -n '\bread\s*:|\.read\b|\bwrite\s*:|\.write\b' apps/web packages/loom/src
-rg -n 'assetAdapter\.write|fileUrl\(' apps/web/src/framework apps/web/src/routes
-git diff --name-only -- apps/api
-git diff --check
-```
-
-The asset search must have no output. Expected module code uses `display.read`
-and uses `form.write` only for a proved non-asset submit conversion. Adapter
-methods such as `assetAdapter.read` are internal helpers, not field contract
-paths. Private framework schema metadata is allowed; module code must not
-depend on it. Run the plan's named focused tests and confirm the output lists
-those files.
+Trace one loaded value through the control, submit and stored result. For a
+changed conversion, check a value that differs across those stages. For a
+lookup, check a pre-filled selection and an invalid parent reference. For an
+asset, check that reload retains its preview and submit sends the canonical
+object. Use the [verification strategy](verification-strategy.md) to select
+checks; repeated assertions of field configuration do not prove this flow.

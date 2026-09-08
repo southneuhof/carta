@@ -1,62 +1,93 @@
-export type PermissionCode =
-  | "view-users"
-  | "list-users"
-  | "detail-users"
-  | "create-users"
-  | "update-users"
-  | "view-roles"
-  | "list-roles"
-  | "detail-roles"
-  | "create-roles"
-  | "update-roles"
-  | "delete-roles"
-  | "view-permissions"
-  | "list-permissions"
-  | "detail-permissions"
-  | "list-role-permissions"
-  | "create-role-permissions"
-  | "delete-role-permissions"
-  | "list-role-assignments"
-  | "create-role-assignments"
-  | "delete-role-assignments";
+export const targetTypes = ["global"] as const;
+
+export type TargetType = (typeof targetTypes)[number];
 
 type PermissionDefinition = {
-  code: PermissionCode;
+  code: string;
   name: string;
   description: string;
+  targetType: TargetType;
   active: true;
 };
 
-function permission(code: PermissionCode, name: string, description: string): PermissionDefinition {
-  return { code, name, description, active: true };
-}
+type ModuleDefinition = {
+  code: string;
+  name: string;
+  active: true;
+  permissions: readonly PermissionDefinition[];
+};
 
-export const permissions = [
-  permission("view-users", "View Users", "View user accounts."),
-  permission("list-users", "List Users", "List user accounts."),
-  permission("detail-users", "Detail Users", "View a user account."),
-  permission("create-users", "Create Users", "Create user accounts."),
-  permission("update-users", "Update Users", "Update user accounts."),
-  permission("view-roles", "View Roles", "View roles."),
-  permission("list-roles", "List Roles", "List roles."),
-  permission("detail-roles", "Detail Roles", "View a role."),
-  permission("create-roles", "Create Roles", "Create roles."),
-  permission("update-roles", "Update Roles", "Update roles."),
-  permission("delete-roles", "Delete Roles", "Delete roles."),
-  permission("view-permissions", "View Permissions", "View permissions."),
-  permission("list-permissions", "List Permissions", "List permissions."),
-  permission("detail-permissions", "Detail Permissions", "View a permission."),
-  permission("list-role-permissions", "List Role Permissions", "List a role's permissions."),
-  permission("create-role-permissions", "Grant Role Permission", "Grant a permission to a role."),
-  permission("delete-role-permissions", "Revoke Role Permission", "Revoke a permission from a role."),
-  permission("list-role-assignments", "List Role Assignments", "List a user's roles."),
-  permission("create-role-assignments", "Assign Role", "Assign a role to a user."),
-  permission("delete-role-assignments", "Unassign Role", "Remove a role from a user."),
-] as const satisfies readonly PermissionDefinition[];
+export const authorizationModules = [
+  {
+    code: "users",
+    name: "Users",
+    active: true,
+    permissions: [
+      { code: "view-users", name: "View Users", description: "View user accounts.", targetType: "global", active: true },
+      { code: "list-users", name: "List Users", description: "List user accounts.", targetType: "global", active: true },
+      { code: "detail-users", name: "Detail Users", description: "View a user account.", targetType: "global", active: true },
+      { code: "create-users", name: "Create Users", description: "Create user accounts.", targetType: "global", active: true },
+      { code: "update-users", name: "Update Users", description: "Update user accounts.", targetType: "global", active: true },
+    ],
+  },
+  {
+    code: "roles",
+    name: "Roles",
+    active: true,
+    permissions: [
+      { code: "view-roles", name: "View Roles", description: "View roles.", targetType: "global", active: true },
+      { code: "list-roles", name: "List Roles", description: "List roles.", targetType: "global", active: true },
+      { code: "detail-roles", name: "Detail Roles", description: "View a role.", targetType: "global", active: true },
+      { code: "create-roles", name: "Create Roles", description: "Create roles.", targetType: "global", active: true },
+      { code: "update-roles", name: "Update Roles", description: "Update roles.", targetType: "global", active: true },
+      { code: "delete-roles", name: "Delete Roles", description: "Delete roles.", targetType: "global", active: true },
+    ],
+  },
+  {
+    code: "permissions",
+    name: "Permissions",
+    active: true,
+    permissions: [
+      { code: "view-permissions", name: "View Permissions", description: "View permissions.", targetType: "global", active: true },
+      { code: "list-permissions", name: "List Permissions", description: "List permissions.", targetType: "global", active: true },
+      { code: "detail-permissions", name: "Detail Permissions", description: "View a permission.", targetType: "global", active: true },
+    ],
+  },
+  {
+    code: "role-permissions",
+    name: "Role Permissions",
+    active: true,
+    permissions: [
+      { code: "list-role-permissions", name: "List Role Permissions", description: "List a role's permissions.", targetType: "global", active: true },
+      { code: "create-role-permissions", name: "Grant Role Permission", description: "Grant a permission to a role.", targetType: "global", active: true },
+      { code: "delete-role-permissions", name: "Revoke Role Permission", description: "Revoke a permission from a role.", targetType: "global", active: true },
+    ],
+  },
+  {
+    code: "role-assignments",
+    name: "Role Assignments",
+    active: true,
+    permissions: [
+      { code: "list-role-assignments", name: "List Role Assignments", description: "List a user's roles.", targetType: "global", active: true },
+      { code: "create-role-assignments", name: "Assign Role", description: "Assign a role to a user.", targetType: "global", active: true },
+      { code: "delete-role-assignments", name: "Unassign Role", description: "Remove a role from a user.", targetType: "global", active: true },
+    ],
+  },
+] as const satisfies readonly ModuleDefinition[];
+
+export type AuthorizationModuleCode = (typeof authorizationModules)[number]["code"];
+export type PermissionCode = (typeof authorizationModules)[number]["permissions"][number]["code"];
 
 export const permissionByCode = Object.freeze(
-  Object.fromEntries(permissions.map((item) => [item.code, { permission: item }])) as Record<
+  Object.fromEntries(
+    authorizationModules.flatMap((module) =>
+      module.permissions.map((permission) => [permission.code, { module, permission }]),
+    ),
+  ) as Record<
     PermissionCode,
-    { permission: PermissionDefinition }
+    {
+      module: (typeof authorizationModules)[number];
+      permission: (typeof authorizationModules)[number]["permissions"][number];
+    }
   >,
 );

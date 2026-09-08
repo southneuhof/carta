@@ -1,6 +1,6 @@
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import { getDb } from '../src/db'
-import { permissions as catalogPermissions, type PermissionCode } from '../src/authorization/catalog'
+import { authorizationModules, type PermissionCode } from '../src/authorization/catalog'
 import { createAuth } from '../src/routes/auth/auth'
 import { accounts } from '../src/routes/auth/auth.entity'
 import { permissions, rolePermissions, roleAssignments, roles } from '../src/routes/roles/roles.entity'
@@ -11,6 +11,8 @@ const seedPassword = process.env.CARTA_ADMIN_PASSWORD ?? 'demo-password'
 
 /** Stable non-login actor used by all public customer-feedback writes. */
 const PUBLIC_INTAKE_USER_ID = 'public-intake-user'
+type CatalogPermission = (typeof authorizationModules)[number]['permissions'][number]
+const catalogPermissions = authorizationModules.flatMap((module) => [...module.permissions]) as CatalogPermission[]
 
 export async function seedPublicIntakeUser(): Promise<string> {
   const db = getDb()

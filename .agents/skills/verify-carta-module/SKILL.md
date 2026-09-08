@@ -49,6 +49,11 @@ Read the applicable layer contracts:
   changed reads/invalidation;
 - `$api-conventions`, `$web-ui-surfaces` and `$build-resource-form` for their layers.
 
+Check whether each added layer owns behavior: a service owns a transaction or
+business operation; an adapter owns a boundary; a type adds a contract that
+inference cannot express. Report forwarding wrappers, duplicate state and
+repeated validation where direct use preserves the required behavior.
+
 ## Evaluate evidence
 
 Inspect test assertions and selected cases, commands, input fingerprints,

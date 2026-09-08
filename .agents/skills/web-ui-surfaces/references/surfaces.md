@@ -20,11 +20,11 @@ collections.
 
 ## Standard resource path
 
-Resource actions are independent. Match the actions proved by legacy and the
-approved design; a standard resource does not need all CRUD actions. Omit an
-unsupported action and its route. Do not add update because create exists, and
-do not replace a supported route-based action with a modal. Each supported
-standard create or update action uses its own `FormView` route.
+Resource actions are independent. Expose the actions required by the task;
+a resource does not need all CRUD actions. Use `FormView` for independent
+create/update pages and `DialogForm` for short contextual edits when these
+fit the requested flow. Preserve existing route access unless it changes
+within the user request.
 
 Use the module schema, one field catalog, and the app Hono adapter:
 
@@ -108,7 +108,8 @@ For a tree or other surface outside standard Views:
 - Use `errorMessage(error, fallback)` from the app normalization adapter.
 
 Keep server-derived record actions or `allowedOperations` as the record-level
-authority. API authorization still runs on submit.
+authority. API authorization still runs on submit. Each delete action declares its
+permission or explicit `null`; each destructive control confirms the action.
 
 ## Filters and tabs
 
@@ -116,3 +117,17 @@ Follow `docs/ui/collections.md`. Keep query state route-local. Use
 `ChipFilter` for a collection query and state its optional or required
 selection contract. Use framework `Tabs` for one selected local surface or
 presentation. Use the app routing Tabs component for route navigation.
+
+## Collection content
+
+Choose columns that help users identify, compare, and act on records. Keep the
+primary name or reference easy to find; show status and relevant dates next.
+Use detail pages for long prose and secondary audit fields. Use cards when
+images or summaries aid scanning; do not add a view switch without that need.
+
+Keep search, filters, sorting, and paging in the collection query. Preserve
+unrelated query keys when one filter changes and reset the page to one. A
+local presentation switch preserves that query. Use the existing namespaced
+URL adapter so sibling lists do not collide and shared links restore state;
+query refinements normally replace the current URL. For a nested list, include its
+parent in source parameters and cache identity; the server enforces the scope.

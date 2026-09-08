@@ -7,9 +7,9 @@ outcomes; the plan names the cases and data that demonstrate them.
 
 Use focused Playwright cases with named steps that map to acceptance IDs.
 Split independent scenarios when it improves isolation; neither one giant test
-nor a fixed number of journeys is required. Verify each required route/action,
-including parent-owned child surfaces when applicable. Exercise changed create,
-update and workflow interactions through the visible authenticated UI, then
+nor a fixed number of journeys is required. Cover the interactions selected by the
+[verification strategy](verification-strategy.md), including child navigation
+when it changes. Exercise those actions through the visible authenticated UI, then
 verify the persisted outcome by reload or navigation. API setup can create
 fixtures; it does not replace the interaction being tested.
 
@@ -24,6 +24,12 @@ Confirm target configuration and service health. Use the package's Playwright
 configuration and supported setup; it owns ports, projects, report paths and
 server lifecycle. A development-only visual inspection does not establish the
 required automated journey.
+
+Use role and accessible-name locators, then stable test IDs when needed.
+Select named fixture records; avoid the first arbitrary row. Fix the clock or
+provide explicit dates for time-sensitive behavior. Wait for an observable
+result, not a fixed delay. Keep test data isolated and cleanup tied to returned
+record IDs, including after a failed assertion.
 
 ## Evidence and diagnosis
 

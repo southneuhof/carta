@@ -10,7 +10,7 @@ standard empty state is the application empty state.
 
 A custom collection slot receives only ready, non-empty records. It changes
 record presentation and does not replace loading, error, or empty content.
-Card collections use `gap-2`.
+Start card collections with `gap-2`; adjust for content and available width.
 
 ## Table and card views
 

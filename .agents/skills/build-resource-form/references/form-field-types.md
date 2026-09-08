@@ -6,38 +6,10 @@ decision.
 The live renderer keys and app adapters are in:
 
 - `packages/loom/src/renderers/form.ts`
-- `apps/web/src/routes/(demo)/input-catalog/inputCatalogDemo.ts`
 - `apps/web/src/framework/inputs/registry.ts`
 
-The source files are authoritative when this manifest and the runtime differ.
+Use an input catalog if the app has one. The source files are authoritative when this manifest and the runtime differ.
 Do not create a second renderer list in application code.
-
-## Field contract
-
-The public field paths are `display.read` for display access and `form.write`
-for submit conversion:
-
-```ts
-const fields = defineFields(schema, {
-  divisionId: {
-    label: 'Division',
-    display: { read: (record) => record.division?.name },
-    form: {
-      renderer: 'lookup',
-      source: divisions,
-      props: { pick: 'id', view: 'name', required: true },
-    },
-  },
-})
-```
-
-Omit identity readers and writers. Use `form.write` only when the control value
-and API value have different proved shapes. File and image fields keep the
-complete asset object and do not use a field writer.
-
-Use `source` for a static array or an owner resource. Use `pick` for the write
-value, `view` for the visible label, and `searchParameters` for server filters.
-Database-backed relations use the owner resource `list` and `detail` actions.
 
 ## Text and numeric values
 
@@ -62,15 +34,16 @@ Use `text` with a native `type` only when the form contract still owns a string.
 | `select` | A compact closed choice set | scalar or array; `source`, `pick`, `view`, `multi`, `searchable`, `clearable` |
 | `radio` | A small exclusive set that must stay visible | scalar; `source`, `pick`, `view`, `variant`, `direction` |
 | `checkbox` | One boolean agreement or flag | boolean; `required` |
-| `switch` | One immediate on/off state | boolean; `required` |
+| `switch` | One on/off value | boolean; `required` |
 | `checkbox-group` | A small visible multi-choice set | array; `source`, `pick`, `view`, `searchParameters` |
 | `lookup` | A searchable database-backed relation | scalar ID or code; owner resource `source`, `pick`, `view`, `searchParameters` |
 
 Use a static source only for a small closed set owned by the form contract. Use
 `lookup` for database rows and parent-filtered relations. The owner resource
 must expose `list` and `detail`, and both actions must return the selected
-identity and label. A multi lookup keeps the selected record array and uses the
-schema helper required by the current frontend field contract.
+identity and label. A multi lookup or select uses `selectionValues(exactItemSchema)` and keeps the
+selected record array. A switch inside a form edits the draft; it does not
+write immediately unless that interaction is explicitly implemented.
 
 ## Date and time values
 

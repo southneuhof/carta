@@ -1,87 +1,56 @@
 ---
 name: web-ui-surfaces
-description: Use when implementing or reviewing Carta apps/web lists, details, forms, dialogs, actions, filters, and route layouts.
+description: Build or review Carta web pages, app navigation, collections, record details, and workflow controls.
 ---
 
 # Web UI surfaces
 
-Use this skill for `apps/web` UI work.
+Use Carta's page shells and controls as the starting point. Adapt content,
+density, and layout to the user's task. Consistency comes from shared controls,
+clear hierarchy, and predictable behavior, not identical pages.
 
-When a parent module design already approves the relevant behavior or framework
-boundary, use that recorded authority. Return only newly exposed material gaps
-to `$carta-module-design`; routine technical implementation needs no new product
-approval. Use the parent plan's proof obligations and the shared
-[verification strategy](../carta-module-development/references/verification-strategy.md)
-for module work rather than adding another verification loop.
+## Find the current boundary
 
-## Discover before edits
+Read `docs/architecture/web-application-architecture.md`, `docs/ui/README.md`,
+and the UI branch for the changed surface. Inspect its route, schema, resource,
+app adapter, and the relevant Loom exports. For a new app surface, inspect
+`apps/web/src/main.ts`, app defaults, navigation manifest, and authenticated
+layout before adding another owner for them.
 
-Read:
+Use nearby modules as evidence, then check their pattern against the current
+public API. Copy neither obsolete contracts nor unnecessary layers. Keep
+framework changes within explicit user scope; compose supported controls
+locally when the requested behavior needs a custom body.
 
-- `docs/ui/README.md`, then each UI contract branch named for the changed
-  surface;
-- `docs/architecture/web-application-architecture.md`
-- `packages/loom/README.md`
-- the owning schema, resource or actions file, route, and focused tests
+## Choose and build
 
-Then search framework exports and `apps/web/src/framework` for the needed
-surface or behavior. Use nearby routes only for domain evidence. The UI
-contract owns visual structure and interaction.
+| Work | Read |
+| --- | --- |
+| New page, app shell, navigation, visual hierarchy, responsive layout | [App conventions](references/app-conventions.md) |
+| Lists, cards, filters, actions, dialogs | [Surfaces](references/surfaces.md) |
+| Workflow detail, history, related records | [Detail layout](references/detail-layout.md) |
+| Display fields and relation labels | [Fields](references/fields.md) |
+| Form values, sources, dependencies, child editing | [Build resource forms](../build-resource-form/SKILL.md) |
 
-Record this before route edits:
+Routes own URLs, query state, navigation, dialogs, and workflow feedback.
+Schemas own data validation. A resource owns standard actions and one shared
+field catalog. Pass the returned action directly to its View:
 
-```text
-Route/surface: <exact route and list/detail/row/form/custom surface>
-Requirement: <UI contract pattern, visible behavior, and actions>
-Reused: <resource API, component, renderer, slot, or app helper>
-Searched: <framework and app paths>
-Gap: <None, or the exact missing capability>
+```vue
+<ListView v-bind="records.list()" />
+<DetailView v-bind="records.detail({ id })" />
+<FormView v-bind="records.create()" />
+<FormView v-bind="records.update({ id })" />
 ```
 
-When the framework lacks a UI contract capability, record
-`framework-gap: <capability>`. Use the parent plan’s explicit authority for
-an approved extension; otherwise obtain owner approval before a substitute or
-framework edit.
+Use `createHonoResourceActions(rpc.<module>)` for standard transport. It already
+normalizes responses. Keep custom transport in app actions, with a typed
+`{ run }` resource action when needed. Routes do not call raw RPC endpoints.
+A file or wrapper earns its place when it owns behavior; simple standard
+resources can call the adapter directly without a separate actions file.
 
-## Select the surface
+## Check the result
 
-- Standard CRUD: `defineSchema` + `defineFields` + `defineResource`, then
-  `ListView`, `DetailView`, or `FormView` with the standard action prop bag.
-- Custom collection or record: use `Table`, `Detail`, `Form`, and existing
-  composite or base components.
-- Workflow detail: use the route-owned layout in
-  [references/detail-layout.md](references/detail-layout.md).
-
-Read [references/surfaces.md](references/surfaces.md) for resource actions,
-collection slots, action overrides, custom-surface permissions, dialogs, and
-filters. Read [references/fields.md](references/fields.md) when fields, forms,
-relations, or dependent lookups change.
-
-## Hard rules
-
-1. Routes own URLs, query state, navigation, dialogs, confirmations, toasts,
-   and workflows. Change only the named surface; do not remove an action from
-   another surface. Route components do not call raw RPC endpoints.
-2. Schemas own standard record, query, create, and update validation. Use
-   `fromZod(schema)` with no caller-supplied output type.
-3. Resources own standard actions and fields. Use
-   `createHonoResourceActions(rpc.<module>)`; response normalization is already
-   owned by that app adapter. Custom actions expose only `{ run }`.
-4. The standard action object is both the View prop bag and the execution path:
-   `v-bind="resource.list()"` and `resource.update({ id }).run(input)`. Do not
-   rebuild a prop bag or add an operations mirror.
-5. Every declared delete action has an explicit permission string or explicit
-   `null`. Every destructive control uses a confirmation.
-6. Standard actions invalidate their resource automatically. After a custom
-   action, await `resource.invalidate({ id })` or `resource.invalidate()`.
-7. Use generated file-route names in resources and the typed navigation
-   manifest. Do not invent route names or create route folder barrel files.
-8. Use the UI contract and existing framework component for layout, copy,
-   fields, collection states, and actions. A proved domain workflow can add
-   minimum route-local composition. A framework gap needs user approval before
-   any framework or local substitute change.
-
-## Verify
-
-Read [references/verification.md](references/verification.md). A user-facing
-change is not complete until its focused Playwright journey passes.
+Use [verification](references/verification.md). Report visible behavior checked,
+failed checks, and any unverified result. Reuse the parent module's evidence;
+do not start a second verification process.

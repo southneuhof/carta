@@ -89,6 +89,31 @@ test('integrates all owner files, reports paths, and is idempotent', () => {
   assert.deepEqual(second.pending, [])
 })
 
+test('integrates a grouped authorization module catalog', () => {
+  const root = fixture()
+  const path = join(root, 'apps/api/src/authorization/catalog.ts')
+  writeFileSync(path, `export const authorizationModules = [
+  {
+    code: 'users',
+    name: 'Users',
+    active: true,
+    permissions: [
+      { code: 'list-users', name: 'List Users', description: 'List users.', targetType: 'global', active: true },
+    ],
+  },
+] as const
+
+export type PermissionCode = (typeof authorizationModules)[number]['permissions'][number]['code']
+`)
+
+  assert.equal(integrate(config(), { root, apply: true }).status, 'APPLIED')
+  assert.equal(integrate(config(), { root, apply: true }).status, 'UP_TO_DATE')
+  const catalog = readFileSync(path, 'utf8')
+  assert.equal((catalog.match(/code: 'test-catalog'/g) ?? []).length, 1)
+  assert.equal((catalog.match(/code: 'list-test-catalog'/g) ?? []).length, 1)
+  assert.match(catalog, /targetType: 'global'/)
+})
+
 test('places an entry after its anchor inside an existing separator', () => {
   const root = fixture()
   const navigationPath = join(root, 'apps/web/src/manifest/navigation.ts')

@@ -1,54 +1,27 @@
-# Verification
+# UI verification
 
-## Focused automated checks
+Use the shared [verification strategy](../../carta-module-development/references/verification-strategy.md)
+for test selection and completion evidence. Read current package scripts for
+commands; run the relevant type check, lint, and existing focused checks.
 
-Run checks for the changed module first:
+Choose tests by failure risk, not by file count:
 
-```sh
-pnpm --filter @southneuhof/framework-web test:focused -- <route-or-resource-spec>
-pnpm --filter @southneuhof/framework-web type-check
-pnpm --filter @southneuhof/framework-web lint:focused -- <changed-files>
-git diff --check
-```
+- A dependency test changes the parent, proves the stale child is cleared, and
+  checks the submitted value. Calling the behavior function alone misses wiring.
+- A workflow test opens the action, submits its input, observes the saved state,
+  and proves the next allowed action changed.
+- A custom collection test checks that switching presentation keeps its query
+  and actions. Do not repeat the framework's table test suite in every module.
+- A route or permission test proves direct entry or a real denied action;
+  comparing route objects and field-name arrays is not sufficient evidence.
 
-When resource route names or navigation change, also run the route-resource
-boundary and manifest specs. Run framework package tests only when approved
-framework code changed.
+Use a focused browser journey for changed interaction or integration that
+smaller tests cannot establish. Use isolated test data. Assert the visible
+result and, for writes, persistence after reload. Use accessible locators and
+observable state rather than sleeps or DOM structure snapshots.
 
-Select broader checks from affected dependencies and failure evidence. A shared
-resource/API boundary can require consumer checks even when its own tests pass.
-For module work, reuse current evidence and applicability decisions from the
-parent verification strategy; these checks are not a separate repeated gate.
-
-## Focused Playwright gate
-
-For every changed route, verify the real authenticated flow in its focused
-Playwright journey:
-
-- The control is on the intended list, detail, row, form, or custom surface.
-- The page shell, action slots, action alignment, copy, spacing, field labels,
-  and collection states match the applicable `docs/ui` contract.
-- Other surfaces keep their intended controls.
-- First load, empty, loading, error, success, and reload states are correct as
-  applicable.
-- Create or update submits all required visible fields.
-- Permission and server record capability hide or show actions correctly.
-- Destructive actions confirm, report errors, refresh data, and do not show
-  duplicate controls.
-- Custom actions invalidate and reload the affected collection or record.
-- Keyboard focus, labels, and accessible names are usable.
-
-Use the fixed E2E fixture and isolated E2E database and storage. If the focused
-journey cannot run or does not pass, report `BLOCKED` or `REWORK`. Do not report
-completion. Do not substitute another UI evidence method.
-
-## Final evidence
-
-Report:
-
-```text
-Reused: <exact resource API, component, renderer, slot, or app helper>
-Searched: <framework and app paths>
-Gap: <None or exact missing capability>
-Checks: <focused test, type-check, lint, diff check, focused Playwright report>
-```
+Inspect meaningful UI changes at wide and narrow widths, including keyboard
+access, long content, empty/error states, and dialogs as applicable. Visual
+inspection and functional tests answer different questions. State exactly
+which ran. If required browser evidence is unavailable, report that gap; a
+passing type check does not establish the interaction.

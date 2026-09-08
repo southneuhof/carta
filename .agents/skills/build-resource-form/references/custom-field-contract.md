@@ -9,7 +9,7 @@ renderer or composite expresses the value.
 
 The outer framework form field owns the label, required state, error, help
 text, and grid span. The custom component owns one domain value and its control
-layout. It renders no second field label or form-level narrative.
+layout. Keep the outer field as the single label owner.
 
 Use the form field slot `input:<field-key>` for one-form use. Consume the
 slot's `value`, `setValue`, `disabled`, `error`, and draft context. Keep one
@@ -23,7 +23,8 @@ boundary.
 
 Compose registered framework inputs and composites. Existing controls continue
 to own selection, upload, date, number, disabled, error, and accessibility
-behavior. The custom component owns only the domain layout, conditional
+behavior. Forward the field ID and accessible description to the actual
+control; emit the touch event expected by the form. The custom component owns only the domain layout, conditional
 sections, and coordination that no selected renderer or composite expresses.
 
 An editable row array uses `TableInput`. A custom field can compose
@@ -35,5 +36,5 @@ Add one focused component or form test that proves:
 
 - the complete domain value moves through the owning form field;
 - disabled and error state reaches each applicable control;
-- the outer field renders the only visible label; and
+- the visible label identifies the editable control; and
 - the submitted value matches the schema contract.

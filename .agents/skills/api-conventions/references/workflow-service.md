@@ -1,66 +1,70 @@
-# Workflow service
+# Workflow services
 
-Use for state machines, child-row writes, or cross-module transactions. Follow
-`apps/api/src/routes/quality-inspection/`.
+Use a service function when a business operation owns several writes, a state
+transition, or a transaction shared with another module. Keep simple factory
+configuration in the model. Avoid a service that only forwards unchanged args.
 
-Keep canonical read or write surfaces on their matching factories when hooks
-or `run` can express them. Add a custom `defineRoute` only for the workflow
-action whose HTTP contract is different, and mark it with
-`// CUSTOM SURFACE — <reason>`.
+## Transaction boundary
 
-## Routes stay thin
+A route resolves identity, validates transport input, and calls the operation.
+Keep canonical HTTP contracts on factory `run`; use custom routes for distinct
+actions. Import `Db`, `Tx`, or `DbOrTx` from `src/db.ts` as needed. A function
+called inside a transaction uses the supplied `tx`, not a fresh `getDb()`.
 
-`<name>.routes.ts` can resolve identity, parse input, and call one service
-function. It must not contain Drizzle writes. Factory `enrich` hooks can read
-extra domain data for a response.
+For a transition:
 
-- Static permission: `authorize: [requirePermission('<code>')]`.
-- Custom action permissions use the URL action segment as the verb and the
-  exact code from the module permission matrix. See [standard-crud.md](standard-crud.md).
-- Session with record-dependent permission: `authorize: [authenticated()]`.
-  The service checks coverage or permission after it loads the record.
-- Body: `schema.parse(await readJsonBody(c))`.
-- Path: `requirePathParam(args, 'id')`.
-- Success: return `{ data }`. Use `created(args.c, data)` only for 201.
+1. Establish the caller and static permission before business writes.
+2. Start one transaction. Load and lock the live parent with
+   `lockRow(tx, table, id)`. Check record access before reporting its state.
+3. Check record-dependent permission, then transition state, against the locked
+   record. Return 404 for an inaccessible record before a state conflict can
+   reveal it. A pre-transaction access read is not sufficient when ownership can
+   change. Use `lockRow`'s `require` option only when access is already secured;
+   it raises 409 `invalid_transition` before returning the row. Validate child
+   membership and mutable related-record requirements in this transaction.
+4. Write parent, children, and required database history together. Stamp custom
+   writes and child audit fields explicitly; the constructor does not stamp
+   arbitrary service writes.
+5. Return the required record. Read transaction-consistent data before commit
+   when the response must describe exactly this write. A post-commit read can
+   include another caller's later change; use it only when that is acceptable.
 
-Do not use `c.req.json().catch(...)`, repeat path guards, or build 200 JSON
-responses by hand.
+Lock children when their state is independently mutable. Use a consistent lock
+order for operations that lock several rows. Use database constraints for
+uniqueness under concurrent writes; a prior existence query is not a guarantee.
 
-## Services own business changes
+Pass the same transaction into an existing cross-module operation. Add a
+transaction-taking function only when a caller needs that composition. Avoid
+nested independent transactions and layers of one-call forwarding functions.
 
-Use the applicable `Db`, `Tx`, or `DbOrTx` type from `src/db.ts`; never replace
-these types with `any`. Keep permission codes in typed constants. Each use case
-follows this shape:
+## State and children
 
-1. Check the caller's permission or coverage.
-2. Parse the use-case input.
-3. Start one transaction.
-4. Use `lockRow(tx, table, id, { require, failMessage })` before branching on
-   the parent state.
-5. Write child and parent rows in the transaction.
-6. Append activity with one module-local `logFor(moduleName, referenceTable)`
-   partial.
-7. After commit, load and return the complete record when the contract needs
-   relations or derived fields.
+- Put transition rules at the write boundary. An `allowedOperations` response
+  helps the UI; it never authorizes the next request. Recheck permission and
+  state when the user acts.
+- Keep old state checks out of routes when the locked service already owns them.
+  Use field validation errors for input errors, 404 for missing/inaccessible
+  records, and conflict errors for competing or invalid state changes.
+- For child edits, validate the child's parent and ownership. Define whether an
+  omitted collection means unchanged and an empty collection means clear.
+- Replace a child collection only when child identity and history are disposable.
+  Otherwise update by stable IDs, insert additions, and delete explicit removals.
+- Snapshot related data only when later source edits must not change the record's
+  meaning. Persist the required snapshot, not a second copy of every relation.
+- Repeated actions need an explicit outcome: reject, return the existing result,
+  or apply once. Use a unique key or locked state for apply-once behavior. Add a
+  queue or outbox only when required delivery or retries justify it.
 
-Use 409 `invalid_transition` for state conflicts, `validationError` for input
-or domain validation, and `notFound` for missing records. `lockRow` already
-checks liveness and the supplied parent-state condition. Do not repeat its
-`FOR UPDATE`, missing-row, or state checks. Lock a child row separately only
-when the use case also branches on that child's state.
+Database rollback does not reverse an object upload, email, or other remote
+write. Keep remote work outside the lock where possible and define failure
+handling for the required effect. Do not mark an action successful before a
+required effect is secured.
 
-For soft delete, use `softDeleteValues` inside the transaction. For a write
-into another module, call that module's existing transaction-first service
-function so both changes commit together.
+## Proof
 
-The constructor `dataWrite` hook does not run for custom routes. Stamp audit
-columns explicitly for child rows and other true custom writes inside the same
-transaction.
-
-## Focused checks
-
-Test allowed and denied permission paths and the state transitions that this
-module owns. Use the shared session and project fixtures from `src/testing`.
-Run the module-scoped spec with `test:focused -- <spec>`. Do not run the full
-API suite unless the change crosses modules or the focused result shows that
-risk.
+For a changed transition, test its valid source state and a rejected state;
+assert parent, child, and history effects. Force a child failure to prove rollback
+when atomicity is the new behavior. Test a foreign child's ID to prove membership
+checks. Use two real concurrent transactions when correctness depends on a lock
+or uniqueness race; sleeps do not prove ordering. Keep these checks focused on
+rules the module owns.

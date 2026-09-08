@@ -1,42 +1,36 @@
 # Workflow detail layout
 
-Use `DetailView` for a standard detail page. Use this route-owned layout only
-when a workflow needs cards, child tables, history, or workflow dialogs.
-Read `docs/ui/surfaces.md` for the page chrome and action contract.
+Use `DetailView` for ordinary record display. Compose `NavigationHeader`,
+`Detail`, cards, child tables, attachments, and history when the task needs
+several sections. Keep the record summary first. A main/sidebar grid is useful
+when short workflow controls sit beside long content; a single column is also
+valid. Do not duplicate the same attachments or fields in several sections.
 
-## Data loading
+## Loading and updates
 
-Start from the resource detail action. Use its namespace, identity, search
-parameters, and run function with `recordKey` and `useLoader`. Do not call RPC
-or create a second normalization path in the route.
+Start from `resource.detail({ id })`. For a custom loader, pass the returned
+namespace, identity, search parameters, and run function to `recordKey` and
+`useLoader`. Preserve inferred record types. Keep identity and cache context
+reactive if the router reuses the component for another record.
 
-After a successful custom action, await `resource.invalidate({ id })`, then
-refresh the active loader. Keep errors visible through
-`errorMessage(error, fallback)`.
-
-## Page structure
-
-- `NavigationHeader` owns title, status, subtitle, back navigation, and top
-  controls.
-- Use a responsive main/sidebar grid. Main content has record and history
-  cards. The sidebar has only current workflow actions.
-- Use framework `Card`, `Detail`, `Table`, `Timeline`, `DialogForm`,
-  `ConfirmationDialog`, `Tooltip`, and base components.
-- Loading uses `role="status"`; errors use `role="alert"`.
-
-Use the spacing and component pattern from the UI contract. Use another
-workflow detail only as domain evidence.
+Standard writes invalidate their resource. After a custom write, await the
+resource invalidation described in the shared
+[cache contract](../../carta-module-development/references/web-query-cache.md).
+Check whether the active custom loader needs an explicit refresh. Do not add
+both broad and record invalidation without checking what each already covers.
+Refresh related resources only when their displayed data changed.
 
 ## Actions
 
-- Put data actions such as Edit and Delete in the standard header resource
-  action region.
-- Show only server-derived workflow actions for the loaded record.
-- Keep Delete out of the workflow-action group.
-- Use icon buttons with `aria-label` and `Tooltip` for top controls.
-- Every destructive or closing action uses a confirmation.
-- Use `DialogForm` for action input. Pass a resource or action `{ run }` bag
-  directly when available.
+Keep Edit and Delete in the record action region. Group workflow actions by
+purpose and show only actions allowed for the current record. Use server
+capabilities for record decisions, and repeat authorization on submit.
 
-Add workflow instructions only when the approved design proves that the
-controls and their states cannot communicate the rule.
+Use `DialogForm` for a short contextual action. Each action has its own input
+schema and field set. If the clicked action fixes a value, do not ask for that
+value again. Use `FormView` for an independent or long form.
+
+Use `useConfirmDelete` and `ConfirmationDialog` for a custom delete control.
+On success, navigate to a valid parent. Keep load and write failures visible
+through the existing error formatter. A custom body must supply loading,
+error, unavailable-record, and retry behavior that a standard View would own.

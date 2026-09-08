@@ -40,6 +40,12 @@ function requireUniqueText(contents, text, checks, name) {
   checks.push({ name, status: occurrences === 1 ? 'PASS' : 'FAIL', detail: `${text} (${occurrences} occurrences)` })
 }
 
+function requireUniquePattern(contents, pattern, checks, name, detail) {
+  if (contents === null) return
+  const occurrences = [...contents.matchAll(pattern)].length
+  checks.push({ name, status: occurrences === 1 ? 'PASS' : 'FAIL', detail: `${detail} (${occurrences} occurrences)` })
+}
+
 function staticVerify(config, { root = repoRoot } = {}) {
   const outputRoot = resolve(root)
   const metadata = moduleMetadata(config)
@@ -59,7 +65,8 @@ function staticVerify(config, { root = repoRoot } = {}) {
   const catalog = read(resolve(outputRoot, 'apps/api/src/authorization/catalog.ts'), checks, 'authorization catalog')
   if (catalog !== null) {
     for (const action of ['list', 'detail', 'create', 'update', 'delete']) {
-      requireUniqueText(catalog, `permission('${metadata.permissions[action]}',`, checks, `permission definition ${metadata.permissions[action]}`)
+      const code = metadata.permissions[action]
+      requireUniquePattern(catalog, new RegExp(`\\{\\s*code:\\s*['"]${code}['"],`, 'g'), checks, `permission definition ${code}`, code)
     }
   }
   try {

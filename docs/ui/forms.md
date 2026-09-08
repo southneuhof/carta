@@ -11,7 +11,7 @@ or `DialogForm` only inside a surface that is not an independent page.
 
 The form action region is bottom-right. Its standard submit label is `Submit`.
 `Form`, `FormView`, `DialogForm`, and form composites use the framework UI
-default unless an approved workflow requires another label.
+default unless an action-specific label makes the result clearer.
 
 ## Field defaults
 
@@ -46,14 +46,11 @@ Use the first option that expresses the complete value contract:
 4. A module-owned custom field composed from framework inputs.
 5. A new framework primitive after an approved framework gap.
 
-The selection decision ends at step 4. After selecting a custom field, read
-the custom field contract from the `build-resource-form` skill in
-`southneuhof/skills`
-(`npx skills@latest add southneuhof/skills --skill build-resource-form`)
-for its implementation contract.
+After selecting a custom field, read the local
+[custom field contract](../../.agents/skills/build-resource-form/references/custom-field-contract.md).
 
 ## Custom form pages
 
-A custom body does not change the page shell, action alignment, submit label,
-field-label ownership, or renderer selection rules. Compose the minimum domain
-layout inside the standard form surface.
+Keep the standard page shell and field-label ownership for a custom body.
+Compose the needed layout inside it; choose action text and alignment that keep
+the next step clear at the available width.
