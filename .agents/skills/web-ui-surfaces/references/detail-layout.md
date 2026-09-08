@@ -5,6 +5,8 @@ Use `DetailView` for ordinary record display. Compose `NavigationHeader`,
 several sections. Keep the record summary first. A main/sidebar grid is useful
 when short workflow controls sit beside long content; a single column is also
 valid. Do not duplicate the same attachments or fields in several sections.
+Use the [file-routing convention](file-routing.md) when a detail page owns
+child routes, tabs, or Back behavior.
 
 ## Loading and updates
 

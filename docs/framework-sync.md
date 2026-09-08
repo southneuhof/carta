@@ -12,6 +12,9 @@ inventory, and `.env` files never go upstream.
 | Shared tooling: `turbo.json`, `tsconfig.base.json`, `pnpm-workspace.yaml`, `.github/workflows` | `plans/`, `docs/` project inventory |
 | Skills live separately at `southneuhof/skills` (`skills/<name>/`) | `.env`, `.env.test`, `.env.e2e` secrets |
 
+Router integration under `apps/web` is project-owned. A routing convention
+change needs a separate reviewed adoption in each project.
+
 ## Start a project from Carta
 
 ```sh

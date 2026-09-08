@@ -85,6 +85,12 @@ loading, empty, error and denied states. Identify confirmation and successful
 submission behavior, reload/persistence expectations, dependent lookups, and
 which lists/details/reports refresh after mutation.
 
+For nested navigation, state which parent pages remain visible and where page
+Back returns. Use the defaults in the
+[file-routing convention](../../web-ui-surfaces/references/file-routing.md)
+unless the required behavior differs. File placement is a planning decision;
+an existing data relationship alone does not determine the visible parent chain.
+
 For a UI reference, say which elements are authoritative (content, interaction,
 layout or styling). Use the existing Carta design system for delegated visual
 detail. Headless changes instead state their API or consumer-facing contract.

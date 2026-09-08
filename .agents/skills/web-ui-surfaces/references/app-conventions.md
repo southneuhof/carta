@@ -15,6 +15,8 @@ application needs them.
 Use the typed navigation manifest for menu labels, groups, order, routes, and
 permission visibility. Use generated route names for links. Derive breadcrumbs
 and active navigation from routing data; do not maintain parallel URL maps.
+Use the [file-routing convention](file-routing.md) for retained parents and
+replacement pages.
 Keep navigation available on direct entry to nested routes. Hide empty groups.
 The API still checks access when a hidden page is requested directly.
 

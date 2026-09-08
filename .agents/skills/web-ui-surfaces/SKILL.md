@@ -1,6 +1,6 @@
 ---
 name: web-ui-surfaces
-description: Build or review Carta web pages, app navigation, collections, record details, and workflow controls.
+description: Build or review Carta web pages, nested file routes, app navigation, collections, record details, and workflow controls.
 ---
 
 # Web UI surfaces
@@ -27,6 +27,7 @@ locally when the requested behavior needs a custom body.
 | Work | Read |
 | --- | --- |
 | New page, app shell, navigation, visual hierarchy, responsive layout | [App conventions](references/app-conventions.md) |
+| File routes, nested parents, tabs, Back, route lifecycle | [File routing](references/file-routing.md) |
 | Lists, cards, filters, actions, dialogs | [Surfaces](references/surfaces.md) |
 | Workflow detail, history, related records | [Detail layout](references/detail-layout.md) |
 | Display fields and relation labels | [Fields](references/fields.md) |

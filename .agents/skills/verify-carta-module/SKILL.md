@@ -47,6 +47,8 @@ Read the applicable layer contracts:
   for resources/forms;
 - [query cache](../carta-module-development/references/web-query-cache.md) for
   changed reads/invalidation;
+- [file routing](../web-ui-surfaces/references/file-routing.md) for changed route
+  structure, tabs, Back targets, or page lifetime;
 - `$api-conventions`, `$web-ui-surfaces` and `$build-resource-form` for their layers.
 
 Check whether each added layer owns behavior: a service owns a transaction or

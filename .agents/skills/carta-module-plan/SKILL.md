@@ -25,6 +25,12 @@ appropriate checks rather than asking the user to choose a testing stack.
 Resolve exact commands from this checkout and distinguish script inspection
 from a successful execution.
 
+For web route changes, read the
+[file-routing convention](../web-ui-surfaces/references/file-routing.md). Map
+the required visible parent chain to route files and page Back targets. Preserve
+existing URLs and names unless the approved change includes them. Treat file
+placement within settled behavior as a technical decision.
+
 If planning exposes a missing business rule or a conflict with approved intent,
 return that specific issue to `$carta-module-design`. Preserve unaffected work.
 Make ordinary technical decisions within the design's delegated scope.

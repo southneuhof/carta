@@ -12,8 +12,9 @@ Choose tests by failure risk, not by file count:
   and proves the next allowed action changed.
 - A custom collection test checks that switching presentation keeps its query
   and actions. Do not repeat the framework's table test suite in every module.
-- A route or permission test proves direct entry or a real denied action;
-  comparing route objects and field-name arrays is not sufficient evidence.
+- For route structure, tabs, Back, or page lifetime, use the checks in
+  [file routing](file-routing.md#verify-changed-behavior). A permission test must
+  prove a real denied action; route objects alone do not establish denial.
 
 Use a focused browser journey for changed interaction or integration that
 smaller tests cannot establish. Use isolated test data. Assert the visible
