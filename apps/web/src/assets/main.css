@@ -187,6 +187,7 @@ body:has(.tox-dialog-wrap) [data-reka-dialog-overlay] {
     font-family: 'Geist Sans';
     font-style: normal;
     font-weight: 100;
+    font-display: swap;
     src: url('/src/assets/fonts/Geist-Thin.otf') format('opentype');
   }
 
@@ -194,6 +195,7 @@ body:has(.tox-dialog-wrap) [data-reka-dialog-overlay] {
     font-family: 'Geist Sans';
     font-style: normal;
     font-weight: 200;
+    font-display: swap;
     src: url('/src/assets/fonts/Geist-UltraLight.otf') format('opentype');
   }
 
@@ -201,6 +203,7 @@ body:has(.tox-dialog-wrap) [data-reka-dialog-overlay] {
     font-family: 'Geist Sans';
     font-style: normal;
     font-weight: 300;
+    font-display: swap;
     src: url('/src/assets/fonts/Geist-Light.otf') format('opentype');
   }
 
@@ -208,6 +211,7 @@ body:has(.tox-dialog-wrap) [data-reka-dialog-overlay] {
     font-family: 'Geist Sans';
     font-style: normal;
     font-weight: 400;
+    font-display: swap;
     src: url('/src/assets/fonts/Geist-Regular.otf') format('opentype');
   }
 
@@ -215,6 +219,7 @@ body:has(.tox-dialog-wrap) [data-reka-dialog-overlay] {
     font-family: 'Geist Sans';
     font-style: normal;
     font-weight: 500;
+    font-display: swap;
     src: url('/src/assets/fonts/Geist-Medium.otf') format('opentype');
   }
 
@@ -222,6 +227,7 @@ body:has(.tox-dialog-wrap) [data-reka-dialog-overlay] {
     font-family: 'Geist Sans';
     font-style: normal;
     font-weight: 600;
+    font-display: swap;
     src: url('/src/assets/fonts/Geist-SemiBold.otf') format('opentype');
   }
 
@@ -229,6 +235,7 @@ body:has(.tox-dialog-wrap) [data-reka-dialog-overlay] {
     font-family: 'Geist Sans';
     font-style: normal;
     font-weight: 700;
+    font-display: swap;
     src: url('/src/assets/fonts/Geist-Bold.otf') format('opentype');
   }
 
@@ -236,6 +243,7 @@ body:has(.tox-dialog-wrap) [data-reka-dialog-overlay] {
     font-family: 'Geist Sans';
     font-style: normal;
     font-weight: 800;
+    font-display: swap;
     src: url('/src/assets/fonts/Geist-Black.otf') format('opentype');
   }
 
@@ -243,6 +251,7 @@ body:has(.tox-dialog-wrap) [data-reka-dialog-overlay] {
     font-family: 'Geist Sans';
     font-style: normal;
     font-weight: 900;
+    font-display: swap;
     src: url('/src/assets/fonts/Geist-UltraBlack.otf') format('opentype');
   }
 }

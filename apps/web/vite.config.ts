@@ -31,6 +31,9 @@ export default defineConfig(({ command, mode }) => {
         },
       }),
     ],
+    optimizeDeps: {
+      include: ['@southneuhof/api > drizzle-orm', '@southneuhof/api > drizzle-orm/pg-core', '@southneuhof/api > drizzle-zod'],
+    },
     resolve: {
       dedupe: ['vue', 'vue-router'],
       extensions: ['.web.ts', '.web.tsx', '.web.mts', '.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],

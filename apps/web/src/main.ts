@@ -16,36 +16,8 @@ import './assets/main.css'
 import '@southneuhof/loom/styles/state-layers.css'
 import 'vue-sonner/style.css'
 import 'remixicon/fonts/remixicon.css'
-import { Chart } from 'chart.js'
-import ChartDataLabels from 'chartjs-plugin-datalabels'
-import annotationPlugin from 'chartjs-plugin-annotation'
-import { LinearScale, CategoryScale, ArcElement, Tooltip, Legend, Title } from 'chart.js'
-import { FunnelController, TrapezoidElement } from 'chartjs-chart-funnel'
 import VueTippy from 'vue-tippy'
 import 'tippy.js/dist/tippy.css' // optional for styling
-
-Chart.register(ChartDataLabels)
-Chart.register(ArcElement, Tooltip, Legend, Title)
-
-const myColorPalette = ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56', '#2ecc71', '#e67e22', '#1abc9c']
-
-Chart.defaults.set('elements.line', { borderWidth: 1 })
-
-Chart.defaults.set('plugins.datalabels', {
-  display: (context: any) => {
-    return context.dataset.data[context.dataIndex] !== 0 ? 'auto' : false
-  },
-  clip: false, // Prevent datalabels from overflowing outside the chart area
-  clamp: true,
-})
-
-Chart.defaults.set({
-  backgroundColor: myColorPalette,
-  animation: false,
-})
-
-Chart.register(annotationPlugin)
-Chart.register(FunnelController, TrapezoidElement, LinearScale, CategoryScale)
 
 const app = createApp(App)
 beginPageReadiness()
