@@ -4,8 +4,8 @@ Carta is a full-stack TypeScript framework and project template for building inf
 
 A Carta project comes with a Hono API, a Vue web application, authentication, users, roles, permissions, database tooling, file storage support, tests, and the conventions used to build new modules. The repository also contains the two frameworks that most of the application is built on:
 
-* [Sprindle](packages/sprindle) for the backend
-* [Loom](packages/loom) for the frontend
+* [Sprindle](https://github.com/southneuhof/sprindle) for the backend
+* [Loom](https://github.com/southneuhof/loom) for the frontend
 
 Carta does not replace Hono, Drizzle, or Vue. It puts a smaller application framework around them so common information-system work follows the same contracts and project structure. Application code can still use the underlying libraries directly when a module needs something outside the standard Carta path.
 
