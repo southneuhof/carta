@@ -1,13 +1,41 @@
-import { created, defineRoute, isHttpError, unauthorized } from '@southneuhof/sprindle'
-import { eq } from 'drizzle-orm'
-import { assignInitialRoles, validateInitialRoles } from '../../roles/roles.service'
+import { created, defineRoute, HttpError, isHttpError, unauthorized } from '@southneuhof/sprindle'
+import { eq, inArray } from 'drizzle-orm'
 import { getDb } from '../../../../db'
 import { orgIdentity, requirePermission } from '../../../../identity'
 import { createAuth } from '../../../auth/auth'
 import { readJsonBody } from '../../../../request-body'
 import { publicRecord } from '../../../../storage/assets'
+import { roleAssignments, roles } from '../../roles/roles.entity'
 import { user, users } from '../users.entity'
 import { createUserSchema } from '../users.create.contract'
+
+function initialRoleIds(roleIds: string[]) {
+  const uniqueRoleIds = [...new Set(roleIds)]
+  if (!uniqueRoleIds.length || uniqueRoleIds.length !== roleIds.length) throw new HttpError(422, 'roles_required')
+  return uniqueRoleIds
+}
+
+async function validateInitialRoles(roleIds: string[]) {
+  const uniqueRoleIds = initialRoleIds(roleIds)
+  const foundRoles = await getDb().select({ id: roles.id, active: roles.active }).from(roles).where(inArray(roles.id, uniqueRoleIds))
+  if (foundRoles.length !== uniqueRoleIds.length || foundRoles.some((row) => !row.active)) throw new HttpError(422, 'roles_required')
+  return uniqueRoleIds
+}
+
+async function assignInitialRoles(actorUserId: string, userId: string, roleIds: string[]) {
+  const uniqueRoleIds = initialRoleIds(roleIds)
+  await getDb().transaction(async (tx) => {
+    const foundRoles = await tx.select({ id: roles.id, active: roles.active }).from(roles).where(inArray(roles.id, uniqueRoleIds))
+    if (foundRoles.length !== uniqueRoleIds.length || foundRoles.some((row) => !row.active)) throw new HttpError(422, 'roles_required')
+    await tx.insert(roleAssignments).values(uniqueRoleIds.map((roleId) => ({
+      userId,
+      roleId,
+      active: true,
+      createdByUserId: actorUserId,
+      updatedByUserId: actorUserId,
+    })))
+  })
+}
 
 export const POST = defineRoute({
   openapi: { requestBody: createUserSchema },

@@ -3,8 +3,8 @@ import { hashPassword } from 'better-auth/crypto'
 import { getDb, setPoolCloseHook } from '../db'
 import { getAuth } from '../routes/auth/auth'
 import { accounts, sessions } from '../routes/auth/auth.entity'
+import { permissions } from '../routes/(authenticated)/permissions/permissions.entity'
 import {
-  permissions,
   rolePermissions,
   roleAssignments,
   roles,

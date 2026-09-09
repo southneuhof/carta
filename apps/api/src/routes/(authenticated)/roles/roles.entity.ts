@@ -1,6 +1,7 @@
 import { createEntity } from '@southneuhof/sprindle/entity'
 import { boolean, pgTable, primaryKey, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
+import { permissions } from '../permissions/permissions.entity'
 import { users } from '../users/users.entity'
 
 export const auditFields = {
@@ -9,15 +10,6 @@ export const auditFields = {
   createdAt: timestamp('created_at', { mode: 'string' }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { mode: 'string' }).notNull().defaultNow(),
 }
-
-export const permissions = pgTable('permissions', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  permissionCode: text('permission_code').notNull().unique(),
-  name: text('name').notNull(),
-  description: text('description'),
-  active: boolean('active').notNull().default(true),
-  ...auditFields,
-})
 
 export const roles = pgTable('roles', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -53,14 +45,5 @@ export const role = createEntity({
     create: createInsertSchema(roles).omit(write),
     update: createUpdateSchema(roles).omit(write),
     select: createSelectSchema(roles),
-  },
-})
-
-export const permission = createEntity({
-  table: permissions,
-  schemas: {
-    create: createInsertSchema(permissions).omit(write),
-    update: createUpdateSchema(permissions).omit(write),
-    select: createSelectSchema(permissions),
   },
 })

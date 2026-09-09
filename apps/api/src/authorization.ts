@@ -1,8 +1,8 @@
 import { and, eq } from 'drizzle-orm'
 import type { PermissionCode } from './authorization/catalog'
 import { getDb } from './db'
+import { permissions } from './routes/(authenticated)/permissions/permissions.entity'
 import {
-  permissions,
   roleAssignments,
   roles,
   rolePermissions,

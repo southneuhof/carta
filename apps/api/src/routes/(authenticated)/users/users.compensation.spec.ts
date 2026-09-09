@@ -1,19 +1,40 @@
 import { afterAll, describe, expect, it, vi } from 'vitest'
 
-vi.mock('../roles/roles.service', async () => {
-  const actual = await vi.importActual<typeof import('../roles/roles.service')>('../roles/roles.service')
-  return { ...actual, assignInitialRoles: vi.fn().mockRejectedValue(new Error('forced assignment failure')) }
+const testState = vi.hoisted(() => ({ roleId: undefined as string | undefined, userId: undefined as string | undefined }))
+
+vi.mock('../../auth/auth', async () => {
+  const actual = await vi.importActual<typeof import('../../auth/auth')>('../../auth/auth')
+  return {
+    ...actual,
+    createAuth: vi.fn((options?: Parameters<typeof actual.createAuth>[0]) => {
+      const auth = actual.createAuth(options)
+      return {
+        ...auth,
+        api: {
+          ...auth.api,
+          signUpEmail: async (...args: Parameters<typeof auth.api.signUpEmail>) => {
+            const result = await auth.api.signUpEmail(...args)
+            testState.userId = result.user?.id
+            if (testState.roleId) {
+              await getDb().update(roles).set({ active: false }).where(eq(roles.id, testState.roleId))
+            }
+            return result
+          },
+        },
+      }
+    }),
+  }
 })
 
 import { hashPassword } from 'better-auth/crypto'
 import { eq } from 'drizzle-orm'
 import { app } from '../../../app'
 import { closeDb, getDb } from '../../../db'
-import { permissions, rolePermissions, roles, roleAssignments } from '../roles/roles.entity'
+import { permissions } from '../permissions/permissions.entity'
+import { rolePermissions, roles, roleAssignments } from '../roles/roles.entity'
 import { accounts, sessions } from '../../auth/auth.entity'
 import { getAuth } from '../../auth/auth'
 import { users } from './users.entity'
-import { assignInitialRoles } from '../roles/roles.service'
 
 function id(prefix: string) {
   return `user-compensation-test-${prefix}-${crypto.randomUUID()}`
@@ -38,23 +59,22 @@ async function adminSession() {
 describe('user creation compensation', () => {
   afterAll(() => closeDb())
 
-  it('removes all Better Auth and assignment rows after post-create failure', async () => {
-    const state = await adminSession()
+  it('removes all Better Auth and assignment rows after a post-create role failure', async () => {
+    const session = await adminSession()
     const db = getDb()
     const roleId = id('target-role')
+    testState.roleId = roleId
     const email = `${id('created')}@example.invalid`
     await db.insert(roles).values({ id: roleId, roleCode: id('target-role-code'), name: 'Target Role' })
 
     const response = await app.request('/users/create', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Cookie: state.cookie },
+      headers: { 'Content-Type': 'application/json', Cookie: session.cookie },
       body: JSON.stringify({ name: 'Created Then Removed', email, password: 'password-123', roleIds: [roleId] }),
     })
-    expect(response.status).toBe(409)
-    expect((await response.json()).error).toBe('user_create_failed')
-    const assignmentCalls = vi.mocked(assignInitialRoles).mock.calls
-    expect(assignmentCalls).toHaveLength(1)
-    const createdUserId = assignmentCalls[0]?.[1]
+    expect(response.status).toBe(422)
+    expect((await response.json()).error).toBe('roles_required')
+    const createdUserId = testState.userId
     if (!createdUserId) throw new Error('The compensation test did not receive the created user ID.')
     expect(await db.select({ id: users.id }).from(users).where(eq(users.id, createdUserId))).toHaveLength(0)
     expect(await db.select({ id: accounts.id }).from(accounts).where(eq(accounts.userId, createdUserId))).toHaveLength(0)

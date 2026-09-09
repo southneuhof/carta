@@ -12,7 +12,7 @@ or hooks. Check current exports in `packages/sprindle/docs/reference.md`.
 | Work | Read |
 |---|---|
 | Resource schemas, CRUD, custom actions, migrations | [Resource contracts](references/standard-crud.md) |
-| State transitions, child writes, shared transactions | [Workflow services](references/workflow-service.md) |
+| State transitions, child writes, shared transactions | [Workflow modules](references/workflow-service.md) |
 | Public records, derived fields, stored files | [Public records](references/public-records.md) |
 
 ## Access
@@ -28,8 +28,9 @@ Custom actions use their action verb. Keep catalog, guard, navigation, and seed
 consistent. Select supported targets from the catalog; add ownership rules only
 when the behavior requires them.
 
-Use route guards for static permission and service checks for record-dependent
-access. UI visibility and URL structure do not authorize a request.
+Use route guards for static permission and route-owned or focused-module checks
+for record-dependent access. UI visibility and URL structure do not authorize a
+request.
 
 ## Verification
 

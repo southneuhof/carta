@@ -28,8 +28,8 @@ pnpm --filter @southneuhof/api db:seed
    conversion for the resource.
 3. Create one `+server.ts` file for each operation. Export the route directly, for example:
    `export const GET = list({ authorize: requirePermission('list-<name>') })`.
-   Keep route-specific schemas, queries, and actions in that route file. Keep only shared business
-   transactions in a service file.
+   Keep route-specific schemas, queries, and actions in that route file. When real production reuse
+   remains, put only that shared behavior in a focused owner-named module beside its owning route.
 4. Keep the module domain part in `src/routes/(authenticated)/<name>/<name>.ts` and register its
    `domain` in `src/domains.ts`. The file route compiler owns HTTP registration.
 5. Generate and apply the migration:

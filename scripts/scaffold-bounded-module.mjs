@@ -643,7 +643,7 @@ export function scaffold(value, { root = repoRoot } = {}) {
     routes: metadata.routes,
     permissions: metadata.permissions,
     checks: {
-      apiTest: resolve(outputRoot, `apps/api/src/routes/${config.slug}/${config.slug}.routes.spec.ts`),
+      apiTest: resolve(outputRoot, `apps/api/src/routes/(authenticated)/${config.slug}/${config.slug}.routes.spec.ts`),
       webTests: [
         resolve(outputRoot, `apps/web/src/routes/(authenticated)/${config.navigation.group}/${config.slug}/${config.slug}.resource.spec.ts`),
         resolve(outputRoot, `apps/web/src/routes/(authenticated)/${config.navigation.group}/${config.slug}/${config.slug}.integration.spec.ts`),

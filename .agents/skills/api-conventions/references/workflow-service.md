@@ -1,8 +1,9 @@
-# Workflow services
+# Workflow modules
 
-Use a service function when a business operation owns several writes, a state
-transition, or a transaction shared with another module. Keep simple factory
-configuration in `+server.ts` and shared policy in `+scope.ts`.
+Keep a business operation in `+server.ts` when one route owns it. Use a focused
+owner-named module when several real consumers share its writes, state transition,
+or transaction. Keep simple factory configuration in `+server.ts` and shared
+policy in `+scope.ts`.
 
 ## Transaction boundary
 
@@ -24,7 +25,7 @@ For a transition:
    membership and mutable related-record requirements in this transaction.
 4. Write parent, children, and required database history together. Stamp custom
    writes and child audit fields explicitly; the constructor does not stamp
-   arbitrary service writes.
+   arbitrary operation-module writes.
 5. Return the required record. Read transaction-consistent data before commit
    when the response must describe exactly this write. A post-commit read can
    include another caller's later change; use it only when that is acceptable.
@@ -42,7 +43,7 @@ nested independent transactions and layers of one-call forwarding functions.
 - Put transition rules at the write boundary. An `allowedOperations` response
   helps the UI; it never authorizes the next request. Recheck permission and
   state when the user acts.
-- Keep old state checks out of routes when the locked service already owns them.
+- Keep old state checks out of routes when the locked operation module already owns them.
   Use field validation errors for input errors, 404 for missing/inaccessible
   records, and conflict errors for competing or invalid state changes.
 - For child edits, validate the child's parent and ownership. Define whether an

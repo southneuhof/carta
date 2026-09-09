@@ -8,9 +8,10 @@ owns framework vocabulary and public contracts.
 - Use canonical factories in file routes for resource actions. Select only
   the actions the product needs. Use declarative options before hooks or custom
   persistence. Use `defineRoute` for a distinct HTTP contract.
-- Keep business transactions in service functions when several writes or state
-  changes must succeed together. Recheck mutable permission and state inside
-  the transaction. Simple CRUD needs no forwarding service.
+- Keep route-owned transactions in the route. When several real production
+  consumers need the same state change, place it in a focused owner-named module.
+  Recheck mutable permission and state inside the transaction. Simple CRUD needs
+  no forwarding module.
 - Validate client input at the request boundary. Database constraints protect
   stored integrity. Server identity owns audit and ownership fields.
 - Apply access predicates to the actual read or write, including list counts.

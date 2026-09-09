@@ -1,6 +1,6 @@
 import { defineSchema } from '@southneuhof/loom'
 import type { WebResourceSchema } from '@southneuhof/loom'
-import { permission } from '@southneuhof/api/routes/(authenticated)/roles/roles.entity'
+import { permission } from '@southneuhof/api/routes/(authenticated)/permissions/permissions.entity'
 import type { z } from 'zod/v4'
 
 export type Permission = z.output<typeof permission.schemas.select>
