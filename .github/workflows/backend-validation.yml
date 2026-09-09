@@ -98,4 +98,4 @@ jobs:
       - name: Test api
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/carta_api_test
-        run: pnpm --filter @southneuhof/api test
+        run: pnpm exec turbo run test --filter=@southneuhof/api --output-logs=errors-only
