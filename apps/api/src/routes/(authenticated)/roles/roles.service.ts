@@ -1,6 +1,6 @@
 import { HttpError, notFound } from '@southneuhof/sprindle'
 import { and, eq, inArray } from 'drizzle-orm'
-import { getDb, type Tx } from '../../db'
+import { getDb, type Tx } from '../../../db'
 import {
   permissions,
   roleAssignments,
@@ -147,15 +147,4 @@ export async function validateInitialRoles(roleIds: string[]) {
   const foundRoles = await getDb().select({ id: roles.id, active: roles.active }).from(roles).where(inArray(roles.id, uniqueRoleIds))
   if (foundRoles.length !== uniqueRoleIds.length || foundRoles.some((row) => !row.active)) throw new HttpError(422, 'roles_required')
   return uniqueRoleIds
-}
-
-export async function deleteUnassignedRole(roleId: string) {
-  return getDb().transaction(async (tx) => {
-    const assignments = await tx.select({ id: roleAssignments.id }).from(roleAssignments).where(and(eq(roleAssignments.roleId, roleId), eq(roleAssignments.active, true)))
-    if (assignments.length) throw new HttpError(409, 'role_in_use', undefined, [{ field: 'assignmentCount', message: String(assignments.length) }])
-    await tx.delete(roleAssignments).where(eq(roleAssignments.roleId, roleId))
-    const deleted = await tx.delete(roles).where(eq(roles.id, roleId)).returning({ id: roles.id })
-    if (!deleted[0]) throw notFound()
-    return { ok: true }
-  })
 }

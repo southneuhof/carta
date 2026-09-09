@@ -3,9 +3,8 @@ import { betterAuth } from 'better-auth'
 import { eq } from 'drizzle-orm'
 import { defineDomainPart } from '@southneuhof/sprindle/model'
 import { getDb } from '../../db'
-import { users } from '../users/users.entity'
+import { users } from '../(authenticated)/users/users.entity'
 import { accounts, sessions, verifications } from './auth.entity'
-import { createAuthRoutes } from './auth.routes'
 
 const schema = { users, sessions, accounts, verifications }
 
@@ -44,7 +43,3 @@ let auth: ReturnType<typeof createAuth> | undefined
 export function getAuth() {
   return (auth ??= createAuth())
 }
-
-export const authRoutes = createAuthRoutes(getAuth)
-
-export default { domain, authRoutes }

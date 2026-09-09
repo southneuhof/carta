@@ -1,4 +1,4 @@
 import { create } from '@southneuhof/sprindle'
-import { roleAuthorization } from '../../../roles/roles'
+import { requirePermission } from '../../../../identity'
 
-export const POST = create({ authorize: roleAuthorization.create })
+export const POST = create({ authorize: requirePermission('create-roles') })

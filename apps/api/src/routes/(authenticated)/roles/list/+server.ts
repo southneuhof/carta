@@ -1,4 +1,4 @@
 import { list } from '@southneuhof/sprindle'
-import { roleAuthorization } from '../../../roles/roles'
+import { requirePermission } from '../../../../identity'
 
-export const GET = list({ authorize: roleAuthorization.list })
+export const GET = list({ authorize: requirePermission('list-roles') })

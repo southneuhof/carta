@@ -1,5 +1,5 @@
 import { defineSchema, fromZod } from '@southneuhof/loom'
-import { role } from '@southneuhof/api/routes/roles/roles.entity'
+import { role } from '@southneuhof/api/routes/(authenticated)/roles/roles.entity'
 import type { AppResourceContract } from '@/framework/hono'
 import { rpc } from '@/framework/rpc'
 import type { z as Zod } from 'zod/v4'

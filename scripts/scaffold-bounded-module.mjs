@@ -317,7 +317,7 @@ export const domain = defineDomainPart({ tables: { ${plural} }, entities: [${ent
 function renderScope(config) {
   const entity = lowerCamel(config.symbol)
   return `import { defineScope } from '@southneuhof/sprindle'
-import { ${entity} } from '../../${config.slug}/${config.slug}.entity'
+import { ${entity} } from './${config.slug}.entity'
 
 export default defineScope({ entity: ${entity} })
 `
@@ -335,7 +335,7 @@ export const ${action === 'create' ? 'POST' : action === 'update' ? 'PATCH' : ac
 
 function renderRouteTest(config) {
   return `import { describe, expect, it } from 'vitest'
-import { app } from '../../app'
+import { app } from '../../../app'
 
 describe(${literal(`${config.title} routes`)}, () => {
   it('requires authentication', async () => {
@@ -355,7 +355,7 @@ function renderSeed(config) {
   }).join('\n')
   const updates = config.seed.updateFields.map((key) => `${key}: sql\`excluded.${config.fields.find((field) => field.key === key).column}\``).join(', ')
   return `import { sql } from 'drizzle-orm'
-import { getDb } from '../../db'
+import { getDb } from '../../../db'
 import { ${plural} } from './${config.slug}.entity'
 
 const records = [
@@ -375,7 +375,7 @@ export async function seed${config.symbol}() {
 function renderSchema(config) {
   const entity = lowerCamel(config.symbol)
   const plural = `${entity}s`
-  const head = `import { ${entity} } from '@southneuhof/api/routes/${config.slug}/${config.slug}.entity'
+  const head = `import { ${entity} } from '@southneuhof/api/routes/(authenticated)/${config.slug}/${config.slug}.entity'
 import { rpc } from '@/framework/rpc'
 import type { z } from 'zod/v4'
 
@@ -580,8 +580,8 @@ describe(${literal(`${config.title} route integration`)}, () => {
 }
 
 function filesFor(config, root) {
-  const apiRoot = `apps/api/src/routes/${config.slug}`
-  const apiFileRoot = `apps/api/src/routes/(authenticated)/${config.slug}`
+  const apiRoot = `apps/api/src/routes/(authenticated)/${config.slug}`
+  const apiFileRoot = apiRoot
   const webRoot = `apps/web/src/routes/(authenticated)/${config.navigation.group}/${config.slug}`
   const routeRoot = `${webRoot}/[${lowerCamel(config.symbol)}Id]`
   const routes = renderRoutes(config)

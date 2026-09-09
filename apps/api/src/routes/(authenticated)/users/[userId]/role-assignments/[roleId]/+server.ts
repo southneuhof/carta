@@ -2,8 +2,8 @@ import { defineRoute } from '@southneuhof/sprindle'
 import { eq } from 'drizzle-orm'
 import { getDb } from '../../../../../../db'
 import { requireOrgIdentity, requirePermission } from '../../../../../../identity'
-import { setRoleAssignment } from '../../../../../roles/roles.service'
-import { users } from '../../../../../users/users.entity'
+import { setRoleAssignment } from '../../../../roles/roles.service'
+import { users } from '../../../users.entity'
 
 const change = (active: boolean) => async (args: Parameters<Parameters<typeof defineRoute>[0]['action']>[0]) => {
   const found = (await getDb().select({ id: users.id }).from(users).where(eq(users.id, args.params.userId)).limit(1))[0]

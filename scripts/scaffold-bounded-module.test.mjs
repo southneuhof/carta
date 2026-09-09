@@ -72,10 +72,10 @@ test('creates explicit source files and stable absolute output', () => {
   const setup = workspace(config())
   const result = JSON.parse(execute(['--config', setup.configPath, '--json'], { root: setup.outputRoot, cwd: setup.directory }))
   const expectedRelative = [
-    'apps/api/src/routes/test-catalog/test-catalog.entity.ts',
-    'apps/api/src/routes/test-catalog/test-catalog.routes.spec.ts',
-    'apps/api/src/routes/test-catalog/test-catalog.seed.ts',
-    'apps/api/src/routes/test-catalog/test-catalog.ts',
+    'apps/api/src/routes/(authenticated)/test-catalog/test-catalog.entity.ts',
+    'apps/api/src/routes/(authenticated)/test-catalog/test-catalog.routes.spec.ts',
+    'apps/api/src/routes/(authenticated)/test-catalog/test-catalog.seed.ts',
+    'apps/api/src/routes/(authenticated)/test-catalog/test-catalog.ts',
     'apps/api/src/routes/(authenticated)/test-catalog/+scope.ts',
     'apps/api/src/routes/(authenticated)/test-catalog/list/+server.ts',
     'apps/api/src/routes/(authenticated)/test-catalog/detail/[id]/+server.ts',
@@ -194,8 +194,8 @@ test('does not generate a seed file when seed metadata is absent', () => {
 
 test('refuses to overwrite existing generated output', () => {
   const setup = workspace(config())
-  const entityPath = join(setup.outputRoot, 'apps/api/src/routes/test-catalog/test-catalog.entity.ts')
-  mkdirSync(join(setup.outputRoot, 'apps/api/src/routes/test-catalog'), { recursive: true })
+  const entityPath = join(setup.outputRoot, 'apps/api/src/routes/(authenticated)/test-catalog/test-catalog.entity.ts')
+  mkdirSync(join(setup.outputRoot, 'apps/api/src/routes/(authenticated)/test-catalog'), { recursive: true })
   writeFileSync(entityPath, 'keep this file')
 
   assert.throws(

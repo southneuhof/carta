@@ -2,7 +2,7 @@
 
 Hono + Sprindle API. Framework vocabulary lives in
 [`packages/sprindle/docs/reference.md`](../../packages/sprindle/docs/reference.md); read it before
-inventing names. Conventions live in `docs/architecture/api-conventions.md`; read it before adding or changing a module. The exemplar resources are `src/routes/users/` for standard CRUD and `src/routes/roles/` for the route → service shape. The operational rule book for agents is the `api-conventions` skill from `southneuhof/skills` (`npx skills@latest add southneuhof/skills --skill api-conventions`); the charter stays the human-readable summary and must not diverge from it — when rules change, change the skill first.
+inventing names. Conventions live in `docs/architecture/api-conventions.md`; read it before adding or changing a module. The example resources are `src/routes/(authenticated)/users/` and `src/routes/(authenticated)/roles/`. The operational rule book for agents is the `api-conventions` skill from `southneuhof/skills` (`npx skills@latest add southneuhof/skills --skill api-conventions`); the charter stays the human-readable summary and must not diverge from it — when rules change, change the skill first.
 
 ## Setup
 
@@ -22,17 +22,16 @@ pnpm --filter @southneuhof/api db:seed
 
 ## Add a resource
 
-1. Create `src/routes/<name>/<name>.entity.ts` — Drizzle table(s), `drizzle-zod` schemas, `createEntity`,
-   and a `defineRelationsPart` if it has relations.
-2. Create `src/routes/<name>/<name>.ts` — `defineModel({ path: '/<name>', entity, authorize:
-   [authenticated()], routes: { list: list(), … } })` beside `<name>.entity.ts` (see `users/users.ts`;
-   there is no `<name>.model.ts` file). **Routes are public unless `authenticated()` is
-   attached**; only `/health` and `/api/auth/*` are meant to be public.
-3. Optional `src/routes/<name>/<name>.routes.ts` for custom routes, following `routes/users/users.routes.ts`.
-4. Register in `src/routes/index.ts`: add ONE `defineModule({ domain, models })` bundle to the
-   matching group (the generator does this for manifest modules). The bundle pairs the module's
-   database ownership with its routes — a missing `domain` fails at boot with an unbound-model
-   error instead of failing per request.
+1. Create `src/routes/(authenticated)/<name>/<name>.entity.ts` — Drizzle table(s), `drizzle-zod`
+   schemas, and `createEntity`.
+2. Create `src/routes/(authenticated)/<name>/+scope.ts` with the entity and any shared record
+   conversion for the resource.
+3. Create one `+server.ts` file for each operation. Export the route directly, for example:
+   `export const GET = list({ authorize: requirePermission('list-<name>') })`.
+   Keep route-specific schemas, queries, and actions in that route file. Keep only shared business
+   transactions in a service file.
+4. Keep the module domain part in `src/routes/(authenticated)/<name>/<name>.ts` and register its
+   `domain` in `src/domains.ts`. The file route compiler owns HTTP registration.
 5. Generate and apply the migration:
 
 ```bash
@@ -56,7 +55,7 @@ For one or more API specs, use the test-aware focused command. It applies
 pending migrations to `.env.test` and forwards the spec paths after `--`:
 
 ```bash
-pnpm --filter @southneuhof/api test:focused -- src/routes/<name>/<name>.routes.spec.ts
+pnpm --filter @southneuhof/api test:focused -- 'src/routes/(authenticated)/<name>/<name>.routes.spec.ts'
 ```
 
 ```bash

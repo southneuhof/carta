@@ -32,7 +32,7 @@ function insertBeforeArrayEnd(source, startMarker, lines, name) {
 
 function insertDomains(source, config) {
   const metadata = moduleMetadata(config)
-  const importLine = `import { domain as ${metadata.plural} } from './routes/${config.slug}/${config.slug}'`
+  const importLine = `import { domain as ${metadata.plural} } from './routes/(authenticated)/${config.slug}/${config.slug}'`
   const domainLine = `  ${metadata.plural},`
   if (count(source, importLine) > 1 || count(source, domainLine) > 1) throw new Error(`domain registration for "${config.slug}" is duplicated.`)
   if (!source.includes(importLine)) source = replaceOnce(source, '\nexport const domains = [', `\n${importLine}\n\nexport const domains = [`, 'domain import')
@@ -77,7 +77,7 @@ function insertCatalog(source, config) {
 
 function insertSeed(source, config) {
   if (!config.seed) return source
-  const importLine = `import { seed${config.symbol} } from '../src/routes/${config.slug}/${config.slug}.seed'`
+  const importLine = `import { seed${config.symbol} } from '../src/routes/(authenticated)/${config.slug}/${config.slug}.seed'`
   const call = `  await seed${config.symbol}()`
   const owner = 'export async function seedDatabase() {'
   if (count(source, owner) !== 1) throw new Error('seedDatabase owner is missing or ambiguous.')

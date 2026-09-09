@@ -1,6 +1,6 @@
 import { defineRoute } from '@southneuhof/sprindle'
 import { requireOrgIdentity, requirePermission } from '../../../../../../identity'
-import { setRolePermission } from '../../../../../roles/roles.service'
+import { setRolePermission } from '../../../roles.service'
 
 const change = (active: boolean) => async (args: Parameters<Parameters<typeof defineRoute>[0]['action']>[0]) => ({
   data: await setRolePermission((await requireOrgIdentity(args)).userId, args.params.roleId, args.params.permissionId, active),

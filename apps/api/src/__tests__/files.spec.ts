@@ -5,7 +5,7 @@ import { closeDb, getDb } from "../db";
 import { app as rawApp } from "../app";
 import { getAuth } from "../routes/auth/auth";
 import { accounts } from "../routes/auth/auth.entity";
-import { users } from "../routes/users/users.entity";
+import { users } from "../routes/(authenticated)/users/users.entity";
 import {
   createPresignedDownload,
   createPresignedUpload,

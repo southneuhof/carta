@@ -1,4 +1,4 @@
 import { defineRoute } from '@southneuhof/sprindle'
-import { authRoutes } from '../../../auth/auth'
+import { getAuth } from '../../../auth/auth'
 
-export const POST = defineRoute(authRoutes.signOut)
+export const POST = defineRoute({ action: async ({ c }) => getAuth().handler(c.req.raw) })

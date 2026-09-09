@@ -1,4 +1,4 @@
 import { update } from '@southneuhof/sprindle'
-import { roleAuthorization } from '../../../../roles/roles'
+import { requirePermission } from '../../../../../identity'
 
-export const PATCH = update({ authorize: roleAuthorization.update })
+export const PATCH = update({ authorize: requirePermission('update-roles') })

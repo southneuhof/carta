@@ -146,7 +146,7 @@ test('wrapper apply only generates/integrates source and preflights incompatible
     const result = spawnSync('python3', [wrapper, '--manifest', manifest, '--root', root, '--apply', '--json'], { encoding: 'utf8' })
     const response = JSON.parse(result.stdout)
     assert.equal(response.databaseWrites, false)
-    assert.equal(existsSync(join(root, 'apps/api/src/routes/test-catalog/test-catalog.entity.ts')), !broken)
+    assert.equal(existsSync(join(root, 'apps/api/src/routes/(authenticated)/test-catalog/test-catalog.entity.ts')), !broken)
     assert.equal(result.status, broken ? 1 : 0, result.stderr)
     assert.ok(response.commands.every(command => !command.argv.some(arg => arg === 'pnpm' || arg.includes('db:migrate') || arg.includes('db:seed'))))
   }

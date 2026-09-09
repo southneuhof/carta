@@ -6,8 +6,8 @@ import {
   roleAssignments,
   roles,
   rolePermissions,
-} from './routes/roles/roles.entity'
-import { users } from './routes/users/users.entity'
+} from './routes/(authenticated)/roles/roles.entity'
+import { users } from './routes/(authenticated)/users/users.entity'
 
 export type OrgIdentity = {
   userId: string

@@ -55,7 +55,7 @@ ruleTester.run('route-authorization', routeAuthorization, {
         import { defineRoute } from '@southneuhof/sprindle/routes'
         defineRoute({})
       `,
-      filename: 'src/routes/health/health.ts',
+      filename: 'src/routes/health/+server.ts',
     },
     {
       name: 'public auth route',
@@ -63,7 +63,7 @@ ruleTester.run('route-authorization', routeAuthorization, {
         import { defineRoute } from '@southneuhof/sprindle/routes'
         defineRoute({})
       `,
-      filename: 'src/routes/auth/auth.routes.ts',
+      filename: 'src/routes/api/auth/sign-in/email/+server.ts',
     },
   ],
   invalid: [

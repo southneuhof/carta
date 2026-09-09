@@ -7,11 +7,11 @@ vi.mock('../roles/roles.service', async () => {
 
 import { hashPassword } from 'better-auth/crypto'
 import { eq } from 'drizzle-orm'
-import { app } from '../../app'
-import { closeDb, getDb } from '../../db'
+import { app } from '../../../app'
+import { closeDb, getDb } from '../../../db'
 import { permissions, rolePermissions, roles, roleAssignments } from '../roles/roles.entity'
-import { accounts, sessions } from '../auth/auth.entity'
-import { getAuth } from '../auth/auth'
+import { accounts, sessions } from '../../auth/auth.entity'
+import { getAuth } from '../../auth/auth'
 import { users } from './users.entity'
 import { assignInitialRoles } from '../roles/roles.service'
 

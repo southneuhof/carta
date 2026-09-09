@@ -2,8 +2,8 @@ import { defineRoute } from '@southneuhof/sprindle'
 import { eq } from 'drizzle-orm'
 import { getDb } from '../../../../../db'
 import { requirePermission } from '../../../../../identity'
-import { listRoleAssignments } from '../../../../roles/roles.service'
-import { users } from '../../../../users/users.entity'
+import { listRoleAssignments } from '../../../roles/roles.service'
+import { users } from '../../users.entity'
 
 export const GET = defineRoute({
   authorize: requirePermission('list-role-assignments'),

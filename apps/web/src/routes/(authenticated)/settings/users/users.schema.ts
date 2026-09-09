@@ -1,6 +1,6 @@
 import { defineSchema, fromZod } from '@southneuhof/loom'
-import { createUserSchema } from '@southneuhof/api/routes/users/users.create.contract'
-import { user, userPublicSchema } from '@southneuhof/api/routes/users/users.entity'
+import { createUserSchema } from '@southneuhof/api/routes/(authenticated)/users/users.create.contract'
+import { user, userPublicSchema } from '@southneuhof/api/routes/(authenticated)/users/users.entity'
 import { z } from 'zod/v4'
 import type { AppResourceContract } from '@/framework/hono'
 import { rpc } from '@/framework/rpc'

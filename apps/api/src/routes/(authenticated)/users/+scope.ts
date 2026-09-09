@@ -1,4 +1,5 @@
 import { defineScope } from '@southneuhof/sprindle'
-import { userScope } from '../../users/users.model'
+import { storedAssetModel } from '../../../storage/assets'
+import { user, userPublicSchema } from './users.entity'
 
-export default defineScope(userScope)
+export default defineScope({ entity: user, enrich: storedAssetModel(userPublicSchema) })

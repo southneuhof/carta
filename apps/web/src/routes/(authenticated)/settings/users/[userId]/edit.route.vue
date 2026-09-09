@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { FormView } from '@southneuhof/loom'
 import { users } from '../users.resource'
-import { user } from '@southneuhof/api/routes/users/users.entity'
+import { user } from '@southneuhof/api/routes/(authenticated)/users/users.entity'
 import type { z } from 'zod/v4'
 
 type UserUpdate = z.input<typeof user.schemas.update>

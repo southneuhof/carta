@@ -3,8 +3,8 @@ import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { fromZod, requiredSchemaKeys } from '@southneuhof/loom'
-import { role } from '@southneuhof/api/routes/roles/roles.entity'
-import { user } from '@southneuhof/api/routes/users/users.entity'
+import { role } from '@southneuhof/api/routes/(authenticated)/roles/roles.entity'
+import { user } from '@southneuhof/api/routes/(authenticated)/users/users.entity'
 
 /**
  * Guards the browser-safe entity boundary.

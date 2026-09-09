@@ -1,4 +1,4 @@
 import { detail } from '@southneuhof/sprindle'
-import { roleAuthorization } from '../../../../roles/roles'
+import { requirePermission } from '../../../../../identity'
 
-export const GET = detail({ authorize: roleAuthorization.detail })
+export const GET = detail({ authorize: requirePermission('detail-roles') })

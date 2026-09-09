@@ -59,7 +59,7 @@ function staticVerify(config, { root = repoRoot } = {}) {
   })
 
   const domains = read(resolve(outputRoot, 'apps/api/src/domains.ts'), checks, 'API domains')
-  requireUniqueText(domains, `import { domain as ${metadata.plural} } from './routes/${config.slug}/${config.slug}'`, checks, 'API domain import')
+  requireUniqueText(domains, `import { domain as ${metadata.plural} } from './routes/(authenticated)/${config.slug}/${config.slug}'`, checks, 'API domain import')
   requireUniqueText(domains, `  ${metadata.plural},`, checks, 'API domain registration')
 
   const catalog = read(resolve(outputRoot, 'apps/api/src/authorization/catalog.ts'), checks, 'authorization catalog')
@@ -99,11 +99,11 @@ function staticVerify(config, { root = repoRoot } = {}) {
   }
 
   if (config.seed) {
-    const seedPath = resolve(outputRoot, `apps/api/src/routes/${config.slug}/${config.slug}.seed.ts`)
+    const seedPath = resolve(outputRoot, `apps/api/src/routes/(authenticated)/${config.slug}/${config.slug}.seed.ts`)
     const seed = read(seedPath, checks, 'module seed')
     requireText(seed, `export async function seed${config.symbol}()`, checks, 'module seed function')
     const seedOwner = read(resolve(outputRoot, 'apps/api/scripts/seed.ts'), checks, 'seed owner')
-    requireUniqueText(seedOwner, `import { seed${config.symbol} } from '../src/routes/${config.slug}/${config.slug}.seed'`, checks, 'seed owner import')
+    requireUniqueText(seedOwner, `import { seed${config.symbol} } from '../src/routes/(authenticated)/${config.slug}/${config.slug}.seed'`, checks, 'seed owner import')
     requireUniqueText(seedOwner, `  await seed${config.symbol}()`, checks, 'seed owner call')
   }
 
@@ -114,13 +114,13 @@ function staticVerify(config, { root = repoRoot } = {}) {
 export function verificationCommands(config, { withSeed = false } = {}) {
   const slug = config.slug
   const apiRouteFiles = [
-    `src/routes/${slug}/${slug}.entity.ts`,
-    `src/routes/${slug}/${slug}.ts`,
-    `src/routes/${slug}/${slug}.routes.spec.ts`,
+    `src/routes/(authenticated)/${slug}/${slug}.entity.ts`,
+    `src/routes/(authenticated)/${slug}/${slug}.ts`,
+    `src/routes/(authenticated)/${slug}/${slug}.routes.spec.ts`,
     'src/domains.ts',
     'src/authorization/catalog.ts',
   ]
-  if (config.seed) apiRouteFiles.push(`src/routes/${slug}/${slug}.seed.ts`, 'scripts/seed.ts')
+  if (config.seed) apiRouteFiles.push(`src/routes/(authenticated)/${slug}/${slug}.seed.ts`, 'scripts/seed.ts')
   const webFiles = [
     `src/routes/(authenticated)/${config.navigation.group}/${slug}/${slug}.schema.ts`,
     `src/routes/(authenticated)/${config.navigation.group}/${slug}/${slug}.resource.ts`,
@@ -135,7 +135,7 @@ export function verificationCommands(config, { withSeed = false } = {}) {
   const specs = []
   if (withSeed) specs.push(['pnpm', ['--filter', '@southneuhof/api', 'db:seed:test']])
   specs.push(
-    ['pnpm', ['--filter', '@southneuhof/api', 'test:focused', '--', `src/routes/${slug}/${slug}.routes.spec.ts`]],
+    ['pnpm', ['--filter', '@southneuhof/api', 'test:focused', '--', `src/routes/(authenticated)/${slug}/${slug}.routes.spec.ts`]],
     ['pnpm', ['--filter', '@southneuhof/framework-web', 'test:focused', '--', `routes/(authenticated)/${config.navigation.group}/${slug}/${slug}.resource.spec.ts`, `routes/(authenticated)/${config.navigation.group}/${slug}/${slug}.integration.spec.ts`]],
     ['pnpm', ['--filter', '@southneuhof/api', 'lint:focused', '--', ...apiRouteFiles]],
     ['pnpm', ['--filter', '@southneuhof/framework-web', 'lint:focused', '--', ...webFiles]],
