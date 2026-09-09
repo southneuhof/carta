@@ -3,9 +3,9 @@
 ## Entity and schema
 
 Define the Drizzle table, write/select schemas, and `createEntity` together.
-Group them with `defineDomainPart`; compose routes with `defineModel`.
-Use current files under `apps/api/src/routes/users/` and `roles/` to locate
-registration and schema integration, not as complete CRUD templates.
+Group database entities with `defineDomainPart`. Put the entity in `+scope.ts`
+and each resource operation in its `+server.ts` file.
+Keep route placement and inheritance under the [file-routing contract](file-routing.md).
 
 - Use database constraints for foreign keys, uniqueness, and valid stored values.
   Use Zod for request shape, normalization, and field errors. An enum belongs in
@@ -26,7 +26,7 @@ registration and schema integration, not as complete CRUD templates.
 
 ## Canonical routes
 
-Resource constructors belong inside `defineModel`. Use the constructor that
+Resource constructors are named method exports in `+server.ts`. Use the constructor that
 matches the operation; it owns parsing, HTTP status, envelope, and missing-row
 behavior. Do not replace it merely to customize persistence.
 
@@ -51,7 +51,7 @@ operation. An inaccessible row returns the same 404 as an absent row. An access
 read followed by an unscoped write is not sufficient. Validate newly selected
 related records against the same ownership boundary.
 
-`app.ts` installs `dataWrite: auditStamp()`. Only canonical create/update invoke
+`create-app.ts` installs `dataWrite: auditStamp()`. Only canonical create/update invoke
 it. Its typed `operation` selects audit values; custom state named `values`
 does not trigger it. Keep the returned server values out of client input.
 
@@ -73,8 +73,9 @@ client values; apply `state.where` to scoped queries and writes; hydrate the
 required relations. Prove these rules in focused tests. Manual list SQL must
 keep filter/count agreement, pagination, and a stable primary-key tie order.
 
-Use `defineRoute` for a different HTTP contract. Declare method, path where
-needed, typed input/output, authorization, and runtime validation. For JSON
+Use `defineRoute({ action, ... })` for a different HTTP contract. The file path
+and method export own its location. Declare authorization and validate input
+at runtime; infer output from the action. For JSON
 writes, `openapi.requestBody` documents the schema but does not parse the body.
 Use `readJsonBody` and `requirePathParam`. Return plain `{ data }`, or `created`
 for 201. Use a `Response` for a real HTTP requirement such as redirect or stream.

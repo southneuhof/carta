@@ -97,14 +97,12 @@ describe('stored asset contract', () => {
 
   it('projects raw keys through the installed JSON response boundary', async () => {
     const route = defineRoute({
-      path: '/probe',
-      method: 'get',
       authorize: [() => undefined],
       action: ({ c }) => c.json({ data: { file: 'uploads/installed.jpg', files: ['uploads/installed-a.jpg', 'hello'] } }),
     })
     const app = installSprindle(
       new Hono().onError(sprindleOnError).use('*', assetRequestContext()),
-      [route] as const,
+      [{ sourcePath: 'probe/+server.ts', httpPath: '/probe', parameters: [], methods: ['GET'], scopes: [], handlers: { GET: route } }] as const,
       { pipeline: { after: storedAssetResponse } },
     )
 

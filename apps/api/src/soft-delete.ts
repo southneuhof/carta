@@ -2,7 +2,7 @@ import { and, eq, getTableColumns, isNull } from 'drizzle-orm'
 import type { AnyColumn } from 'drizzle-orm'
 import type { PgColumn, PgTable } from 'drizzle-orm/pg-core'
 import { notFound } from '@southneuhof/sprindle'
-import type { RouteAuthorize } from '@southneuhof/sprindle/model'
+import type { FileRequestArgs, FileValidationIssue, RouteParameters } from '@southneuhof/sprindle'
 import { deleteRoute } from '@southneuhof/sprindle/routes'
 import { getDb } from './db'
 import { requireOrgIdentity } from './identity'
@@ -38,7 +38,7 @@ export function softDeleteValues(columns: Record<string, PgColumn>, userId: stri
  */
 export function softDeleteRoute(options: {
   table: SoftDeleteTable
-  authorize: RouteAuthorize[]
+  authorize: Array<(args: FileRequestArgs<RouteParameters, object>) => void | Response | FileValidationIssue | Promise<void | Response | FileValidationIssue>>
   reason?: string
   cascade?: Array<{ table: SoftDeleteTable; fkColumn: AnyColumn }>
 }) {

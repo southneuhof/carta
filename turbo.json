@@ -1,10 +1,8 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  // dependencyOutputs is not used: every type-check/build task runs with
-  // --noEmit and declares no file outputs, so there are no dependency
-  // outputs to hash. Cross-package inputs resolve to workspace sources via
-  // tsconfig paths, and topological dependsOn plus default input hashing
-  // already covers invalidation.
+  // Sprindle type-check prepares its command and declaration files. API
+  // type-check prepares the private route artifact. Declared outputs let a
+  // cache hit restore the tools and types needed by dependent packages.
   "futureFlags": {
     // Lets --affected resolve the PR base ref from origin/ on GitHub
     // Actions checkouts where the base branch has no local ref.
@@ -17,15 +15,15 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**", "dist-tooling/**", "dist-types/**", ".sprindle/**"]
     },
     "test": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["build", "^build"],
       "outputs": []
     },
     "type-check": {
       "dependsOn": ["^type-check"],
-      "outputs": []
+      "outputs": ["dist-tooling/**", "dist-types/**", ".sprindle/**"]
     },
     "lint": {
       "dependsOn": ["^lint"],

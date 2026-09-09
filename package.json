@@ -26,7 +26,8 @@
     "integrate:bounded-module": "node scripts/integrate-bounded-module.mjs",
     "verify:module": "node scripts/verify-module.mjs",
     "module:evidence": "node scripts/module-evidence.mjs",
-    "test:module-tooling": "node --test scripts/*.test.mjs"
+    "test:module-tooling": "node --test scripts/*.test.mjs",
+    "setup:editor": "pnpm --filter @southneuhof/sprindle editor:install"
   },
   "devDependencies": {
     "turbo": "^2.10.12",

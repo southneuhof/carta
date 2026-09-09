@@ -32,8 +32,7 @@ to the owner of that decision; unaffected work remains valid.
 
 ## Start from the Carta application
 
-Treat `apps/api` and `apps/web` as the application owners. Reuse their registered
-modules, app adapters, navigation and design tokens. Inspect current public
+Treat `apps/api` and `apps/web` as the application owners. Reuse their entities, file routes, app adapters, navigation and design tokens. Inspect current public
 framework exports before using an example from another app. A completed app
 can show a useful interaction; its domain, permission model, helper files and
 old framework API are not prerequisites for a new Carta app.

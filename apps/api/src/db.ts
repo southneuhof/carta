@@ -2,7 +2,7 @@ import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
 import { bindDomainDatabase, defineDomainSchema } from '@southneuhof/sprindle/model'
 import type { DomainPart } from '@southneuhof/sprindle/model'
-import { modules } from './routes'
+import { domains } from './domains'
 
 let pool: Pool | undefined
 let db: ReturnType<typeof drizzle> | undefined
@@ -11,7 +11,7 @@ let domainSchema: ReturnType<typeof defineDomainSchema> | undefined
 let onPoolClose: (() => Promise<void>) | undefined
 
 function domainParts(): readonly DomainPart[] {
-  return modules.flatMap((module) => ('domain' in module && module.domain ? [module.domain] : []))
+  return domains
 }
 
 export function getDb() {

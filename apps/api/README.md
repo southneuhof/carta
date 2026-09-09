@@ -4,7 +4,7 @@
 
 Copy `.env.example` to `.env` and configure the database and auth settings. Copy `.env.example` to `.env`. The API trusts `APP_ORIGIN` only. API port 5180, database `carta`, admin seed via `CARTA_ADMIN_EMAIL` and `CARTA_ADMIN_PASSWORD`.
 
-Auth is served at `/api/auth/*`. All routes except `/health` and `/api/auth/*` require a valid Better Auth session cookie.
+Auth is served at `/api/auth/*`. All routes except `/health`, `/openapi.json`, and `/api/auth/*` require a valid Better Auth session cookie.
 
 `src/routes/` is the public API surface. Group related route files in folders.
 
@@ -65,36 +65,23 @@ curl -b cookies.txt -X DELETE "$API_URL/files/object" \
 MinIO bucket CORS policy must allow `PUT` from the browser origin and allow the
 signed request headers, including `Content-Type`.
 
-Naming:
-
-- `*.ts`: route entry
-- `*.model.ts`: model entry
-- `*.entity.ts`: entity entry
-- `*.routes.ts`: custom model routes
-
-Example:
-
-```txt
-src/routes/uoms/uoms.ts
-src/routes/uoms/uoms.entity.ts
-src/routes/quality-inspection/quality-inspection.routes.ts
-src/routes/quality-inspection/quality-inspection.service.ts
-```
-
-Export first-class routes and models directly:
+HTTP routes use files. A `+server.ts` file exports named HTTP methods. The
+nearest `+scope.ts` supplies shared context, access, and an entity. Group
+directories in parentheses do not add a URL segment.
 
 ```ts
-export const exampleModel = defineModel({
-  path: '/example',
-  entity: example,
-  routes: { list: list(), detail: detail() },
-})
+// src/routes/health/+server.ts
+import { defineRoute } from '@southneuhof/sprindle'
 
-export const healthRoute = defineRoute({
-  path: '/health',
-  method: 'get',
+export const GET = defineRoute({
   action: () => ({ ok: true }),
 })
 ```
 
-Register routes explicitly in `src/routes/index.ts`, then install them with `installSprindle(app, routes)`. Model route RPC types come from their Sprindle route tree.
+Normal build, type-check, test, and development commands maintain the private
+route artifact. Developers do not register routes or import generated files.
+Database domains are registered separately in `src/domains.ts`.
+
+Run `pnpm setup:editor` once after checkout to build and install the matching
+Sprindle language extension for VS Code. Route changes then update editor types
+without a development server or a route generation command.

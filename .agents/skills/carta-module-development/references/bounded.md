@@ -1,4 +1,7 @@
-# Optional bounded generator
+# Optional module scaffold
+
+This optional scaffold writes application source once. Route discovery needs no
+scaffold command or manifest; use normal file edits for later route changes.
 
 Use this only for a new single resource whose approved design includes all five
 standard actions (list, detail, create, update, delete), a generated text UUID

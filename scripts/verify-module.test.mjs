@@ -74,7 +74,7 @@ test('check-only verifies the generated module without changing files', () => {
   const setup = fixture()
   const paths = [
     ...expectedGeneratedPaths(setup.value, { root: setup.root }),
-    join(setup.root, 'apps/api/src/routes/index.ts'),
+    join(setup.root, 'apps/api/src/domains.ts'),
     join(setup.root, 'apps/api/src/authorization/catalog.ts'),
     join(setup.root, 'apps/api/scripts/seed.ts'),
     join(setup.root, 'apps/web/src/manifest/navigation.ts'),

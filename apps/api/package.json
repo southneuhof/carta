@@ -7,12 +7,15 @@
     "node": ">=24"
   },
   "scripts": {
+    "routes:build": "sprindle-routes-build . src/routes",
+    "routes:compile": "tsx scripts/compile-routes.ts",
+    "routes:check": "sprindle-routes-check . src/routes",
     "dev": "tsx scripts/dev.ts",
-    "build": "tsc -p tsconfig.json --noEmit --singleThreaded",
-    "type-check": "tsc -p tsconfig.json --noEmit --singleThreaded",
+    "build": "pnpm run routes:build && tsx scripts/build-production.ts && pnpm run routes:check && tsc -p tsconfig.json --noEmit --singleThreaded",
+    "type-check": "pnpm run routes:build && pnpm run routes:check && tsc -p tsconfig.json --noEmit --singleThreaded",
     "lint": "oxlint src scripts",
-    "test": "pnpm run db:migrate:test && node --env-file-if-exists=.env --env-file=.env.test ./node_modules/vitest/vitest.mjs run",
-    "test:focused": "pnpm run db:migrate:test && sh -c 'if [ \"$1\" = \"--\" ]; then shift; fi; exec node --env-file-if-exists=.env --env-file=.env.test ./node_modules/vitest/vitest.mjs run \"$@\"' --",
+    "test": "pnpm run routes:compile && pnpm run db:migrate:test && node --env-file-if-exists=.env --env-file=.env.test ./node_modules/vitest/vitest.mjs run",
+    "test:focused": "pnpm run routes:compile && pnpm run db:migrate:test && sh -c 'if [ \"$1\" = \"--\" ]; then shift; fi; exec node --env-file-if-exists=.env --env-file=.env.test ./node_modules/vitest/vitest.mjs run \"$@\"' --",
     "lint:focused": "sh -c 'if [ \"$1\" = \"--\" ]; then shift; fi; exec oxlint --quiet \"$@\"' --",
     "test:lint-rules": "node ./node_modules/vitest/vitest.mjs run scripts/oxlint-plugin.spec.mjs",
     "db:push": "drizzle-kit push",
@@ -29,11 +32,13 @@
     "e2e:seed": "node --env-file=.env --env-file=.env.e2e --import tsx scripts/seed-e2e.ts",
     "e2e:clear": "node --env-file=.env --env-file=.env.e2e --import tsx scripts/clear-e2e-storage.ts",
     "e2e:cleanup-incident-reports": "node --env-file=.env --env-file=.env.e2e --import tsx scripts/cleanup-e2e-incident-reports.ts",
-    "e2e:prepare": "pnpm run e2e:reset && pnpm run e2e:migrate && pnpm run e2e:clear && pnpm run e2e:seed"
+    "e2e:prepare": "pnpm run e2e:reset && pnpm run e2e:migrate && pnpm run e2e:clear && pnpm run e2e:seed",
+    "test:dev-routes": "node --test scripts/dev-route-reload.proof.mjs"
   },
   "exports": {
     ".": "./src/index.ts",
-    "./app": "./src/app.ts"
+    "./app": "./src/app.ts",
+    "./routes-contract": "./.sprindle/routes.d.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1106.0",
@@ -56,6 +61,7 @@
     "@types/pg": "^8.20.0",
     "@types/qrcode": "^1.5.6",
     "drizzle-kit": "1.0.0-rc.4",
+    "esbuild": "^0.25.12",
     "oxlint": "1.79.0",
     "tsx": "^4.22.4",
     "typescript": "7.0.2",

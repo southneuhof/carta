@@ -1,12 +1,9 @@
-import { detail, list, update } from '@southneuhof/sprindle/routes'
-import { defineModel } from '@southneuhof/sprindle/model'
 import { and, asc, countDistinct, eq, getTableColumns } from 'drizzle-orm'
 import { getDb } from '../../db'
 import { requirePermission } from '../../identity'
 import { equalityFilters, orderClause, searchCondition } from '../../list-query'
 import { sessions } from '../auth/auth.entity'
 import { user, users, userPublicSchema } from './users.entity'
-import { createUser } from './users.routes'
 import { storedAssetModel } from '../../storage/assets'
 
 const userColumns = getTableColumns(users) as Record<string, unknown>
@@ -21,7 +18,7 @@ function listWhere(query: Record<string, unknown>) {
   return conditions.length ? and(...conditions) : undefined
 }
 
-export const userList = list({
+export const userListConfig = {
   authorize: [requirePermission('list-users')],
   run: async (args) => {
     const query = args.state.query
@@ -38,9 +35,9 @@ export const userList = list({
       total: Number(totalRows[0]?.value ?? 0),
     }
   },
-})
+}
 
-const updateUser = update({
+export const updateUserConfig = {
   authorize: [requirePermission('update-users')],
   run: async ({ state }) => {
     const id = state.id
@@ -56,16 +53,6 @@ const updateUser = update({
     })
     return updated
   },
-})
+}
 
-export const userModel = defineModel({
-  path: '/users',
-  entity: user,
-  enrich: storedAssetModel(userPublicSchema),
-  routes: {
-    list: userList,
-    detail: detail({ authorize: [requirePermission('detail-users')] }),
-    create: createUser,
-    update: updateUser,
-  },
-})
+export const userScope = { entity: user, enrich: storedAssetModel(userPublicSchema) }

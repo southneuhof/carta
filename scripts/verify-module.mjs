@@ -58,9 +58,9 @@ function staticVerify(config, { root = repoRoot } = {}) {
     detail: missingGenerated.length ? `Missing: ${missingGenerated.join(', ')}` : `${generated.length} files present`,
   })
 
-  const apiIndex = read(resolve(outputRoot, 'apps/api/src/routes/index.ts'), checks, 'API route index')
-  requireUniqueText(apiIndex, `import { ${metadata.entity}Model, domain as ${metadata.plural}Domain } from './${config.slug}/${config.slug}'`, checks, 'API route import')
-  requireUniqueText(apiIndex, `  defineModule({ domain: ${metadata.plural}Domain, models: [${metadata.entity}Model] }),`, checks, 'API module registration')
+  const domains = read(resolve(outputRoot, 'apps/api/src/domains.ts'), checks, 'API domains')
+  requireUniqueText(domains, `import { domain as ${metadata.plural} } from './routes/${config.slug}/${config.slug}'`, checks, 'API domain import')
+  requireUniqueText(domains, `  ${metadata.plural},`, checks, 'API domain registration')
 
   const catalog = read(resolve(outputRoot, 'apps/api/src/authorization/catalog.ts'), checks, 'authorization catalog')
   if (catalog !== null) {
@@ -117,7 +117,7 @@ export function verificationCommands(config, { withSeed = false } = {}) {
     `src/routes/${slug}/${slug}.entity.ts`,
     `src/routes/${slug}/${slug}.ts`,
     `src/routes/${slug}/${slug}.routes.spec.ts`,
-    'src/routes/index.ts',
+    'src/domains.ts',
     'src/authorization/catalog.ts',
   ]
   if (config.seed) apiRouteFiles.push(`src/routes/${slug}/${slug}.seed.ts`, 'scripts/seed.ts')

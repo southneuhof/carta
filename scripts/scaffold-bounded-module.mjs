@@ -307,30 +307,29 @@ function renderRoute(config) {
   const plural = `${lowerCamel(config.symbol)}s`
   const entity = lowerCamel(config.symbol)
   const metadata = moduleMetadata(config)
-  return `import { create, deleteRoute, detail, list, update } from '@southneuhof/sprindle/routes'
-import { defineDomainPart, defineModel } from '@southneuhof/sprindle/model'
-import { requirePermission } from '../../identity'
+  return `import { defineDomainPart } from '@southneuhof/sprindle/model'
 import { ${plural}, ${entity} } from './${config.slug}.entity'
 
-const listAccess = [requirePermission('${metadata.permissions.list}')]
-const detailAccess = [requirePermission('${metadata.permissions.detail}')]
-const createAccess = [requirePermission('${metadata.permissions.create}')]
-const updateAccess = [requirePermission('${metadata.permissions.update}')]
-const deleteAccess = [requirePermission('${metadata.permissions.delete}')]
-
 export const domain = defineDomainPart({ tables: { ${plural} }, entities: [${entity}] })
+`
+}
 
-export const ${entity}Model = defineModel({
-  path: '/${config.slug}',
-  entity: ${entity},
-  routes: {
-    list: list({ authorize: listAccess }),
-    detail: detail({ authorize: detailAccess }),
-    create: create({ authorize: createAccess }),
-    update: update({ authorize: updateAccess }),
-    delete: deleteRoute({ authorize: deleteAccess }),
-  },
-})
+function renderScope(config) {
+  const entity = lowerCamel(config.symbol)
+  return `import { defineScope } from '@southneuhof/sprindle'
+import { ${entity} } from '../../${config.slug}/${config.slug}.entity'
+
+export default defineScope({ entity: ${entity} })
+`
+}
+
+function renderServer(config, action) {
+  const helper = action === 'delete' ? 'deleteRoute' : action
+  const identityPath = ['detail', 'update', 'delete'].includes(action) ? '../../../../../identity' : '../../../../identity'
+  return `import { ${helper} } from '@southneuhof/sprindle'
+import { requirePermission } from '${identityPath}'
+
+export const ${action === 'create' ? 'POST' : action === 'update' ? 'PATCH' : action === 'delete' ? 'DELETE' : 'GET'} = ${helper}({ authorize: requirePermission('${action}-${config.slug}') })
 `
 }
 
@@ -582,6 +581,7 @@ describe(${literal(`${config.title} route integration`)}, () => {
 
 function filesFor(config, root) {
   const apiRoot = `apps/api/src/routes/${config.slug}`
+  const apiFileRoot = `apps/api/src/routes/(authenticated)/${config.slug}`
   const webRoot = `apps/web/src/routes/(authenticated)/${config.navigation.group}/${config.slug}`
   const routeRoot = `${webRoot}/[${lowerCamel(config.symbol)}Id]`
   const routes = renderRoutes(config)
@@ -589,6 +589,12 @@ function filesFor(config, root) {
     [`${apiRoot}/${config.slug}.entity.ts`, renderEntity(config)],
     [`${apiRoot}/${config.slug}.ts`, renderRoute(config)],
     [`${apiRoot}/${config.slug}.routes.spec.ts`, renderRouteTest(config)],
+    [`${apiFileRoot}/+scope.ts`, renderScope(config)],
+    [`${apiFileRoot}/list/+server.ts`, renderServer(config, 'list')],
+    [`${apiFileRoot}/detail/[id]/+server.ts`, renderServer(config, 'detail')],
+    [`${apiFileRoot}/create/+server.ts`, renderServer(config, 'create')],
+    [`${apiFileRoot}/update/[id]/+server.ts`, renderServer(config, 'update')],
+    [`${apiFileRoot}/delete/[id]/+server.ts`, renderServer(config, 'delete')],
     [`${webRoot}/${config.slug}.schema.ts`, renderSchema(config)],
     [`${webRoot}/${config.slug}.resource.ts`, renderResource(config)],
     [`${webRoot}/${config.slug}.resource.spec.ts`, renderResourceTest(config)],
@@ -616,7 +622,7 @@ export function scaffold(value, { root = repoRoot } = {}) {
   const generated = files.map((file) => file.path).sort((left, right) => left.localeCompare(right))
   const integration = [
     'apps/api/src/authorization/catalog.ts',
-    'apps/api/src/routes/index.ts',
+    'apps/api/src/domains.ts',
     'apps/web/src/manifest/navigation.ts',
     ...(config.seed ? ['apps/api/scripts/seed.ts'] : []),
   ].map((path) => resolve(outputRoot, path)).sort((left, right) => left.localeCompare(right))

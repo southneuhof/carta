@@ -1,5 +1,5 @@
-import { defineRoute } from '@southneuhof/sprindle/routes'
-import type { ModelRuntimeContext } from '@southneuhof/sprindle/model'
+import type { TypedResponse } from 'hono'
+import { z } from 'zod/v4'
 
 type AuthHandler = { handler(request: Request): Promise<Response> }
 type SignInOutput = {
@@ -7,19 +7,20 @@ type SignInOutput = {
   token: string
   user: { id: string; name: string; email: string; emailVerified: boolean; image?: string | null; createdAt: Date; updatedAt: Date }
 }
+const signInInput = z.object({ email: z.string(), password: z.string() })
 
 function handler(getAuth: () => AuthHandler) {
   return async ({ c }: { c: { req: { raw: Request } } }) => getAuth().handler(c.req.raw)
 }
 
+function signInHandler(getAuth: () => AuthHandler) {
+  return async (args: { c: { req: { raw: Request } } }): Promise<TypedResponse<SignInOutput, 200, 'json'>> => handler(getAuth)(args) as never
+}
+
 export function createAuthRoutes(getAuth: () => AuthHandler) {
   return {
-    signInEmail: defineRoute<SignInOutput, ModelRuntimeContext, 'post', '/api/auth/sign-in/email', { json: { email: string; password: string } }>({
-      path: '/api/auth/sign-in/email',
-      method: 'post',
-      action: handler(getAuth) as never,
-    }),
-    getSession: defineRoute({ path: '/api/auth/get-session', method: 'get', action: handler(getAuth) }),
-    signOut: defineRoute({ path: '/api/auth/sign-out', method: 'post', action: handler(getAuth) }),
+    signInEmail: { openapi: { requestBody: signInInput }, action: signInHandler(getAuth) },
+    getSession: { action: handler(getAuth) },
+    signOut: { action: handler(getAuth) },
   }
 }

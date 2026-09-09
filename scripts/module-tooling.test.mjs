@@ -17,10 +17,11 @@ test('generated resource and route use the current package, guard and detail per
   const root = workspace()
   const result = scaffold(boundedConfig(), { root })
   const resource = readFileSync(result.generated.find(path => path.endsWith('.resource.ts')), 'utf8')
-  const route = readFileSync(join(root, 'apps/api/src/routes/test-catalog/test-catalog.ts'), 'utf8')
+  const route = readFileSync(join(root, 'apps/api/src/routes/(authenticated)/test-catalog/detail/[id]/+server.ts'), 'utf8')
   assert.ok(resource.includes("from '@southneuhof/loom'"))
   assert.ok(resource.includes("permission: 'detail-test-catalog'"))
-  assert.ok(route.includes("from '../../identity'"))
+  assert.ok(route.includes("from '../../../../../identity'"))
+  assert.ok(route.includes("detail({ authorize: requirePermission('detail-test-catalog') })"))
   for (const path of result.generated) assert.ok(!readFileSync(path, 'utf8').includes('@southneuhof/is-vue-framework'), path)
 })
 

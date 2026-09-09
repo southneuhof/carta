@@ -1,14 +1,12 @@
 import { forbidden, notFound, unauthorized } from '@southneuhof/sprindle'
-import { authenticated, defineRoute } from '@southneuhof/sprindle/routes'
-import type { ModelRuntimeContext, RouteAuthorize, RouteHandlerArgs } from '@southneuhof/sprindle/model'
-import type { TypedResponse } from 'hono'
+import type { FileRequestArgs, RouteParameters } from '@southneuhof/sprindle'
 import type { PermissionCode } from './authorization/catalog'
 import { resolveIdentity, type OrgIdentity } from './authorization'
 
 export type { OrgIdentity }
 
 type SessionLike = { user?: { id?: unknown } }
-type IdentityArgs = Pick<RouteHandlerArgs, 'c' | 'identity'>
+type IdentityArgs = Pick<FileRequestArgs<RouteParameters, object>, 'c' | 'identity'>
 const CACHE_KEY = 'carta:orgIdentity'
 
 function sessionUserId(session: unknown): string | null {
@@ -33,31 +31,16 @@ export async function requireOrgIdentity(args: IdentityArgs): Promise<OrgIdentit
   return identity
 }
 
-export function requirePathParam(args: RouteHandlerArgs, name: string): string {
+export function requirePathParam(args: IdentityArgs, name: string): string {
   const id = args.c.req.param(name)
   if (!id) throw notFound()
   return id
 }
 
-export function requirePermission(code: PermissionCode): RouteAuthorize {
+export function requirePermission(code: PermissionCode) {
   return async (args) => {
     const identity = await orgIdentity(args)
     if (!identity) throw unauthorized()
     if (!identity.permissions.has(code)) throw forbidden(`Missing permission "${code}".`)
   }
 }
-
-
-type PublicOrgIdentity = Omit<OrgIdentity, 'permissions'> & { permissions: PermissionCode[] }
-type MeOutput = TypedResponse<{ data: PublicOrgIdentity }, 200, 'json'> | TypedResponse<{ error: string; message?: string }, 401, 'json'>
-
-export const meRoute = defineRoute<MeOutput, ModelRuntimeContext, 'get', '/me', { query?: Record<string, never> }>({
-  path: '/me',
-  method: 'get',
-  authorize: [authenticated()],
-  action: async (args) => {
-    const identity = await orgIdentity(args)
-    if (!identity) return args.c.json({ error: 'unauthorized' }, 401)
-    return args.c.json({ data: { ...identity, permissions: [...identity.permissions] } }, 200)
-  },
-})

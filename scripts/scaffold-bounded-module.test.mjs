@@ -76,6 +76,12 @@ test('creates explicit source files and stable absolute output', () => {
     'apps/api/src/routes/test-catalog/test-catalog.routes.spec.ts',
     'apps/api/src/routes/test-catalog/test-catalog.seed.ts',
     'apps/api/src/routes/test-catalog/test-catalog.ts',
+    'apps/api/src/routes/(authenticated)/test-catalog/+scope.ts',
+    'apps/api/src/routes/(authenticated)/test-catalog/list/+server.ts',
+    'apps/api/src/routes/(authenticated)/test-catalog/detail/[id]/+server.ts',
+    'apps/api/src/routes/(authenticated)/test-catalog/create/+server.ts',
+    'apps/api/src/routes/(authenticated)/test-catalog/update/[id]/+server.ts',
+    'apps/api/src/routes/(authenticated)/test-catalog/delete/[id]/+server.ts',
     'apps/web/src/routes/(authenticated)/settings/test-catalog/[testCatalogId]/detail.route.vue',
     'apps/web/src/routes/(authenticated)/settings/test-catalog/[testCatalogId]/edit.route.vue',
     'apps/web/src/routes/(authenticated)/settings/test-catalog/create.route.vue',
@@ -92,7 +98,7 @@ test('creates explicit source files and stable absolute output', () => {
   assert.deepEqual(result.manual, [...result.manual].sort())
   assert.ok(result.generated.every((path) => isAbsolute(path) && readFileSync(path, 'utf8')))
   assert.ok(result.manual.every((path) => isAbsolute(path)))
-  assert.ok(result.integration.some((path) => path.endsWith('/apps/api/src/routes/index.ts')))
+  assert.ok(result.integration.some((path) => path.endsWith('/apps/api/src/domains.ts')))
   assert.ok(result.integration.some((path) => path.endsWith('/apps/api/src/authorization/catalog.ts')))
   assert.ok(result.integration.some((path) => path.endsWith('/apps/api/scripts/seed.ts')))
   assert.ok(result.integration.some((path) => path.endsWith('/apps/web/src/manifest/navigation.ts')))

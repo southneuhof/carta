@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 
 export const sourceRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 export const ownerPaths = [
-  'apps/api/src/routes/index.ts',
+  'apps/api/src/domains.ts',
   'apps/api/src/authorization/catalog.ts',
   'apps/api/scripts/seed.ts',
   'apps/web/src/manifest/navigation.ts',

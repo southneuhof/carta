@@ -6,7 +6,7 @@ Preserve unrelated work. Source paths are grounded owners, not a reason to stop
 for every routine supporting edit within approved scope.
 
 For each coherent slice, implement the dependency-ordered data/API/resource/UI
-changes and their tests. Follow the routed layer contracts. Extend registration,
+changes and their tests. Follow the routed layer contracts. Extend database domains,
 navigation, relation loading, permissions and affected caches when the approved
 behavior requires them. Derive field and permission mappings from the contract;
 new business policy returns to the design skill.

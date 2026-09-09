@@ -13,8 +13,12 @@ node_modules
 .svelte-kit
 .DS_Store
 dist
+dist-tooling
+dist-types
 dist-ssr
 coverage
+.vscode-test/
+.sprindle/
 *.tsbuildinfo
 *.local
 .env

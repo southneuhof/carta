@@ -1,20 +1,44 @@
-import { spawn } from 'node:child_process'
+import { spawn, type ChildProcess } from 'node:child_process'
+import { compileRouteManifest, watchRouteManifest } from '@southneuhof/sprindle/tooling'
 
-const children = [
-  spawn('tsx', ['watch', '--env-file-if-exists=.env', 'src/server.ts'], { stdio: 'inherit' }),
-]
+const projectRoot = new URL('..', import.meta.url).pathname
+const manifest = '.sprindle-dev/routes.mjs'
+await compileRouteManifest(projectRoot, 'src/routes', manifest, false)
 
-for (const child of children) {
-  child.on('exit', (code) => {
-    for (const sibling of children) {
-      if (sibling !== child) sibling.kill()
-    }
-    process.exit(code ?? 0)
+let server: ChildProcess | undefined
+let restarting = false
+let ready = false
+
+function startServer() {
+  server = spawn('tsx', ['--env-file-if-exists=.env', 'src/server.ts'], { stdio: 'inherit', env: { ...process.env, SPRINDLE_ROUTE_MANIFEST: manifest } })
+  server.on('exit', (code, signal) => {
+    if (restarting) return
+    void watcher?.close().finally(() => process.exit(signal ? 1 : code ?? 0))
   })
 }
 
+function restartServer() {
+  if (!server || restarting) return
+  restarting = true
+  const previous = server
+  previous.once('exit', () => { restarting = false; startServer() })
+  previous.kill('SIGTERM')
+}
+
+const watcher = await watchRouteManifest(projectRoot, 'src/routes', (error) => {
+  if (error) {
+    process.stderr.write(`${error.stack ?? error.message}\n`)
+    return
+  }
+  if (ready) restartServer()
+}, manifest, false)
+ready = true
+startServer()
+
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.on(signal, () => {
-    for (const child of children) child.kill(signal)
+    restarting = true
+    server?.kill(signal)
+    void watcher.close().finally(() => process.exit())
   })
 }

@@ -2,7 +2,7 @@
 
 Use a service function when a business operation owns several writes, a state
 transition, or a transaction shared with another module. Keep simple factory
-configuration in the model. Avoid a service that only forwards unchanged args.
+configuration in `+server.ts` and shared policy in `+scope.ts`.
 
 ## Transaction boundary
 

@@ -21,6 +21,12 @@ A requirement states **what Carta must guarantee**. The measurement method and t
 - **CAR-FS-CMP-02 — Scope/documentation completeness [GATE, Both, FRAMEWORK]**  
   Public documentation SHALL state what the framework owns, what the application owns, and the supported extension path for deliberately app-level concerns.
 
+For Sprindle route authoring, verify the
+[file-routing contract](../../api-conventions/references/file-routing.md) with
+add, move, and delete cases through normal editor, dev, check, and build flows.
+Require automatic context inference, no manual route artifacts, matching runtime
+and SDK contracts, and a production build that runs without route source files.
+
 ### Functional correctness — 3.1.2
 
 - **CAR-FS-COR-01 — Canonical Sprindle contract correctness [GATE, Sprindle, FRAMEWORK]**  

@@ -25,6 +25,11 @@ appropriate checks rather than asking the user to choose a testing stack.
 Resolve exact commands from this checkout and distinguish script inspection
 from a successful execution.
 
+For backend routes, read the
+[file-routing contract](../api-conventions/references/file-routing.md). Name the
+method exports, URL parameters, inherited scopes, and affected SDK consumers.
+Keep database domains separate from HTTP routing.
+
 For web route changes, read the
 [file-routing convention](../web-ui-surfaces/references/file-routing.md). Map
 the required visible parent chain to route files and page Back targets. Preserve

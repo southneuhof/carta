@@ -30,13 +30,13 @@ function insertBeforeArrayEnd(source, startMarker, lines, name) {
   return `${before}${before.endsWith('\n') ? '' : '\n'}${lines}\n${source.slice(end)}`
 }
 
-function insertRouteIndex(source, config) {
+function insertDomains(source, config) {
   const metadata = moduleMetadata(config)
-  const importLine = `import { ${metadata.entity}Model, domain as ${metadata.plural}Domain } from './${config.slug}/${config.slug}'`
-  const moduleLine = `  defineModule({ domain: ${metadata.plural}Domain, models: [${metadata.entity}Model] }),`
-  if (count(source, importLine) > 1 || count(source, moduleLine) > 1) throw new Error(`route registration for "${config.slug}" is duplicated.`)
-  if (!source.includes(importLine)) source = replaceOnce(source, '\nexport const modules = [', `\n${importLine}\n\nexport const modules = [`, 'route import')
-  if (!source.includes(moduleLine)) source = insertBeforeArrayEnd(source, 'export const modules = [', moduleLine, 'modules')
+  const importLine = `import { domain as ${metadata.plural} } from './routes/${config.slug}/${config.slug}'`
+  const domainLine = `  ${metadata.plural},`
+  if (count(source, importLine) > 1 || count(source, domainLine) > 1) throw new Error(`domain registration for "${config.slug}" is duplicated.`)
+  if (!source.includes(importLine)) source = replaceOnce(source, '\nexport const domains = [', `\n${importLine}\n\nexport const domains = [`, 'domain import')
+  if (!source.includes(domainLine)) source = insertBeforeArrayEnd(source, 'export const domains = [', domainLine, 'domains')
   return source
 }
 
@@ -124,7 +124,7 @@ function insertNavigation(source, config) {
 
 function filePlan(root, config) {
   const files = [
-    ['apps/api/src/routes/index.ts', (source) => insertRouteIndex(source, config)],
+    ['apps/api/src/domains.ts', (source) => insertDomains(source, config)],
     ['apps/api/src/authorization/catalog.ts', (source) => insertCatalog(source, config)],
     ['apps/web/src/manifest/navigation.ts', (source) => insertNavigation(source, config)],
   ]

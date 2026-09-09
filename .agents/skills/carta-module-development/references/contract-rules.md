@@ -24,8 +24,10 @@ patterns. Use this file to check the boundaries between them.
   arrays use JSON and the API `selectionQuery(itemSchema)` contract.
 - **Access:** Bind one permission policy across API, resource actions, route
   guards, navigation and seed data. Read the
-  [API permission rules](../../api-conventions/references/standard-crud.md).
+  [API permission rules](../../api-conventions/SKILL.md).
   Server checks remain required even when the UI hides an action.
+- **Backend routes:** Use the [file-routing contract](../../api-conventions/references/file-routing.md).
+  Plan the inherited scope chain with each HTTP action.
 - **Navigation:** Register each intended entry point in the app navigation
   manifest. A filesystem route alone does not add a sidebar entry.
 - **State:** Specify deletion, recovery and workflow effects as observable

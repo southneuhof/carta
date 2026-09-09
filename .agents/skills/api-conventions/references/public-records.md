@@ -7,16 +7,16 @@ Use declared relations for ordinary related records. Keep output schemas narrow:
 internal columns, credentials, and unrestricted related objects are not public
 because a database query returned them.
 
-Use model `enrich: { schema, run }` for conversion shared by list/detail/create/
+Use scope `enrich: { schema, run }` for conversion shared by list/detail/create/
 update. The schema validates the public record. Its callback runs once per list
 row: keep it free of database and remote I/O. Use list `enrich` to fetch derived
 data for all returned IDs, then join by ID with a `Map` or `Set`. Return early
 for an empty list. Query only the extra data, not the base row again.
 
-Route enrichment runs after model enrichment. Preserve the declared public shape
+Route enrichment runs after scope enrichment. Preserve the declared public shape
 when adding operation-specific fields. Keep detail/create/update display data
 consistent so a saved form can render immediately. A custom route must apply its
-own public schema; model enrichment does not run for `defineRoute`.
+own public schema; scope enrichment does not run for `defineRoute`.
 
 Use focused context endpoints only when a form needs a bounded set of dependent
 choices or derived defaults that normal resource reads cannot supply. Scope

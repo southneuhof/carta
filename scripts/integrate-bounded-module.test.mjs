@@ -73,9 +73,8 @@ test('integrates all owner files, reports paths, and is idempotent', () => {
   assert.equal(applied.changed.length, 4)
   assert.ok(applied.changed.every((path) => existsSync(path)))
 
-  const routeIndex = readFileSync(join(root, 'apps/api/src/routes/index.ts'), 'utf8')
-  assert.match(routeIndex, /testCatalogModel/)
-  assert.equal((routeIndex.match(/testCatalogsDomain/g) ?? []).length, 2)
+  const domains = readFileSync(join(root, 'apps/api/src/domains.ts'), 'utf8')
+  assert.equal((domains.match(/testCatalogs/g) ?? []).length, 2)
   const navigation = readFileSync(join(root, 'apps/web/src/manifest/navigation.ts'), 'utf8')
   assert.equal((navigation.match(/settings-test-catalog/g) ?? []).length, 1)
   assert.equal((navigation.match(/separator: 'Test'/g) ?? []).length, 1)
@@ -143,7 +142,7 @@ test('fails closed on a missing anchor without writing partial changes', () => {
   const navigationPath = join(root, 'apps/web/src/manifest/navigation.ts')
   writeFileSync(navigationPath, readFileSync(navigationPath, 'utf8').replace("settings-roles", 'missing-anchor'))
   const before = new Map([
-    'apps/api/src/routes/index.ts',
+    'apps/api/src/domains.ts',
     'apps/api/src/authorization/catalog.ts',
     'apps/api/scripts/seed.ts',
     'apps/web/src/manifest/navigation.ts',
@@ -154,13 +153,13 @@ test('fails closed on a missing anchor without writing partial changes', () => {
   for (const [path, contents] of before) assert.equal(readFileSync(join(root, path), 'utf8'), contents)
 })
 
-test('refuses duplicate route registrations', () => {
+test('refuses duplicate domain registrations', () => {
   const root = fixture()
   integrate(config(), { root, apply: true })
-  const path = join(root, 'apps/api/src/routes/index.ts')
+  const path = join(root, 'apps/api/src/domains.ts')
   const source = readFileSync(path, 'utf8')
-  const bundleLine = '  defineModule({ domain: testCatalogsDomain, models: [testCatalogModel] }),'
-  assert.equal((source.match(new RegExp(bundleLine.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) ?? []).length, 1)
-  writeFileSync(path, source.replace(bundleLine, `${bundleLine}\n${bundleLine}`))
-  assert.throws(() => integrate(config(), { root, apply: true }), /route registration.*duplicated/)
+  const domainLine = '  testCatalogs,'
+  assert.equal((source.match(new RegExp(domainLine.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) ?? []).length, 1)
+  writeFileSync(path, source.replace(domainLine, `${domainLine}\n${domainLine}`))
+  assert.throws(() => integrate(config(), { root, apply: true }), /domain registration.*duplicated/)
 })

@@ -5,7 +5,7 @@ Carta uses Hono, Sprindle and Drizzle in `apps/api`. The local
 instructions. [Sprindle reference](../../packages/sprindle/docs/reference.md)
 owns framework vocabulary and public contracts.
 
-- Use canonical factories in `defineModel` for resource actions. Select only
+- Use canonical factories in file routes for resource actions. Select only
   the actions the product needs. Use declarative options before hooks or custom
   persistence. Use `defineRoute` for a distinct HTTP contract.
 - Keep business transactions in service functions when several writes or state

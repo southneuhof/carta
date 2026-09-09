@@ -47,7 +47,9 @@ Read the applicable layer contracts:
   for resources/forms;
 - [query cache](../carta-module-development/references/web-query-cache.md) for
   changed reads/invalidation;
-- [file routing](../web-ui-surfaces/references/file-routing.md) for changed route
+- [backend routing](../api-conventions/references/file-routing.md) for API
+  placement, inherited access, context inference, and consumer contracts;
+- [web file routing](../web-ui-surfaces/references/file-routing.md) for changed route
   structure, tabs, Back targets, or page lifetime;
 - `$api-conventions`, `$web-ui-surfaces` and `$build-resource-form` for their layers.
 

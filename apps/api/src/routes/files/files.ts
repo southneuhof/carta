@@ -1,7 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { authenticated, defineRoute } from '@southneuhof/sprindle/routes'
-import type { ModelRuntimeContext } from '@southneuhof/sprindle/model'
-import type { TypedResponse } from 'hono'
+import type { Context } from 'hono'
 import { z } from 'zod/v4'
 import {
   createPresignedDownload,
@@ -32,21 +30,7 @@ type FolderRecord = {
 }
 type FileRecord = FolderRecord | StoredAsset
 
-type PresignedUploadInput = { json: z.input<typeof presignedUploadSchema> }
-type PresignedUploadOutput = TypedResponse<{
-  data: {
-    uploadUrl: string
-    asset: StoredAsset
-    method: 'PUT'
-    headers: { 'Content-Type': string }
-    expiresIn: number
-  }
-}, 200, 'json'>
-type FileListInput = { query: { prefix?: string } }
-type FileListOutput = TypedResponse<{ data: FileRecord[]; meta: { total: number; totalPage: number } }, 200, 'json'>
 const deleteObjectSchema = z.object({ key: uploadKey })
-type DeleteObjectInput = { json: z.input<typeof deleteObjectSchema> }
-type DeleteObjectOutput = TypedResponse<{ ok: true }, 200, 'json'>
 
 function objectKey(filename: string) {
   const extension = filename.match(/\.([a-zA-Z0-9]{1,16})$/)?.[1]?.toLowerCase()
@@ -57,11 +41,8 @@ function fileName(key: string, prefix: string) {
   return key.slice(prefix.length).replace(/\/$/, '').split('/').pop() || key
 }
 
-export const listFilesRoute = defineRoute<FileListOutput, ModelRuntimeContext, 'get', '/files', FileListInput>({
-  path: '/files',
-  method: 'get',
-  authorize: [authenticated()],
-  action: async ({ c }) => {
+export const listFilesConfig = {
+  action: async ({ c }: { c: Context }) => {
     const prefix = prefixSchema.parse(c.req.query('prefix') || 'uploads/')
     const result = await listObjects(prefix)
     const folders: FileRecord[] = (result.CommonPrefixes ?? [])
@@ -79,13 +60,11 @@ export const listFilesRoute = defineRoute<FileListOutput, ModelRuntimeContext, '
     const data = [...folders, ...files]
     return c.json({ data, meta: { total: data.length, totalPage: 1 } })
   },
-})
+}
 
-export const presignedUploadRoute = defineRoute<PresignedUploadOutput, ModelRuntimeContext, 'post', '/files/presigned-url', PresignedUploadInput>({
-  path: '/files/presigned-url',
-  method: 'post',
-  authorize: [authenticated()],
-  action: async (args) => {
+export const presignedUploadConfig = {
+  openapi: { requestBody: presignedUploadSchema },
+  action: async (args: { c: Context }) => {
     const input = presignedUploadSchema.parse(await readJsonBody(args.c))
     const key = objectKey(input.filename)
     const signed = await createPresignedUpload({ key, contentType: input.contentType })
@@ -101,28 +80,21 @@ export const presignedUploadRoute = defineRoute<PresignedUploadOutput, ModelRunt
       },
     })
   },
-})
+}
 
-export const fileObjectRoute = defineRoute({
-  path: '/files/object',
-  method: 'get',
-  authorize: [authenticated()],
-  action: async ({ c }) => {
+export const fileObjectConfig = {
+  action: async ({ c }: { c: Context }) => {
     const key = uploadKey.parse(c.req.query('key'))
     const signed = await createPresignedDownload(key)
     return c.redirect(signed.url)
   },
-})
+}
 
-export const deleteFileRoute = defineRoute<DeleteObjectOutput, ModelRuntimeContext, 'delete', '/files/object', DeleteObjectInput>({
-  path: '/files/object',
-  method: 'delete',
-  authorize: [authenticated()],
-  action: async ({ c }) => {
+export const deleteFileConfig = {
+  openapi: { requestBody: deleteObjectSchema },
+  action: async ({ c }: { c: Context }) => {
     const input = deleteObjectSchema.parse(await readJsonBody(c))
     await deleteObject(input.key)
     return c.json({ ok: true })
   },
-})
-
-export default { listFilesRoute, presignedUploadRoute, fileObjectRoute, deleteFileRoute }
+}
