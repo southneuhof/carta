@@ -28,5 +28,13 @@ Keep status labels and formats with their field definition. Static enums can
 use local options. Let the schema infer record types; fix a missing projection
 at its contract instead of casting records to `any` or fields to `never`.
 
+Form controls and display fields have separate contracts. Check list and detail
+output with representative returned values. Use the app display defaults or a
+supported renderer/format for dates, times, files and structured values. Preserve
+the date's time basis, show relation labels, and expose file names with the
+required preview or download action. Include required workflow results and
+history in the visible field selection. Verify these outcomes through the
+[UI checks](verification.md), rather than asserting field configuration.
+
 For form values and dependencies, use
 [build-resource-form](../../build-resource-form/SKILL.md).

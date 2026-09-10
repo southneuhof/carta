@@ -4,6 +4,12 @@ Use the shared [verification strategy](../../carta-module-development/references
 for test selection and completion evidence. Read current package scripts for
 commands; run the relevant type check, lint, and existing focused checks.
 
+Review custom UI code against the
+[framework-first composition rule](../SKILL.md#framework-first-composition).
+Check whether each custom block owns an unmet requirement or duplicates supported
+framework behavior. Reuse the pattern checks from planning; inspect new deviations.
+Behavioral tests prove the interaction, while source review proves component reuse.
+
 Choose tests by failure risk, not by file count:
 
 - A dependency test changes the parent, proves the stale child is cleared, and

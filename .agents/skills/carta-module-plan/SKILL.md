@@ -30,6 +30,13 @@ For backend routes, read the
 method exports, URL parameters, inherited scopes, and affected SDK consumers.
 Keep database domains separate from HTTP routing.
 
+For web work, apply `$web-ui-surfaces` and, for forms, `$build-resource-form`.
+Select supported interaction patterns before choosing custom routes or controls.
+Map each required UI action to its entry point, inputs, access/state conditions
+and visible result in the plan's existing owner rows. Reference the design's
+predicates rather than copying them. Reuse pattern choices across actions; record
+only actual framework gaps as exceptions.
+
 For web route changes, read the
 [file-routing convention](../web-ui-surfaces/references/file-routing.md). Map
 the required visible parent chain to route files and page Back targets. Preserve
@@ -62,7 +69,7 @@ not a transcript or repeated copy of the design in each file.
 
 Use the [worksheet contract](../carta-module-development/references/module-execution-worksheet.md)
 for the dependency/status index and acceptance ownership. Map every acceptance
-ID to a primary plan and a proof obligation. Use
+ID to a primary plan and its required evidence surfaces. Use
 [verification strategy](../carta-module-development/references/verification-strategy.md)
 to select the smallest sufficient tests and broader checks justified by impact.
 

@@ -28,6 +28,19 @@ and integration; keep exhaustive permission and state combinations at the API.
 A layout or copy-only change can use visual inspection and existing checks.
 An explicit acceptance requirement still needs its stated evidence.
 
+Select proof for every expected outcome within an acceptance case. One case can
+require both API and browser evidence. Put the required surfaces in the worksheet
+before implementation; add separate evidence rows where needed. A UI interaction
+requires browser evidence even when the same case also specifies stored effects.
+Use visual evidence for display/layout outcomes and source review for framework
+composition. Reuse a check only for outcomes its actual assertions establish.
+
+For visible actions, prove that the permitted user can find and complete the
+action, see updated data and available actions before reload, and retain the
+result after reload. For filters, change the visible control and check the
+matching records. For file or relation inputs, use the actual control and verify
+the saved value and display. Page-render checks establish presence only.
+
 ## Tests that earn their cost
 
 - Assert public outcomes and persisted effects. A status code alone cannot

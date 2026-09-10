@@ -27,6 +27,11 @@
 | Plan | File | Depends on | Status | Review |
 |---|---|---|---|---|
 
+## Required evidence
+
+| Acceptance | Required surfaces |
+|---|---|
+
 ## Acceptance
 
 | Acceptance | Plan | Surface | Test case | Implementation | Red | Green | Review | Result |

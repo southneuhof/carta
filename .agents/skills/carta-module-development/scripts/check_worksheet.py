@@ -42,6 +42,7 @@ def check(folder):
     inventory = table(design, ['Obligation', 'Rule references', 'Acceptance IDs'])
     coverage = table(worksheet, ['Obligation', 'Acceptance IDs'])
     plans = table(worksheet, ['Plan', 'File', 'Depends on', 'Status', 'Review'])
+    required = table(worksheet, ['Acceptance', 'Required surfaces'])
     acceptance = table(worksheet, ['Acceptance', 'Plan', 'Surface', 'Test case',
                                    'Implementation', 'Red', 'Green', 'Review', 'Result'])
 
@@ -57,7 +58,15 @@ def check(folder):
     expected = indexed(inventory, 'Obligation')
     actual = indexed(coverage, 'Obligation')
     plan_map = indexed(plans, 'Plan')
-    cases = indexed(acceptance, 'Acceptance')
+    requirements = indexed(required, 'Acceptance')
+    cases = {}
+    evidence_keys = set()
+    for row in acceptance:
+        key = (row['Acceptance'], row['Surface'], row['Test case'])
+        if key in evidence_keys:
+            errors.append(f'duplicate evidence row: {key}')
+        evidence_keys.add(key)
+        cases.setdefault(row['Acceptance'], []).append(row)
     declared = re.findall(r'^id:\s*(A-\d+)\s*$', design, re.MULTILINE)
     if len(declared) != len(set(declared)):
         errors.append('duplicate acceptance record IDs in design')
@@ -83,8 +92,18 @@ def check(folder):
             errors.append(f'{name}: no acceptance cases')
         if name in actual and linked != ids(actual[name]['Acceptance IDs'], 'A'):
             errors.append(f'{name}: acceptance links differ from design')
-    if covered != set(declared) or set(cases) != set(declared):
-        errors.append('design records, inventory links and worksheet acceptance IDs differ')
+    if any(values != set(declared) for values in [covered, set(cases), set(requirements)]):
+        errors.append('design records, inventory links, required evidence and acceptance IDs differ')
+    for name, row in requirements.items():
+        surfaces = {value.strip() for value in row['Required surfaces'].split(',')}
+        if not surfaces <= {'API', 'UNIT', 'BROWSER', 'VISUAL'}:
+            errors.append(f'{name}: invalid required surfaces')
+        actual_surfaces = {case['Surface'] for case in cases.get(name, [])}
+        if surfaces != actual_surfaces:
+            errors.append(f'{name}: evidence surfaces differ from required surfaces')
+    for name, rows in cases.items():
+        if len({row['Plan'] for row in rows}) != 1:
+            errors.append(f'{name}: evidence must have one primary plan')
 
     def file_link(value, label):
         if not value or not (folder / value).is_file():
@@ -113,6 +132,9 @@ def check(folder):
                 cycles = []
             indexed(cycles, 'Cycle')
             cycle_cases = set()
+            cycle_tests = set()
+            evidence_tests = {(case['Acceptance'], case['Test case']) for case in acceptance
+                              if case['Plan'] == name}
             for cycle in cycles:
                 if any(not value for value in cycle.values()):
                     errors.append(f'{name}/{cycle["Cycle"]}: empty required property')
@@ -120,9 +142,7 @@ def check(folder):
                 cycle_cases |= linked
                 if not linked or linked - assigned_cases:
                     errors.append(f'{name}/{cycle["Cycle"]}: invalid acceptance links')
-                for case in linked & cases.keys():
-                    if cycle['Test case'] != cases[case]['Test case']:
-                        errors.append(f'{name}/{cycle["Cycle"]}: test differs from {case}')
+                cycle_tests.update((case, cycle['Test case']) for case in linked)
                 if cycle['Review timing'] not in {'before-implementation', 'after-plan'}:
                     errors.append(f'{name}/{cycle["Cycle"]}: invalid review timing')
                 if cycle['Review timing'] == 'after-plan' and cycle['Consequence'] != 'NONE':
@@ -131,6 +151,8 @@ def check(folder):
                     errors.append(f'{name}/{cycle["Cycle"]}: missing consequence')
             if cycle_cases != assigned_cases:
                 errors.append(f'{name}: cycle coverage differs from acceptance ownership')
+            if cycle_tests != evidence_tests:
+                errors.append(f'{name}: cycle tests differ from evidence rows')
         deps = ids(row['Depends on'], 'P')
         dependencies[name] = deps
         if not deps and row['Depends on'] != 'NONE':
@@ -160,7 +182,8 @@ def check(folder):
     for name in dependencies:
         visit(name, set())
 
-    for name, row in cases.items():
+    for row in acceptance:
+        name = f'{row["Acceptance"]}/{row["Surface"]}/{row["Test case"]}'
         if row['Plan'] not in plan_map:
             errors.append(f'{name}: missing primary plan')
         if row['Surface'] not in {'API', 'UNIT', 'BROWSER', 'VISUAL'}:

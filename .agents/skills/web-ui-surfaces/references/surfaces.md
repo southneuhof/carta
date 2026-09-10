@@ -21,10 +21,10 @@ collections.
 ## Standard resource path
 
 Resource actions are independent. Expose the actions required by the task;
-a resource does not need all CRUD actions. Use `FormView` for independent
-create/update pages and `DialogForm` for short contextual edits when these
-fit the requested flow. Preserve existing route access unless it changes
-within the user request.
+a resource does not need all CRUD actions. Use `FormView` for independent form
+pages and `DialogForm` for input within the current interaction. Choose from the
+required navigation and retained context, whether the action is standard or custom.
+Preserve existing route access unless it changes within the user request.
 
 Use the module schema, one field catalog, and the app Hono adapter:
 

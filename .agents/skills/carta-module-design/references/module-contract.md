@@ -31,6 +31,11 @@ Authority is `OBSERVED` for current evidence, `CONFIRMED` for user requirements,
 classification per claim; separate observed facts from proposed decisions. Record conflicts
 and their resolution. Approval identifies the exact revision; silence is not approval.
 
+Trace supplied process branches and UI requirements to rule IDs or explicit
+exclusions. When sources differ, name which source governs each affected behavior.
+Treat an inferred rule as a proposal until confirmed; general approval does not
+resolve contradictory rules within the same revision.
+
 ## Data tables
 
 For each new or changed entity, name its meaning, owner and identity. Use:
@@ -76,6 +81,12 @@ Rule references. Use exact IDs, not ID ranges.
 Specify no-match rejection and overlapping-condition precedence, or make conditions
 exclusive. For joins, define completion; for returns, define retained and cleared
 values. A linear resource needs no artificial state machine.
+
+For each completion condition, define the evidence or authorized confirmation
+that establishes it. For return/resubmit paths, state which prior decisions and
+reasons remain available after another cycle. Check terminal-state restrictions
+against every action, including attachment and metadata writes. Reference these
+conditions from action records so transitions and actions use the same rule.
 
 ## Action records
 

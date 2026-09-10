@@ -18,9 +18,21 @@ app adapter, and the relevant Loom exports. For a new app surface, inspect
 layout before adding another owner for them.
 
 Use nearby modules as evidence, then check their pattern against the current
-public API. Copy neither obsolete contracts nor unnecessary layers. Keep
-framework changes within explicit user scope; compose supported controls
-locally when the requested behavior needs a custom body.
+public API. Reuse a pattern already checked in this task while its contract is
+unchanged. Keep framework changes within explicit user scope.
+
+## Framework-first composition
+
+Use established framework patterns directly. Select the highest-level component
+that supports the required interaction, including its states and feedback.
+Before adding custom UI behavior, check the relevant component contract and
+extension points. Use supported slots, fields, actions and framework controls;
+keep custom code limited to the unmet requirement.
+
+Check once per interaction pattern, not once per component instance. Standard
+use needs no written justification. For a real gap, record the missing capability
+and the local code that owns it in the plan or handoff. A custom layout can still
+use framework-owned forms, inputs, buttons, dialogs and data loading.
 
 ## Choose and build
 

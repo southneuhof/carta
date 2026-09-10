@@ -13,9 +13,11 @@ apply the same criteria. An executor summary is an input, not a verdict.
 
 ## Establish the review scope
 
-Read the approved design/revision, selected plans, worksheet acceptance/handoff
-rows and complete relevant diff, including dirty and untracked files. Read the
-current owners and consumers needed to interpret it. Consult the shared
+First derive the required outcomes from the approved design/revision and its
+source references. Then compare selected plans, worksheet required surfaces,
+acceptance/handoff rows and the complete relevant diff, including dirty and
+untracked files. Read the current owners and consumers needed to interpret it.
+Consult the shared
 [module contract](../carta-module-design/references/module-contract.md),
 [worksheet contract](../carta-module-development/references/module-execution-worksheet.md)
 and [verification strategy](../carta-module-development/references/verification-strategy.md).
@@ -33,6 +35,10 @@ owning API/service/persistence to the observable result and affected consumers.
 Check relevant allowed and denied cases, field/relationship meaning, lifecycle,
 atomicity/retries, visible states, reload and invalidation. Compare implementation
 to the approved design, not just to tests written by the same implementer.
+
+Apply the design's source and workflow consistency checks to unresolved conflicts.
+A missing storage column does not remove a required effect or retained history.
+Trace repeated workflow cycles when earlier decisions must remain available.
 
 Map each acceptance ID to direct implementation and sufficient evidence. Compare
 changed owners with plan scope and distinguish pre-existing unrelated work.
@@ -62,6 +68,10 @@ repeated validation where direct use preserves the required behavior.
 
 Compare the design inventory with worksheet coverage and plan ownership. Check
 required branches, invariants and whole sequences, including browser obligations.
+Check every expected outcome against the assertion or visual evidence that proves
+it. Apply the [UI review](../web-ui-surfaces/references/verification.md) to custom
+composition and displayed values. A passed API row leaves a required browser or
+visual row open until that evidence is sufficient.
 Inspect red/green evidence, required test-gate reviews, changed assertions,
 selected cases, commands, input fingerprints,
 environment identity and results. Reuse current sufficient evidence; rerun the
@@ -110,3 +120,5 @@ BLOCKERS: affected IDs and missing prerequisite, or None
 Return the report to the workflow owner, who records it and updates the worksheet.
 A scoped plan pass does not mark the entire feature done. Preserve failures and
 unverified results explicitly; never turn a missing runtime into a pass.
+Required work can leave scope only through an authorized scope change. An executor
+or reviewer cannot relabel missing acceptance evidence as optional follow-up work.

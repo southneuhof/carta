@@ -16,6 +16,10 @@ Bind standard API schemas with `defineSchema` and `fromZod(schema)`. Infer parse
 types; add a local form transform only when the control and API shapes differ.
 Keep custom action schemas separate from standard CRUD schemas.
 
+For file/image fields in standard or custom actions, read the
+[asset-object contract](../carta-module-development/references/frontend-field-contract.md#objects-and-identifiers)
+before selecting the write schema. Use that contract to resolve an input mismatch.
+
 Use one `defineFields` catalog. Select only each action's fields in its required
 order. A schema key string uses the app field default; a field reference adds
 module behavior. One terminal `.override(...)` handles one action difference.
@@ -44,8 +48,9 @@ fields. The outer form owns label, required state, error, help, and grid span.
 Use the app's language and domain terms; preserve legacy copy only when the
 request makes it authoritative. Add help for non-obvious format or consequence.
 
-Use `FormView` for an independent page and `DialogForm` for a short contextual
-form. Pass the standard action bag directly. Keep final form actions together
+Apply the [framework-first composition rule](../web-ui-surfaces/SKILL.md#framework-first-composition)
+once per form pattern. Use `FormView` for an independent page and `DialogForm` for
+a contextual form. Pass the standard action bag directly. Keep final form actions together
 at the bottom; use the app submit default unless a specific workflow label is
 clearer. Let the form own draft, validation, pending state, and ordinary close
 behavior instead of adding parallel state in the route.

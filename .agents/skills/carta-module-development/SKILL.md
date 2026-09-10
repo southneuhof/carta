@@ -61,8 +61,9 @@ requirements and label the review as a self-review.
 Use [verification-strategy.md](references/verification-strategy.md) to select
 and record evidence. Invoke `$verify-carta-module` for final acceptance whether
 implementation was delegated or direct. A static helper pass or executor summary
-is not a module acceptance verdict. Complete only when every required acceptance
-row has current sufficient evidence, semantic review passes and blockers are clear.
+is not a module acceptance verdict. Complete only when every required evidence
+surface and acceptance row has current sufficient evidence, semantic review passes
+and blockers are clear. Apply the verifier's scope-change rule to unfinished work.
 
 ## Layer contracts
 

@@ -59,6 +59,10 @@ gaps rather than polishing ambiguous prose. An available independent reviewer
 can inspect the packet without the discovery conversation; otherwise perform
 and label a self-review. A heading check is not a semantic review.
 
+Complete the source and workflow consistency checks in the
+[module contract](references/module-contract.md#authority-and-scope) before declaring
+readiness. Check both source coverage and agreement between the design's rules.
+
 The user request and confirmed decisions can establish approval. Record their
 source and scope. For a material product decision not yet authorized, present
 the proposed behavior and exact design revision for approval. Visual composition

@@ -19,10 +19,17 @@ required sequence needs a row. Every acceptance case has one primary plan, liste
 plan using exact IDs; extra
 integration cases can belong to later plans. List dependencies by plan ID.
 
-Each Acceptance row names a surface (`API`, `UNIT`, `BROWSER`, `VISUAL`), test case
-as `file::exact test title` (or a named visual check), implementation owner and
-evidence. Plan cycle Test case values must match these rows. Split acceptance cases when they
-need independently reviewed outcomes. Use `PENDING` until evidence exists.
+Before assignment, list each acceptance ID once in Required evidence with its
+comma-separated required surfaces (`API`, `UNIT`, `BROWSER`, `VISUAL`). Select
+them with the [verification strategy](verification-strategy.md#select-proof-by-behavior-and-impact).
+The reviewer checks this selection against all expected outcomes in the design.
+
+Each Acceptance row names one surface, test case as `file::exact test title`
+(or a named visual check), implementation owner and evidence. Repeat an acceptance
+ID for separate tests or surfaces; keep all its rows in the same primary plan.
+The acceptance ID, surface and test case together identify a unique evidence row.
+Plan cycles must cover each row's test case, and each cycle must have matching
+evidence rows for its acceptance IDs. Use `PENDING` until evidence exists.
 Report links are paths relative to the feature folder. Use one report per evidence
 cell; the report can link multiple runs. `Red` links observed failure or a report
 explaining existing coverage/visual applicability under verification strategy.
@@ -36,9 +43,12 @@ python3 .agents/skills/carta-module-development/scripts/check_worksheet.py plans
 
 The checker requires the current inventory/table format. For an older approved
 layout, map its IDs into the current tables without changing rules or approval.
-It checks coverage, ownership, cycle/test mapping, file links and state consistency. It cannot prove
+It checks coverage, required surfaces, ownership, cycle/test mapping, file links
+and state consistency. It cannot prove
 inventory completeness, assertion quality, report truth or input freshness; the
 reviewer checks those against design, source and recorded command results.
+When resuming an older worksheet, select required surfaces from the design before
+mapping existing reports. Existing API passes cannot determine the UI obligations.
 
 ## State and gates
 

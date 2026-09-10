@@ -29,6 +29,10 @@ id: A-01
 |---|---|---|---|---|
 | P-01 | 001-result.md | NONE | VERIFIED | report.md |
 
+| Acceptance | Required surfaces |
+|---|---|
+| A-01 | BROWSER |
+
 | Acceptance | Plan | Surface | Test case | Implementation | Red | Green | Review | Result |
 |---|---|---|---|---|---|---|---|---|
 | A-01 | P-01 | BROWSER | request.spec.ts::saves and reloads | app.ts:save | report.md | report.md | report.md | PASS |
@@ -49,6 +53,7 @@ id: A-01
                 worksheet.replace('| P-01 | BROWSER', '| P-02 | BROWSER'),
                 worksheet.replace('| NONE | VERIFIED', '| P-01 | VERIFIED'),
                 worksheet.replace('| BROWSER |', '| UNKNOWN |'),
+                worksheet.replace('| A-01 | BROWSER |', '| A-01 | API, BROWSER |'),
                 worksheet.replace('| report.md | PASS', '| missing.md | PASS'),
             ]:
                 (folder / 'worksheet.md').write_text(broken)
@@ -66,6 +71,32 @@ id: A-01
                 self.assertTrue(check(folder))
             (folder / '001-result.md').write_text('- Acceptance: A-02')
             self.assertTrue(check(folder))
+            (folder / '001-result.md').write_text(plan)
+            api_row = '| A-01 | P-01 | API | api.spec.ts::stores result | app.ts:save | report.md | report.md | report.md | PASS |\n'
+            combined = worksheet.replace('| A-01 | BROWSER |', '| A-01 | API, BROWSER |') + api_row
+            api_cycle = '| C-02 | A-01 | api.spec.ts::stores result | request and user | persisted result | missing action | app.ts | after-plan | NONE |\n'
+            (folder / 'worksheet.md').write_text(combined)
+            # Every surface needs its planned test, even under one acceptance ID.
+            self.assertTrue(check(folder))
+            (folder / '001-result.md').write_text(plan + api_cycle)
+            self.assertEqual(check(folder), [])
+            for broken in [
+                combined.replace('| BROWSER | request.spec.ts::saves and reloads', '| API | request.spec.ts::saves and reloads'),
+                combined.replace('| API, BROWSER |', '| API |'),
+                combined + api_row,
+                combined.replace('| P-01 | API |', '| P-02 | API |'),
+                combined.replace('| report.md | PASS |\n', '| report.md | PENDING |\n', 1),
+            ]:
+                (folder / 'worksheet.md').write_text(broken)
+                self.assertTrue(check(folder), broken)
+            (folder / 'worksheet.md').write_text(combined)
+            extra_browser_row = api_row.replace('| API | api.spec.ts::stores result', '| BROWSER | request.spec.ts::filters records')
+            extra_browser_cycle = api_cycle.replace('C-02', 'C-03').replace('api.spec.ts::stores result', 'request.spec.ts::filters records')
+            (folder / 'worksheet.md').write_text(combined + extra_browser_row)
+            self.assertTrue(check(folder))
+            (folder / '001-result.md').write_text(plan + api_cycle + extra_browser_cycle)
+            self.assertEqual(check(folder), [])
+            (folder / 'worksheet.md').write_text(worksheet)
             (folder / '001-result.md').write_text(plan)
             (folder / 'design.md').write_text(design + '\n| Invariant ID | Condition that must remain true |\n|---|---|\n| I-01 | A required invariant |\n')
             self.assertTrue(check(folder))

@@ -92,13 +92,19 @@ Do not apply one identifier rule to all inputs:
   persistence boundary, then sends current labels in the same record array.
   Do not map these values to IDs and do not add a field writer.
 
-The API owns the stored-asset HTTP value. `storedAssetSchema` defines the exact
-object, `storedAssetInput` extracts its upload key for persistence, and
-`storedAsset()` creates fresh read values. The app asset adapter validates this
-object and maps its fixed `id`, `url`, `name`, `mimeType`, `size`, and
-`updatedAt` fields to the generic input contract. It does not accept raw keys,
+The API owns the stored-asset HTTP value. `storedAssetSchema` in `apps/api/src/schema.ts`
+defines the exact object, `storedAssetInput` extracts its upload key for persistence,
+and `storedAsset()` creates fresh read values. The app asset adapter validates this
+object and maps it to the generic input contract. It does not accept raw keys,
 external URLs, partial objects, nested envelopes, or compatibility aliases. A multi
 file field uses an object array and submits the array unchanged.
+
+Apply this contract to custom workflow actions as well as create/update. If an
+action expects a raw key from a file control, correct its API input schema to use
+`storedAssetInput`. The form schema uses `storedAssetSchema` so parsing preserves
+the object. Keep the key-extraction transform on the server, including when the
+form uses `fromZod`; a client writer or client schema transform would preserve
+the wrong HTTP contract.
 
 The renderer/schema compatibility diagnostic skips its mismatch error only when
 the field has `form.write`. Keep compatibility metadata private to the

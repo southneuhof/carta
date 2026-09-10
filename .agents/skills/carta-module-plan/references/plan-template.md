@@ -30,7 +30,8 @@ update order separately. Resolve architecture and dependency choices here.
 |---|---|---|---|---|---|---|---|---|
 
 Each row names one test as `file::exact test title`, identical to its worksheet
-Test case. Use exact acceptance IDs. Every owned acceptance case needs a cycle.
+Test case. Use exact acceptance IDs. An acceptance case can need several cycles
+to prove its required surfaces. Every evidence row needs a matching cycle.
 Review timing is `before-implementation` or `after-plan`; Consequence states the
 qualifying effect or `NONE`. Split independent tests into separate rows; one
 sequence test can cover a journey.
@@ -59,7 +60,8 @@ orchestrator verdict. Completion and state follow the worksheet contract.
 ## Readiness
 
 Map every design inventory obligation to acceptance and every acceptance case to
-one primary plan in the [worksheet](../../carta-module-development/references/module-execution-worksheet.md).
+one primary plan and its required surfaces in the
+[worksheet](../../carta-module-development/references/module-execution-worksheet.md).
 Check paths, interfaces, command selectors, fixtures, assertions and dependency
 order as an executor without the interview. Use
 [verification strategy](../../carta-module-development/references/verification-strategy.md)
