@@ -73,6 +73,12 @@ export const authorizationModules = [
       { code: "delete-role-assignments", name: "Unassign Role", description: "Remove a role from a user.", targetType: "global", active: true },
     ],
   },
+  {
+    name: "Stop Work Actions",
+    active: true,
+    permissions: [
+    ],
+  },
 ] as const satisfies readonly ModuleDefinition[];
 
 export type AuthorizationModuleCode = (typeof authorizationModules)[number]["code"];

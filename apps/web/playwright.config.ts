@@ -50,7 +50,7 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { browserName: 'chromium' } }],
   webServer: [
     {
-      command: 'node --env-file=.env --env-file=.env.e2e --import tsx src/server.ts',
+      command: 'pnpm exec tsx scripts/compile-routes.ts .sprindle-e2e/routes.mjs && node --env-file=.env --env-file=.env.e2e --import tsx src/server.ts',
       cwd: apiRoot,
       url: `${apiUrl}/health`,
       timeout: 120_000,
@@ -59,6 +59,7 @@ export default defineConfig({
         API_PORT: apiPort,
         BETTER_AUTH_URL: apiUrl,
         APP_ORIGIN: webUrl,
+        SPRINDLE_ROUTE_MANIFEST: '.sprindle-e2e/routes.mjs',
       },
     },
     {

@@ -1,7 +1,6 @@
 import { drizzleAdapter } from '@better-auth/drizzle-adapter'
 import { betterAuth } from 'better-auth'
 import { eq } from 'drizzle-orm'
-import { defineDomainPart } from '@southneuhof/sprindle/model'
 import { getDb } from '../../db'
 import { users } from '../(authenticated)/users/users.entity'
 import { accounts, sessions, verifications } from './auth.entity'
@@ -33,11 +32,6 @@ export function createAuth({ allowSignUp = false }: { allowSignUp?: boolean } = 
     },
   })
 }
-
-export const domain = defineDomainPart({
-  tables: { sessions, accounts, verifications },
-  entities: [],
-})
 
 let auth: ReturnType<typeof createAuth> | undefined
 export function getAuth() {

@@ -1,19 +1,6 @@
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import { getDb } from '../src/db'
 import { authorizationModules, type PermissionCode } from '../src/authorization/catalog'
-import { createAuth } from '../src/routes/auth/auth'
-import { accounts } from '../src/routes/auth/auth.entity'
-import { permissions } from '../src/routes/(authenticated)/permissions/permissions.entity'
-import { rolePermissions, roleAssignments, roles } from '../src/routes/(authenticated)/roles/roles.entity'
-import { users } from '../src/routes/(authenticated)/users/users.entity'
-
-const seedEmail = process.env.CARTA_ADMIN_EMAIL ?? 'admin@example.com'
-const seedPassword = process.env.CARTA_ADMIN_PASSWORD ?? 'demo-password'
-
-/** Stable non-login actor used by all public customer-feedback writes. */
-const PUBLIC_INTAKE_USER_ID = 'public-intake-user'
-type CatalogPermission = (typeof authorizationModules)[number]['permissions'][number]
-const catalogPermissions = authorizationModules.flatMap((module) => [...module.permissions]) as CatalogPermission[]
 
 export async function seedPublicIntakeUser(): Promise<string> {
   const db = getDb()
@@ -25,13 +12,12 @@ export async function seedPublicIntakeUser(): Promise<string> {
   }).onConflictDoUpdate({
     target: users.id,
     set: { name: 'Public Intake', email: 'public-intake@system.invalid', statusCode: 'inactive' },
-  })
-  await db.delete(accounts).where(eq(accounts.userId, PUBLIC_INTAKE_USER_ID))
-  await db.delete(roleAssignments).where(eq(roleAssignments.userId, PUBLIC_INTAKE_USER_ID))
-  return PUBLIC_INTAKE_USER_ID
-}
-
-export async function seedRoleGroups() {
+    id: `role-${roleCode}`,
+    roleCode,
+    name: roleCode.split('-').map((part) => part[0]!.toUpperCase() + part.slice(1)).join(' '),
+    description: 'Stop Work Action workflow role.',
+    active: true,
+  }))).onConflictDoNothing()
 }
 
 export async function seedAuthorization() {
@@ -78,7 +64,6 @@ export async function seedAuthorization() {
   const permissionRows = await db.select({ id: permissions.id, code: permissions.permissionCode }).from(permissions)
   const stalePermissionIds = permissionRows.filter((permission) => !catalogPermissionCodes.has(permission.code as PermissionCode)).map((permission) => permission.id)
   if (stalePermissionIds.length) await db.update(permissions).set({ active: false }).where(inArray(permissions.id, stalePermissionIds))
-  const seededRoleIds = ['role-administrator'] as const
   await db
     .update(rolePermissions)
     .set({ active: false })
@@ -96,7 +81,13 @@ export async function seedAuthorization() {
     .onConflictDoUpdate({
       target: [rolePermissions.roleId, rolePermissions.permissionId],
       set: { active: true },
-    })
+    roleId: `role-${roleCode}`,
+    active: true as const,
+  }))).filter((grant): grant is { roleId: string; permissionId: string; active: true } => Boolean(grant.permissionId))
+  if (workflowGrants.length) await db.insert(rolePermissions).values(workflowGrants).onConflictDoUpdate({
+    target: [rolePermissions.roleId, rolePermissions.permissionId],
+    set: { active: true },
+  })
 }
 
 export async function seedAdministrator(): Promise<string> {
@@ -151,6 +142,9 @@ export async function seedAdministrator(): Promise<string> {
           },
         })
     }
-  }
+    userId: admin.id,
+    scopeType: 'corporate',
+    scopeValue: null,
+  }).onConflictDoNothing()
   return admin.id
 }
