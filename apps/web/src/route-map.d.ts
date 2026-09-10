@@ -122,22 +122,6 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-      | never
-    >,
-      | never
-    >,
-      | never
-    >,
-      | never
-    >,
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
     'auth-login': RouteRecordInfo<
       'auth-login',
       '/auth/login',
@@ -286,36 +270,6 @@ declare module 'vue-router/auto-routes' {
     'src/routes/(authenticated)/settings/users/create.route.vue': {
       routes:
         | 'settings-users-create'
-      views:
-        | never
-      pathParamNames:
-        | never
-      routes:
-      views:
-        | never
-      pathParamNames:
-        | never
-      routes:
-      views:
-        | never
-      pathParamNames:
-        | never
-      routes:
-      views:
-        | never
-      pathParamNames:
-        | never
-      routes:
-      views:
-        | never
-      pathParamNames:
-        | never
-      routes:
-      views:
-        | never
-      pathParamNames:
-        | never
-      routes:
       views:
         | never
       pathParamNames:
