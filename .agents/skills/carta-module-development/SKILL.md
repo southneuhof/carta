@@ -52,10 +52,10 @@ still have an unresolved business rule. For a new full-CRUD resource with no
 special behavior, check [bounded.md](references/bounded.md) for generator limits;
 generator ineligibility does not change the approved scope.
 
-Use delegation when available and useful. Give the executor the current design,
-worksheet, selected dependency-ordered plans, existing evidence and write
-boundaries. Keep a coherent slice together rather than forcing one agent per
-file. When delegation is unavailable, execute directly with the same acceptance
+Use delegation when available and useful. Give the executor one plan and its
+required design, worksheet, source and evidence references. The orchestrator
+reviews every plan before assigning the next; execution.md owns the gates.
+When delegation is unavailable, execute directly with the same acceptance
 requirements and label the review as a self-review.
 
 Use [verification-strategy.md](references/verification-strategy.md) to select

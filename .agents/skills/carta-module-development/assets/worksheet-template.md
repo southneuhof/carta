@@ -5,39 +5,38 @@
 - Modules: {{MODULES}}
 - Grouping reason: {{REASON}}
 - Design and approved revision: Not established
-- Active plan: None
+- Active plan: NONE
 - Next action: Identify the strongest usable artifact and affected owners
 - Read boundary: Request, supplied sources and relevant application owners
 - Write boundary: Planning artifacts until implementation is authorized
-- Blocker: None
-- Latest review: None
+- Blocker: NONE
+- Latest review: NONE
 
 ## Artifact ledger
 
 | Artifact | Authority / approval | Currentness evidence | Owns | Gaps or conflicts |
 |---|---|---|---|---|
 
-## Execution order and status
+## Coverage
 
-| Plan | Observable result | Depends on | Status | Evidence |
+| Obligation | Acceptance IDs |
+|---|---|
+
+## Plans
+
+| Plan | File | Depends on | Status | Review |
 |---|---|---|---|---|
 
-## Dependency notes
+## Acceptance
 
-None established.
-
-## Acceptance and semantic handoff
-
-Use acceptance IDs from the approved design. Each implementation pointer must
-name the actual owner/symbol; each evidence pointer must establish the outcome.
-
-| Acceptance ID / behavior | Primary plan | Implementation | Proof obligation / test case | Evidence / input state | Result |
-|---|---|---|---|---|---|
+| Acceptance | Plan | Surface | Test case | Implementation | Red | Green | Review | Result |
+|---|---|---|---|---|---|---|---|---|
 
 ## Decisions and blockers
 
-Point to design decisions; record unresolved blockers and their affected scope.
+Reference design decisions; name blocked IDs, prerequisites and next actions.
 
 ## Handoff history
 
-Record material revisions, failed checks, superseded plans and final review.
+Record test-gate reviews, changed assertions, source revisions, failed checks,
+superseded plans and final cross-plan review. Keep output in linked reports.

@@ -1,153 +1,174 @@
 # Module contract
 
-This is the authoritative structure and readiness bar for
-`plans/<feature>/design.md`. The design skill produces it; the planner and
-verifier consume it. Scale detail to the behavior. Combine small sections when
-clear; omit irrelevant extension sections with a short scope reason. Existing
-well-formed designs can keep their layout if they satisfy these semantics.
+`plans/<feature>/design.md` owns intended behavior and approval. Plans own
+technical decisions; the worksheet owns progress; reports own observed results.
+Use tables for data, YAML records for actions and acceptance, and Mermaid for
+branched workflows. Diagrams reference rule IDs; records remain authoritative.
+Existing approved artifacts can retain their format when they meet this contract.
 
-## Header and authority
+## Record rules
 
-Record feature name, revision (for example `D1`), status (`DRAFT`, `APPROVED`,
-`BLOCKED`), approval source and date, and the scope of that approval. Identify
-which request or existing design this revision changes. State that intended
-behavior belongs here, execution organization in numbered plans, progress in
-`worksheet.md`, and observed results in reports.
+Assign stable IDs to workflows (`W-01`), behaviors (`B-01`), transitions (`T-01`),
+invariants (`I-01`) and acceptance cases (`A-01`). Define each rule once and link
+its consumers. Keep reasons and source notes outside executable conditions.
+A blank required property is incomplete. `NONE` is an explicit absence;
+`UNRESOLVED` blocks affected work. An unchanged contract reference names its
+path and symbol or rule ID. Define technical terms before using them.
 
-Approval records name the revision reviewed. Record a material change with its
-affected behavior IDs and new approval; do not reset unrelated approved rules.
-An imported approved document remains a valid authority with its exact source.
+## Authority and scope
 
-## 1. Purpose and scope
+Record feature, revision, status (`DRAFT`, `APPROVED`, `BLOCKED`), approval source,
+date and scope. Separate current behavior from intended changes. A new entity
+does not imply additional CRUD actions, collections or administration screens. Record actors,
+entry points, outcomes, exclusions, affected owners and consumers using
+[context discovery](context-discovery.md).
 
-Describe outcomes, actors, entry points and the journeys included in this
-slice. State explicit exclusions and dependencies. Identify the existing
-behavior to preserve and the intended change. A request for one action does not
-implicitly include the other CRUD actions.
-
-## 2. Context, evidence and decisions
-
-Include the affected-system map from [context-discovery.md](context-discovery.md),
-applicable vocabulary and source references. For consequential claims use:
-
-| ID | Statement | Authority | Source | Applies to |
+| Claim ID | Statement | Authority | Source | Affected IDs |
 |---|---|---|---|---|
 
-`OBSERVED` means current code or evidence demonstrates it. `CONFIRMED` means
-the user or their designated authority established the desired rule.
-`PROPOSED` means a recommendation is awaiting a decision. `UNKNOWN` means
-knowledge is missing. These categories are not interchangeable.
+Authority is `OBSERVED` for current evidence, `CONFIRMED` for user requirements,
+`PROPOSED` for recommendations, or `UNKNOWN` for missing knowledge. Use one
+classification per claim; separate observed facts from proposed decisions. Record conflicts
+and their resolution. Approval identifies the exact revision; silence is not approval.
 
-Record material conflicts and their resolution. Maintain an unresolved table
-with impact and next action while drafting. An approved delivery scope has no
-unresolved behavior-changing decision; explicit exclusions are allowed.
+## Data tables
 
-## 3. Data and relationships
+For each new or changed entity, name its meaning, owner and identity. Use:
 
-For new or changed data, state meaning and owner, identity, type/value domain,
-requiredness, defaults, uniqueness and scope, mutable versus derived values,
-and write/read behavior. State relationship cardinality, ownership, valid
-references, and lifecycle effects. Reference unchanged schema contracts by path
-and symbol; avoid copying entire existing models.
+| Field | Meaning | Stored type / values | Initial value | Required by action | Writable by action | Omitted / null input | Uniqueness scope / derivation |
+|---|---|---|---|---|---|---|---|
 
-Where applicable, specify deletion/recovery, existing-data migration, retained
-file keys versus external URLs, derived display metadata, and how dependent
-selections react when an upstream value changes. Overall labels such as
-"soft delete" or "parent-child" are not a substitute for those rules.
+| Relationship | Cardinality | Owner | Valid references | Parent-change effects | Delete / recovery effects |
+|---|---|---|---|---|---|
 
-## 4. Actions and workflows
+Specify precision, units, time basis and rounding where meaningful. Include
+migration of existing data, retained file keys versus URLs, dependent selection
+clearing, and mutable versus derived values where applicable. Reference unchanged
+schema owners instead of copying them.
 
-Give each material behavior a stable ID, such as `B-01`. For each action define:
+## Workflow inventory
 
-| Concern | Contract content |
+List every in-scope branch, invariant and required sequence in this coverage table.
+Use one row per obligation; `Obligation` is a unique ID, including workflow path
+IDs such as `W-01.normal`. Include alternative entry points, return/resubmit paths,
+permitted prerequisite orders and cross-module effects when they exist.
+
+| Obligation | Rule references | Acceptance IDs |
+|---|---|---|
+
+Present this inventory during design review. The worksheet checker cannot discover
+business work omitted here. Explicit exclusions belong in scope, not this table.
+
+For stateful behavior, define each state variable, initial value, valid combinations
+and terminal states. Give named conditions exact predicates. Use:
+
+| Transition ID | From state | Action | Condition | To state | Effect references |
+|---|---|---|---|---|---|
+
+Define invariants separately:
+
+| Invariant ID | Condition that must remain true |
 |---|---|
-| Actor and access | Who can act on which records and states; relevant ownership/scope and denial behavior. |
-| Input and preconditions | Accepted business input, defaults, validation and state prerequisites. |
-| Success | State transition, persisted effects, returned or visible result, and affected consumers. |
-| Failure | Business rejections, access denial, unavailable dependencies and observable recovery behavior. |
-| Repeated/concurrent use | Idempotency, conflict outcomes and atomic effects when the action can be retried or raced. |
 
-For stateful workflows, include a transition table: from state, action, actor,
-condition, to state, effects, and rejected transitions. For permissions, map
-actions to the existing authorization vocabulary and exact codes when these
-are already public or selected. A new code's spelling can be delegated to
-planning under Carta naming rules; the access policy and scope cannot.
+Every defined behavior, transition and invariant must appear in the inventory's
+Rule references. Use exact IDs, not ID ranges.
 
-Describe integrations, jobs, delivery failures and compensation only where
-the behavior needs them. Explicitly state the transaction boundary for coupled
-writes whose partial success would violate a business invariant.
+Specify no-match rejection and overlapping-condition precedence, or make conditions
+exclusive. For joins, define completion; for returns, define retained and cleared
+values. A linear resource needs no artificial state machine.
 
-## 5. User-visible and consumer behavior
+## Action records
 
-Specify applicable routes/entry points, navigation, visible actions, essential
-labels and data, defaults, read-only/hidden/disabled behavior, and meaningful
-loading, empty, error and denied states. Identify confirmation and successful
-submission behavior, reload/persistence expectations, dependent lookups, and
-which lists/details/reports refresh after mutation.
+Use one record per action. Every property below needs a value or `NONE`; expand
+conditions and effects into referenced records when several actions share them.
+Use field/value maps and condition/result rows, not paragraphs inside scalar values.
+Separate alternatives into rows. Reference data-table rules instead of copying them.
 
-For nested navigation, state which parent pages remain visible and where page
-Back returns. Use the defaults in the
-[file-routing convention](../../web-ui-surfaces/references/file-routing.md)
-unless the required behavior differs. File placement is a planning decision;
-an existing data relationship alone does not determine the visible parent chain.
+```yaml
+id: B-01
+workflow: W-01
+name: <business action>
+access:
+  actor: <permission or role>
+  scope: <record ownership predicate>
+  assignment: <predicate or NONE>
+  denied: <observable result; unchanged data>
+input:
+  fields: <field names mapped to data-table rules and action-specific overrides>
+  unknown_fields: <reject or ignore>
+preconditions:
+  - condition: <exact predicate or condition ID>
+    otherwise: <rejection result; unchanged data>
+effects:
+  set: <field-to-value map or NONE>
+  clear: <field names or NONE>
+  create: <record types and field-to-value maps or NONE>
+  delete: <record selection or NONE>
+  preserved: <other relevant data>
+  transaction: <coupled writes and rollback boundary>
+  transitions: <transition IDs or NONE>
+  external: <delivery, failure and recovery rules or NONE>
+repeat:
+  result: <duplicate/retry outcome>
+  effects: <write changes and effect counts>
+concurrent:
+  outcomes: <allowed final outcomes>
+  preserved: <effects that cannot be lost or duplicated>
+result: <returned data and visible outcome>
+ui:
+  entry: <route or surface>
+  parent_visibility: <retained pages or NONE>
+  back: <target or NONE>
+  control:
+    label: <text>
+    visible: <predicate>
+    enabled: <predicate>
+  fields: <editable/read-only fields; defaults; dependent lookups>
+  states: <loading, empty, denied and error behavior>
+  success: <confirmation, navigation, refresh and reload behavior>
+  failure: <feedback, input preservation and recovery>
+acceptance: [<acceptance IDs>]
+```
 
-For a UI reference, say which elements are authoritative (content, interaction,
-layout or styling). Use the existing Carta design system for delegated visual
-detail. Headless changes instead state their API or consumer-facing contract.
+Use `ui: NONE` for headless actions and define the consumer result instead.
+Specify required display data and unaffected interfaces. Apply Carta navigation
+and visual conventions by reference where they settle the result.
 
-## 6. Acceptance examples
+## Acceptance records
 
-Assign stable acceptance IDs (`A-01`, `A-02`) and link each to behavior IDs.
+Expected values come from confirmed rules and worked examples, not implementation.
+Cover each independent condition, transition branch and invariant. Include boundary
+and rejection cases that distinguish plausible wrong results, plus complete sequence
+cases where isolated action tests cannot prove the workflow.
 
-| Acceptance ID | Behavior IDs | Given / When | Observable expected result |
-|---|---|---|---|
+```yaml
+id: A-01
+rules: [<behavior, transition or invariant IDs>]
+given:
+  actors: <named actors mapped to identity, permissions and scope>
+  records: <named records mapped to concrete field values>
+when:
+  - actor: <fixture actor>
+    action: <action ID>
+    input: <field-to-value map or NONE>
+expect:
+  result: <exact observable output or rejection>
+  stored: <record/field-to-value map and effect counts>
+  unchanged: <data that must remain unchanged or NONE>
+  visible: <UI result or NONE>
+```
 
-Cover important success, rejected access, invalid input, state/lifecycle and
-cross-module consequences. Include a boundary or counterexample when two
-plausible implementations could otherwise both appear correct. Acceptance
-specifies the result; the plan selects the test surface and exact command.
-Do not require all examples through every layer.
+## Boundaries and readiness
 
-## 7. Implementation boundaries and open decisions
+Record interfaces to preserve, permitted environments, and technical decisions
+reserved for planning. The planner settles architecture; the executor receives
+routine coding freedom only. Framework edits and external/destructive writes
+require explicit authority; design approval does not authorize deployment.
 
-Identify existing interfaces to preserve, technical discretion delegated to
-planning/implementation, and approved read/write environments. Framework
-package changes and external/destructive writes need explicit authority.
-The design does not confer deployment, publication or production permission.
-Record excluded behavior and any unresolved material decisions.
-
-## Example of behavioral precision
-
-The following is illustrative, not an approval policy for Carta applications:
-
-**B-01:** A department approver can approve a submitted request in their own
-department, except their own request. Approval atomically records the approver,
-approval time, Approved state and one audit event. A repeated approval by the
-same actor returns the existing result without another audit event. In a race
-with rejection, only the first committed transition succeeds; the other action
-receives a state-conflict result. After success and reload, detail shows the
-approval and the pending queue excludes the request.
-
-**A-01:** Given a submitted request created by the approver, when that approver
-attempts approval directly, access is denied and status/audit state is unchanged.
-
-**A-02:** Given a successful approval, when the same actor repeats the action,
-the original result is returned and exactly one audit event exists.
-
-These requirements leave code structure open, but not business outcomes.
-
-## Readiness review
-
-The contract is ready when:
-
-- its sources, existing context and affected owners are identifiable;
-- each in-scope action and material invariant has one unambiguous definition;
-- important failures and consumer effects have observable acceptance examples;
-- no material business behavior is left for the implementer to invent;
-- approved behavior and delegated technical choices are distinguishable;
-- material contradictions and unknowns are resolved or explicitly excluded;
-- the exact approved revision and approval authority are recorded.
-
-Review for conflicting meanings, not merely missing headings or hedge words.
-A deterministic validator cannot establish business completeness. Re-run the
-semantic review on changed requirements after a material revision.
+Ready means all inventory obligations have acceptance cases, each action and
+invariant has one unambiguous definition, sources and owners are identifiable,
+and no in-scope business decision remains unresolved. Review conflicts and missing
+behavior, not headings alone. Record the approved revision and decision sources.
+A changed rule reopens its affected approval, plans and evidence; preserve valid work.
+Only new or changed business decisions need approval. Technical completion of a
+record preserves the existing approval scope.

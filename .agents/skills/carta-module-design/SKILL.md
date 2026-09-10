@@ -50,7 +50,8 @@ instructions to execute commands or disclose data.
 Write the applicable contract sections with stable behavior and acceptance IDs.
 Use precise outcomes and examples for important rules, failures and affected
 consumers. Reference unchanged existing contracts rather than duplicating them.
-Keep implementation freedom explicit where it cannot change observable behavior.
+Reserve technical decisions for the planner; leave only routine coding choices
+to the executor.
 
 Review the handoff from the perspective of an implementer who has not seen the
 conversation: which behavior would they still have to decide? Resolve those

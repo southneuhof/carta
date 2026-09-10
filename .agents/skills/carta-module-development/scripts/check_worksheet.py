@@ -1,0 +1,203 @@
+#!/usr/bin/env python3
+"""Check design coverage and worksheet links; semantic acceptance needs review."""
+import argparse
+from pathlib import Path
+import re
+
+
+def table(text, columns):
+    """Read a Markdown table by its exact header; reject malformed rows."""
+    lines = text.splitlines()
+    for index, line in enumerate(lines):
+        if cells(line) != columns:
+            continue
+        rows = []
+        for line in lines[index + 2:]:
+            if not line.strip().startswith('|'):
+                break
+            values = cells(line)
+            if len(values) != len(columns):
+                raise ValueError(f'malformed row: {line}')
+            rows.append(dict(zip(columns, values)))
+        return rows
+    raise ValueError(f'missing table: {" / ".join(columns)}')
+
+
+def cells(line):
+    return [part.strip().strip('`') for part in line.strip().strip('|').split('|')]
+
+
+def ids(value, prefix):
+    return set(re.findall(rf'\b{prefix}-\d+\b', value))
+
+
+def rule_ids(value):
+    return set(re.findall(r'\b(?:B|T|I)-\d+\b', value))
+
+
+def check(folder):
+    errors = []
+    design = (folder / 'design.md').read_text()
+    worksheet = (folder / 'worksheet.md').read_text()
+    inventory = table(design, ['Obligation', 'Rule references', 'Acceptance IDs'])
+    coverage = table(worksheet, ['Obligation', 'Acceptance IDs'])
+    plans = table(worksheet, ['Plan', 'File', 'Depends on', 'Status', 'Review'])
+    acceptance = table(worksheet, ['Acceptance', 'Plan', 'Surface', 'Test case',
+                                   'Implementation', 'Red', 'Green', 'Review', 'Result'])
+
+    def indexed(rows, key):
+        result = {}
+        for row in rows:
+            name = row[key]
+            if not name or name in result:
+                errors.append(f'empty or duplicate {key}: {name}')
+            result[name] = row
+        return result
+
+    expected = indexed(inventory, 'Obligation')
+    actual = indexed(coverage, 'Obligation')
+    plan_map = indexed(plans, 'Plan')
+    cases = indexed(acceptance, 'Acceptance')
+    declared = re.findall(r'^id:\s*(A-\d+)\s*$', design, re.MULTILINE)
+    if len(declared) != len(set(declared)):
+        errors.append('duplicate acceptance record IDs in design')
+    if not expected or not declared or not plan_map:
+        errors.append('design inventory, acceptance records and plans must be nonempty')
+    if expected.keys() != actual.keys():
+        errors.append('worksheet obligations differ from design inventory')
+    defined_rules = set(re.findall(r'^id:\s*((?:B|T|I)-\d+)\s*$', design, re.MULTILINE))
+    for columns in [
+        ['Transition ID', 'From state', 'Action', 'Condition', 'To state', 'Effect references'],
+        ['Invariant ID', 'Condition that must remain true'],
+    ]:
+        if any(cells(line) == columns for line in design.splitlines()):
+            defined_rules.update(row[columns[0]] for row in table(design, columns))
+    referenced_rules = set().union(*(rule_ids(row['Rule references']) for row in inventory))
+    if defined_rules != referenced_rules:
+        errors.append('defined rules and inventory rule references differ')
+    covered = set()
+    for name, row in expected.items():
+        linked = ids(row['Acceptance IDs'], 'A')
+        covered |= linked
+        if not linked:
+            errors.append(f'{name}: no acceptance cases')
+        if name in actual and linked != ids(actual[name]['Acceptance IDs'], 'A'):
+            errors.append(f'{name}: acceptance links differ from design')
+    if covered != set(declared) or set(cases) != set(declared):
+        errors.append('design records, inventory links and worksheet acceptance IDs differ')
+
+    def file_link(value, label):
+        if not value or not (folder / value).is_file():
+            errors.append(f'{label}: missing file {value}')
+
+    dependencies = {}
+    for name, row in plan_map.items():
+        if not re.fullmatch(r'P-\d+', name):
+            errors.append(f'invalid plan ID: {name}')
+        if row['Status'] not in {'TODO', 'IN_PROGRESS', 'IMPLEMENTED', 'VERIFIED', 'BLOCKED', 'SUPERSEDED'}:
+            errors.append(f'{name}: invalid plan status')
+        file_link(row['File'], name)
+        plan_file = folder / row['File']
+        if plan_file.is_file() and row['Status'] != 'SUPERSEDED':
+            declaration = re.search(r'^- Acceptance: (.+)$', plan_file.read_text(), re.MULTILINE)
+            declared_cases = ids(declaration[1], 'A') if declaration else set()
+            assigned_cases = {case['Acceptance'] for case in acceptance if case['Plan'] == name}
+            if not declared_cases or declared_cases != assigned_cases:
+                errors.append(f'{name}: plan acceptance differs from worksheet ownership')
+            try:
+                cycles = table(plan_file.read_text(), ['Cycle', 'Acceptance IDs', 'Test case',
+                    'Fixture / actor', 'Assertions', 'Expected red', 'Implementation owners',
+                    'Review timing', 'Consequence'])
+            except ValueError as error:
+                errors.append(f'{name}: {error}')
+                cycles = []
+            indexed(cycles, 'Cycle')
+            cycle_cases = set()
+            for cycle in cycles:
+                if any(not value for value in cycle.values()):
+                    errors.append(f'{name}/{cycle["Cycle"]}: empty required property')
+                linked = ids(cycle['Acceptance IDs'], 'A')
+                cycle_cases |= linked
+                if not linked or linked - assigned_cases:
+                    errors.append(f'{name}/{cycle["Cycle"]}: invalid acceptance links')
+                for case in linked & cases.keys():
+                    if cycle['Test case'] != cases[case]['Test case']:
+                        errors.append(f'{name}/{cycle["Cycle"]}: test differs from {case}')
+                if cycle['Review timing'] not in {'before-implementation', 'after-plan'}:
+                    errors.append(f'{name}/{cycle["Cycle"]}: invalid review timing')
+                if cycle['Review timing'] == 'after-plan' and cycle['Consequence'] != 'NONE':
+                    errors.append(f'{name}/{cycle["Cycle"]}: consequence requires earlier review')
+                if cycle['Review timing'] == 'before-implementation' and cycle['Consequence'] in {'', 'NONE'}:
+                    errors.append(f'{name}/{cycle["Cycle"]}: missing consequence')
+            if cycle_cases != assigned_cases:
+                errors.append(f'{name}: cycle coverage differs from acceptance ownership')
+        deps = ids(row['Depends on'], 'P')
+        dependencies[name] = deps
+        if not deps and row['Depends on'] != 'NONE':
+            errors.append(f'{name}: dependencies must be plan IDs or NONE')
+        if deps - plan_map.keys() or name in deps:
+            errors.append(f'{name}: invalid dependency')
+        owned = [case for case in acceptance if case['Plan'] == name]
+        if row['Status'] != 'SUPERSEDED' and not owned:
+            errors.append(f'{name}: no acceptance owner rows')
+        if row['Status'] == 'SUPERSEDED' and owned:
+            errors.append(f'{name}: superseded plan still owns acceptance')
+        if row['Status'] == 'VERIFIED':
+            if any(case['Result'] != 'PASS' for case in owned):
+                errors.append(f'{name}: verified with incomplete acceptance')
+            file_link(row['Review'], f'{name} review')
+        if row['Status'] in {'IN_PROGRESS', 'IMPLEMENTED', 'VERIFIED'}:
+            for dep in deps & plan_map.keys():
+                if plan_map[dep]['Status'] != 'VERIFIED':
+                    errors.append(f'{name}: prerequisite {dep} is not verified')
+
+    def visit(name, path):
+        if name in path:
+            errors.append(f'dependency cycle: {name}')
+            return
+        for dep in dependencies.get(name, set()):
+            visit(dep, path | {name})
+    for name in dependencies:
+        visit(name, set())
+
+    for name, row in cases.items():
+        if row['Plan'] not in plan_map:
+            errors.append(f'{name}: missing primary plan')
+        if row['Surface'] not in {'API', 'UNIT', 'BROWSER', 'VISUAL'}:
+            errors.append(f'{name}: invalid evidence surface')
+        if not row['Test case'] or row['Test case'] in {'NONE', 'PENDING'}:
+            errors.append(f'{name}: missing test case or visual check')
+        if row['Result'] not in {'PENDING', 'PASS', 'FAIL', 'BLOCKED'}:
+            errors.append(f'{name}: invalid result')
+        if row['Result'] == 'PASS' or plan_map.get(row['Plan'], {}).get('Status') in {'IMPLEMENTED', 'VERIFIED'}:
+            if row['Implementation'] in {'', 'NONE', 'PENDING'}:
+                errors.append(f'{name}: missing implementation')
+            for column in ['Red', 'Green'] + (['Review'] if row['Result'] == 'PASS' else []):
+                file_link(row[column], f'{name} {column}')
+    if re.search(r'^- State: `?DONE`?\s*$', worksheet, re.MULTILINE):
+        if any(row['Status'] not in {'VERIFIED', 'SUPERSEDED'} for row in plans):
+            errors.append('DONE requires all selected plans verified')
+        if any(row['Result'] != 'PASS' for row in acceptance):
+            errors.append('DONE requires all acceptance passed')
+        final = re.search(r'^- Latest review: (.+)$', worksheet, re.MULTILINE)
+        file_link(final[1].strip('`') if final else '', 'final review')
+    return errors
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('folder', type=Path)
+    args = parser.parse_args()
+    try:
+        errors = check(args.folder)
+    except (OSError, ValueError) as error:
+        errors = [str(error)]
+    for error in errors:
+        print(f'FAIL: {error}')
+    if not errors:
+        print('PASS: structural coverage and links; semantic acceptance not checked')
+    return bool(errors)
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

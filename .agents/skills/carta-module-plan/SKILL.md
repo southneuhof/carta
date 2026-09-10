@@ -38,7 +38,14 @@ placement within settled behavior as a technical decision.
 
 If planning exposes a missing business rule or a conflict with approved intent,
 return that specific issue to `$carta-module-design`. Preserve unaffected work.
-Make ordinary technical decisions within the design's delegated scope.
+Make ordinary technical decisions within the design's delegated scope. A missing
+implementation owner is work to plan, not itself a product blocker. Choose local
+storage, symbols, permission-code spelling and transaction mechanics when behavior
+is settled. Ask the decision owner only for missing business policy or authority;
+name the observable outcome that the answer changes. Storage representation is
+technical; who may create/read records or receive a grant is business policy.
+An absent source of project assignments cannot be replaced by test fixtures and
+called a complete application workflow.
 
 ## Organize the work
 
@@ -62,7 +69,8 @@ to select the smallest sufficient tests and broader checks justified by impact.
 State relevant owners and symbols, intended changes, required interfaces between
 plans, exact commands with working directories, and expected evidence. Code
 excerpts and target code shapes belong where they resolve a fragile boundary;
-implementation detail that cannot affect the contract stays with the implementer.
+settle interfaces, transaction boundaries, dependencies, fixtures and assertions
+before delegation. Leave only routine local coding choices to the executor.
 
 ## Review and hand off
 

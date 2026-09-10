@@ -1,84 +1,77 @@
 # Module implementation plan
 
-Write one plan per observable result. Keep a small result in one short plan;
-split only for a separate outcome, prerequisite or risk boundary. The design
-owns behavior, this plan owns implementation order and proof, and the worksheet
-owns progress. Link to those owners instead of repeating them.
-
-Use `plans/<feature>/NNN-<result>.md`. Preserve existing numbering and usable
-plans. The executor has the repository and referenced artifacts; it must not
-need the discovery conversation.
-
-## Template
+Use `plans/<feature>/NNN-<result>.md`, one plan per observable vertical result.
+Split for a real dependency or risk boundary. Preserve valid numbering on resume.
+The design defines behavior; reference its IDs rather than copying rules.
+The capable planner resolves architecture before assigning the plan to an executor.
 
 ```markdown
-# Plan NNN: <Observable result>
+# Plan NNN: <observable result>
 
-- Design: <path, revision and approval source>
-- Acceptance: <IDs owned by this plan>
-- Depends on: <plan and required interface, or none>
-- Source: <commit/date and relevant input snapshot>
-- State: <worksheet row>
+- Design: <path, approved revision and authority>
+- Acceptance: <owned IDs>
+- Depends on: <plan IDs and exact required interfaces, or NONE>
+- Source: <commit and relevant dirty/untracked input snapshot>
+- Scope: <permitted edits, test target and side effects>
 
-## Result and current owners
+## Owners and interfaces
 
-State the intended change and its reason. Name the current files and symbols
-that own the behavior, and consumers affected by it. Distinguish new files from
-inspected files. Include code only when it clarifies a fragile interface.
-
-## Scope
-
-State the selected outcomes, supporting edits and relevant exclusions. Name
-permitted test targets and side effects. Separate migration generation from
-applying it. Preserve unrelated work. Framework changes and external or
-destructive writes require the user's authority.
-
-## Implementation
-
-1. <Change, owning files/symbols and required input/output contract.>
-   Verify: <smallest useful check and expected outcome.>
-2. <Next dependent result.>
-   Verify: <check or shared acceptance gate.>
-
-Reference the applicable layer skills. Keep technical choices with the
-implementer when they cannot change the behavior contract. Include migration,
-backfill and consumer update order when the data contract changes.
-
-## Checks
-
-| Acceptance ID | Plausible fault | Test owner/case | Expected result |
+| File / symbol | Existing or new | Required change | Consumers |
 |---|---|---|---|
 
-| Check | Working directory | Exact command | Setup and evidence path |
-|---|---|---|---|
+Specify exact route methods/paths, input/output types, errors, authorization,
+transaction placement and cross-plan interfaces. Name existing exemplars and
+applicable layer contracts. State migration generation/application and consumer
+update order separately. Resolve architecture and dependency choices here.
 
-Use current package scripts and test selectors. Name fixtures and the isolated
-target. Mark commands as inspected or run. Use the shared verification strategy
-for test selection; a test list is not an instruction to copy framework tests.
+## TDD cycles
 
-## Completion and blockers
+| Cycle | Acceptance IDs | Test case | Fixture / actor | Assertions | Expected red | Implementation owners | Review timing | Consequence |
+|---|---|---|---|---|---|---|---|---|
 
-Complete when each owned acceptance outcome has current sufficient evidence,
-required checks pass, affected consumers work, and the worksheet records the
-implementation and review result. Report unrun checks as unverified.
+Each row names one test as `file::exact test title`, identical to its worksheet
+Test case. Use exact acceptance IDs. Every owned acceptance case needs a cycle.
+Review timing is `before-implementation` or `after-plan`; Consequence states the
+qualifying effect or `NONE`. Split independent tests into separate rows; one
+sequence test can cover a journey.
+A plan review gate applies between plans, not between backend and UI layers.
+Define exact inputs,
+expected outputs, unchanged data and test boundaries from the design. Use the
+verification strategy to classify review timing and evidence exceptions.
+YAML acceptance records specify tests; executable Vitest/Playwright code runs them.
 
-Name actual stop conditions and the affected work: missing product decision,
-incompatible contract, missing write authority or unavailable safe test target.
-A routine failure calls for diagnosis and a focused rerun. Source drift calls
-for comparison and reconciliation; it does not cancel unaffected work.
+## Commands
+
+| Purpose / selected cases | Working directory | Exact command | Setup / isolated target | Evidence path |
+|---|---|---|---|---|
+
+Mark commands as inspected or run. Include focused cycle checks and the affected
+regression checks. Missing setup stays blocked. Browser cases name UI steps and
+persisted outcomes; backend evidence cannot complete a required UI case.
+
+## Handoff
+
+Return changed owners, acceptance IDs, red/green and regression reports, test
+changes, input snapshot and unresolved conflicts. Stop after this plan for the
+orchestrator verdict. Completion and state follow the worksheet contract.
 ```
 
-## Review the handoff
+## Readiness
 
-Read the plan as an implementer. Can each outcome be built and proved without
-inventing product behavior? Check paths, commands, dependencies, authority and
-acceptance coverage. Remove sections that add no execution information.
+Map every design inventory obligation to acceptance and every acceptance case to
+one primary plan in the [worksheet](../../carta-module-development/references/module-execution-worksheet.md).
+Check paths, interfaces, command selectors, fixtures, assertions and dependency
+order as an executor without the interview. Use
+[verification strategy](../../carta-module-development/references/verification-strategy.md)
+for test boundaries and serious-consequence review.
 
-Use the [worksheet contract](../../carta-module-development/references/module-execution-worksheet.md)
-for state and handoff fields. Designate one existing index as the live owner;
-an older `README.md` and `worksheet.md` must not hold competing status tables.
-Keep superseded decisions and failed checks identifiable in their reports.
+Before marking READY, review the packet semantically: decision authority, one test
+per cycle, required red-review timing, and UI actions actually performed by the
+browser case. A structural pass does not complete this review. Record the verdict
+and exact next action: write/run the first named test, obtain its required red
+review, or reuse justified existing coverage. Application edits follow that gate.
 
-Use the [verification strategy](../../carta-module-development/references/verification-strategy.md)
-for evidence freshness and the smallest sufficient checks. A plan-only request
-ends with the plan; an authorized implementation continues without another gate.
+A repository conflict returns its exact evidence to the planner; a new business
+choice returns to design. Preserve unaffected work. The executor may select local
+names and equivalent expressions; changed public interfaces, transactions,
+dependencies or approved assertions need orchestrator review.

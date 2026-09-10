@@ -1,72 +1,75 @@
 # Module execution worksheet
 
-The feature folder is the durable handoff:
+The feature folder contains `design.md`, numbered plans, `worksheet.md` and
+`reports/`. The design owns behavior and approval; plans own technical decisions;
+the worksheet owns status and evidence links; reports own observed results.
+Acceptance IDs join these artifacts. Keep rule definitions in the design.
 
-```text
-plans/<feature>/
-  design.md
-  worksheet.md
-  001-<observable-result>.md
-  reports/
-```
+## Coverage and ownership
 
-## Authority and state
-
-| Information | One owner |
-|---|---|
-| Intended behavior, decisions and approval | `design.md` or the exact approved source it incorporates |
-| Technical order, dependencies, scope and proof obligations | Numbered plans |
-| Artifact ledger, plan index, live state and acceptance/handoff results | `worksheet.md` |
-| Observed command/UI results, snapshots and review verdicts | Named reports |
-
-The design's acceptance IDs are the stable join key. A worksheet row references
-the rule rather than repeating its definition. Its implementation and evidence
-columns are the semantic handoff; no separate undocumented handoff file exists.
-The planner owns proposed checks; actual commands and results live in reports.
-
-Feature states: `INTAKE` → `DESIGN` → `PLAN` → `READY` → `EXECUTE` →
-`VERIFY` → `DONE`. Use `BLOCKED` with the affected stage and exact missing
-prerequisite. Skip already completed stages when resuming valid artifacts.
-
-Plan states: `TODO`, `IN_PROGRESS`, `IMPLEMENTED`, `VERIFIED`, `BLOCKED`,
-`SUPERSEDED`. `IMPLEMENTED` means the executor has completed that plan's work and
-checks. `VERIFIED` means an acceptance review passed for that scope. Neither
-alone implies feature `DONE`. Explicit prerequisite gates can require a reviewed
-plan; otherwise a dependent plan can proceed when the required interface and
-its checks are complete.
-
-Acceptance results: `PENDING`, `PASS`, `FAIL`, `BLOCKED`, `NOT_NEEDED`.
-`NOT_NEEDED` needs an applicability reason consistent with approved scope; it
-cannot waive an approved requirement. Every required row has a primary plan
-owner and may name additional integration evidence from other plans.
-
-Feature `DONE` requires all selected plans verified, every required acceptance
-row passing with current evidence, final cross-plan effects checked, and a
-recorded final verdict. A standalone verification skill returns the verdict;
-the workflow owner records it and advances state. Independent review is used
-when available; otherwise explicitly record self-review with identical criteria.
-
-## Initialize and maintain
-
-Use [the worksheet template](../assets/worksheet-template.md), or run:
+Use the [template](../assets/worksheet-template.md), or initialize it:
 
 ```sh
-python3 .agents/skills/carta-module-development/scripts/init_worksheet.py <feature-slug>
+python3 .agents/skills/carta-module-development/scripts/init_worksheet.py <feature>
 ```
 
-The initializer never overwrites an existing worksheet. Keep older valid plans,
-numbering and history on resume. If a prior `README.md` is the live execution
-index, designate one owner and turn the other into a pointer. Translate legacy
-states by their evidence, not by renaming `DONE` to a verified result.
+Copy design inventory obligation IDs and acceptance links into Coverage. Compare
+against the design, not only the worksheet. Every in-scope branch, invariant and
+required sequence needs a row. Every acceptance case has one primary plan, listed under `- Acceptance:` in that
+plan using exact IDs; extra
+integration cases can belong to later plans. List dependencies by plan ID.
 
-Update at meaningful stage/slice handoffs, new decisions, failures and completed
-verification, not after every command. Record the next concrete action and its
-boundary. Source edits begin only under implementation authority. A material
-behavior change invalidates the affected approval/evidence, not all prior work.
+Each Acceptance row names a surface (`API`, `UNIT`, `BROWSER`, `VISUAL`), test case
+as `file::exact test title` (or a named visual check), implementation owner and
+evidence. Plan cycle Test case values must match these rows. Split acceptance cases when they
+need independently reviewed outcomes. Use `PENDING` until evidence exists.
+Report links are paths relative to the feature folder. Use one report per evidence
+cell; the report can link multiple runs. `Red` links observed failure or a report
+explaining existing coverage/visual applicability under verification strategy.
+`Green` links successful checks. `Review` links the orchestrator verdict.
 
-## Review input
+Run the structural check before assignment and after handoff:
 
-The reviewer receives design and revision, relevant plans, the acceptance/handoff
-rows, the in-scope diff (including new/dirty files), evidence paths and declared
-write boundaries. If an artifact is unavailable, identify the missing evidence
-and keep that scope blocked; do not reconstruct decisions from memory.
+```sh
+python3 .agents/skills/carta-module-development/scripts/check_worksheet.py plans/<feature>
+```
+
+The checker requires the current inventory/table format. For an older approved
+layout, map its IDs into the current tables without changing rules or approval.
+It checks coverage, ownership, cycle/test mapping, file links and state consistency. It cannot prove
+inventory completeness, assertion quality, report truth or input freshness; the
+reviewer checks those against design, source and recorded command results.
+
+## State and gates
+
+Feature: `INTAKE` → `DESIGN` → `PLAN` → `READY` → `EXECUTE` → `VERIFY` → `DONE`.
+`READY` is the plan readiness gate. `BLOCKED` names the affected stage and missing
+prerequisite. Resume from valid artifacts; keep independent work moving.
+
+Plan: `TODO`, `IN_PROGRESS`, `IMPLEMENTED`, `VERIFIED`, `BLOCKED`, `SUPERSEDED`.
+`IMPLEMENTED` requires completed work and checks. The executor stops at this state.
+The orchestrator reviews every plan before assigning the next. `VERIFIED` requires
+all owned acceptance rows passed with evidence and the scoped review report.
+A blocked plan does not prevent a reviewed, independent plan from proceeding.
+
+Acceptance: `PENDING`, `PASS`, `FAIL`, `BLOCKED`. Explicit exclusions belong to
+approved design scope, not a checkbox that waives an obligation. The executor
+records evidence; the orchestrator records acceptance and state. Direct execution
+labels reviews as self-review and uses identical criteria.
+
+`DONE` requires all selected plans verified, every required acceptance row passed
+with current evidence, and final review of cross-plan effects and complete journeys.
+Record its report in `Latest review`. A scoped plan pass cannot complete the feature.
+
+## Handoff and resume
+
+Update at plan/cycle review gates, changed decisions and material failures, not
+every command. Record required/passed/failed/blocked IDs, evidence paths and the
+next action. At a before-implementation gate, name reviewer, acceptance IDs, red
+report and verdict. The executor waits for that verdict before implementing.
+
+A reviewer receives the approved revision, plan, coverage and acceptance rows,
+relevant diff including dirty/new files, evidence and write boundaries. Reuse
+current evidence. Changed rules or relevant inputs reopen affected rows and plans;
+compare dependencies before invalidating unrelated work. Preserve superseded
+reports and failed runs. Missing history stays unverified rather than reconstructed.

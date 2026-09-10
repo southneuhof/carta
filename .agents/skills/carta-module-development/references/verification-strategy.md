@@ -73,6 +73,44 @@ Prepare ordinary local prerequisites within task authority. If they cannot be
 established safely, report the exact blocked checks rather than offering a new
 test framework or claiming the runtime result from static checks.
 
+## TDD and review timing
+
+The planner selects public test boundaries, concrete fixtures and expected values
+from the approved design. The executor writes executable Vitest or Playwright
+tests, one cycle at a time. Acceptance YAML is a specification, not a test run.
+A cycle is test → observed red → implementation → green → affected regression checks.
+
+Red must detect the missing behavior: an expected assertion failure or a missing
+planned interface/control. Environment, import mistakes, invalid fixtures, zero
+selected tests and skipped cases are not behavior evidence. Inspect all planned
+assertions after the interface exists. An immediate pass requires checking whether
+behavior already exists or assertions are weak; preserve valid code and record
+existing coverage instead of manufacturing failure. For already implemented work,
+record missing historical red evidence and perform acceptance review; do not claim
+TDD retroactively. A copy/layout-only change can use stated visual evidence.
+
+Require orchestrator review of executable assertions and red output before
+implementation when failure has one of these consequences:
+
+| Consequence | Qualifying effect |
+|---|---|
+| Unauthorized access/action | Expose scoped data or allow an unauthorized mutation. |
+| Financial error | Change a charge, payment, balance or committed cost incorrectly. |
+| Data/history loss | Remove records or required evidence, including through migration. |
+| Irreversible external effect | Submit, publish or issue an external instruction. |
+| Invalid final decision | Approve or close work without required conditions. |
+| Broken coupled effects | Lose a reservation, duplicate an effect, or partially commit an invariant. |
+| User-designated consequence | The user identifies the affected rule as serious. |
+
+Record timing, affected acceptance IDs and the concrete consequence in each plan
+cycle. Complexity or a money field alone does not qualify. Other cycles receive
+review after the plan. Timing changes review, not correctness or coverage.
+
+For every review, inspect changed tests as well as code. Setup repairs preserve
+assertions; proposed assertion changes return to the orchestrator. Changes to
+business expectations require design authority. A before-implementation test pass
+records reviewer, case IDs and red report; it does not pass module acceptance.
+
 ## Tight loop
 
 Run focused checks after a meaningful changed boundary. On failure inspect the

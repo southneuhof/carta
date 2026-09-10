@@ -60,7 +60,10 @@ repeated validation where direct use preserves the required behavior.
 
 ## Evaluate evidence
 
-Inspect test assertions and selected cases, commands, input fingerprints,
+Compare the design inventory with worksheet coverage and plan ownership. Check
+required branches, invariants and whole sequences, including browser obligations.
+Inspect red/green evidence, required test-gate reviews, changed assertions,
+selected cases, commands, input fingerprints,
 environment identity and results. Reuse current sufficient evidence; rerun the
 smallest affected checks when evidence is missing, stale, failed or insufficient.
 Broaden checks when shared changes expose dependent consumers. Fingerprints
@@ -98,7 +101,7 @@ REVIEW: independent | self-review
 DESIGN: path, approved revision and source
 IMPLEMENTATION: scope/drift and direct-owner findings
 ACCEPTANCE: IDs, implementation pointers and evidence
-CHECKS: command/report paths, results and freshness
+CHECKS: red/green or stated existing-coverage exception, test gates, reports and freshness
 UI: case/step evidence or applicability reason
 REWORK: affected IDs, owning plan and exact correction, or None
 BLOCKERS: affected IDs and missing prerequisite, or None
