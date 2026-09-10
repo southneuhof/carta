@@ -7,6 +7,7 @@ await compileRouteManifest(projectRoot, 'src/routes', manifest, false)
 
 let server: ChildProcess | undefined
 let restarting = false
+let stopping = false
 let ready = false
 
 function startServer() {
@@ -21,7 +22,11 @@ function restartServer() {
   if (!server || restarting) return
   restarting = true
   const previous = server
-  previous.once('exit', () => { restarting = false; startServer() })
+  previous.once('exit', () => {
+    if (stopping) return
+    restarting = false
+    startServer()
+  })
   previous.kill('SIGTERM')
 }
 
@@ -37,8 +42,11 @@ startServer()
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.on(signal, () => {
+    if (stopping) return
+    stopping = true
     restarting = true
     server?.kill(signal)
-    void watcher.close().finally(() => process.exit())
+    void watcher.close()
+    process.exit()
   })
 }

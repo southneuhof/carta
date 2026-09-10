@@ -26,6 +26,19 @@ async function eventually(path, status, body) {
   assert.fail(`development server did not return ${status} for ${path}; last response: ${last}`)
 }
 
+async function stop(child) {
+  const started = Date.now()
+  await new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      try { process.kill(-child.pid, 'SIGKILL') } catch {}
+      reject(new Error('development server did not stop after SIGINT'))
+    }, 3_000)
+    child.once('exit', () => { clearTimeout(timeout); resolve() })
+    process.kill(-child.pid, 'SIGINT')
+  })
+  assert.ok(Date.now() - started < 3_000, 'development server shutdown took too long')
+}
+
 test('cold dev starts after compilation and reloads add, invalid recovery, move, and delete', { timeout: 60_000 }, async () => {
   await rm(join(root, '.sprindle'), { recursive: true, force: true })
   await rm(routeRoot, { recursive: true, force: true })
@@ -54,8 +67,7 @@ test('cold dev starts after compilation and reloads add, invalid recovery, move,
     await rm(join(routeRoot, 'moved'), { recursive: true })
     await eventually('/moved', 404)
   } finally {
-    process.kill(-child.pid, 'SIGTERM')
-    await new Promise((resolve) => child.once('exit', resolve))
+    await stop(child)
     await rm(routeRoot, { recursive: true, force: true })
   }
   assert.match(output, /Listening on port/)

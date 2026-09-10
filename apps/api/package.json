@@ -10,7 +10,7 @@
     "routes:build": "sprindle-routes-build . src/routes",
     "routes:compile": "tsx scripts/compile-routes.ts",
     "routes:check": "sprindle-routes-check . src/routes",
-    "dev": "tsx scripts/dev.ts",
+    "dev": "node --import tsx scripts/dev.ts",
     "build": "pnpm run routes:build && tsx scripts/build-production.ts && pnpm run routes:check && tsc -p tsconfig.json --noEmit --singleThreaded",
     "type-check": "pnpm run routes:build && pnpm run routes:check && tsc -p tsconfig.json --noEmit --singleThreaded",
     "lint": "oxlint src scripts",
