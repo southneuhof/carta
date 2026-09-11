@@ -41,6 +41,37 @@ result after reload. For filters, change the visible control and check the
 matching records. For file or relation inputs, use the actual control and verify
 the saved value and display. Page-render checks establish presence only.
 
+## Browser journeys
+
+Derive journeys from action, transition and conditional-input rules before reading
+existing tests or worksheet evidence. An old API-only evidence choice does not
+remove a changed UI path. Add its browser proof without changing business approval.
+
+Give each distinct user workflow a browser journey. Split when required controls
+or inputs, the submission contract, action sequence, visible result or failure
+recovery differs. Count user workflows, not code branches or every combination.
+Use one independent starting record per selected journey. A rejected submission
+and successful retry can share that record and test.
+
+For example, safe review then close differs from unsafe review then close. If
+investigation is optional after unsafe review, select both branches: close without
+it, and reject missing required evidence then upload and close. Check retained
+evidence when it changes requiredness. Keep other state/permission combinations
+at the API boundary.
+
+Reuse coverage for unchanged standard CRUD behavior. Module-specific inputs,
+validation, access, uploads and edit hydration still need integration proof.
+Use the actual changed controls and assert the submitted value, updated actions
+and persistence after reload. Seed prerequisites; perform the selected sequence
+through the UI.
+
+The design selects journey IDs and acceptance links. The worksheet maps each to
+one distinct `file::exact test title`; parameterized cases need distinct titles.
+The plan supplies data and assertions. Run `check_worksheet.py --browser-report`
+on the preserved Playwright JSON report. Every selected case must pass in each
+reported project without skipped attempts or retry failures. Review assertions
+against the design; a matching title cannot prove coverage or report freshness.
+
 ## Tests that earn their cost
 
 - Assert public outcomes and persisted effects. A status code alone cannot

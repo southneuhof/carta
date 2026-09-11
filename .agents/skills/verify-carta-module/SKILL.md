@@ -69,7 +69,11 @@ repeated validation where direct use preserves the required behavior.
 Compare the design inventory with worksheet coverage and plan ownership. Check
 required branches, invariants and whole sequences, including browser obligations.
 Check every expected outcome against the assertion or visual evidence that proves
-it. Apply the [UI review](../web-ui-surfaces/references/verification.md) to custom
+it. Compare distinct workflow branches with the design journey inventory; inspect
+conditional input paths even when another path passes. Run the worksheet browser
+report check and UI contract check. Inspect component exceptions and tests that
+stub forms, schemas, serialization or unresolved components; those stubs cannot
+prove the replaced boundary. Apply the [UI review](../web-ui-surfaces/references/verification.md) to custom
 composition and displayed values. A passed API row leaves a required browser or
 visual row open until that evidence is sufficient.
 Inspect red/green evidence, required test-gate reviews, changed assertions,

@@ -33,7 +33,9 @@ evidence rows for its acceptance IDs. Use `PENDING` until evidence exists.
 Report links are paths relative to the feature folder. Use one report per evidence
 cell; the report can link multiple runs. `Red` links observed failure or a report
 explaining existing coverage/visual applicability under verification strategy.
-`Green` links successful checks. `Review` links the orchestrator verdict.
+`Green` links recorder JSON for executable checks and a review report for visual
+evidence. The checker rejects failed, non-command or changed-during-run command
+reports. Run the recorder freshness check too; structural status is not freshness. `Review` links the orchestrator verdict.
 
 Run the structural check before assignment and after handoff:
 
@@ -49,6 +51,23 @@ inventory completeness, assertion quality, report truth or input freshness; the
 reviewer checks those against design, source and recorded command results.
 When resuming an older worksheet, select required surfaces from the design before
 mapping existing reports. Existing API passes cannot determine the UI obligations.
+
+## Browser journey mapping
+
+Copy design journey IDs into `Journey / Test case`; each maps to a distinct
+browser evidence case with the same acceptance links. Keep both journey tables
+empty only when the design explains why no changed UI workflow needs proof.
+On resume, derive missing journeys from approved behavior; preserve approval.
+
+Record the preserved Playwright JSON path under `- Browser report:`. Run:
+
+```sh
+python3 .agents/skills/carta-module-development/scripts/check_worksheet.py plans/<feature> --browser-report plans/<feature>/reports/<run>/results.json
+```
+
+The check matches files/titles and passing attempts for all selected journeys.
+`DONE` runs this check using the worksheet report path. It cannot judge assertions,
+report provenance or freshness; review those with the evidence recorder.
 
 ## State and gates
 

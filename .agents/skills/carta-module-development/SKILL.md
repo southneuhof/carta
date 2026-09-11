@@ -52,9 +52,13 @@ still have an unresolved business rule. For a new full-CRUD resource with no
 special behavior, check [bounded.md](references/bounded.md) for generator limits;
 generator ineligibility does not change the approved scope.
 
-Use delegation when available and useful. Give the executor one plan and its
-required design, worksheet, source and evidence references. The orchestrator
-reviews every plan before assigning the next; execution.md owns the gates.
+Before assigning execution, run the worksheet checker and review the UI contract
+and journey coverage against the approved behavior. Missing mappings return to
+planning. Delegate plan reconciliation as planning, not execution.
+
+Use delegation when available and useful. Assign workers through the
+[execution handoff](references/execution.md#assignment). The orchestrator reviews
+every plan before assigning the next; workers return evidence, not acceptance.
 When delegation is unavailable, execute directly with the same acceptance
 requirements and label the review as a self-review.
 

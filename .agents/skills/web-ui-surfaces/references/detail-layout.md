@@ -1,8 +1,11 @@
 # Workflow detail layout
 
-Use `DetailView` for ordinary record display. Compose `NavigationHeader`,
-`Detail`, cards, child tables, attachments, and history when the task needs
-several sections. Keep the record summary first. A main/sidebar grid is useful
+Start with `DetailView` for record display. Extend its supported controls and
+`value:<key>` slots; place related sections beside it. Several sections alone
+do not require a custom record shell. Use `Detail` within custom composition
+only for a named requirement that `DetailView` and adjacent sections cannot meet.
+Use the registered file renderer or `FileComponent` for attachments. Keep the
+record summary first. A main/sidebar grid is useful
 when short workflow controls sit beside long content; a single column is also
 valid. Do not duplicate the same attachments or fields in several sections.
 Use the [file-routing convention](file-routing.md) when a detail page owns

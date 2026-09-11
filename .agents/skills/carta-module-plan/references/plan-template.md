@@ -24,6 +24,13 @@ transaction placement and cross-plan interfaces. Name existing exemplars and
 applicable layer contracts. State migration generation/application and consumer
 update order separately. Resolve architecture and dependency choices here.
 
+## UI contract
+
+For changed web surfaces, reference `ui-contract.json` from the
+[UI contract](../../web-ui-surfaces/references/ui-contract.md). Record the selected
+component, extension and actual gap once. For each design journey, map one exact
+browser test in the worksheet; put its fixture and assertions in the cycle below.
+
 ## TDD cycles
 
 | Cycle | Acceptance IDs | Test case | Fixture / actor | Assertions | Expected red | Implementation owners | Review timing | Consequence |
@@ -67,7 +74,9 @@ order as an executor without the interview. Use
 [verification strategy](../../carta-module-development/references/verification-strategy.md)
 for test boundaries and serious-consequence review.
 
-Before marking READY, review the packet semantically: decision authority, one test
+Before marking READY, review the UI contract and journey selection against current
+component source and business rules. Existing code and passing tests cannot select
+the required components or workflow paths. Then review the packet semantically: decision authority, one test
 per cycle, required red-review timing, and UI actions actually performed by the
 browser case. A structural pass does not complete this review. Record the verdict
 and exact next action: write/run the first named test, obtain its required red

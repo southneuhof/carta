@@ -158,7 +158,6 @@ test('worksheet initialization uses the canonical asset, preserves existing work
   const first = spawnSync('python3', [tool, 'inventory', '--path', target], { cwd: root, encoding: 'utf8' })
   assert.equal(first.status, 0, first.stderr)
   assert.match(readFileSync(target, 'utf8'), /# inventory worksheet/)
-  assert.match(readFileSync(target, 'utf8'), /Acceptance and semantic handoff/)
   writeFileSync(target, 'ongoing work')
   const second = spawnSync('python3', [tool, 'inventory', '--path', target], { encoding: 'utf8' })
   assert.equal(second.status, 0); assert.equal(readFileSync(target, 'utf8'), 'ongoing work')

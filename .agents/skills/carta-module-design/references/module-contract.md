@@ -61,6 +61,16 @@ permitted prerequisite orders and cross-module effects when they exist.
 | Obligation | Rule references | Acceptance IDs |
 |---|---|---|
 
+For UI workflows, list the distinct browser journeys:
+
+| Journey | Obligation | Acceptance IDs | Distinct interaction |
+|---|---|---|---|
+
+Use stable `J-01` IDs and existing obligation/acceptance IDs. Select paths by the
+[journey rule](../../carta-module-development/references/verification-strategy.md#browser-journeys),
+including conditional required inputs. Headless or unchanged UI work keeps an
+empty table with its reason. This table selects proof; action records own rules.
+
 Present this inventory during design review. The worksheet checker cannot discover
 business work omitted here. Explicit exclusions belong in scope, not this table.
 
@@ -131,7 +141,7 @@ ui:
   parent_visibility: <retained pages or NONE>
   back: <target or NONE>
   control:
-    label: <text>
+    label: <framework default, or confirmed exact text and source>
     visible: <predicate>
     enabled: <predicate>
   fields: <editable/read-only fields; defaults; dependent lookups>

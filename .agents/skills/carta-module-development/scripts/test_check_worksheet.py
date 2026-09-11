@@ -2,10 +2,36 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
-from check_worksheet import check
+from check_worksheet import check, check_browser_report
+import json
 
 
 class WorksheetCheck(unittest.TestCase):
+    def test_each_selected_path_needs_an_observed_pass(self):
+        with TemporaryDirectory() as directory:
+            folder = Path(directory)
+            (folder / 'worksheet.md').write_text(
+                '| Journey | Test case |\n|---|---|\n'
+                '| J-01 | apps/web/e2e/workflow.spec.ts::safe close |\n'
+                '| J-02 | apps/web/e2e/workflow.spec.ts::unsafe close |\n')
+            def spec(title):
+                return {'file': 'workflow.spec.ts', 'title': title, 'tests': [
+                    {'expectedStatus': 'passed', 'status': 'expected', 'results': [{'status': 'passed'}]}]}
+            report = folder / 'browser.json'
+            data = {'suites': [{'specs': [spec('safe close')]}]}
+            report.write_text(json.dumps(data))
+            self.assertTrue(any('J-02' in error for error in check_browser_report(folder, report)))
+            data['suites'][0]['specs'].append(spec('unsafe close'))
+            report.write_text(json.dumps(data))
+            self.assertEqual(check_browser_report(folder, report), [])
+            data['suites'][0]['specs'][1]['tests'].append(
+                {'expectedStatus': 'passed', 'status': 'unexpected', 'results': [{'status': 'failed'}]})
+            report.write_text(json.dumps(data))
+            self.assertTrue(check_browser_report(folder, report))
+            report.write_text('[]')
+            with self.assertRaises(ValueError):
+                check_browser_report(folder, report)
+
     def test_coverage_and_completion(self):
         with TemporaryDirectory() as directory:
             folder = Path(directory)
@@ -19,6 +45,7 @@ id: B-01
 id: A-01
 ```
 '''
+            design += '\n| Journey | Obligation | Acceptance IDs | Distinct interaction |\n|---|---|---|---|\n'
             worksheet = '''- State: `DONE`
 - Latest review: report.md
 | Obligation | Acceptance IDs |
@@ -35,8 +62,9 @@ id: A-01
 
 | Acceptance | Plan | Surface | Test case | Implementation | Red | Green | Review | Result |
 |---|---|---|---|---|---|---|---|---|
-| A-01 | P-01 | BROWSER | request.spec.ts::saves and reloads | app.ts:save | report.md | report.md | report.md | PASS |
+| A-01 | P-01 | BROWSER | request.spec.ts::saves and reloads | app.ts:save | report.md | green.json | report.md | PASS |
 '''
+            worksheet = '| Journey | Test case |\n|---|---|\n\n' + worksheet
             (folder / 'design.md').write_text(design)
             (folder / 'worksheet.md').write_text(worksheet)
             plan = """- Acceptance: A-01
@@ -46,7 +74,52 @@ id: A-01
 """
             (folder / '001-result.md').write_text(plan)
             (folder / 'report.md').write_text('Evidence')
+            snapshot = {'inputs': ['app.ts'], 'fingerprint': '0' * 64}
+            green = {'scope': 'command', 'status': 'PASS', 'result': {'exitCode': 0}, 'before': snapshot, 'after': snapshot}
+            (folder / 'green.json').write_text(json.dumps(green))
+            for changed in [
+                {**green, 'status': 'FAIL'},
+                {**green, 'result': {'exitCode': 2}},
+                {**green, 'after': {**snapshot, 'fingerprint': '1' * 64}},
+                {**green, 'scope': 'static'},
+            ]:
+                (folder / 'green.json').write_text(json.dumps(changed))
+                self.assertTrue(check(folder))
+            (folder / 'green.json').write_text(json.dumps(green))
             self.assertEqual(check(folder), [])
+            journey_design = design + '| J-01 | W-01.normal | A-01 | Save and reload |\n'
+            journey_worksheet = worksheet.replace('|---|---|\n\n', '|---|---|\n| J-01 | request.spec.ts::saves and reloads |\n\n', 1)
+            journey_worksheet += '\n- Browser report: browser.json\n'
+            browser = {'suites': [{'specs': [{'file': 'request.spec.ts', 'title': 'saves and reloads', 'tests': [
+                {'expectedStatus': 'passed', 'status': 'expected', 'results': [{'status': 'passed'}]}
+            ]}]}]}
+            report = folder / 'browser.json'
+            report.write_text(json.dumps(browser))
+            (folder / 'design.md').write_text(journey_design)
+            (folder / 'worksheet.md').write_text(journey_worksheet)
+            self.assertEqual(check(folder), [])
+            for changed in [
+                journey_worksheet.replace('| J-01 | request.spec.ts::saves and reloads |', ''),
+                journey_worksheet.replace('| J-01 | request.spec.ts::saves and reloads |', '| J-01 | request.spec.ts::other |'),
+            ]:
+                (folder / 'worksheet.md').write_text(changed)
+                self.assertTrue(check(folder))
+            (folder / 'worksheet.md').write_text(journey_worksheet)
+            for status in ['failed', 'skipped', 'timedOut', 'interrupted']:
+                changed = json.loads(json.dumps(browser))
+                changed['suites'][0]['specs'][0]['tests'][0]['results'][0]['status'] = status
+                report.write_text(json.dumps(changed))
+                self.assertTrue(check(folder), status)
+            report.write_text(json.dumps({'suites': []}))
+            self.assertTrue(check_browser_report(folder, report))
+            changed = json.loads(json.dumps(browser))
+            changed['suites'][0]['specs'][0]['tests'][0]['results'].insert(0, {'status': 'failed'})
+            report.write_text(json.dumps(changed))
+            self.assertTrue(check_browser_report(folder, report))
+            report.write_text(json.dumps(browser))
+            self.assertEqual(check_browser_report(folder, report), [])
+            (folder / 'design.md').write_text(design)
+            (folder / 'worksheet.md').write_text(worksheet)
             for broken in [
                 worksheet.replace('| W-01.normal | A-01 |', ''),
                 worksheet.replace('| PASS |', '| PENDING |'),
@@ -72,7 +145,7 @@ id: A-01
             (folder / '001-result.md').write_text('- Acceptance: A-02')
             self.assertTrue(check(folder))
             (folder / '001-result.md').write_text(plan)
-            api_row = '| A-01 | P-01 | API | api.spec.ts::stores result | app.ts:save | report.md | report.md | report.md | PASS |\n'
+            api_row = '| A-01 | P-01 | API | api.spec.ts::stores result | app.ts:save | report.md | green.json | report.md | PASS |\n'
             combined = worksheet.replace('| A-01 | BROWSER |', '| A-01 | API, BROWSER |') + api_row
             api_cycle = '| C-02 | A-01 | api.spec.ts::stores result | request and user | persisted result | missing action | app.ts | after-plan | NONE |\n'
             (folder / 'worksheet.md').write_text(combined)

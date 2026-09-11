@@ -29,10 +29,16 @@ Before adding custom UI behavior, check the relevant component contract and
 extension points. Use supported slots, fields, actions and framework controls;
 keep custom code limited to the unmet requirement.
 
-Check once per interaction pattern, not once per component instance. Standard
-use needs no written justification. For a real gap, record the missing capability
-and the local code that owns it in the plan or handoff. A custom layout can still
-use framework-owned forms, inputs, buttons, dialogs and data loading.
+Select in order: standard View/action, supported slot or adjacent section,
+lower-level framework component, then local code for a named unmet requirement.
+Keep standard Create controls unless the requested interaction needs an override.
+Import template components or identify their runtime registration; a test stub
+or type declaration does not register a component.
+
+Record each changed surface's component, extension and actual gap in the plan's
+[UI contract](references/ui-contract.md). Check once per interaction pattern.
+Run the contract check before handoff; review every exception against the current
+component source. A custom layout retains framework controls and field rendering.
 
 ## Choose and build
 

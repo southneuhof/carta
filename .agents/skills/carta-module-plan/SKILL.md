@@ -69,7 +69,9 @@ not a transcript or repeated copy of the design in each file.
 
 Use the [worksheet contract](../carta-module-development/references/module-execution-worksheet.md)
 for the dependency/status index and acceptance ownership. Map every acceptance
-ID to a primary plan and its required evidence surfaces. Use
+ID to a primary plan and its required evidence surfaces. Map every design journey
+to a distinct browser test and independent starting record. Select assertions
+that detect its different inputs, submission, next actions and saved result. Use
 [verification strategy](../carta-module-development/references/verification-strategy.md)
 to select the smallest sufficient tests and broader checks justified by impact.
 

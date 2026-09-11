@@ -14,10 +14,9 @@ in browser tests and exhaustive access/state combinations at the API.
 ## Journey and data
 
 Use focused Playwright cases with named steps that map to acceptance IDs.
-Split independent scenarios when it improves isolation; neither one giant test
-nor a fixed number of journeys is required. Cover the interactions selected by the
-[verification strategy](verification-strategy.md), including child navigation
-when it changes. Exercise those actions through the visible authenticated UI, then
+Use the [journey selection rule](verification-strategy.md#browser-journeys) and
+worksheet mapping. Give each selected journey an independent record and distinct
+test title. Include child navigation when it changes. Exercise those actions through the visible authenticated UI, then
 verify the persisted outcome by reload or navigation. API setup can create
 fixtures and establish authenticated actors; it does not replace the interaction
 being tested. For an approval journey, seed the pre-approval state and approve

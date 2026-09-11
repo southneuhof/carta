@@ -26,7 +26,7 @@
     "integrate:bounded-module": "node scripts/integrate-bounded-module.mjs",
     "verify:module": "node scripts/verify-module.mjs",
     "module:evidence": "node scripts/module-evidence.mjs",
-    "test:module-tooling": "node --test scripts/*.test.mjs",
+    "test:module-tooling": "node --test scripts/*.test.mjs && python3 -B -m unittest discover -s .agents/skills/carta-module-development/scripts",
     "setup:editor": "pnpm --filter @southneuhof/sprindle editor:install"
   },
   "devDependencies": {

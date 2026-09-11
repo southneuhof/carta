@@ -26,6 +26,10 @@ module behavior. One terminal `.override(...)` handles one action difference.
 Keep `display.read` for display projection and `form.write` for necessary submit
 conversion. Omit identity functions and copied input/output type wrappers.
 
+For state-dependent inputs, supply the current record through form context.
+Match required state and submit validation to the server predicate, including
+previously retained values. Help text alone does not enforce a required input.
+
 Account for every required write value: user input, fixed parent context, or
 server-owned data. Show editable required fields. Supply fixed values through
 `initialData`; keep server-owned values out of client write schemas. Do not add

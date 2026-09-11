@@ -8,7 +8,10 @@ Review custom UI code against the
 [framework-first composition rule](../SKILL.md#framework-first-composition).
 Check whether each custom block owns an unmet requirement or duplicates supported
 framework behavior. Reuse the pattern checks from planning; inspect new deviations.
-Behavioral tests prove the interaction, while source review proves component reuse.
+Run the [UI contract check](ui-contract.md) for declared component use and
+resolution. Inspect source for undeclared surfaces and unjustified exceptions.
+Behavior tests prove interaction; neither test counts nor component imports prove
+framework composition.
 
 Choose tests by failure risk, not by file count:
 

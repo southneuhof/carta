@@ -32,6 +32,13 @@
 | Acceptance | Required surfaces |
 |---|---|
 
+## Browser journeys
+
+| Journey | Test case |
+|---|---|
+
+- Browser report: PENDING
+
 ## Acceptance
 
 | Acceptance | Plan | Surface | Test case | Implementation | Red | Green | Review | Result |

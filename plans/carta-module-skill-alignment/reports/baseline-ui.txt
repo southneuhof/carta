@@ -1,0 +1,8 @@
+FAIL: apps/web/src/routes/(authenticated)/transaksi/swa/index.route.vue:40: unresolved component <Button>
+FAIL: apps/web/src/routes/(authenticated)/transaksi/swa/index.route.vue: Create override needs a requested interaction in extensions
+FAIL: apps/web/src/routes/(authenticated)/transaksi/swa/[swaId]/detail.route.vue:112: unresolved component <Button>
+FAIL: apps/web/src/routes/(authenticated)/transaksi/swa/[swaId]/detail.route.vue:113: unresolved component <Button>
+FAIL: apps/web/src/routes/(authenticated)/transaksi/swa/[swaId]/detail.route.vue:114: unresolved component <Button>
+FAIL: apps/web/src/routes/(authenticated)/transaksi/swa/[swaId]/detail.route.vue:117: unresolved component <Button>
+FAIL: apps/web/src/routes/(authenticated)/transaksi/swa/[swaId]/detail.route.vue:124: unresolved component <Button>
+FAIL: apps/web/src/routes/(authenticated)/transaksi/swa/[swaId]/detail.route.vue: template must use DetailView from @southneuhof/loom
