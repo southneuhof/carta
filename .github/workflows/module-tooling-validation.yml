@@ -6,7 +6,10 @@ on:
       - '.agents/skills/**'
       - 'scripts/**'
       - 'package.json'
+      - 'pnpm-workspace.yaml'
+      - 'pnpm-lock.yaml'
       - 'apps/api/package.json'
+      - 'apps/web/package.json'
       - 'apps/api/scripts/test-target.mjs'
       - 'apps/api/src/authorization/catalog.ts'
       - 'apps/api/src/routes/index.ts'
@@ -18,7 +21,10 @@ on:
       - '.agents/skills/**'
       - 'scripts/**'
       - 'package.json'
+      - 'pnpm-workspace.yaml'
+      - 'pnpm-lock.yaml'
       - 'apps/api/package.json'
+      - 'apps/web/package.json'
       - 'apps/api/scripts/test-target.mjs'
       - 'apps/api/src/authorization/catalog.ts'
       - 'apps/api/src/routes/index.ts'
@@ -41,11 +47,19 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.1.0
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
       - name: Check Python prerequisite
         run: python3 --version
-      - name: Test module skills and helpers without application dependencies
+      - name: Test module skills and helpers
         run: node --test scripts/*.test.mjs
