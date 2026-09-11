@@ -3,7 +3,11 @@ import { compileRouteManifest, watchRouteManifest } from '@southneuhof/sprindle/
 
 const projectRoot = new URL('..', import.meta.url).pathname
 const manifest = '.sprindle-dev/routes.mjs'
+const bootStarted = Date.now()
+const log = (message: string) => console.log(`[api:dev] ${message} (+${Date.now() - bootStarted}ms)`)
+log('Compiling file routes...')
 await compileRouteManifest(projectRoot, 'src/routes', manifest, false)
+log('File routes compiled. Starting route watcher...')
 
 let server: ChildProcess | undefined
 let restarting = false
@@ -11,6 +15,7 @@ let stopping = false
 let ready = false
 
 function startServer() {
+  log('Starting API server...')
   server = spawn('tsx', ['--env-file-if-exists=.env', 'src/server.ts'], { stdio: 'inherit', env: { ...process.env, SPRINDLE_ROUTE_MANIFEST: manifest } })
   server.on('exit', (code, signal) => {
     if (restarting) return
@@ -37,6 +42,7 @@ const watcher = await watchRouteManifest(projectRoot, 'src/routes', (error) => {
   }
   if (ready) restartServer()
 }, manifest, false)
+log('Route watcher ready.')
 ready = true
 startServer()
 
