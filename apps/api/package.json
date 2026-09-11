@@ -7,10 +7,11 @@
     "node": ">=24"
   },
   "scripts": {
-    "routes:build": "sprindle-routes-build . src/routes",
-    "routes:compile": "tsx scripts/compile-routes.ts",
-    "routes:check": "sprindle-routes-check . src/routes",
-    "dev": "node --import tsx scripts/dev.ts",
+    "routes:build": "pnpm run tooling:ensure && sprindle-routes-build . src/routes",
+    "routes:compile": "pnpm run tooling:ensure && tsx scripts/compile-routes.ts",
+    "routes:check": "pnpm run tooling:ensure && sprindle-routes-check . src/routes",
+    "tooling:ensure": "node scripts/ensure-tooling.mjs",
+    "dev": "pnpm run tooling:ensure && node --import tsx scripts/dev.ts",
     "build": "pnpm run routes:build && tsx scripts/build-production.ts && pnpm run routes:check && tsc -p tsconfig.json --noEmit --singleThreaded",
     "type-check": "pnpm run routes:build && pnpm run routes:check && tsc -p tsconfig.json --noEmit --singleThreaded",
     "lint": "oxlint src scripts",

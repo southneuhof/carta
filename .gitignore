@@ -18,8 +18,7 @@ dist-types
 dist-ssr
 coverage
 .vscode-test/
-.sprindle/
-/apps/api/.sprindle-e2e/
+.sprindle*/
 *.tsbuildinfo
 *.local
 .env

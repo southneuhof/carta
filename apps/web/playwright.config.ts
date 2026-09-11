@@ -50,7 +50,7 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { browserName: 'chromium' } }],
   webServer: [
     {
-      command: 'pnpm exec tsx scripts/compile-routes.ts .sprindle-e2e/routes.mjs && node --env-file=.env --env-file=.env.e2e --import tsx src/server.ts',
+      command: 'pnpm exec tsx scripts/ensure-tooling.mjs && pnpm exec tsx scripts/compile-routes.ts .sprindle-e2e/routes.mjs && node --env-file=.env --env-file=.env.e2e --import tsx src/server.ts',
       cwd: apiRoot,
       url: `${apiUrl}/health`,
       timeout: 120_000,
