@@ -459,3 +459,12 @@ not reproduce the automatic reinstall, including Node 24 with `CI=true`.
 With the fixture repair, the complete route-contract suite passed locally on
 Node 24: eight tests. Focused web lint and `git diff --check` also passed.
 Updated CI must pass before merge; local success does not replace that gate.
+
+The first updated CI run confirmed that automatic installation was disabled,
+then exposed a second setup error: copied API workspace links still targeted
+the source checkout. On a clean runner that checkout has no Sprindle build
+output, while `tooling:ensure` builds the fixture's separate Sprindle copy.
+The fixture now points its API Sprindle link at that copy and excludes generated
+tool/type output when copying source. This makes the tests build and use their
+own tools. All eight contract tests pass locally on Node 24 with this clean
+fixture, and focused lint and diff checks pass. CI validation remains required.

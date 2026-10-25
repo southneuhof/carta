@@ -40,7 +40,7 @@ function fixture(conflictingAlias = false, typeOnlyAliasConflict = false) {
     filter: (source) =>
       !relative(sprindleSource, source)
         .split(sep)
-        .some((part) => ['node_modules', '.git', '.sprindle-package'].includes(part)),
+        .some((part) => ['node_modules', '.git', '.sprindle-package', 'dist-tooling', 'dist-types'].includes(part)),
   })
   symlinkSync(join(sprindleSource, 'node_modules'), join(sprindleRoot, 'node_modules'), 'dir')
 
@@ -57,6 +57,9 @@ function fixture(conflictingAlias = false, typeOnlyAliasConflict = false) {
   mkdirSync(join(apiRoot, 'scripts'), { recursive: true })
   copyFileSync(join(repoRoot, 'apps/api/scripts/ensure-tooling.mjs'), join(apiRoot, 'scripts/ensure-tooling.mjs'))
   cpSync(join(repoRoot, 'apps/api/node_modules'), join(apiRoot, 'node_modules'), { recursive: true })
+  const apiSprindle = join(apiRoot, 'node_modules/@southneuhof/sprindle')
+  rmSync(apiSprindle, { recursive: true, force: true })
+  symlinkSync(sprindleRoot, apiSprindle, 'dir')
 
   for (const name of ['web']) {
     const packageRoot = join(root, 'apps', name)
