@@ -468,3 +468,22 @@ The fixture now points its API Sprindle link at that copy and excludes generated
 tool/type output when copying source. This makes the tests build and use their
 own tools. All eight contract tests pass locally on Node 24 with this clean
 fixture, and focused lint and diff checks pass. CI validation remains required.
+
+### Stopped at the user's checkpoint — 2026-10-25
+
+The route-contract proofs pass in CI at `99dc404`. Later web validation exposed
+two existing browser assertions that required slot array identity. Form slots
+now return readonly snapshots, so a fresh array does not mean the draft changed.
+The focused browser command reproduced both failures locally.
+
+The local test correction uses a distinct selected owner through the real
+setter, checks that the other three forms retain their values, checks that
+default factories do not rerun, and checks the distinct submitted records.
+It removes ineffective attempts to mutate frozen snapshots. No form production
+code changed. The focused cases pass, and the full Loom browser suite passes:
+17 files, 87 tests. A matching Chromium browser was downloaded for local proof.
+
+The user requested a stop before further work. Save this correction as a local
+commit and leave PR 8 open. The browser correction has not been pushed. Next:
+review and push the checkpoint, confirm all PR checks pass, then merge only
+after the user resumes the task. The earlier fixture fixes are already pushed.
