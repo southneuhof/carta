@@ -30,6 +30,8 @@ function fixture(conflictingAlias = false, typeOnlyAliasConflict = false) {
     const source = join(repoRoot, file)
     if (existsSync(source)) copyFileSync(source, join(root, file))
   }
+  const workspaceConfig = join(root, 'pnpm-workspace.yaml')
+  writeFileSync(workspaceConfig, `${readFileSync(workspaceConfig, 'utf8')}\nverifyDepsBeforeRun: false\n`)
 
   const sprindleSource = join(repoRoot, 'packages/sprindle')
   const sprindleRoot = join(root, 'packages/sprindle')
@@ -80,13 +82,7 @@ function fixture(conflictingAlias = false, typeOnlyAliasConflict = false) {
 
   const workspaceModules = join(root, 'node_modules')
   mkdirSync(workspaceModules, { recursive: true })
-  copyFileSync(join(repoRoot, 'node_modules/.modules.yaml'), join(workspaceModules, '.modules.yaml'))
   symlinkSync(join(repoRoot, 'node_modules/.pnpm'), join(workspaceModules, '.pnpm'), 'dir')
-  const workspaceState = JSON.parse(readFileSync(join(repoRoot, 'node_modules/.pnpm-workspace-state-v1.json'), 'utf8'))
-  workspaceState.projects = Object.fromEntries(
-    Object.entries(workspaceState.projects).map(([path, project]) => [path === repoRoot || path.startsWith(`${repoRoot}${sep}`) ? resolve(root, relative(repoRoot, path)) : path, project])
-  )
-  writeFileSync(join(workspaceModules, '.pnpm-workspace-state-v1.json'), JSON.stringify(workspaceState))
   mkdirSync(join(workspaceModules, '@southneuhof'), { recursive: true })
   mkdirSync(join(workspaceModules, '@types'), { recursive: true })
   symlinkSync(join(repoRoot, 'apps/api/node_modules/@types/node'), join(workspaceModules, '@types/node'), 'dir')

@@ -439,3 +439,23 @@ All executable done criteria passed. These checks prove bounded recovery from
 controlled blocked compiler work and safe lock recovery. They do not establish
 the blocked operation in the original incident. Direct synchronous compiler
 calls outside the watcher retain the limitation recorded above.
+
+## CI follow-up — 2026-10-25
+
+The user authorized repair of PR 8 CI failures and merge after checks pass.
+The backend, Windows tooling, macOS watcher, and TypeScript jobs passed on the
+initial PR. Web validation failed five of eight route-contract proofs after
+pnpm installed dependencies in a temporary fixture. The install removed manual
+fixture package links, so the tests failed on unresolved imports before they
+could check the intended import-agreement contract.
+
+The fixture now sets `verifyDepsBeforeRun: false` in its own temporary workspace
+configuration. It reuses the already installed dependencies and no longer
+copies pnpm's private install-state files. The real workspace configuration and
+production guard are unchanged. All existing test assertions remain intact.
+
+The original CI command and logs provide the failing evidence. Local runs did
+not reproduce the automatic reinstall, including Node 24 with `CI=true`.
+With the fixture repair, the complete route-contract suite passed locally on
+Node 24: eight tests. Focused web lint and `git diff --check` also passed.
+Updated CI must pass before merge; local success does not replace that gate.
