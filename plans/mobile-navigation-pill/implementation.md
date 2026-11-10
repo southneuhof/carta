@@ -59,5 +59,6 @@ Local browser evidence and check logs are under
 existing fixture and is not a permanent application test.
 
 Delivery uses GitHub CLI because the Origin CLI is unavailable. Independent
-runtime review and main promotion are pending. Restore the temporary E2E
-configuration and stop the task-owned database after that review.
+runtime review and main promotion are tracked in
+[PR 13](https://github.com/southneuhof/carta/pull/13). Restore the temporary E2E
+configuration and stop the task-owned database after the review.
