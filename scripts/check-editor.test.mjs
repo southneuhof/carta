@@ -96,7 +96,7 @@ test('the read-only editor check accepts current files and advises on stale or i
   assert.ok(receipt.inputs.fingerprint)
   assert.ok(receipt.payloads.some((payload) => payload.path === 'dist/language-server.mjs'))
   assert.ok(receipt.payloads.some((payload) => payload.path === 'extension.cjs'))
-  assert.ok(receipt.payloads.some((payload) => payload.path === 'routes/definition.ts'))
+  assert.ok(receipt.payloads.some((payload) => payload.path === 'dist-types/routes/definition.d.ts'))
   assert.ok(receipt.payloads.some((payload) => payload.path === 'dist-types/index.d.ts'))
   assertReadOnly(workspace)
 

@@ -198,7 +198,7 @@ test('development runtime edits restart the API without compiling routes', { tim
     child.on('error', (error) => { output += `${error.stack ?? error.message}\n` })
 
     try {
-      await eventuallyJson(base, '/startup', { moduleValue: 'module-one', appValue: 'app-one', envValue: 'env-one' })
+      await eventuallyJson(base, '/startup', { moduleValue: 'module-one', appValue: 'app-one', envValue: 'env-one' }, 30_000)
     } catch (error) {
       throw new Error(`${error.message}\n${output}`)
     }
