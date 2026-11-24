@@ -87,7 +87,7 @@ function createApi() {
     },
     delete: {
       permission: null,
-      run: actions.delete,
+      run: (record) => actions.delete(record.id),
     },
   })
   return {
