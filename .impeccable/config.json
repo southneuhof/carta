@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "geist sans",
+        "files": [
+          "packages/loom/src/styles/framework.css"
+        ],
+        "createdAt": "2026-11-24T07:27:29.351Z",
+        "reason": "Agent: Carta sets Geist Sans as its application typeface in apps/web/src/assets/main.css and ships all nine weights. The declarations predate and are unchanged by the Loom refactor."
+      }
+    ]
+  }
+}
