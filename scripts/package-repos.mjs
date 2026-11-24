@@ -12,6 +12,7 @@ const packages = [
     dir: 'packages/spool',
     remote: 'https://github.com/southneuhof/spool.git',
     remoteName: 'pkg-spool',
+    branch: 'carta',
   },
   {
     name: '@southneuhof/loom',
@@ -78,7 +79,7 @@ function ensureRemote(pkg) {
 }
 
 function remoteHasBranch(pkg, branch) {
-  return Boolean(tryGit(['ls-remote', '--heads', pkg.remoteName, branch]))
+  return Boolean(tryGit(['ls-remote', '--heads', pkg.remoteName, `refs/heads/${branch}`]))
 }
 
 function detectRemoteDefaultBranch(pkg) {
@@ -102,9 +103,9 @@ function bootstrap() {
       continue
     }
 
-    const sourceBranch = remoteHasBranch(pkg, desiredBranch)
+    const sourceBranch = pkg.branch ?? (remoteHasBranch(pkg, desiredBranch)
       ? desiredBranch
-      : detectRemoteDefaultBranch(pkg)
+      : detectRemoteDefaultBranch(pkg))
 
     console.log(`add ${pkg.dir} from ${pkg.remoteName}#${sourceBranch}`)
     runGit(
@@ -119,14 +120,15 @@ function pull() {
 
   for (const pkg of packages) {
     ensureRemote(pkg)
-    if (!remoteHasBranch(pkg, desiredBranch)) {
-      console.log(`skip ${pkg.dir} because ${desiredBranch} does not exist yet`)
+    const branch = pkg.branch ?? desiredBranch
+    if (!remoteHasBranch(pkg, branch)) {
+      console.log(`skip ${pkg.dir} because ${branch} does not exist yet`)
       continue
     }
 
-    console.log(`pull ${pkg.dir} from ${pkg.remoteName}#${desiredBranch}`)
+    console.log(`pull ${pkg.dir} from ${pkg.remoteName}#${branch}`)
     runGit(
-      ['subtree', 'pull', `--prefix=${pkg.dir}`, pkg.remoteName, desiredBranch, '--squash'],
+      ['subtree', 'pull', `--prefix=${pkg.dir}`, pkg.remoteName, branch, '--squash'],
       { capture: false },
     )
   }
@@ -137,26 +139,28 @@ function pushPackages() {
 
   for (const pkg of packages) {
     ensureRemote(pkg)
+    const branch = pkg.branch ?? desiredBranch
     console.log(`split ${pkg.dir}`)
     const splitSha = runGit(['subtree', 'split', `--prefix=${pkg.dir}`])
-    console.log(`push ${pkg.dir} to ${pkg.remoteName}#${desiredBranch}`)
-    runGit(['push', pkg.remoteName, `${splitSha}:refs/heads/${desiredBranch}`], { capture: false })
+    console.log(`push ${pkg.dir} to ${pkg.remoteName}#${branch}`)
+    runGit(['push', pkg.remoteName, `${splitSha}:refs/heads/${branch}`], { capture: false })
   }
 }
 
 function status() {
   for (const pkg of packages) {
     ensureRemote(pkg)
+    const branch = pkg.branch ?? desiredBranch
     const changed = tryGit(['status', '--short', '--', pkg.dir])
       .split('\n')
       .filter(Boolean)
       .length
-    const branchExists = remoteHasBranch(pkg, desiredBranch)
+    const branchExists = remoteHasBranch(pkg, branch)
     const lastCommit = tryGit(['log', '-1', '--format=%h %s', '--', pkg.dir]) || 'untracked in history'
     console.log(
       [
         pkg.dir,
-        `branch=${branchExists ? desiredBranch : 'missing'}`,
+        `branch=${branchExists ? branch : 'missing'}`,
         `changes=${changed}`,
         `last=${lastCommit}`,
       ].join(' | '),

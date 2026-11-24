@@ -13,6 +13,10 @@ Preserve unrelated project files and local environment values.
 |  | Root tooling, `.github/workflows`, `plans/`, and project documents |
 | Skills live separately at `southneuhof/skills` (`skills/<name>/`) | `.env`, `.env.test`, `.env.e2e` secrets |
 
+Package sync uses Spool's `carta` branch for the workspace package. Spool's
+`main` branch owns the standalone npm package and its proof fixtures. Other
+framework packages sync on `main`.
+
 Router integration under `apps/web` is project-owned. When an update changes
 the routing contract, adapt the project routes and check their behavior.
 
