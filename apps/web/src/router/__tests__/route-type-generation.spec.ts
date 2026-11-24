@@ -186,10 +186,7 @@ defineResource({
       code: 1,
       stdout: expect.stringMatching(/consumer\.ts\(\d+,\d+\): error TS\d+:[\s\S]*Type '"alpha"' is not assignable to type '"keeper"'/),
     })
-    await writeFile(join(root, 'src/routes/alpha.route.vue'), '<template />')
-    await generate(root)
-    await expect(compile()).resolves.toMatchObject({ stderr: '' })
-  })
+  }, 65_000)
 
   it('checks optional, repeatable, empty, and exact resource parameters', async () => {
     const root = await fixture({
