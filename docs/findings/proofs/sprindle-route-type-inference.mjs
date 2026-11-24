@@ -48,7 +48,14 @@ async function manifest(root, destination, sdkDestination) {
 
 function projectRoutes(base = project, routes = 'routes', output = file('generated/routes')) {
   const root = resolve(base, routes)
-  const overlay = routeLanguageOverlay(base, routes, new Map(), join(framework, 'src/routes/definition.ts'), join(framework, 'dist-types/index.d.ts'))
+  const overlay = routeLanguageOverlay({
+    projectRoot: base,
+    root,
+    config: join(base, 'tsconfig.json'),
+    open: new Map(),
+    definition: join(framework, 'dist-types/routes/definition.d.ts'),
+    publicTypes: join(framework, 'dist-types/index.d.ts'),
+  })
   const mapped = (path) => path.startsWith(root + sep) ? join(output, relative(root, path)).replace(/\.([rs])\.d\.ts$/, '.$1.ts') : path
   for (const [path, text] of overlay) {
     if (!path.startsWith(root + sep)) continue
