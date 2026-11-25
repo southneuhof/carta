@@ -11,9 +11,8 @@
 - Change framework packages only when the user request explicitly includes them. Keep unsupported behavior local.
 - For an update from upstream, read [the update procedure](docs/framework-sync.md#update-carta-packages-in-a-project). It defines authorization, local work protection, conflict resolution, and required checks.
 - Use `$carta-audit` for a Sprindle plus Loom framework audit.
-- Use `$carta-module-development` for module work and `$carta-module-design` for initial designs or material contract revisions.
-- Use `$api-conventions` for `apps/api` changes and `$web-ui-surfaces` for `apps/web` UI changes.
-- Read [DESIGN.md](DESIGN.md) before you design, build, or review an `apps/web` page.
+- Before implementing or reviewing a module (including from `plans/*/design.md`), open [carta-module-development](.agents/skills/carta-module-development/SKILL.md). Use [carta-module-design](.agents/skills/carta-module-design/SKILL.md) for initial designs or material contract revisions.
+- Before changing `apps/api`, open [api-conventions](.agents/skills/api-conventions/SKILL.md). Before changing `apps/web` routes, resources, forms, or pages, open [web-ui-surfaces](.agents/skills/web-ui-surfaces/SKILL.md), its [capability index](.agents/skills/web-ui-surfaces/references/capabilities.md), and [DESIGN.md](DESIGN.md).
 - Read [the resource architecture](docs/resource_system_overhaul/ARCHITECTURE.md)
 before you change Loom resource declarations, author application modules, or
 static resource checks. It defines the current API contract.

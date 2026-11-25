@@ -17,7 +17,13 @@ Use a plain field object for static input. Use a field function when the full
 configuration depends on typed Form context or the read-only draft. Return the
 whole field configuration. Put visibility and span on the field. Put authored
 disabled state in the input props. Only `behavior.derived` remains for values
-computed from the draft.
+computed from the draft. Keep field labels concise without appending
+`(required)` text. Use `renderer: 'date'` consistently for calendar dates
+across the application instead of mixing `DateInput` with raw text date inputs.
+Inside `TableInput` inline rows, keep every field a real input or structured
+display rather than abusing `renderer: 'separator'` as a read-only column, and
+format derived totals consistently (for example two decimal places for
+currency).
 
 For file selection, imports, or preprocessing, use the existing FileInput,
 ImageInput, CameraInput, or DrawingCanvas. Omitted mode keeps stored
