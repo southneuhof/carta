@@ -45,8 +45,7 @@ describe('routeBreadcrumbs', () => {
       { label: 'Settings' },
       { label: 'Users', to: { name: 'settings-users' } },
       { label: 'Detail' },
-      { label: 'Role' },
-      { label: 'Assignments' },
+      { label: 'Role Assignments' },
     ])
   })
 

@@ -19,6 +19,23 @@ function titleCase(value: string): string {
     .join(' ')
 }
 
+function suffixSegments(route: RouteLocationNormalizedLoaded, entryPath: string): string[] {
+  const leafPath = route.matched.at(-1)?.path
+  if (leafPath && leafPath.startsWith(entryPath)) {
+    const rest = leafPath.slice(entryPath.length)
+    return rest
+      .split('/')
+      .filter((segment) => Boolean(segment) && !segment.startsWith(':'))
+  }
+  const paramValues = new Set(
+    Object.values(route.params).flatMap((value) => (Array.isArray(value) ? value : value === undefined ? [] : [String(value)])),
+  )
+  const rest = route.path.startsWith(entryPath) ? route.path.slice(entryPath.length) : ''
+  return rest
+    .split('/')
+    .filter((segment) => Boolean(segment) && !paramValues.has(segment))
+}
+
 export function routeBreadcrumbs(route: RouteLocationNormalizedLoaded, router: Pick<Router, 'resolve'>, navigation: readonly VisibleNavigationModule[]): BreadcrumbItem[] {
   const routeName = String(route.name ?? '')
   const match = activeNavigationEntry(route.path, (to) => router.resolve(to), navigation)
@@ -31,8 +48,8 @@ export function routeBreadcrumbs(route: RouteLocationNormalizedLoaded, router: P
   items.push({ label: match.entry.title, ...(isEntrypoint ? {} : { to: match.entry.to }) })
 
   if (!isEntrypoint) {
-    const suffix = routeName.slice(match.entry.name.length).split('-').filter(Boolean)
-    for (const segment of suffix) {
+    const entryPath = router.resolve(match.entry.to).path
+    for (const segment of suffixSegments(route, entryPath)) {
       const label = pageLabels[segment] ?? titleCase(segment)
       if (items.at(-1)?.label !== label) items.push({ label })
     }
