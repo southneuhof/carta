@@ -331,7 +331,7 @@ Check access again on run, even if can returned true earlier. The binder copies 
 
 FormView runs its completion callback, then applies its default navigation unless the callback prevents it or defaultTo is false. A callback or navigation failure does not repeat the write or become a validation error. Keep page completion and toast policy at the page owner.
 
-FormView merges the current route query into its default submit target. Target query values replace carried values. A callback's `navigate(target)` uses exactly the supplied target and does not add the current query. NavigationHeader merges the current route query into an explicit `backTo` target. Browser history back stays unchanged.
+FormView merges the current route query into its default submit target. Target query values replace carried values. A callback's `navigate(target)` uses exactly the supplied target and does not add the current query. `PageHeader` renders a Back control only when `backTo` is supplied (`'history'` or a `RouteTarget`) and merges the current route query into an explicit `backTo` target. Browser history back stays unchanged.
 
 Shared view props, action slot targets, and submit context use `RouteTarget`, a string or a generic relative or path target. Resource route declarations use strict `RouteMap` types.
 
@@ -361,7 +361,7 @@ Query changes, refresh, pagination, namespace changes, and replacement row objec
 
 With a controlled query prop, the parent owns query values. Forward replacements and emit one update. Without a controlled query, Collection owns query state and URL synchronization. Do not mutate the parent query. Browser back and parent replacements update the controls without an echo loop.
 
-DetailView owns one `useRecord` read. Its `controls` slot receives record and read state. Its ready `body` slot receives `{ record, detail }`; `detail` contains the resolved record as data and has no loader. The body replaces the standard detail card. Without a body slot, DetailView renders that card from the same available record. A cache hit follows the same path as a fresh load. Background refresh errors stay visible with the record and have a separate `read-error` slot.
+DetailView owns one `useRecord` read. It renders standard Edit and Delete header actions when `updateRoute` or `deleteRecord` is wired (for example from `resource.detail({ id })`), with `#edit-action` and `#delete-action` slots for per-action overrides and `#controls` for extra workflow actions. Its `controls` slot receives record, read state, and action state. Its ready `body` slot receives `{ record, detail }`; `detail` contains the resolved record as data and has no loader. The body replaces the standard detail card. Without a body slot, DetailView renders that card from the same available record. Both `defineDetail` and `defineForm` accept optional `sections` (`{ title, description?, fields }[]`) orthogonal to `schema` and `fields`. A cache hit follows the same path as a fresh load. Background refresh errors stay visible with the record and have a separate `read-error` slot.
 
 TreeTable starts collapsed and renders expanded hierarchy rows with their original record context. It requires rowKey, children, and treeColumn. Use a cell slot to replace the label content while keeping the disclosure control. TreeTable and TreeTableContent share expansion state and rendering. Do not apply a display accessor or format twice.
 
@@ -379,8 +379,13 @@ the parent rows needed to show those keys.
 ### 7.2 Filters
 
 ListView owns one filter session outside the popover. Its `filters`, `toolbar`,
-and `context` slots share `draft`, `setValue`, `validate`, `reset`, `errorFor`,
-`setError`, `touch`, `touched`, `issues`, and `validating`. `setValue` validates
+and `context` slots share `draft`, `setValue`, `field`, `validate`, `reset`,
+`errorFor`, `setError`, `touch`, `touched`, `issues`, and `validating`.
+`field(key)` derives `{ key, label, value, setValue, error, touched, props,
+input, options }` from the shared `filters` definition so quick inline controls
+in `#filters` do not duplicate options or labels. Set `filterControls="slot"` on
+`ListView` when a page exposes quick inline filters only and omits the built-in
+filter popover trigger. `setValue` validates
 and commits valid output; invalid input stays in the draft. `validate` checks
 without committing. `reset` restores and applies the baseline even before the
 popover opens. Query replacement hydrates the same session. Nested ordinary

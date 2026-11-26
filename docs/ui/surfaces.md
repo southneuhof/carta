@@ -25,7 +25,12 @@ Each override replaces only the named standard action.
 
 ## Filters
 
-`ListView #filters` hosts collection query controls.
+`ListView #filters` hosts quick inline collection query controls and receives
+`field(key)` to derive labels, options, and input bindings from the shared
+`filters` definition. Set `filter-controls="slot"` on `ListView` when the list
+uses quick inline filters only and does not need the built-in filter popover.
+Set `body-variant="plain"` when a custom `#collection` card grid or board sits
+directly on the page background without an outer body card.
 
 Use [collections.md](collections.md) to select `ChipFilter` or `Tabs`.
 

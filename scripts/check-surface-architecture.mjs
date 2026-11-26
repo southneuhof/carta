@@ -46,6 +46,7 @@ const removedNames = new Set([
   'InputPropsAdapter',
   'InputPropsRegistry',
   'ModelConfig',
+  'NavigationHeader',
   'ResourceActionField',
   'ResourceActionFields',
   'ResourceCapabilities',

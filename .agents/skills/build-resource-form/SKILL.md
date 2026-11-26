@@ -15,14 +15,19 @@ existing controls cannot express.
 
 Use a plain field object for static input. Use a field function when the full
 configuration depends on typed Form context or the read-only draft. Return the
-whole field configuration. Put visibility and span on the field. Put authored
-disabled state in the input props. Only `behavior.derived` remains for values
-computed from the draft. Keep field labels concise without appending
-`(required)` text. Use `renderer: 'date'` consistently for calendar dates
-across the application instead of mixing `DateInput` with raw text date inputs.
-Inside `TableInput` inline rows, keep every field a real input or structured
-display rather than abusing `renderer: 'separator'` as a read-only column, and
-format derived totals consistently (for example two decimal places for
+whole field configuration. Put visibility, span, and conditional `required`
+(when a `.superRefine()` rule makes an optional schema field dynamically
+required) on the field; ordinary requiredness is inferred from the schema,
+including `z.preprocess(...)` wrappers. Group multi-group forms with `sections`
+on `defineForm` (`{ title, description?, fields }[]`), which collapses empty
+hidden sections automatically. Put authored disabled state in the input props.
+Only `behavior.derived` remains for values computed from the draft. Keep field
+labels concise without appending `(required)` text. Use `renderer: 'date'`
+consistently for calendar dates across the application instead of mixing
+`DateInput` with raw text date inputs. Inside `TableInput` inline rows, use
+`kind: 'display'` (`read`, `format`, `align`) for read-only or computed columns
+(such as `Subtotal`) instead of disabled text inputs or `renderer: 'separator'`,
+and format derived totals consistently (for example two decimal places for
 currency).
 
 For file selection, imports, or preprocessing, use the existing FileInput,

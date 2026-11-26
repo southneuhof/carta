@@ -35,15 +35,13 @@ can clear it.
 Use `ListView`, `DetailView`, and `FormView` with their standard layouts for
 standard CRUD pages. Keep `DetailView`'s single default card on ordinary detail
 pages instead of splitting fields across multiple custom cards, and keep all
-fields of one card inside a single `defineDetail` map so label colons align.
-`DetailView` and `FormView` own the page header through `NavigationHeader`. A
-custom page with a back target uses `NavigationHeader` directly; top-level
-sidebar custom pages omit any Back button by using a clean framed `Card` header
-until `NavigationHeader` supports hiding its Back control (never hide it with
-brittle CSS selector overrides). `ListView` renders its own title and toolbar
-header. Show one page header on each page; sections below it keep their own
-short headings. Keep module titles in the standard header; omit decorative
-banners, repeated titles, and slogans.
+fields of one card inside a single `defineDetail` map (using `sections` when
+logical groups help scanning) so label colons align. `ListView`, `DetailView`,
+and `FormView` share `PageHeader`. Custom pages use `PageHeader` directly: pass
+`backTo` when the page has a back target and omit `backTo` on top-level sidebar
+custom pages so no Back button renders. Show one page header on each page;
+sections below it keep their own short headings. Keep module titles in the
+standard header; omit decorative banners, repeated titles, and slogans.
 
 Keep container framing consistent across peer sections on a page. Enclose peer
 sections below `DetailView` (including child tables, lists, and routed tab
@@ -87,9 +85,8 @@ queue item when present so the workspace never opens on an empty stub. Keep
 comparison panels (such as technician workload or schedule slots) visible
 without vertical jumping: selecting a record must never expand a region above a
 sibling comparison section and push it below the fold. Inside a queue or list
-pane, present selectable rows inside one framed `Card` separated by subtle
-dividers (`divide-y divide-outline-variant`) rather than stacking many
-separate bordered cards.
+pane, render selectable rows with Loom `ListItem` inside one framed `Card`
+rather than stacking separate bordered cards or wrapping IDs in pill buttons.
 
 Group by proximity before adding boxes. Keep related facts close (`gap-1` to
 `gap-2`) and separate distinct groups generously (`gap-4` to `gap-6`, with more
@@ -114,9 +111,11 @@ actions in their normal locations. Preserve the default `Create` button label
 wording. Keep row actions compact (icon controls or a menu) so wide text
 buttons do not distort narrow table rows.
 
-Put requested record workflow actions in the detail controls area. Keep header
-actions right-aligned and visually tiered so unrelated buttons do not compete
-at equal weight:
+Put requested record workflow actions in the detail controls area. `DetailView`
+renders standard `Edit` (`variant="outlined"`) and `Delete` (`variant="outlined"
+color="error"`) controls automatically when `update` or `delete` is declared on
+the resource. Keep header actions right-aligned and visually tiered so unrelated
+buttons do not compete at equal weight:
 
 - Primary workflow action: `variant="filled"` (for example `Start Work`, `Approve`, `Complete Work`).
 - Record management controls: `variant="outlined"` (for example `Edit`, `Delete` with `color="error"`).
@@ -144,15 +143,18 @@ or `#trailing-icon` slot:
 
 Use `FormView` for an independent form page, `DialogForm` for a short
 contextual input form, `ConfirmationDialog` for yes/no confirmations, and
-`Form` inside an existing surface. Group fields by task and put prerequisite
-fields before dependent fields.
+`Form` inside an existing surface. Group fields by task with `sections` on
+`defineForm` and `defineDetail` when a record has multiple distinct field groups,
+and put prerequisite fields before dependent fields.
 
 Keep collection filter bars calm and aligned. Prefer `ListView`'s built-in
-filter controls or a compact, single-row aligned filter bar. Keep controls in
-the same filter row consistent in height and type. Represent boolean or single
-category quick filters with `ChipFilter` rather than a stray floating switch or
-a standalone pill action button above a list. Use the smallest filter width
-that fits the control; use a full row only when needed.
+filter controls or a compact, single-row `#filters` bar that derives field
+config and options through `field(key)`. When a list only needs quick inline
+filters and no popover, set `filter-controls="slot"` on `ListView`. Keep
+controls in the same filter row consistent in height and type. Represent boolean
+or single category quick filters with `ChipFilter` rather than a stray floating
+switch or a standalone pill action button above a list. Use the smallest filter
+width that fits the control; use a full row only when needed.
 
 A contextual dialog form opens from its own action and owns its normal open and
 close interaction. In repeated content, use one dialog form for each record
@@ -164,15 +166,15 @@ coordinate the same dialog.
 Use shared Loom controls and keep their standard designs. Customize only for an
 explicit user request or a required interaction they cannot support. Check the
 [capability index](.agents/skills/web-ui-surfaces/references/capabilities.md)
-before building any filter, dialog, timeline, or button bar. Never wrap a
-record ID in a pill button just to make a list item clickable; make the full
-list item selectable inside a divided container with a clear active highlight.
+before building any filter, dialog, list item, timeline, or button bar. Never
+wrap a record ID in a pill button just to make a list item clickable; use
+`ListItem` for multi-line selectable rows with clear active highlight.
 Keep default `Button` horizontal padding intact so Material 3 pill hover and
 focus states frame the label cleanly (never strip padding with `px-0`). Keep
 left edges optically aligned by placing secondary navigation buttons
 right-aligned in the section header row, or using a plain `RouterLink` when a
-link sits flush-left under body copy. Never inject fragile
-`tr:nth-child(...)` divider CSS into `DetailView`.
+link sits flush-left under body copy. Use `sections` on `defineDetail` instead
+of injecting fragile `tr:nth-child(...)` divider CSS into `DetailView`.
 
 Change wording through label configuration, and keep field labels clean without
 appending `(required)` text. Import components from public exports or verified
@@ -209,12 +211,12 @@ page actions separate from global actions. Use restrained borders and surfaces,
 and support the app's light and dark themes.
 
 Apply button emphasis for the app's warm-neutral monochrome Material 3 theme.
-Because `secondary-container` sits very close to `surface-container` in light
-mode, `variant="tonal"` blends into outlined cards and fails to signal active
-selection. Use `variant="filled"` (`bg-primary text-on-primary`) for primary
+Use `variant="filled"` (or `toggle` + `:selected="true"` on a `Button`, which
+switches to `bg-primary text-on-primary` and sets `aria-pressed`) for primary
 actions and selected button states (paired with a leading `check` icon and
 clear wording such as `Selected`), `variant="outlined"` for secondary and
-unselected options, and `variant="text"` for quiet reference triggers.
+unselected options, `variant="tonal"` when a subtle filled secondary container
+is needed, and `variant="text"` for quiet reference triggers.
 
 ## Access and feedback
 

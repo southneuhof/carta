@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   app.use(FrameworkPlugin, {
     adapters: createFrameworkAdapters(router),
     renderers: { display: appDisplayRenderers },
-    uiDefaults: { backLabel: 'Kembali' },
+    uiDefaults: { locale: 'en-US' },
   })
   app.use(FileManagerPlugin, fileManagerOptions)
   app.use(router)

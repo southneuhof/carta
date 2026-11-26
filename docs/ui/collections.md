@@ -47,9 +47,11 @@ ListView synchronizes filter inputs from the current query. Search and
 successful filter changes reset the page once. Clearing a filter removes its
 query keys. A stale or invalid filter result does not load records.
 
-For inline or toolbar filters, bind controls to the slot's `draft` and
-`setValue` rather than editing router state. Keep schemas, labels, and loaders
-in `filters`. The [shared filter contract](../resource_system_overhaul/ARCHITECTURE.md#72-filters)
+For inline or toolbar filters, bind controls to the slot's `field(key)` helper
+(or `draft` and `setValue`) rather than editing router state or duplicating
+option arrays. Keep schemas, labels, and loaders in `filters`, and set
+`filter-controls="slot"` on `ListView` when no filter popover is needed. The
+[shared filter contract](../resource_system_overhaul/ARCHITECTURE.md#72-filters)
 defines validation, errors, reset, and query hydration.
 
 Each filter declares all query keys it can set or clear in `queryKeys`, and a

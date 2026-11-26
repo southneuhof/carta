@@ -23,17 +23,11 @@ function suffixSegments(route: RouteLocationNormalizedLoaded, entryPath: string)
   const leafPath = route.matched.at(-1)?.path
   if (leafPath && leafPath.startsWith(entryPath)) {
     const rest = leafPath.slice(entryPath.length)
-    return rest
-      .split('/')
-      .filter((segment) => Boolean(segment) && !segment.startsWith(':'))
+    return rest.split('/').filter((segment) => Boolean(segment) && !segment.startsWith(':'))
   }
-  const paramValues = new Set(
-    Object.values(route.params).flatMap((value) => (Array.isArray(value) ? value : value === undefined ? [] : [String(value)])),
-  )
+  const paramValues = new Set(Object.values(route.params).flatMap((value) => (Array.isArray(value) ? value : value === undefined ? [] : [String(value)])))
   const rest = route.path.startsWith(entryPath) ? route.path.slice(entryPath.length) : ''
-  return rest
-    .split('/')
-    .filter((segment) => Boolean(segment) && !paramValues.has(segment))
+  return rest.split('/').filter((segment) => Boolean(segment) && !paramValues.has(segment))
 }
 
 export function routeBreadcrumbs(route: RouteLocationNormalizedLoaded, router: Pick<Router, 'resolve'>, navigation: readonly VisibleNavigationModule[]): BreadcrumbItem[] {

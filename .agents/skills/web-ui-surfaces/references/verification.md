@@ -8,12 +8,11 @@ layout, visual hierarchy, or contrast.
 
 - Run web lint, type check, and `pnpm run test:surface-architecture`.
 - Resolve every new native-control `vue/no-restricted-syntax` warning
-  (`button`, `input`, `select`, `textarea`) for standard buttons, filters, and
-  dialogs instead of ignoring warnings because ESLint exits 0. Keep a warning
-  only for a justified `#row-actions` or `#actions` slot override, or for a
-  full-row multi-line selectable list item (`<button type="button">` with
-  `aria-pressed`) where Loom has no list-item component. Never distort a
-  selectable row into a pill button around a record ID to silence a warning.
+  (`button`, `input`, `select`, `textarea`) for standard buttons, filters,
+  list items, and dialogs instead of ignoring warnings because ESLint exits 0.
+  Use `ListItem` for multi-line selectable queue rows and `Button` /
+  `ChipFilter` for actions and filters. Keep a warning only for a justified
+  `#row-actions` or `#actions` slot override where no Loom component fits.
 - Confirm every custom component or native control still has an unsupported
   requirement verified against [capabilities.md](capabilities.md).
 
@@ -25,16 +24,20 @@ layout, visual hierarchy, or contrast.
   bound `command.can` and `command.run`, and cross-resource invalidation.
 - Confirm:
   - `ListView` keeps the default `Create` label unless the approved design
-    explicitly requires custom wording.
-  - Standard CRUD detail pages keep `DetailView`'s single default card, and no
-    card stacks two separate `<Detail>` components.
+    explicitly requires custom wording, uses `field(key)` in `#filters` instead
+    of duplicating options, and uses `filter-controls="slot"` when omitting the
+    filter popover.
+  - Standard CRUD detail pages keep `DetailView`'s single default card (using
+    `defineDetail` `sections` when logical groups help scanning) and rely on
+    built-in `DetailView` Edit/Delete actions instead of hand-wiring them.
   - Plain-text textarea fields use plain-text display, never `renderer: 'html'`.
   - Calendar dates use one consistent renderer (`renderer: 'date'`) across
-    changed forms, labels omit `(required)` text, and `TableInput` never uses
-    `renderer: 'separator'` as a fake column.
-  - Top-level sidebar custom pages omit Back controls cleanly without selector
-    CSS hacks, `Button` elements keep default horizontal padding (no `px-0`),
-    and `DetailView` uses no `tr:nth-child(...)` border CSS hacks.
+    changed forms, labels omit `(required)` text, and `TableInput` uses
+    `kind: 'display'` for read-only computed columns rather than disabled
+    inputs or `renderer: 'separator'`.
+  - Custom pages use `PageHeader` (omitting `backTo` on top-level sidebar
+    pages), `Button` elements keep default horizontal padding (no `px-0`), and
+    `DetailView` uses no `tr:nth-child(...)` border CSS hacks.
   - Detail page `load` placement, explicit date and timestamp locale,
     `tabular-nums` alignment, and empty-value placeholders (`-`) are consistent
     across sibling modules.

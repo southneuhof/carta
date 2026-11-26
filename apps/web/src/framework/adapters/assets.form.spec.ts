@@ -118,7 +118,7 @@ function fileInput(host: HTMLElement): HTMLInputElement {
 }
 
 function attachmentsRemoveButtons(host: HTMLElement): HTMLButtonElement[] {
-  return [...host.querySelectorAll<HTMLButtonElement>('button')].filter((button) => button.textContent === 'Hapus')
+  return [...host.querySelectorAll<HTMLButtonElement>('button')].filter((button) => button.textContent === 'Remove')
 }
 
 function selectFiles(input: HTMLInputElement, files: File[]) {
