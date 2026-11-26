@@ -30,14 +30,15 @@ the app's typography. Let page content scroll behind the pill. Place safe-area
 and pill clearance at the end of the scrollable content so the last controls
 can clear it.
 
-## Page structure
+## Page structure and layout craft
 
 Use `ListView`, `DetailView`, and `FormView` with their standard layouts for
-standard CRUD pages. Keep `DetailView`'s default body on ordinary detail pages
-instead of replacing it with custom multi-card grids. `DetailView` and
-`FormView` own the page header through `NavigationHeader`. A custom page
-without those Views uses `NavigationHeader` directly, and top-level sidebar
-pages pass `:back-to="false"` so they do not show a stray Back arrow.
+standard CRUD pages. Keep `DetailView`'s single default card on ordinary detail
+pages instead of splitting fields across multiple custom cards, and keep all
+fields of one card inside a single `defineDetail` map so label colons align.
+`DetailView` and `FormView` own the page header through `NavigationHeader`. A
+custom page without those Views uses `NavigationHeader` directly, and top-level
+sidebar pages pass `:back-to="false"` so they do not show a stray Back arrow.
 `ListView` renders its own title and toolbar header. Show one
 `NavigationHeader` on each page; sections below it keep their own short
 headings. Keep module titles in the standard header; omit decorative banners,
@@ -74,22 +75,33 @@ default-child redirect while the detail remains visible. Length alone does not
 earn a route. See [file routing](docs/architecture/file-routing.md) for file
 placement, replacement pages, and Back targets.
 
-Keep custom interactive workspaces calm and spatially stable. When users work
-across a queue and a comparison panel (such as technician workload or schedule
-slots), keep both regions visible without vertical jumping. Selecting an item
-must never expand a panel above a sibling comparison section and push it below
-the fold. Present the selected item's detail and action form in a non-shifting
-side pane, a `Dialog`, or a fixed layout region that preserves comparison
-visibility on desktop and keeps reading order logical on narrow screens.
+Design custom interactive workspaces from a spatial thesis before coding. Name
+the primary task order, give the primary work region clear visual dominance
+rather than equal-width columns of identical cards, and auto-select the first
+queue item when present so the workspace never opens on an empty stub. Keep
+comparison panels (such as technician workload or schedule slots) visible
+without vertical jumping: selecting a record must never expand a region above a
+sibling comparison section and push it below the fold. Inside a queue or list
+pane, present selectable rows inside one framed `Card` separated by subtle
+dividers (`divide-y divide-outline-variant`) rather than stacking many
+separate bordered cards.
+
+Group by proximity before adding boxes. Keep related facts close (`gap-1` to
+`gap-2`) and separate distinct groups generously (`gap-4` to `gap-6`, with more
+space above a heading than below it). Avoid repeating one uniform spacing value
+until every element has equal weight. Pass the squint test: with detail
+blurred, the page header, primary work area, and supporting regions remain
+distinct in priority order.
 
 For collections, show the primary name or reference first, then useful status,
 dates, and amounts. Keep high-priority columns visible on desktop (1440px+) so
 status, priority, dates, and totals are not clipped off-screen behind sticky
 row actions. Put long prose and secondary audit fields in detail. Use cards
-when images or summaries help users compare records. Add a `Table` and `Cards`
-switch only when both views serve the task.
+when images or summaries help users compare records; keep card interiors tight
+with a clean footer row rather than empty vertical voids. Add a `Table` and
+`Cards` switch only when both views serve the task.
 
-## Actions and forms
+## Actions, icons, and forms
 
 Keep standard `ListView` Create controls and list row View, Edit, and Delete
 actions in their normal locations. Preserve the default `Create` button label
@@ -97,13 +109,33 @@ actions in their normal locations. Preserve the default `Create` button label
 wording. Keep row actions compact (icon controls or a menu) so wide text
 buttons do not distort narrow table rows.
 
-Put requested record workflow actions in the detail controls area. Group
-related actions, keep header actions right-aligned, and keep final form actions
-together at the bottom-right. Use framework `Button` controls across an action
-bar so sibling Edit, Delete, and workflow actions share the same height and
-visual treatment (wrap `Button` in `RouterLink` or navigate programmatically
-rather than placing a raw styled link beside a `Button`). The page header does
-not repeat form actions.
+Put requested record workflow actions in the detail controls area. Keep header
+actions right-aligned and visually tiered so unrelated buttons do not compete
+at equal weight:
+
+- Primary workflow action: `variant="filled"` (for example `Start Work`, `Approve`, `Complete Work`).
+- Record management controls: `variant="outlined"` (for example `Edit`, `Delete` with `color="error"`).
+- Secondary reference dialog triggers: `variant="text"` (for example `Audit Details`, `Activity Log`).
+
+Use framework `Button` controls across an action bar so sibling actions share
+the same height and treatment (wrap `Button` in `RouterLink` or navigate
+programmatically rather than placing a raw styled link beside a `Button`). Keep
+every form `Submit` button compact and right-aligned at the bottom of the form
+(including inside custom workspaces); never stretch `Submit` full-width across
+a column. The page header does not repeat form actions.
+
+Apply the button icon rule consistently using Loom `Icon` in `Button`'s `#icon`
+or `#trailing-icon` slot:
+
+- **Add an icon:**
+  - Header and toolbar actions (leading icon: `Create`, `Edit`, `Delete`, `Start Work`, `Approve`, `Reject`, `Complete Work`, `Export`).
+  - Triggers that open a reference dialog or navigate to another page (leading icon such as `file-list` or `history` for dialogs; trailing `arrow-right-up` for navigation links such as `Open work order`).
+  - Active selected toggle buttons (leading `check` icon alongside `variant="filled"`).
+  - Standalone destructive actions outside a confirmation footer (`Delete`, `Reject`).
+- **Omit the icon:**
+  - Form and dialog footer commits and dismissals (`Submit`, `Save`, `Cancel`, `Close`, `Continue`, `Previous`, `Next`).
+  - Repeated unselected list or card buttons (such as `Choose` repeated across technician cards; add `check` only on the selected item, or use `kind="icon"` in table rows).
+  - Inline text recovery actions inside alerts (`Retry`, `Clear filters`).
 
 Use `FormView` for an independent form page, `DialogForm` for a short
 contextual input form, `ConfirmationDialog` for yes/no confirmations, and
@@ -112,25 +144,31 @@ fields before dependent fields.
 
 Keep collection filter bars calm and aligned. Prefer `ListView`'s built-in
 filter controls or a compact, single-row aligned filter bar. Keep controls in
-the same filter row visually consistent in height and type, and group boolean
-filters cleanly as chips or inside a filter bar rather than leaving a stray
-floating switch above a list. Use the smallest filter width that fits the
-control; use a full row only when needed.
+the same filter row consistent in height and type. Represent boolean or single
+category quick filters with `ChipFilter` rather than a stray floating switch or
+a standalone pill action button above a list. Use the smallest filter width
+that fits the control; use a full row only when needed.
 
 A contextual dialog form opens from its own action and owns its normal open and
 close interaction. In repeated content, use one dialog form for each record
 action. Let the page control visibility only when another page control must
 coordinate the same dialog.
 
-## Controls and values
+## Controls, optical alignment, and values
 
 Use shared Loom controls and keep their standard designs. Customize only for an
 explicit user request or a required interaction they cannot support. Check the
 [capability index](.agents/skills/web-ui-surfaces/references/capabilities.md)
-before building any filter, dialog, timeline, or button bar. Change wording
-through label configuration, and keep field labels clean without appending
-`(required)` text. Import components from public exports or verified Loom
-component paths.
+before building any filter, dialog, timeline, or button bar. Never wrap a
+record ID in a pill button just to make a list item clickable; make the full
+list item selectable inside a divided container with a clear active highlight.
+Keep left edges optically aligned: place navigation actions like `Open work
+order` in the section header row or strip horizontal padding (`px-0`) on
+flush-left text buttons so they never sit indented under unpadded text.
+
+Change wording through label configuration, and keep field labels clean without
+appending `(required)` text. Import components from public exports or verified
+Loom component paths.
 
 Choose display behavior for every visible field. Use a reusable display
 fragment when several fields share a renderer, accessor, or format. Pass the
@@ -141,9 +179,9 @@ with raw text date inputs. Render plain-text textarea values as plain text
 (`whitespace-pre-wrap` or standard display), never with `renderer: 'html'`.
 Keep one empty-value placeholder (`-`) and one chip variant across a page. Show
 attachments as previews or named file links, states as labelled framework
-chips, relations as names, and dates and currency with consistent formatting.
-Show structured values as readable content; use raw JSON only when the task
-requires JSON.
+chips, relations as names, and dates, hours, and currency with consistent
+formatting and `tabular-nums`. Show structured values as readable content; use
+raw JSON only when the task requires JSON.
 
 ## Text, emphasis, and spacing
 
@@ -153,20 +191,21 @@ unclear. The standard create label is `Create`, the standard submit label is
 `Submit`, and collection view labels are `Table` and `Cards`. Use the existing
 app language and domain terms.
 
-Use the selected framework surface's spacing and theme tokens. Start peer
-sections and action groups with `gap-2`. Let actions wrap on narrow screens.
-Use colour with a text label for status. Keep content and controls usable at
-narrow widths and with browser zoom. Keep page actions separate from global
-actions. Use restrained borders and surfaces, and support the app's light and
-dark themes.
+Establish obvious typographic weight and scale steps so section headings,
+record titles, body copy, and muted metadata (`text-on-surface-variant`) read
+in clear order. Use the selected framework surface's spacing and theme tokens.
+Let actions wrap on narrow screens. Use colour with a text label for status.
+Keep content and controls usable at narrow widths and with browser zoom. Keep
+page actions separate from global actions. Use restrained borders and surfaces,
+and support the app's light and dark themes.
 
 Apply button emphasis for the app's warm-neutral monochrome Material 3 theme.
 Because `secondary-container` sits very close to `surface-container` in light
 mode, `variant="tonal"` blends into outlined cards and fails to signal active
 selection. Use `variant="filled"` (`bg-primary text-on-primary`) for primary
-actions and selected button states (paired with clear selected wording such as
-`Selected` or a check icon), `variant="outlined"` for secondary and unselected
-options, and `variant="text"` for quiet secondary triggers.
+actions and selected button states (paired with a leading `check` icon and
+clear wording such as `Selected`), `variant="outlined"` for secondary and
+unselected options, and `variant="text"` for quiet reference triggers.
 
 ## Access and feedback
 

@@ -12,7 +12,7 @@ page, resource, or component.
 | Work | Contract |
 |---|---|
 | Components and existing Loom owners | [Capability index](references/capabilities.md) |
-| Visual layout, framing, emphasis, dialogs | [DESIGN.md](../../../DESIGN.md) |
+| Visual layout, framing, icons, emphasis, dialogs | [DESIGN.md](../../../DESIGN.md) |
 | Resources, operations, values, slots | [Architecture and compiled examples](../../../docs/resource_system_overhaul/ARCHITECTURE.md) |
 | Routes, navigation, parents, Back targets | [File routing](../../../docs/architecture/file-routing.md) |
 | API schemas, transport, query ownership | [Web architecture](../../../docs/architecture/web-application-architecture.md) |
@@ -22,27 +22,38 @@ page, resource, or component.
 ## Composition defaults
 
 1. **Use the highest-level Loom owner.** Start with `ListView`, `DetailView`,
-   and `FormView`. Keep default View layouts and `ListView`'s default `Create`
-   button label unless the approved design explicitly requires custom wording
-   or custom sections.
+   and `FormView`. Keep `DetailView`'s single default card on standard CRUD
+   detail pages, keep all fields of one card inside a single `defineDetail` map
+   so colons align, and keep `ListView`'s default `Create` button label unless
+   the approved design explicitly requires custom wording or custom sections.
 2. **Reuse Loom composites before writing markup.** Check
    [capabilities.md](references/capabilities.md) for `ChipFilter`,
-   `ConfirmationDialog`, `DialogForm`, `Dialog`, `Timeline`, `Button`, and
-   `Card`. Avoid hand-rolled native `<button>` elements, custom modal wrappers,
-   or custom `<ol>` timelines.
-3. **Keep pages framed, calm, and spatially stable.** Place peer sections below
-   `DetailView` inside `Card` containers and keep cards flat (never nest a
-   `Card` inside a `Card`). Move secondary read-only views (audit metadata,
-   technical details, activity logs) behind a button that opens a `Dialog`. In
-   custom workspaces, keep comparison panels visible so selecting an item never
-   pushes them below the fold.
-4. **Match theme emphasis and control contracts.** Use `Button` with
-   `variant="filled"` for primary actions and selected button states (paired
-   with clear selected wording or an icon), never `variant="tonal"` on
-   `surfaceContainer` cards. Pass `:back-to="false"` to `NavigationHeader` on
-   top-level sidebar pages. Gate custom controls with View-supplied callbacks
-   and `command.can` / `allowedOperations`, never hardcoded status checks.
-   Render plain-text fields as plain text, never with `renderer: 'html'`.
+   `ConfirmationDialog`, `DialogForm`, `Dialog`, `Timeline`, `Button`, `Icon`,
+   and `Card`. For multi-line selectable queue rows where Loom has no list-item
+   component, render clean full-row selectors inside one divided `Card`
+   (`divide-y`) rather than wrapping record IDs in pill buttons.
+3. **Design custom workspaces from a spatial thesis.** Give the primary work
+   region clear visual dominance instead of equal-width columns of identical
+   cards, auto-select the first queue item when present so the workspace never
+   opens on an empty stub, and keep comparison panels visible so selecting a
+   record never pushes them below the fold. Use tight proximity inside groups
+   and generous spacing between groups so the page passes the squint test.
+4. **Keep pages framed and secondary info in dialogs.** Place peer sections
+   below `DetailView` inside `Card` containers and keep cards flat (never nest
+   a `Card` inside a `Card`). Move secondary read-only views (audit metadata,
+   technical details, activity logs) behind `variant="text"` buttons with icons
+   that open a `Dialog`.
+5. **Follow action-bar hierarchy, the button icon rule, and theme emphasis.**
+   Tier header actions cleanly (`filled` for primary workflow actions,
+   `outlined` for record controls like Edit/Delete, `text` for secondary
+   reference dialogs). Add icons to header/toolbar actions, dialog/navigation
+   triggers, active selected buttons (`check`), and standalone destructive
+   actions; omit icons on form/dialog `Submit`/`Cancel`, repeated unselected
+   row/card `Choose` buttons, and inline recovery links. Keep form `Submit`
+   compact and right-aligned, align flush-left links optically, pass
+   `:back-to="false"` on top-level custom `NavigationHeader` routes, gate
+   custom controls with `command.can` and `allowedOperations`, and render
+   plain-text fields as plain text (never `renderer: 'html'`).
 
 ## Resource and data binding
 
