@@ -6,9 +6,8 @@ import { createPinia } from 'pinia'
 import { createMemoryHistory, createRouter, RouterView, type RouteRecordRaw } from 'vue-router'
 import { createRoutesContext, resolveOptions, type EditableTreeNode } from 'vue-router/unplugin'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { defineResource, defineDetail, defineTable, resetResourceActionRegistry, resetResourceRuntimeForTests } from '@southneuhof/loom'
+import { defineResource, defineDetail, defineTable, PageHeader, resetResourceActionRegistry, resetResourceRuntimeForTests } from '@southneuhof/loom'
 import type { CollectionResult, RecordLoadContext } from '@southneuhof/loom'
-import NavigationHeader from '@southneuhof/loom/components/views/NavigationHeader.vue'
 import AppRouterView from '@/components/routing/AppRouterView.vue'
 import { z } from 'zod/v4'
 import { applyFileRouteConventions } from '../file-routing/layout-groups'
@@ -57,7 +56,7 @@ async function fixture() {
     'authenticated.layout.vue': defineComponent(() => () => h('div', ['shell', h(AppRouterView)])),
     'detail.route.vue': defineComponent(() => () => h('div', ['user-detail', h(AppRouterView)])),
     'index.route.vue': defineComponent(() => () => h('div', 'role-list')),
-    'detail.roles.[roleId].detail.route.vue': defineComponent(() => () => h('div', ['role-detail', h(NavigationHeader, { title: 'Role', backTo })])),
+    'detail.roles.[roleId].detail.route.vue': defineComponent(() => () => h('div', ['role-detail', h(PageHeader, { title: 'Role', backTo })])),
     'detail.denied.route.vue': defineComponent({ setup: () => (onMounted(deniedMount), () => h('div', 'denied-body')) }),
     'dashboard.route.vue': defineComponent(() => () => h('div', 'dashboard')),
   }
