@@ -53,8 +53,9 @@ every item directly on the rendered pixels:
    primary work area, and supporting panels read in clear order. Custom
    workspaces give the primary work region width dominance (never an equal
    3-column wall of identical cards), auto-select the first queue item when
-   present so no blank stub appears, and group queue rows inside one divided
-   `Card` rather than stacking many separate bordered cards.
+   present so no blank stub appears, and render selectable queue rows with
+   `ListItem` inside a `Card` rather than stacking separate bordered cards or
+   wrapping IDs in pill buttons.
 2. **Table readability.** Primary columns (status, priority, dates, key
    amounts) stay visible on desktop without silent clipping behind sticky row
    actions, and row actions stay compact.
@@ -74,9 +75,9 @@ every item directly on the rendered pixels:
 6. **Action hierarchy, icons, and emphasis.** Header bars visually tier primary
    workflow actions (`filled` + icon), record controls (`outlined` + icon), and
    secondary reference dialogs (`text` + icon). Active selected buttons use
-   `variant="filled"` with a leading `check` icon (never `tonal`). Form/dialog
-   `Submit`/`Cancel` and repeated unselected `Choose` buttons omit icons. Chips
-   share one variant per page.
+   `toggle` + `:selected="true"` or `variant="filled"` with a leading `check`
+   icon. Form/dialog `Submit`/`Cancel` and repeated unselected `Choose` buttons
+   omit icons. Chips share one variant per page.
 7. **Spatial stability, narrow screen, and dark theme.** Selecting a record in
    a custom workspace keeps sibling comparison panels visible without pushing
    them below the fold. At 375px, sections stack cleanly in logical task order
