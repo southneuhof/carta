@@ -37,19 +37,24 @@ standard CRUD pages. Keep `DetailView`'s single default card on ordinary detail
 pages instead of splitting fields across multiple custom cards, and keep all
 fields of one card inside a single `defineDetail` map so label colons align.
 `DetailView` and `FormView` own the page header through `NavigationHeader`. A
-custom page without those Views uses `NavigationHeader` directly, and top-level
-sidebar pages pass `:back-to="false"` so they do not show a stray Back arrow.
-`ListView` renders its own title and toolbar header. Show one
-`NavigationHeader` on each page; sections below it keep their own short
-headings. Keep module titles in the standard header; omit decorative banners,
-repeated titles, and slogans.
+custom page with a back target uses `NavigationHeader` directly; top-level
+sidebar custom pages omit any Back button by using a clean framed `Card` header
+until `NavigationHeader` supports hiding its Back control (never hide it with
+brittle CSS selector overrides). `ListView` renders its own title and toolbar
+header. Show one page header on each page; sections below it keep their own
+short headings. Keep module titles in the standard header; omit decorative
+banners, repeated titles, and slogans.
 
 Keep container framing consistent across peer sections on a page. Enclose peer
 sections below `DetailView` (including child tables, lists, and routed tab
 bodies) in framework `Card` containers (`variant="outlined"
 color="surfaceContainer"`) so they match the framed summary rather than
-floating bare on the page background. Keep card containers flat: place sibling
-cards side by side or stacked, and never nest one `Card` inside another `Card`.
+floating bare on the page background. Never nest two same-tone outlined cards.
+When a sub-group inside a card genuinely needs visual containment (such as
+assigned job items inside a workload card or cards inside a collection), step
+to a distinct Material 3 container tone (`surface-container-low`,
+`surface-container-lowest`, or `surface-container-high` inside
+`surface-container`) without redundant heavy borders.
 
 Keep the main page focused on primary operational work. Show the record summary
 first, with the primary task and its controls. Show each field or attachment
@@ -162,9 +167,12 @@ explicit user request or a required interaction they cannot support. Check the
 before building any filter, dialog, timeline, or button bar. Never wrap a
 record ID in a pill button just to make a list item clickable; make the full
 list item selectable inside a divided container with a clear active highlight.
-Keep left edges optically aligned: place navigation actions like `Open work
-order` in the section header row or strip horizontal padding (`px-0`) on
-flush-left text buttons so they never sit indented under unpadded text.
+Keep default `Button` horizontal padding intact so Material 3 pill hover and
+focus states frame the label cleanly (never strip padding with `px-0`). Keep
+left edges optically aligned by placing secondary navigation buttons
+right-aligned in the section header row, or using a plain `RouterLink` when a
+link sits flush-left under body copy. Never inject fragile
+`tr:nth-child(...)` divider CSS into `DetailView`.
 
 Change wording through label configuration, and keep field labels clean without
 appending `(required)` text. Import components from public exports or verified
@@ -179,9 +187,10 @@ with raw text date inputs. Render plain-text textarea values as plain text
 (`whitespace-pre-wrap` or standard display), never with `renderer: 'html'`.
 Keep one empty-value placeholder (`-`) and one chip variant across a page. Show
 attachments as previews or named file links, states as labelled framework
-chips, relations as names, and dates, hours, and currency with consistent
-formatting and `tabular-nums`. Show structured values as readable content; use
-raw JSON only when the task requires JSON.
+chips, relations as names, and dates, hours, and currency with one explicit
+application locale and `tabular-nums` (never mix OS-default locale formatting
+with a hardcoded locale). Show structured values as readable content; use raw
+JSON only when the task requires JSON.
 
 ## Text, emphasis, and spacing
 

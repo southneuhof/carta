@@ -32,9 +32,12 @@ layout, visual hierarchy, or contrast.
   - Calendar dates use one consistent renderer (`renderer: 'date'`) across
     changed forms, labels omit `(required)` text, and `TableInput` never uses
     `renderer: 'separator'` as a fake column.
-  - Top-level sidebar custom pages pass `:back-to="false"` to `NavigationHeader`.
-  - Detail page `load` placement, `tabular-nums` alignment, and empty-value
-    placeholders (`-`) are consistent across sibling modules.
+  - Top-level sidebar custom pages omit Back controls cleanly without selector
+    CSS hacks, `Button` elements keep default horizontal padding (no `px-0`),
+    and `DetailView` uses no `tr:nth-child(...)` border CSS hacks.
+  - Detail page `load` placement, explicit date and timestamp locale,
+    `tabular-nums` alignment, and empty-value placeholders (`-`) are consistent
+    across sibling modules.
 
 ## 3. Rendered visual inspection
 
@@ -53,16 +56,18 @@ every item directly on the rendered pixels:
    amounts) stay visible on desktop without silent clipping behind sticky row
    actions, and row actions stay compact.
 3. **Containment discipline.** Peer sections below `DetailView` sit inside
-   consistent `Card` containers rather than floating bare on the background,
-   and no `Card` is nested inside another `Card`.
+   consistent `Card` containers rather than floating bare on the background.
+   No two same-tone outlined cards are nested; any nested sub-card steps to a
+   distinct Material 3 container tone without redundant borders.
 4. **Secondary content in dialogs.** Read-only audit metadata, technical
    details, and activity logs open in a `Dialog` from `variant="text"` buttons
    with icons rather than stacking inline disclosures or low-priority tabs.
 5. **Calm filters and optical alignment.** Filter controls stay compact and
    aligned with matching height, zero stray floating switches, and zero
-   pill-button filter toggles masquerading as actions. Flush-left links and
-   text buttons align cleanly with surrounding copy, and form `Submit` buttons
-   stay compact and right-aligned (never full-width).
+   pill-button filter toggles masquerading as actions. `Button` hover pills
+   preserve balanced horizontal padding (no `px-0`), flush-left links use plain
+   `RouterLink`, and form `Submit` buttons stay compact and right-aligned
+   (never full-width).
 6. **Action hierarchy, icons, and emphasis.** Header bars visually tier primary
    workflow actions (`filled` + icon), record controls (`outlined` + icon), and
    secondary reference dialogs (`text` + icon). Active selected buttons use

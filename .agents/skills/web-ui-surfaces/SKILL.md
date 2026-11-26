@@ -39,21 +39,26 @@ page, resource, or component.
    record never pushes them below the fold. Use tight proximity inside groups
    and generous spacing between groups so the page passes the squint test.
 4. **Keep pages framed and secondary info in dialogs.** Place peer sections
-   below `DetailView` inside `Card` containers and keep cards flat (never nest
-   a `Card` inside a `Card`). Move secondary read-only views (audit metadata,
-   technical details, activity logs) behind `variant="text"` buttons with icons
-   that open a `Dialog`.
+   below `DetailView` inside `Card` containers. Never nest two same-tone
+   outlined cards; when sub-items inside a card need containment, step to a
+   distinct Material 3 container tone (`surface-container-low`,
+   `surface-container-lowest`, or `surface-container-high`) without redundant
+   heavy borders. Move secondary read-only views (audit metadata, technical
+   details, activity logs) behind `variant="text"` buttons with icons that open
+   a `Dialog`.
 5. **Follow action-bar hierarchy, the button icon rule, and theme emphasis.**
    Tier header actions cleanly (`filled` for primary workflow actions,
    `outlined` for record controls like Edit/Delete, `text` for secondary
    reference dialogs). Add icons to header/toolbar actions, dialog/navigation
    triggers, active selected buttons (`check`), and standalone destructive
    actions; omit icons on form/dialog `Submit`/`Cancel`, repeated unselected
-   row/card `Choose` buttons, and inline recovery links. Keep form `Submit`
-   compact and right-aligned, align flush-left links optically, pass
-   `:back-to="false"` on top-level custom `NavigationHeader` routes, gate
-   custom controls with `command.can` and `allowedOperations`, and render
-   plain-text fields as plain text (never `renderer: 'html'`).
+   row/card `Choose` buttons, and inline recovery links. Keep default `Button`
+   horizontal padding intact (never pass `px-0`), keep form `Submit` compact
+   and right-aligned, omit Back controls on top-level sidebar custom pages
+   without selector CSS hacks, use one explicit locale for dates and
+   timestamps, gate custom controls with `command.can` and
+   `allowedOperations`, and render plain-text fields as plain text (never
+   `renderer: 'html'`).
 
 ## Resource and data binding
 
