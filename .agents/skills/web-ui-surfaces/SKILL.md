@@ -30,10 +30,12 @@ page, resource, or component.
    approved design explicitly requires custom wording or custom sections.
 2. **Reuse Loom components from `@southneuhof/loom`.** Check
    [capabilities.md](references/capabilities.md) for `PageHeader`, `ListItem`,
-   `ChipFilter`, `ConfirmationDialog`, `DialogForm`, `Dialog`, `Drawer`,
-   `Timeline`, `Button`, `Icon`, and `Card`. Use `ListItem` for multi-line
-   selectable queue rows inside a `Card` rather than raw `<button>` rows or
-   pill-wrapped record IDs.
+   `Tabs`, `ChipFilter`, `ConfirmationDialog`, `DialogForm`, `Dialog`, `Drawer`,
+   `Timeline`, `Button`, `Icon`, and `Card`. Use `ListItem` inside a divided
+   `Card` (`divide-y divide-outline-variant`) for multi-line selectable queue
+   rows, and `Tabs` for local view switches and routed child sections. Rely on
+   Loom props, slots, and defaults rather than overriding component internals
+   with `:deep(...)` or descendant CSS selectors.
 3. **Design custom workspaces from a spatial thesis.** Give the primary work
    region clear visual dominance instead of equal-width columns of identical
    cards, auto-select the first queue item when present so the workspace never
@@ -42,26 +44,21 @@ page, resource, or component.
    and generous spacing between groups so the page passes the squint test.
 4. **Keep pages framed and secondary info in dialogs.** Place peer sections
    below `DetailView` inside `Card` containers. Never nest two same-tone
-   outlined cards; when sub-items inside a card need containment, step to a
-   distinct Material 3 container tone (`surface-container-low`,
-   `surface-container-lowest`, or `surface-container-high`) without redundant
-   heavy borders (or use `body-variant="plain"` on `ListView` when a card grid
-   sits directly on the canvas). Move secondary read-only views (audit
-   metadata, technical details, activity logs) behind `variant="text"` buttons
-   with icons that open a `Dialog`.
+   outlined cards; when sub-items inside a `surface-container` card need
+   containment, step up to `surface-container-high` without redundant borders
+   (never `surface-container-lowest`, which reads as a recessed cutout), or use
+   `body-variant="plain"` on `ListView` when a card grid sits directly on the
+   canvas. Move secondary read-only views (audit metadata, technical details,
+   activity logs) behind `variant="text"` buttons with icons that open a
+   `Dialog`.
 5. **Follow action-bar hierarchy, the button icon rule, and theme emphasis.**
    Tier header actions cleanly (`filled` for primary workflow actions,
    `outlined` for record controls like Edit/Delete, `text` for secondary
    reference dialogs). Use `PageHeader` for custom page headers (omit `backTo`
-   on top-level sidebar pages). Add icons to header/toolbar actions,
-   dialog/navigation triggers, active selected buttons (`check`), and
-   standalone destructive actions; omit icons on form/dialog `Submit`/`Cancel`,
-   repeated unselected row/card `Choose` buttons, and inline recovery links.
-   Keep default `Button` horizontal padding intact (never pass `px-0`), keep
-   form `Submit` compact and right-aligned, use one explicit locale for dates
-   and timestamps, gate custom controls with `command.can` and
-   `allowedOperations`, and render plain-text fields as plain text (never
-   `renderer: 'html'`).
+   on top-level sidebar pages). Follow the icon rules in
+   [DESIGN.md](../../../DESIGN.md#actions-icons-and-forms), use one explicit
+   locale for dates and timestamps, and gate custom controls with `command.can`
+   and `allowedOperations`.
 
 ## Resource and data binding
 

@@ -48,11 +48,12 @@ sections below `DetailView` (including child tables, lists, and routed tab
 bodies) in framework `Card` containers (`variant="outlined"
 color="surfaceContainer"`) so they match the framed summary rather than
 floating bare on the page background. Never nest two same-tone outlined cards.
-When a sub-group inside a card genuinely needs visual containment (such as
-assigned job items inside a workload card or cards inside a collection), step
-to a distinct Material 3 container tone (`surface-container-low`,
-`surface-container-lowest`, or `surface-container-high` inside
-`surface-container`) without redundant heavy borders.
+When a sub-group inside a `surface-container` card needs visual containment,
+step up in Material 3 tonal elevation (`surface-container-high` or
+`surface-container-highest`) without redundant borders; do not use
+`surface-container-lowest` for nested cards inside `surface-container`, since
+it reads as a recessed cutout. Inside a list or queue card, use flat divided
+`ListItem` rows (`divide-y divide-outline-variant`) rather than nested cards.
 
 Keep the main page focused on primary operational work. Show the record summary
 first, with the primary task and its controls. Show each field or attachment
@@ -85,8 +86,8 @@ queue item when present so the workspace never opens on an empty stub. Keep
 comparison panels (such as technician workload or schedule slots) visible
 without vertical jumping: selecting a record must never expand a region above a
 sibling comparison section and push it below the fold. Inside a queue or list
-pane, render selectable rows with Loom `ListItem` inside one framed `Card`
-rather than stacking separate bordered cards or wrapping IDs in pill buttons.
+pane, render selectable rows with Loom `ListItem` inside one divided `Card`
+(`divide-y divide-outline-variant`) rather than stacking bordered cards.
 
 Group by proximity before adding boxes. Keep related facts close (`gap-1` to
 `gap-2`) and separate distinct groups generously (`gap-4` to `gap-6`, with more
@@ -96,12 +97,11 @@ blurred, the page header, primary work area, and supporting regions remain
 distinct in priority order.
 
 For collections, show the primary name or reference first, then useful status,
-dates, and amounts. Keep high-priority columns visible on desktop (1440px+) so
-status, priority, dates, and totals are not clipped off-screen behind sticky
-row actions. Put long prose and secondary audit fields in detail. Use cards
-when images or summaries help users compare records; keep card interiors tight
-with a clean footer row rather than empty vertical voids. Add a `Table` and
-`Cards` switch only when both views serve the task.
+dates, and amounts. Put long prose and secondary audit fields in detail. Use
+cards when images or summaries help users compare records; keep card interiors
+tight with a clean footer row rather than empty vertical voids. Add a `Table`
+and `Cards` switch using `Tabs` (with icons when switching visual modes) only
+when both views serve the task.
 
 ## Actions, icons, and forms
 
@@ -123,23 +123,23 @@ buttons do not compete at equal weight:
 
 Use framework `Button` controls across an action bar so sibling actions share
 the same height and treatment (wrap `Button` in `RouterLink` or navigate
-programmatically rather than placing a raw styled link beside a `Button`). Keep
-every form `Submit` button compact and right-aligned at the bottom of the form
-(including inside custom workspaces); never stretch `Submit` full-width across
-a column. The page header does not repeat form actions.
+programmatically rather than placing a raw styled link beside a `Button`). The
+page header does not repeat form actions.
 
 Apply the button icon rule consistently using Loom `Icon` in `Button`'s `#icon`
 or `#trailing-icon` slot:
 
 - **Add an icon:**
   - Header and toolbar actions (leading icon: `Create`, `Edit`, `Delete`, `Start Work`, `Approve`, `Reject`, `Complete Work`, `Export`).
-  - Triggers that open a reference dialog or navigate to another page (leading icon such as `file-list` or `history` for dialogs; trailing `arrow-right-up` for navigation links such as `Open work order`).
+  - Triggers that open a reference dialog or navigate to another page (leading icon such as `file-list` or `history` for dialogs; trailing `arrow-right-up` for navigation links).
   - Active selected toggle buttons (leading `check` icon alongside `variant="filled"`).
   - Standalone destructive actions outside a confirmation footer (`Delete`, `Reject`).
+  - Visual-mode tabs where icons aid recognition (for example `table` and `layout-grid` on `Table` / `Cards` `Tabs`).
 - **Omit the icon:**
   - Form and dialog footer commits and dismissals (`Submit`, `Save`, `Cancel`, `Close`, `Continue`, `Previous`, `Next`).
-  - Repeated unselected list or card buttons (such as `Choose` repeated across technician cards; add `check` only on the selected item, or use `kind="icon"` in table rows).
+  - Repeated unselected list or card buttons (add `check` only on the selected item, or use `kind="icon"` in table rows).
   - Inline text recovery actions inside alerts (`Retry`, `Clear filters`).
+  - Text-driven domain or sub-resource tabs where icons add noise.
 
 Use `FormView` for an independent form page, `DialogForm` for a short
 contextual input form, `ConfirmationDialog` for yes/no confirmations, and
@@ -166,27 +166,20 @@ coordinate the same dialog.
 Use shared Loom controls and keep their standard designs. Customize only for an
 explicit user request or a required interaction they cannot support. Check the
 [capability index](.agents/skills/web-ui-surfaces/references/capabilities.md)
-before building any filter, dialog, list item, timeline, or button bar. Never
-wrap a record ID in a pill button just to make a list item clickable; use
-`ListItem` for multi-line selectable rows with clear active highlight.
-Keep default `Button` horizontal padding intact so Material 3 pill hover and
-focus states frame the label cleanly (never strip padding with `px-0`). Keep
-left edges optically aligned by placing secondary navigation buttons
-right-aligned in the section header row, or using a plain `RouterLink` when a
-link sits flush-left under body copy. Use `sections` on `defineDetail` instead
-of injecting fragile `tr:nth-child(...)` divider CSS into `DetailView`.
+before building any filter, dialog, list item, timeline, or button bar. Rely on
+Loom component props, slots, and defaults rather than overriding component
+internals with `:deep(...)` or descendant CSS selectors. Keep left edges
+optically aligned by placing secondary navigation buttons right-aligned in the
+section header row, or using a plain `RouterLink` when a link sits flush-left
+under body copy.
 
-Change wording through label configuration, and keep field labels clean without
-appending `(required)` text. Import components from public exports or verified
-Loom component paths.
+Change wording through label configuration, and import components from
+`@southneuhof/loom`.
 
 Choose display behavior for every visible field. Use a reusable display
 fragment when several fields share a renderer, accessor, or format. Pass the
 needed fragments to each `defineTable` column map and `defineDetail` field map.
-Keep form inputs in their own `defineForm` map. Use `renderer: 'date'`
-consistently for calendar dates across the app rather than mixing `DateInput`
-with raw text date inputs. Render plain-text textarea values as plain text
-(`whitespace-pre-wrap` or standard display), never with `renderer: 'html'`.
+Keep form inputs in their own `defineForm` map.
 Keep one empty-value placeholder (`-`) and one chip variant across a page. Show
 attachments as previews or named file links, states as labelled framework
 chips, relations as names, and dates, hours, and currency with one explicit

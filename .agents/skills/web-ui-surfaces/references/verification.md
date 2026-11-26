@@ -8,11 +8,10 @@ layout, visual hierarchy, or contrast.
 
 - Run web lint, type check, and `pnpm run test:surface-architecture`.
 - Resolve every new native-control `vue/no-restricted-syntax` warning
-  (`button`, `input`, `select`, `textarea`) for standard buttons, filters,
-  list items, and dialogs instead of ignoring warnings because ESLint exits 0.
-  Use `ListItem` for multi-line selectable queue rows and `Button` /
-  `ChipFilter` for actions and filters. Keep a warning only for a justified
-  `#row-actions` or `#actions` slot override where no Loom component fits.
+  (`button`, `input`, `select`, `textarea`) instead of ignoring warnings because
+  ESLint exits 0. Use `ListItem`, `Button`, `Tabs`, and `ChipFilter` from
+  `@southneuhof/loom`. Keep a warning only for a justified `#row-actions` or
+  `#actions` slot override where no Loom component fits.
 - Confirm every custom component or native control still has an unsupported
   requirement verified against [capabilities.md](capabilities.md).
 
@@ -24,20 +23,14 @@ layout, visual hierarchy, or contrast.
   bound `command.can` and `command.run`, and cross-resource invalidation.
 - Confirm:
   - `ListView` keeps the default `Create` label unless the approved design
-    explicitly requires custom wording, uses `field(key)` in `#filters` instead
-    of duplicating options, and uses `filter-controls="slot"` when omitting the
-    filter popover.
-  - Standard CRUD detail pages keep `DetailView`'s single default card (using
-    `defineDetail` `sections` when logical groups help scanning) and rely on
-    built-in `DetailView` Edit/Delete actions instead of hand-wiring them.
-  - Plain-text textarea fields use plain-text display, never `renderer: 'html'`.
-  - Calendar dates use one consistent renderer (`renderer: 'date'`) across
-    changed forms, labels omit `(required)` text, and `TableInput` uses
-    `kind: 'display'` for read-only computed columns rather than disabled
-    inputs or `renderer: 'separator'`.
+    explicitly requires custom wording, uses `field(key)` in `#filters`, and
+    uses `filter-controls="slot"` when omitting the filter popover.
+  - Standard CRUD detail pages keep `DetailView`'s single default card (with
+    `sections` when helpful) and rely on built-in `DetailView` Edit and Delete
+    actions.
   - Custom pages use `PageHeader` (omitting `backTo` on top-level sidebar
-    pages), `Button` elements keep default horizontal padding (no `px-0`), and
-    `DetailView` uses no `tr:nth-child(...)` border CSS hacks.
+    pages), and changed pages do not override Loom internals with `:deep(...)`
+    or descendant CSS selectors.
   - Detail page `load` placement, explicit date and timestamp locale,
     `tabular-nums` alignment, and empty-value placeholders (`-`) are consistent
     across sibling modules.
@@ -51,38 +44,32 @@ every item directly on the rendered pixels:
 
 1. **Squint test and spatial hierarchy.** With detail blurred, page header,
    primary work area, and supporting panels read in clear order. Custom
-   workspaces give the primary work region width dominance (never an equal
-   3-column wall of identical cards), auto-select the first queue item when
-   present so no blank stub appears, and render selectable queue rows with
-   `ListItem` inside a `Card` rather than stacking separate bordered cards or
-   wrapping IDs in pill buttons.
-2. **Table readability.** Primary columns (status, priority, dates, key
-   amounts) stay visible on desktop without silent clipping behind sticky row
-   actions, and row actions stay compact.
-3. **Containment discipline.** Peer sections below `DetailView` sit inside
+   workspaces give the primary work region width dominance, auto-select the
+   first queue item when present so no blank stub appears, and render selectable
+   queue rows with flat `ListItem` rows inside a divided `Card`.
+2. **Containment discipline.** Peer sections below `DetailView` sit inside
    consistent `Card` containers rather than floating bare on the background.
-   No two same-tone outlined cards are nested; any nested sub-card steps to a
-   distinct Material 3 container tone without redundant borders.
-4. **Secondary content in dialogs.** Read-only audit metadata, technical
+   No two same-tone outlined cards are nested; nested containment inside
+   `surface-container` steps up to `surface-container-high` without redundant
+   borders (never `surface-container-lowest`).
+3. **Secondary content in dialogs.** Read-only audit metadata, technical
    details, and activity logs open in a `Dialog` from `variant="text"` buttons
    with icons rather than stacking inline disclosures or low-priority tabs.
-5. **Calm filters and optical alignment.** Filter controls stay compact and
-   aligned with matching height, zero stray floating switches, and zero
-   pill-button filter toggles masquerading as actions. `Button` hover pills
-   preserve balanced horizontal padding (no `px-0`), flush-left links use plain
-   `RouterLink`, and form `Submit` buttons stay compact and right-aligned
-   (never full-width).
-6. **Action hierarchy, icons, and emphasis.** Header bars visually tier primary
+4. **Calm filters and controls.** Filter controls stay compact and aligned with
+   matching height. Local view switches (`Table` / `Cards`) use `Tabs` (with
+   icons when helpful) rather than competing primary buttons. Flush-left links
+   use plain `RouterLink`.
+5. **Action hierarchy, icons, and emphasis.** Header bars visually tier primary
    workflow actions (`filled` + icon), record controls (`outlined` + icon), and
-   secondary reference dialogs (`text` + icon). Active selected buttons use
-   `toggle` + `:selected="true"` or `variant="filled"` with a leading `check`
-   icon. Form/dialog `Submit`/`Cancel` and repeated unselected `Choose` buttons
-   omit icons. Chips share one variant per page.
-7. **Spatial stability, narrow screen, and dark theme.** Selecting a record in
+   secondary reference dialogs (`text` + icon). Active selected action buttons
+   use `toggle` + `:selected="true"` or `variant="filled"` with a leading `check`
+   icon. Form/dialog footer actions and repeated unselected buttons omit icons.
+   Chips share one variant per page.
+6. **Spatial stability, narrow screen, and dark theme.** Selecting a record in
    a custom workspace keeps sibling comparison panels visible without pushing
    them below the fold. At 375px, sections stack cleanly in logical task order
-   with zero horizontal overflow, zero nested scroll traps, and clearance above
-   the bottom-right navigation pill. All text, cards, chips, and selected
+   with zero horizontal page overflow, zero nested scroll traps, and clearance
+   above the bottom-right navigation pill. All text, cards, chips, and selected
    states remain readable in dark mode.
 
 Select automated runtime and browser proof through
