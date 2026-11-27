@@ -5,13 +5,15 @@ description: Build or review Carta apps/web pages, Loom Views, resources, filter
 
 # Web UI surfaces
 
-Read [DESIGN.md](../../../DESIGN.md) and the
-[capability index](references/capabilities.md) before authoring any `apps/web`
-page, resource, or component.
+Read [DESIGN.md](../../../DESIGN.md), the generated
+[Loom and web framework catalog](../../../packages/loom/CATALOG.md), and the
+[capability selection guide](references/capabilities.md) before authoring any
+`apps/web` page, resource, or component.
 
 | Work | Contract |
 |---|---|
-| Components and existing Loom owners | [Capability index](references/capabilities.md) |
+| Full inventory of Loom components, props, slots, renderers, and web helpers | [Loom catalog](../../../packages/loom/CATALOG.md) |
+| Component choice and disambiguation rules | [Capability guide](references/capabilities.md) |
 | Visual layout, framing, icons, emphasis, dialogs | [DESIGN.md](../../../DESIGN.md) |
 | Resources, operations, values, slots | [Architecture and compiled examples](../../../docs/resource_system_overhaul/ARCHITECTURE.md) |
 | Routes, navigation, parents, Back targets | [File routing](../../../docs/architecture/file-routing.md) |
@@ -29,13 +31,10 @@ page, resource, or component.
    resource, and keep `ListView`'s default `Create` button label unless the
    approved design explicitly requires custom wording or custom sections.
 2. **Reuse Loom components from `@southneuhof/loom`.** Check
-   [capabilities.md](references/capabilities.md) for `PageHeader`, `ListItem`,
-   `Tabs`, `ChipFilter`, `ConfirmationDialog`, `DialogForm`, `Dialog`, `Drawer`,
-   `Timeline`, `Button`, `Icon`, and `Card`. Use `ListItem` inside a divided
-   `Card` (`divide-y divide-outline-variant`) for multi-line selectable queue
-   rows, and `Tabs` for local view switches and routed child sections. Rely on
-   Loom props, slots, and defaults rather than overriding component internals
-   with `:deep(...)` or descendant CSS selectors.
+   [Loom catalog](../../../packages/loom/CATALOG.md) for exported components,
+   props, slots, form renderers, and app display renderers before building local
+   wrappers. Rely on Loom props, slots, and defaults rather than overriding
+   component internals with `:deep(...)` or descendant CSS selectors.
 3. **Design custom workspaces from a spatial thesis.** Give the primary work
    region clear visual dominance instead of equal-width columns of identical
    cards, auto-select the first queue item when present so the workspace never
@@ -67,8 +66,11 @@ Call `resource.list()` and `resource.create()` to bind their page props. Bind
 operation's `form` or `detail` bag consistently across modules. Use
 `DetailView`'s `body` and `controls` slots or `useRecord` for custom record
 pages. Use `useCollection` when a custom page owns a collection presentation.
-Bound commands already invalidate their resource; add invalidation only for
-another affected resource or an unbound write.
+Bound commands already invalidate their own resource; declare `invalidates` on
+resource writes and commands to refresh related resources instead of writing
+manual invalidation wrappers. Use `runHonoMutation` from `@/framework/hono` for
+custom write endpoints so uncertain writes and error codes follow the shared
+transport contract.
 
 Normal web type checks and builds validate module navigation paths.
 Complete every check in [UI review](references/verification.md) before

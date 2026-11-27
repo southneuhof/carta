@@ -3,7 +3,15 @@ export function formatCurrency(num: number | undefined | null, locale = 'ID', cu
 }
 
 export function formatDate(date: string | undefined | null, options?: Intl.DateTimeFormatOptions, locale = 'id-ID') {
-  return date ? new Date(date).toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric', ...(options || {}) }) : '-'
+  if (!date) return '-'
+  const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(date)
+  return new Date(date).toLocaleDateString(locale, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    ...(dateOnly ? { timeZone: 'UTC' } : {}),
+    ...(options || {}),
+  })
 }
 
 export function formatTime(date: string | undefined | null, options?: Intl.DateTimeFormatOptions, locale = 'id-ID') {

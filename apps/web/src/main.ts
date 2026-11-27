@@ -22,7 +22,7 @@ beginPageReadiness()
 router.beforeEach(() => beginPageReadiness())
 router.afterEach(() => markPageNavigationSettled())
 router.onError((error) => setPageReadinessError(error))
-configureParser({ dictionary })
+configureParser({ locale: 'en-US', currency: 'USD', dictionary })
 declare module 'vue' {
   export interface ComponentCustomProperties {
     $parse: (key: string, value: string | number, mode?: 'dictionary' | 'parser') => any

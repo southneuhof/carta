@@ -3,7 +3,7 @@ import { hc } from 'hono/client'
 import { validator } from 'hono/validator'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod/v4'
-import { createHonoResourceActions } from './actions'
+import { createHonoResourceActions, runHonoMutation } from './actions'
 import { collectionQueryFields } from './collectionQuery'
 
 const app = new Hono()
@@ -401,6 +401,29 @@ describe('createHonoResourceActions', () => {
     await expect(actions.list({ query: {}, searchParameters: {} })).resolves.toEqual({
       data: [{ id: '1', name: 'One' }],
       meta: { page: 1, pageSize: 10, total: 1, totalPage: 1 },
+    })
+  })
+
+  it('runs custom mutations with record unwrapping, error codes, and uncertain write classification', async () => {
+    await expect(runHonoMutation<{ id: string; status: string }>('approve', async () => new Response(JSON.stringify({ data: { id: '1', status: 'approved' } }), { status: 200 }))).resolves.toEqual({
+      id: '1',
+      status: 'approved',
+    })
+
+    await expect(runHonoMutation('assign', async () => new Response(JSON.stringify({ error: 'work_order_state_conflict', message: 'Outside queue.' }), { status: 409 }))).rejects.toEqual({
+      code: 'work_order_state_conflict',
+      message: 'Outside queue.',
+    })
+
+    await expect(
+      runHonoMutation('assign', async () => {
+        throw new Error('Socket closed.')
+      })
+    ).rejects.toMatchObject({
+      operation: 'assign',
+      postWrite: true,
+      writeOutcome: 'uncertain',
+      retryable: false,
     })
   })
 })

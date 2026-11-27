@@ -76,4 +76,12 @@ describe('parse utilities', () => {
 
     expect(parse('active', 'Y')).toBe('Y')
   })
+
+  it('rebinds built-in formatters when locale and currency are configured', () => {
+    configureParser({ locale: 'en-US', currency: 'USD' })
+
+    expect(parse('number', 1234.5)).toBe('1,234.5')
+    expect(parse('currency', 182.5)).toBe('$182.50')
+    expect(parse('date', '2026-11-24')).toBe('November 24, 2026')
+  })
 })

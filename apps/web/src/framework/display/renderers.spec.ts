@@ -30,9 +30,10 @@ describe('app display renderers', () => {
   it('registers app renderers in the shared display registry', () => {
     const registries = createRendererRegistries({ display: appDisplayRenderers })
 
-    for (const key of ['chip', 'html', 'image', 'file', 'array-clauses']) {
+    for (const key of ['chip', 'image', 'file', 'array-clauses']) {
       expect(registries.display.has(key)).toBe(true)
     }
+    expect(registries.display.has('html')).toBe(false)
     expect(registries.form.has('chip')).toBe(false)
   })
 
@@ -42,15 +43,6 @@ describe('app display renderers', () => {
 
     expect(view.text()).toBe('Aktif')
     expect(view.classes()).toContain('bg-success')
-    view.unmount()
-  })
-
-  it('renders text-only content for the HTML display key', () => {
-    const renderer = createRendererRegistries({ display: appDisplayRenderers }).display.require('html')
-    const view = mount(renderer, { props: { value: '<strong>Plain text</strong>' } })
-
-    expect(view.text()).toBe('<strong>Plain text</strong>')
-    expect(view.find('strong').exists()).toBe(false)
     view.unmount()
   })
 

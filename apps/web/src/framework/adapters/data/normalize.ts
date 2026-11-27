@@ -62,7 +62,12 @@ function collectIssues(errors: unknown): SchemaIssue[] | undefined {
 export function normalizeError(error: unknown): SubmitError {
   const normalized = defaultDataAdapter.normalizeError(error)
   const issues = isRecord(error) ? (normalized.issues ?? collectIssues(error.errors)) : normalized.issues
-  return issues ? { ...normalized, issues } : normalized
+  const code = normalized.code ?? (isRecord(error) && typeof error.error === 'string' && error.error ? error.error : undefined)
+  return {
+    ...normalized,
+    ...(issues ? { issues } : {}),
+    ...(code ? { code } : {}),
+  }
 }
 
 export function errorMessage(error: unknown, fallback: string): string {

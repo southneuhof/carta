@@ -1,3 +1,3 @@
-export { createHonoResourceActions } from './actions'
+export { createHonoResourceActions, runHonoMutation } from './actions'
 export { parseHonoResponse } from './response'
 export type { HonoRequestOf, HonoResponseOf, HonoResponseRecordOf, HonoRecordOf, HonoCreateOf, HonoUpdateOf, HonoResourceActions } from './contracts'

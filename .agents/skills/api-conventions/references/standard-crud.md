@@ -17,8 +17,18 @@ and foreign keys when adapting examples.
 
 ## Operations
 
+Check the [Sprindle catalog](../../../../packages/sprindle/CATALOG.md) before
+writing custom query, locking, or route boilerplate. Prefer `createEntity({ read })`
+and `list({ query })` over hand-rolled SQL filtering, use `detail({ run })`
+instead of raw `defineRoute` when a detail read needs joins or child records,
+and use `lockRow` from `@southneuhof/sprindle/source` for transactional
+`FOR UPDATE` locks with liveness and state checks.
+
 Use [Sprindle operations](../../../../packages/sprindle/docs/reference.md#file-routes)
-for parsing, status, and responses. Keep single-owner operations in their route;
+for parsing, status, and responses. Parse once at the boundary: do not re-parse
+`state.input` inside `create` or `update` `run` callbacks when the entity schema
+already parsed it, and do not re-parse output records in both a data reader and
+a pass-through `scope.enrich`. Keep single-owner operations in their route;
 extract shared code for real consumers.
 
 Custom `run` owns persistence: apply `state.where` to reads and writes,

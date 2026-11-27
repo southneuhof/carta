@@ -3,38 +3,51 @@ import { formatCurrency, formatDate, formatDateTime, formatDelta, formatHour, fo
 export type Formatter = (value: any) => any
 
 export interface ParserConfig {
+  locale?: string
+  currency?: string
   dictionary?: Record<string, Record<string, string>>
   formatters?: Record<string, Formatter>
 }
 
-const defaultFormatters: Record<string, Formatter> = {
-  number: formatNumber,
-  largeNumber: formatLargeNumber,
-  currency: formatCurrency,
-  month: formatMonth,
-  date: formatDate,
-  time: formatTime,
-  datetime: formatDateTime,
-  hour: formatHour,
-  delta: formatDelta,
+function createDefaultFormatters(locale: string, currency: string): Record<string, Formatter> {
+  return {
+    number: (value) => formatNumber(value, locale),
+    largeNumber: (value) => formatLargeNumber(value, locale),
+    currency: (value) => formatCurrency(value, locale, currency),
+    month: (value) => formatMonth(value, undefined, locale),
+    date: (value) => formatDate(value, undefined, locale),
+    time: (value) => formatTime(value, undefined, locale),
+    datetime: (value) => formatDateTime(value, undefined, locale),
+    hour: formatHour,
+    delta: formatDelta,
+  }
 }
 
-let parserConfig: Required<ParserConfig> = {
+let activeLocale = 'id-ID'
+let activeCurrency = 'IDR'
+let customFormatters: Record<string, Formatter> = {}
+let parserConfig: { dictionary: Record<string, Record<string, string>>; formatters: Record<string, Formatter> } = {
   dictionary: {},
-  formatters: { ...defaultFormatters },
+  formatters: createDefaultFormatters(activeLocale, activeCurrency),
 }
 
 export function configureParser(options: ParserConfig) {
+  if (options.locale) activeLocale = options.locale
+  if (options.currency) activeCurrency = options.currency
+  if (options.formatters) customFormatters = { ...customFormatters, ...options.formatters }
   parserConfig = {
     dictionary: { ...parserConfig.dictionary, ...(options.dictionary || {}) },
-    formatters: { ...parserConfig.formatters, ...(options.formatters || {}) },
+    formatters: { ...createDefaultFormatters(activeLocale, activeCurrency), ...customFormatters },
   }
 }
 
 export function resetParserConfigForTests() {
+  activeLocale = 'id-ID'
+  activeCurrency = 'IDR'
+  customFormatters = {}
   parserConfig = {
     dictionary: {},
-    formatters: { ...defaultFormatters },
+    formatters: createDefaultFormatters(activeLocale, activeCurrency),
   }
 }
 

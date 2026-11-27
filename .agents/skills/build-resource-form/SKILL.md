@@ -5,7 +5,10 @@ description: Build or review Carta forms, value conversion, relation sources, an
 
 # Build resource forms
 
-Read [DESIGN.md](../../../DESIGN.md) for layout. Use the [form guide](../../../docs/ui/forms.md)
+Read [DESIGN.md](../../../DESIGN.md) for layout and check the
+[form renderers table](../../../packages/loom/CATALOG.md#form-renderers-defineform)
+for available inputs and props (including `DateInput` `withTimePicker` and
+`TableInput` inline mode). Use the [form guide](../../../docs/ui/forms.md)
 for controls and composition, and the [value contract](../../../docs/resource_system_overhaul/ARCHITECTURE.md#4-schemas-and-value-ownership)
 for drafts, defaults, and schema input/output. Reuse labels by business meaning
 and schema subsets by matching input/output contracts.

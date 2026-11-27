@@ -72,6 +72,7 @@ function definiteWriteRejection(error: unknown): SubmitError {
   return {
     message: normalized.message,
     ...(normalized.issues ? { issues: normalized.issues } : {}),
+    ...(normalized.code ? { code: normalized.code } : {}),
   }
 }
 
@@ -122,6 +123,11 @@ function routeEndpoint(route: unknown, path: readonly string[]): RuntimeEndpoint
   }
   if (!isRuntimeEndpoint(endpoint)) throw new Error(`Hono ${path[0]} operation endpoint is unavailable.`)
   return endpoint
+}
+
+export async function runHonoMutation<TRecord = unknown>(operation: string, request: () => Promise<Response>): Promise<TRecord> {
+  const body = await writePayload(await requestFor(operation, request, true), operation)
+  return (isRecord(body) && Object.hasOwn(body, 'data') ? dataAdapter.normalizeRecord(body) : body) as TRecord
 }
 
 export function createHonoResourceActions<const TRoute>(route: TRoute & RouteWithoutList<TRoute>, options?: never): HonoResourceActions<TRoute>

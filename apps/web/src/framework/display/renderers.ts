@@ -24,12 +24,6 @@ const chipRenderer = defineComponent({
   },
 })
 
-const textBlockRenderer = defineComponent({
-  name: 'AppDisplayTextBlockRenderer',
-  props: { value: { type: null, default: undefined } },
-  setup: (props) => () => h('div', { class: 'whitespace-pre-wrap' }, String(props.value ?? '-')),
-})
-
 const imageRenderer = defineComponent({
   name: 'AppDisplayImageRenderer',
   props: { value: { type: null, default: undefined } },
@@ -80,7 +74,6 @@ const arrayRenderer = defineComponent({
 declare module '@southneuhof/loom/renderers/displayContracts' {
   interface DisplayRendererComponents {
     chip: typeof chipRenderer
-    html: typeof textBlockRenderer
     image: typeof imageRenderer
     file: typeof fileRenderer
     'array-clauses': typeof arrayRenderer
@@ -89,7 +82,6 @@ declare module '@southneuhof/loom/renderers/displayContracts' {
 
 export const appDisplayRenderers = {
   chip: chipRenderer,
-  html: textBlockRenderer,
   image: imageRenderer,
   file: fileRenderer,
   'array-clauses': arrayRenderer,
