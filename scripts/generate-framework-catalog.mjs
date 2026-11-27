@@ -394,6 +394,56 @@ function formatList(values, empty = '-') {
   return values.map((v) => `\`${v}\``).join(', ')
 }
 
+function compactTypeText(sf, node) {
+  if (!node) return ''
+  const text = node.getText(sf).replace(/\s+/g, ' ').trim()
+  if (text.length <= 72) return text
+  if (ts.isTypeLiteralNode(node)) {
+    const keys = node.members.map((m) => (ts.isPropertySignature(m) || ts.isMethodSignature(m)) ? propertyNameText(m.name) : '').filter(Boolean)
+    return keys.length ? `{ ${keys.join(', ')} }` : '{ ... }'
+  }
+  return `${text.slice(0, 69)}...`
+}
+
+function extractTsSignature(filePath, symbolName) {
+  const sf = parseTs(filePath)
+  const formatParams = (params) =>
+    params
+      .map((p) => {
+        const name = p.name.getText(sf)
+        const opt = p.questionToken || p.initializer ? '?' : ''
+        const type = p.type ? `: ${compactTypeText(sf, p.type)}` : ''
+        return `${name}${opt}${type}`
+      })
+      .join(', ')
+
+  const formatTypeParams = (typeParams) => {
+    if (!typeParams?.length) return ''
+    const parts = typeParams.map((tp) => {
+      const name = tp.name.text
+      return tp.default ? `${name}?` : name
+    })
+    return `<${parts.join(', ')}>`
+  }
+
+  let match
+  for (const stmt of sf.statements) {
+    const isExport = stmt.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)
+    if (!isExport) continue
+    if (ts.isFunctionDeclaration(stmt) && stmt.name?.text === symbolName) {
+      if (stmt.body || !match) match = stmt
+    }
+    if (ts.isClassDeclaration(stmt) && stmt.name?.text === symbolName) {
+      const ctor = stmt.members.find((m) => ts.isConstructorDeclaration(m))
+      return `new ${symbolName}${formatTypeParams(stmt.typeParameters)}(${ctor ? formatParams(ctor.parameters) : ''})`
+    }
+  }
+  if (match) {
+    return `${symbolName}${formatTypeParams(match.typeParameters)}(${formatParams(match.parameters)})`
+  }
+  return symbolName
+}
+
 function buildLoomCatalog(root) {
   const views = collectBarrelVueExports(resolve(root, 'packages/loom/src/components/views/index.ts'))
   const core = [
@@ -441,6 +491,25 @@ function buildLoomCatalog(root) {
   const createDeclProps = collectTypeMembers(resolve(root, 'packages/loom/src/resources/operations.ts'), 'ResourceCreateDeclaration')
   const customCmdProps = collectTypeMembers(resolve(root, 'packages/loom/src/resources/operations.ts'), 'ResourceCustomCommand')
 
+  const coreFactories = [
+    ['defineForm', 'packages/loom/src/forms/defineForm.ts'],
+    ['defineTable', 'packages/loom/src/tables/defineTable.ts'],
+    ['defineDetail', 'packages/loom/src/details/defineDetail.ts'],
+    ['defineResource', 'packages/loom/src/resources/defineResource.ts'],
+    ['useCollection', 'packages/loom/src/components/core/useCollection.ts'],
+    ['useRecord', 'packages/loom/src/components/core/useRecord.ts'],
+    ['useLoader', 'packages/loom/src/query/loader.ts'],
+    ['useNamespacedQuery', 'packages/loom/src/query/namespace.ts'],
+    ['downloadBlob', 'packages/loom/src/services/download.ts'],
+    ['parseFilenameFromContentDisposition', 'packages/loom/src/services/download.ts'],
+  ]
+  const factoryLines = ['| Export | Signature | Source |', '|---|---|---|']
+  for (const [name, rel] of coreFactories) {
+    const abs = resolve(root, rel)
+    if (!existsSync(abs)) continue
+    factoryLines.push(`| \`${name}\` | \`${extractTsSignature(abs, name)}\` | \`${rel}\` |`)
+  }
+
   return [
     '# Loom and web framework catalog',
     '',
@@ -464,6 +533,10 @@ function buildLoomCatalog(root) {
     '',
     `- Default parser formatters (\`@southneuhof/utilities/parse\`, configured in \`apps/web/src/main.ts\`): ${formatList(formatters)}`,
     '- Plain multi-line strings in `Detail` and `Table` preserve newlines automatically via `DisplayValue.vue` (`whitespace-pre-line`).',
+    '',
+    '## Core factories, composables, and utilities (`@southneuhof/loom`)',
+    '',
+    factoryLines.join('\n'),
     '',
     '## Resource and web transport helpers',
     '',
@@ -533,7 +606,11 @@ function buildSprindleCatalog(root) {
 
   const readOptions = collectTypeMembers(drizzleSourcePath, 'CreateDrizzleSourceRead')
   const lockOptions = collectTypeMembers(lockRowPath, 'LockRowOptions')
-  const errorHelpers = extractTsFunctionExports(resolve(root, 'packages/sprindle/src/errors.ts'))
+  const errorsPath = resolve(root, 'packages/sprindle/src/errors.ts')
+  const errorSignatures = ['HttpError', 'validationError', 'unauthorized', 'forbidden', 'notFound'].map((name) =>
+    extractTsSignature(errorsPath, name),
+  )
+  const lockSignature = extractTsSignature(lockRowPath, 'lockRow')
   const entityHelpers = extractTsFunctionExports(entityPath)
 
   const appApiModules = [
@@ -568,8 +645,8 @@ function buildSprindleCatalog(root) {
     '',
     `- \`@southneuhof/sprindle/entity\`: ${formatList(entityHelpers)}`,
     `  - \`createEntity({ table, schemas, read })\` read options: ${formatList(readOptions)}`,
-    `- \`@southneuhof/sprindle/source\`: \`lockRow(db, table, id, options?)\` with options ${formatList(lockOptions)} (adds \`deletedAt IS NULL\` automatically, throws 404 or 409 \`invalid_transition\`).`,
-    `- \`@southneuhof/sprindle\` errors: ${formatList(errorHelpers)}`,
+    `- \`@southneuhof/sprindle/source\`: \`${lockSignature}\` with options ${formatList(lockOptions)} (adds \`deletedAt IS NULL\` automatically, throws 404 or 409 \`invalid_transition\`).`,
+    `- \`@southneuhof/sprindle\` errors: ${formatList(errorSignatures)}`,
     '',
     '## App API shared helpers (`apps/api/src/`)',
     '',

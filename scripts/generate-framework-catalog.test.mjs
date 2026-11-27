@@ -16,13 +16,16 @@ test('framework catalogs stay synchronized with Loom and Sprindle source exports
   assert.match(loomEntry.content, /`DateInput` \| [^|\n]*`withTimePicker`/)
   assert.match(loomEntry.content, /`ChipFilter` \| [^|\n]*`selection`/)
   assert.match(loomEntry.content, /`invalidates`/)
+  assert.match(loomEntry.content, /`useCollection<TRecord, TQuery>/)
+  assert.match(loomEntry.content, /`downloadBlob\(response: Response, fallbackFilename: string\)`/)
   assert.match(loomEntry.content, /`runHonoMutation\(operation, request\)`/)
   assert.doesNotMatch(loomEntry.content, /\| `html` \|/)
   assert.doesNotMatch(loomEntry.content, /`ConfirmationDialogActions`/)
 
   assert.match(sprindleEntry.content, /`detail` \| [^|\n]*`run`/)
   assert.match(sprindleEntry.content, /`list` \| [^|\n]*`query\{defaultSort,defaultOrder,enumFilters\}`/)
-  assert.match(sprindleEntry.content, /`lockRow\(db, table, id, options\?\)`/)
+  assert.match(sprindleEntry.content, /`lockRow<T>\(db: LockDb, table: T, id: string, options\?: LockRowOptions\)`/)
+  assert.match(sprindleEntry.content, /`readMultipart\(c, options\)`/)
   assert.match(sprindleEntry.content, /`pinnedOrder`, `searchColumns`, `virtual`/)
 
   for (const [filePath, expected] of byFile) {

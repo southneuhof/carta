@@ -39,6 +39,23 @@ export default defineConfig(({ command, mode }) => {
       }),
     ],
     optimizeDeps: {
+      include: [
+        'vue',
+        'vue-router',
+        'pinia',
+        'reka-ui',
+        'vaul-vue',
+        'zod',
+        'zod/v4',
+        'date-fns',
+        'hono/client',
+        'vue-sonner',
+        'tailwind-merge',
+        'dompurify',
+        'vuedraggable',
+        '@vuepic/vue-datepicker',
+        '@vueuse/core',
+      ],
       rolldownOptions: {
         plugins: [schemaBoundary],
       },
