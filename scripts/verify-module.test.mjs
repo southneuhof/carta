@@ -52,8 +52,8 @@ async function waitForChecks() {
   return { ...result, calls, logs: join(cwd, '.local/verification/verify-module') }
 }
 
-test('builds before compiling routes, then starts every enabled check before any check finishes', (t) => {
-  const runResult = run(t, ['--fast', '--api-test', 'src/auth spec.ts', '--web-test', 'roles.spec.ts'], { stageSize: 5 })
+test('builds before compiling routes, then runs enabled checks up to --concurrency', (t) => {
+  const runResult = run(t, ['--fast', '--concurrency', '5', '--api-test', 'src/auth spec.ts', '--web-test', 'roles.spec.ts'], { stageSize: 5 })
   assert.equal(runResult.status, 1)
   assert.deepEqual(runResult.calls.slice(0, 2), [
     ['--filter', '@southneuhof/api', 'build'],
