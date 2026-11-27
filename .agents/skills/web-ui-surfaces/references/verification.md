@@ -37,10 +37,14 @@ layout, visual hierarchy, or contrast.
 
 ## 3. Rendered visual inspection
 
-Start the development app and inspect changed pages in a real browser across
-**all three view states**: desktop (1440px to 1600px) in light mode, narrow
-(375px) mobile width, and dark mode on custom workspaces. Capture and verify
-every item directly on the rendered pixels:
+Run `pnpm verify:ui --config <path.json>` from the repository root. List the
+changed routes in the config. The command can start the app, sign in, and
+capture desktop and mobile views in light and dark modes. Read `report.json`
+and open the screenshots. Use
+[Runtime proof](../../verify-carta-module/references/runtime.md#browser-proof-only-when-selected)
+for config fields and interactive workflows.
+
+Inspect the screenshots for these conditions.
 
 1. **Visual hierarchy and reading order.** Page header, primary work area, and
    supporting panels read in clear order. Custom workspaces give the primary

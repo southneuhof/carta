@@ -53,87 +53,77 @@ function collectBarrelVueExports(barrelPath) {
   return items
 }
 
-function collectTypeMembers(filePath, typeName, visited = new Set()) {
-  const key = `${filePath}#${typeName}`
-  if (visited.has(key) || !existsSync(filePath) || filePath.endsWith('.vue')) return []
-  visited.add(key)
-  const sf = parseTs(filePath)
+function namedImports(sf) {
   const imports = new Map()
   for (const stmt of sf.statements) {
     if (!ts.isImportDeclaration(stmt) || !ts.isStringLiteral(stmt.moduleSpecifier)) continue
-    const target = resolveTsFile(filePath, stmt.moduleSpecifier.text)
-    if (!target || !stmt.importClause?.namedBindings || !ts.isNamedImports(stmt.importClause.namedBindings)) continue
-    for (const el of stmt.importClause.namedBindings.elements) {
+    const target = resolveTsFile(sf.fileName, stmt.moduleSpecifier.text)
+    const bindings = stmt.importClause?.namedBindings
+    if (!target || !bindings || !ts.isNamedImports(bindings)) continue
+    for (const el of bindings.elements) {
       imports.set(el.name.text, { file: target, exported: (el.propertyName ?? el.name).text })
     }
   }
+  return imports
+}
 
-  const extractFromTypeNode = (node) => {
-    if (!node) return []
-    if (ts.isTypeLiteralNode(node)) {
-      return node.members
-        .filter((m) => ts.isPropertySignature(m))
-        .map((m) => propertyNameText(m.name))
-        .filter(Boolean)
-    }
-    if (ts.isIntersectionTypeNode(node) || ts.isUnionTypeNode(node)) {
-      return node.types.flatMap(extractFromTypeNode)
-    }
-    if (ts.isParenthesizedTypeNode(node)) return extractFromTypeNode(node.type)
-    if (ts.isTypeReferenceNode(node) && ts.isIdentifier(node.typeName)) {
-      const refName = node.typeName.text
-      if ((refName === 'Omit' || refName === 'Pick' || refName === 'Partial' || refName === 'Required') && node.typeArguments?.length) {
-        const base = extractFromTypeNode(node.typeArguments[0])
-        if (refName === 'Omit' && node.typeArguments[1]) {
-          const omitted = new Set(extractStringLiterals(node.typeArguments[1]))
-          return base.filter((name) => !omitted.has(name))
-        }
-        if (refName === 'Pick' && node.typeArguments[1]) {
-          const picked = new Set(extractStringLiterals(node.typeArguments[1]))
-          return base.filter((name) => picked.has(name))
-        }
-        return base
-      }
-      const imported = imports.get(refName)
-      if (imported) return collectTypeMembers(imported.file, imported.exported, visited)
-      return collectTypeMembers(filePath, refName, visited)
-    }
-    return []
+function membersOfType(node, sf, visited) {
+  if (!node) return []
+  if (ts.isTypeLiteralNode(node)) return [...node.members]
+  if (ts.isMappedTypeNode(node)) return [node]
+  if (ts.isIntersectionTypeNode(node) || ts.isUnionTypeNode(node)) {
+    return node.types.flatMap((part) => membersOfType(part, sf, visited))
   }
+  if (ts.isParenthesizedTypeNode(node)) return membersOfType(node.type, sf, visited)
+  if (!ts.isTypeReferenceNode(node) || !ts.isIdentifier(node.typeName)) return []
+  const name = node.typeName.text
+  if (['Omit', 'Pick', 'Partial', 'Required'].includes(name) && node.typeArguments?.length) {
+    const base = membersOfType(node.typeArguments[0], sf, visited)
+    const keys = new Set(extractStringLiterals(node.typeArguments[1]))
+    if (name === 'Omit') return base.filter((member) => !keys.has(propertyNameText(member.name)))
+    if (name === 'Pick') return base.filter((member) => keys.has(propertyNameText(member.name)))
+    return base
+  }
+  return resolveMembers(sf, name, visited)
+}
+
+function resolveMembers(sf, name, visited = new Set()) {
+  const key = `${sf.fileName}#${name}`
+  if (visited.has(key)) return []
+  const next = new Set(visited).add(key)
+  const imported = namedImports(sf).get(name)
+  if (imported && !imported.file.endsWith('.vue')) return resolveMembers(parseTs(imported.file), imported.exported, next)
 
   for (const stmt of sf.statements) {
-    if (ts.isInterfaceDeclaration(stmt) && stmt.name.text === typeName) {
-      const own = stmt.members
-        .filter((m) => ts.isPropertySignature(m))
-        .map((m) => propertyNameText(m.name))
-        .filter(Boolean)
+    if (ts.isInterfaceDeclaration(stmt) && stmt.name.text === name) {
       const inherited = (stmt.heritageClauses ?? []).flatMap((clause) =>
-        clause.types.flatMap((expr) => {
-          if (!ts.isIdentifier(expr.expression)) return []
-          const refName = expr.expression.text
-          const imported = imports.get(refName)
-          return imported ? collectTypeMembers(imported.file, imported.exported, visited) : collectTypeMembers(filePath, refName, visited)
-        }),
+        clause.types.flatMap((entry) => ts.isIdentifier(entry.expression) ? resolveMembers(sf, entry.expression.text, next) : []),
       )
-      return [...new Set([...inherited, ...own])]
+      return [...inherited, ...stmt.members]
     }
-    if (ts.isTypeAliasDeclaration(stmt) && stmt.name.text === typeName) {
-      return [...new Set(extractFromTypeNode(stmt.type))]
-    }
+    if (ts.isTypeAliasDeclaration(stmt) && stmt.name.text === name) return membersOfType(stmt.type, sf, next)
   }
   for (const stmt of sf.statements) {
     if (!ts.isExportDeclaration(stmt) || !stmt.moduleSpecifier || !ts.isStringLiteral(stmt.moduleSpecifier)) continue
-    const target = resolveTsFile(filePath, stmt.moduleSpecifier.text)
-    if (!target) continue
+    const target = resolveTsFile(sf.fileName, stmt.moduleSpecifier.text)
+    if (!target || target.endsWith('.vue')) continue
     if (!stmt.exportClause) {
-      const found = collectTypeMembers(target, typeName, visited)
+      const found = resolveMembers(parseTs(target), name, next)
       if (found.length) return found
     } else if (ts.isNamedExports(stmt.exportClause)) {
-      const match = stmt.exportClause.elements.find((el) => el.name.text === typeName)
-      if (match) return collectTypeMembers(target, (match.propertyName ?? match.name).text, visited)
+      const match = stmt.exportClause.elements.find((el) => el.name.text === name)
+      if (match) return resolveMembers(parseTs(target), (match.propertyName ?? match.name).text, next)
     }
   }
   return []
+}
+
+function propNames(members) {
+  return [...new Set(members.filter(ts.isPropertySignature).map((member) => propertyNameText(member.name)).filter(Boolean))]
+}
+
+function collectTypeMembers(filePath, typeName) {
+  return propNames(resolveMembers(parseTs(filePath), typeName))
 }
 
 function extractStringLiterals(node) {
@@ -143,24 +133,43 @@ function extractStringLiterals(node) {
   return []
 }
 
-function extractSlots(templateContent) {
+function typeText(node) {
+  return node.getText().replace(/\s+/g, ' ').trim()
+}
+
+function camelCase(name) {
+  return name.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())
+}
+
+function extractSlots(templateContent, bindings) {
   if (!templateContent) return []
-  const ast = vueDom.baseParse(templateContent)
-  const slots = new Set()
+  const slots = []
   const visit = (node) => {
-    if (!node || typeof node !== 'object') return
     if (node.type === 1 && node.tag === 'slot') {
-      const nameAttr = (node.props ?? []).find((p) => p.type === 6 && p.name === 'name')
-      const dynamicName = (node.props ?? []).find((p) => p.type === 7 && p.name === 'bind' && p.arg?.content === 'name')
-      if (nameAttr?.value?.content) slots.add(nameAttr.value.content)
-      else if (dynamicName) slots.add('[dynamic]')
-      else slots.add('default')
+      const nameAttr = node.props.find((prop) => prop.type === 6 && prop.name === 'name')
+      const dynamicName = node.props.find((prop) => prop.type === 7 && prop.name === 'bind' && prop.arg?.content === 'name')
+      const name = nameAttr?.value?.content ?? (dynamicName ? '[dynamic]' : 'default')
+      const shape = node.props.flatMap((prop) => {
+        if (prop.type !== 7 || prop.name !== 'bind') return []
+        if (prop.arg) return prop.arg.content === 'name' ? [] : [camelCase(prop.arg.content)]
+        const value = prop.exp?.content
+        if (!value) return []
+        if (bindings.has(value)) return bindings.get(value)
+        const expression = ts.createSourceFile('binding.ts', `(${value})`, ts.ScriptTarget.Latest, true).statements[0]?.expression?.expression
+        if (!expression || !ts.isObjectLiteralExpression(expression)) return [`...${value}`]
+        return expression.properties.flatMap((property) => {
+          if (ts.isSpreadAssignment(property)) return [`...${typeText(property.expression)}`]
+          const key = propertyNameText(property.name)
+          return key ? [key] : []
+        })
+      })
+      const label = dynamicName?.exp?.content.match(/^`([^$]+)\$\{/)?.[1]
+      slots.push({ name, label: label ? `${label}${'{key}'}` : name, shape: [...new Set(shape)].join(', ') })
     }
     for (const child of node.children ?? []) visit(child)
-    for (const branch of node.branches ?? []) visit(branch)
   }
-  visit(ast)
-  return [...slots]
+  visit(vueDom.baseParse(templateContent))
+  return slots
 }
 
 const domNoiseProps = new Set([
@@ -192,24 +201,68 @@ function isDomNoiseProp(name) {
   return domNoiseProps.has(name) || name.startsWith('aria-')
 }
 
-function extractInlineTypeMembers(filePath, imports, node) {
-  if (!node) return []
-  if (ts.isTypeLiteralNode(node)) {
-    return node.members
-      .filter((m) => ts.isPropertySignature(m))
-      .map((m) => propertyNameText(m.name))
-      .filter(Boolean)
+const runtimeTypes = new Map([
+  ['String', 'string'], ['Boolean', 'boolean'], ['Number', 'number'],
+  ['Object', 'object'], ['Function', 'Function'], ['Array', 'unknown[]'],
+])
+
+function runtimeValue(expression) {
+  if (!ts.isIdentifier(expression)) return expression
+  const sf = expression.getSourceFile()
+  const imported = namedImports(sf).get(expression.text)
+  const declarationFile = imported ? parseTs(imported.file) : sf
+  const name = imported?.exported ?? expression.text
+  for (const statement of declarationFile.statements) {
+    if (!ts.isVariableStatement(statement)) continue
+    const declaration = statement.declarationList.declarations.find((entry) => propertyNameText(entry.name) === name)
+    if (declaration?.initializer) return declaration.initializer
   }
-  if (ts.isIntersectionTypeNode(node) || ts.isUnionTypeNode(node)) {
-    return node.types.flatMap((part) => extractInlineTypeMembers(filePath, imports, part))
+  return expression
+}
+
+function runtimeType(expression) {
+  if (ts.isAsExpression(expression) && ts.isTypeReferenceNode(expression.type) &&
+      expression.type.typeName.getText() === 'PropType' && expression.type.typeArguments?.length) {
+    return typeText(expression.type.typeArguments[0])
   }
-  if (ts.isParenthesizedTypeNode(node)) return extractInlineTypeMembers(filePath, imports, node.type)
-  if (ts.isTypeReferenceNode(node) && ts.isIdentifier(node.typeName)) {
-    const refName = node.typeName.text
-    const imported = imports.get(refName)
-    return imported ? collectTypeMembers(imported.file, imported.exported) : collectTypeMembers(filePath, refName)
-  }
-  return []
+  if (ts.isArrayLiteralExpression(expression)) return expression.elements.map(runtimeType).join(' | ')
+  return runtimeTypes.get(expression.getText()) ?? typeText(expression)
+}
+
+function runtimeProps(object) {
+  return object.properties.flatMap((prop) => {
+    if (ts.isSpreadAssignment(prop)) {
+      const source = runtimeValue(prop.expression)
+      return ts.isObjectLiteralExpression(source) ? runtimeProps(source) : []
+    }
+    const name = propertyNameText(prop.name)
+    if (!name || !ts.isPropertyAssignment(prop)) return []
+    let type = prop.initializer
+    let required = false
+    if (ts.isObjectLiteralExpression(type)) {
+      const options = type.properties.flatMap((entry) => {
+        if (!ts.isSpreadAssignment(entry)) return [entry]
+        const source = runtimeValue(entry.expression)
+        return ts.isObjectLiteralExpression(source) ? [...source.properties] : []
+      }).filter(ts.isPropertyAssignment)
+      required = options.some((entry) => propertyNameText(entry.name) === 'required' && entry.initializer.kind === ts.SyntaxKind.TrueKeyword)
+      type = options.find((entry) => propertyNameText(entry.name) === 'type')?.initializer
+    }
+    return type ? [`${name}${required ? '' : '?'}: ${runtimeType(type)}`] : []
+  })
+}
+
+function slotContract(member) {
+  const index = ts.isIndexSignatureDeclaration(member)
+  const mapped = ts.isMappedTypeNode(member)
+  const name = index ? member.parameters[0].type : mapped ? member.nameType : member.name
+  const label = (name && (index || mapped ? typeText(name).replaceAll('`', '') : propertyNameText(name))) ?? '[dynamic]'
+  const type = member.type
+  if (!type || !ts.isFunctionTypeNode(type)) return undefined
+  const shape = type.parameters[0]?.type
+  if (!shape) return [label, '']
+  const keys = ts.isTypeReferenceNode(shape) ? propNames(membersOfType(shape, shape.getSourceFile())) : []
+  return [label, keys.length ? `${typeText(shape)} { ${keys.join(', ')} }` : typeText(shape)]
 }
 
 function extractVueComponent(filePath) {
@@ -217,35 +270,55 @@ function extractVueComponent(filePath) {
   const { descriptor } = vueSfc.parse(source, { filename: filePath })
   const scriptContent = descriptor.scriptSetup?.content ?? descriptor.script?.content ?? ''
   const sf = ts.createSourceFile(filePath, scriptContent, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
-  const imports = new Map()
-  for (const stmt of sf.statements) {
-    if (!ts.isImportDeclaration(stmt) || !ts.isStringLiteral(stmt.moduleSpecifier)) continue
-    const target = resolveTsFile(filePath, stmt.moduleSpecifier.text)
-    if (!target || !stmt.importClause?.namedBindings || !ts.isNamedImports(stmt.importClause.namedBindings)) continue
-    for (const el of stmt.importClause.namedBindings.elements) {
-      imports.set(el.name.text, { file: target, exported: (el.propertyName ?? el.name).text })
-    }
-  }
 
   const props = []
   const models = []
-  let hasCommonProps = false
+  const typedProps = []
+  const typedSlots = new Map()
+  const slotBindings = new Map()
+  let propDeclaration
+  let commonProps = false
 
   const visit = (node) => {
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer &&
+        ts.isCallExpression(node.initializer) && node.initializer.typeArguments?.length) {
+      const keys = propNames(membersOfType(node.initializer.typeArguments[0], sf))
+      if (keys.length) slotBindings.set(node.name.text, keys)
+    }
     if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
       const callee = node.expression.text
+      const type = node.typeArguments?.[0]
       if (callee === 'defineModel') {
         const first = node.arguments[0]
-        models.push(first && ts.isStringLiteral(first) ? `v-model:${first.text}` : 'v-model')
+        const model = first && ts.isStringLiteral(first) ? `v-model:${first.text}` : 'v-model'
+        models.push(model)
+        if (type) typedProps.push(`${model}: ${typeText(type)}`)
+      }
+      if (callee === 'defineSlots' && type) {
+        for (const member of membersOfType(type, sf)) {
+          const slot = slotContract(member)
+          if (slot) typedSlots.set(...slot)
+        }
       }
       if (callee === 'defineProps') {
-        if (node.typeArguments?.length) {
-          props.push(...extractInlineTypeMembers(filePath, imports, node.typeArguments[0]))
+        if (type) {
+          const members = membersOfType(type, sf)
+          propDeclaration = typeText(type)
+          props.push(...propNames(members))
+          for (const member of members.filter(ts.isPropertySignature)) {
+            const name = propertyNameText(member.name)
+            if (member.type && name && !isDomNoiseProp(name)) {
+              typedProps.push(`${name}${member.questionToken ? '?' : ''}: ${typeText(member.type)}`)
+            }
+          }
         } else if (node.arguments[0] && ts.isObjectLiteralExpression(node.arguments[0])) {
+          typedProps.push(...runtimeProps(node.arguments[0]))
           for (const prop of node.arguments[0].properties) {
             if (ts.isSpreadAssignment(prop)) {
-              if (ts.isIdentifier(prop.expression) && prop.expression.text === 'commonProps') hasCommonProps = true
-              else if (ts.isIdentifier(prop.expression)) props.push(`...${prop.expression.text}`)
+              if (ts.isIdentifier(prop.expression)) {
+                if (prop.expression.text === 'commonProps') commonProps = true
+                else props.push(`...${prop.expression.text}`)
+              }
             } else {
               const name = propertyNameText(prop.name)
               if (name) props.push(name)
@@ -258,10 +331,19 @@ function extractVueComponent(filePath) {
   }
   visit(sf)
 
+  const slots = extractSlots(descriptor.template?.content, slotBindings)
   const uniqueProps = [...new Set(props)].filter((name) => !isDomNoiseProp(name))
-  if (hasCommonProps) uniqueProps.push('...commonProps')
-  const slots = extractSlots(descriptor.template?.content)
-  return { models: [...new Set(models)], props: uniqueProps, slots }
+  if (commonProps) uniqueProps.push('...commonProps')
+  const slotContracts = new Map(typedSlots)
+  for (const { name, label, shape } of slots) {
+    if (name === '[dynamic]' && label === name && [...typedSlots.keys()].some((key) => key.includes('${'))) continue
+    if (!slotContracts.has(label)) slotContracts.set(label, shape && `{ ${shape} }`)
+  }
+  return {
+    models: [...new Set(models)], props: uniqueProps, slots: [...new Set(slots.map((slot) => slot.name))],
+    propDeclaration, typedProps: [...new Set(typedProps)],
+    typedSlots: [...slotContracts].map(([name, shape]) => shape ? `${name}: ${shape}` : name),
+  }
 }
 
 function extractBuiltInFormRenderers(root) {
@@ -454,6 +536,22 @@ function buildLoomCatalog(root) {
   ]
   const base = collectBarrelVueExports(resolve(root, 'packages/loom/src/components/base/index.ts'))
   const composites = collectBarrelVueExports(resolve(root, 'packages/loom/src/components/composites/index.ts'))
+  const direct = collectBarrelVueExports(resolve(root, 'packages/loom/src/index.ts'))
+  const components = new Map([...views, ...core, ...base, ...composites, ...direct].map((item) => [item.name, item]))
+  const highTraffic = ['ListView', 'DetailView', 'Form', 'TableInput', 'DateInput', 'DateRangeInput', 'SelectInput', 'DrawingCanvas', 'Drawer', 'MapView']
+  const contractLines = highTraffic.flatMap((name) => {
+    const { file } = components.get(name)
+    const { propDeclaration, typedProps, typedSlots } = extractVueComponent(file)
+    const source = posixPath(root, file).replace(/^packages\/loom\//, '')
+    const declaration = propDeclaration && !propDeclaration.startsWith('{') ? ` (${formatList([propDeclaration])})` : ''
+    return [
+      `### [${name}](${source})`,
+      '',
+      `- Props${declaration} ${formatList(typedProps)}`,
+      `- Slots ${formatList(typedSlots, 'None')}`,
+      '',
+    ]
+  })
   const formRenderers = extractBuiltInFormRenderers(root)
   const displayRenderers = extractAppDisplayRenderers(root)
   const formatters = extractDefaultFormatters(root)
@@ -491,6 +589,19 @@ function buildLoomCatalog(root) {
   const createDeclProps = collectTypeMembers(resolve(root, 'packages/loom/src/resources/operations.ts'), 'ResourceCreateDeclaration')
   const customCmdProps = collectTypeMembers(resolve(root, 'packages/loom/src/resources/operations.ts'), 'ResourceCustomCommand')
 
+  const operations = parseTs(resolve(root, 'packages/loom/src/resources/operations.ts'))
+  const exports = parseTs(resolve(root, 'packages/loom/src/exports/contracts.ts'))
+  const context = propNames(resolveMembers(operations, 'ResourceCustomContext'))
+  const handles = propNames(resolveMembers(operations, 'ResourceCustomHandle'))
+  const download = resolveMembers(exports, 'ExportDownloadOption').map((member) => typeText(member))
+  const downloadList = resolveMembers(exports, 'ListExportConfiguration').find((member) => propertyNameText(member.name) === 'downloads')
+  const resourceContracts = [
+    '- Declare custom commands in `defineResource({ actions: { name: { permission, run } } })`. Use a function in the same map for a read action.',
+    `- Command options ${formatList(customCmdProps)}. Use the bound command at \`resource.actions.name\`.`,
+    `- Bound command members ${formatList(handles)}. Call \`withContext({ ${context.join(', ')} })\` for record access checks. Pass the same operation arguments to \`can(...args)\` and \`run(...args)\`. \`run\` checks access and invalidates queries after success.`,
+    `- Set \`exports.list.downloads\` for custom downloads in the list export menu. Type ${formatList([typeText(downloadList)])}. Each entry has ${formatList(download)}.`,
+  ]
+
   const coreFactories = [
     ['defineForm', 'packages/loom/src/forms/defineForm.ts'],
     ['defineTable', 'packages/loom/src/tables/defineTable.ts'],
@@ -523,6 +634,11 @@ function buildLoomCatalog(root) {
     '',
     renderTable([...base, ...composites]),
     '',
+    '## High-traffic component contracts',
+    '',
+    'See each declaration for constraints on combinations of props.',
+    '',
+    ...contractLines,
     '## Form renderers (`defineForm`)',
     '',
     rendererLines.join('\n'),
@@ -538,12 +654,15 @@ function buildLoomCatalog(root) {
     '',
     factoryLines.join('\n'),
     '',
+    '## Resource custom commands and exports',
+    '',
+    ...resourceContracts,
+    '',
     '## Resource and web transport helpers',
     '',
     `- \`@southneuhof/loom\` resource API: ${formatList(resourceApi)}`,
     `  - \`defineResource\` keys: ${formatList(resourceDeclProps)}`,
     `  - \`create\` / \`update\` / \`delete\` write options include: ${formatList(createDeclProps.filter((k) => ['permission', 'route', 'visible', 'invalidates', 'successMessage', 'backTo', 'defaultTo'].includes(k)))}`,
-    `  - custom command options (\`actions.<name>\`): ${formatList(customCmdProps)}`,
     `- \`@/framework/hono\`: ${formatList(honoHelpers)}`,
     `- \`@/framework/schema\`: ${formatList(schemaHelpers)}`,
     '',

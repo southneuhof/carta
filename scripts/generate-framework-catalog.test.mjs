@@ -22,6 +22,18 @@ test('framework catalogs stay synchronized with Loom and Sprindle source exports
   assert.doesNotMatch(loomEntry.content, /\| `html` \|/)
   assert.doesNotMatch(loomEntry.content, /`ConfirmationDialogActions`/)
 
+  const contracts = loomEntry.content.split('## High-traffic component contracts')[1]?.split('\n## ')[0]
+  assert.ok(contracts)
+  assert.match(contracts, /collection: CollectionSlotProps<TRecord, TQuery>/)
+  assert.match(contracts, /trigger: \{ setOpen, disabled \}/)
+  assert.match(contracts, /teleport\?: DatepickerTeleportTarget/)
+  assert.match(contracts, /mapProvider\?: 'openstreetmap' \| 'google'/)
+  const resourceContracts = loomEntry.content.split('## Resource custom commands and exports')[1]?.split('\n## ')[0]
+  assert.ok(resourceContracts)
+  assert.match(resourceContracts, /withContext\(\{ record \}\)/)
+  assert.match(resourceContracts, /exports\.list\.downloads/)
+  assert.match(resourceContracts, /run\(context: \{ query: TQuery; signal: AbortSignal \}\)/)
+
   assert.match(sprindleEntry.content, /`detail` \| [^|\n]*`run`/)
   assert.match(sprindleEntry.content, /`list` \| [^|\n]*`query\{defaultSort,defaultOrder,enumFilters\}`/)
   assert.match(sprindleEntry.content, /`lockRow<T>\(db: LockDb, table: T, id: string, options\?: LockRowOptions\)`/)

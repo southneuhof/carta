@@ -25,6 +25,8 @@
     "push:all": "node scripts/package-repos.mjs push-all",
     "skills:add": "sh -c 'npx skills@latest add southneuhof/skills --skill \"$1\"' --",
     "skills:update": "npx skills update",
+    "verify:ui": "node scripts/verify-ui.mjs",
+    "verify:module": "node scripts/verify-module.mjs",
     "test:module-tooling": "node --test scripts/*.test.mjs",
     "setup:local": "node scripts/local-environment.mjs setup",
     "module:preflight": "node scripts/local-environment.mjs preflight",

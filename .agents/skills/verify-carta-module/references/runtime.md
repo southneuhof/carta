@@ -82,19 +82,33 @@ a proof. Seed records remain available for later runs.
 
 ## Browser proof, only when selected
 
-Use `apps/web/playwright.config.ts` and `e2e/fixtures.ts`; do not create a second
-launcher or login harness. Inspect the selected spec and preparation commands:
-the default fixture runs destructive `e2e:prepare`, including database reset
-and bucket clearing. Require the isolated E2E target and authority for that reset.
-Run `pnpm module:preflight -- --needs api,web,browser,storage` first.
+Run `pnpm verify:ui` from the repository root. Use `--routes list=/settings/users`
+for a route list or `--config <path.json>` for per-route settings. In the config,
+set `webUrl` and `apiUrl` for known servers. Use `startServers: true` to start
+and stop local servers for the check. The owned API uses the database configured
+in `apps/api/.env`. Start a separate isolated API for workflows that write
+test data and give its URL to the command. For `--preview`, use a web build that
+already points to the selected API.
 
-For the existing permission-switch failure case, run
-`pnpm --filter @southneuhof/framework-web test:e2e -- role-mapping.spec.ts -g 'A-3 failed permission update'`.
-Playwright starts and stops its servers. Local iteration flags require known
-owned servers and prepared state; they do not prove server identity. Avoid
-default form filling and filter journeys. Use fixture payloads through HTTP
-for setup, then drive the custom interaction through real accessible controls.
-Capture action and result plus relevant persisted effects. Copy selected
-artifacts from `apps/web/test-results` and `apps/web/playwright-report` into the
-run evidence directory before another invocation overwrites them. Report UI
-paths not driven as unverified.
+Give each route a `name` and `path`. Set `viewports` to a list of `desktop` and
+`mobile` and `themes` to a list of `light` and `dark` to select captures. Use
+`selector` or `waitFor` to wait for an element or text. The top-level `login`
+object supplies the default account. Set route `auth` to `false` for anonymous
+routes or give it an `email` and `password` for a different account. Keep login
+config in `.local/`.
+
+For an interactive workflow, pass `--script <path.mjs>` or set `script` in the
+config. Export an async default function. Use `newContext()` for anonymous
+pages and `loginContext()` for the configured account. Pass an account to
+`loginContext({ email, password })` to select it. Call
+`await assertPageClean(page)` after the workflow. Check the relevant saved data
+with a fresh read. Use `outDir` for evidence.
+
+Read `report.json` and inspect the screenshots before reporting the result.
+The default output directory is `.local/verification/verify-ui/`. Paths in
+the config are relative to that file. Paths in command flags are relative to
+the current directory.
+
+For a maintained Playwright spec, use its existing package command. Read the
+spec and its setup commands first. The default E2E fixture resets its database
+and clears its storage bucket. Use the authorized isolated E2E target.

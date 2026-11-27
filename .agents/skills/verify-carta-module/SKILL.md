@@ -57,11 +57,19 @@ Read [runtime instructions](references/runtime.md) for live checks and the
 Recipes do not add acceptance obligations. Update one only when changed paths
 need reusable instructions.
 
-Use package scripts and scoped instructions. API route changes include normal
-SDK and web type checks. Inspect aggregate commands before running them.
-Reuse credible results, including delegated results, while their inputs remain
-unchanged. After corrections, rerun affected checks only. Broaden for a concrete
-defect, changed shared behavior, or missing critical evidence.
+Run `pnpm verify:module` from the repository root and wait for it to finish.
+Use `--api-test <path>` or `--web-test <path>` for selected tests. Use
+`--skip-api-test` or `--skip-web-unit` when the selected proof excludes that
+suite. Read the summary and the failed step logs in
+`.local/verification/verify-module/`.
+
+If the disposable test database schema is out of sync, run
+`pnpm --filter @southneuhof/api db:refresh:test`. This command checks the test
+target, drops its tables, applies migrations, and seeds the database.
+
+For selected browser checks, run `pnpm verify:ui --config <path.json>` and wait
+for it to finish. Use the [runtime instructions](references/runtime.md#browser-proof-only-when-selected)
+to set up a workflow script. After a correction, repeat the affected checks.
 
 Use [$test-audit](../test-audit/SKILL.md) for new or changed tests and
 [UI review](../web-ui-surfaces/references/verification.md) for changed web wiring.

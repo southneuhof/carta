@@ -20,7 +20,7 @@ export default defineConfig(({ command, mode }) => {
   const validPort = Number.isInteger(port) && port >= 1 && port <= 65535 ? port : undefined
   const schemaBoundary = schemaBoundaryPlugin()
   return {
-    envPrefix: ['VITE_'],
+    envPrefix: ['VITE_', 'GOOGLE_MAP_API_KEY'],
     server: {
       port: validPort,
       strictPort: true,

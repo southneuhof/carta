@@ -22,6 +22,8 @@
     "db:push": "drizzle-kit push",
     "db:reset": "tsx --env-file-if-exists=.env scripts/reset-db.ts && pnpm run db:migrate",
     "db:refresh": "pnpm run db:reset && pnpm run db:seed",
+    "db:reset:test": "node --env-file-if-exists=.env --env-file=.env.test --import tsx scripts/test-target.mjs --reset && pnpm run db:migrate:test",
+    "db:refresh:test": "pnpm run db:reset:test && node --env-file-if-exists=.env --env-file=.env.test --import tsx scripts/test-target.mjs --seed",
     "db:smoke": "tsx --env-file-if-exists=.env scripts/smoke-db.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",

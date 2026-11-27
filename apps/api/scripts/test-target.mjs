@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-// Configuration preflight only: this does not connect to or modify a database.
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, realpathSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { parseEnv } from 'node:util'
 import { fileURLToPath } from 'node:url'
@@ -40,11 +39,29 @@ export function assertTestTarget({ cwd = process.cwd(), env = process.env } = {}
   return { purpose: 'test', hostname: target.hostname, port: target.port, database: target.database }
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && existsSync(process.argv[1]) && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
   if (process.argv.includes('--help')) {
-    console.log('Usage: node --env-file-if-exists=.env --env-file=.env.test scripts/test-target.mjs\nChecks explicit test purpose/name, effective environment and separation from .env. Does not connect or write.')
+    console.log('Usage: node --env-file-if-exists=.env --env-file=.env.test --import tsx scripts/test-target.mjs [--reset | --seed]\nChecks the test database target before any requested write.')
   } else {
-    try { console.log(JSON.stringify({ status: 'VALID', scope: 'test-configuration', ...assertTestTarget() })) }
-    catch (error) { console.error(`test-target: ${error.message}`); process.exitCode = 1 }
+    try {
+      const target = assertTestTarget()
+      console.log(JSON.stringify({ status: 'VALID', scope: 'test-configuration', ...target }))
+      const args = process.argv.slice(2)
+      if (args.length === 1 && args[0] === '--reset') {
+        const { resetDatabase } = await import('./reset-db.ts')
+        await resetDatabase()
+      } else if (args.length === 1 && args[0] === '--seed') {
+        const { seedDatabase } = await import('./seed.ts')
+        const { closeDb } = await import('../src/db.ts')
+        try {
+          await seedDatabase()
+        } finally {
+          await closeDb()
+        }
+      } else if (args.length) throw new Error('Use --reset or --seed.')
+    } catch (error) {
+      console.error(`test-target: ${error.message}`)
+      process.exitCode = 1
+    }
   }
 }
