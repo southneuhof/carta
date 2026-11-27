@@ -23,6 +23,7 @@ const options = {
   routes: { type: 'string' },
   script: { type: 'string' },
   timeout: { type: 'string' },
+  concurrency: { type: 'string' },
   help: { type: 'boolean' },
 }
 
@@ -99,6 +100,12 @@ export function readConfig(args, cwd = process.cwd()) {
   if (!Number.isSafeInteger(timeout) || timeout < 1 || timeout > 2_147_483_647) {
     throw new Error('--timeout must be a positive integer in milliseconds.')
   }
+  const defaultConcurrency = file.concurrency === undefined ? 4 : file.concurrency
+  const concurrency = values.concurrency === undefined ? defaultConcurrency : Number(values.concurrency)
+  if ((values.concurrency !== undefined && !/^\d+$/.test(values.concurrency)) ||
+      !Number.isSafeInteger(concurrency) || concurrency < 1) {
+    throw new Error('--concurrency must be a positive integer.')
+  }
 
   const viewportSizes = { ...sizes }
   let viewports = Object.keys(sizes)
@@ -154,7 +161,7 @@ export function readConfig(args, cwd = process.cwd()) {
   const script = values.script !== undefined ? resolve(cwd, values.script) : file.script && resolve(base, file.script)
   if (!script && !routes.length) throw new Error('Give at least one route or a workflow script.')
   return {
-    webUrl, apiUrl, routes, script, timeout, viewportSizes, defaultAccount,
+    webUrl, apiUrl, routes, script, timeout, concurrency, viewportSizes, defaultAccount,
     outDir: values.out !== undefined ? resolve(cwd, values.out)
       : file.outDir ? resolve(base, file.outDir) : resolve(cwd, '.local/verification/verify-ui'),
     startServers: values['start-servers'] ?? file.startServers,
@@ -300,6 +307,7 @@ async function startServers(config, owned, signal, untilInterrupted) {
     checks.push(ready(new URL('/health', apiUrl), api, signal))
   }
   await Promise.all(checks)
+  return !!web && !config.preview
 }
 
 function chromium() {
@@ -330,14 +338,14 @@ function browserHelpers(browser, config) {
   const sessions = new Map()
   const watchPage = (page) => {
     if (pages.has(page)) return pages.get(page)
-    const issues = []
-    let sawAnonymousMe401 = false
-    pages.set(page, issues)
+    const state = { issues: [], sawAnonymousMe401: false }
+    const { issues } = state
+    pages.set(page, state)
     page.on('pageerror', (error) => issues.push(`pageerror: ${error.message}`))
     page.on('response', (response) => {
       if (response.status() === 401) {
         try {
-          if (new URL(response.url()).pathname === '/me') sawAnonymousMe401 = true
+          if (new URL(response.url()).pathname === '/me') state.sawAnonymousMe401 = true
         } catch {}
       }
       if (response.status() >= 500) issues.push(`HTTP ${response.status()}: ${response.url()}`)
@@ -346,10 +354,10 @@ function browserHelpers(browser, config) {
       if (message.type() !== 'error') return
       const text = message.text()
       const locationUrl = message.location?.()?.url ?? ''
-      if (isExpectedAnonymousMeConsoleError(text, locationUrl, sawAnonymousMe401)) return
+      if (isExpectedAnonymousMeConsoleError(text, locationUrl, state.sawAnonymousMe401)) return
       issues.push(`console.error: ${text}`)
     })
-    return issues
+    return state
   }
   browser.on('context', (context) => context.on('page', watchPage))
   async function newContext(options = {}) {
@@ -383,46 +391,149 @@ function browserHelpers(browser, config) {
     }
     return sessions.get(key)
   }
+  function resetPage(page) {
+    const state = watchPage(page)
+    state.issues.length = 0
+    state.sawAnonymousMe401 = false
+  }
   async function assertPageClean(page) {
-    const issues = watchPage(page)
+    const { issues } = watchPage(page)
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)
     const failures = overflow ? [...issues, 'Horizontal page overflow.'] : issues
     if (failures.length) throw new Error(failures.join('\n'))
   }
-  return { newContext, loginContext, assertPageClean }
+  return { newContext, loginContext, assertPageClean, resetPage }
 }
 
-async function capture(context, route, config, helpers, result) {
-  const { viewport, theme } = result
-  const page = await context.newPage()
-  try {
-    await page.setViewportSize(config.viewportSizes[viewport])
-    await page.emulateMedia({ colorScheme: theme })
-    await page.addInitScript(({ origin, theme }) => {
-      if (location.origin !== origin) return
-      localStorage.setItem('colorPreference', JSON.stringify(theme))
-      const apply = () => {
-        document.documentElement.classList.toggle('light', theme === 'light')
-        document.documentElement.classList.toggle('dark', theme === 'dark')
-      }
-      if (document.documentElement) apply()
-      else document.addEventListener('DOMContentLoaded', apply, { once: true })
-    }, { origin: config.webUrl.origin, theme })
-    const response = await page.goto(route.url, { waitUntil: 'networkidle' })
-    if (response?.status() >= 400) throw new Error(`Navigation failed (HTTP ${response.status()}).`)
-    const destination = new URL(page.url())
-    if (destination.origin !== config.webUrl.origin) throw new Error('The route redirected to another origin.')
-    if (route.credentials && destination.pathname === '/auth/login' &&
-        new URL(route.url).pathname !== '/auth/login') throw new Error('The route redirected to login.')
-    if (route.waitFor) await page.getByText(route.waitFor).first().waitFor({ state: 'visible' })
-    if (route.selector) await page.locator(route.selector).first().waitFor({ state: 'visible' })
-    const screenshot = `${route.name}-${viewport}-${theme}.png`
-    await page.screenshot({ path: resolve(config.outDir, screenshot), fullPage: true })
-    result.screenshot = screenshot
-    await helpers.assertPageClean(page)
-  } finally {
-    await page.close()
+async function navigate(page, url, config) {
+  const start = performance.now()
+  const origins = new Set([config.webUrl.origin, config.apiUrl.origin])
+  const pending = new Set()
+  let scheduleIdle
+  let rejectIdle
+  let pageStopped = false
+  let idleTimer
+  let deadline
+  const track = (request) => {
+    if (!origins.has(new URL(request.url()).origin)) return
+    pending.add(request)
+    scheduleIdle?.()
   }
+  const finish = (request) => {
+    if (pending.delete(request)) scheduleIdle?.()
+  }
+  const cancel = () => {
+    pageStopped = true
+    rejectIdle?.(new Error('The browser page closed or crashed while waiting for local requests.'))
+  }
+  page.on('request', track)
+  page.on('requestfinished', finish)
+  page.on('requestfailed', finish)
+  page.once('close', cancel)
+  page.once('crash', cancel)
+  try {
+    const response = await page.goto(url, { waitUntil: 'domcontentloaded' })
+    if (response?.status() >= 400) throw new Error(`Navigation failed (HTTP ${response.status()}).`)
+    await new Promise((done, reject) => {
+      rejectIdle = reject
+      if (pageStopped) return cancel()
+      scheduleIdle = () => {
+        clearTimeout(idleTimer)
+        if (!pending.size) idleTimer = setTimeout(done, 300)
+      }
+      const remaining = Math.max(0, config.timeout - (performance.now() - start))
+      deadline = setTimeout(() => {
+        const paths = [...pending].slice(0, 5).map((request) => new URL(request.url()).pathname)
+        const detail = paths.length ? ` Pending requests: ${paths.join(', ')}.` : ''
+        reject(new Error(`Local requests did not settle within ${config.timeout} ms.${detail}`))
+      }, remaining)
+      scheduleIdle()
+    })
+  } finally {
+    clearTimeout(idleTimer)
+    clearTimeout(deadline)
+    page.off('request', track)
+    page.off('requestfinished', finish)
+    page.off('requestfailed', finish)
+    page.off('close', cancel)
+    page.off('crash', cancel)
+  }
+}
+
+async function capture(page, route, config, helpers, result) {
+  const { viewport, theme } = result
+  await page.setViewportSize(config.viewportSizes[viewport])
+  await navigate(page, route.url, config)
+  const destination = new URL(page.url())
+  if (destination.origin !== config.webUrl.origin) throw new Error('The route redirected to another origin.')
+  if (route.credentials && destination.pathname === '/auth/login' &&
+      new URL(route.url).pathname !== '/auth/login') throw new Error('The route redirected to login.')
+  if (route.waitFor) await page.getByText(route.waitFor).first().waitFor({ state: 'visible' })
+  if (route.selector) await page.locator(route.selector).first().waitFor({ state: 'visible' })
+  const screenshot = `${route.name}-${viewport}-${theme}.png`
+  await page.screenshot({ path: resolve(config.outDir, screenshot), fullPage: true })
+  result.screenshot = screenshot
+  await helpers.assertPageClean(page)
+}
+
+async function captureRoutes(config, helpers, captures, signal) {
+  const contexts = new Map()
+  function contextFor(route, theme) {
+    const key = JSON.stringify([theme, route.credentials?.email, route.credentials?.password])
+    if (!contexts.has(key)) {
+      contexts.set(key, (async () => {
+        const session = route.credentials && await helpers.loginContext(route.credentials)
+        const storageState = await session?.storageState()
+        const context = await helpers.newContext({ storageState, colorScheme: theme })
+        await context.addInitScript(({ origin, theme }) => {
+          if (location.origin !== origin) return
+          localStorage.setItem('colorPreference', JSON.stringify(theme))
+          const apply = () => {
+            document.documentElement.classList.toggle('light', theme === 'light')
+            document.documentElement.classList.toggle('dark', theme === 'dark')
+          }
+          if (document.documentElement) apply()
+          else document.addEventListener('DOMContentLoaded', apply, { once: true })
+        }, { origin: config.webUrl.origin, theme })
+        return context
+      })())
+    }
+    return contexts.get(key)
+  }
+  const planned = config.routes.flatMap((route) => route.viewports.flatMap((viewport) => route.themes.map((theme) => ({
+    route, result: { route: route.name, viewport, theme },
+  }))))
+  captures.push(...planned.map(({ result }) => result))
+  const queue = themes.flatMap((theme) => planned.filter(({ result }) => result.theme === theme))
+  let next = 0
+  async function worker() {
+    let page
+    try {
+      while (next < queue.length) {
+        signal.throwIfAborted()
+        const { route, result } = queue[next++]
+        try {
+          const context = await contextFor(route, result.theme)
+          if (page?.context() === context && !page.isClosed()) {
+            await page.goto('about:blank', { waitUntil: 'domcontentloaded' })
+          } else {
+            await page?.close()
+            page = await context.newPage()
+          }
+          helpers.resetPage(page)
+          await capture(page, route, config, helpers, result)
+          result.ok = true
+        } catch (error) {
+          signal.throwIfAborted()
+          result.ok = false
+          result.error = error.message
+        }
+      }
+    } finally {
+      await page?.close()
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(config.concurrency, queue.length) }, worker))
 }
 
 async function verify(config) {
@@ -449,35 +560,28 @@ async function verify(config) {
   process.on('SIGTERM', onInterrupt)
   let browser
   try {
-    await startServers(config, owned, signal, untilInterrupted)
+    const warmup = await startServers(config, owned, signal, untilInterrupted)
     signal.throwIfAborted()
     browser = await chromium().launch({ timeout: config.timeout })
     signal.throwIfAborted()
     const helpers = browserHelpers(browser, config)
-    const anonymous = config.routes.some((route) => !route.credentials) ? await helpers.newContext() : undefined
-    for (const route of config.routes) {
-      for (const viewport of route.viewports) {
-        for (const theme of route.themes) {
-          signal.throwIfAborted()
-          const result = { route: route.name, viewport, theme }
-          try {
-            const context = route.credentials ? await untilInterrupted(helpers.loginContext(route.credentials)) : anonymous
-            await untilInterrupted(capture(context, route, config, helpers, result))
-            result.ok = true
-          } catch (error) {
-            signal.throwIfAborted()
-            result.ok = false
-            result.error = error.message
-          }
-          report.captures.push(result)
-        }
+    if (warmup) {
+      const context = await helpers.newContext()
+      try {
+        const page = await context.newPage()
+        await untilInterrupted(navigate(page, new URL('/', webUrl).href, config))
+        await helpers.assertPageClean(page)
+      } finally {
+        await context.close()
       }
     }
+    await untilInterrupted(captureRoutes(config, helpers, report.captures, signal))
     if (config.script) {
       report.workflow = { path: config.script, ok: false }
       const mod = await untilInterrupted(import(pathToFileURL(config.script).href))
       if (typeof mod.default !== 'function') throw new Error('The workflow module must export a default function.')
-      await untilInterrupted(mod.default({ browser, ...helpers, webUrl: webUrl.origin, apiUrl: apiUrl.origin, outDir }))
+      const { newContext, loginContext, assertPageClean } = helpers
+      await untilInterrupted(mod.default({ browser, newContext, loginContext, assertPageClean, webUrl: webUrl.origin, apiUrl: apiUrl.origin, outDir }))
       report.workflow.ok = true
     }
   } catch (error) {
@@ -505,7 +609,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   try {
     const config = readConfig(process.argv.slice(process.argv[2] === '--' ? 3 : 2))
     if (config.help) {
-      console.log('Usage: pnpm verify:ui [--config <path.json>] [--routes <name=path,...>] [--script <path.mjs>] [--out <dir>] [--web-url <url>] [--api-url <url>] [--start-servers] [--preview] [--login <email:password>] [--timeout <ms>]')
+      console.log('Usage: pnpm verify:ui [--config <path.json>] [--routes <name=path,...>] [--script <path.mjs>] [--out <dir>] [--web-url <url>] [--api-url <url>] [--start-servers] [--preview] [--login <email:password>] [--timeout <ms>] [--concurrency <n>]')
     } else await verify(config)
   } catch (error) {
     console.error(`verify:ui: ${error.message}`)

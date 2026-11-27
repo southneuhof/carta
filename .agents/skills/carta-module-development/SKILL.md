@@ -20,6 +20,10 @@ and reviews with findings rather than implementation.
 ## Implement
 
 Select checks through [$verify-carta-module](../verify-carta-module/SKILL.md).
+During edits, run `pnpm verify:module --fast --api-test <spec>` and correct the
+reported failures together. Run the full command once at the end. Use the
+[foreground procedure](../verify-carta-module/references/runtime.md#verification-commands)
+for both verification commands.
 Use the optional [plan format](references/planning.md) when execution or resume
 needs a file.
 
@@ -52,7 +56,9 @@ choices locally.
 Complete [module verification](../verify-carta-module/SKILL.md) and, for any
 `apps/web` change, complete every gate in
 [UI review](../web-ui-surfaces/references/verification.md) including zero new
-lint warnings and rendered browser inspection. Review custom code against its
+lint warnings and rendered browser inspection. For Gate 3, select about 10 to
+16 captures across the changed pages. Cover desktop light mode, mobile at
+375 px, and dark mode on custom workspaces. Review custom code against its
 stated unsupported requirement. Mark an existing design's implementation
 `Current` only when requirements, setup, checks, and rendered UI review are
 complete. Report delivered behavior, setup status, checks, and remaining gaps.

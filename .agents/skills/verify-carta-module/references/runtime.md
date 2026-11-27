@@ -1,5 +1,13 @@
 # Runtime proof
 
+## Verification commands
+
+Run `pnpm verify:module` and `pnpm verify:ui` in the foreground from the
+repository root. Use one shell call per command and wait for it to finish.
+Set the wait or yield limit to `120000` to `180000` ms, or use the longest wait
+the shell tool supports. Do not set it to `100` to `1000` ms. Do not redirect
+output to a log file and check it repeatedly with `tail`, `ps`, or `write_stdin`.
+
 ## API launch
 
 Run from the repository root. Dependencies must be installed. If local env
@@ -92,6 +100,10 @@ already points to the selected API.
 
 Give each route a `name` and `path`. Set `viewports` to a list of `desktop` and
 `mobile` and `themes` to a list of `light` and `dark` to select captures. Use
+about 10 to 16 representative captures for Gate 3. Cover the changed pages in
+desktop light mode, narrow layouts at 375 px, and custom workspaces in dark
+mode. Select viewport and theme pairs per route to avoid duplicate coverage. Use
+`--concurrency <n>` to set the capture worker limit. The default is 4. Use
 `selector` or `waitFor` to wait for an element or text. The top-level `login`
 object supplies the default account. Set route `auth` to `false` for anonymous
 routes or give it an `email` and `password` for a different account. Keep login

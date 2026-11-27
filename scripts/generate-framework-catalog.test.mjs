@@ -28,8 +28,11 @@ test('framework catalogs stay synchronized with Loom and Sprindle source exports
   assert.match(contracts, /trigger: \{ setOpen, disabled \}/)
   assert.match(contracts, /teleport\?: DatepickerTeleportTarget/)
   assert.match(contracts, /mapProvider\?: 'openstreetmap' \| 'google'/)
+  assert.match(loomEntry.content, /`defineTable` and `defineDetail`[^\n]+top-level `labels`[^\n]+`sortable` and `read`[^\n]+`format` inside `cell`/)
+  assert.match(loomEntry.content, /`apps\/web\/src\/manifest\/navigation\.ts`[^\n]+`VisibleNavigationModule`[^\n]+`kind`, `name`, `title`, `icon`, and `routes`[^\n]+`description`/)
   const resourceContracts = loomEntry.content.split('## Resource custom commands and exports')[1]?.split('\n## ')[0]
   assert.ok(resourceContracts)
+  assert.match(resourceContracts, /writes as command objects[^\n]+read-only loaders as functions in `actions`/)
   assert.match(resourceContracts, /withContext\(\{ record \}\)/)
   assert.match(resourceContracts, /exports\.list\.downloads/)
   assert.match(resourceContracts, /run\(context: \{ query: TQuery; signal: AbortSignal \}\)/)

@@ -57,6 +57,21 @@ test('keeps anonymous routes separate from default and route-specific accounts',
   assert.deepEqual(config.routes[2].themes, ['dark'])
 })
 
+test('defaults to four capture workers and accepts config and CLI overrides', (t) => {
+  const cwd = fixture(t, { concurrency: 2, routes: [{ name: 'app', path: '/' }] })
+  assert.equal(readConfig(['--routes', 'app=/']).concurrency, 4)
+  assert.equal(readConfig(['--config', 'review.json'], cwd).concurrency, 2)
+  assert.equal(readConfig(['--config', 'review.json', '--concurrency', '1'], cwd).concurrency, 1)
+})
+
+test('rejects capture limits that are not positive whole numbers', (t) => {
+  for (const value of ['0', '-1', '1.5', '1e2', 'many', '9007199254740992', '']) {
+    assert.throws(() => readConfig(['--routes', 'app=/', `--concurrency=${value}`]), /--concurrency must be a positive integer/)
+  }
+  const cwd = fixture(t, { concurrency: '2', routes: [{ name: 'app', path: '/' }] })
+  assert.throws(() => readConfig(['--config', 'review.json'], cwd), /--concurrency must be a positive integer/)
+})
+
 test('rejects cross-origin routes before a browser can send an authenticated request', () => {
   assert.throws(
     () => readConfig(['--web-url', 'http://app.test', '--routes', 'external=//unrelated.test/']),

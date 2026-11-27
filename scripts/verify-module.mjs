@@ -1,4 +1,4 @@
-import { spawnSync } from 'node:child_process'
+import { spawn } from 'node:child_process'
 import { appendFileSync, closeSync, mkdirSync, openSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { parseArgs, stripVTControlCharacters } from 'node:util'
@@ -10,22 +10,27 @@ const options = {
   'skip-api-test': { type: 'boolean' },
   'web-test': { type: 'string' },
   'skip-web-unit': { type: 'boolean' },
+  fast: { type: 'boolean' },
   'fail-fast': { type: 'boolean' },
   help: { type: 'boolean' },
 }
 
-function runStep(command, log) {
+function runCommand(command, log) {
   const fd = openSync(log, 'w')
-  let result
+  let child
   try {
-    result = spawnSync('pnpm', command, { stdio: ['ignore', fd, fd] })
+    child = spawn('pnpm', command, { stdio: ['ignore', fd, fd] })
   } finally {
     closeSync(fd)
   }
-  if (result.error || result.signal) {
-    appendFileSync(log, `\n${result.error?.message ?? `Terminated by ${result.signal}`}\n`)
-  }
-  return result.status ?? 1
+  return new Promise((done) => {
+    let error
+    child.once('error', (reason) => { error = reason })
+    child.once('close', (status, signal) => {
+      if (error || signal) appendFileSync(log, `\n${error?.message ?? `Terminated by ${signal}`}\n`)
+      done(status ?? 1)
+    })
+  })
 }
 
 function countNativeWarnings(output) {
@@ -34,11 +39,26 @@ function countNativeWarnings(output) {
   ).length
 }
 
-function main() {
+async function runStep([name, command], outDir) {
+  if (!command) return { name, status: 'SKIP', log: '-' }
+
+  const log = `${name}.log`
+  const path = resolve(outDir, log)
+  const start = performance.now()
+  console.log(`[start] ${name}`)
+  const code = await runCommand(command, path)
+  const seconds = ((performance.now() - start) / 1000).toFixed(1)
+  console.log(`[${code ? 'fail' : 'pass'} ${seconds}s] ${name}`)
+  const output = code || name === 'web-lint' ? stripVTControlCharacters(readFileSync(path, 'utf8')) : ''
+  const detail = name === 'web-lint' ? `; native-control warnings: ${countNativeWarnings(output)}` : ''
+  return { name, status: code ? `FAIL (${code})${detail}` : `PASS${detail}`, log, code, output }
+}
+
+async function main() {
   const args = process.argv.slice(process.argv[2] === '--' ? 3 : 2)
   const { values } = parseArgs({ args, options })
   if (values.help) {
-    console.log('Usage: pnpm verify:module [--api-test <path> | --skip-api-test] [--web-test <path> | --skip-web-unit] [--fail-fast]')
+    console.log('Usage: pnpm verify:module [--api-test <path> | --skip-api-test] [--web-test <path> | --skip-web-unit] [--fast] [--fail-fast]')
     return
   }
   if ((values['api-test'] !== undefined && (values['skip-api-test'] || !values['api-test'].trim())) ||
@@ -46,45 +66,40 @@ function main() {
     throw new Error('Give a nonempty focused test path or skip the suite.')
   }
 
-  const steps = [
-    ['routes-compile', [...api, 'routes:compile']],
+  const preparation = [
     ['api-build', [...api, 'build']],
+    ['routes-compile', [...api, 'routes:compile']],
+  ]
+  const skipWebUnit = values['skip-web-unit'] || (values.fast && values['web-test'] === undefined)
+  const checks = [
     ['api-test', values['skip-api-test'] ? null : values['api-test'] ? [...api, 'test:focused', '--', values['api-test']] : [...api, 'test']],
     ['web-type-check', [...web, 'type-check']],
     ['web-lint', [...web, 'lint']],
-    ['web-unit', values['skip-web-unit'] ? null : values['web-test'] ? [...web, 'test:focused', '--', values['web-test']] : [...web, 'test:unit']],
+    ['web-unit', skipWebUnit ? null : values['web-test'] ? [...web, 'test:focused', '--', values['web-test']] : [...web, 'test:unit']],
     ['surface-architecture', ['run', 'test:surface-architecture']],
   ]
   const outDir = resolve('.local/verification/verify-module')
   mkdirSync(outDir, { recursive: true })
   const results = []
-  let failed = false
-  for (const [name, command] of steps) {
-    if (!command || (failed && values['fail-fast'])) {
-      results.push({ name, status: 'SKIP', log: '-' })
-      continue
-    }
-
-    const log = `${name}.log`
-    const path = resolve(outDir, log)
-    const status = runStep(command, path)
-    const output = status || name === 'web-lint' ? stripVTControlCharacters(readFileSync(path, 'utf8')) : ''
-    const detail = name === 'web-lint' ? `; native-control warnings: ${countNativeWarnings(output)}` : ''
-    results.push({ name, status: status ? `FAIL (${status})${detail}` : `PASS${detail}`, log })
-    if (status) {
-      failed = true
-      console.log(`\n${name} (last 12 lines)\n${output.trimEnd().split('\n').slice(-12).join('\n')}`)
-    }
+  const shouldStop = () => values['fail-fast'] && results.some(({ code }) => code)
+  for (const [name, command] of preparation) {
+    results.push(await runStep([name, shouldStop() ? null : command], outDir))
   }
+  const skipChecks = shouldStop()
+  results.push(...await Promise.all(checks.map(([name, command]) => runStep([name, skipChecks ? null : command], outDir))))
   console.log(`\nLogs: ${outDir}\n`)
   const resultWidth = Math.max(...results.map(({ status }) => status.length), 'Result'.length) + 2
   console.log(`${'Step'.padEnd(22)}${'Result'.padEnd(resultWidth)}Log`)
   for (const { name, status, log } of results) console.log(`${name.padEnd(22)}${status.padEnd(resultWidth)}${log}`)
-  if (failed) process.exitCode = 1
+  for (const { name, code, output } of results) {
+    if (!code) continue
+    console.log(`\n${name} (last 12 lines)\n${output.trimEnd().split('\n').slice(-12).join('\n')}`)
+    process.exitCode = 1
+  }
 }
 
 try {
-  main()
+  await main()
 } catch (error) {
   console.error(`verify:module: ${error.message}`)
   process.exitCode = 1
