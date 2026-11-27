@@ -540,6 +540,7 @@ function buildSprindleCatalog(root) {
     'apps/api/src/identity.ts',
     'apps/api/src/schema.ts',
     'apps/api/src/storage/assets.ts',
+    'apps/api/src/storage/uploads.ts',
     'apps/api/src/soft-delete.ts',
     'apps/api/src/unique-violation.ts',
     'apps/api/src/audit.ts',
