@@ -20,7 +20,7 @@ export const locationOperations: LocationOperations = {
   async autocomplete({ input, signal, mapProvider }) {
     if (mapProvider === 'openstreetmap') {
       const key = import.meta.env.VITE_GEOAPIFY_API_KEY
-      if (!key) throw new Error('VITE_GEOAPIFY_API_KEY is required.')
+      if (!key) return []
       const url = new URL('https://api.geoapify.com/v1/geocode/autocomplete')
       url.search = new URLSearchParams({ text: input, apiKey: key, format: 'json' }).toString()
       const response = await fetch(url, { signal })
@@ -54,9 +54,7 @@ export const locationOperations: LocationOperations = {
 
   async mapConfig({ signal, mapProvider }) {
     if (mapProvider === 'openstreetmap') {
-      const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY
-      if (!apiKey) throw new Error('VITE_GEOAPIFY_API_KEY is required.')
-      return { apiKey }
+      return { apiKey: import.meta.env.VITE_GEOAPIFY_API_KEY ?? '' }
     }
     const { data } = await services.get('configs', undefined, { init: { signal } })
     return { apiKey: data.gmaps.web }
