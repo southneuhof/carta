@@ -55,7 +55,7 @@ Read [DESIGN.md](../../../DESIGN.md), the generated
    left-to-right from quietest to strongest so the primary `filled` CTA sits
    **top-rightmost** (`#secondary-controls` for `text` reference triggers,
    automatic `outlined` `Edit`/`Delete`, `#controls` for primary workflow CTA).
-   Use `ChipFilter` for Material 3 filter chips, `PageHeader` for custom page
+   Use `ChipFilter` for filter chips, `PageHeader` for custom page
    headers (omit `backTo` on top-level sidebar pages), follow the icon rules in
    [DESIGN.md](../../../DESIGN.md#actions-icons-and-forms), and gate custom
    controls with `command.can` and `allowedOperations`.

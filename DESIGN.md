@@ -131,7 +131,6 @@ or `#trailing-icon` slot:
 - **Add an icon:**
   - Header and toolbar actions (leading icon: `Create`, `Edit`, `Delete`, `Start Work`, `Approve`, `Reject`, `Complete Work`, `Export`).
   - Triggers that open a reference dialog or navigate to another page (leading icon such as `file-list` or `history` for dialogs; trailing `arrow-right-up` for navigation links).
-  - Active selected toggle buttons (leading `check` icon alongside `variant="filled"`).
   - Standalone destructive actions outside a confirmation footer (`Delete`, `Reject`).
   - Visual-mode tabs where icons aid recognition (for example `table` and `layout-grid` on `Table` / `Cards` `Tabs`).
 - **Omit the icon:**
@@ -150,7 +149,7 @@ Keep collection filter bars calm and uncluttered. Follow Material 3 filter
 conventions and use progressive disclosure when horizontal space is tight:
 
 - **Cramped panes or 2+ secondary filters** (such as a narrow split-workspace queue column or a multi-filter toolbar): keep `SearchBox` visible and place secondary filters inside a Loom `Popover` opened from a compact filter button (showing an active filter count or indicator when filters are set), matching `ListView`'s default filter popover. Do not stack mismatched search, lookup, select, and toggle controls across multiple cramped rows.
-- **Single quick category or status filter**: use `ChipFilter` (Material 3 `rounded-lg` filter chips with `secondary-container` selected state and leading `check` icon) in one compact row, setting `filter-controls="slot"` on `ListView` when `#filters` already owns every filter.
+- **Single quick category or status filter**: use `ChipFilter` in one compact row, setting `filter-controls="slot"` on `ListView` when `#filters` already owns every filter.
 - **Inline multi-filter row on wide lists**: derive controls through `field(key)` and keep sibling controls consistent in height and type (do not pair a filled `LookupInput` button next to outlined `SelectInput` dropdowns in the same row). Use the smallest filter width that fits the control.
 
 A contextual dialog form opens from its own action and owns its normal open and
@@ -205,7 +204,7 @@ Carta's Material 3 component roles above generic styling advice:
 
 - **Primary CTA buttons**: `Button` `variant="filled"` (`rounded-full`, `bg-primary text-on-primary`), placed at the rightmost end of a header or form footer.
 - **Secondary and record buttons**: `Button` `variant="outlined"` (or `variant="tonal"` when subtle secondary fill fits) and `variant="text"` for quiet reference dialog triggers.
-- **Filter chips**: `ChipFilter` (`rounded-lg`, `h-8`, `border-outline-variant` unselected, `bg-secondary-container text-on-secondary-container` with leading `check` icon when selected), never styled as full-pill CTA buttons.
+- **Filter chips**: `ChipFilter` (built on Loom `Chip`, never styled as full-pill CTA buttons).
 - **List selection**: `ListItem` (`bg-primary-container text-on-primary-container` selected inside a flat divided `Card`).
 
 ## Access and feedback

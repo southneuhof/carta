@@ -42,11 +42,11 @@ Start the development app and inspect changed pages in a real browser across
 (375px) mobile width, and dark mode on custom workspaces. Capture and verify
 every item directly on the rendered pixels:
 
-1. **Squint test and spatial hierarchy.** With detail blurred, page header,
-   primary work area, and supporting panels read in clear order. Custom
-   workspaces give the primary work region width dominance, auto-select the
-   first queue item when present so no blank stub appears, and render selectable
-   queue rows with flat `ListItem` rows inside a divided `Card`.
+1. **Visual hierarchy and reading order.** Page header, primary work area, and
+   supporting panels read in clear order. Custom workspaces give the primary
+   work region width dominance, auto-select the first queue item when present
+   so no blank stub appears, and render selectable queue rows with flat
+   `ListItem` rows inside a divided `Card`.
 2. **Containment discipline.** Peer sections below `DetailView` sit inside
    consistent `Card` containers rather than floating bare on the background.
    No two same-tone outlined cards are nested; nested containment inside
@@ -55,15 +55,18 @@ every item directly on the rendered pixels:
 3. **Secondary content in dialogs.** Read-only audit metadata, technical
    details, and activity logs open in a `Dialog` from `variant="text"` buttons
    with icons rather than stacking inline disclosures or low-priority tabs.
-4. **Calm filters and controls.** Filter controls stay compact and aligned with
-   matching height. Local view switches (`Table` / `Cards`) use `Tabs` (with
-   icons when helpful) rather than competing primary buttons. Flush-left links
-   use plain `RouterLink`.
-5. **Action hierarchy, icons, and emphasis.** Header bars visually tier primary
-   workflow actions (`filled` + icon), record controls (`outlined` + icon), and
-   secondary reference dialogs (`text` + icon). Active selected action buttons
-   use `toggle` + `:selected="true"` or `variant="filled"` with a leading `check`
-   icon. Form/dialog footer actions and repeated unselected buttons omit icons.
+4. **Calm filters and progressive disclosure.** Filter controls stay compact
+   and uncluttered. Narrow panes or filter groups with 2+ secondary filters
+   keep `SearchBox` visible and place secondary filters inside a `Popover`
+   opened from a compact filter button. Single quick status or category filters
+   use `ChipFilter` directly. Local view switches (`Table` / `Cards`) use
+   `Tabs` (with icons when helpful) rather than competing primary buttons.
+   Flush-left links use plain `RouterLink`.
+5. **Action order, icons, and emphasis.** Header bars order controls
+   left-to-right from quietest to strongest so the primary `filled` CTA sits
+   top-rightmost (`#secondary-controls` for `text` reference dialogs, automatic
+   `outlined` `Edit`/`Delete`, `#controls` for the primary workflow action).
+   Form/dialog footer actions and repeated unselected buttons omit icons.
    Chips share one variant per page.
 6. **Spatial stability, narrow screen, and dark theme.** Selecting a record in
    a custom workspace keeps sibling comparison panels visible without pushing
