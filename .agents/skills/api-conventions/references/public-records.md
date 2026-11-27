@@ -26,7 +26,10 @@ applicable. Preserve canonical objects through
 
 Use `src/storage/s3.ts` for storage. Signed URLs are not stored identities.
 Removing an association does not authorize shared-object deletion. Database
-rollback does not undo storage writes or removals.
+rollback does not undo storage writes or removals; for multipart JSON plus file
+or image uploads, use `readMultipart`, `withUploadedObjects`, and
+`streamStoredObject` from `src/storage/uploads.ts` so magic-byte validation,
+object cleanup on failed writes, and `nosniff` response headers stay shared.
 
 ## Local file workflows
 

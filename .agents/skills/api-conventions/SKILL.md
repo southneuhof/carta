@@ -29,4 +29,7 @@ Define codes in `src/authorization/catalog.ts`; keep guards, resource access,
 navigation, and seed consistent.
 
 API tests migrate their target. Inspect the target guard and `.env.test.example`
-before storage checks. Session helpers live in `src/testing/session.ts`.
+before storage checks. Session helpers live in `src/testing/session.ts`. Update
+`src/__tests__/route-contract.spec.ts` when adding or removing HTTP routes, and
+run `pnpm --filter @southneuhof/api build` before full API tests because
+`production-bundle.spec.ts` verifies `dist/application.mjs`.
