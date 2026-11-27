@@ -416,6 +416,24 @@ describe('createHonoResourceActions', () => {
     })
 
     await expect(
+      runHonoMutation(
+        'assign',
+        async () =>
+          new Response(
+            JSON.stringify({
+              error: 'validation_error',
+              issues: [{ field: 'assetTag', message: 'Already in use.' }],
+            }),
+            { status: 422 }
+          )
+      )
+    ).rejects.toEqual({
+      code: 'validation_error',
+      message: 'Already in use.',
+      issues: [{ path: ['assetTag'], message: 'Already in use.' }],
+    })
+
+    await expect(
       runHonoMutation('assign', async () => {
         throw new Error('Socket closed.')
       })

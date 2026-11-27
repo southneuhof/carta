@@ -59,12 +59,17 @@ function collectIssues(errors: unknown): SchemaIssue[] | undefined {
   return issues.length ? issues : undefined
 }
 
+const routeIssues = z.array(z.object({ field: z.string().optional(), message: z.string() }))
+
 export function normalizeError(error: unknown): SubmitError {
   const normalized = defaultDataAdapter.normalizeError(error)
-  const issues = isRecord(error) ? (normalized.issues ?? collectIssues(error.errors)) : normalized.issues
+  const routeErrors = isRecord(error) ? routeIssues.safeParse(error.issues).data : undefined
+  const issues = normalized.issues ?? routeErrors?.map(({ field, message }) => ({ path: field?.split('.') ?? [], message })) ?? (isRecord(error) ? collectIssues(error.errors) : undefined)
+  const message = isRecord(error) && typeof error.message !== 'string' ? (routeErrors?.[0]?.message ?? normalized.message) : normalized.message
   const code = normalized.code ?? (isRecord(error) && typeof error.error === 'string' && error.error ? error.error : undefined)
   return {
     ...normalized,
+    message,
     ...(issues ? { issues } : {}),
     ...(code ? { code } : {}),
   }

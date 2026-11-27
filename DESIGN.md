@@ -79,22 +79,20 @@ default-child redirect while the detail remains visible. Length alone does not
 earn a route. See [file routing](docs/architecture/file-routing.md) for file
 placement, replacement pages, and Back targets.
 
-Design custom interactive workspaces from a spatial thesis before coding. Name
-the primary task order, give the primary work region clear visual dominance
-rather than equal-width columns of identical cards, and auto-select the first
-queue item when present so the workspace never opens on an empty stub. Keep
-comparison panels (such as technician workload or schedule slots) visible
-without vertical jumping: selecting a record must never expand a region above a
-sibling comparison section and push it below the fold. Inside a queue or list
-pane, render selectable rows with Loom `ListItem` inside one divided `Card`
-(`divide-y divide-outline-variant`) rather than stacking bordered cards.
+Design custom interactive workspaces for clear reading and task order. Give the
+primary work region clear visual dominance rather than equal-width columns of
+identical cards, and auto-select the first queue item when present so the
+workspace never opens on an empty stub. Keep comparison panels (such as
+technician workload or schedule slots) visible without vertical jumping:
+selecting a record must never expand a region above a sibling comparison section
+and push it below the fold. Inside a queue or list pane, render selectable rows
+with Loom `ListItem` inside one divided `Card` (`divide-y divide-outline-variant`)
+rather than stacking bordered cards.
 
 Group by proximity before adding boxes. Keep related facts close (`gap-1` to
-`gap-2`) and separate distinct groups generously (`gap-4` to `gap-6`, with more
-space above a heading than below it). Avoid repeating one uniform spacing value
-until every element has equal weight. Pass the squint test: with detail
-blurred, the page header, primary work area, and supporting regions remain
-distinct in priority order.
+`gap-2`) and separate distinct groups with more space (`gap-4` to `gap-6`, with
+more space above a heading than below it) so the page header, primary work area,
+and supporting regions read in clear priority order.
 
 For collections, show the primary name or reference first, then useful status,
 dates, and amounts. Put long prose and secondary audit fields in detail. Use
@@ -114,12 +112,13 @@ buttons do not distort narrow table rows.
 Put requested record workflow actions in the detail controls area. `DetailView`
 renders standard `Edit` (`variant="outlined"`) and `Delete` (`variant="outlined"
 color="error"`) controls automatically when `update` or `delete` is declared on
-the resource. Keep header actions right-aligned and visually tiered so unrelated
-buttons do not compete at equal weight:
+the resource. Keep header actions right-aligned and ordered left-to-right from
+lowest to highest emphasis so the **primary action is always top-rightmost**
+(matching `ListView`'s rightmost `+ Create`):
 
-- Primary workflow action: `variant="filled"` (for example `Start Work`, `Approve`, `Complete Work`).
-- Record management controls: `variant="outlined"` (for example `Edit`, `Delete` with `color="error"`).
-- Secondary reference dialog triggers: `variant="text"` (for example `Audit Details`, `Activity Log`).
+1. Quiet utility icons and secondary reference dialog triggers on the left: `variant="text"` in `DetailView`'s `#secondary-controls` slot (for example `Audit Details`, `Activity Log`).
+2. Record management and secondary workflow controls in the middle: `variant="outlined"` (automatic `Edit` and `Delete` with `color="error"`, or `Reject`).
+3. Primary workflow action at the far top-rightmost position: `variant="filled"` in `#controls` (for example `Submit`, `Approve`, `Start Work`, `Complete Work`).
 
 Use framework `Button` controls across an action bar so sibling actions share
 the same height and treatment (wrap `Button` in `RouterLink` or navigate
@@ -147,14 +146,12 @@ contextual input form, `ConfirmationDialog` for yes/no confirmations, and
 `defineForm` and `defineDetail` when a record has multiple distinct field groups,
 and put prerequisite fields before dependent fields.
 
-Keep collection filter bars calm and aligned. Prefer `ListView`'s built-in
-filter controls or a compact, single-row `#filters` bar that derives field
-config and options through `field(key)`. When a list only needs quick inline
-filters and no popover, set `filter-controls="slot"` on `ListView`. Keep
-controls in the same filter row consistent in height and type. Represent boolean
-or single category quick filters with `ChipFilter` rather than a stray floating
-switch or a standalone pill action button above a list. Use the smallest filter
-width that fits the control; use a full row only when needed.
+Keep collection filter bars calm and uncluttered. Follow Material 3 filter
+conventions and use progressive disclosure when horizontal space is tight:
+
+- **Cramped panes or 2+ secondary filters** (such as a narrow split-workspace queue column or a multi-filter toolbar): keep `SearchBox` visible and place secondary filters inside a Loom `Popover` opened from a compact filter button (showing an active filter count or indicator when filters are set), matching `ListView`'s default filter popover. Do not stack mismatched search, lookup, select, and toggle controls across multiple cramped rows.
+- **Single quick category or status filter**: use `ChipFilter` (Material 3 `rounded-lg` filter chips with `secondary-container` selected state and leading `check` icon) in one compact row, setting `filter-controls="slot"` on `ListView` when `#filters` already owns every filter.
+- **Inline multi-filter row on wide lists**: derive controls through `field(key)` and keep sibling controls consistent in height and type (do not pair a filled `LookupInput` button next to outlined `SelectInput` dropdowns in the same row). Use the smallest filter width that fits the control.
 
 A contextual dialog form opens from its own action and owns its normal open and
 close interaction. In repeated content, use one dialog form for each record
@@ -203,13 +200,13 @@ Keep content and controls usable at narrow widths and with browser zoom. Keep
 page actions separate from global actions. Use restrained borders and surfaces,
 and support the app's light and dark themes.
 
-Apply button emphasis for the app's warm-neutral monochrome Material 3 theme.
-Use `variant="filled"` (or `toggle` + `:selected="true"` on a `Button`, which
-switches to `bg-primary text-on-primary` and sets `aria-pressed`) for primary
-actions and selected button states (paired with a leading `check` icon and
-clear wording such as `Selected`), `variant="outlined"` for secondary and
-unselected options, `variant="tonal"` when a subtle filled secondary container
-is needed, and `variant="text"` for quiet reference triggers.
+Apply Material 3 emphasis consistently across the app's warm-neutral theme. Hold
+Carta's Material 3 component roles above generic styling advice:
+
+- **Primary CTA buttons**: `Button` `variant="filled"` (`rounded-full`, `bg-primary text-on-primary`), placed at the rightmost end of a header or form footer.
+- **Secondary and record buttons**: `Button` `variant="outlined"` (or `variant="tonal"` when subtle secondary fill fits) and `variant="text"` for quiet reference dialog triggers.
+- **Filter chips**: `ChipFilter` (`rounded-lg`, `h-8`, `border-outline-variant` unselected, `bg-secondary-container text-on-secondary-container` with leading `check` icon when selected), never styled as full-pill CTA buttons.
+- **List selection**: `ListItem` (`bg-primary-container text-on-primary-container` selected inside a flat divided `Card`).
 
 ## Access and feedback
 

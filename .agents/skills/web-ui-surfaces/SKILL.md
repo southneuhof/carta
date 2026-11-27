@@ -35,12 +35,13 @@ Read [DESIGN.md](../../../DESIGN.md), the generated
    props, slots, form renderers, and app display renderers before building local
    wrappers. Rely on Loom props, slots, and defaults rather than overriding
    component internals with `:deep(...)` or descendant CSS selectors.
-3. **Design custom workspaces from a spatial thesis.** Give the primary work
+3. **Design custom workspaces for clear reading order.** Give the primary work
    region clear visual dominance instead of equal-width columns of identical
    cards, auto-select the first queue item when present so the workspace never
    opens on an empty stub, and keep comparison panels visible so selecting a
-   record never pushes them below the fold. Use tight proximity inside groups
-   and generous spacing between groups so the page passes the squint test.
+   record never pushes them below the fold. Use progressive disclosure (a
+   `Popover` filter button beside `SearchBox`) when a narrow queue pane has
+   multiple filters.
 4. **Keep pages framed and secondary info in dialogs.** Place peer sections
    below `DetailView` inside `Card` containers. Never nest two same-tone
    outlined cards; when sub-items inside a `surface-container` card need
@@ -50,14 +51,14 @@ Read [DESIGN.md](../../../DESIGN.md), the generated
    canvas. Move secondary read-only views (audit metadata, technical details,
    activity logs) behind `variant="text"` buttons with icons that open a
    `Dialog`.
-5. **Follow action-bar hierarchy, the button icon rule, and theme emphasis.**
-   Tier header actions cleanly (`filled` for primary workflow actions,
-   `outlined` for record controls like Edit/Delete, `text` for secondary
-   reference dialogs). Use `PageHeader` for custom page headers (omit `backTo`
-   on top-level sidebar pages). Follow the icon rules in
-   [DESIGN.md](../../../DESIGN.md#actions-icons-and-forms), use one explicit
-   locale for dates and timestamps, and gate custom controls with `command.can`
-   and `allowedOperations`.
+5. **Follow Material 3 action order and component roles.** Order header actions
+   left-to-right from quietest to strongest so the primary `filled` CTA sits
+   **top-rightmost** (`#secondary-controls` for `text` reference triggers,
+   automatic `outlined` `Edit`/`Delete`, `#controls` for primary workflow CTA).
+   Use `ChipFilter` for Material 3 filter chips, `PageHeader` for custom page
+   headers (omit `backTo` on top-level sidebar pages), follow the icon rules in
+   [DESIGN.md](../../../DESIGN.md#actions-icons-and-forms), and gate custom
+   controls with `command.can` and `allowedOperations`.
 
 ## Resource and data binding
 
