@@ -27,42 +27,29 @@ for both verification commands.
 Use the optional [plan format](references/planning.md) when execution or resume
 needs a file.
 
-Before writing code in any layer, open its owning skill and reference:
+Before writing code in any layer, open its owning skill:
 
-| Change | Required guidance |
+| Change | Owning skill |
 |---|---|
 | API, data, permissions, transactions | [$api-conventions](../api-conventions/SKILL.md) |
-| Pages, resources, views, custom workspaces, navigation | [$web-ui-surfaces](../web-ui-surfaces/SKILL.md), [capability index](../web-ui-surfaces/references/capabilities.md), and [DESIGN.md](../../../DESIGN.md) |
+| Pages, resources, views, custom workspaces, navigation | [$web-ui-surfaces](../web-ui-surfaces/SKILL.md) and [DESIGN.md](../../../DESIGN.md) |
 | Forms, lookups, inline tables, and file inputs | [$build-resource-form](../build-resource-form/SKILL.md) |
 
-For each changed interaction or operation, look up its existing framework owner
-in the [capability index](../web-ui-surfaces/references/capabilities.md) and
-inspect a current consumer (such as `apps/web/src/routes/(authenticated)/settings/users/users.resource.ts`)
-before writing custom code. Build resource modules on `defineResource`,
-`defineTable`, `defineDetail`, `defineForm`, `ListView`, `DetailView`,
-`FormView`, `Form`, `TreeTable`, and `TableInput` instead of raw `<table>`,
-`<form>`, or manual `reactive()` CRUD state. Preserve standard View defaults
-(`ListView`, `DetailView`, `FormView`, default `Create` label) unless the
-approved design requires custom behavior. Group non-standard requirements in
-task notes by owner and state the unsupported requirement for each custom part.
-Reuse the owner's loading, validation, persistence, access, and mutation
-lifecycle.
+Before writing custom web code, open `apps/web/src/routes/(authenticated)/settings/users/users.resource.ts`
+and follow [$web-ui-surfaces](../web-ui-surfaces/SKILL.md) defaults (Loom
+Resources, Views, and Forms instead of raw `<table>` or `<form>`). Group any
+non-standard requirements in task notes with the unsupported reason.
 
 If a design record exists, mark implementation `In progress`.
-Complete required migrations, seed data, access, navigation, and preview setup.
-Apply new migrations to the configured development database; a migrated test
-database alone does not complete setup. Report failures and continue
-independent work. Return material contract changes to design; resolve routine
+Complete migrations, seed data, access, navigation, and preview setup. Apply
+new migrations to the development database (a migrated test database alone is
+insufficient). Return material contract changes to design; resolve routine
 choices locally.
 
 ## Finish
 
-Complete [module verification](../verify-carta-module/SKILL.md) and, for any
+Complete [$verify-carta-module](../verify-carta-module/SKILL.md) and, for any
 `apps/web` change, complete every gate in
-[UI review](../web-ui-surfaces/references/verification.md) including zero new
-lint warnings and rendered browser inspection. For Gate 3, select about 10 to
-16 captures across the changed pages. Cover desktop light mode, mobile at
-375 px, and dark mode on custom workspaces. Review custom code against its
-stated unsupported requirement. Mark an existing design's implementation
-`Current` only when requirements, setup, checks, and rendered UI review are
-complete. Report delivered behavior, setup status, checks, and remaining gaps.
+[UI review](../web-ui-surfaces/references/verification.md). Mark an existing
+design `Current` only when requirements, setup, checks, and rendered UI review
+pass. Report delivered behavior, setup status, checks, and remaining gaps.

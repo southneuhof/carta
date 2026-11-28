@@ -12,8 +12,6 @@
 - For an update from upstream, read [the update procedure](docs/framework-sync.md#update-carta-packages-in-a-project). It defines authorization, local work protection, conflict resolution, and required checks.
 - Use `$carta-audit` for a Sprindle plus Loom framework audit.
 - Before implementing or reviewing a module (including from `plans/*/design.md`), open [carta-module-development](.agents/skills/carta-module-development/SKILL.md). Use [carta-module-design](.agents/skills/carta-module-design/SKILL.md) for initial designs or material contract revisions.
-- Before changing `apps/api`, open [api-conventions](.agents/skills/api-conventions/SKILL.md). Before changing `apps/web` routes, resources, forms, or pages, open [web-ui-surfaces](.agents/skills/web-ui-surfaces/SKILL.md), its [capability index](.agents/skills/web-ui-surfaces/references/capabilities.md), and [DESIGN.md](DESIGN.md).
-- Read [the resource architecture](docs/resource_system_overhaul/ARCHITECTURE.md)
-before you change Loom resource declarations, author application modules, or
-static resource checks. It defines the current API contract.
+- Before changing `apps/api`, open [api-conventions](.agents/skills/api-conventions/SKILL.md). Before changing `apps/web` routes, resources, forms, or pages, open [web-ui-surfaces](.agents/skills/web-ui-surfaces/SKILL.md) and [DESIGN.md](DESIGN.md).
+- Read [the resource architecture](docs/resource_system_overhaul/ARCHITECTURE.md) only when changing `packages/loom` resource internals or `scripts/check-surface-architecture.mjs`. For application modules, use [web-ui-surfaces](.agents/skills/web-ui-surfaces/SKILL.md) and search [packages/loom/CATALOG.md](packages/loom/CATALOG.md) on demand.
 - Report failed checks, blocked work, and unverified results.

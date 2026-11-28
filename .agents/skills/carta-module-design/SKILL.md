@@ -49,8 +49,7 @@ Define each rule once. Keep its reasons and unresolved choices beside it.
 Keep execution notes outside the design and use Git for history.
 
 Check feasibility against current contracts. For web work, read
-[DESIGN.md](../../../DESIGN.md) and the
-[resource architecture](../../../docs/resource_system_overhaul/ARCHITECTURE.md).
+[DESIGN.md](../../../DESIGN.md) and [$web-ui-surfaces](../web-ui-surfaces/SKILL.md).
 Resolve business questions and known write-authority needs before approval.
 
 ## Approve

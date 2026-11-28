@@ -20,16 +20,37 @@ The HTTP equivalents are `POST /users/create`, `GET /users/detail/:id`,
 
 ## Driving it with HTTP and Vitest
 
-Preconditions: guarded migrated test database, seeded administrator, and the
-owned API instance from [runtime](../references/runtime.md).
+Preconditions: guarded migrated test database, seeded administrator, and an
+owned API instance on free port `5190`:
 
-- Run `control.mjs users` with the exact invocation in runtime. It signs in,
-  creates an account with two fixture roles, and reads the saved account and
-  exact assignments independently from PostgreSQL.
-- It updates the name through HTTP and reads it back with unchanged email.
-- It signs in twice as that account and proves both sessions work, disables
-  the account through HTTP, then requires zero stored sessions and two denied
-  `/me` requests. The administrator session must still work.
+```sh
+pnpm module:preflight -- --needs api,test
+pnpm --filter @southneuhof/api routes:compile
+pnpm --filter @southneuhof/api db:seed:test
+export VERIFY_RUN_DIR="$PWD/.local/verification/$(date -u +%Y%m%dT%H%M%SZ)-users"
+mkdir -p "$VERIFY_RUN_DIR"
+cd apps/api
+export API_PORT=5190 BETTER_AUTH_URL=http://127.0.0.1:5190 SPRINDLE_ROUTE_MANIFEST=.sprindle-test/routes.mjs
+node --env-file-if-exists=.env --env-file=.env.test --import tsx src/server.ts > "$VERIFY_RUN_DIR/api.log" 2>&1 &
+export VERIFY_API_PID=$!
+trap 'kill "$VERIFY_API_PID" 2>/dev/null; wait "$VERIFY_API_PID" 2>/dev/null || true' EXIT
+```
+
+Wait for `Listening on port 5190` in `api.log`, then run from `apps/api`:
+
+```sh
+set -o pipefail
+node --env-file-if-exists=.env --env-file=.env.test ../../.agents/skills/verify-carta-module/scripts/control.mjs doctor | tee "$VERIFY_RUN_DIR/doctor.jsonl"
+node --env-file-if-exists=.env --env-file=.env.test ../../.agents/skills/verify-carta-module/scripts/control.mjs users | tee "$VERIFY_RUN_DIR/users.jsonl"
+kill "$VERIFY_API_PID"; wait "$VERIFY_API_PID" || true; trap - EXIT
+```
+
+- `control.mjs users` signs in, creates an account with two fixture roles,
+  updates its name with unchanged email, proves two sessions work, disables the
+  account, verifies zero stored sessions and two denied `/me` requests while the
+  administrator session remains valid, and removes its own fixtures in `finally`.
+- Run it only when specifically verifying the Users recipe, not beside
+  equivalent route tests.
 - For changed creation rules, reuse
   `pnpm --filter @southneuhof/api test:focused -- 'src/routes/(authenticated)/users/users.routes.spec.ts' 'src/routes/(authenticated)/users/users.compensation.spec.ts'`
   from the repository root. Read each case's scope; the existing revocation
