@@ -47,11 +47,12 @@ clear the pill.
   and keep key comparison context visible.
 - **Spacing and collections.** Use `gap-2` as the standard gap between page
   sections, stacked `Card`s, sibling panels, and views (matching `ListView`,
-  `DetailView`, and `FormView`). Use `gap-1` only for tight inline label/fact
-  pairs or compact icon rows; avoid `gap-4` or `gap-6` between top-level cards
-  and sections so spacing stays uniform across the page. Put primary
-  name/reference first, then status, dates, and amounts. Add a `Table` /
-  `Cards` `Tabs` switch only when both views serve the task.
+  `DetailView`, and `FormView`). Use `gap-6` between horizontal rows of labeled
+  filter or form fields so controls stay comfortably grouped without stretching
+  apart across empty space, and `gap-1` for tight inline label/fact pairs or
+  compact icon rows. Put primary name/reference first, then status, dates, and
+  amounts. Add a `Table` / `Cards` `Tabs` switch only when both views serve the
+  task.
 
 ## Actions and forms
 
