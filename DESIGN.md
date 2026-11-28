@@ -17,11 +17,15 @@ clear the pill.
 
 ## Page structure
 
-- **Standard CRUD views.** Use `ListView`, `DetailView`, and `FormView` with
-  default layouts. Keep one `DetailView` card with a single `defineDetail` map
-  (using `sections` for logical groups) so colons align. Custom pages use one
-  `PageHeader` (pass `backTo` when returning; omit `backTo` on top-level sidebar
-  pages). Omit decorative banners, repeated titles, and slogans.
+- **Standard CRUD views and bare pages.** Use `ListView`, `DetailView`, and
+  `FormView` with default layouts. Keep one `DetailView` card with a single
+  `defineDetail` map (using `sections` for logical groups) so colons align. On
+  non-CRUD pages (dashboards, analytics, split queues, custom workspaces),
+  prefer a bare typographic `<header>` (`<h1>` directly on the canvas with
+  optional right-aligned filters or actions) instead of wrapping the title in a
+  boxed `PageHeader` card. Reserve `PageHeader` for CRUD views or drill-down
+  pages that need `backTo` and card toolbar chrome. Omit decorative banners,
+  repeated titles, and slogans.
 - **Framing and elevation.** Enclose peer sections below `DetailView` in
   `Card` (`variant="outlined" color="surfaceContainer"`), and prefer keeping
   `ListView`'s default outer `Card` around `#collection` card grids. Never nest
@@ -71,9 +75,11 @@ clear the pill.
     text-driven domain tabs.
 - **Calm filters.** In narrow panes or with 2+ secondary filters, keep
   `SearchBox` visible and place secondary filters inside a `Popover` behind a
-  compact filter button (matching `ListView`'s default filter popover). Use
-  `ChipFilter` for a single quick status/category filter (`filter-controls="slot"`
-  on `ListView` when `#filters` owns all filters). On wide inline filter rows,
+  borderless icon-only trigger (`Button kind="icon" variant="standard"`,
+  stepping to `variant="tonal"` when filters are active, matching `ListView`'s
+  filter icon) rather than an outlined text `Filters` button. Use `ChipFilter`
+  for a single quick status/category filter (`filter-controls="slot"` on
+  `ListView` when `#filters` owns all filters). On wide inline filter rows,
   derive controls via `field(key)` with consistent heights and minimal widths.
 - **Forms and dialogs.** Use `FormView` for standalone form pages, `DialogForm`
   for short contextual input modals (including editing secondary detail
