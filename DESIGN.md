@@ -116,9 +116,8 @@ the resource. Keep header actions right-aligned and ordered left-to-right from
 lowest to highest emphasis so the **primary action is always top-rightmost**
 (matching `ListView`'s rightmost `+ Create`):
 
-1. Quiet utility icons and secondary reference dialog triggers on the left: `variant="text"` in `DetailView`'s `#secondary-controls` slot (for example `Audit Details`, `Activity Log`).
-2. Record management and secondary workflow controls in the middle: `variant="outlined"` (automatic `Edit` and `Delete` with `color="error"`, or `Reject`).
-3. Primary workflow action at the far top-rightmost position: `variant="filled"` in `#controls` (for example `Submit`, `Approve`, `Start Work`, `Complete Work`).
+1. Record management and export controls first: export icon and automatic `Edit` (`variant="outlined"`) and `Delete` (`variant="outlined" color="error"`).
+2. Custom detail actions rightmost in `#controls`, ordered left-to-right from quietest (`variant="text"` reference dialog triggers and secondary `variant="outlined"` actions) to the primary `variant="filled"` workflow CTA at the far top-rightmost position (for example `Submit`, `Approve`, `Start Work`, `Complete Work`).
 
 Use framework `Button` controls across an action bar so sibling actions share
 the same height and treatment (wrap `Button` in `RouterLink` or navigate

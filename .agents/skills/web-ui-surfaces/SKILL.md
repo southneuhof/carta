@@ -33,7 +33,7 @@ Read [DESIGN.md](../../../DESIGN.md), the generated
    mirror its structure:
    - Resource file (`*.resource.ts`): `defineResource({ key, identity, list, detail, create, update, delete, actions, exports })` backed by `createHonoResourceActions(...)` or `parseHonoResponse` / `runHonoMutation`.
    - Directory page: `<ListView v-bind="resource.list()" title="...">` with `exports.list.downloads` for custom CSV/XLSX downloads and `#filters` / `#row-actions` only when needed.
-   - Detail page: `<DetailView v-bind="resource.detail({ id })">` using `#title`, `#description`, `#secondary-controls`, `#controls`, and `#body` rather than replacing `DetailView` with a manual `PageHeader` page.
+   - Detail page: `<DetailView v-bind="resource.detail({ id })">` using `#title`, `#description`, `#controls`, and `#body` rather than replacing `DetailView` with a manual `PageHeader` page.
    - Forms (including drawer and public forms): `<Form v-bind="form" />` built with `defineForm({ schema, fields, submit })`, using `TableInput` (`reorderable`) for repeating line items or checklists and `MapView` for read-only maps.
    - Standard CRUD detail pages keep `DetailView`'s single default card, keep all
      fields of one card inside a single `defineDetail` map (with `sections` when
@@ -64,8 +64,9 @@ Read [DESIGN.md](../../../DESIGN.md), the generated
    `Dialog`.
 5. **Follow Material 3 action order and component roles.** Order header actions
    left-to-right from quietest to strongest so the primary `filled` CTA sits
-   **top-rightmost** (`#secondary-controls` for `text` reference triggers,
-   automatic `outlined` `Edit`/`Delete`, `#controls` for primary workflow CTA).
+   **top-rightmost** (automatic `outlined` `Edit`/`Delete`, followed by
+   `#controls` ordered from quietest `text`/`outlined` actions to the primary
+   `filled` workflow CTA).
    Use `ChipFilter` for filter chips, `PageHeader` for custom page
    headers (omit `backTo` on top-level sidebar pages), follow the icon rules in
    [DESIGN.md](../../../DESIGN.md#actions-icons-and-forms), and gate custom

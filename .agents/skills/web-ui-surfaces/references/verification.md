@@ -69,8 +69,8 @@ Inspect the screenshots for these conditions.
    Flush-left links use plain `RouterLink`.
 5. **Action order, icons, and emphasis.** Header bars order controls
    left-to-right from quietest to strongest so the primary `filled` CTA sits
-   top-rightmost (`#secondary-controls` for `text` reference dialogs, automatic
-   `outlined` `Edit`/`Delete`, `#controls` for the primary workflow action).
+   top-rightmost (automatic `outlined` `Edit`/`Delete`, followed by `#controls`
+   from quietest actions to the primary `filled` workflow action).
    Form/dialog footer actions and repeated unselected buttons omit icons.
    Chips share one variant per page.
 6. **Spatial stability, narrow screen, and dark theme.** Selecting a record in
