@@ -23,13 +23,18 @@ clear the pill.
   `PageHeader` (pass `backTo` when returning; omit `backTo` on top-level sidebar
   pages). Omit decorative banners, repeated titles, and slogans.
 - **Framing and elevation.** Enclose peer sections below `DetailView` in
-  `Card` (`variant="outlined" color="surfaceContainer"`). Never nest two
-  same-tone outlined cards: step up to `surface-container-high` or
-  `surface-container-highest` without borders (never `surface-container-lowest`,
-  which reads as a recessed cutout). Inside a list or queue card, use flat
-  `ListItem` rows (`divide-y divide-outline-variant`) rather than nested cards.
+  `Card` (`variant="outlined" color="surfaceContainer"`), and prefer keeping
+  `ListView`'s default outer `Card` around `#collection` card grids. Never nest
+  two same-tone outlined cards: step inner cards up to borderless
+  `surface-container-high` (`Card` `color="surfaceContainerHigh"`) or
+  `surface-container-highest` (never `surface-container-lowest`, which reads as
+  a recessed cutout). Inside a list or queue card, use flat `ListItem` rows
+  (`divide-y divide-outline-variant`) rather than nested cards.
 - **Hierarchy and secondary content.** Show primary work first and each field
-  once. Place read-only audit metadata, technical details, and activity logs in
+  once. Keep detail pages and detail tabs read-first: render sub-sections as a
+  read-only view (`Detail` or a read-only `Card`) with an `Edit` button that
+  opens a `DialogForm` rather than embedding live forms directly on a detail
+  page. Place read-only audit metadata, technical details, and activity logs in
   a `Dialog` opened from a quiet `variant="text"` button rather than stacking
   inline disclosures or low-priority tabs. Show a single operational child
   collection in a framed `Card` directly below `DetailView`; use routed `Tabs`
@@ -71,9 +76,15 @@ clear the pill.
   on `ListView` when `#filters` owns all filters). On wide inline filter rows,
   derive controls via `field(key)` with consistent heights and minimal widths.
 - **Forms and dialogs.** Use `FormView` for standalone form pages, `DialogForm`
-  for short contextual input modals, `ConfirmationDialog` for yes/no
-  confirmations, and `Form` inside an existing container. Group multi-section
-  forms with `sections` and place prerequisite fields before dependent fields.
+  for short contextual input modals (including editing secondary detail
+  sections), `ConfirmationDialog` for yes/no confirmations, `Dialog` for
+  list-triggered utilities such as two-step CSV/Excel imports with preview
+  rather than dedicated routes, and `Form` inside an existing container. Group
+  multi-section forms with `sections` and place prerequisite fields before
+  dependent fields. For computed or read-only value previews inside forms,
+  prefer a disabled controlled Loom input (such as disabled `NumberInput` or
+  `TextInput`) for grid consistency, or plain typography without faux-input box
+  styling.
 
 ## Controls and values
 
