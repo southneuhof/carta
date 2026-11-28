@@ -42,7 +42,7 @@ async function toggle(row: RoleAssignment) {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
+  <div class="flex flex-col gap-2">
     <ListView title="Role Assignments" v-bind="list">
       <template #row-actions="{ record }">
         <Switch

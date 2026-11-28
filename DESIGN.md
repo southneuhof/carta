@@ -39,10 +39,13 @@ clear the pill.
   auto-select the first queue item so no blank stub appears, and keep sibling
   comparison panels visible without pushing them below the fold when a row is
   selected.
-- **Proximity and collections.** Group related facts with `gap-1` to `gap-2` and
-  separate sections with `gap-4` to `gap-6`. Put primary name/reference first,
-  then status, dates, and amounts. Add a `Table` / `Cards` `Tabs` switch only
-  when both views serve the task.
+- **Spacing and collections.** Use `gap-2` as the standard gap between page
+  sections, stacked `Card`s, sibling panels, and views (matching `ListView`,
+  `DetailView`, and `FormView`). Use `gap-1` only for tight inline label/fact
+  pairs or compact icon rows; avoid `gap-4` or `gap-6` between top-level cards
+  and sections so spacing stays uniform across the page. Put primary
+  name/reference first, then status, dates, and amounts. Add a `Table` /
+  `Cards` `Tabs` switch only when both views serve the task.
 
 ## Actions and forms
 

@@ -36,8 +36,9 @@ captures). Read `report.json` and inspect the saved PNGs directly against
 
 1. Visual hierarchy, auto-selected first queue item, and flat `ListItem` rows
    inside divided `Card`s on custom workspaces.
-2. Consistent `Card` framing below `DetailView`, no nested same-tone outlined
-   cards, and secondary read-only views behind `Dialog` triggers.
+2. Consistent `gap-2` spacing and `Card` framing across stacked sections and
+   below `DetailView`, no nested same-tone outlined cards, and secondary
+   read-only views behind `Dialog` triggers.
 3. Calm filters (progressive `Popover` disclosure for 2+ secondary filters,
    `ChipFilter` for single quick filters) and right-aligned action order with
    primary `filled` CTA top-rightmost.
