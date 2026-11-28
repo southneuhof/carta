@@ -65,22 +65,28 @@ clear the pill.
   dialog triggers, secondary `variant="outlined"`) to the **primary
   `variant="filled"` CTA top-rightmost**. Use Loom `Button` across action bars
   and never repeat form footer actions in the page header.
-- **Icons (`Button` `#icon` / `#trailing-icon`):**
-  - Add: header/toolbar actions, reference dialog or navigation triggers
-    (trailing `arrow-right-up` for navigation), standalone destructive actions
-    outside confirmation footers, and visual-mode `Tabs` (`table`, `layout-grid`).
-  - Omit: form/dialog footer commits and dismissals (`Submit`, `Save`, `Cancel`,
-    `Close`, `Continue`, `Previous`, `Next`), repeated unselected list/card
-    buttons, inline alert recovery links (`Retry`, `Clear filters`), and
-    text-driven domain tabs.
+- **Icons and icon-only controls (`Button` `#icon` / `#trailing-icon`):**
+  - Icon-only first: when a familiar icon communicates a utility or secondary
+    action clearly on its own (filter, columns, download/export, refresh, view,
+    edit, delete, close), prefer a borderless icon button (`Button kind="icon"
+    variant="standard"` with `aria-label`, stepping to `variant="tonal"` when
+    active). Add text only when the action needs clarification (domain-specific
+    verbs, ambiguous workflows, or primary CTAs).
+  - Add icon with text: labeled header/toolbar actions, reference dialog or
+    navigation triggers (trailing `arrow-right-up` for navigation), standalone
+    destructive actions outside confirmation footers, and visual-mode `Tabs`
+    (`table`, `layout-grid`).
+  - Omit icon: form/dialog footer commits and dismissals (`Submit`, `Save`,
+    `Cancel`, `Close`, `Continue`, `Previous`, `Next`), repeated unselected
+    list/card buttons, inline alert recovery links (`Retry`, `Clear filters`),
+    and text-driven domain tabs.
 - **Calm filters.** In narrow panes or with 2+ secondary filters, keep
   `SearchBox` visible and place secondary filters inside a `Popover` behind a
-  borderless icon-only trigger (`Button kind="icon" variant="standard"`,
-  stepping to `variant="tonal"` when filters are active, matching `ListView`'s
-  filter icon) rather than an outlined text `Filters` button. Use `ChipFilter`
-  for a single quick status/category filter (`filter-controls="slot"` on
-  `ListView` when `#filters` owns all filters). On wide inline filter rows,
-  derive controls via `field(key)` with consistent heights and minimal widths.
+  borderless filter icon button (matching `ListView`'s default filter trigger).
+  Use `ChipFilter` for a single quick status/category filter
+  (`filter-controls="slot"` on `ListView` when `#filters` owns all filters). On
+  wide inline filter rows, derive controls via `field(key)` with consistent
+  heights and minimal widths.
 - **Forms and dialogs.** Use `FormView` for standalone form pages, `DialogForm`
   for short contextual input modals (including editing secondary detail
   sections), `ConfirmationDialog` for yes/no confirmations, `Dialog` for
