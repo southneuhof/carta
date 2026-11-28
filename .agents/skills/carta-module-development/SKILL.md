@@ -37,11 +37,15 @@ Before writing code in any layer, open its owning skill and reference:
 
 For each changed interaction or operation, look up its existing framework owner
 in the [capability index](../web-ui-surfaces/references/capabilities.md) and
-inspect a current consumer before writing custom code. Preserve standard View
-defaults (`ListView`, `DetailView`, `FormView`, default `Create` label) unless
-the approved design requires custom behavior. Group non-standard requirements
-in task notes by owner and state the unsupported requirement for each custom
-part. Reuse the owner's loading, validation, persistence, access, and mutation
+inspect a current consumer (such as `apps/web/src/routes/(authenticated)/settings/users/users.resource.ts`)
+before writing custom code. Build resource modules on `defineResource`,
+`defineTable`, `defineDetail`, `defineForm`, `ListView`, `DetailView`,
+`FormView`, `Form`, `TreeTable`, and `TableInput` instead of raw `<table>`,
+`<form>`, or manual `reactive()` CRUD state. Preserve standard View defaults
+(`ListView`, `DetailView`, `FormView`, default `Create` label) unless the
+approved design requires custom behavior. Group non-standard requirements in
+task notes by owner and state the unsupported requirement for each custom part.
+Reuse the owner's loading, validation, persistence, access, and mutation
 lifecycle.
 
 If a design record exists, mark implementation `In progress`.

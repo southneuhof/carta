@@ -8,10 +8,11 @@ layout, visual hierarchy, or contrast.
 
 - Run web lint, type check, and `pnpm run test:surface-architecture`.
 - Resolve every new native-control `vue/no-restricted-syntax` warning
-  (`button`, `input`, `select`, `textarea`) instead of ignoring warnings because
-  ESLint exits 0. Use `ListItem`, `Button`, `Tabs`, and `ChipFilter` from
-  `@southneuhof/loom`. Keep a warning only for a justified `#row-actions` or
-  `#actions` slot override where no Loom component fits.
+  (`button`, `input`, `select`, `textarea`, `table`, `form`) instead of ignoring
+  warnings because ESLint exits 0. Use `ListView`, `DetailView`, `FormView`,
+  `Form`, `Table`, `TreeTable`, `TableInput`, `ListItem`, `Button`, `Tabs`, and
+  `ChipFilter` from `@southneuhof/loom`. Keep a warning only for a justified
+  `#row-actions` or `#actions` slot override where no Loom component fits.
 - Confirm every custom component or native control still has an unsupported
   requirement verified against [capabilities.md](capabilities.md).
 

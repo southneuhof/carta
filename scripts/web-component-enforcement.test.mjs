@@ -59,6 +59,8 @@ const inputType = 'text'
   <input />
   <select />
   <textarea />
+  <table />
+  <form />
   <MissingWidget />
   <Form><template #actions /></Form>
   <ListView><template #row-actions-view /></ListView>
@@ -77,12 +79,14 @@ const inputType = 'text'
   assert.match(undefinedComponents[0].message, /MissingWidget/)
   assert.equal(casingErrors.length, 1)
   assert.match(casingErrors[0].message, /button-widget/)
-  assert.equal(reviewWarnings.length, 8)
+  assert.equal(reviewWarnings.length, 10)
   assert.equal(reviewWarnings.some((message) => message.line === hiddenInputLine), false)
   assert.equal(reviewWarnings.some((message) => message.line === lineOf('<input type="text"')), true)
   assert.equal(reviewWarnings.some((message) => message.line === lineOf('<input :type="inputType"')), true)
   assert.equal(reviewWarnings.some((message) => message.line === lineOf('<input />')), true)
   assert.equal(reviewWarnings.some((message) => message.line === lineOf('<select')), true)
+  assert.equal(reviewWarnings.some((message) => message.line === lineOf('<table')), true)
+  assert.equal(reviewWarnings.some((message) => message.line === lineOf('<form')), true)
   assert.equal(reviewWarnings.some((message) => message.line === lineOf('#actions')), true)
   assert.equal(reviewWarnings.some((message) => message.line === lineOf('#row-actions-view')), true)
   assert.equal(reviewWarnings.some((message) => message.line === lineOf('#controls')), false)

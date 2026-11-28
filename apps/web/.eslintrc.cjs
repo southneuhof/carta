@@ -27,6 +27,14 @@ module.exports = {
         message: 'Review this native control against DESIGN.md#controls-and-values.',
       },
       {
+        selector: "VElement[rawName='table']",
+        message: 'Review this native control against DESIGN.md#controls-and-values. Use Loom ListView, Table, TreeTable, or TableInput.',
+      },
+      {
+        selector: "VElement[rawName='form']",
+        message: 'Review this native control against DESIGN.md#controls-and-values. Use Loom FormView or Form with defineForm.',
+      },
+      {
         selector: "VAttribute[directive=true][key.name.name='slot'][key.argument.name=/^(create-action|row-actions|row-actions-view|row-actions-edit|row-actions-delete|actions)$/]",
         message: 'Review this standard-control replacement against DESIGN.md#controls-and-values.',
       },

@@ -23,13 +23,24 @@ Read [DESIGN.md](../../../DESIGN.md), the generated
 
 ## Composition defaults
 
-1. **Use the highest-level Loom owner.** Start with `ListView`, `DetailView`,
-   and `FormView`. Keep `DetailView`'s single default card on standard CRUD
-   detail pages, keep all fields of one card inside a single `defineDetail` map
-   (with `sections` when logical groups help scanning) so colons align, rely on
-   `DetailView`'s automatic Edit and Delete header actions when declared on the
-   resource, and keep `ListView`'s default `Create` button label unless the
-   approved design explicitly requires custom wording or custom sections.
+1. **Use the highest-level Loom owner.** Start every CRUD, directory, detail,
+   tree, or form module with `defineResource`, `defineTable`, `defineDetail`,
+   `defineForm`, `ListView`, `DetailView`, `FormView`, `Form`, `TreeTable`, and
+   `TableInput` from `@southneuhof/loom`. Do not write native `<table>` or
+   `<form>` elements or manual `reactive()` CRUD pages when Loom owns that
+   pattern. Before writing routes for a new module, inspect
+   `apps/web/src/routes/(authenticated)/settings/users/users.resource.ts` and
+   mirror its structure:
+   - Resource file (`*.resource.ts`): `defineResource({ key, identity, list, detail, create, update, delete, actions, exports })` backed by `createHonoResourceActions(...)` or `parseHonoResponse` / `runHonoMutation`.
+   - Directory page: `<ListView v-bind="resource.list()" title="...">` with `exports.list.downloads` for custom CSV/XLSX downloads and `#filters` / `#row-actions` only when needed.
+   - Detail page: `<DetailView v-bind="resource.detail({ id })">` using `#title`, `#description`, `#secondary-controls`, `#controls`, and `#body` rather than replacing `DetailView` with a manual `PageHeader` page.
+   - Forms (including drawer and public forms): `<Form v-bind="form" />` built with `defineForm({ schema, fields, submit })`, using `TableInput` (`reorderable`) for repeating line items or checklists and `MapView` for read-only maps.
+   - Standard CRUD detail pages keep `DetailView`'s single default card, keep all
+     fields of one card inside a single `defineDetail` map (with `sections` when
+     logical groups help scanning) so colons align, rely on `DetailView`'s
+     automatic Edit and Delete header actions when declared on the resource, and
+     keep `ListView`'s default `Create` button label unless the approved design
+     explicitly requires custom wording or custom sections.
 2. **Reuse Loom components from `@southneuhof/loom`.** Check
    [Loom catalog](../../../packages/loom/CATALOG.md) for exported components,
    props, slots, form renderers, and app display renderers before building local

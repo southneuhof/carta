@@ -60,7 +60,7 @@ function runCommand(command, log) {
 
 function countNativeWarnings(output) {
   return output.split('\n').filter((line) =>
-    /^\s*\d+:\d+\s+warning\s+Review this native control against DESIGN\.md#controls-and-values\.?\s+vue\/no-restricted-syntax\s*$/.test(line),
+    /^\s*\d+:\d+\s+warning\s+Review this native control against DESIGN\.md#controls-and-values\b.*vue\/no-restricted-syntax\s*$/.test(line),
   ).length
 }
 
