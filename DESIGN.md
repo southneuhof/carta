@@ -31,23 +31,20 @@ clear the pill.
   `ListView`'s default outer `Card` around `#collection` card grids. Never nest
   two same-tone outlined cards: step inner cards up to borderless
   `surface-container-high` (`Card` `color="surfaceContainerHigh"`) or
-  `surface-container-highest` (never `surface-container-lowest`, which reads as
-  a recessed cutout). Inside a list or queue card, use flat `ListItem` rows
-  (`divide-y divide-outline-variant`) rather than nested cards.
+  `surface-container-highest`. Inside a list or queue card, use flat `ListItem`
+  rows (`divide-y divide-outline-variant`) rather than nested cards.
 - **Hierarchy and secondary content.** Show primary work first and each field
   once. Keep detail pages and detail tabs read-first: render sub-sections as a
   read-only view (`Detail` or a read-only `Card`) with an `Edit` button that
   opens a `DialogForm` rather than embedding live forms directly on a detail
-  page. Place read-only audit metadata, technical details, and activity logs in
-  a `Dialog` opened from a quiet `variant="text"` button rather than stacking
-  inline disclosures or low-priority tabs. Show a single operational child
-  collection in a framed `Card` directly below `DetailView`; use routed `Tabs`
-  (`RoutedTabItem` + `AppRouterView`) only for multiple primary operational
-  sections with independent linkable state.
+  page. Keep infrequent reference metadata in a `Dialog` rather than cluttering
+  the main flow with inline disclosures or low-priority tabs. Show a single
+  operational child collection in a framed `Card` directly below `DetailView`;
+  use routed `Tabs` (`RoutedTabItem` + `AppRouterView`) only for multiple
+  primary operational sections with independent linkable state.
 - **Custom workspaces.** Give the primary work region clear width dominance,
-  auto-select the first queue item so no blank stub appears, and keep sibling
-  comparison panels visible without pushing them below the fold when a row is
-  selected.
+  populate a default selection in split workspaces so no blank stub appears,
+  and keep key comparison context visible.
 - **Spacing and collections.** Use `gap-2` as the standard gap between page
   sections, stacked `Card`s, sibling panels, and views (matching `ListView`,
   `DetailView`, and `FormView`). Use `gap-1` only for tight inline label/fact
@@ -76,10 +73,9 @@ clear the pill.
     navigation triggers (trailing `arrow-right-up` for navigation), standalone
     destructive actions outside confirmation footers, and visual-mode `Tabs`
     (`table`, `layout-grid`).
-  - Omit icon: form/dialog footer commits and dismissals (`Submit`, `Save`,
-    `Cancel`, `Close`, `Continue`, `Previous`, `Next`), repeated unselected
-    list/card buttons, inline alert recovery links (`Retry`, `Clear filters`),
-    and text-driven domain tabs.
+  - Omit icon: routine text commits and dismissals in form or dialog footers,
+    repeated unselected list/card buttons, inline recovery links, and
+    text-driven domain tabs.
 - **Calm filters.** In narrow panes or with 2+ secondary filters, keep
   `SearchBox` visible and place secondary filters inside a `Popover` behind a
   borderless filter icon button (matching `ListView`'s default filter trigger).
@@ -89,21 +85,19 @@ clear the pill.
   heights and minimal widths.
 - **Forms and dialogs.** Use `FormView` for standalone form pages, `DialogForm`
   for short contextual input modals (including editing secondary detail
-  sections), `ConfirmationDialog` for yes/no confirmations, `Dialog` for
-  list-triggered utilities such as two-step CSV/Excel imports with preview
-  rather than dedicated routes, and `Form` inside an existing container. Group
-  multi-section forms with `sections` and place prerequisite fields before
-  dependent fields. For computed or read-only value previews inside forms,
-  prefer a disabled controlled Loom input (such as disabled `NumberInput` or
-  `TextInput`) for grid consistency, or plain typography without faux-input box
+  sections), `ConfirmationDialog` for yes/no confirmations, `Dialog` for short
+  list-triggered utilities and batch previews rather than dedicated routes, and
+  `Form` inside an existing container. Group multi-section forms with `sections`
+  and place prerequisite fields before dependent fields. For computed or
+  read-only value previews inside forms, prefer a disabled controlled Loom
+  input for grid consistency, or plain typography without faux-input box
   styling.
 
 ## Controls and values
 
 Import shared controls from `@southneuhof/loom` and avoid `:deep(...)` or
 descendant CSS overrides. Check [capabilities.md](.agents/skills/web-ui-surfaces/references/capabilities.md)
-before building local wrappers. Keep left edges optically aligned (right-aligned
-section buttons or flush-left plain `RouterLink` under body copy).
+before building local wrappers. Keep left edges optically aligned.
 
 - **Values.** Keep one empty placeholder (`-`), one chip variant per page,
   relations as names, states as labelled chips, attachments as previews or named

@@ -29,21 +29,11 @@ hierarchy, or contrast.
 
 Run `pnpm verify:ui --config <path.json>` from the repository root (see
 [Runtime proof](../../verify-carta-module/references/runtime.md#browser-proof-only-when-selected))
-across **all three view states**: desktop (`1440px`) light mode, narrow (`375px`)
-mobile width, and dark mode on custom workspaces (`10` to `16` representative
-captures). Read `report.json` and inspect the saved PNGs directly against
-[DESIGN.md](../../../../DESIGN.md):
-
-1. Visual hierarchy, auto-selected first queue item, and flat `ListItem` rows
-   inside divided `Card`s on custom workspaces.
-2. Consistent `gap-2` spacing and `Card` framing across stacked sections and
-   below `DetailView`, no nested same-tone outlined cards, and secondary
-   read-only views behind `Dialog` triggers.
-3. Calm filters (progressive `Popover` disclosure for 2+ secondary filters,
-   `ChipFilter` for single quick filters) and right-aligned action order with
-   primary `filled` CTA top-rightmost.
-4. Zero horizontal overflow (`375px`), no nested scroll traps, bottom
-   navigation pill clearance, and readable contrast in dark mode.
+across desktop (`1440px`) light mode, narrow (`375px`) mobile width, and dark
+mode on representative changed routes. Read `report.json` and inspect the saved
+PNGs directly against [DESIGN.md](../../../../DESIGN.md) for layout framing,
+spacing (`gap-2`), hierarchy, zero horizontal overflow (`375px`), bottom
+navigation pill clearance, and dark-mode contrast.
 
 Select automated proof through [$verify-carta-module](../../verify-carta-module/SKILL.md).
 For documentation-only changes, check source facts, links, and scope.

@@ -2,11 +2,7 @@
 
 ## Verification commands
 
-Run `pnpm verify:module` and `pnpm verify:ui` in the foreground from the
-repository root. Use one shell call per command and wait for it to finish.
-Set the wait or yield limit to `120000` to `180000` ms, or use the longest wait
-the shell tool supports. Do not redirect output to a log file and poll with
-`tail`, `ps`, or `write_stdin`.
+Run these commands from the repository root:
 
 - Inner-loop edits: `pnpm verify:module --fast --api-test <spec>`
 - Final gate: `pnpm verify:module`
@@ -28,9 +24,9 @@ use a web build targeting that API.
 Configure routes with `name`, `path`, `viewports` (`desktop`, `mobile`),
 `themes` (`light`, `dark`), optional `selector` or `waitFor`, and `auth`
 (`false` for anonymous or `{ email, password }` to override top-level `login`).
-Keep login configs in `.local/`. Use about 10 to 16 representative captures for
-Gate 3 across desktop light, 375 px mobile, and dark mode on custom workspaces.
-Use `--concurrency <n>` (default `4`) to adjust worker count.
+Keep login configs in `.local/`. Capture representative changed routes across
+desktop light, 375 px mobile, and dark mode. Use `--concurrency <n>` (default
+`4`) to adjust worker count.
 
 For interactive workflows, pass `--script <path.mjs>` (or `script` in config)
 exporting an async default function receiving `{ browser, newContext,

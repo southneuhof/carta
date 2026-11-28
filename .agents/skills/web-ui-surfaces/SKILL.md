@@ -32,9 +32,9 @@ reading it front-to-back.
    `apps/web/src/routes/(authenticated)/settings/users/users.resource.ts` and
    mirror its structure:
    - Resource (`*.resource.ts`): `defineResource({ key, identity, list, detail, create, update, delete, actions, exports })` backed by `createHonoResourceActions(...)` or `parseHonoResponse` / `runHonoMutation`.
-   - Directory: `<ListView v-bind="resource.list()" title="...">` with `exports.list.downloads` for custom CSV/XLSX downloads; keep the default `Create` label unless the design requires custom wording.
-   - Detail: `<DetailView v-bind="resource.detail({ id })">` using `#title`, `#description`, `#controls` (rightmost), and `#body`, keeping one `defineDetail` map (with `sections`) and automatic Edit/Delete actions on standard CRUD details.
-   - Forms (including drawer and public forms): `<Form v-bind="form" />` with `defineForm({ schema, fields, submit })`, `TableInput` (`reorderable`) for repeating rows, and `MapView` for read-only maps.
+   - Directory: `<ListView v-bind="resource.list()" title="...">`.
+   - Detail: `<DetailView v-bind="resource.detail({ id })">` using `#title`, `#description`, `#controls` (rightmost), and `#body`, with one `defineDetail` map (`sections` for groups) and automatic Edit/Delete actions on standard CRUD details.
+   - Forms (including drawer and public forms): `<Form v-bind="form" />` with `defineForm({ schema, fields, submit })`.
 2. **Reuse `@southneuhof/loom` directly.** Check [capabilities.md](references/capabilities.md)
    and search [CATALOG.md](../../../packages/loom/CATALOG.md) before writing local
    wrappers. Rely on Loom props, slots, and defaults rather than `:deep(...)` or

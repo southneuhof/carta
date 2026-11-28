@@ -21,7 +21,6 @@ exempt them.
 | Standard request lifecycle | Retry, cancellation, stale responses, refresh, cache invalidation, ordinary navigation |
 | Standard presentation | Labels, colors, formatting, component selection, DOM arrangement, generic narrow screens |
 | Trivial constants or aliases | Enum declarations, permission constants, forwarding aliases |
-| Retired machinery | Version counters, policy tokens, compatibility flags, their test-only helpers |
 
 Classify by purpose. Business security, ownership, calculations, and workflow
 decisions remain eligible. Preserve production requirements and explicitly
@@ -69,9 +68,9 @@ If the disposable test database schema is out of sync, run
 `pnpm --filter @southneuhof/api db:refresh:test`. This command checks the test
 target, drops its tables, applies migrations, and seeds the database.
 
-For selected browser checks, run `pnpm verify:ui --config <path.json>`. Use the
-[runtime instructions](references/runtime.md#verification-commands) to run both
-verification commands in the foreground. After a correction, repeat the affected checks.
+For selected browser checks, run `pnpm verify:ui --config <path.json>` (see
+[runtime instructions](references/runtime.md#browser-proof-only-when-selected)).
+After a correction, repeat the affected checks.
 
 Use [$test-audit](../test-audit/SKILL.md) for new or changed tests and
 [UI review](../web-ui-surfaces/references/verification.md) for changed web wiring.
@@ -94,8 +93,4 @@ Missing prerequisites block only dependent claims; keep their assertions intact.
 
 Report checked boundaries, commands, results, evidence, and gaps. Store live
 evidence under `.local/verification/<run>/` without secrets or session tokens.
-Clean up owned processes and fixtures, not evidence. Verify what a dry run
-actually skips.
-
-To maintain this skill, use `/maintain-verification-skill` when available;
-otherwise reconcile affected recipes with current routes and real results.
+Clean up owned processes and fixtures, not evidence.

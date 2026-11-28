@@ -7,8 +7,7 @@ description: Build or review Carta forms, value conversion, relation sources, an
 
 Read [DESIGN.md](../../../DESIGN.md) for layout and search the
 [form renderers table](../../../packages/loom/CATALOG.md#form-renderers-defineform)
-on demand for available inputs and props (including `DateInput` `withTimePicker`
-and `TableInput` inline mode). Use the [form guide](../../../docs/ui/forms.md)
+on demand for available inputs and props. Use the [form guide](../../../docs/ui/forms.md)
 when you need detailed control composition, and consult
 [ARCHITECTURE.md](../../../docs/resource_system_overhaul/ARCHITECTURE.md#4-schemas-and-value-ownership)
 only when debugging edge-case schema draft/output behavior. Reuse labels by

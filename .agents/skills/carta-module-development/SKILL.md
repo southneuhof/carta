@@ -21,9 +21,7 @@ and reviews with findings rather than implementation.
 
 Select checks through [$verify-carta-module](../verify-carta-module/SKILL.md).
 During edits, run `pnpm verify:module --fast --api-test <spec>` and correct the
-reported failures together. Run the full command once at the end. Use the
-[foreground procedure](../verify-carta-module/references/runtime.md#verification-commands)
-for both verification commands.
+reported failures together. Run the full `pnpm verify:module` once at the end.
 Use the optional [plan format](references/planning.md) when execution or resume
 needs a file.
 
@@ -35,10 +33,7 @@ Before writing code in any layer, open its owning skill:
 | Pages, resources, views, custom workspaces, navigation | [$web-ui-surfaces](../web-ui-surfaces/SKILL.md) and [DESIGN.md](../../../DESIGN.md) |
 | Forms, lookups, inline tables, and file inputs | [$build-resource-form](../build-resource-form/SKILL.md) |
 
-Before writing custom web code, open `apps/web/src/routes/(authenticated)/settings/users/users.resource.ts`
-and follow [$web-ui-surfaces](../web-ui-surfaces/SKILL.md) defaults (Loom
-Resources, Views, and Forms instead of raw `<table>` or `<form>`). Group any
-non-standard requirements in task notes with the unsupported reason.
+Group any non-standard UI requirements in task notes with the unsupported reason.
 
 If a design record exists, mark implementation `In progress`.
 Complete migrations, seed data, access, navigation, and preview setup. Apply
